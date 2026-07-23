@@ -673,9 +673,43 @@ git commit -m "feat(protocol): doc ghi kieu du lieu tuong thich java DataStream"
 > trên thực tế chưa ai gửi 7 lệnh đó với thân tin rỗng. Bản Go **sửa cho đúng
 > hơn bản gốc**, thay vì chép nguyên lỗi.
 >
-> Cài đặt đúng nằm ở `server/internal/protocol/frame.go`. Bộ test bổ sung có
-> `TestGoiDacBietThanRongKhongLamLechGoiSau` — test này ghi hai gói liên tiếp
-> rồi đọc lại, bắt được đúng hiện tượng lệch dòng chứ không chỉ đếm độ dài.
+> ### Và còn HAI lỗi nữa cùng loại, phát hiện ở vòng soi sau
+>
+> **Lỗi 2 — nguy hiểm hơn lỗi 1.** Nhánh còn lại cũng có cùng điều kiện thừa:
+> ```go
+> case n > 0 && f.coKhoa():   // SAI y hệt
+> ```
+> Lệnh **thường** gửi với thân tin rỗng **sau khi đã có khoá** sẽ ghi 2 byte
+> thô, trong khi client vẫn XOR chúng → vừa ra độ dài rác, vừa **đẩy lệch con
+> trỏ khoá vĩnh viễn**. Nguy hiểm hơn lỗi 1 vì "lệnh thường gửi rỗng" là
+> thông báo và xác nhận — xảy ra liên tục khi chơi, còn 7 lệnh đặc biệt thì hiếm.
+>
+> **Lỗi 3 — sập cả máy chủ.** Nhánh lệnh đặc biệt gọi `f.ks.Write(...)` không
+> kiểm `coKhoa()`. Gọi trước `SetKey` là panic con trỏ rỗng, mà panic không
+> `recover()` trong Go **làm sập cả tiến trình** — đá văng toàn bộ người chơi
+> đang online, không chỉ một kết nối.
+>
+> ### Nguyên tắc đúng, áp dụng cho CẢ BA nhánh
+>
+> | Quyết định | Dựa vào |
+> |---|---|
+> | Mã hoá hay không | **chỉ** `coKhoa()` |
+> | 2 byte hay 3 byte độ dài | **chỉ** byte lệnh |
+> | Độ dài thân tin | **không tham gia quyết định nào** |
+>
+> Bằng chứng dứt điểm cho nguyên tắc này: **chính client, ở hàm
+> `doSendMessage` nhánh `data == null`, cũng mã hoá 2 byte độ dài khi đã có
+> khoá** (`Session_ME.cs`, gọi `writeKey((sbyte)0)` hai lần). Xác nhận từ cả
+> chiều đọc lẫn chiều gửi của client.
+>
+> Cài đặt đúng nằm ở `server/internal/protocol/frame.go`. Bộ test bổ sung:
+> `TestGoiDacBietThanRongKhongLamLechGoiSau`, `TestLenhThuongThanRongVanMaHoaDoDai`,
+> `TestLenhDacBietChuaCoKhoaTraLoiKhongPanic` — hai cái đầu ghi hai gói liên
+> tiếp rồi đọc lại, bắt được hiện tượng lệch dòng chứ không chỉ đếm độ dài.
+>
+> **Bài học lớn nhất của Task 4:** sửa xong lỗi 1 mà không soi nhánh còn lại
+> nên bỏ sót lỗi 2 — cùng một kiểu sai, cách đó vài dòng. Khi sửa một lỗi,
+> phải tìm xem cùng kiểu sai đó còn ở đâu nữa.
 
 **Files:**
 - Create: `server/internal/protocol/message.go`

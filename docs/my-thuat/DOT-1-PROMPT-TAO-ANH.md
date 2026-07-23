@@ -71,6 +71,28 @@ Tạo ảnh **đúng bằng kích thước ghi ở cột `Cỡ`**. Nếu công c
 | Nút giao diện | 96×48 |
 | Khung giao diện | ghi riêng từng dòng |
 
+## A4b. Quy tắc CO GIÃN cho giao diện (bổ sung sau lô duyệt đầu)
+
+Giao diện trong game phải kéo giãn được: nút "OK" ngắn và nút "Xác nhận giao dịch" dài **dùng chung một ảnh**. Kỹ thuật là giữ nguyên hai đầu, kéo giãn phần giữa.
+
+**Mọi ảnh nút và khung phải tuân thủ:**
+
+```
+BẮT BUỘC: 9-slice safe. The left 24px and right 24px are decorative caps.
+Everything between them must be a FLAT, UNIFORM horizontal band with no
+gradient along the X axis, no corner ornament, no motif that would visibly
+repeat or distort when the middle is stretched horizontally.
+```
+
+**Thanh chỉ số phải tách làm hai ảnh riêng**, không được gộp:
+
+| Ảnh | Nội dung |
+|---|---|
+| `..._nen_x4.png` | **Chỉ máng rỗng** — rãnh tối, hai đầu bo, ruột trống hoàn toàn |
+| `..._fill_x4.png` | **Chỉ dải màu đầy** — hình chữ nhật đặc, cạnh trái và phải **cắt phẳng**, không bo, không nắp |
+
+Lý do: khi người chơi mất máu, phần đầy bị cắt bớt từ bên phải. Nếu dải màu có nắp bo ở đầu phải thì cắt xong sẽ mất nắp, trông vỡ.
+
 ## A5. Quy tắc đặt tên file
 
 ```
@@ -112,15 +134,17 @@ Làm **Nhóm 1 (Giao diện) trước tiên** và **dừng lại chờ duyệt**
 | # | Tên file | Cỡ | SUBJECT |
 |---|---|---|---|
 | 1 | `ui_khung_hoithoai_x4.png` | 480×160 | dialogue box, dark lacquered wood panel with orange trim, aged paper inner area, small scroll-roll caps at both ends, 9-slice friendly (flat edges) |
-| 2 | `ui_nut_thuong_x4.png` | 96×48 | button, dark wood with orange border, slight bevel, empty center |
-| 3 | `ui_nut_nhan_x4.png` | 96×48 | same button but pressed-in state, darker, inset shadow |
-| 4 | `ui_nut_khoa_x4.png` | 96×48 | same button but disabled, desaturated grey, small padlock at right |
-| 5 | `ui_thanh_theluc_x4.png` | 240×32 | horizontal stat bar, empty dark socket with orange-red fill from left, rounded caps |
-| 6 | `ui_thanh_chakra_x4.png` | 240×32 | same bar shape, cyan blue fill |
+| 2 | `ui_nut_thuong_x4.png` | 96×48 | button, dark lacquered wood, **9-slice safe** (left/right 24px are caps, middle is a flat uniform band), warm orange border line running the full width, empty center, subtle top bevel |
+| 3 | `ui_nut_nhan_x4.png` | 96×48 | same button, pressed state — clearly darker overall, border line dimmed, a soft inset shadow along the top edge. **Must be obviously different from the normal state at a glance**, not a subtle shift. 9-slice safe |
+| 4 | `ui_nut_khoa_x4.png` | 96×48 | same button, disabled — fully desaturated grey-blue, no orange anywhere, a small padlock icon centred in the right cap. 9-slice safe |
+| 5 | `ui_thanh_theluc_nen_x4.png` | 240×32 | **empty** stat bar socket only: a dark recessed channel with rounded ends and a thin lighter rim. Interior completely empty, no fill colour |
+| 6 | `ui_thanh_theluc_fill_x4.png` | 240×32 | **fill only**: a solid orange-red horizontal band with a soft highlight along the top. **Left and right edges cut perfectly flat and square** — no rounding, no caps, no fade. Nothing else in the image |
+| 6b | `ui_thanh_chakra_nen_x4.png` | 240×32 | identical socket to image 5 (same shape, same rim), reuse the exact geometry |
+| 6c | `ui_thanh_chakra_fill_x4.png` | 240×32 | fill only, cyan blue, same flat-cut edges and same highlight treatment as image 6 |
 | 7 | `ui_o_vatpham_x4.png` | 64×64 | empty inventory slot, dark recessed square, thin lighter inner border |
 | 8 | `ui_o_dangchon_x4.png` | 64×64 | same slot with bright orange glowing border, selected state |
 | 9 | `ui_khung_avatar_x4.png` | 96×96 | circular portrait frame, rope-braid ring, dark wood outer, empty center |
-| 10 | `ui_logo_game_x4.png` | 512×256 | game logo mark: a stylised leaf-and-spiral emblem over bold brush-stroke shapes, orange and dark, no letters |
+| 10 | `ui_logo_game_x4.png` | 512×256 | game emblem, viewed **flat and front-on like a metal badge**, NOT a creature and NOT a flying shape. Composition: a single broad leaf pointing up, with a bold spiral carved into its centre, mounted on a horizontal metal headband plate with two rivets and a cloth strap running off both sides. Symmetrical, heraldic, still. Orange leaf, dark steel plate, deep navy strap. **NEGATIVE for this image specifically: bird, phoenix, wings, flame, motion streaks, feathers, swoosh, light halo or glow around the outer edge** — the outer edge must be a clean hard cutout on transparency |
 
 **→ DỪNG. Gửi 10 ảnh này để duyệt phong cách trước khi làm tiếp.**
 

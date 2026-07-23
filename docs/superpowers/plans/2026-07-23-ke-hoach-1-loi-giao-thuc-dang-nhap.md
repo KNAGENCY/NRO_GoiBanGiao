@@ -6,11 +6,25 @@
 
 **Architecture:** Ba tầng tách bạch. Tầng `protocol` chỉ biết byte và khoá mã, không biết gì về game. Tầng `net` quản lý kết nối TCP và vòng đời phiên. Tầng `game` xử lý nghiệp vụ đăng nhập. Mọi thứ liên quan giao thức cũ gói kín trong `internal/protocol` để sau này thay client mới chỉ cần thêm tầng khác.
 
-**Tech Stack:** Go 1.23+, PostgreSQL 16, `github.com/jackc/pgx/v5`, thư viện chuẩn `crypto/pbkdf2`, `testing`.
+**Tech Stack:** Go 1.24+ (máy đang có 1.26.5), PostgreSQL 16.4, `github.com/jackc/pgx/v5`, thư viện chuẩn `crypto/pbkdf2`, `testing`.
+
+## Môi trường đã dựng sẵn trên máy này
+
+| Thứ | Vị trí / giá trị |
+|---|---|
+| Go | `D:\Go\bin\go.exe` — phiên bản 1.26.5, đã có trong PATH |
+| PostgreSQL | `D:\PostgreSQL\bin\` — 16.4, **cổng 5433** |
+| Người dùng CSDL | `postgres` / mật khẩu `nrodev123` |
+| CSDL chạy thật | `nro` |
+| CSDL cho kiểm thử | `nro_test` |
+| Chuỗi kết nối | `postgres://postgres:nrodev123@127.0.0.1:5433/nro` |
 
 ## Global Constraints
 
-- Go 1.23 trở lên. Không dùng thư viện ngoài ngoài `pgx/v5` trong kế hoạch này.
+- **Go 1.24 trở lên** (bắt buộc: `crypto/pbkdf2` chỉ có trong thư viện chuẩn từ 1.24).
+- **Không dùng thư viện ngoài, ngoại trừ đúng một cái: `github.com/jackc/pgx/v5`.**
+  Cụ thể: KHÔNG dùng `golang.org/x/crypto` — đã kiểm chứng thư viện chuẩn
+  `crypto/pbkdf2` cho ra kết quả khớp tuyệt đối với bản Java.
 - Mọi ghi chú trong code viết **tiếng Việt**, giải thích *tại sao* chứ không phải *cái gì*.
 - Số nguyên trên dây truyền theo **big-endian** (chuẩn Java DataOutputStream), trừ đúng một ngoại lệ ghi rõ ở Task 3.
 - Độ dài khoá mã **phải ≤ 127 byte**. Client dùng biến `sbyte` làm con trỏ khoá; dài hơn 127 là tràn số.
@@ -123,7 +137,7 @@ cd D:/NRO_GoiBanGiao
 mkdir -p server/cmd/nroserver
 cd server
 go mod init nroserver
-go mod edit -go=1.23
+go mod edit -go=1.24
 ```
 
 - [ ] **Step 2: Viết điểm khởi động tạm**
@@ -1023,6 +1037,7 @@ Tạo `server/internal/auth/password.go`:
 package auth
 
 import (
+	"crypto/pbkdf2"
 	"crypto/rand"
 	"crypto/sha256"
 	"crypto/subtle"
@@ -1030,8 +1045,6 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-
-	"golang.org/x/crypto/pbkdf2"
 )
 
 const (
@@ -1053,7 +1066,12 @@ func Hash(matKhau string) (string, error) {
 	if _, err := rand.Read(muoi); err != nil {
 		return "", fmt.Errorf("khong sinh duoc muoi: %w", err)
 	}
-	bam := pbkdf2.Key([]byte(matKhau), muoi, soVong, soBitKey/8, sha256.New)
+	// Chu y chu ky ham cua thu vien CHUAN khac voi golang.org/x/crypto:
+	//   pbkdf2.Key(ham_bam, mat_khau_string, muoi, so_vong, so_byte) (bytes, error)
+	bam, err := pbkdf2.Key(sha256.New, matKhau, muoi, soVong, soBitKey/8)
+	if err != nil {
+		return "", fmt.Errorf("bam that bai: %w", err)
+	}
 	return fmt.Sprintf("%s%d$%s$%s",
 		tienTo, soVong,
 		base64.StdEncoding.EncodeToString(muoi),
@@ -1088,20 +1106,20 @@ func Verify(matKhau, luuTru string) bool {
 		return false
 	}
 
-	duoc := pbkdf2.Key([]byte(matKhau), muoi, vong, len(muon), sha256.New)
+	duoc, err := pbkdf2.Key(sha256.New, matKhau, muoi, vong, len(muon))
+	if err != nil {
+		return false
+	}
 	return subtle.ConstantTimeCompare(muon, duoc) == 1
 }
 ```
 
-- [ ] **Step 4: Thêm thư viện pbkdf2**
+- [ ] **Step 4: Không cần thêm thư viện nào**
 
-Run:
-```bash
-cd D:/NRO_GoiBanGiao/server
-go get golang.org/x/crypto@latest
-go mod tidy
-```
-Expected: `go.mod` xuất hiện dòng `golang.org/x/crypto`
+`crypto/pbkdf2` nằm trong thư viện chuẩn từ Go 1.24. Đã kiểm chứng trên máy này rằng nó cho ra **đúng chuỗi băm mà bản Java sinh ra** với cùng dữ liệu vào.
+
+Run: `cd D:/NRO_GoiBanGiao/server && go build ./...`
+Expected: không lỗi, `go.mod` **không** có `golang.org/x/crypto`
 
 - [ ] **Step 5: Chạy kiểm thử**
 
@@ -1171,7 +1189,7 @@ import (
 
 // Kiem thu nay can mot CSDL PostgreSQL that. Dat bien moi truong:
 //
-//	NRO_TEST_DSN=postgres://postgres:matkhau@localhost:5432/nro_test
+//	NRO_TEST_DSN=postgres://postgres:nrodev123@127.0.0.1:5433/nro_test
 //
 // Khong dat thi bo qua, de nguoi khac chay `go test ./...` khong bi do.
 func moKetNoiThu(t *testing.T) *Store {
@@ -1303,8 +1321,8 @@ go mod tidy
 
 Tạo CSDL thử và chạy lược đồ (thay `matkhau` bằng mật khẩu Postgres của bạn):
 ```bash
-psql -U postgres -c "CREATE DATABASE nro_test;"
-psql -U postgres -d nro_test -f internal/store/migrations/0001_tai_khoan.sql
+# CSDL nro_test da tao san tren may nay
+D:\PostgreSQL\bin\psql.exe -h 127.0.0.1 -p 5433 -U postgres -d nro_test -f internal/store/migrations/0001_tai_khoan.sql
 ```
 
 - [ ] **Step 6: Chạy kiểm thử**
@@ -1312,7 +1330,7 @@ psql -U postgres -d nro_test -f internal/store/migrations/0001_tai_khoan.sql
 Run:
 ```bash
 cd D:/NRO_GoiBanGiao/server
-set NRO_TEST_DSN=postgres://postgres:matkhau@localhost:5432/nro_test
+set NRO_TEST_DSN=postgres://postgres:nrodev123@127.0.0.1:5433/nro_test
 go test ./internal/store/ -v
 ```
 Expected: PASS — 2 kiểm thử. Nếu chưa đặt `NRO_TEST_DSN` thì thấy SKIP, cũng chấp nhận được nhưng phải chạy được ít nhất một lần với CSDL thật trước khi qua task sau.
@@ -2092,8 +2110,8 @@ Tạo `server/README.md`:
 1. Tạo cơ sở dữ liệu và nạp lược đồ:
 
 ```bash
-psql -U postgres -c "CREATE DATABASE nro;"
-psql -U postgres -d nro -f internal/store/migrations/0001_tai_khoan.sql
+# CSDL nro da tao san tren may nay
+D:\PostgreSQL\bin\psql.exe -h 127.0.0.1 -p 5433 -U postgres -d nro -f internal/store/migrations/0001_tai_khoan.sql
 ```
 
 2. Tạo một tài khoản để thử (mật khẩu là `1`, dùng chuỗi băm sẵn):
@@ -2106,7 +2124,7 @@ INSERT INTO tai_khoan (ten_dang_nhap, mat_khau_bam) VALUES
 3. Chạy:
 
 ```bash
-set NRO_DSN=postgres://postgres:matkhau@localhost:5432/nro
+set NRO_DSN=postgres://postgres:nrodev123@127.0.0.1:5433/nro
 set NRO_DIA_CHI=:14445
 go run ./cmd/nroserver
 ```
@@ -2125,7 +2143,7 @@ Kiểm thử trong `internal/store` cần biến `NRO_TEST_DSN`; không đặt t
 Run:
 ```bash
 cd D:/NRO_GoiBanGiao/server
-set NRO_DSN=postgres://postgres:matkhau@localhost:5432/nro
+set NRO_DSN=postgres://postgres:nrodev123@127.0.0.1:5433/nro
 go run ./cmd/nroserver
 ```
 Expected: in ra `may chu game dang lang nghe dia_chi=:14445`

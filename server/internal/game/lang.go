@@ -32,10 +32,15 @@ var danhSachLang = []Lang{
 }
 
 // TimLang tra ve lang theo id, hoac nil neu khong co.
+// Tra ban sao de tranh lo su sua qua con tro cua nguoi goi.
 func TimLang(id int16) *Lang {
 	for i := range danhSachLang {
 		if danhSachLang[i].ID == id {
-			return &danhSachLang[i]
+			// Tra ban sao, KHONG tro thang vao slice goc: nguoi goi lo tay sua
+			// truong cua ket qua se khong dung toi du lieu he thong. (Go tu dua
+			// ban sao len heap khi lay dia chi tra ve — an toan, dung idiom.)
+			cp := danhSachLang[i]
+			return &cp
 		}
 	}
 	return nil

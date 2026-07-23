@@ -34,3 +34,16 @@ func TestCoDuNamLang(t *testing.T) {
 		t.Errorf("co %d lang, mong doi 5", n)
 	}
 }
+
+func TestTimLangTraBanSaoKhongSuaDuocGoc(t *testing.T) {
+	l := TimLang(0)
+	if l == nil {
+		t.Fatal("lang 0 phai ton tai")
+	}
+	goc := l.HpKhoiDau
+	l.HpKhoiDau = 999999 // sua qua con tro tra ve
+	lai := TimLang(0)
+	if lai.HpKhoiDau != goc {
+		t.Errorf("sua qua con tro TimLang khong duoc dung du lieu goc: goc=%d, sau khi sua doc lai=%d", goc, lai.HpKhoiDau)
+	}
+}

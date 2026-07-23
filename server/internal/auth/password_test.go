@@ -1,6 +1,9 @@
 package auth
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 // Chuoi bam do may chu Java cu sinh ra phai doi chieu duoc.
 // Gia tri nay lay tu tai khoan that trong CSDL `z`, mat khau la "1".
@@ -62,5 +65,39 @@ func TestChuoiBamHong(t *testing.T) {
 		if Verify("bat ky", x) {
 			t.Fatalf("chuoi hong %q ma van cho qua", x)
 		}
+	}
+}
+
+// Chan so vong qua lon khong duoc treo may chu.
+func TestChanSoVongQuaLon(t *testing.T) {
+	tests := []struct {
+		name   string
+		soVong string
+	}{
+		{"vua vuot nguong", "1000001"},
+		{"2 ty vong", "2147483648"},
+		{"64-bit max", "9223372036854775807"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			// Tao chuoi bam voi so vong qua lon
+			bamMau := "pbkdf2$" + test.soVong + "$5Q53KdKJ0c559SGZQOh2fw==$CtbK9GXUDmUYhDEg4AOdFM3cLT7s08mEPGgCoyUOAzU="
+
+			// Do thoi gian — phai tra nhanh (duoi 1 giay)
+			start := time.Now()
+			result := Verify("mat khau gi", bamMau)
+			elapsed := time.Since(start)
+
+			// Phai tra false (so vong qua lon)
+			if result {
+				t.Errorf("so vong %s qua lon ma van cho qua", test.soVong)
+			}
+
+			// Phai tra nhanh (duoi 1 giay)
+			if elapsed > time.Second {
+				t.Errorf("so vong %s lam treo hang phut: %v", test.soVong, elapsed)
+			}
+		})
 	}
 }

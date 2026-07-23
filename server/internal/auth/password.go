@@ -17,11 +17,22 @@ import (
 )
 
 const (
-	tienTo   = "pbkdf2$"
-	soVong   = 100000
-	soByteMu = 16
-	soBitKey = 256
+	tienTo      = "pbkdf2$"
+	soVong      = 100000
+	soVongToiDa = 1_000_000
+	soByteMu    = 16
+	soBitKey    = 256
 )
+
+// soVongToiDa chan tren so vong lap doc tu chuoi bam.
+//
+// Vi sao can: neu cot mat khau trong CSDL bi hong hoac bi chen sai mot so
+// vong khong lo (vd 2 ty), Verify se chay that va treo hang phut - mot luong
+// xu ly dang nhap bi treo cung nguy hiem ngang sap. Ban Java tinh co an toan
+// nho so 32 bit bi tran, con Go dung so 64 bit nen khong tran.
+//
+// Muc 1 trieu la gap 10 lan gia tri dang dung (100.000), du du dat de sau nay
+// tang so vong theo phan cung moi, ma van chan duoc truong hop du lieu hong.
 
 // IsHashed cho biet chuoi luu trong CSDL da o dang bam hay con la mat khau tho
 // cua he thong cu.
@@ -63,7 +74,7 @@ func Verify(matKhau, luuTru string) bool {
 		return false
 	}
 	vong, err := strconv.Atoi(phan[1])
-	if err != nil || vong < 1 {
+	if err != nil || vong < 1 || vong > soVongToiDa {
 		return false
 	}
 	muoi, err := base64.StdEncoding.DecodeString(phan[2])

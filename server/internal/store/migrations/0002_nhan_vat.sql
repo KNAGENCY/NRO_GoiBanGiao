@@ -54,3 +54,20 @@ END $$;
 -- chi muc — giu lai lam tai lieu y dinh, IF NOT EXISTS nen khong trung.
 CREATE INDEX IF NOT EXISTS nhan_vat_theo_tai_khoan
     ON nhan_vat (tai_khoan_id);
+
+-- Ten nhan vat chi cho phep chu cai tieng Anh va chu so, dai 5-10. Cung ly do
+-- nhu rang buoc ten dang nhap o 0001: duoi locale C, lower() KHONG case-fold
+-- duoc ky tu ngoai ASCII, nen neu de lot ky tu co dau vao cot co
+-- UNIQUE(lower(ten)) thi co che chong trung ten khong phan biet hoa thuong bi
+-- vo hieu. CHECK o CSDL de web/panel/script import chen thang cung khong lach
+-- duoc. Khop regex reTenNhanVat phia Go (5-10 ky tu [A-Za-z0-9], Task 6).
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'nhan_vat_ten_hop_le'
+    ) THEN
+        ALTER TABLE nhan_vat
+            ADD CONSTRAINT nhan_vat_ten_hop_le
+            CHECK (ten ~ '^[A-Za-z0-9]{5,10}$');
+    END IF;
+END $$;

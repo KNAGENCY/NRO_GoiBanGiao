@@ -105,6 +105,14 @@ func (f *Framer) ReadMessage() (*Message, error) {
 // Dinh dang (xem ServerManager.java, ham doSendMessage): lenh, do dai, than tin.
 // Do dai dung 3 byte cho cac lenh trong lenhDoDaiBaByte, 2 byte cho phan con lai.
 //
+// Quan trong: 3 byte do dai la bat buoc cho MOI goi mang lenh trong
+// lenhDoDaiBaByte, KE CA khi than tin rong (n == 0). Client (Session_ME.cs,
+// ham readMessage) chi nhin byte lenh de quyet dinh goi readMessage2 — ham nay
+// LUON doc du 3 byte do dai, khong he xet than tin dai bao nhieu. Server ma
+// rut xuong 2 byte khi than tin rong se lam client doc lem mot byte cua goi ke
+// tiep sang truong do dai, lech dong byte tu do tro di — client treo im lang,
+// khong bao loi gi.
+//
 // Ban Java ghi "XOR(x) - 128" con client doc "readKey(b) + 128". Tren byte 8 bit,
 // cong 128 va tru 128 cho cung ket qua, nen o day dung cong cho de doc.
 func (f *Framer) WriteMessage(m *Message) error {
@@ -118,7 +126,13 @@ func (f *Framer) WriteMessage(m *Message) error {
 
 	n := len(m.Data)
 	switch {
-	case n > 0 && lenhDoDaiBaByte[m.Command]:
+	case lenhDoDaiBaByte[m.Command]:
+		// Client (Session_ME.cs, readMessage) quyet dinh doc 3 byte do dai CHI
+		// dua vao byte lenh, khong xet than tin co rong hay khong (readMessage2
+		// luon chay cho 7 lenh nay). Vi vay server bat buoc phai LUON ghi du 3
+		// byte cho cac lenh nay, ke ca khi n == 0 — rut xuong 2 byte se lam
+		// client doc lem sang goi ke tiep, lech dong byte tu do tro di va client
+		// treo im lang khong bao loi gi. KHONG duoc them dieu kien n > 0 o day.
 		out = append(out, f.ks.Write(byte(n))+128)
 		out = append(out, f.ks.Write(byte(n>>8))+128)
 		out = append(out, f.ks.Write(byte(n>>16))+128)

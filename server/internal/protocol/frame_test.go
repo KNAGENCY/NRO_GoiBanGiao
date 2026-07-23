@@ -95,6 +95,98 @@ func TestGoiRongVanGhiDoDai(t *testing.T) {
 	}
 }
 
+// Lenh dac biet voi than tin RONG van phai ghi du 3 byte do dai, khong duoc
+// rut xuong 2 byte. Client (Session_ME.cs, readMessage) quyet dinh doc 3 byte
+// CHI dua vao byte lenh, khong xet than tin co rong hay khong — neu server rut
+// xuong 2 byte thi client van doc 3, lech dong byte tu do tro di.
+func TestLenhDacBietThanRongVanDungBaByte(t *testing.T) {
+	var day bytes.Buffer
+	f := NewFramer(&bytes.Buffer{}, &day)
+	f.SetKey(DeriveKey([]byte{1, 2, 3, 4}))
+
+	// -87 nam trong danh sach dac biet, than tin rong (nil)
+	if err := f.WriteMessage(&Message{Command: -87, Data: nil}); err != nil {
+		t.Fatalf("loi ghi: %v", err)
+	}
+	// 1 byte lenh + 3 byte do dai (khong co than tin) = 4
+	if day.Len() != 4 {
+		t.Fatalf("goi dai %d byte, mong doi 4 (lenh dac biet than tin rong van phai dung 3 byte do dai, khong duoc rut xuong 3)", day.Len())
+	}
+}
+
+// Test manh hon TestLenhDacBietThanRongVanDungBaByte: khong chi dem do dai goi
+// dau, ma ghi LIEN TIEP hai goi roi doc lai bang mot Framer khac cung khoa —
+// dung cach TestVongTronSauKhiCoKhoa da lam (con tro ghi va con tro doc la hai
+// Framer rieng). Goi dau la lenh dac biet than tin rong, goi sau la lenh thuong
+// co than tin. Neu server ghi thieu byte cho goi dau, con tro doc cua goi sau
+// se lech dung mot byte — dung hien tuong "treo im lang" ma loi nay gay ra.
+//
+// Vi ReadMessage() mo phong chieu client->server (luon 2 byte do dai, xem
+// docstring ReadMessage), o day ta tu doc goi dac biet "bang tay" y het cach
+// client that su doc (Session_ME.cs, readMessage2: luon 3 byte do dai bat ke
+// than tin), roi dung ReadMessage() binh thuong cho goi thuong con lai. Neu con
+// tro doc con dung cho sau goi dau thi goi sau phai ra dung Command va Data.
+func TestGoiDacBietThanRongKhongLamLechGoiSau(t *testing.T) {
+	raw := []byte{7, 11, 19, 23}
+	var day bytes.Buffer
+
+	ben_gui := NewFramer(&bytes.Buffer{}, &day)
+	ben_gui.SetKey(DeriveKey(raw))
+
+	goi1 := &Message{Command: -87, Data: nil}                // lenh dac biet, than tin rong
+	goi2 := &Message{Command: -29, Data: []byte{0x10, 0x20, 0x30, 0x40}} // lenh thuong, co than tin
+
+	if err := ben_gui.WriteMessage(goi1); err != nil {
+		t.Fatalf("loi ghi goi 1: %v", err)
+	}
+	if err := ben_gui.WriteMessage(goi2); err != nil {
+		t.Fatalf("loi ghi goi 2: %v", err)
+	}
+
+	// Ben nhan dung con tro DOC, Framer moi nhung cung khoa dan xuat tu cung raw.
+	ben_nhan := NewFramer(bytes.NewReader(day.Bytes()), &bytes.Buffer{})
+	ben_nhan.SetKey(DeriveKey(raw))
+
+	// Doc goi 1 "bang tay" — mo phong readMessage2 cua client: cmd roi LUON 3
+	// byte do dai (khong xet than tin).
+	cmdByte, err := ben_nhan.docMotByte()
+	if err != nil {
+		t.Fatalf("loi doc lenh goi 1: %v", err)
+	}
+	cmd1 := int8(ben_nhan.ks.Read(cmdByte))
+	if cmd1 != goi1.Command {
+		t.Fatalf("Command goi 1 = %d, mong doi %d", cmd1, goi1.Command)
+	}
+	if !lenhDoDaiBaByte[cmd1] {
+		t.Fatalf("cmd1 = %d phai nam trong danh sach lenh dac biet, sai gia thiet test", cmd1)
+	}
+	var doDai1 [3]byte
+	for i := 0; i < 3; i++ {
+		b, err := ben_nhan.docMotByte()
+		if err != nil {
+			t.Fatalf("loi doc byte do dai thu %d cua goi 1 (con tro lech tu day): %v", i, err)
+		}
+		doDai1[i] = ben_nhan.ks.Read(b) + 128
+	}
+	n1 := int(doDai1[0]) | int(doDai1[1])<<8 | int(doDai1[2])<<16
+	if n1 != 0 {
+		t.Fatalf("do dai than tin goi 1 giai ma ra %d, mong doi 0 (con tro doc da lech)", n1)
+	}
+
+	// Doc goi 2 bang ReadMessage binh thuong. Neu con tro con dung cho, phai ra
+	// dung Command va Data cua goi 2; neu goi 1 ghi thieu byte, cho nay se sai.
+	nhan2, err := ben_nhan.ReadMessage()
+	if err != nil {
+		t.Fatalf("loi doc goi 2 (con tro doc bi lech do goi 1 ghi thieu byte): %v", err)
+	}
+	if nhan2.Command != goi2.Command {
+		t.Fatalf("Command goi 2 = %d, mong doi %d (con tro doc bi lech do goi 1 ghi thieu byte)", nhan2.Command, goi2.Command)
+	}
+	if !bytes.Equal(nhan2.Data, goi2.Data) {
+		t.Fatalf("Data goi 2 = %v, mong doi %v (con tro doc bi lech do goi 1 ghi thieu byte)", nhan2.Data, goi2.Data)
+	}
+}
+
 // Goi qua lon phai bi tu choi de tranh ke xau bao do dai khong lo lam can RAM.
 func TestTuChoiGoiQuaLon(t *testing.T) {
 	// cmd -29, do dai 0xFFFF, nhung khong co du lieu theo sau

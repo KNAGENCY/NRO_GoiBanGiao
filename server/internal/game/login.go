@@ -27,11 +27,14 @@ const (
 //
 //	 -29  khung "chua dang nhap" — Controller.java:733, ben trong con mot
 //	      byte lenh con nua (0 = dang nhap) — Controller.java:876
+//	 -28  hop thu "khong tren ban do" — Controller.java messageNotMap, ben
+//	      trong con mot byte lenh con nua (2 = tao nhan vat)
 //	 -26  hien hop thoai co nut OK — Service.sendThongBaoOK
 //	-102  bao client thoat trang thai "dang cho" — Service.sendLoginFail
 //	   2  chuyen sang man tao nhan vat — Service.switchToCreateChar
 const (
 	lenhChuaDangNhap    int8 = -29
+	lenhKhongTrenBanDo  int8 = -28 // hop thu "khong tren ban do" — Controller.java messageNotMap
 	lenhConDangNhap     byte = 0
 	lenhThongBaoOK      int8 = -26
 	lenhDangNhapThatBai int8 = -102
@@ -103,15 +106,17 @@ func (b *BoXuLy) KiemTraDangNhap(ctx context.Context, ten, matKhau string) (KetQ
 	return KetQuaDangNhap{ThanhCong: true, TaiKhoan: tk}, nil
 }
 
-// XuLy nhan goi tin da giai ma tu tang mang.
-//
-// Goi dang nhap long hai tang: khung -29, ben trong la byte lenh con roi
-// moi toi du lieu. Doc thieu mot tang la boc tach ra rac.
+// XuLy nhan goi tin da giai ma tu tang mang va dieu phoi theo lenh.
 func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
-	if m.Command != lenhChuaDangNhap {
-		// Ke hoach 1 chi lam dang nhap. Cac lenh khac bo qua, khong ngat
-		// ket noi — client gui vai goi phu ngay sau khi noi (vi du
-		// setClientType), day la chuyen BINH THUONG chu khong phai dang ngo.
+	switch m.Command {
+	case lenhChuaDangNhap: // -29
+		return b.xuLyDangNhap(s, m)
+	case lenhKhongTrenBanDo: // -28
+		return b.xuLyKhongTrenBanDo(s, m)
+	default:
+		// Lenh chua ho tro: bo qua, khong ngat ket noi — client gui vai goi
+		// phu ngay sau khi noi (vi du setClientType), day la chuyen BINH
+		// THUONG chu khong phai dang ngo.
 		//
 		// TUYET DOI KHONG ghi log o day, ke ca muc Debug: do bang thuc te tren
 		// may chu that, mot ket noi don gui goi 3 byte lenh la co the dat
@@ -120,14 +125,36 @@ func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 		// han - day chinh la loi da tung xay ra (xem review-cuoi-report.md).
 		return nil
 	}
+}
 
+// xuLyKhongTrenBanDo doc byte lenh con roi dieu phoi. Ke hoach 2 chi lam lenh
+// con 2 (tao nhan vat); cac lenh con khac la Ke hoach 3.
+func (b *BoXuLy) xuLyKhongTrenBanDo(s *mynet.Session, m *protocol.Message) error {
+	r := protocol.NewReader(m.Data)
+	lenhCon, err := r.Byte()
+	if err != nil {
+		return fmt.Errorf("goi -28 thieu byte lenh con: %w", err)
+	}
+	switch lenhCon {
+	case lenhConTaoNhanVat: // 2
+		return b.xuLyTaoNhanVat(s, r)
+	default:
+		// Lenh con khac la Ke hoach 3, bo qua im lang (cung ly do khong ghi
+		// log nhu nhanh "lenh chua ho tro" o XuLy).
+		return nil
+	}
+}
+
+// xuLyDangNhap xu ly khung -29 (dang nhap). Goi long hai tang: byte lenh con
+// roi moi toi ten/mat khau. Doc thieu mot tang la boc tach ra rac.
+func (b *BoXuLy) xuLyDangNhap(s *mynet.Session, m *protocol.Message) error {
 	r := protocol.NewReader(m.Data)
 	lenhCon, err := r.Byte()
 	if err != nil {
 		return fmt.Errorf("goi -29 thieu byte lenh con: %w", err)
 	}
 	if lenhCon != lenhConDangNhap {
-		// Cung ly do khong ghi log nhu nhanh "lenh chua ho tro" o tren: lenh
+		// Cung ly do khong ghi log nhu nhanh "lenh chua ho tro" o XuLy: lenh
 		// con la (vd setClientType) la binh thuong, ghi log se lap lai chinh
 		// dieu kien gay ngap nhat ky da xay ra tren may chu that.
 		return nil

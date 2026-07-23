@@ -6,10 +6,6 @@ import (
 	"io"
 )
 
-// doDaiThanToiDa chan ke xau bao mot do dai khong lo de ep may chu cap phat
-// het bo nho. Goi lon nhat that su trong game la du lieu vat pham, duoi 1 MB.
-const doDaiThanToiDa = 4 << 20 // 4 MB
-
 // lenhDoDaiBaByte la cac lenh dung 3 byte do dai thay vi 2.
 // Danh sach lay tu ServerManager.java (ham doSendMessage) va Session_ME.cs
 // (ham readMessage). Hai ben phai khop tuyet doi, lech mot lenh la lech ca dong.
@@ -96,10 +92,15 @@ func (f *Framer) ReadMessage() (*Message, error) {
 		n = int(binary.LittleEndian.Uint16([]byte{b1, b2}))
 	}
 
-	if n < 0 || n > doDaiThanToiDa {
-		return nil, fmt.Errorf("goi tin bao do dai %d, vuot gioi han %d", n, doDaiThanToiDa)
-	}
-
+	// KHONG can chot chan do dai o day. Truong do dai trong dinh dang nay chi
+	// co DUNG 2 BYTE (b1, b2 o tren) - du co doc theo thu tu nao, n cung
+	// khong the vuot qua 65535 (64 KB), vi n luon duoc ghep tu chinh xac 2
+	// byte do. Tung co hang so doDaiThanToiDa (4 MB) va mot nhanh kiem
+	// "n > doDaiThanToiDa" o day, nhung do la MA CHET: dieu kien khong bao
+	// gio dung duoc vi n <= 65535 < 4 MB luon dung. Da bo ca hang so lan
+	// nhanh kiem (xem TestThanTinThieuDuLieuBaoLoi trong frame_test.go: no
+	// tung bi dat ten/chu thich sai la kiem chot chan nay, trong khi thuc ra
+	// dang kiem io.ReadFull() bao thieu du lieu).
 	data := make([]byte, n)
 	if n > 0 {
 		if _, err := io.ReadFull(f.r, data); err != nil {

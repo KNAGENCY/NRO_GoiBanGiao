@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"log/slog"
 	"net"
+	"strings"
 	"testing"
 	"time"
 
@@ -221,9 +223,9 @@ func dungPhienThat(t *testing.T, b *BoXuLy) (fClient *protocol.Framer, dong func
 // Test nay dung mot phien that (net.Pipe + mynet.PhucVu that), gui goi dang
 // nhap SAI mat khau, roi bat dung HAI goi tin server tra ve tren day va
 // khang dinh: (1) co du hai goi, (2) dung lenh, (3) dung noi dung, (4) dung
-// THU TU (-26 truoc, -102 sau — dung thu tu client can de thoat trang thai
-// cho ROI moi hien hop thoai, khong thi hop thoai hien len nhung client van
-// ket ket qua o trang thai cho).
+// THU TU (-26 truoc, -102 sau — dung thu tu client can: HIEN HOP THOAI TRUOC
+// ROI MOI THOAT TRANG THAI CHO, khong thi hop thoai hien len nhung client van
+// ket qua o trang thai cho — dung loi that da tung xay ra o ban Java cu).
 func TestTuChoiDangNhapGuiDuHaiGoiDungThuTu(t *testing.T) {
 	bam, _ := auth.Hash("dungmatkhau")
 	b := NewBoXuLy(&khoGia{tk: &store.TaiKhoan{ID: 1, TenDangNhap: "nguoi", MatKhauBam: bam}})
@@ -320,5 +322,103 @@ func TestSaiMatKhauTrenTaiKhoanBiKhoaVanBaoSaiThongTin(t *testing.T) {
 	if kq.LyDo != LyDoSaiThongTin {
 		t.Fatalf("ly do = %q, mong doi %q (KHONG duoc la %q — se lo cho ke go bay biet tai khoan nay co that)",
 			kq.LyDo, LyDoSaiThongTin, LyDoBiKhoa)
+	}
+}
+
+// ---------------------------------------------------------------------------
+// PHAN A ①: chan ngap nhat ky. Xem chu thich chi tiet o login.go va o
+// main.go (mucNhatKyTuChuoi) de biet boi canh day du (9 GB/gio tu 1 ket noi).
+// ---------------------------------------------------------------------------
+
+// demNhatKy la mot slog.Handler chi dem so dong da ghi, dung de kiem tra
+// "khong ghi nhat ky nao" ma khong can doc noi dung tung dong.
+type demNhatKy struct {
+	soDong int
+}
+
+func (d *demNhatKy) Enabled(context.Context, slog.Level) bool { return true }
+func (d *demNhatKy) Handle(context.Context, slog.Record) error {
+	d.soDong++
+	return nil
+}
+func (d *demNhatKy) WithAttrs([]slog.Attr) slog.Handler { return d }
+func (d *demNhatKy) WithGroup(string) slog.Handler      { return d }
+
+// TestGoiLenhLaKhongGhiNhatKy la kiem chung cho viec ① trong PHAN A: nhan mot
+// goi mang lenh la (khac -29), hoac mot goi -29 voi lenh con la (khac 0),
+// TUYET DOI KHONG duoc ghi bat ky dong nhat ky nao — du o muc Debug.
+//
+// Boi canh: do bang thuc te tren may chu that, mot ket noi don gui goi 3 byte
+// lenh la co the dat 32.452 goi/giay. Truoc day moi goi nhu vay lam ghi MOT
+// dong Debug (~67 byte) trong XuLy() — khuech dai thanh 9 GB/GIO tren dia CHI
+// TU MOT ket noi. Ha muc log mac dinh xuong info (viec o main.go) la chua du
+// neu ai do dieu tra su co roi bat NRO_MUC_NHAT_KY=debug: dong log van con do
+// va van khuech dai y het cu. Cach sua dung la BO HAN dong log, khong phai ha
+// muc — client gui cac goi nay mot cach binh thuong (vi du lenh con
+// setClientType), khong phai chuyen dang ghi lai.
+func TestGoiLenhLaKhongGhiNhatKy(t *testing.T) {
+	dem := &demNhatKy{}
+	cu := slog.Default()
+	slog.SetDefault(slog.New(dem))
+	defer slog.SetDefault(cu)
+
+	b := NewBoXuLy(&khoGia{err: context.Canceled}) // kho khong duoc goi toi
+
+	// 1. Lenh top-level la (khac -29 = lenhChuaDangNhap).
+	if err := b.XuLy(&mynet.Session{}, &protocol.Message{Command: 42}); err != nil {
+		t.Fatalf("XuLy loi khong mong doi voi lenh la: %v", err)
+	}
+
+	// 2. Lenh con la, sau khi da vao dung khung -29 (vd client goi
+	// setClientType, mot lenh con khac lenhConDangNhap = 0).
+	w := protocol.NewWriter()
+	w.Byte(9) // lenh con la
+	if err := b.XuLy(&mynet.Session{}, protocol.NewMessage(-29, w)); err != nil {
+		t.Fatalf("XuLy loi khong mong doi voi lenh con la: %v", err)
+	}
+
+	if dem.soDong != 0 {
+		t.Fatalf("XuLy ghi %d dong nhat ky cho lenh la/lenh con la, mong doi 0 (phai bo han, khong chi ha muc)", dem.soDong)
+	}
+}
+
+// ---------------------------------------------------------------------------
+// PHAN A ②: kiem dinh dang ten dang nhap o tang Go, TRUOC khi cham toi kho.
+// ---------------------------------------------------------------------------
+
+// TestTenSaiDinhDangBiChanKhongGoiKho la kiem chung cho viec ② trong PHAN A:
+// ten dang nhap khong khop ^[A-Za-z0-9_]{4,20}$ phai bi KiemTraDangNhap tu
+// choi NGAY, khong duoc cham toi kho du lieu (truoc day chi CSDL kiem qua
+// rang buoc CHECK, nen mot ten 60.000 ky tu van bi ghi nguyen vao nhat ky roi
+// day xuong CSDL — cong voi ich vi chac chan khong khop gi).
+//
+// Dung khoGia bao loi neu bi goi de bat dung viec "khong goi toi kho".
+func TestTenSaiDinhDangBiChanKhongGoiKho(t *testing.T) {
+	b := NewBoXuLy(&khoGia{err: context.Canceled}) // kho se loi neu bi goi
+
+	truongHop := []struct {
+		mota string
+		ten  string
+	}{
+		{"qua ngan (3 ky tu)", "abc"},
+		{"qua dai (21 ky tu)", strings.Repeat("x", 21)},
+		{"co dau tieng Viet", "nguơi_chơi"},
+		{"ky tu dac biet", "nguoi!choi"},
+	}
+
+	for _, tc := range truongHop {
+		t.Run(tc.mota, func(t *testing.T) {
+			kq, err := b.KiemTraDangNhap(context.Background(), tc.ten, "mat-khau-gi-do")
+			if err != nil {
+				t.Fatalf("khong duoc goi toi kho: %v", err)
+			}
+			if kq.ThanhCong {
+				t.Fatalf("ten %q sai dinh dang ma van cho dang nhap", tc.ten)
+			}
+			if kq.LyDo != LyDoSaiThongTin {
+				t.Fatalf("ly do = %q, mong doi %q (khong duoc tao cau bao rieng — se lo luat dat ten cho ke xau)",
+					kq.LyDo, LyDoSaiThongTin)
+			}
+		})
 	}
 }

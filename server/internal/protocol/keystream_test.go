@@ -63,6 +63,44 @@ func TestHaiConTroDocLap(t *testing.T) {
 	}
 }
 
+// TestGenerateRawKeyThatSuNgauNhien la kiem chung cho PHAN B, Test 1: kiem
+// thu dot bien da chi ra GenerateRawKey tra ve TOAN BYTE 0 van lam moi test
+// khac DAT (chung chi kiem do dai, khong kiem noi dung). Khoa toan byte 0
+// nghia la phep XOR trong KeyStream KHONG ma hoa gi ca (x XOR 0 == x) — moi
+// goi tin se di TRAN tren mang.
+//
+// Kiem hai dieu: (a) hai lan sinh khoa LIEN TIEP phai ra KHAC nhau, (b) tu
+// khoa sinh ra KHONG duoc la toan byte giong nhau (bao gom ca toan 0).
+func TestGenerateRawKeyThatSuNgauNhien(t *testing.T) {
+	a, err := GenerateRawKey(16)
+	if err != nil {
+		t.Fatalf("loi khong mong doi: %v", err)
+	}
+	b, err := GenerateRawKey(16)
+	if err != nil {
+		t.Fatalf("loi khong mong doi: %v", err)
+	}
+
+	if bytes.Equal(a, b) {
+		t.Fatalf("hai lan sinh khoa LIEN TIEP ra GIONG HET nhau: %v — khong the la ngau nhien that", a)
+	}
+
+	toanByteGiongNhau := func(k []byte) bool {
+		for _, x := range k {
+			if x != k[0] {
+				return false
+			}
+		}
+		return true
+	}
+	if toanByteGiongNhau(a) {
+		t.Fatalf("khoa (lan 1) la toan byte giong nhau: %v — vd toan byte 0 se lam XOR khong ma hoa gi ca", a)
+	}
+	if toanByteGiongNhau(b) {
+		t.Fatalf("khoa (lan 2) la toan byte giong nhau: %v — vd toan byte 0 se lam XOR khong ma hoa gi ca", b)
+	}
+}
+
 func TestGenerateRawKeyChanDoDaiSai(t *testing.T) {
 	if _, err := GenerateRawKey(0); err == nil {
 		t.Fatal("do dai 0 phai bao loi")

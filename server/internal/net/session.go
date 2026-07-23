@@ -25,6 +25,22 @@ const (
 
 	// thoiGianChoGoiTin: ket noi im lang qua lau coi nhu da chet.
 	thoiGianChoGoiTin = 120 * time.Second
+
+	// thoiGianChoGui: han gio cho MOI LAN GHI xuong client.
+	//
+	// Vi sao can ca hai chieu (doc VA ghi), khong chi doc: han gio doc chi
+	// cuu duoc khi luong may chu dang KET O READ(). Neu client gui goi lien
+	// tuc roi ngung DOC (khong phai ngung gui), bo dem gui TCP phia may chu
+	// se day len, va Write() se CHAN VINH VIEN cho toi khi client doc bot —
+	// luc do luong dang ket o Write(), han gio doc khong lien quan gi ca. Da
+	// do duoc tren may chu that: client gui 10.910 goi roi khong doc gi, ket
+	// noi song toi 190 giay truoc khi bi phat hien — han gio doc (120s)
+	// khong cuu duoc vi no chi ap dung cho Read(), khong ap dung cho Write().
+	//
+	// Chon 30s (ngan hon nhieu so thoiGianChoGoiTin): ghi la thao tac may chu
+	// CHU DONG thuc hien de tra loi, khong co ly do gi phai cho lau nhu doc
+	// (noi may chu bi dong THU DONG cho client goi tin lien tuc).
+	thoiGianChoGui = 30 * time.Second
 )
 
 // XuLyGoiTin la thu tang tren cai dat de nhan goi tin da giai ma.
@@ -50,6 +66,10 @@ type Session struct {
 func (s *Session) Gui(m *protocol.Message) error {
 	s.muGui.Lock()
 	defer s.muGui.Unlock()
+	// Dat han gio TRUOC MOI LAN GHI (xem chu thich thoiGianChoGui): thieu
+	// buoc nay la ly do luong may chu co the ket vinh vien o Write() khi
+	// client ngung doc du van con gui goi len.
+	_ = s.conn.SetWriteDeadline(time.Now().Add(thoiGianChoGui))
 	return s.framer.WriteMessage(m)
 }
 

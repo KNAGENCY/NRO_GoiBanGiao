@@ -39,9 +39,16 @@ const (
 	lenhTaoNhanVat      int8 = 2
 
 	// gioiHanThan chan than tin bao do dai khong lo, tranh cap phat het bo
-	// nho neu noi nham vao mot thu khong phai may chu that. Cung gia tri voi
-	// doDaiThanToiDa trong protocol/frame.go (khong dung chung duoc vi do la
-	// hang so khong xuat khau cua goi do).
+	// nho neu noi nham vao mot thu khong phai may chu that.
+	//
+	// Truoc day chu thich nay so sanh voi mot hang so cung ten (doDaiThanToiDa)
+	// ben protocol/frame.go — hang so do DA BI BO ben phia may chu vi la MA
+	// CHET (truong do dai server doc chi co 2 byte, khong bao gio vuot 65535,
+	// nen dieu kien so sanh voi 4 MB khong bao gio dung). Ghi chu lai o day de
+	// tranh nham lan tuong tu: gioi han 4 MB o DAY (cong cu client gia) cung
+	// dang trong tinh trang tuong tu — khong xoa vi ngoai pham vi ke hoach
+	// nay (chi sua server/internal/protocol/frame.go), nhung nen luu y neu sau
+	// nay dong dung cong cu nay.
 	gioiHanThan = 4 << 20
 )
 

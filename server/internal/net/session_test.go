@@ -1,6 +1,7 @@
 package net
 
 import (
+	"errors"
 	"io"
 	"net"
 	"testing"
@@ -121,5 +122,62 @@ func TestGoiDauKhongPhaiBatTayThiNgat(t *testing.T) {
 	ben_client.SetReadDeadline(time.Now().Add(2 * time.Second))
 	if _, err := fClient.ReadMessage(); err == nil {
 		t.Fatal("may chu phai ngat ket noi khi goi dau khong phai -27")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// PHAN A ③: Gui phai co han gio ghi, khong chi han gio doc.
+// ---------------------------------------------------------------------------
+
+// connHanGioNgan bien moi loi goi SetWriteDeadline thanh mot han RAT NGAN
+// (50ms), bat ke Session.Gui yeu cau han gio bao lau. Nho vay test co the
+// chung minh co che han gio ghi thuc su phat huy tac dung — Write() tren
+// net.Pipe tra ve loi timeout — ma khong phai cho that su het thoiGianChoGui
+// (vd 30 giay) trong luc chay test.
+type connHanGioNgan struct {
+	net.Conn
+}
+
+func (c *connHanGioNgan) SetWriteDeadline(t time.Time) error {
+	return c.Conn.SetWriteDeadline(time.Now().Add(50 * time.Millisecond))
+}
+
+// TestGuiCoHanGioGhiKhongTreoVinhVien la bang chung cho viec ③ trong PHAN A.
+//
+// Boi canh (do bang thuc te): client gui 10.910 goi tin roi khong doc gi ca.
+// Session.Gui() truoc day KHONG dat han gio ghi, nen khi bo dem gui TCP day
+// (client khong doc), luong may chu goi Write() se KET VINH VIEN o do. Han
+// gio DOC (thoiGianChoGoiTin, 120s) khong cuu duoc: luc do luong dang ket o
+// Write(), khong phai o Read(). Ket qua do duoc: ket noi song toi 190 giay.
+//
+// net.Pipe() khong co bo dem: Write() o mot dau CHAN cho toi khi dau kia Read,
+// nen neu khong dat han gio ghi, khong ai doc tu ben_client -> Gui() se treo
+// vinh vien. Test dung connHanGioNgan de ep han gio thuc te xuong 50ms (xem
+// chu thich kieu do) thay vi phai cho that thoiGianChoGui that (vd 30s).
+func TestGuiCoHanGioGhiKhongTreoVinhVien(t *testing.T) {
+	ben_client, ben_server := net.Pipe()
+	defer ben_client.Close()
+	defer ben_server.Close()
+	// CO Y khong doc gi tu ben_client: mo phong client gui roi bo doc.
+
+	s := &Session{
+		conn:   &connHanGioNgan{Conn: ben_server},
+		framer: protocol.NewFramer(ben_server, ben_server),
+	}
+
+	xong := make(chan error, 1)
+	go func() { xong <- s.Gui(&protocol.Message{Command: -27}) }()
+
+	select {
+	case err := <-xong:
+		if err == nil {
+			t.Fatal("Gui phai tra ve loi timeout khi client khong doc gi (han gio ghi), nhung lai thanh cong")
+		}
+		var netErr net.Error
+		if !errors.As(err, &netErr) || !netErr.Timeout() {
+			t.Fatalf("loi = %v, mong doi mot net.Error co Timeout() == true (tuc la Gui co dat han gio ghi)", err)
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("Gui() TREO VINH VIEN khi client khong doc gi — thieu han gio ghi truoc moi lan ghi")
 	}
 }

@@ -149,3 +149,61 @@ func TestChenTenDangNhapHopLeThanhCong(t *testing.T) {
 		t.Fatalf("ten dang nhap hop le phai duoc chap nhan nhung lai bi tu choi: %v", err)
 	}
 }
+
+// TestLayTaiKhoanDungThuTuCotBoolean la kiem chung cho PHAN B, Test 3: kiem
+// thu dot bien da chi ra hoan doi thu tu bi_khoa <-> la_admin trong lenh Scan
+// cua LayTaiKhoan VAN LAM cac test khac DAT — vi ca hai cung kieu bool nen
+// Scan() "nuot" tron, khong bao loi kieu du lieu.
+//
+// Hau qua neu loi nay lot qua: tai khoan BI KHOA van dang nhap duoc binh
+// thuong (vi truong BiKhoa doc nham gia tri cua la_admin), VA nguoi choi
+// thuong bong nhien thanh QUAN TRI VIEN (vi truong LaAdmin doc nham gia tri
+// cua bi_khoa).
+//
+// Kiem bang HAI tai khoan NGUOC nhau — (bi_khoa=true, la_admin=false) va
+// (bi_khoa=false, la_admin=true) — vi neu chi kiem MOT chieu (vd ca hai cung
+// false) thi hoan doi cot se khong lam sai ket qua nao ca; phai co it nhat
+// mot truong true o moi tai khoan, va hai tai khoan phai NGUOC nhau, thi hoan
+// doi cot moi chac chan bi bat o it nhat mot ben.
+func TestLayTaiKhoanDungThuTuCotBoolean(t *testing.T) {
+	s := moKetNoiThu(t)
+	ctx := context.Background()
+
+	truongHop := []struct {
+		ten     string
+		biKhoa  bool
+		laAdmin bool
+	}{
+		{"tk_khoa_thuong01", true, false},
+		{"tk_thuong_admin1", false, true},
+	}
+
+	for _, tc := range truongHop {
+		tc := tc
+		_, err := s.pool.Exec(ctx,
+			`INSERT INTO tai_khoan (ten_dang_nhap, mat_khau_bam, bi_khoa, la_admin)
+			 VALUES ($1, 'bam-gia', $2, $3)`, tc.ten, tc.biKhoa, tc.laAdmin)
+		if err != nil {
+			t.Fatalf("chen tai khoan %q that bai: %v", tc.ten, err)
+		}
+		t.Cleanup(func() {
+			s.pool.Exec(context.Background(),
+				`DELETE FROM tai_khoan WHERE lower(ten_dang_nhap) = lower($1)`, tc.ten)
+		})
+	}
+
+	for _, tc := range truongHop {
+		tk, err := s.LayTaiKhoan(ctx, tc.ten)
+		if err != nil {
+			t.Fatalf("doc tai khoan %q that bai: %v", tc.ten, err)
+		}
+		if tk.BiKhoa != tc.biKhoa {
+			t.Fatalf("tai khoan %q: BiKhoa = %v, mong doi %v (nghi ngo cot bi_khoa/la_admin bi hoan doi trong Scan)",
+				tc.ten, tk.BiKhoa, tc.biKhoa)
+		}
+		if tk.LaAdmin != tc.laAdmin {
+			t.Fatalf("tai khoan %q: LaAdmin = %v, mong doi %v (nghi ngo cot bi_khoa/la_admin bi hoan doi trong Scan)",
+				tc.ten, tk.LaAdmin, tc.laAdmin)
+		}
+	}
+}

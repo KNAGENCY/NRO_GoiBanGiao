@@ -133,7 +133,7 @@ func TestGoiDacBietThanRongKhongLamLechGoiSau(t *testing.T) {
 	ben_gui := NewFramer(&bytes.Buffer{}, &day)
 	ben_gui.SetKey(DeriveKey(raw))
 
-	goi1 := &Message{Command: -87, Data: nil}                // lenh dac biet, than tin rong
+	goi1 := &Message{Command: -87, Data: nil}                            // lenh dac biet, than tin rong
 	goi2 := &Message{Command: -29, Data: []byte{0x10, 0x20, 0x30, 0x40}} // lenh thuong, co than tin
 
 	if err := ben_gui.WriteMessage(goi1); err != nil {
@@ -223,7 +223,7 @@ func TestLenhThuongThanRongVanMaHoaDoDai(t *testing.T) {
 			ben_gui := NewFramer(&bytes.Buffer{}, &day)
 			ben_gui.SetKey(DeriveKey(raw))
 
-			goi1 := &Message{Command: -29, Data: rongData} // lenh thuong, than tin rong
+			goi1 := &Message{Command: -29, Data: rongData}                 // lenh thuong, than tin rong
 			goi2 := &Message{Command: -29, Data: []byte{0x11, 0x22, 0x33}} // lenh thuong, co than tin
 
 			if err := ben_gui.WriteMessage(goi1); err != nil {
@@ -275,12 +275,25 @@ func TestLenhDacBietChuaCoKhoaTraLoiKhongPanic(t *testing.T) {
 	}
 }
 
-// Goi qua lon phai bi tu choi de tranh ke xau bao do dai khong lo lam can RAM.
-func TestTuChoiGoiQuaLon(t *testing.T) {
-	// cmd -29, do dai 0xFFFF, nhung khong co du lieu theo sau
+// TestThanTinThieuDuLieuBaoLoi: goi tin khai bao do dai than tin, nhung KHONG
+// co du du lieu theo sau, phai bao loi.
+//
+// LUU Y — test nay TUNG mang ten "TestTuChoiGoiQuaLon" voi chu thich noi day
+// la kiem mot "chot chan do dai khong lo" (hang so doDaiThanToiDa, 4 MB). Dieu
+// do SAI: truong do dai trong dinh dang nay chi co 2 BYTE (xem ReadMessage),
+// nen n toi da luon la 65535 (64 KB) — khong bao gio cham toi, dung noi vuot
+// qua, gioi han 4 MB. Chot chan do la MA CHET (dieu kien khong bao gio dung
+// duoc), va da bi bo (xem frame.go). Loi ma test nay thuc su dang bat den tu
+// io.ReadFull() ben trong ReadMessage(): no bao "unexpected EOF" khi phan than
+// tin doc duoc ngan hon do dai da khai bao (o day: khai 65535 byte nhung
+// khong co byte nao theo sau) — hoan toan khong lien quan toi bat ky gioi han
+// kich thuoc nao. Da doi ten va viet lai chu thich cho dung ban chat.
+func TestThanTinThieuDuLieuBaoLoi(t *testing.T) {
+	// cmd -29, khai bao do dai 0xFFFF (65535 byte), nhung khong co du lieu
+	// theo sau -> io.ReadFull() trong ReadMessage() phai bao loi.
 	vao := bytes.NewReader([]byte{0xE3, 0xFF, 0xFF})
 	f := NewFramer(vao, &bytes.Buffer{})
 	if _, err := f.ReadMessage(); err == nil {
-		t.Fatal("goi bao do dai 65535 ma khong co du lieu phai bao loi")
+		t.Fatal("goi khai bao do dai 65535 nhung khong co du lieu theo sau phai bao loi (thieu du lieu, khong phai vuot gioi han)")
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"regexp"
 	"strings"
 
 	"nroserver/internal/auth"
@@ -23,11 +24,12 @@ const (
 )
 
 // Lenh trong giao thuc. Cac gia tri nay lay tu ban Java cu, DUNG DOI:
-//   -29  khung "chua dang nhap" — Controller.java:733, ben trong con mot
-//        byte lenh con nua (0 = dang nhap) — Controller.java:876
-//   -26  hien hop thoai co nut OK — Service.sendThongBaoOK
-//  -102  bao client thoat trang thai "dang cho" — Service.sendLoginFail
-//     2  chuyen sang man tao nhan vat — Service.switchToCreateChar
+//
+//	 -29  khung "chua dang nhap" — Controller.java:733, ben trong con mot
+//	      byte lenh con nua (0 = dang nhap) — Controller.java:876
+//	 -26  hien hop thoai co nut OK — Service.sendThongBaoOK
+//	-102  bao client thoat trang thai "dang cho" — Service.sendLoginFail
+//	   2  chuyen sang man tao nhan vat — Service.switchToCreateChar
 const (
 	lenhChuaDangNhap    int8 = -29
 	lenhConDangNhap     byte = 0
@@ -35,6 +37,17 @@ const (
 	lenhDangNhapThatBai int8 = -102
 	lenhTaoNhanVat      int8 = 2
 )
+
+// reTenDangNhapHopLe khop dung quy tac ma CSDL da ap dung bang rang buoc CHECK
+// tai_khoan_ten_hop_le (xem migrations/0001_tai_khoan.sql). Bien nay bien dich
+// MOT LAN o muc goi (khong phai moi lan goi ham) — MustCompile la an toan o day
+// vi bieu thuc chinh tay viet, khong doi luc chay.
+//
+// Vi sao phai kiem lai o tang Go dù CSDL da co CHECK: neu khong, mot ten dang
+// nhap dai (vi du 60.000 ky tu) van bi ghi nguyen vao nhat ky roi day tron ven
+// xuong CSDL truoc khi bi CHECK tu choi — cong toan bo qua trinh do la vo ich
+// vi chac chan khong khop gi. Kiem truoc o Go tranh duoc ca hai lang phi do.
+var reTenDangNhapHopLe = regexp.MustCompile(`^[A-Za-z0-9_]{4,20}$`)
 
 type KetQuaDangNhap struct {
 	ThanhCong bool
@@ -56,7 +69,12 @@ func NewBoXuLy(kho KhoTaiKhoan) *BoXuLy { return &BoXuLy{kho: kho} }
 // KiemTraDangNhap chua toan bo luat dang nhap, tach khoi phan mang de kiem thu.
 func (b *BoXuLy) KiemTraDangNhap(ctx context.Context, ten, matKhau string) (KetQuaDangNhap, error) {
 	ten = strings.TrimSpace(ten)
-	if ten == "" || matKhau == "" {
+	// Kiem dinh dang TRUOC khi cham toi kho: mot ten khong the nao khop se
+	// khong bao gio tim thay tai khoan, nen goi kho la lang phi thuan tuy.
+	// Tra ve CUNG mot cau bao chung (LyDoSaiThongTin) nhu moi truong hop sai
+	// khac — KHONG duoc tao cau rieng cho truong hop nay, vi lam vay se lo
+	// cho ke xau biet duoc luat dat ten (vd do dai, bang chu cai cho phep).
+	if !reTenDangNhapHopLe.MatchString(ten) || matKhau == "" {
 		return KetQuaDangNhap{LyDo: LyDoSaiThongTin}, nil
 	}
 
@@ -84,8 +102,14 @@ func (b *BoXuLy) KiemTraDangNhap(ctx context.Context, ten, matKhau string) (KetQ
 func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 	if m.Command != lenhChuaDangNhap {
 		// Ke hoach 1 chi lam dang nhap. Cac lenh khac bo qua, khong ngat
-		// ket noi — client gui vai goi phu ngay sau khi noi.
-		slog.Debug("bo qua lenh chua ho tro", "lenh", m.Command)
+		// ket noi — client gui vai goi phu ngay sau khi noi (vi du
+		// setClientType), day la chuyen BINH THUONG chu khong phai dang ngo.
+		//
+		// TUYET DOI KHONG ghi log o day, ke ca muc Debug: do bang thuc te tren
+		// may chu that, mot ket noi don gui goi 3 byte lenh la co the dat
+		// 32.452 goi/giay. Ghi MOT dong log (~67 byte) cho moi goi nhu vay
+		// se khuech dai thanh 9 GB/GIO tren dia CHI TU MOT ket noi, khong gioi
+		// han - day chinh la loi da tung xay ra (xem review-cuoi-report.md).
 		return nil
 	}
 
@@ -95,7 +119,9 @@ func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 		return fmt.Errorf("goi -29 thieu byte lenh con: %w", err)
 	}
 	if lenhCon != lenhConDangNhap {
-		slog.Debug("bo qua lenh con chua ho tro", "lenh_con", lenhCon)
+		// Cung ly do khong ghi log nhu nhanh "lenh chua ho tro" o tren: lenh
+		// con la (vd setClientType) la binh thuong, ghi log se lap lai chinh
+		// dieu kien gay ngap nhat ky da xay ra tren may chu that.
 		return nil
 	}
 

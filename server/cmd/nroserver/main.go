@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"nroserver/internal/game"
@@ -16,10 +17,48 @@ import (
 	"nroserver/internal/store"
 )
 
+// mucNhatKyTuChuoi dich gia tri bien moi truong NRO_MUC_NHAT_KY thanh slog.Level.
+// hopLe == false nghia la chuoi khong nhan dang duoc; ham van tra ve
+// slog.LevelInfo trong truong hop do de goi noi khong can xu ly rieng, nhung
+// nen canh bao nguoi van hanh biet gia tri ho dat bi bo qua.
+func mucNhatKyTuChuoi(s string) (muc slog.Level, hopLe bool) {
+	switch strings.ToLower(strings.TrimSpace(s)) {
+	case "":
+		return slog.LevelInfo, true
+	case "debug":
+		return slog.LevelDebug, true
+	case "info":
+		return slog.LevelInfo, true
+	case "warn", "warning":
+		return slog.LevelWarn, true
+	case "error":
+		return slog.LevelError, true
+	default:
+		return slog.LevelInfo, false
+	}
+}
+
 func main() {
+	// MAC DINH LA INFO, TUYET DOI KHONG PHAI DEBUG.
+	//
+	// Ly do: da do duoc tren may chu that mot ket noi don gui goi 3 byte lenh
+	// la co the dat 32.452 goi/giay. Truoc day moi goi nhu vay lam
+	// internal/game/login.go ghi MOT dong Debug (~67 byte) - voi muc mac dinh
+	// la Debug, dieu do khuech dai thanh 9 GB/GIO tren dia CHI TU MOT ket noi,
+	// khong gioi han. Da bo han cac dong Debug do (xem login.go), nhung muc
+	// mac dinh cua chinh logger cung phai la info: neu sau nay co ai them log
+	// Debug moi ma quen doi lai muc mac dinh, may chu it nhat khong tu dong
+	// bat no len khi trien khai binh thuong (khong dat NRO_MUC_NHAT_KY).
+	// Muon xem log chi tiet luc dieu tra su co thi tu dat
+	// NRO_MUC_NHAT_KY=debug, KHONG duoc lam do la mac dinh.
+	muc, hopLe := mucNhatKyTuChuoi(os.Getenv("NRO_MUC_NHAT_KY"))
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-		Level: slog.LevelDebug,
+		Level: muc,
 	})))
+	if !hopLe {
+		slog.Warn("NRO_MUC_NHAT_KY khong nhan dang duoc, dung muc mac dinh info",
+			"gia_tri_nhan_duoc", os.Getenv("NRO_MUC_NHAT_KY"))
+	}
 
 	dsn := os.Getenv("NRO_DSN")
 	if dsn == "" {

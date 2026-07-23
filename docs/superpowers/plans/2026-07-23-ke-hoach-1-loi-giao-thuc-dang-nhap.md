@@ -387,6 +387,40 @@ git commit -m "feat(protocol): luong khoa ma tuong thich client cu"
 
 ### Task 3: Đọc ghi kiểu dữ liệu tương thích Java
 
+> ## ⚠️ ĐÍNH CHÍNH — code mẫu bên dưới CÓ LỖI, đã sửa khi thi công
+>
+> **Đoạn `func (w *Writer) UTF` trong kế hoạch này viết sai.** Nó ghi thẳng
+> chuỗi Go (UTF-8 tiêu chuẩn), trong khi Java dùng biến thể gọi là
+> **modified UTF-8**. Hai chỗ khác nhau:
+>
+> | Ký tự | UTF-8 chuẩn (code sai) | Modified UTF-8 (đúng) |
+> |---|---|---|
+> | NUL (U+0000) | 1 byte `00` | 2 byte `C0 80` |
+> | Emoji (ngoài BMP) | 4 byte | **6 byte** — tách thành cặp surrogate |
+>
+> Hậu quả đo bằng Java thật: ghi emoji theo UTF-8 chuẩn làm
+> `java.io.DataInputStream.readUTF` phía client **ném `UTFDataFormatException`**
+> — gói tin coi như hỏng, không phải hiện sai chữ.
+>
+> Nguy hiểm ở chỗ: bộ test trong kế hoạch này **vẫn đạt hết** dù code sai, vì
+> nó chỉ thử chuỗi ASCII và tiếng Việt có dấu — hai loại đó trùng nhau giữa
+> hai cách mã hoá. Lỗi chỉ lộ khi người chơi gõ emoji vào tên hoặc chat.
+>
+> **Cài đặt đúng nằm ở `server/internal/protocol/datastream.go`** (hàm
+> `encodeModifiedUTF8` / `decodeModifiedUTF8`). Ai đọc lại kế hoạch này thì
+> lấy code trong repo, đừng chép code mẫu bên dưới.
+>
+> Hai chuỗi byte chuẩn đo từ Java thật, dùng làm mốc kiểm thử:
+> ```
+> writeUTF("A" + NUL + "B")  ->  00 04 41 C0 80 42
+> writeUTF("X" + emoji + "Y") ->  00 08 58 ED A0 BC ED BE 89 59
+> ```
+>
+> Bài học: **test đạt không có nghĩa là code đúng** — chỉ có nghĩa là code
+> đúng với những gì test thử. Ràng buộc chung của kế hoạch đã ghi rõ
+> "modified UTF-8 của Java" ngay từ đầu, nhưng cả code lẫn test đều không
+> thực hiện đúng ràng buộc đó.
+
 **Files:**
 - Create: `server/internal/protocol/datastream.go`
 - Test: `server/internal/protocol/datastream_test.go`

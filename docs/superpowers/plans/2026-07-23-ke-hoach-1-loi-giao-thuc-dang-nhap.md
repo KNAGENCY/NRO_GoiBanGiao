@@ -21,7 +21,10 @@
 
 ## Global Constraints
 
-- **Go 1.24 trở lên** (bắt buộc: `crypto/pbkdf2` chỉ có trong thư viện chuẩn từ 1.24).
+- **Go 1.25 trở lên.** Ban đầu đặt sàn 1.24 (mốc `crypto/pbkdf2` vào thư viện
+  chuẩn). Từ Task 6 phải nâng lên 1.25 vì `pgx/v5 v5.10.0` tự khai báo cần
+  Go 1.25 — đây là ràng buộc của thư viện, không phải lựa chọn. Máy đang
+  chạy 1.26.5 nên không ảnh hưởng gì.
 - **Không dùng thư viện ngoài, ngoại trừ đúng một cái: `github.com/jackc/pgx/v5`.**
   Cụ thể: KHÔNG dùng `golang.org/x/crypto` — đã kiểm chứng thư viện chuẩn
   `crypto/pbkdf2` cho ra kết quả khớp tuyệt đối với bản Java.
@@ -387,6 +390,40 @@ git commit -m "feat(protocol): luong khoa ma tuong thich client cu"
 
 ### Task 3: Đọc ghi kiểu dữ liệu tương thích Java
 
+> ## ⚠️ ĐÍNH CHÍNH — code mẫu bên dưới CÓ LỖI, đã sửa khi thi công
+>
+> **Đoạn `func (w *Writer) UTF` trong kế hoạch này viết sai.** Nó ghi thẳng
+> chuỗi Go (UTF-8 tiêu chuẩn), trong khi Java dùng biến thể gọi là
+> **modified UTF-8**. Hai chỗ khác nhau:
+>
+> | Ký tự | UTF-8 chuẩn (code sai) | Modified UTF-8 (đúng) |
+> |---|---|---|
+> | NUL (U+0000) | 1 byte `00` | 2 byte `C0 80` |
+> | Emoji (ngoài BMP) | 4 byte | **6 byte** — tách thành cặp surrogate |
+>
+> Hậu quả đo bằng Java thật: ghi emoji theo UTF-8 chuẩn làm
+> `java.io.DataInputStream.readUTF` phía client **ném `UTFDataFormatException`**
+> — gói tin coi như hỏng, không phải hiện sai chữ.
+>
+> Nguy hiểm ở chỗ: bộ test trong kế hoạch này **vẫn đạt hết** dù code sai, vì
+> nó chỉ thử chuỗi ASCII và tiếng Việt có dấu — hai loại đó trùng nhau giữa
+> hai cách mã hoá. Lỗi chỉ lộ khi người chơi gõ emoji vào tên hoặc chat.
+>
+> **Cài đặt đúng nằm ở `server/internal/protocol/datastream.go`** (hàm
+> `encodeModifiedUTF8` / `decodeModifiedUTF8`). Ai đọc lại kế hoạch này thì
+> lấy code trong repo, đừng chép code mẫu bên dưới.
+>
+> Hai chuỗi byte chuẩn đo từ Java thật, dùng làm mốc kiểm thử:
+> ```
+> writeUTF("A" + NUL + "B")  ->  00 04 41 C0 80 42
+> writeUTF("X" + emoji + "Y") ->  00 08 58 ED A0 BC ED BE 89 59
+> ```
+>
+> Bài học: **test đạt không có nghĩa là code đúng** — chỉ có nghĩa là code
+> đúng với những gì test thử. Ràng buộc chung của kế hoạch đã ghi rõ
+> "modified UTF-8 của Java" ngay từ đầu, nhưng cả code lẫn test đều không
+> thực hiện đúng ràng buộc đó.
+
 **Files:**
 - Create: `server/internal/protocol/datastream.go`
 - Test: `server/internal/protocol/datastream_test.go`
@@ -610,6 +647,72 @@ git commit -m "feat(protocol): doc ghi kieu du lieu tuong thich java DataStream"
 ---
 
 ### Task 4: Khung tin trên dây
+
+> ## ⚠️ ĐÍNH CHÍNH THỨ HAI — code mẫu bên dưới CÓ LỖI NGHIÊM TRỌNG, đã sửa
+>
+> Trong `WriteMessage`, câu `switch` chọn nhánh độ dài 3 byte viết là:
+>
+> ```go
+> case n > 0 && lenhDoDaiBaByte[m.Command]:   // SAI
+> ```
+>
+> **Điều kiện `n > 0` là thừa và gây lệch dòng byte.** Bằng chứng lấy từ client
+> (`Session_ME.cs`, hàm `readMessage`):
+>
+> ```csharp
+> if (b == -32 || b == -66 || b == 11 || b == -67 || b == -74 || b == -87 || b == 66)
+>     return readMessage2(b);   // readMessage2 LUÔN đọc 3 byte độ dài
+> ```
+>
+> Client quyết định đọc 3 byte **chỉ dựa vào byte lệnh**, không xét độ dài thân
+> tin. Nên nếu server gửi một trong 7 lệnh đó với thân tin rỗng: server ghi 2
+> byte, client đọc 3 byte → **mọi gói tin sau đó đều đọc sai**. Triệu chứng:
+> client treo im lặng, không có thông báo lỗi nào.
+>
+> **Sửa đúng:** bỏ `n > 0`, chỉ còn `case lenhDoDaiBaByte[m.Command]:`
+>
+> Điều đáng chú ý: bản Java cũ cũng có cùng lỗ hổng này cho trường hợp
+> `data == null` (ghi `writeShort(0)` 2 byte không xét lệnh). Nó chưa nổ vì
+> trên thực tế chưa ai gửi 7 lệnh đó với thân tin rỗng. Bản Go **sửa cho đúng
+> hơn bản gốc**, thay vì chép nguyên lỗi.
+>
+> ### Và còn HAI lỗi nữa cùng loại, phát hiện ở vòng soi sau
+>
+> **Lỗi 2 — nguy hiểm hơn lỗi 1.** Nhánh còn lại cũng có cùng điều kiện thừa:
+> ```go
+> case n > 0 && f.coKhoa():   // SAI y hệt
+> ```
+> Lệnh **thường** gửi với thân tin rỗng **sau khi đã có khoá** sẽ ghi 2 byte
+> thô, trong khi client vẫn XOR chúng → vừa ra độ dài rác, vừa **đẩy lệch con
+> trỏ khoá vĩnh viễn**. Nguy hiểm hơn lỗi 1 vì "lệnh thường gửi rỗng" là
+> thông báo và xác nhận — xảy ra liên tục khi chơi, còn 7 lệnh đặc biệt thì hiếm.
+>
+> **Lỗi 3 — sập cả máy chủ.** Nhánh lệnh đặc biệt gọi `f.ks.Write(...)` không
+> kiểm `coKhoa()`. Gọi trước `SetKey` là panic con trỏ rỗng, mà panic không
+> `recover()` trong Go **làm sập cả tiến trình** — đá văng toàn bộ người chơi
+> đang online, không chỉ một kết nối.
+>
+> ### Nguyên tắc đúng, áp dụng cho CẢ BA nhánh
+>
+> | Quyết định | Dựa vào |
+> |---|---|
+> | Mã hoá hay không | **chỉ** `coKhoa()` |
+> | 2 byte hay 3 byte độ dài | **chỉ** byte lệnh |
+> | Độ dài thân tin | **không tham gia quyết định nào** |
+>
+> Bằng chứng dứt điểm cho nguyên tắc này: **chính client, ở hàm
+> `doSendMessage` nhánh `data == null`, cũng mã hoá 2 byte độ dài khi đã có
+> khoá** (`Session_ME.cs`, gọi `writeKey((sbyte)0)` hai lần). Xác nhận từ cả
+> chiều đọc lẫn chiều gửi của client.
+>
+> Cài đặt đúng nằm ở `server/internal/protocol/frame.go`. Bộ test bổ sung:
+> `TestGoiDacBietThanRongKhongLamLechGoiSau`, `TestLenhThuongThanRongVanMaHoaDoDai`,
+> `TestLenhDacBietChuaCoKhoaTraLoiKhongPanic` — hai cái đầu ghi hai gói liên
+> tiếp rồi đọc lại, bắt được hiện tượng lệch dòng chứ không chỉ đếm độ dài.
+>
+> **Bài học lớn nhất của Task 4:** sửa xong lỗi 1 mà không soi nhánh còn lại
+> nên bỏ sót lỗi 2 — cùng một kiểu sai, cách đó vài dòng. Khi sửa một lỗi,
+> phải tìm xem cùng kiểu sai đó còn ở đâu nữa.
 
 **Files:**
 - Create: `server/internal/protocol/message.go`

@@ -8,6 +8,7 @@
 # Dua len GitHub la lo du lieu ca nhan, khong the thu hoi.
 *.sql
 !docs/**/*.sql
+!server/**/migrations/**/*.sql
 
 # --- 2. KHO ANH (~820 MB) ---
 # Anh se nam tren Cloudflare R2, khong nam trong git.
@@ -57,3 +58,12 @@ desktop.ini
 .idea/
 *.iml
 *.swp
+
+# --- 8. DO NHAP CUA QUY TRINH THI CONG ---
+# Brief, bao cao, file diff sinh ra khi giao viec cho tro ly phu.
+# La ban nhap, khong phai san pham. Giu ngoai git cho kho sach.
+.superpowers/
+
+# --- 9. THU MUC ANH DO NGUOI DUNG GUI VE ---
+# Anh se nam tren Cloudflare R2 theo thiet ke, khong dua vao git.
+my thuat/

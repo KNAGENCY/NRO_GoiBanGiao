@@ -1,9 +1,86 @@
 # ĐỢT 1 — HƯỚNG DẪN TẠO ẢNH (dành cho AI tạo ảnh)
 
 > **Đọc toàn bộ Phần A trước khi tạo bất kỳ ảnh nào.**
-> Sau đó làm tuần tự Nhóm 1 → Nhóm 8. Mỗi dòng trong bảng là một ảnh.
 > Tự đặt tên file đúng cột `Tên file`. Xuất PNG nền trong suốt.
-> Khi xong tất cả, nén thành 1 file zip giữ nguyên cấu trúc thư mục theo nhóm.
+
+---
+
+# ⚠️ ĐỌC ĐẦU TIÊN — TÌNH TRẠNG VÀ VÌ SAO LÔ TRƯỚC BỊ TRẢ LẠI
+
+## Đã có gì rồi
+
+**Nhóm 1 (giao diện) đã làm xong và ĐƯỢC DUYỆT — 12 ảnh, KHÔNG cần làm lại.**
+
+Đó là các file: `ui_khung_hoithoai`, `ui_nut_thuong`, `ui_nut_nhan`, `ui_nut_khoa`,
+`ui_thanh_theluc_nen`, `ui_thanh_theluc_fill`, `ui_thanh_chakra_nen`,
+`ui_thanh_chakra_fill`, `ui_o_vatpham`, `ui_o_dangchon`, `ui_khung_avatar`,
+`ui_logo_game`.
+
+**12 ảnh đó là chuẩn phong cách của cả dự án.** Mọi ảnh làm sau phải nhìn như cùng
+một bộ với chúng.
+
+## Lô 343 ảnh trước đã bị trả lại — lý do
+
+Lô đó **đúng hết về hình thức**: đủ số lượng, đúng tên file, đúng thư mục, đúng
+kích thước, có nền trong suốt. Nhưng nội dung bên trong **không phải tranh** —
+chúng là hình khối phẳng vẽ bằng lệnh code.
+
+Số đo cụ thể:
+
+| | 12 ảnh đã duyệt | 343 ảnh bị trả lại |
+|---|---|---|
+| Số màu khác nhau trong một ảnh | **81 – 1.264** | **2 – 5** |
+| Dung lượng file | 300 B – 16 KB | dưới 1 KB |
+
+Ví dụ cụ thể: file `boss_zabuza_x4.png` ra một **hình que** — đầu là hình tròn màu
+da, thân là một khối hình thang tím, chân là hai vạch đen thẳng. Không có bóng,
+không có khối, không có viền, không có chi tiết trang phục nào.
+
+## Vì sao lại xảy ra, và cách tránh
+
+Nhóm 1 ra đẹp vì nó toàn là **giao diện** — khung, nút, thanh, ô vuông. Những thứ
+đó vẽ bằng hình học vẫn đẹp. Nhân vật, quái, boss, phong cảnh thì không.
+
+Khi nhận yêu cầu 343 ảnh một lượt, công cụ nhiều khả năng đã chuyển sang **viết
+chương trình vẽ hình khối** để cho đủ số lượng, thay vì sinh từng ảnh.
+
+**Vì vậy hãy làm theo cách này:**
+
+1. **Làm từng nhóm một, không ôm cả lô.** Xong một nhóm thì dừng lại, giao nhóm
+   đó, chờ duyệt rồi mới sang nhóm sau. Nhóm 1 ra đẹp chính vì nó chỉ có 12 ảnh.
+2. **Nếu không sinh nổi hết số lượng trong một nhóm** — hãy làm được bao nhiêu
+   giao bấy nhiêu và nói rõ còn thiếu những file nào. **Tuyệt đối đừng thay thế
+   bằng hình khối để cho đủ số. Thà thiếu còn hơn giả.**
+3. **Tự kiểm trước khi giao:** mở vài ảnh bất kỳ ra đếm số màu. Dưới 40 màu là
+   ảnh đó hỏng, phải làm lại. Bên nhận sẽ kiểm đúng chỉ số này bằng chương trình
+   và trả lại cả lô nếu không đạt.
+
+## Thứ tự các nhóm còn phải làm
+
+| Thứ tự | Nhóm | Số ảnh | Ghi chú |
+|---|---|---|---|
+| ~~0~~ | ~~Nhóm 1 phần 1A (12 ảnh chuẩn)~~ | ~~12~~ | **XONG, đã duyệt** |
+| 1 | Nhóm 1 phần 1B — giao diện còn lại | 50 | biểu tượng, huy hiệu cấp bậc, nền |
+| 2 | Nhóm 2 — vật phẩm | 100 | |
+| 3 | Nhóm 4 — vũ khí | 20 | |
+| 4 | Nhóm 5 — quái | 12 | |
+| 5 | Nhóm 6 — boss | 6 | khó nhất, làm sau khi đã quen tay |
+| 6 | Nhóm 7 — NPC | 30 | 15 dáng người + 15 chân dung |
+| 7 | Nhóm 3 — trang phục nhân vật | 36 | |
+| 8 | Nhóm 8 — hiệu ứng | 10 | tấm nhiều khung |
+| 9 | Nhóm 9 — mảnh ghép bản đồ | 79 | |
+
+**Mỗi lần giao một nhóm**, nén thành zip riêng, đặt tên `dot1-nhom<số>-<tên>.zip`,
+giữ nguyên thư mục theo quy ước ở mục A5.
+
+## Nếu gặp mục thiếu thông tin
+
+Ở lô trước có báo là **5 mục chưa có tên file hoặc chưa có mô tả rõ**. Cách xử lý
+đúng: **bỏ qua và liệt kê chúng ra cuối báo cáo** — đừng tự nghĩ ra tên, đừng tự
+nghĩ ra nội dung. Người nhận sẽ bổ sung rồi gửi lại.
+
+Nếu lần này vẫn gặp mục nào như vậy, làm y hệt: ghi rõ **mục nào, thuộc nhóm nào,
+thiếu cái gì**.
 
 ---
 
@@ -117,17 +194,50 @@ text, letters, numbers, logo, watermark, signature, frame border,
 guns, modern clothing, western fantasy armor, drop shadow on floor.
 ```
 
+## A6b. ⛔ CẤM VẼ HÌNH KHỐI BẰNG CODE — đọc kỹ
+
+Đây là lỗi đã xảy ra thật và làm hỏng cả một lô 343 ảnh.
+
+**Mỗi ảnh phải được SINH RA bằng mô hình tạo ảnh.** Tuyệt đối **không** được viết chương trình (Python/PIL, SVG, canvas, matplotlib…) để vẽ hình khối rồi xuất ra PNG.
+
+Cách phân biệt, và đây cũng là cách bên nhận sẽ kiểm:
+
+| | Ảnh thật | Hình khối vẽ bằng code |
+|---|---|---|
+| Số màu khác nhau trong một ảnh | **80 – 1.300** | 2 – 5 |
+| Dung lượng file | 1 – 20 KB | dưới 1 KB |
+
+**Ngưỡng nghiệm thu: mỗi ảnh phải có ít nhất 40 màu khác nhau.** Dưới mức đó sẽ bị trả lại toàn bộ lô.
+
+Lý do: phong cách yêu cầu là tô 3 sắc độ (nền / bóng / sáng) cộng viền tối. Riêng bốn thứ đó đã cho ra hàng chục màu sau khi khử răng cưa. Ảnh chỉ có 3 màu nghĩa là **không có bóng, không có khối, không có viền** — tức là không làm đúng yêu cầu phong cách.
+
+**Nếu không sinh nổi hết số lượng trong một lần**, hãy làm từng lô nhỏ và nói rõ còn thiếu bao nhiêu. **Đừng thay thế bằng hình khối để cho đủ số** — thà thiếu còn hơn giả.
+
+## A6c. Nếu prompt thiếu, hãy hỏi chứ đừng bịa
+
+Nếu gặp mục nào trong danh sách mà **chưa có tên file rõ ràng hoặc chưa có mô tả**, hãy **bỏ qua và liệt kê ra cuối báo cáo**. Đừng tự nghĩ ra tên, đừng tự nghĩ ra nội dung.
+
 ## A7. Thứ tự làm — QUAN TRỌNG
 
-Làm **Nhóm 1 (Giao diện) trước tiên** và **dừng lại chờ duyệt** sau khi xong 10 ảnh đầu. Giao diện định ra phong cách cho mọi thứ còn lại — sai ở đây thì 350 ảnh sau sai theo.
+**Bước định phong cách đã xong rồi** — 12 ảnh ở mục 1A đã được duyệt và là chuẩn cho cả dự án. Đừng làm lại chúng.
+
+Thứ tự các nhóm còn lại xem **bảng ở đầu file** (mục "Thứ tự các nhóm còn phải làm").
+
+Nguyên tắc quan trọng nhất: **làm xong một nhóm thì dừng lại giao nhóm đó, chờ duyệt rồi mới sang nhóm sau.** Đừng ôm nhiều nhóm cùng lúc — đó chính là cách lô 343 ảnh trước bị hỏng.
 
 ---
 
 # PHẦN B — DANH SÁCH ẢNH
 
-## NHÓM 1 — GIAO DIỆN (60 ảnh) → `01-giao-dien/`
+## NHÓM 1 — GIAO DIỆN (62 ảnh, **12 ảnh đầu ĐÃ XONG**) → `01-giao-dien/`
 
 **Khối phụ cho nhóm này:** `UI element, clean vector-like edges, subtle scroll/parchment and dark lacquered wood motif, ninja scroll aesthetic, symmetrical.`
+
+> **Mục 1A bên dưới (12 ảnh) đã làm xong và được duyệt — BỎ QUA, đừng làm lại.**
+> Chúng được giữ ở đây làm **mẫu tham chiếu phong cách**: mọi ảnh bạn làm phải
+> nhìn như cùng một bộ với 12 ảnh này.
+>
+> **Bắt đầu từ mục 1B.**
 
 ### 1A. Mười ảnh đầu — LÀM TRƯỚC RỒI DỪNG CHỜ DUYỆT
 

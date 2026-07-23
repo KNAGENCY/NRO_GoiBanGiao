@@ -62,3 +62,7 @@ desktop.ini
 # Brief, bao cao, file diff sinh ra khi giao viec cho tro ly phu.
 # La ban nhap, khong phai san pham. Giu ngoai git cho kho sach.
 .superpowers/
+
+# --- 9. THU MUC ANH DO NGUOI DUNG GUI VE ---
+# Anh se nam tren Cloudflare R2 theo thiet ke, khong dua vao git.
+my thuat/

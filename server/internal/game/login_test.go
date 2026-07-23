@@ -3,6 +3,7 @@ package game
 import (
 	"bytes"
 	"context"
+	"errors"
 	"io"
 	"log/slog"
 	"net"
@@ -16,9 +17,19 @@ import (
 	"nroserver/internal/store"
 )
 
+// khoGia gia lap Kho. Cac field tai khoan (tk/err) giu nguyen tu Ke hoach 1 de
+// khong phai sua lai moi test cu chi dat hai field do. Ba field con lai la moi
+// cua Ke hoach 2, mac dinh nil/false nen test cu khong dung toi van bien dich
+// va chay binh thuong.
 type khoGia struct {
 	tk  *store.TaiKhoan
 	err error
+
+	nhanVat       *store.NhanVat // nil = tai khoan chua co nhan vat
+	loiLayNhanVat error          // dat = store.ErrKhongThayNhanVat de gia lap "chua co"
+	tenDaDung     bool
+	nhanVatVuaTao *store.NhanVat
+	loiTaoNhanVat error
 }
 
 func (k *khoGia) LayTaiKhoan(ctx context.Context, ten string) (*store.TaiKhoan, error) {
@@ -26,6 +37,31 @@ func (k *khoGia) LayTaiKhoan(ctx context.Context, ten string) (*store.TaiKhoan, 
 		return nil, k.err
 	}
 	return k.tk, nil
+}
+
+func (k *khoGia) LayNhanVatTheoTaiKhoan(ctx context.Context, taiKhoanID int64) (*store.NhanVat, error) {
+	if k.loiLayNhanVat != nil {
+		return nil, k.loiLayNhanVat
+	}
+	return k.nhanVat, nil
+}
+
+func (k *khoGia) TenNhanVatDaDung(ctx context.Context, ten string) (bool, error) {
+	return k.tenDaDung, nil
+}
+
+func (k *khoGia) TaoNhanVat(ctx context.Context, nv store.NhanVatMoi) (*store.NhanVat, error) {
+	if k.loiTaoNhanVat != nil {
+		return nil, k.loiTaoNhanVat
+	}
+	return k.nhanVatVuaTao, nil
+}
+
+// taiKhoanHopLeChoTest tra mot tai khoan hop le voi mat khau bam san khop
+// "matkhau", dung chung cho cac test dang nhap re nhanh nhan vat duoi day.
+func taiKhoanHopLeChoTest() *store.TaiKhoan {
+	bam, _ := auth.Hash("matkhau")
+	return &store.TaiKhoan{ID: 1, TenDangNhap: "nguoidung", MatKhauBam: bam}
 }
 
 // dungGoiDangNhap dung goi dang nhap dung y het client gui:
@@ -209,6 +245,53 @@ func dungPhienThat(t *testing.T, b *BoXuLy) (fClient *protocol.Framer, dong func
 	return fClient, func() { benClient.Close() }
 }
 
+// chayDangNhap dung mot BoXuLy tren kho da cho, gui goi dang nhap that qua
+// net.Pipe (dungPhienThat), roi doc HET cac goi may chu tra ve cho toi khi
+// ket noi RANH — tuc la ReadMessage het han gio (xem han 5 giay dat trong
+// dungPhienThat) — va tra ve DANH SACH cac goi da doc duoc.
+//
+// Vi sao doc-toi-khi-ranh thay vi doc dung mot so goi biet truoc: dung cho ca
+// hai nhanh Ke hoach 2 — nhanh "da co nhan vat" (stub vaoTheGioi khong gui goi
+// nao ca, danh sach ket qua se RONG) va nhanh "chua co nhan vat" (gui dung
+// mot goi lenh 2). Neu doc theo so luong co dinh se khong the biet chac la
+// "khong con goi nao nua" hay chi la "chua toi luot goi do".
+func chayDangNhap(t *testing.T, kho Kho, ten, matKhau string) []*protocol.Message {
+	t.Helper()
+
+	b := NewBoXuLy(kho)
+	fClient, dong := dungPhienThat(t, b)
+	defer dong()
+
+	if err := fClient.WriteMessage(dungGoiDangNhap(ten, matKhau)); err != nil {
+		t.Fatalf("gui goi dang nhap that bai: %v", err)
+	}
+
+	var goiGuiRa []*protocol.Message
+	for {
+		m, err := fClient.ReadMessage()
+		if err != nil {
+			var netErr net.Error
+			if errors.As(err, &netErr) && netErr.Timeout() {
+				break // het han gio ma khong co goi moi -> ket noi da ranh
+			}
+			t.Fatalf("loi khi doc goi may chu tra ve: %v", err)
+		}
+		goiGuiRa = append(goiGuiRa, m)
+	}
+	return goiGuiRa
+}
+
+// coLenh bao mot danh sach goi (tra ve tu chayDangNhap) co chua goi mang lenh
+// da cho hay khong.
+func coLenh(goi []*protocol.Message, lenh int8) bool {
+	for _, m := range goi {
+		if m.Command == lenh {
+			return true
+		}
+	}
+	return false
+}
+
 // TestTuChoiDangNhapGuiDuHaiGoiDungThuTu la kiem thu QUAN TRONG NHAT cua Task 8.
 //
 // Boi canh: ban Java cu TUNG co loi that trong guiTuChoi (Service.sendLoginFail):
@@ -277,9 +360,17 @@ func TestTuChoiDangNhapGuiDuHaiGoiDungThuTu(t *testing.T) {
 // mat khau DUNG phai lam server gui xuong lenh 2 (chuyen man tao nhan vat),
 // than rong. Cung dung phien that (khong chi goi KiemTraDangNhap()) de bat
 // loi o ca buoc gui goi tin (guiChuyenSangTaoNhanVat), khong chi o logic kiem tra.
+//
+// Ke hoach 2: dang nhap xong CHI gui lenh 2 khi tai khoan CHUA co nhan vat.
+// khoGia o day phai gia lap "chua co" (loiLayNhanVat: ErrKhongThayNhanVat) de
+// gia thiet cu cua test nay (Ke hoach 1) van dung — xem
+// TestDangNhapDaCoNhanVat_KhongGuiManTao ben duoi cho nhanh nguoc lai.
 func TestDangNhapDungGuiLenhTaoNhanVat(t *testing.T) {
 	bam, _ := auth.Hash("dungmatkhau")
-	b := NewBoXuLy(&khoGia{tk: &store.TaiKhoan{ID: 1, TenDangNhap: "nguoi", MatKhauBam: bam}})
+	b := NewBoXuLy(&khoGia{
+		tk:            &store.TaiKhoan{ID: 1, TenDangNhap: "nguoi", MatKhauBam: bam},
+		loiLayNhanVat: store.ErrKhongThayNhanVat,
+	})
 
 	fClient, dong := dungPhienThat(t, b)
 	defer dong()
@@ -297,6 +388,32 @@ func TestDangNhapDungGuiLenhTaoNhanVat(t *testing.T) {
 	}
 	if len(m.Data) != 0 {
 		t.Fatalf("than goi lenh 2 = %v (dai %d byte), mong doi rong", m.Data, len(m.Data))
+	}
+}
+
+// TestDangNhapChuaCoNhanVat_GuiManTao va TestDangNhapDaCoNhanVat_KhongGuiManTao
+// la hai kiem thu chinh cua Task 5 (Ke hoach 2): dang nhap thanh cong phai RE
+// NHANH theo viec tai khoan da co nhan vat hay chua — thay vi luon gui lenh 2
+// nhu Ke hoach 1.
+func TestDangNhapChuaCoNhanVat_GuiManTao(t *testing.T) {
+	kho := &khoGia{
+		tk:            taiKhoanHopLeChoTest(),
+		loiLayNhanVat: store.ErrKhongThayNhanVat,
+	}
+	goiGuiRa := chayDangNhap(t, kho, "nguoidung", "matkhau")
+	if !coLenh(goiGuiRa, 2) {
+		t.Error("chua co nhan vat -> phai gui lenh 2 (man tao nhan vat)")
+	}
+}
+
+func TestDangNhapDaCoNhanVat_KhongGuiManTao(t *testing.T) {
+	kho := &khoGia{
+		tk:      taiKhoanHopLeChoTest(),
+		nhanVat: &store.NhanVat{ID: 7, Ten: "Naruto", Lang: 0},
+	}
+	goiGuiRa := chayDangNhap(t, kho, "nguoidung", "matkhau")
+	if coLenh(goiGuiRa, 2) {
+		t.Error("da co nhan vat -> KHONG duoc gui lenh 2 (khong quay lai man tao)")
 	}
 }
 

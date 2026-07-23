@@ -55,16 +55,24 @@ type KetQuaDangNhap struct {
 	TaiKhoan  *store.TaiKhoan
 }
 
-// KhoTaiKhoan tach ra thanh giao dien de kiem thu khong can CSDL that.
-type KhoTaiKhoan interface {
+// Kho gom moi thao tac CSDL ma tang game can. Tach thanh giao dien de kiem thu
+// khong can CSDL that. (Ke hoach 1 chi co LayTaiKhoan; Ke hoach 2 them nhan vat.)
+type Kho interface {
 	LayTaiKhoan(ctx context.Context, ten string) (*store.TaiKhoan, error)
+	LayNhanVatTheoTaiKhoan(ctx context.Context, taiKhoanID int64) (*store.NhanVat, error)
+	TenNhanVatDaDung(ctx context.Context, ten string) (bool, error)
+	TaoNhanVat(ctx context.Context, nv store.NhanVatMoi) (*store.NhanVat, error)
 }
 
+// BoXuLy giu trang thai cua MOT phien (mot ket noi). Xem Task 1: moi ket noi
+// mot BoXuLy rieng, nen cac truong duoi day khong bao gio bi hai phien tranh.
 type BoXuLy struct {
-	kho KhoTaiKhoan
+	kho      Kho
+	taiKhoan *store.TaiKhoan // nil khi chua dang nhap
+	nhanVat  *store.NhanVat  // nil khi chua co / chua vao the gioi
 }
 
-func NewBoXuLy(kho KhoTaiKhoan) *BoXuLy { return &BoXuLy{kho: kho} }
+func NewBoXuLy(kho Kho) *BoXuLy { return &BoXuLy{kho: kho} }
 
 // KiemTraDangNhap chua toan bo luat dang nhap, tach khoi phan mang de kiem thu.
 func (b *BoXuLy) KiemTraDangNhap(ctx context.Context, ten, matKhau string) (KetQuaDangNhap, error) {
@@ -147,7 +155,17 @@ func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 
 	slog.Info("dang nhap thanh cong",
 		"ip", s.DiaChiIP, "ten", kq.TaiKhoan.TenDangNhap, "id", kq.TaiKhoan.ID)
-	return guiChuyenSangTaoNhanVat(s)
+	b.taiKhoan = kq.TaiKhoan // ghi nhan phien nay da dang nhap bang tai khoan nao
+
+	nv, err := b.kho.LayNhanVatTheoTaiKhoan(context.Background(), kq.TaiKhoan.ID)
+	if errors.Is(err, store.ErrKhongThayNhanVat) {
+		return guiChuyenSangTaoNhanVat(s) // chua co -> mo man tao
+	}
+	if err != nil {
+		slog.Error("loi he thong khi tai nhan vat", "ip", s.DiaChiIP, "loi", err)
+		return guiTuChoi(s, "Không tải được nhân vật, vui lòng thử lại sau.")
+	}
+	return b.vaoTheGioi(s, nv) // da co -> vao the gioi (stub Ke hoach 2)
 }
 
 // guiTuChoi bao loi roi bao client thoat khoi trang thai "dang cho".
@@ -168,7 +186,18 @@ func guiTuChoi(s *mynet.Session, cau string) error {
 }
 
 // guiChuyenSangTaoNhanVat bao client mo man hinh tao nhan vat (lenh 2, than rong).
-// Ke hoach 2 se thay bang: neu tai khoan da co nhan vat thi vao thang the gioi.
 func guiChuyenSangTaoNhanVat(s *mynet.Session) error {
 	return s.Gui(&protocol.Message{Command: lenhTaoNhanVat})
+}
+
+// vaoTheGioi la diem hen chung cho ca hai duong: dang nhap co san nhan vat, va
+// vua tao nhan vat xong. Ke hoach 2 chi ghi nhan nhan vat vao phien va log —
+// Ke hoach 3 se gui du chuoi goi (-28/7 danh sach lang, -30/0 ME_INFO, -24 MAP
+// INFO) de client roi man "Xin cho". Voi Ke hoach 2, client Unity that se treo
+// o day: dung du kien, kiem thu bang client gia.
+func (b *BoXuLy) vaoTheGioi(s *mynet.Session, nv *store.NhanVat) error {
+	b.nhanVat = nv
+	slog.Info("nhan vat vao the gioi (stub Ke hoach 2)",
+		"ten", nv.Ten, "lang", nv.Lang, "id", nv.ID, "map", nv.MapID)
+	return nil
 }

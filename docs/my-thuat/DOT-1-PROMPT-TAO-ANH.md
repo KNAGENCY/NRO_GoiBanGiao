@@ -117,6 +117,29 @@ text, letters, numbers, logo, watermark, signature, frame border,
 guns, modern clothing, western fantasy armor, drop shadow on floor.
 ```
 
+## A6b. ⛔ CẤM VẼ HÌNH KHỐI BẰNG CODE — đọc kỹ
+
+Đây là lỗi đã xảy ra thật và làm hỏng cả một lô 343 ảnh.
+
+**Mỗi ảnh phải được SINH RA bằng mô hình tạo ảnh.** Tuyệt đối **không** được viết chương trình (Python/PIL, SVG, canvas, matplotlib…) để vẽ hình khối rồi xuất ra PNG.
+
+Cách phân biệt, và đây cũng là cách bên nhận sẽ kiểm:
+
+| | Ảnh thật | Hình khối vẽ bằng code |
+|---|---|---|
+| Số màu khác nhau trong một ảnh | **80 – 1.300** | 2 – 5 |
+| Dung lượng file | 1 – 20 KB | dưới 1 KB |
+
+**Ngưỡng nghiệm thu: mỗi ảnh phải có ít nhất 40 màu khác nhau.** Dưới mức đó sẽ bị trả lại toàn bộ lô.
+
+Lý do: phong cách yêu cầu là tô 3 sắc độ (nền / bóng / sáng) cộng viền tối. Riêng bốn thứ đó đã cho ra hàng chục màu sau khi khử răng cưa. Ảnh chỉ có 3 màu nghĩa là **không có bóng, không có khối, không có viền** — tức là không làm đúng yêu cầu phong cách.
+
+**Nếu không sinh nổi hết số lượng trong một lần**, hãy làm từng lô nhỏ và nói rõ còn thiếu bao nhiêu. **Đừng thay thế bằng hình khối để cho đủ số** — thà thiếu còn hơn giả.
+
+## A6c. Nếu prompt thiếu, hãy hỏi chứ đừng bịa
+
+Nếu gặp mục nào trong danh sách mà **chưa có tên file rõ ràng hoặc chưa có mô tả**, hãy **bỏ qua và liệt kê ra cuối báo cáo**. Đừng tự nghĩ ra tên, đừng tự nghĩ ra nội dung.
+
 ## A7. Thứ tự làm — QUAN TRỌNG
 
 Làm **Nhóm 1 (Giao diện) trước tiên** và **dừng lại chờ duyệt** sau khi xong 10 ảnh đầu. Giao diện định ra phong cách cho mọi thứ còn lại — sai ở đây thì 350 ảnh sau sai theo.

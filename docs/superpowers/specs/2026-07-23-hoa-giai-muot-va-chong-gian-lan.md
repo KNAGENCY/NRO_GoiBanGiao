@@ -221,16 +221,50 @@ so với vị trí *đang vẽ* và các gói xếp hàng chứ không thay th�
 cùng một khung hình vẫn cộng dồn thành 100 → 200 → 300px và nhảy hình.
 
 Vì game mới **có xây lại client** (đổi toàn bộ mỹ thuật, giao diện, cốt truyện),
-sửa ba dòng ở client rẻ hơn nhiều so với mọi thủ thuật phía máy chủ:
+sửa ở client rẻ hơn nhiều so với mọi thủ thuật phía máy chủ:
 
 | # | Sửa gì | Ở đâu | Được gì |
 |---|---|---|---|
 | **C1** | `Time.timeScale = 1.5f` → **`1.0f`** | `ModFunc.cs:632` | Tốc độ do máy chủ quyết hoàn toàn. **Đồng thời hết luôn lỗi alt-tab** (§3.2b), vì `Main.cs:152` vốn đã đặt lại `1f`. Bù lại bằng cách nâng chỉ số `speed` máy chủ gửi xuống, cảm giác chơi không đổi. |
-| **C2** | **Xoá** lệnh chat `s <n>` | `ModFunc.cs:2039-2050`, `GameScr.cs:6242` | Bịt hack tốc độ có sẵn (§3.2a) |
+| **C2** | Lệnh `s <n>` → **chuyển thành chế độ admin** (xem §4.1.1) | `ModFunc.cs:2039-2050`, `GameScr.cs:6242` | Người thường không dùng được nữa (bịt hack §3.2a); admin vẫn chỉnh được tốc độ để thử game |
 | **C3** | Ngưỡng nhảy hình `> 100` → **`> 250`** | `Char.cs:6219` | Hết nhảy hình ở mọi tốc độ hợp lệ, kể cả khi hai gói dồn một khung. Dịch chuyển tức thời (5000px) vẫn nhảy đúng như phải thế. |
 
 Sau ba sửa này, nhịp logic về **50/giây** và tốc độ tính thẳng bằng px/giây do
 máy chủ đặt — không còn hệ số ẩn nào.
+
+#### 4.1.1 Chế độ tốc độ dành cho admin
+
+Thay vì xoá hẳn lệnh `s <n>`, giữ nó lại như **công cụ của quản trị viên** để
+thử nghiệm — đi nhanh qua bản đồ khi kiểm tra nội dung, quay video, gỡ lỗi.
+Nhưng phải **máy chủ quyết định**, không phải client tự cho mình quyền:
+
+```
+Client (chỉ admin thấy nút/lệnh):  gửi "đặt hệ số tốc độ = N"  (bật/tắt/tăng/giảm)
+Máy chủ nhận:
+    tra cột la_admin của tài khoản này trong CSDL
+    KHÔNG phải admin  →  bỏ qua, ghi nhật ký mức cảnh báo (có kẻ giả lệnh admin)
+    ĐÚNG là admin      →  nâng trần bình tín dụng di chuyển (§4.2) của người này lên N lần
+```
+
+**Điểm mấu chốt — vì sao không để client tự đổi `timeScale`:** nếu admin chỉ
+đổi `timeScale` phía mình, họ đi nhanh trên màn hình nhưng **bình tín dụng
+máy chủ sẽ kéo họ về** (vì họ vượt tốc độ trần). Nên chế độ tốc độ admin chỉ
+thật sự chạy khi **máy chủ nới trần cho đúng người đó**. Đây là lý do nó bắt
+buộc phải là tính năng máy-chủ-quyết, không phải mẹo phía client.
+
+**Không bao giờ tin cờ admin từ client.** Client có thể nói "tôi là admin" —
+máy chủ **luôn tra lại `la_admin` trong CSDL** (cột đã có sẵn từ Kế hoạch 1,
+bảng `tai_khoan`). Đây cùng một nguyên tắc với toàn bộ phần chống gian lận:
+client xin, máy chủ quyết.
+
+**Tham số chỉnh được:**
+- Bật / tắt (về tốc độ thường)
+- Hệ số N: tăng / giảm theo nấc (ví dụ 1× → 2× → 4× → 8×)
+- Trần N tối đa nên có giới hạn (ví dụ 20×) để lỡ tay không văng khỏi bản đồ
+
+Việc dựng chế độ này thuộc phần hệ thống quản trị (gắn cùng Panel — Kế hoạch 8),
+nhưng phần **máy chủ nới trần theo `la_admin`** thuộc Kế hoạch 3 vì nó nằm ngay
+trong logic bình tín dụng di chuyển.
 
 ### 4.2 Nguyên tắc máy chủ: tin nhưng có kiểm, sai thì kéo về
 
@@ -270,6 +304,7 @@ chung sẽ rộng bằng người mạnh nhất máy chủ — vô dụng với 
 | Bình tín dụng | **400 px**, hồi = trần riêng × 1,3 | ≈ 0,4–1 giây giật mạng tuỳ tốc độ người chơi |
 | Vượt ngân sách | **Từ chối + kéo về** | Client không có lựa chọn khác (§2.1) |
 | Chiêu dịch chuyển | **Cấp tín dụng riêng một lần** | `SkillService.java:674-694`, 5000px là hợp lệ. Máy chủ tự cấp khi **chính nó** xử lý chiêu, không phải khi client xin. |
+| Chế độ tốc độ admin | **Nới trần bình tín dụng theo `la_admin`** | §4.1.1. Máy chủ tra CSDL, không tin cờ admin từ client. |
 | Client tự nhảy khi đánh | **Cấp tín dụng riêng** | `GameScr.cs:2050-2062` gán `cx = mục tiêu ± 60` rồi gửi ngay — hợp lệ, phải cho qua |
 | Kiểm địa hình | **Có** — tra `tileMap`, chặn xuyên tường khi không bay | Java không kiểm. Tra một ô mảng, gần như miễn phí. |
 | Tầm nhìn | **Toàn khu vực, không bán kính** | ≤1920px, ≤30 người. Chia bán kính là phức tạp hoá vô ích. |
@@ -335,6 +370,7 @@ quyết bằng gộp nhiều gói vào một lần ghi cho mỗi người nhận
 
 - [ ] Đưa **bảng §4.3** vào Global Constraints của Kế hoạch 3
 - [ ] Ba sửa đổi client **C1, C2, C3** (§4.1) — làm cùng đợt dựng lại client
+- [ ] Chế độ tốc độ admin (§4.1.1): phần máy chủ nới trần theo `la_admin` → Kế hoạch 3; phần nút bấm/lệnh phía admin → Kế hoạch 8 (Panel)
 - [ ] Ràng buộc kiểm tầm đánh mọi chiêu (§4.4) vào Kế hoạch 4, kèm danh sách chiêu **đã có** kiểm
 - [ ] Kế hoạch 6: mọi tầm đánh trong dữ liệu < chiều rộng bản đồ
 - [ ] Kế hoạch 6: `Manager.java:725` đọc `max_player` bằng `getByte()` — vỡ nếu >127 người/khu vực

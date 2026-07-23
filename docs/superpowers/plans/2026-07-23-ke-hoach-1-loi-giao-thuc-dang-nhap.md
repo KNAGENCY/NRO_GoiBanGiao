@@ -645,6 +645,38 @@ git commit -m "feat(protocol): doc ghi kieu du lieu tuong thich java DataStream"
 
 ### Task 4: Khung tin trên dây
 
+> ## ⚠️ ĐÍNH CHÍNH THỨ HAI — code mẫu bên dưới CÓ LỖI NGHIÊM TRỌNG, đã sửa
+>
+> Trong `WriteMessage`, câu `switch` chọn nhánh độ dài 3 byte viết là:
+>
+> ```go
+> case n > 0 && lenhDoDaiBaByte[m.Command]:   // SAI
+> ```
+>
+> **Điều kiện `n > 0` là thừa và gây lệch dòng byte.** Bằng chứng lấy từ client
+> (`Session_ME.cs`, hàm `readMessage`):
+>
+> ```csharp
+> if (b == -32 || b == -66 || b == 11 || b == -67 || b == -74 || b == -87 || b == 66)
+>     return readMessage2(b);   // readMessage2 LUÔN đọc 3 byte độ dài
+> ```
+>
+> Client quyết định đọc 3 byte **chỉ dựa vào byte lệnh**, không xét độ dài thân
+> tin. Nên nếu server gửi một trong 7 lệnh đó với thân tin rỗng: server ghi 2
+> byte, client đọc 3 byte → **mọi gói tin sau đó đều đọc sai**. Triệu chứng:
+> client treo im lặng, không có thông báo lỗi nào.
+>
+> **Sửa đúng:** bỏ `n > 0`, chỉ còn `case lenhDoDaiBaByte[m.Command]:`
+>
+> Điều đáng chú ý: bản Java cũ cũng có cùng lỗ hổng này cho trường hợp
+> `data == null` (ghi `writeShort(0)` 2 byte không xét lệnh). Nó chưa nổ vì
+> trên thực tế chưa ai gửi 7 lệnh đó với thân tin rỗng. Bản Go **sửa cho đúng
+> hơn bản gốc**, thay vì chép nguyên lỗi.
+>
+> Cài đặt đúng nằm ở `server/internal/protocol/frame.go`. Bộ test bổ sung có
+> `TestGoiDacBietThanRongKhongLamLechGoiSau` — test này ghi hai gói liên tiếp
+> rồi đọc lại, bắt được đúng hiện tượng lệch dòng chứ không chỉ đếm độ dài.
+
 **Files:**
 - Create: `server/internal/protocol/message.go`
 - Create: `server/internal/protocol/frame.go`

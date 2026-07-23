@@ -1,0 +1,171 @@
+# ==========================================================================
+#  KET LUAN SAU KHI KIEM TRA: KHONG PHAI SUA GI CA.
+#
+#  Dong "auto_prepend_file" dang tro toi C:/xampp/htdocs/ddos_guard.php.
+#  Day la duong dan Windows tuyet doi, va tren VPS Windows Server no VAN DUNG,
+#  VOI DIEU KIEN ban cai XAMPP vao dung o C:\xampp (dung doi sang D:\xampp).
+#
+#  File duoi day giong het file dang chay o C:\xampp\htdocs\.htaccess,
+#  toi chi them phan chu thich giai thich. Ban co the chep de len cung duoc.
+#
+#  ---------------------------------------------------------------------
+#  CHEP FILE NAY LEN VPS THE NAO
+#  ---------------------------------------------------------------------
+#  Chep file nay vao   C:\xampp\htdocs\   roi DOI TEN thanh   .htaccess
+#  (co dau cham o dau, khong co duoi .txt)
+#
+#  Windows hay tu an duoi file. Neu doi ten xong ma van thay ".htaccess.txt"
+#  thi mo File Explorer -> the View -> tick "File name extensions" roi doi lai.
+#
+#  ---------------------------------------------------------------------
+#  CACH KIEM TRA LOP CHAN SPAM CO THAT SU CHAY KHONG
+#  ---------------------------------------------------------------------
+#  Day la thu nguy hiem nhat o day: neu duong dan sai, Apache KHONG BAO LOI GI.
+#  Web van chay binh thuong, chi la lop bao ve bien mat ma ban khong he biet.
+#
+#  Cach thu (lam mot lan roi tra lai ngay):
+#    1) Sua tam dong auto_prepend_file thanh mot ten file khong co that,
+#       vi du "C:/xampp/htdocs/khong-co-that.php"
+#    2) Luu, khoi dong lai Apache, mo web len.
+#    3) Neu web BAO LOI -> lop bao ve DANG CHAY, tot.
+#       Neu web VAN CHAY Y HET -> lop bao ve DANG KHONG CHAY, phai tim nguyen nhan.
+#    4) Sua tra lai duong dan dung, luu, khoi dong lai Apache.
+#
+#  ---------------------------------------------------------------------
+#  NEU BAN CAI XAMPP SANG O KHAC (vi du D:\xampp)
+#  ---------------------------------------------------------------------
+#  Thi phai sua CUNG LUC 4 cho, thieu mot cho la hong lang le:
+#    1) dong auto_prepend_file trong chinh file nay
+#    2) C:\xampp\htdocs\sv1\kame\data.php dong 27 (duong dan boss_status.json)
+#    3) C:\Users\...\zz1\run.bat dong 20 (WEB_ROOT)
+#    4) zz1\src\boss\BossManager.java dong 282 (duong dan du phong)
+#  => Loi khuyen: cu cai dung C:\xampp cho khoi phai dung den 4 cho tren.
+# ==========================================================================
+
+Options -Indexes
+DirectoryIndex index.php
+
+# Application-layer request guard. Loaded before every PHP endpoint in this tree.
+<IfModule php_module>
+  php_value auto_prepend_file "C:/xampp/htdocs/ddos_guard.php"
+</IfModule>
+
+# The guard is executable infrastructure, never a public endpoint.
+<Files "ddos_guard.php">
+  Require all denied
+</Files>
+
+# Icon la tai nguyen tinh; khong nap bo loc request PHP cho tung anh.
+<Files "icon_asset.php">
+  php_value auto_prepend_file none
+</Files>
+
+# Prevent accidental exposure of limiter state or logs.
+<FilesMatch "\.(?:sqlite|sqlite3|db|log)(?:\.[0-9]+)?$">
+  Require all denied
+</FilesMatch>
+
+<IfModule mod_autoindex.c>
+  IndexIgnore *
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "same-origin"
+</IfModule>
+
+<FilesMatch "\.(zip|rar|7z|tar|gz|bak|backup|old|orig|save|tmp|log|txt|sql|ini|env)(?:[-._].*)?$">
+  Require all denied
+</FilesMatch>
+
+<FilesMatch "\.php\.(?:bak|backup|old|orig|save)(?:[-._].*)?$">
+  Require all denied
+</FilesMatch>
+
+# Khong cho phep duoi URL thua dang /sv1/trangchu/abc. Neu bat, Apache van nap
+# trangchu.php roi cho mod_rewrite chay lai -> vong lap noi bo -> loi 500.
+# Tat di thi duong dan sai tra ve 404 dung nhu mong doi.
+AcceptPathInfo Off
+
+# Trang bao loi rieng, dung giao dien Ngoc Rong Kame.
+ErrorDocument 404 /sv1/khong-thay.php
+ErrorDocument 403 /sv1/khong-thay.php
+
+RewriteEngine On
+
+# Doc icon game tu thu muc data/icon/x4 thong qua icon_asset.php.
+RewriteRule ^icon/([^/]+)$ icon_asset.php?file=$1 [L,QSA,NC]
+
+# ---------------------------------------------------------------------------
+# TRANG CHU: nrokame.com mo thang trang game.
+#
+# Truoc day dia chi goc ra index.php - trang hoc tap gia "EduVerse" cua chu cu,
+# dung de nguy trang server game. Chu moi da chon bo lop nguy trang (2026-07-21).
+#
+# Dung REWRITE (nap ngam) chu KHONG dung REDIRECT (chuyen huong), de dia chi
+# tren thanh trinh duyet van gon la nrokame.com. Lam duoc vay vi moi duong dan
+# anh/CSS trong giao dien deu la duong dan TUYET DOI (/sv1/kame/theme.css,
+# /img/brand/logo.png) - khong co duong dan tuong doi nao de bi lech goc.
+#
+# File index.php DA BI GO HAN khoi thu muc web (22/07/2026), theo yeu cau cua
+# chu moi. Ban goc cua no duoc giu tai:
+#     D:\NRO_Backup\2026-07-22_go-nguy-trang\index.php.nguy-trang
+# Cung dot do da chuyen ca zz4.rar ra khoi day - file nen do chua toan bo ma
+# nguon trang quan tri, khong duoc de trong thu muc web cong khai.
+#
+# Vi index.php khong con, dong duoi day la thu DUY NHAT quyet dinh dia chi goc
+# ra trang nao. Go dong nay di thi nrokame.com se thanh trang trong (loi 404).
+RewriteRule ^$ /sv1/trangchu.php [L]
+
+# Khi nguoi dung mo trang bang GET, doi URL co .php sang URL sach.
+# Vi du: /sv1/admin/panel.php -> /sv1/admin/panel
+RewriteCond %{REQUEST_METHOD} =GET
+RewriteCond %{THE_REQUEST} \s/+(.+?)\.php(?:[\s?]) [NC]
+RewriteRule ^(.+)\.php$ /$1 [R=302,L,NE]
+
+# Neu URL sach tuong ung voi mot file .php that, Apache tu nap file do.
+# Vi du: /sv1/admin/panel -> /sv1/admin/panel.php
+#
+# PHAI dung %{DOCUMENT_ROOT}%{REQUEST_URI}, KHONG duoc dung %{REQUEST_FILENAME}.
+# Ly do: voi duong dan thua nhu /sv1/tin-tuc/abc, Apache cat "/abc" ra lam
+# PATH_INFO va de REQUEST_FILENAME = ".../sv1/tin-tuc". Luc do dieu kien
+# "REQUEST_FILENAME.php -f" van dung (tin-tuc.php co that), luat ban ra
+# /sv1/tin-tuc/abc.php, roi vong lai va noi them .php mai -> Apache bao
+# "exceeded the limit of 10 internal redirects" -> loi 500 thay vi 404.
+RewriteCond %{REQUEST_URI} !\.php$
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.php -f
+RewriteRule ^(.+?)/?$ $1.php [L,QSA]
+
+# ---------------------------------------------------------------------------
+# DUONG DAN NGAN O GOC TEN MIEN  ->  trang that trong /sv1/
+#
+# Van de: moi link da phat ra ngoai deu viet dang  nrokame.com/tai-game  (tuc
+# la o GOC ten mien): 7 cot trong bang adminpanel, file sv1\config.php, va ca
+# trong client Unity. Nhung trang that lai nam trong thu muc /sv1/.
+# Truoc khi sua: nguoi choi bam "Tai game" hay "Nap the" trong game -> loi 404.
+#
+# KHONG duoc chuyen file ra goc, cung KHONG duoc doi ten thu muc sv1: chuoi
+# "sv1" la khoa tra cuu de web tim ra thu muc may chu game (game_bridge.php).
+# Doi ten la dut toan bo lien ket giua web va game. Vi vay chi doi DUONG DI.
+
+# Loi tat rieng: /lien-he chua co trang rieng, cho ve trung tam ho tro.
+RewriteRule ^lien-he/?$ /sv1/ho-tro.php [L,QSA]
+
+# Luat chung: /xxx -> /sv1/xxx.php, chi khi o goc KHONG co ma trong sv1 CO.
+# Dat sau luat o tren nen trang o goc (vi du /privacy-policy) van uu tien.
+#
+# Dieu kien "!^/sv1/" la cai chan vong lap: sau khi nap ngam, dia chi da bat
+# dau bang /sv1/ nen luat nay khong chay lai lan thu hai.
+RewriteCond %{REQUEST_URI} !^/sv1/
+RewriteCond %{REQUEST_URI} !\.php$
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI}.php !-f
+RewriteCond %{DOCUMENT_ROOT}/sv1%{REQUEST_URI}.php -f
+RewriteRule ^(.+?)/?$ /sv1/$1.php [L,QSA]
+
+# Chan moi file sao luu ma nguon - tranh lo code ra ngoai
+<FilesMatch "\.(cu|bak|old|goc|orig|save|swp|tmp)$">
+    Require all denied
+</FilesMatch>

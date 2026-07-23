@@ -1,0 +1,59 @@
+# ===========================================================================
+#  NHUNG THU KHONG DUA LEN GITHUB
+#  Ly do ghi ngay canh tung muc de sau nay khong ai xoa nham.
+# ===========================================================================
+
+# --- 1. DU LIEU NGUOI CHOI - TUYET DOI KHONG ---
+# File dump chua tai khoan, mat khau da bam, nhan vat cua nguoi choi that.
+# Dua len GitHub la lo du lieu ca nhan, khong the thu hoi.
+*.sql
+!docs/**/*.sql
+
+# --- 2. KHO ANH (~820 MB) ---
+# Anh se nam tren Cloudflare R2, khong nam trong git.
+1-MAY-CHU-GAME/data/
+
+# --- 3. FILE DA BIEN DICH ---
+# Sinh lai duoc tu ma nguon, khong can luu lich su.
+*.jar
+*.class
+*.exe
+*.dll
+*.apk
+out/
+dist/
+build/
+nbproject/
+
+# --- 4. BAN LUU ---
+_BAN-LUU-*/
+*.bak
+*.bak-*
+*.goc
+*.truoc-*
+
+# --- 5. FILE CAU HINH CHUA MAT KHAU ---
+# Chi git file mau (.example), khong bao gio git file that.
+1-MAY-CHU-GAME/data/config/config.properties
+2-WEB/htdocs/sv1/config.php
+4-BO-CAI-DAT/cau-hinh/config.properties
+.env
+.env.*
+!.env.example
+
+# --- 6. FILE TRANG THAI SINH RA LUC CHAY ---
+1-MAY-CHU-GAME/panel_*.txt
+1-MAY-CHU-GAME/panel_*.json
+1-MAY-CHU-GAME/panel_*.properties
+1-MAY-CHU-GAME/logs/
+2-WEB/htdocs/sv1/boss_status.json
+2-WEB/htdocs/sv1/admin/reset_log.txt
+
+# --- 7. RAC CUA HE DIEU HANH VA TRINH SOAN THAO ---
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
+*.iml
+*.swp

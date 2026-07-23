@@ -1,0 +1,166 @@
+/* ==========================================================================
+   KAME ADMIN — bo thanh phan rieng cho khu quan tri.
+   Xay TREN theme.css + ui-kit.css (da nap truoc). CHI dung bien --kame-*,
+   KHONG hardcode mau. Moi trang admin phai dung cac class o day, khong tu che.
+
+   Huong Kieu 2: nen van giay cu (tu body theme.css), thanh header nau dam,
+   vien cam, bang du lieu nen giay nhat de doc.
+   ========================================================================== */
+
+/* --- Khung ngoai --------------------------------------------------------- */
+.kadmin {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: var(--kame-space-5) var(--kame-space-4) var(--kame-space-8);
+}
+
+/* --- Thanh header trang admin ------------------------------------------- */
+.kadmin-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--kame-space-4);
+    flex-wrap: wrap;
+    background: var(--kame-maroon-900);
+    border: var(--kame-border);
+    border-bottom: 3px solid var(--kame-orange-600);
+    border-radius: var(--kame-radius-md) var(--kame-radius-md) 0 0;
+    padding: var(--kame-space-4) var(--kame-space-5);
+}
+.kadmin-bar__title {
+    display: flex;
+    align-items: center;
+    gap: var(--kame-space-3);
+    margin: 0;
+    color: var(--kame-paper-100);
+    font-family: "Roboto Condensed", "Arial Narrow", sans-serif;
+    font-style: italic;
+    font-weight: 900;
+    font-size: 24px;
+    line-height: 1.1;
+}
+.kadmin-bar__title .ti,
+.kadmin-bar__title svg { color: var(--kame-orange-400); flex: none; }
+.kadmin-bar__actions { display: flex; align-items: center; gap: var(--kame-space-2); flex-wrap: wrap; }
+
+/* --- Than trang (noi tiep header, cung khung) --------------------------- */
+.kadmin-body {
+    background: var(--kame-paper-100);
+    border: var(--kame-border);
+    border-top: none;
+    border-radius: 0 0 var(--kame-radius-md) var(--kame-radius-md);
+    padding: var(--kame-space-5);
+}
+
+/* --- The con trong than -------------------------------------------------- */
+.kadmin-card {
+    background: #fffdf7;
+    border: var(--kame-border);
+    border-radius: var(--kame-radius-md);
+    padding: var(--kame-space-5);
+    margin-bottom: var(--kame-space-4);
+}
+.kadmin-card__head {
+    display: flex;
+    align-items: center;
+    gap: var(--kame-space-2);
+    margin: 0 0 var(--kame-space-4);
+    padding-bottom: var(--kame-space-3);
+    border-bottom: 2px solid var(--kame-orange-600);
+    color: var(--kame-maroon-700);
+    font-family: "Roboto Condensed", "Arial Narrow", sans-serif;
+    font-weight: 900;
+    font-size: 18px;
+}
+
+/* --- Thanh cong cu (tim kiem + nut) ------------------------------------- */
+.kadmin-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--kame-space-3);
+    flex-wrap: wrap;
+    margin-bottom: var(--kame-space-4);
+}
+.kadmin-toolbar__grow { flex: 1 1 220px; }
+
+/* --- Bang du lieu -------------------------------------------------------- */
+.kadmin-table-wrap { overflow-x: auto; border-radius: var(--kame-radius-sm); }
+.kadmin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    color: var(--kame-ink);
+    background: #fffdf7;
+}
+.kadmin-table thead th {
+    text-align: left;
+    padding: 10px 14px;
+    background: var(--kame-paper-300);
+    color: var(--kame-maroon-900);
+    font-weight: 800;
+    white-space: nowrap;
+    border-bottom: 2px solid var(--kame-maroon-700);
+}
+.kadmin-table tbody td { padding: 10px 14px; border-top: 1px solid var(--kame-paper-300); }
+.kadmin-table tbody tr:nth-child(even) { background: #fdf7e8; }
+.kadmin-table tbody tr:hover { background: #fbeecf; }
+.kadmin-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.kadmin-table td.act { text-align: right; white-space: nowrap; }
+
+/* --- The chi so (thong ke nhanh) ---------------------------------------- */
+.kadmin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--kame-space-3); margin-bottom: var(--kame-space-4); }
+.kadmin-stat {
+    background: #fffdf7;
+    border: var(--kame-border);
+    border-left: 5px solid var(--kame-orange-600);
+    border-radius: var(--kame-radius-sm);
+    padding: var(--kame-space-3) var(--kame-space-4);
+}
+.kadmin-stat__label { color: var(--kame-maroon-700); font-size: 13px; font-weight: 600; margin: 0 0 4px; }
+.kadmin-stat__value { color: var(--kame-ink); font-family: "Roboto Condensed", sans-serif; font-weight: 900; font-size: 26px; line-height: 1; }
+
+/* --- Nut quay lai / lien ket phu ---------------------------------------- */
+.kadmin-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--kame-maroon-700);
+    font-weight: 700;
+    text-decoration: none;
+}
+.kadmin-back:hover { color: var(--kame-orange-700); text-decoration: underline; }
+
+/* --- Icon vat pham (khung nho) ------------------------------------------ */
+.kadmin-icon {
+    width: 40px; height: 40px;
+    display: grid; place-items: center;
+    background: var(--kame-paper-300);
+    border: 1px solid var(--kame-maroon-700);
+    border-radius: var(--kame-radius-sm);
+}
+.kadmin-icon img { max-width: 32px; max-height: 32px; image-rendering: pixelated; }
+
+/* --- Màu nền trạng thái (dòng khóa/admin/hoạt động...) -------------------
+   Dùng thay cho hardcode hex khi cần tô nền dòng theo trạng thái. Hoà tông
+   giấy cũ, không chói. Ví dụ: <tr class="krow-danger"> cho tài khoản bị khóa. */
+:root {
+    --kame-tint-danger:  #f6d6d0;   /* khóa / xóa / cảnh báo */
+    --kame-tint-success: #d8ecd2;   /* đang hoạt động / hợp lệ */
+    --kame-tint-warning: #fbe6bf;   /* admin / cần chú ý */
+    --kame-tint-neutral: #ece5d6;   /* trung tính / tắt */
+}
+.krow-danger  { background: var(--kame-tint-danger)  !important; }
+.krow-success { background: var(--kame-tint-success) !important; }
+.krow-warning { background: var(--kame-tint-warning) !important; }
+.krow-neutral { background: var(--kame-tint-neutral) !important; }
+.kdot { display:inline-block; width:10px; height:10px; border-radius:50%; border:1px solid var(--kame-maroon-700); vertical-align:middle; }
+.kdot--danger  { background: var(--kame-tint-danger); }
+.kdot--success { background: var(--kame-tint-success); }
+.kdot--warning { background: var(--kame-tint-warning); }
+.kdot--neutral { background: var(--kame-tint-neutral); }
+
+@media (max-width: 640px) {
+    .kadmin { padding: var(--kame-space-3); }
+    .kadmin-bar__title { font-size: 20px; }
+    .kadmin-body { padding: var(--kame-space-3); }
+}

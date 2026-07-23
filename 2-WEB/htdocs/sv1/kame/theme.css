@@ -1,0 +1,460 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@1,700;1,900&family=Be+Vietnam+Pro:wght@400;600;800&display=swap");
+
+/* ==========================================================================
+   THEME NGỌC RỒNG KAME
+   Lớp bổ sung nằm TRÊN ui-kit.css. Chỉ dùng biến màu của ui-kit, không hardcode.
+   Nạp theo thứ tự: ui-kit.css rồi mới tới theme.css.
+   ========================================================================== */
+
+/* --- Nền giấy cũ: ghi đè đường dẫn sai trong ui-kit.css ------------------- */
+body {
+  background: var(--kame-paper-100) url("/img/brand/giay-cu.jpg") repeat;
+}
+
+/* --- Tiện ích chung ------------------------------------------------------ */
+.kame-section { padding-block: var(--kame-space-8); }
+.kame-section--tight { padding-block: var(--kame-space-6); }
+.kame-col-3 { grid-column: span 3; }
+.kame-col-4 { grid-column: span 4; }
+.kame-col-6 { grid-column: span 6; }
+.kame-col-8 { grid-column: span 8; }
+.kame-col-12 { grid-column: span 12; }
+.kame-center { text-align: center; }
+.kame-link { color: var(--kame-maroon-700); font-weight: 700; }
+.kame-page-wrap { min-height: 60vh; }
+
+/* Vạch tiêu đề mục có gạch cam bên dưới */
+.kame-section-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--kame-space-3);
+  margin-bottom: var(--kame-space-5);
+  padding-bottom: var(--kame-space-3);
+  border-bottom: 3px solid var(--kame-orange-600);
+}
+
+/* --- HERO trang chủ ------------------------------------------------------ */
+.kame-hero {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  min-height: clamp(340px, 52vh, 560px);
+  border-bottom: var(--kame-border);
+  background: var(--kame-maroon-900) url("/img/brand/hero.jpg") center / cover no-repeat;
+}
+
+/* Phủ tối để chữ trắng luôn đọc được */
+.kame-hero::after {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  content: "";
+  background:
+    linear-gradient(to top, rgb(54 0 14 / 88%) 0%, rgb(54 0 14 / 46%) 42%, rgb(54 0 14 / 12%) 100%),
+    linear-gradient(to right, rgb(54 0 14 / 62%) 0%, transparent 62%);
+}
+
+.kame-hero__inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding-block: var(--kame-space-8) var(--kame-space-7);
+}
+
+.kame-hero__content { max-width: 640px; }              /* chữ dồn về dưới-trái */
+.kame-hero__title { color: var(--kame-white); text-shadow: 0 4px 0 rgb(54 0 14 / 55%); }
+.kame-hero__title em { color: var(--kame-gold); font-style: italic; }
+.kame-hero__desc {
+  margin: var(--kame-space-4) 0 var(--kame-space-5);
+  color: rgb(255 253 245 / 90%);
+  font-size: 17px;
+}
+.kame-hero__actions { display: flex; flex-wrap: wrap; gap: var(--kame-space-3); }
+
+/* --- Khối số liệu THẬT --------------------------------------------------- */
+.kame-stat {
+  display: grid;
+  gap: 4px;
+  padding: var(--kame-space-4) var(--kame-space-5);
+  border: var(--kame-border);
+  border-radius: var(--kame-radius-md);
+  background: rgb(255 243 213 / 92%);
+  box-shadow: var(--kame-shadow-sm);
+  text-align: center;
+}
+
+.kame-stat__value {
+  color: var(--kame-maroon-700);
+  font-family: "Roboto Condensed", "Arial Narrow", sans-serif;
+  font-size: clamp(26px, 3.4vw, 40px);
+  font-style: italic;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.kame-stat__label {
+  color: rgb(40 21 15 / 68%);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.kame-stat--live .kame-stat__value { color: var(--kame-orange-600); }
+.kame-stat--empty .kame-stat__value { color: rgb(40 21 15 / 45%); font-size: 20px; }
+
+/* Chấm nhấp nháy báo dữ liệu đang cập nhật */
+.kame-live-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--kame-green);
+  animation: kame-pulse 1.8s ease-in-out infinite;
+}
+.kame-live-dot--off { background: rgb(40 21 15 / 35%); animation: none; }
+
+@keyframes kame-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .25; }
+}
+
+/* --- Thẻ BOSS ------------------------------------------------------------ */
+.kame-boss-card {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: var(--kame-space-4);
+  align-items: center;
+  padding: var(--kame-space-4);
+  border: var(--kame-border);
+  border-radius: var(--kame-radius-md);
+  background: rgb(255 243 213 / 94%);
+  box-shadow: var(--kame-shadow-sm);
+}
+
+.kame-boss-card__avatar {
+  display: grid;
+  width: 64px;
+  aspect-ratio: 1;
+  overflow: hidden;
+  place-items: center;
+  border: 3px solid var(--kame-maroon-700);
+  border-radius: 50%;
+  background: var(--kame-paper-300);
+}
+
+.kame-boss-card__avatar img {
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+  image-rendering: pixelated;               /* icon game gốc rất nhỏ */
+}
+
+.kame-boss-card__name {
+  margin: 0;
+  color: var(--kame-maroon-700);
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.kame-boss-card__map { font-size: 13px; color: rgb(40 21 15 / 66%); }
+
+.kame-boss-card__top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Thanh máu: đỏ khi boss đang sống/ACTIVE, xám khi AFK */
+.kame-boss-hp {
+  position: relative;
+  overflow: hidden;
+  height: 14px;
+  margin-top: 8px;
+  border: 2px solid var(--kame-maroon-700);
+  border-radius: 999px;
+  background: rgb(40 21 15 / 14%);
+}
+
+.kame-boss-hp__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(to bottom, var(--kame-red), var(--kame-maroon-700));
+  transition: width .4s ease;
+}
+
+.kame-boss-card--afk .kame-boss-hp__fill {
+  background: linear-gradient(to bottom, rgb(40 21 15 / 42%), rgb(40 21 15 / 62%));
+}
+.kame-boss-card--afk .kame-boss-card__avatar img { filter: grayscale(.85); opacity: .75; }
+
+.kame-boss-hp__text {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgb(40 21 15 / 70%);
+}
+
+.kame-boss-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--kame-space-4); }
+
+/* --- Bảng xếp hạng ------------------------------------------------------- */
+.kame-rank { display: grid; gap: 10px; }
+
+.kame-rank-row {
+  display: grid;
+  grid-template-columns: 46px 48px 1fr auto;
+  gap: var(--kame-space-3);
+  align-items: center;
+  padding: 10px var(--kame-space-4);
+  border: 2px solid rgb(96 0 24 / 40%);
+  border-radius: var(--kame-radius-sm);
+  background: rgb(255 243 213 / 90%);
+}
+
+.kame-rank-row__pos {
+  display: grid;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 2px solid var(--kame-maroon-700);
+  border-radius: var(--kame-radius-sm);
+  color: var(--kame-maroon-700);
+  background: var(--kame-paper-300);
+  font-family: "Roboto Condensed", "Arial Narrow", sans-serif;
+  font-size: 20px;
+  font-style: italic;
+  font-weight: 900;
+}
+
+.kame-rank-row__avatar {
+  display: grid;
+  width: 48px;
+  aspect-ratio: 1;
+  overflow: hidden;
+  place-items: center;
+  border: 2px solid var(--kame-maroon-700);
+  border-radius: 50%;
+  background: var(--kame-paper-300);
+}
+.kame-rank-row__avatar img { width: 80%; height: 80%; object-fit: contain; image-rendering: pixelated; }
+
+.kame-rank-row__name { font-weight: 800; overflow-wrap: anywhere; }
+.kame-rank-row__meta { font-size: 12px; color: rgb(40 21 15 / 64%); }
+
+.kame-rank-row__value {
+  color: var(--kame-maroon-700);
+  font-family: "Roboto Condensed", "Arial Narrow", sans-serif;
+  font-size: 20px;
+  font-style: italic;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+/* Top 3 to hơn và ngả vàng */
+.kame-rank-row--top {
+  border-color: var(--kame-gold);
+  background: linear-gradient(90deg, rgb(255 200 61 / 34%), rgb(255 243 213 / 92%));
+  box-shadow: var(--kame-shadow-sm);
+}
+.kame-rank-row--top .kame-rank-row__pos {
+  border-color: var(--kame-gold);
+  color: var(--kame-maroon-900);
+  background: var(--kame-gold);
+  font-size: 24px;
+}
+.kame-rank-row--top .kame-rank-row__name { font-size: 18px; }
+.kame-rank-row--top .kame-rank-row__value { font-size: 25px; }
+.kame-rank-row--top .kame-rank-row__avatar { width: 56px; border-width: 3px; }
+.kame-rank-row--top { grid-template-columns: 52px 56px 1fr auto; }
+
+/* --- Ô giữ chỗ ảnh chưa có ---------------------------------------------- */
+.kame-ph {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  padding: var(--kame-space-4);
+  border: 3px dashed rgb(96 0 24 / 45%);
+  border-radius: var(--kame-radius-md);
+  background: var(--kame-paper-300) url("/img/brand/giay-cu.jpg") repeat;
+  color: var(--kame-maroon-700);
+  text-align: center;
+}
+
+.kame-ph__name {
+  font-family: "Roboto Condensed", "Arial Narrow", sans-serif;
+  font-size: 15px;
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.kame-ph__note { margin-top: 4px; font-size: 12px; color: rgb(40 21 15 / 58%); }
+
+/* --- Dải cảnh báo 12 tuổi ------------------------------------------------ */
+.kame-agewarn {
+  padding-block: var(--kame-space-3);
+  border-top: 2px solid rgb(255 253 245 / 22%);
+  color: rgb(255 253 245 / 78%);
+  background: var(--kame-maroon-900);
+  font-size: 13px;
+  text-align: center;
+}
+.kame-agewarn strong { color: var(--kame-gold); }
+
+/* --- Header / logo ------------------------------------------------------- */
+.kame-header__logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.kame-header__logo img { height: 40px; width: auto; display: block; }
+.kame-header__actions { display: flex; align-items: center; gap: var(--kame-space-3); }
+.kame-header__user { font-size: 13px; font-weight: 800; color: var(--kame-maroon-700); }
+.kame-nav a[aria-current="page"] { color: var(--kame-orange-600); }
+.kame-nav a:hover { color: var(--kame-orange-700); }
+
+.kame-button--sm { min-height: 40px; padding-inline: 18px; font-size: 13px; }
+
+/* Nút mở drawer — chỉ hiện dưới 900px */
+.kame-burger {
+  display: none;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: var(--kame-border);
+  border-radius: var(--kame-radius-sm);
+  background: var(--kame-paper-100);
+  cursor: pointer;
+}
+.kame-burger span {
+  display: block;
+  width: 22px;
+  height: 3px;
+  margin: 4px auto;
+  border-radius: 2px;
+  background: var(--kame-maroon-700);
+}
+
+/* --- Drawer di động ------------------------------------------------------ */
+.kame-drawer {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  display: none;
+  background: rgb(40 21 15 / 62%);
+}
+.kame-drawer[data-open="true"] { display: block; }
+
+.kame-drawer__panel {
+  display: flex;
+  width: min(320px, 86%);
+  height: 100%;
+  flex-direction: column;
+  gap: var(--kame-space-3);
+  margin-left: auto;
+  padding: var(--kame-space-5);
+  border-left: var(--kame-border);
+  background: var(--kame-paper-100) url("/img/brand/giay-cu.jpg") repeat;
+  overflow-y: auto;
+}
+
+.kame-drawer__panel a {
+  padding: 12px 4px;
+  border-bottom: 1px solid rgb(96 0 24 / 22%);
+  color: var(--kame-ink);
+  font-weight: 800;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.kame-drawer__panel a[aria-current="page"] { color: var(--kame-orange-600); }
+.kame-drawer__close { align-self: flex-end; }
+
+/* --- Footer -------------------------------------------------------------- */
+.kame-footer a { color: rgb(255 253 245 / 82%); text-decoration: none; }
+.kame-footer a:hover { color: var(--kame-gold); }
+.kame-footer__title {
+  margin: 0 0 var(--kame-space-3);
+  color: var(--kame-gold);
+  font-family: "Roboto Condensed", "Arial Narrow", sans-serif;
+  font-size: 18px;
+  font-style: italic;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.kame-footer__list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.kame-footer__brand img { height: 46px; width: auto; }
+.kame-footer__brand p { margin: var(--kame-space-3) 0 0; font-size: 14px; color: rgb(255 253 245 / 74%); }
+
+/* --- Modal đăng nhập / đăng ký ------------------------------------------- */
+.kame-modal-backdrop[data-open="false"] { display: none; }
+.kame-modal-backdrop {
+  position: fixed;
+  z-index: 70;
+  inset: 0;
+  min-height: 100%;
+  overflow-y: auto;
+}
+.kame-modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--kame-space-3);
+  margin-bottom: var(--kame-space-4);
+}
+.kame-modal__foot { margin-top: var(--kame-space-4); font-size: 14px; text-align: center; }
+.kame-modal__foot button {
+  border: 0;
+  background: none;
+  color: var(--kame-orange-700);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+.kame-modal form { display: grid; gap: var(--kame-space-4); }
+.kame-modal .kame-alert { display: none; }
+.kame-modal .kame-alert[data-show="true"] { display: block; }
+
+/* --- Ba mức responsive: 1180 / 900 / 600 -------------------------------- */
+@media (max-width: 1180px) {
+  .kame-col-3 { grid-column: span 6; }
+  .kame-col-4 { grid-column: span 6; }
+}
+
+@media (max-width: 900px) {
+  .kame-burger { display: block; }
+  .kame-col-3, .kame-col-4, .kame-col-6, .kame-col-8 { grid-column: 1 / -1; }
+  .kame-boss-grid { grid-template-columns: 1fr; }
+  .kame-header__actions .kame-button--hide-sm { display: none; }
+  .kame-hero { min-height: 320px; }
+  .kame-section { padding-block: var(--kame-space-6); }
+}
+
+@media (max-width: 600px) {
+  /* Header tren dien thoai.
+     Truoc day header tran ngang TOAN BO trang o khung 375px: logo rong 176px
+     (anh goc 599x136, cao 40px -> rong 176) + nut Dang nhap 95 + nut Tai game 86
+     + burger 31 + hai khoang cach 24px = 431px, trong khi khung chi rong 340px.
+     Cac phan tu flex mac dinh khong co lai duoi kich thuoc noi dung, nen trang
+     bi day rong ra 441px va NGUOI DUNG PHAI KEO NGANG o moi trang.
+     Ba viec duoi day cho no vua khit ma van giu du ca hai nut chinh. */
+  .kame-header__inner { gap: 10px; }
+  .kame-header__logo { min-width: 0; flex-shrink: 1; }
+  .kame-header__logo img { height: 30px; max-width: 100%; }
+  .kame-header__actions { gap: 8px; }
+  .kame-header__actions .kame-button { padding-inline: 12px; font-size: 12px; }
+  .kame-burger { width: 40px; height: 40px; }
+
+  .kame-rank-row,
+  .kame-rank-row--top { grid-template-columns: 38px 40px 1fr; row-gap: 6px; }
+  .kame-rank-row__value { grid-column: 2 / -1; font-size: 18px; }
+  .kame-rank-row--top .kame-rank-row__value { font-size: 20px; }
+  .kame-rank-row__avatar,
+  .kame-rank-row--top .kame-rank-row__avatar { width: 40px; }
+  .kame-boss-card { grid-template-columns: 52px 1fr; }
+  .kame-boss-card__avatar { width: 52px; }
+  .kame-hero__inner { padding-block: var(--kame-space-6) var(--kame-space-5); }
+  .kame-stat { padding: var(--kame-space-3); }
+}

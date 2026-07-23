@@ -1,0 +1,28 @@
+Options -Indexes
+
+# Chi cho phep cong khai dung cac bo cai game duoc trang chu su dung.
+# Dung NROKAME.zip (zip chu khong rar: Windows mo duoc zip san, khong phai cai WinRAR).
+<FilesMatch "^(?:NROKAME\.zip|NRO\.apk|IPA\.ipa)$">
+  Require all granted
+</FilesMatch>
+
+<IfModule mod_headers.c>
+  Header always set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+  Header always set Pragma "no-cache"
+  Header always set Expires "0"
+
+  <Files "NROKAME.zip">
+    Header set Content-Type "application/zip"
+    Header set Content-Disposition "attachment; filename=NROKAME.zip"
+  </Files>
+  <Files "NRO.apk">
+    Header set Content-Type "application/vnd.android.package-archive"
+    Header set Content-Disposition "attachment; filename=NRO.apk"
+  </Files>
+  <Files "IPA.ipa">
+    Header set Content-Type "application/octet-stream"
+    Header set Content-Disposition "attachment; filename=IPA.ipa"
+  </Files>
+</IfModule>
+
+FileETag None

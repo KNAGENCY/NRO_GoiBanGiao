@@ -21,7 +21,10 @@
 
 ## Global Constraints
 
-- **Go 1.24 trở lên** (bắt buộc: `crypto/pbkdf2` chỉ có trong thư viện chuẩn từ 1.24).
+- **Go 1.25 trở lên.** Ban đầu đặt sàn 1.24 (mốc `crypto/pbkdf2` vào thư viện
+  chuẩn). Từ Task 6 phải nâng lên 1.25 vì `pgx/v5 v5.10.0` tự khai báo cần
+  Go 1.25 — đây là ràng buộc của thư viện, không phải lựa chọn. Máy đang
+  chạy 1.26.5 nên không ảnh hưởng gì.
 - **Không dùng thư viện ngoài, ngoại trừ đúng một cái: `github.com/jackc/pgx/v5`.**
   Cụ thể: KHÔNG dùng `golang.org/x/crypto` — đã kiểm chứng thư viện chuẩn
   `crypto/pbkdf2` cho ra kết quả khớp tuyệt đối với bản Java.

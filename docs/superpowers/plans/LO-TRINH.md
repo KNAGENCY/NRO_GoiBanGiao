@@ -75,8 +75,9 @@ sai thì tới Kế hoạch 9 mới phát hiện, lúc đó sửa là viết l�
 | **Tần suất gửi vị trí + ngân sách nội suy phía client** | Client phải "đoán" vị trí giữa hai lần máy chủ báo. Không thiết kế từ đầu thì nhân vật sẽ nhảy cóc. |
 | **Client dự đoán trước, máy chủ xác nhận sau** | Người chơi bấm đánh phải thấy phản hồi **ngay khung hình đó**, không đợi máy chủ trả lời. Nhưng máy chủ vẫn phải là bên quyết định thật (xem §5.1 của thiết kế: lỗ hổng "máy chủ tin tuyệt đối client"). Hai yêu cầu này mâu thuẫn nhau — phải thiết kế cách hoà giải **trước khi** viết tầng khu vực, không phải vá sau. |
 
-**Việc cần làm:** khi viết Kế hoạch 3, đưa ba mục này vào phần Global
-Constraints của nó, kèm con số cụ thể.
+**✅ Đã giải quyết** — xem [`../specs/2026-07-23-hoa-giai-muot-va-chong-gian-lan.md`](../specs/2026-07-23-hoa-giai-muot-va-chong-gian-lan.md).
+Bảng số chốt ở §4.3 của tài liệu đó, đưa nguyên vào Global Constraints của
+Kế hoạch 3. Ba sửa đổi client ở §4.1 làm cùng đợt dựng lại client.
 
 ### Chưa viết chi tiết vì
 

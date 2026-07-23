@@ -19,6 +19,20 @@ var lenhDoDaiBaByte = map[int8]bool{
 
 // Framer doc va ghi goi tin tren mot ket noi.
 // Truoc khi goi SetKey thi moi thu di nguyen ban — do la giai doan bat tay.
+//
+// Framer mo hinh hoa phia MAY CHU cua duong day:
+//
+//	WriteMessage = dinh dang server -> client
+//	ReadMessage  = dinh dang client -> server
+//
+// KHONG dung Framer lam "client gia" o giai doan CHUA CO KHOA. Doan do hai
+// chieu dung hai thu tu byte KHAC NHAU, va do la co y - no phan chieu dung
+// hanh vi cua client that (Session_ME.cs):
+//   - client DOC do dai theo big-endian:  (b1 & 0xFF00) | (b2 & 0xFF)
+//   - client GHI do dai theo little-endian: BinaryWriter.Write(ushort) cua .NET
+//
+// Sau khi co khoa thi hai chieu doi xung, luc do dung hai Framer rieng cung
+// mot khoa la hop le (xem cac test san co).
 type Framer struct {
 	r  io.Reader
 	w  io.Writer
@@ -122,14 +136,14 @@ func (f *Framer) ReadMessage() (*Message, error) {
 //  2. Nhanh lenh THUONG (khong nam trong lenhDoDaiBaByte) khi DA CO KHOA: dieu
 //     kien "n > 0" o day la SAI — phai LUON ma hoa 2 byte do dai mien la
 //     coKhoa(), bat ke than tin rong hay khong. Ba bang chung:
-//       a) Client doc (Session_ME.cs, readMessage): chi xet getKeyComplete,
-//          hoan toan khong xet do dai than tin — "if (getKeyComplete) { ...
-//          doc 2 byte da XOR }".
-//       b) Chinh client GUI goi RONG (Session_ME.cs, doSendMessage, nhanh
-//          data == null) van tu ma hoa 2 byte (qua writeKey) khi da co khoa,
-//          chu khong ghi tho.
-//       c) Java cu (ServerManager.java): data != null va size == 0 van roi
-//          vao nhanh "else if (session.sentKey())" -> ghi 2 byte CO ma hoa.
+//     a) Client doc (Session_ME.cs, readMessage): chi xet getKeyComplete,
+//     hoan toan khong xet do dai than tin — "if (getKeyComplete) { ...
+//     doc 2 byte da XOR }".
+//     b) Chinh client GUI goi RONG (Session_ME.cs, doSendMessage, nhanh
+//     data == null) van tu ma hoa 2 byte (qua writeKey) khi da co khoa,
+//     chu khong ghi tho.
+//     c) Java cu (ServerManager.java): data != null va size == 0 van roi
+//     vao nhanh "else if (session.sentKey())" -> ghi 2 byte CO ma hoa.
 //     Neu server ghi 2 byte RAW cho goi rong luc da co khoa: client XOR chung
 //     ra do dai rac, VA con tro cua KeyStream phia ghi khong duoc tien (vi
 //     ks.Write khong duoc goi) trong khi con tro phia doc lai tien (vi

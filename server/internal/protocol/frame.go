@@ -105,17 +105,51 @@ func (f *Framer) ReadMessage() (*Message, error) {
 // Dinh dang (xem ServerManager.java, ham doSendMessage): lenh, do dai, than tin.
 // Do dai dung 3 byte cho cac lenh trong lenhDoDaiBaByte, 2 byte cho phan con lai.
 //
-// Quan trong: 3 byte do dai la bat buoc cho MOI goi mang lenh trong
-// lenhDoDaiBaByte, KE CA khi than tin rong (n == 0). Client (Session_ME.cs,
-// ham readMessage) chi nhin byte lenh de quyet dinh goi readMessage2 — ham nay
-// LUON doc du 3 byte do dai, khong he xet than tin dai bao nhieu. Server ma
-// rut xuong 2 byte khi than tin rong se lam client doc lem mot byte cua goi ke
-// tiep sang truong do dai, lech dong byte tu do tro di — client treo im lang,
-// khong bao loi gi.
+// Nguyen tac chung, ap dung nhat quan cho CA BA nhanh ben duoi: quyet dinh CO
+// MA HOA hay khong CHI dua vao coKhoa(); quyet dinh 2 byte hay 3 byte CHI dua
+// vao byte lenh (co nam trong lenhDoDaiBaByte hay khong). Do dai than tin (n)
+// KHONG duoc tham gia vao bat ky quyet dinh nao trong so nay — dung n de gate
+// la nguyen nhan cua ca hai loi da tung xay ra:
+//
+//  1. Nhanh lenh dac biet: 3 byte do dai la bat buoc cho MOI goi mang lenh
+//     trong lenhDoDaiBaByte, KE CA khi than tin rong (n == 0). Client
+//     (Session_ME.cs, readMessage) chi nhin byte lenh de quyet dinh goi
+//     readMessage2 — ham nay LUON doc du 3 byte do dai, khong he xet than tin
+//     dai bao nhieu. Server ma rut xuong 2 byte khi than tin rong se lam
+//     client doc lem mot byte cua goi ke tiep sang truong do dai, lech dong
+//     byte tu do tro di — client treo im lang, khong bao loi gi.
+//
+//  2. Nhanh lenh THUONG (khong nam trong lenhDoDaiBaByte) khi DA CO KHOA: dieu
+//     kien "n > 0" o day la SAI — phai LUON ma hoa 2 byte do dai mien la
+//     coKhoa(), bat ke than tin rong hay khong. Ba bang chung:
+//       a) Client doc (Session_ME.cs, readMessage): chi xet getKeyComplete,
+//          hoan toan khong xet do dai than tin — "if (getKeyComplete) { ...
+//          doc 2 byte da XOR }".
+//       b) Chinh client GUI goi RONG (Session_ME.cs, doSendMessage, nhanh
+//          data == null) van tu ma hoa 2 byte (qua writeKey) khi da co khoa,
+//          chu khong ghi tho.
+//       c) Java cu (ServerManager.java): data != null va size == 0 van roi
+//          vao nhanh "else if (session.sentKey())" -> ghi 2 byte CO ma hoa.
+//     Neu server ghi 2 byte RAW cho goi rong luc da co khoa: client XOR chung
+//     ra do dai rac, VA con tro cua KeyStream phia ghi khong duoc tien (vi
+//     ks.Write khong duoc goi) trong khi con tro phia doc lai tien (vi
+//     ReadMessage luon goi ks.Read cho 2 byte do dai khi coKhoa()) — hai con
+//     tro lech nhau VINH VIEN tu do, hong ca cac goi sau chu khong rieng goi
+//     rong nay. Ma "lenh thuong gui rong sau bat tay" la chuyen xay ra lien
+//     tuc (thong bao, xac nhan).
 //
 // Ban Java ghi "XOR(x) - 128" con client doc "readKey(b) + 128". Tren byte 8 bit,
 // cong 128 va tru 128 cho cung ket qua, nen o day dung cong cho de doc.
 func (f *Framer) WriteMessage(m *Message) error {
+	// LOI panic: nhanh lenh dac biet ben duoi goi f.ks.Write(...) khong dieu
+	// kien. Neu chua SetKey thi f.ks == nil, cham vao se panic — va panic
+	// khong duoc recover() se lam sap ca tien trinh may chu, da vang TOAN BO
+	// nguoi choi dang online chu khong rieng mot ket noi. Chan tu day: chua co
+	// khoa thi tu choi ro rang bang error, tuyet doi khong cham vao f.ks.
+	if lenhDoDaiBaByte[m.Command] && !f.coKhoa() {
+		return fmt.Errorf("lenh dac biet %d can ma hoa do dai 3 byte nhung Framer chua goi SetKey (chua co khoa)", m.Command)
+	}
+
 	out := make([]byte, 0, len(m.Data)+8)
 
 	if f.coKhoa() {
@@ -127,20 +161,19 @@ func (f *Framer) WriteMessage(m *Message) error {
 	n := len(m.Data)
 	switch {
 	case lenhDoDaiBaByte[m.Command]:
-		// Client (Session_ME.cs, readMessage) quyet dinh doc 3 byte do dai CHI
-		// dua vao byte lenh, khong xet than tin co rong hay khong (readMessage2
-		// luon chay cho 7 lenh nay). Vi vay server bat buoc phai LUON ghi du 3
-		// byte cho cac lenh nay, ke ca khi n == 0 — rut xuong 2 byte se lam
-		// client doc lem sang goi ke tiep, lech dong byte tu do tro di va client
-		// treo im lang khong bao loi gi. KHONG duoc them dieu kien n > 0 o day.
+		// f.coKhoa() da duoc dam bao la true o day (kiem tra dau ham).
+		// KHONG duoc them dieu kien n > 0: xem bang chung (1) o docstring.
 		out = append(out, f.ks.Write(byte(n))+128)
 		out = append(out, f.ks.Write(byte(n>>8))+128)
 		out = append(out, f.ks.Write(byte(n>>16))+128)
-	case n > 0 && f.coKhoa():
+	case f.coKhoa():
+		// Lenh thuong, da co khoa: LUON ma hoa 2 byte do dai, bat ke n co
+		// bang 0 hay khong. KHONG duoc them dieu kien n > 0: xem bang chung
+		// (2a, 2b, 2c) o docstring.
 		out = append(out, f.ks.Write(byte(n>>8)))
 		out = append(out, f.ks.Write(byte(n&0xFF)))
 	default:
-		// Chua co khoa, hoac than tin rong: ghi 2 byte big-endian khong ma hoa.
+		// Chua co khoa (giai doan bat tay): ghi 2 byte big-endian khong ma hoa.
 		out = binary.BigEndian.AppendUint16(out, uint16(n))
 	}
 

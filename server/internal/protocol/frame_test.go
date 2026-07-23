@@ -187,6 +187,94 @@ func TestGoiDacBietThanRongKhongLamLechGoiSau(t *testing.T) {
 	}
 }
 
+// LOI 1 (nghiem trong): lenh THUONG (khong nam trong lenhDoDaiBaByte) voi than
+// tin RONG, SAU KHI DA CO KHOA, van phai ma hoa 2 byte do dai bang XOR — dieu
+// kien "n > 0" o nhanh co khoa la SAI. Bang chung:
+//
+//	a) Client doc (Session_ME.cs, readMessage): chi xet getKeyComplete, khong
+//	   he xet do dai than tin — "if (getKeyComplete) { ... doc 2 byte da XOR }".
+//	b) Chinh client GUI goi RONG (Session_ME.cs, doSendMessage, nhanh
+//	   data == null) van tu ma hoa 2 byte khong qua writeKey khi da co khoa.
+//	c) Java cu (ServerManager.java): data != null, size == 0 van roi vao nhanh
+//	   "else if (session.sentKey())" -> ghi 2 byte CO ma hoa.
+//
+// Neu server ghi 2 byte RAW (khong XOR) cho goi rong luc da co khoa, client se
+// XOR chung ra do dai rac, VA quan trong hon: con tro khoa cua KeyStream phia
+// ghi khong duoc tien (vi ks.Write khong duoc goi cho 2 byte do dai), trong
+// khi con tro khoa phia doc lai tien (vi ReadMessage luon goi ks.Read cho 2
+// byte do dai khi coKhoa()). Hai con tro lech nhau vinh vien tu do, lam MOI
+// goi tin sau do giai ma sai — khong chi goi rong nay.
+//
+// Test nay bat dung hien tuong do: ghi hai goi LIEN TIEP (goi 1 rong, goi 2 co
+// than tin) roi doc lai bang Framer khac cung khoa. Neu con tro lech, goi 2 se
+// giai ma sai hoac loi.
+func TestLenhThuongThanRongVanMaHoaDoDai(t *testing.T) {
+	for _, ten := range []string{"Data=nil", "Data=[]byte{}"} {
+		ten := ten
+		t.Run(ten, func(t *testing.T) {
+			var rongData []byte
+			if ten == "Data=[]byte{}" {
+				rongData = []byte{}
+			}
+
+			raw := []byte{2, 4, 6, 8}
+			var day bytes.Buffer
+
+			ben_gui := NewFramer(&bytes.Buffer{}, &day)
+			ben_gui.SetKey(DeriveKey(raw))
+
+			goi1 := &Message{Command: -29, Data: rongData} // lenh thuong, than tin rong
+			goi2 := &Message{Command: -29, Data: []byte{0x11, 0x22, 0x33}} // lenh thuong, co than tin
+
+			if err := ben_gui.WriteMessage(goi1); err != nil {
+				t.Fatalf("loi ghi goi 1: %v", err)
+			}
+			if err := ben_gui.WriteMessage(goi2); err != nil {
+				t.Fatalf("loi ghi goi 2: %v", err)
+			}
+
+			ben_nhan := NewFramer(bytes.NewReader(day.Bytes()), &bytes.Buffer{})
+			ben_nhan.SetKey(DeriveKey(raw))
+
+			nhan1, err := ben_nhan.ReadMessage()
+			if err != nil {
+				t.Fatalf("loi doc goi 1: %v", err)
+			}
+			if nhan1.Command != goi1.Command {
+				t.Fatalf("Command goi 1 = %d, mong doi %d", nhan1.Command, goi1.Command)
+			}
+			if len(nhan1.Data) != 0 {
+				t.Fatalf("Data goi 1 dai %d, mong doi 0", len(nhan1.Data))
+			}
+
+			nhan2, err := ben_nhan.ReadMessage()
+			if err != nil {
+				t.Fatalf("loi doc goi 2 (con tro khoa lech vi goi 1 ghi do dai khong ma hoa): %v", err)
+			}
+			if nhan2.Command != goi2.Command {
+				t.Fatalf("Command goi 2 = %d, mong doi %d (con tro khoa lech)", nhan2.Command, goi2.Command)
+			}
+			if !bytes.Equal(nhan2.Data, goi2.Data) {
+				t.Fatalf("Data goi 2 = %v, mong doi %v (con tro khoa lech)", nhan2.Data, goi2.Data)
+			}
+		})
+	}
+}
+
+// LOI 2 (quan trong): goi WriteMessage voi lenh dac biet TRUOC KHI SetKey phai
+// tra ve error, KHONG duoc panic. Nhanh lenh dac biet goi f.ks.Write(...) ma
+// khong kiem f.coKhoa() truoc — f.ks con nil luc chua SetKey, cham vao se
+// panic. Panic khong duoc recover() se lam sap ca tien trinh may chu, da vang
+// TOAN BO nguoi choi dang online chu khong rieng mot ket noi.
+func TestLenhDacBietChuaCoKhoaTraLoiKhongPanic(t *testing.T) {
+	f := NewFramer(&bytes.Buffer{}, &bytes.Buffer{})
+	// -87 nam trong danh sach dac biet, f chua goi SetKey nen f.ks == nil.
+	err := f.WriteMessage(&Message{Command: -87, Data: []byte{0x01}})
+	if err == nil {
+		t.Fatal("mong doi error khi ghi lenh dac biet truoc khi SetKey, nhung khong co loi (va khong panic)")
+	}
+}
+
 // Goi qua lon phai bi tu choi de tranh ke xau bao do dai khong lo lam can RAM.
 func TestTuChoiGoiQuaLon(t *testing.T) {
 	// cmd -29, do dai 0xFFFF, nhung khong co du lieu theo sau

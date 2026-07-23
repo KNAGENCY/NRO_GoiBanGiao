@@ -8,6 +8,7 @@
 # Dua len GitHub la lo du lieu ca nhan, khong the thu hoi.
 *.sql
 !docs/**/*.sql
+!server/**/migrations/**/*.sql
 
 # --- 2. KHO ANH (~820 MB) ---
 # Anh se nam tren Cloudflare R2, khong nam trong git.

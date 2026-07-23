@@ -16,7 +16,7 @@ khi tới nơi, vì làm xong cái trước mới biết cái sau cần gì.
 | # | Tên | Trạng thái | Phụ thuộc |
 |---|---|---|---|
 | 1 | Lõi giao thức + Đăng nhập | ✅ **Xong** (gộp `6529d35`) | — |
-| 2 | Chuyển dữ liệu cũ sang CSDL mới | Chưa bắt đầu | 1 |
+| 2 | **Nhân vật: tạo, lưu, tải** | Chưa bắt đầu | 1 |
 | 3 | Mô hình actor cho khu vực + di chuyển | Chưa bắt đầu | 1, 2 |
 | 4 | Chiến đấu, chiêu thức, quái, boss | Chưa bắt đầu | 3 |
 | 5 | Vật phẩm, hành trang, cửa hàng, giao dịch | Chưa bắt đầu | 3 |
@@ -29,6 +29,15 @@ khi tới nơi, vì làm xong cái trước mới biết cái sau cần gì.
 
 Kế hoạch **B** và **V** không đánh số vì chúng cắt ngang mọi kế hoạch khác,
 không nằm gọn ở một chỗ trong thứ tự.
+
+> **Ghi chú Kế hoạch 2 (24/07/2026):** ban đầu định là "chuyển dữ liệu cũ".
+> Nhưng CSDL cũ chỉ có **3 tài khoản + 3 nhân vật thử nghiệm** (đếm thật từ
+> `3-CO-SO-DU-LIEU/z-moi-nhat.sql`) — không có người chơi thật. Quy trình
+> chuyển dữ liệu ở thiết kế §6.3 sinh ra để bảo vệ tài sản người chơi thật,
+> ở đây không cần. Đây là game Naruto mới, khởi đầu sạch. Nên Kế hoạch 2 đổi
+> thành **xây hệ thống nhân vật** (tạo/lưu/tải), nối tiếp chỗ Kế hoạch 1 dừng
+> (đăng nhập xong → màn hình tạo nhân vật). Ba tài khoản thử vi phạm ràng buộc
+> tên đăng nhập mới → bỏ, không mang sang.
 
 ---
 

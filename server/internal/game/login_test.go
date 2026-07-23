@@ -195,7 +195,7 @@ func dungPhienThat(t *testing.T, b *BoXuLy) (fClient *protocol.Framer, dong func
 	t.Helper()
 
 	benClient, benServer := net.Pipe()
-	go mynet.PhucVu(benServer, b)
+	go mynet.PhucVu(benServer, func() mynet.XuLyGoiTin { return b })
 
 	benClient.SetReadDeadline(time.Now().Add(5 * time.Second))
 

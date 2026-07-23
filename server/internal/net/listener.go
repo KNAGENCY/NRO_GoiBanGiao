@@ -7,7 +7,8 @@ import (
 )
 
 // LangNghe mo cong TCP va phuc vu tung ket noi tren mot goroutine rieng.
-func LangNghe(diaChi string, xuLy XuLyGoiTin) error {
+// taoXuLy duoc goi mot lan cho MOI ket noi (xem PhucVu).
+func LangNghe(diaChi string, taoXuLy func() XuLyGoiTin) error {
 	ln, err := net.Listen("tcp", diaChi)
 	if err != nil {
 		return fmt.Errorf("khong mo duoc cong %s: %w", diaChi, err)
@@ -22,6 +23,6 @@ func LangNghe(diaChi string, xuLy XuLyGoiTin) error {
 			slog.Error("nhan ket noi that bai", "loi", err)
 			continue
 		}
-		go PhucVu(conn, xuLy)
+		go PhucVu(conn, taoXuLy)
 	}
 }

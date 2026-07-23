@@ -78,7 +78,13 @@ func (s *Session) Dong() {
 }
 
 // PhucVu chay vong doi mot ket noi cho toi khi dong.
-func PhucVu(conn net.Conn, xuLy XuLyGoiTin) {
+//
+// Nhan MOT HAM TAO bo xu ly, khong phai mot bo xu ly dung chung: moi ket noi
+// can trang thai rieng (dang nhap bang tai khoan nao, dang giu nhan vat nao).
+// Cho moi ket noi mot bo xu ly rieng nghia la trang thai do chi la truong cua
+// bo xu ly — khong can ban do phien->trang thai, va khi ket noi dong thi bo xu
+// ly duoc thu gom theo, khong ro ri.
+func PhucVu(conn net.Conn, taoXuLy func() XuLyGoiTin) {
 	diaChi := "khong-ro"
 	if a, ok := conn.RemoteAddr().(*net.TCPAddr); ok {
 		diaChi = a.IP.String()
@@ -90,6 +96,8 @@ func PhucVu(conn net.Conn, xuLy XuLyGoiTin) {
 		DiaChiIP: diaChi,
 	}
 	defer s.Dong()
+
+	xuLy := taoXuLy()
 
 	if err := batTay(s); err != nil {
 		slog.Warn("bat tay that bai", "ip", diaChi, "loi", err)

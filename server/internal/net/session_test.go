@@ -26,7 +26,7 @@ func TestBatTayRoiNhanGoiDaMaHoa(t *testing.T) {
 	defer ben_client.Close()
 
 	xuLy := &xuLyGhiNhan{nhanDuoc: make(chan *protocol.Message, 4)}
-	go PhucVu(ben_server, xuLy)
+	go PhucVu(ben_server, func() XuLyGoiTin { return xuLy })
 
 	fClient := protocol.NewFramer(ben_client, ben_client)
 
@@ -112,7 +112,8 @@ func TestGoiDauKhongPhaiBatTayThiNgat(t *testing.T) {
 	ben_client, ben_server := net.Pipe()
 	defer ben_client.Close()
 
-	go PhucVu(ben_server, &xuLyGhiNhan{nhanDuoc: make(chan *protocol.Message, 1)})
+	xuLy2 := &xuLyGhiNhan{nhanDuoc: make(chan *protocol.Message, 1)}
+	go PhucVu(ben_server, func() XuLyGoiTin { return xuLy2 })
 
 	fClient := protocol.NewFramer(ben_client, ben_client)
 	if err := fClient.WriteMessage(&protocol.Message{Command: 99}); err != nil {

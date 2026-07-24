@@ -21,10 +21,12 @@ package game
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net"
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -58,27 +60,37 @@ func moKhoThatChoTest(t *testing.T) *store.Store {
 	return s
 }
 
+// moPoolThuChoTest mo mot pgxpool RIENG (khac pool noi bo cua *store.Store,
+// khong xuat ra ngoai) — dung cho cac thao tac SQL truc tiep ma store.Store
+// co y khong xuat (chen tai khoan tho, dem hang kiem chung trong kich ban dua
+// tranh). Tu dang ky dong qua t.Cleanup.
+func moPoolThuChoTest(t *testing.T) *pgxpool.Pool {
+	t.Helper()
+	dsn := os.Getenv("NRO_TEST_DSN")
+	pool, err := pgxpool.New(context.Background(), dsn)
+	if err != nil {
+		t.Fatalf("khong mo duoc pool CSDL thu: %v", err)
+	}
+	t.Cleanup(pool.Close)
+	return pool
+}
+
 // taoTaiKhoanCoMatKhau chen mot tai khoan THAT vao CSDL voi mat khau da BAM
 // bang auth.Hash (dung dinh dang that server doi chieu luc dang nhap — luu
 // mat khau tho se khong bao gio Verify() dung). Tra ve ID tai khoan vua tao.
 //
 // store.Store CO Y khong xuat ham "chen tai khoan tho" nao (tao tai khoan
 // that su la qua kenh dang ky, ngoai pham vi Ke hoach 2) — nen o day phai tu
-// mo mot pgxpool rieng va chen thang bang SQL, dung nhu ghi chu trong
-// task-7-brief.md: "Trong game phai tu chen tai khoan qua SQL hoac qua kho
-// that". Tu dang ky don dep qua t.Cleanup: xoa nhan_vat TRUOC (khoa ngoai toi
-// tai_khoan) roi moi xoa tai_khoan — dung thu tu Cleanup chay LIFO nen dang
-// ky pool.Close() TRUOC, dang ky xoa hang SAU, de luc chay cleanup thi xoa
-// hang thuc hien truoc, dong pool sau cung.
+// mo mot pgxpool rieng (moPoolThuChoTest) va chen thang bang SQL, dung nhu
+// ghi chu trong task-7-brief.md: "Trong game phai tu chen tai khoan qua SQL
+// hoac qua kho that". Tu dang ky don dep qua t.Cleanup: xoa nhan_vat TRUOC
+// (khoa ngoai toi tai_khoan) roi moi xoa tai_khoan — dung thu tu Cleanup chay
+// LIFO nen moPoolThuChoTest dang ky pool.Close() TRUOC, ham nay dang ky xoa
+// hang SAU, de luc chay cleanup thi xoa hang thuc hien truoc, dong pool sau
+// cung.
 func taoTaiKhoanCoMatKhau(t *testing.T, ten, matKhau string) int64 {
 	t.Helper()
-	dsn := os.Getenv("NRO_TEST_DSN")
-
-	pool, err := pgxpool.New(context.Background(), dsn)
-	if err != nil {
-		t.Fatalf("khong mo duoc pool CSDL de chen tai khoan thu: %v", err)
-	}
-	t.Cleanup(pool.Close)
+	pool := moPoolThuChoTest(t)
 
 	bam, err := auth.Hash(matKhau)
 	if err != nil {
@@ -281,6 +293,74 @@ func (cl *clientGia) choDungMotLenh(t *testing.T, lenh int8) bool {
 }
 
 // ---------------------------------------------------------------------------
+// Cap ham RIENG cho kich ban dua tranh (TestTaoNhanVat_DuaTranhCungTen): an
+// toan goi tu GOROUTINE KHAC voi goroutine dang chay ham test.
+//
+// *testing.T KHONG an toan khi FailNow() (duoc t.Fatal/t.Fatalf goi ben
+// trong) chay tu mot goroutine khac goroutine thuc thi ham Test — tai lieu Go
+// noi ro "FailNow must be called from the goroutine running the Test..."; goi
+// tu goroutine khac se chi lam GOROUTINE DO thoat qua runtime.Goexit(), rat
+// de gay treo vinh vien (vd mot goroutine trong cuoc dua thoat som ma quen
+// goi wg.Done()) thay vi that bai ro rang. Vi vay hai ham duoi day KHONG dung
+// t o bat ky dang nao (khong ca t.Helper()) — chi tra du lieu (loi/ket qua)
+// qua gia tri tra ve, de goroutine CHINH cua test tu gom qua channel roi moi
+// goi t.Fatal SAU KHI wg.Wait() (xem TestTaoNhanVat_DuaTranhCungTen).
+// ---------------------------------------------------------------------------
+
+// guiTaoNhanVatKhongFatal giong het clientGia.taoNhanVat ve dinh dang goi tin
+// (khung lenhKhongTrenBanDo, than: lenhConTaoNhanVat + ten + lang + kieu toc)
+// nhung tra loi qua error thay vi goi t.Fatal — an toan goi tu goroutine con.
+func (cl *clientGia) guiTaoNhanVatKhongFatal(ten string, lang, toc byte) error {
+	w := protocol.NewWriter()
+	w.Byte(lenhConTaoNhanVat)
+	if err := w.UTF(ten); err != nil {
+		return fmt.Errorf("dong goi ten nhan vat that bai: %w", err)
+	}
+	w.Byte(lang)
+	w.Byte(toc)
+	return cl.f.WriteMessage(protocol.NewMessage(lenhKhongTrenBanDo, w))
+}
+
+// ketQuaDocSauKhiTao la ket qua doc duoc tren MOT phien sau khi da gui goi
+// tao nhan vat, dung rieng cho kich ban dua tranh. cauThongBao (noi dung cau
+// bao trong goi -26) duoc giu lai CHI de ghi vao t.Logf lam bang chung/chan
+// doan de neu sau nay dot bien khac lam sai NOI DUNG cau bao (khong doi
+// hanh vi tu-choi/khong-tu-choi), dong log con lai van chi ro duoc — bat bien
+// chinh cua test van CHI dua vao co/khong -26, khong dua vao dung chu.
+type ketQuaDocSauKhiTao struct {
+	biTuChoi    bool   // true neu nhan duoc -26 (hop thoai OK, tu choi)
+	cauThongBao string // noi dung cau bao trong goi -26, neu biTuChoi
+	loi         error  // khac nil neu gap loi bat thuong (khac het han gio doc)
+}
+
+// docPhanHoiTaoNhanVat dat han gio NGAN (hanChoImLang) roi doc DUNG MOT lan:
+//   - het han ma khong co gi toi -> Ke hoach 2 khong gui goi nao khi THANH
+//     CONG (xem vaoTheGioi trong nhanvat.go), nen day la thanh cong.
+//   - nhan duoc -26 -> bi tu choi.
+//   - bat ky truong hop nao khac (loi khac timeout, hoac lenh la khong mong
+//     doi trong kich ban nay) -> tra ve qua truong loi, de goroutine chinh
+//     lam that bai ro rang thay vi phan loai nham thanh cong/tu choi.
+func (cl *clientGia) docPhanHoiTaoNhanVat() ketQuaDocSauKhiTao {
+	_ = cl.conn.SetReadDeadline(time.Now().Add(hanChoImLang))
+	defer cl.conn.SetReadDeadline(time.Now().Add(5 * time.Second))
+
+	m, err := cl.f.ReadMessage()
+	if err != nil {
+		var netErr net.Error
+		if errors.As(err, &netErr) && netErr.Timeout() {
+			return ketQuaDocSauKhiTao{biTuChoi: false} // im lang -> thanh cong
+		}
+		return ketQuaDocSauKhiTao{loi: fmt.Errorf("loi doc KHONG PHAI het han gio (nghi ngo may chu sap/dong ket noi): %w", err)}
+	}
+	if m.Command != lenhThongBaoOK {
+		return ketQuaDocSauKhiTao{loi: fmt.Errorf("nhan lenh %d ngoai du kien, mong doi -26 hoac im lang", m.Command)}
+	}
+	dr := protocol.NewReader(m.Data)
+	cau, _ := dr.UTF()
+	return ketQuaDocSauKhiTao{biTuChoi: true, cauThongBao: cau}
+}
+
+// ---------------------------------------------------------------------------
 // Kich ban 1 (duong hanh phuc): dang ky -> dang nhap -> nhan lenh 2 -> tao
 // nhan vat hop le -> khong -26 -> kiem CSDL -> ngat -> phien MOI dang nhap
 // lai -> KHONG con nhan lenh 2 nua.
@@ -359,6 +439,16 @@ func TestTaoRoiDangNhapLai_ThayNhanVat(t *testing.T) {
 // ---------------------------------------------------------------------------
 // Kich ban 2: hai tai khoan khac nhau, tai khoan thu hai tao nhan vat trung
 // ten (chi khac hoa thuong) voi tai khoan thu nhat -> phai nhan -26.
+//
+// Luu y pham vi: hai buoc gui goi trong kich ban nay LUON tuan tu (TK1 tao
+// xong HET, roi moi toi TK2), nen nhanh tu choi o day CHAC CHAN di qua
+// pre-check tang game (TenNhanVatDaDung trong xuLyTaoNhanVat) — KHONG bao gio
+// cham toi nhanh anh xa loi UNIQUE that su ben trong store.TaoNhanVat (so
+// sanh pgErr.ConstraintName == "nhan_vat_ten_duy_nhat" -> ErrTenNhanVatDaDung
+// trong store.go). Nhanh do chi kich hoat khi hai client "lot qua" pre-check
+// CUNG LUC — xem TestTaoNhanVat_DuaTranhCungTen (duoi file nay) cho kich ban
+// dua tranh that su phu duong do, va internal/store/store_test.go
+// (TestTenNhanVatTrungBiTuChoi) cho kiem thu truc tiep tren store.Store.
 // ---------------------------------------------------------------------------
 
 func TestTichHop_TenTrungGiuaHaiTaiKhoan_TuChoi(t *testing.T) {
@@ -406,6 +496,15 @@ func TestTichHop_TenTrungGiuaHaiTaiKhoan_TuChoi(t *testing.T) {
 // ---------------------------------------------------------------------------
 // Kich ban 3: mot tai khoan da co nhan vat (qua duong dang nhap lai, tuc
 // vaoTheGioi da gan b.nhanVat tu CSDL), gui tiep -28/2 -> phai nhan -26.
+//
+// Luu y pham vi (giong het kich ban 2 o tren): -26 o day di qua nhanh
+// pre-check b.nhanVat != nil ngay dau xuLyTaoNhanVat (khong cham CSDL nua),
+// KHONG phai nhanh anh xa loi UNIQUE(tai_khoan_id) (nhan_vat_mot_tai_khoan)
+// cua store.TaoNhanVat. Nhanh UNIQUE(tai_khoan_id) do rieng — mot tai khoan
+// gui HAI yeu cau tao nhan vat DUA NHAU (chua co lan nao thanh cong truoc do)
+// — ngoai pham vi kich ban nay (kich ban nay co tinh tao THANH CONG lan dau
+// roi moi thu lai lan hai, khong phai dua tranh); duoc
+// internal/store/store_test.go (TestMotTaiKhoanChiMotNhanVat) phu truc tiep.
 // ---------------------------------------------------------------------------
 
 func TestTichHop_TaiKhoanDaCoNhanVat_TuChoiTaoTiep(t *testing.T) {
@@ -537,5 +636,121 @@ func TestTichHop_ChuaDangNhapMaTaoNhanVat_ImLangKhongSap(t *testing.T) {
 	cl.dangNhap(tenTK, matKhau)
 	if !cl.choDungMotLenh(t, 2) {
 		t.Fatal("sau khi gui goi tao nhan vat luc chua dang nhap, ket noi phai VAN hoat dong binh thuong (dang nhap tiep theo phai thanh cong)")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Kich ban 7 (sua vong 1, theo phat hien cua nguoi soi chay dot bien): DUA
+// TRANH THAT giua hai tai khoan cung tao nhan vat MOT TEN gan nhu dong thoi.
+//
+// Boi canh: kich ban 2 va 3 o tren CHI di qua pre-check tang game
+// (TenNhanVatDaDung / b.nhanVat != nil) vi hai buoc gui goi trong hai kich
+// ban do LUON TUAN TU — nen KHONG BAO GIO cham toi nhanh anh xa loi UNIQUE
+// that su ben trong store.TaoNhanVat (store.go: so sanh
+// pgErr.ConstraintName == "nhan_vat_ten_duy_nhat" -> ErrTenNhanVatDaDung).
+// Nhanh do CHI kich hoat khi hai client "lot qua" pre-check CUNG LUC — dung
+// xay ra tren may chu nhieu nguoi choi that (hai nguoi bam nut "Tao" gan nhu
+// dong thoi voi cung mot ten dep). Test nay dung dung tinh huong do: hai
+// goroutine gui goi tao nhan vat GAN NHU DONG THOI, khong doi nhau — dua vao
+// pgxpool (an toan dung dong thoi) cua CUNG mot khoThat va rang buoc UNIQUE
+// that cua Postgres de tao ra cuoc dua thuc su, khong gia lap.
+func TestTaoNhanVat_DuaTranhCungTen(t *testing.T) {
+	khoThat := moKhoThatChoTest(t)
+	ctx := context.Background()
+
+	tenTK1 := "duaA" + hauToNganNgau(t)
+	tenTK2 := "duaB" + hauToNganNgau(t)
+	matKhau := "matkhau123"
+	taoTaiKhoanCoMatKhau(t, tenTK1, matKhau)
+	taoTaiKhoanCoMatKhau(t, tenTK2, matKhau)
+
+	// "Race" (4 chu cai) + hau to: dam bao >=5 ky tu KE CA khi hau to chi la
+	// 1 chu so (vd "Race3" = 5 ky tu) — mot tien to ngan hon (vd "Dua", 3 chu
+	// cai) se cho ten 4 ky tu voi hau to 1 chu so, VI PHAM ngay reTenNhanVat
+	// (^[A-Za-z0-9]{5,10}$) truoc ca khi toi duoc logic dua tranh can kiem.
+	tenNV := "Race" + hauToNganNgau(t)
+
+	cl1 := moPhienClientGia(t, khoThat)
+	defer cl1.dong()
+	cl2 := moPhienClientGia(t, khoThat)
+	defer cl2.dong()
+
+	cl1.dangNhap(tenTK1, matKhau)
+	if !cl1.choDungMotLenh(t, 2) {
+		t.Fatal("TK1: lan dau dang nhap phai nhan DUNG MOT lenh 2")
+	}
+	cl2.dangNhap(tenTK2, matKhau)
+	if !cl2.choDungMotLenh(t, 2) {
+		t.Fatal("TK2: lan dau dang nhap phai nhan DUNG MOT lenh 2")
+	}
+
+	// Cuoc dua: gui goi tao nhan vat CUNG TEN tren hai goroutine RIENG, khong
+	// dong bo hoa gi giua chung — day chinh la dieu tao ra dua tranh thuc su
+	// giua hai luong xu ly phia may chu (hai *BoXuLy rieng, dung chung
+	// khoThat/pgxpool an toan dong thoi). Ket qua gom qua channel (KHONG ghi
+	// chung bien tran giua cac goroutine) — xem chu thich cap ham
+	// guiTaoNhanVatKhongFatal/docPhanHoiTaoNhanVat o tren ve ly do khong dung
+	// t.Fatal ben trong goroutine con.
+	type ketQuaDua struct {
+		phien       string
+		biTuChoi    bool
+		cauThongBao string
+		loi         error
+	}
+	ketQuaCh := make(chan ketQuaDua, 2)
+	var wg sync.WaitGroup
+	guiVaDoc := func(nhan string, cl *clientGia) {
+		defer wg.Done()
+		if err := cl.guiTaoNhanVatKhongFatal(tenNV, 0, 5); err != nil {
+			ketQuaCh <- ketQuaDua{phien: nhan, loi: fmt.Errorf("gui goi tao nhan vat that bai: %w", err)}
+			return
+		}
+		kq := cl.docPhanHoiTaoNhanVat()
+		ketQuaCh <- ketQuaDua{phien: nhan, biTuChoi: kq.biTuChoi, cauThongBao: kq.cauThongBao, loi: kq.loi}
+	}
+	wg.Add(2)
+	go guiVaDoc("TK1", cl1)
+	go guiVaDoc("TK2", cl2)
+	wg.Wait()
+	close(ketQuaCh)
+
+	// Tu day tro xuong CHAY TREN GOROUTINE CHINH cua test — an toan dung
+	// t.Fatal/t.Errorf binh thuong.
+	var soThanhCong, soBiTuChoi int
+	for kq := range ketQuaCh {
+		if kq.loi != nil {
+			t.Fatalf("phien %s gap loi khi gui/doc phan hoi tao nhan vat: %v", kq.phien, kq.loi)
+		}
+		if kq.biTuChoi {
+			soBiTuChoi++
+			t.Logf("phien %s: bi tu choi -26, cau bao %q", kq.phien, kq.cauThongBao)
+		} else {
+			soThanhCong++
+			t.Logf("phien %s: thanh cong (im lang)", kq.phien)
+		}
+	}
+
+	// Bat bien phai dung BAT KE tang nao thang trong cuoc dua (pre-check kip
+	// chan mot ben, HOAC ca hai lot qua pre-check roi UNIQUE cua Postgres chot
+	// chan): DUNG MOT thanh cong, DUNG MOT bi tu choi. Khong duoc ca hai thanh
+	// cong (vi pham UNIQUE(lower(ten))), khong duoc ca hai bi tu choi (ten hop
+	// le va chua ai dung truoc do, nen it nhat mot ben PHAI thanh cong).
+	if soThanhCong != 1 || soBiTuChoi != 1 {
+		t.Fatalf("dua tranh cung ten %q: mong doi DUNG MOT thanh cong + DUNG MOT bi tu choi (-26), nhan duoc %d thanh cong / %d bi tu choi",
+			tenNV, soThanhCong, soBiTuChoi)
+	}
+
+	// Kiem CSDL doc lap voi viec dem -26 o tren: phai co DUNG MOT hang nhan_vat
+	// mang ten nay (khong phan biet hoa thuong) — khang dinh cuoi cung, chac
+	// chan khong co hai hang trung ten nao lot duoc ca hai tang kiem tra.
+	pool := moPoolThuChoTest(t)
+	var soHangTrungTen int
+	if err := pool.QueryRow(ctx,
+		`SELECT count(*) FROM nhan_vat WHERE lower(ten) = lower($1)`, tenNV,
+	).Scan(&soHangTrungTen); err != nil {
+		t.Fatalf("dem nhan_vat trung ten that bai: %v", err)
+	}
+	if soHangTrungTen != 1 {
+		t.Fatalf("CSDL co %d hang nhan_vat ten %q (khong phan biet hoa thuong), mong doi DUNG MOT", soHangTrungTen, tenNV)
 	}
 }

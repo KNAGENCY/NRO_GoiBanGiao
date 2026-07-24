@@ -56,6 +56,7 @@ Client **xin** cập nhật bằng cách gửi: `-87` (thân rỗng) cho data; `
 - `server/internal/protocol/datastream_test.go` — test `ThemMang`.
 - `server/internal/game/login.go` — `XuLy` điều phối thêm `-87`; `xuLyKhongTrenBanDo` thêm lệnh con 6/7/8/13; `vaoTheGioi` gửi `-28/4`.
 - `server/internal/game/login_test.go` — cập nhật nếu `vaoTheGioi` đổi hành vi (giờ gửi `-28/4`).
+- `server/internal/game/tichhop_test.go` — **BẮT BUỘC** cập nhật: `vaoTheGioi` giờ gửi `-28/4`, làm vỡ các test tích hợp Kế hoạch 2 vốn khẳng định "im lặng sau khi vào thế giới" (xem Task 5 Step 1b).
 
 ## Ranh giới Kế hoạch 3 ↔ Kế hoạch 4
 
@@ -556,6 +557,7 @@ git commit -m "feat(game): dung goi catalog skill (5 lang Naruto), map rong, ite
 **Files:**
 - Modify: `server/internal/game/login.go`
 - Modify: `server/internal/game/login_test.go`
+- Modify: `server/internal/game/tichhop_test.go` (test tích hợp Kế hoạch 2 vỡ vì `vaoTheGioi` đổi hành vi)
 
 **Interfaces:**
 - Consumes: `goiVersionGame`, `goiCatalogData`, `goiCatalogSkill`, `goiCatalogMap`, `goiCatalogItem` (Task 3-4); `s.Gui`, `b.nhanVat`, `b.taiKhoan`.
@@ -612,6 +614,18 @@ func TestPhucVuGoiXinSkill5Lang(t *testing.T) {
 ```
 
 > **Helper `docMotGoi`:** đọc đúng một gói máy chủ gửi ra qua `fClient` (framer client giả). Nếu Kế hoạch 1/2 đã có helper đọc gói (ví dụ trong `chayDangNhap`/`docGoi`), tái dùng; nếu chưa có dạng "đọc một gói", trích ra `docMotGoi(t, f) *protocol.Message { m, err := f.ReadMessage(); ... }`.
+
+- [ ] **Step 1b: Sửa test tích hợp Kế hoạch 2 bị vỡ vì `vaoTheGioi` đổi hành vi**
+
+`vaoTheGioi` trước đây là stub im lặng; giờ nó gửi `-28/4`. Các test tích hợp Kế hoạch 2 trong `server/internal/game/tichhop_test.go` khẳng định "im lặng sau khi vào thế giới" sẽ **vỡ** (đã kiểm chứng bằng soi đối kháng kế hoạch). Chạy trước để thấy chúng đỏ, rồi sửa:
+
+Run: `$env:NRO_TEST_DSN='postgres://postgres:nrodev123@127.0.0.1:5433/nro_test'` rồi `D:\Go\bin\go.exe test ./internal/game/ -run "TestTaoRoiDangNhapLai|TestTichHop|TestTaoNhanVat_DuaTranh" -v` → một số ĐỎ.
+
+Các chỗ phải sửa (đọc code thật để lấy đúng tên hàm/dòng — tên dưới là điểm neo):
+- **Sau khi vào thế giới, mong đợi và tiêu thụ đúng một gói `-28/4` rồi mới im lặng.** Mọi chỗ gọi helper kiểu `khongConGoiGi`/`nhanLenhTrongKhoang` **ngay sau** một `vaoTheGioi` (tạo nhân vật thành công, hoặc đăng nhập tài khoản đã có nhân vật) phải: đọc một gói, khẳng định `Command == -28` và byte lệnh con `== 4` (versionGame), rồi mới khẳng định im lặng tiếp (client giả không tự làm version dance). Cụ thể tối thiểu: `TestTaoRoiDangNhapLai_ThayNhanVat` (sau `taoNhanVat` và sau đăng nhập lại đã-có-nhân-vật), `TestTichHop_TenTrungGiuaHaiTaiKhoan_TuChoi` (tài khoản 1 sau khi tạo thành công), `TestTichHop_TaiKhoanDaCoNhanVat_TuChoiTaoTiep`.
+- **`TestTaoNhanVat_DuaTranhCungTen`**: helper đọc phản hồi tạo nhân vật (kiểu `docPhanHoiTaoNhanVat`) phải coi **`-28/4` là dấu hiệu THÀNH CÔNG** (bên thắng đua), `-26` là bị từ chối (bên thua). Trước đây thành công = im lặng; giờ thành công = nhận `-28/4`. Bất biến "đúng một thành công, đúng một `-26`" giữ nguyên.
+
+Sửa xong chạy lại lệnh trên → tất cả PASS. Đừng đổi ý nghĩa test (vẫn kiểm đúng bất biến cũ), chỉ cập nhật cho khớp việc `vaoTheGioi` giờ phát `-28/4`.
 
 - [ ] **Step 2: Chạy — phải fail**
 

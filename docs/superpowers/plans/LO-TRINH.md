@@ -5,8 +5,16 @@
 Mỗi kế hoạch là một tài liệu riêng, viết theo skill `superpowers:writing-plans`,
 thi công theo skill `superpowers:subagent-driven-development`.
 
-**Mức độ chắc chắn của lộ trình này:** Kế hoạch 1 và 2 đã xong và gộp. Kế hoạch
-3, 4, 5, 10 đã chốt phạm vi. Các kế hoạch còn lại là bản phác.
+**Mức độ chắc chắn của lộ trình này:** Kế hoạch 1, 2, 3 đã xong và gộp. Kế hoạch
+4, 5, 10 đã chốt phạm vi. Các kế hoạch còn lại là bản phác.
+
+**Kế hoạch 4 tiếp theo — nhắc trước khi bắt tay:** byte-table đã có đủ ở
+[`../specs/2026-07-24-giao-thuc-vao-the-gioi.md`](../specs/2026-07-24-giao-thuc-vao-the-gioi.md)
+§7 (`-82` tileset), §8 (`-30/0` ME_INFO), §9 (`-24` MAP INFO), §10 (định dạng
+tile map). Cần: mô hình khu vực nạp map làng Naruto (dùng mapId cũ để client có
+sẵn đồ hoạ — hình ảnh Naruto tới khi dựng lại client), chuỗi `-82 → -30/0 → -24`
+khi nhận `-28/13`. Nợ mang từ Kế hoạch 3: thêm test guard `nhanVat==nil` cho gói
+`-87`; mở rộng tập lệnh 3-byte trong `thuclient` nếu gửi lệnh mới.
 
 **Tách "vào thế giới" (24/07/2026):** khi giải mã giao thức mới thấy đưa nhân
 vật vào bản đồ là hai hệ con tách bạch: (a) **đồng bộ dữ liệu tĩnh** — bắt tay
@@ -39,8 +47,8 @@ kết nối theo IP (Kế hoạch bảo mật B, là bước lùi so với bản
 |---|---|---|---|
 | 1 | Lõi giao thức + Đăng nhập | ✅ **Xong** (gộp `6529d35`) | — |
 | 2 | Nhân vật: tạo, lưu, tải | ✅ **Xong** (gộp `0816c89`) | 1 |
-| 3 | **Đồng bộ dữ liệu tĩnh** (bắt tay + 4 catalog, 5 làng) | Đang thi công | 1, 2 |
-| 4 | Vào thế giới (ME_INFO + MAP INFO + tileset + khu vực) | Chưa bắt đầu | 3 |
+| 3 | Đồng bộ dữ liệu tĩnh (bắt tay + 4 catalog, 5 làng) | ✅ **Xong** (gộp `7a85431`) | 1, 2 |
+| 4 | **Vào thế giới** (ME_INFO + MAP INFO + tileset + khu vực) | Chưa bắt đầu | 3 |
 | 5 | Di chuyển + mô hình actor cho khu vực | Chưa bắt đầu | 4 |
 | 6 | Chiến đấu, chiêu thức, quái, boss | Chưa bắt đầu | 5 |
 | 7 | Vật phẩm, hành trang, cửa hàng, giao dịch | Chưa bắt đầu | 5 |

@@ -887,3 +887,102 @@ func TestNhanClientOk(t *testing.T) {
 		t.Error("gui -28/13 (clientOk) khong lam b.clientSanSang = true")
 	}
 }
+
+// ---------------------------------------------------------------------------
+// Vá chốt chống gọi lại cho xuLyClientOk (-28/13) va xuLyVaoKhuVuc (-39).
+//
+// Boi canh: soi phat hien ca hai handler nay KHONG co chot chong tai nhap. Loi
+// quan trong (tranh chap): neu client gui LAI -28/13 sau khi da gui -39 (nhan
+// vat da "giao" cho actor khu vuc quan ly vi tri), xuLyClientOk chay lai se
+// GOI goiMapInfo(b.nhanVat, bd) — DOC nv.ViTriX/Y tren luong phien, CUNG LUC
+// actor co the dang GHI hai truong do (xuLyDiChuyen -> suKienDiChuyen) — doc
+// cap toa do "xe" (nua cu nua moi). Day dung loai tranh chap Ke hoach 5 Task 7
+// da xoa o noi khac; hai handler vao-the-gioi nay bi sot.
+// ---------------------------------------------------------------------------
+
+// TestClientOkKhongChayLaiLanHai la kiem chung QUAN TRONG cho chot chong goi
+// lai cua xuLyClientOk. Gui -28/13 lan 1 phai nhan du 3 goi -82/-30/-24 (dung
+// nhu TestClientOkGuiVaoTheGioi). Gui LAI -28/13 lan 2 (client that khong lam
+// vay, nhung mot con gia hoac goi lap tren mang co the) PHAI bi bo qua HOAN
+// TOAN im lang — khong duoc gui THEM bat ky goi nao, chung to xuLyClientOk
+// khong chay lai than ham (tranh doc nv.ViTriX/Y tranh chap voi actor ghi).
+func TestClientOkKhongChayLaiLanHai(t *testing.T) {
+	b := NewBoXuLy(&khoGia{}, nil)
+	b.nhanVat = &store.NhanVat{ID: 7, Ten: "Naruto", Lang: 0, KieuToc: 5,
+		SucManh: 100, Vang: 1000, Ngoc: 0, MapID: 1, ViTriX: 100, ViTriY: 384}
+	fClient, dong := dungPhienThat(t, b)
+	defer dong()
+
+	guiClientOk := func() {
+		t.Helper()
+		w := protocol.NewWriter()
+		w.Byte(lenhConClientOk) // 13
+		if err := fClient.WriteMessage(protocol.NewMessage(lenhKhongTrenBanDo, w)); err != nil {
+			t.Fatalf("gui -28/13 that bai: %v", err)
+		}
+	}
+
+	// Lan 1: phai nhan du 3 goi theo dung thu tu (nhu TestClientOkGuiVaoTheGioi).
+	guiClientOk()
+	m82 := docMotGoi(t, fClient)
+	if m82.Command != -82 {
+		t.Fatalf("lan 1, goi 1 = lenh %d, mong doi -82", m82.Command)
+	}
+	m30 := docMotGoi(t, fClient)
+	if m30.Command != -30 {
+		t.Fatalf("lan 1, goi 2 = lenh %d, mong doi -30", m30.Command)
+	}
+	m24 := docMotGoi(t, fClient)
+	if m24.Command != -24 {
+		t.Fatalf("lan 1, goi 3 = lenh %d, mong doi -24", m24.Command)
+	}
+
+	// Lan 2: gui LAI -28/13 — PHAI khong nhan them goi nao (chot chong goi lai).
+	guiClientOk()
+	if !fClientHetHanNgan(t, fClient) {
+		t.Fatal("gui -28/13 lan hai van khien xuLyClientOk gui them goi tin — thieu chot chong goi lai")
+	}
+}
+
+// TestVaoKhuVucLanHaiKhongPhatGoiTrung la kiem chung cho chot chong goi lai
+// cua xuLyVaoKhuVuc. Kich ban: client gui -39 (bao da tai xong map) HAI LAN
+// LIEN TIEP. Neu khong co chot: lan -39 THU HAI se khien actor xu ly LAI
+// suKienVao — buoc 1 cua KhuVuc.xuLy (xem khuvuc.go) phat -5 cua TUNG "nguoi
+// cu" trong khu vuc cho nguoi moi; nhung nguoi "cu" do gio CHINH LA nguoi nay
+// (da duoc them vao khu vuc boi lan -39 thu nhat) — ket qua actor gui cho
+// chinh nguoi choi goi -5 CUA CHINH HO, mot goi trung/nhieu thua tren day.
+// Voi chot dung, lan -39 thu hai la no-op hoan toan, khong co goi nao them.
+func TestVaoKhuVucLanHaiKhongPhatGoiTrung(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	k.BatDau()
+	defer k.Dung()
+	soKhuVuc := &SoKhuVuc{theoMap: map[int32]*KhuVuc{1: k}}
+
+	b := NewBoXuLy(&khoGia{}, soKhuVuc)
+	b.nhanVat = &store.NhanVat{ID: 7, Ten: "Naruto", Lang: 0, KieuToc: 5,
+		SucManh: 100, Vang: 1000, Ngoc: 0, MapID: 1, ViTriX: 100, ViTriY: 384}
+	fClient, dong := dungPhienThat(t, b)
+	defer dong()
+
+	// Bat tay -28/13 truoc de b.khuVuc duoc gan (xuLyClientOk). Doc het 3 goi.
+	w := protocol.NewWriter()
+	w.Byte(lenhConClientOk)
+	if err := fClient.WriteMessage(protocol.NewMessage(lenhKhongTrenBanDo, w)); err != nil {
+		t.Fatalf("gui -28/13 that bai: %v", err)
+	}
+	docMotGoi(t, fClient) // -82
+	docMotGoi(t, fClient) // -30
+	docMotGoi(t, fClient) // -24
+
+	// Gui -39 (vao khu vuc) HAI LAN LIEN TIEP — mo phong client gui trung.
+	if err := fClient.WriteMessage(&protocol.Message{Command: lenhVaoKhuVuc}); err != nil {
+		t.Fatalf("gui -39 lan 1 that bai: %v", err)
+	}
+	if err := fClient.WriteMessage(&protocol.Message{Command: lenhVaoKhuVuc}); err != nil {
+		t.Fatalf("gui -39 lan 2 that bai: %v", err)
+	}
+
+	if !fClientHetHanNgan(t, fClient) {
+		t.Fatal("gui -39 lan hai lam actor phat them goi tin (vd -5 cua chinh nguoi nay cho chinh ho) — thieu chot chong goi lai")
+	}
+}

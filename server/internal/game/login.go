@@ -76,6 +76,7 @@ type BoXuLy struct {
 	nhanVat  *store.NhanVat  // nil khi chua co / chua vao the gioi
 
 	clientSanSang bool      // client da gui -28/13 (bat tay xong)
+	daVaoKhuVuc   bool      // da gui suKienVao (chan -39 goi lap gay -5 trung)
 	khuVuc        *KhuVuc   // khu vuc nhan vat dang o (dung o KH4; nen mong cho KH5)
 	soKhuVuc      *SoKhuVuc // so khu vuc CHUNG (5 map), tra khu vuc theo mapId cua nhan vat
 }
@@ -193,7 +194,11 @@ func (b *BoXuLy) phucVuCatalog(s *mynet.Session, m *protocol.Message) error {
 // gui NGAY 3 goi de client render: -82 tileset -> -30/0 ME_INFO -> -24 MAP INFO.
 // Thu tu quan trong: -82 PHAI truoc -24 (§7), khong thi client thoat han app.
 func (b *BoXuLy) xuLyClientOk(s *mynet.Session) error {
-	if b.nhanVat == nil {
+	// Chi chay MOT LAN moi phien: neu chua co nhan vat, hoac da san sang roi thi bo
+	// qua. Chan tai nhap quan trong vi sau khi -39 giao nv cho actor, chay lai
+	// xuLyClientOk se khien goiMapInfo DOC nv.ViTriX/Y tren luong phien trong khi
+	// actor dang GHI (tranh chap). Client that chi gui -28/13 mot lan.
+	if b.nhanVat == nil || b.clientSanSang {
 		return nil
 	}
 	b.clientSanSang = true
@@ -245,10 +250,17 @@ func (b *BoXuLy) xuLyClientOk(s *mynet.Session) error {
 
 // xuLyVaoKhuVuc: client gui -39 (da tai xong map) -> dua nhan vat vao khu vuc chung
 // (actor phat -5 cua nguoi cu cho minh, va phat -5 cua minh cho nguoi cu).
+//
+// Chi chay MOT LAN moi phien (chot b.daVaoKhuVuc): goi lap -39 se khien actor xu ly
+// LAI suKienVao, va nguoi "cu" duy nhat trong buoc phat -5 luc do chinh la nguoi nay
+// (da duoc them vao khu vuc boi lan -39 truoc) — actor se gui cho ho goi -5 CUA
+// CHINH HO, mot goi trung thua tren day. Ke hoach 5 chua co doi map; khi them doi
+// map se can reset daVaoKhuVuc luc roi khu vuc — hien mot phien = mot lan vao.
 func (b *BoXuLy) xuLyVaoKhuVuc(s *mynet.Session) error {
-	if b.khuVuc == nil || b.nhanVat == nil {
+	if b.khuVuc == nil || b.nhanVat == nil || b.daVaoKhuVuc {
 		return nil
 	}
+	b.daVaoKhuVuc = true
 	b.khuVuc.Gui(suKienVao{nv: b.nhanVat, phien: s})
 	return nil
 }
@@ -278,8 +290,10 @@ func (b *BoXuLy) xuLyDiChuyen(m *protocol.Message) error {
 
 // KhiDong duoc PhucVu goi khi phien dong (defer). Neu nhan vat da vao khu vuc,
 // bao actor go no ra (actor phat -6 cho nguoi con lai). An toan goi khi khuVuc nil.
+// Chi gui suKienRa neu da thuc su vao (daVaoKhuVuc) — chua vao thi khong can go,
+// du actor xu ly suKienRa cua id khong co van la no-op an toan.
 func (b *BoXuLy) KhiDong() {
-	if b.khuVuc != nil && b.nhanVat != nil {
+	if b.khuVuc != nil && b.nhanVat != nil && b.daVaoKhuVuc {
 		b.khuVuc.Gui(suKienRa{idNhanVat: b.nhanVat.ID})
 	}
 }

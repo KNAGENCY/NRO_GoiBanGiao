@@ -48,14 +48,14 @@ kết nối theo IP (Kế hoạch bảo mật B, là bước lùi so với bản
 | 1 | Lõi giao thức + Đăng nhập | ✅ **Xong** (gộp `6529d35`) | — |
 | 2 | Nhân vật: tạo, lưu, tải | ✅ **Xong** (gộp `0816c89`) | 1 |
 | 3 | Đồng bộ dữ liệu tĩnh (bắt tay + 4 catalog, 5 làng) | ✅ **Xong** (gộp `7a85431`) | 1, 2 |
-| 4 | **Vào thế giới** (ME_INFO + MAP INFO + tileset + khu vực) | Chưa bắt đầu | 3 |
+| 4 | **Vào thế giới** (ME_INFO + MAP INFO + tileset + khu vực) | ✅ **Xong** (gộp `aef5f71`) — còn B9: bạn tự kiểm bằng client Unity thật | 3 |
 | 5 | Di chuyển + mô hình actor cho khu vực | Chưa bắt đầu | 4 |
 | 6 | Chiến đấu, chiêu thức, quái, boss | Chưa bắt đầu | 5 |
 | 7 | Vật phẩm, hành trang, cửa hàng, giao dịch | Chưa bắt đầu | 5 |
 | 8 | Kho nội dung YAML + nạp nóng | Chưa bắt đầu | 6, 7 |
 | 9 | Nhiệm vụ, cốt truyện, NPC | Chưa bắt đầu | 8 |
 | 10 | **Cảm giác chơi** — hoạt ảnh, chuyển màn, hướng dẫn người mới | Chưa bắt đầu | 5, 6 |
-| W | Web + Panel quản trị (Next.js) | Chưa bắt đầu | 2 |
+| W | Web + Panel quản trị (Next.js) | 🔨 **Đang làm** — W1 (đăng ký/đăng nhập) + W2 (trang cá nhân, đổi mật khẩu, bảng xếp hạng, panel admin) đã lên main. Còn W3 (cấu hình/nhật ký/nạp thẻ, phân trang, thu hồi phiên) | 2 |
 | B | Bảo mật: chống gian lận, chống dò mật khẩu, chống DDoS | Chưa bắt đầu | 5, 6 |
 | V | Triển khai VPS, giám sát, phát hành | Chưa bắt đầu | tất cả |
 

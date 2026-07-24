@@ -137,6 +137,23 @@ func thanTaoNhanVat(t *testing.T, ten string, lang, toc byte) []byte {
 	return w.Bytes() // ham xuat byte that cua Writer (xem datastream.go)
 }
 
+// kiemTraDungMotGoiTuChoi khang dinh may chu gui ve DUNG MOT goi, va goi do la
+// -26 (hop thoai OK). Sieu QUAN TRONG phai kiem CA SO LUONG: guiHopThoai chi
+// duoc gui DUY NHAT mot -26, KHONG duoc kem them -102 (khac guiTuChoi cua man
+// dang nhap — xem chu thich guiHopThoai trong nhanvat.go). Neu chi kiem
+// goi[0].Command == -26 ma khong kiem len(goi) == 1, mot dot bien them -102
+// thua vao guiHopThoai van lot qua duoc — day chinh la lo hong da bi bat boi
+// kiem thu dot bien.
+func kiemTraDungMotGoiTuChoi(t *testing.T, goi []*protocol.Message) {
+	t.Helper()
+	if len(goi) != 1 {
+		t.Fatalf("phai nhan DUNG MOT goi (guiHopThoai KHONG duoc kem goi nao khac), nhan %d goi: %+v", len(goi), goi)
+	}
+	if goi[0].Command != -26 {
+		t.Fatalf("goi nhan duoc co lenh %d, mong doi -26 (hop thoai OK)", goi[0].Command)
+	}
+}
+
 func TestTaoNhanVat_TenQuaNgan_TuChoi(t *testing.T) {
 	b := boXuLyDaDangNhap(t)
 	s, docGoi := phienGia(t)
@@ -144,10 +161,20 @@ func TestTaoNhanVat_TenQuaNgan_TuChoi(t *testing.T) {
 	if err := b.xuLyTaoNhanVat(s, r); err != nil {
 		t.Fatalf("xuLyTaoNhanVat loi: %v", err)
 	}
-	goi := docGoi()
-	if len(goi) == 0 || goi[0].Command != -26 {
-		t.Errorf("ten qua ngan phai tra -26, nhan %+v", goi)
+	kiemTraDungMotGoiTuChoi(t, docGoi())
+}
+
+// TestTaoNhanVat_TenQuaDai_TuChoi bat dot bien noi long gioi han tren cua
+// reTenNhanVat (vi du {5,10} -> {5,50}): khong test nao truoc day thu mot ten
+// VUOT can tren, chi co ten qua NGAN (duoi can duoi).
+func TestTaoNhanVat_TenQuaDai_TuChoi(t *testing.T) {
+	b := boXuLyDaDangNhap(t)
+	s, docGoi := phienGia(t)
+	r := protocol.NewReader(thanTaoNhanVat(t, "Naruto12345", 0, 5)) // 11 ky tu > 10
+	if err := b.xuLyTaoNhanVat(s, r); err != nil {
+		t.Fatalf("xuLyTaoNhanVat loi: %v", err)
 	}
+	kiemTraDungMotGoiTuChoi(t, docGoi())
 }
 
 func TestTaoNhanVat_KyTuLa_TuChoi(t *testing.T) {
@@ -155,9 +182,20 @@ func TestTaoNhanVat_KyTuLa_TuChoi(t *testing.T) {
 	s, docGoi := phienGia(t)
 	r := protocol.NewReader(thanTaoNhanVat(t, "na ru to", 0, 5)) // co dau cach
 	_ = b.xuLyTaoNhanVat(s, r)
-	if goi := docGoi(); len(goi) == 0 || goi[0].Command != -26 {
-		t.Errorf("ky tu la phai tra -26, nhan %+v", goi)
+	kiemTraDungMotGoiTuChoi(t, docGoi())
+}
+
+// TestTaoNhanVat_TenCam_TuChoi bat dot bien bo han nhanh kiem danhSachTenCam:
+// "admin" dai dung 5-10 ky tu, chi gom chu cai (khop reTenNhanVat), nen NEU
+// thieu buoc kiem danh sach cam thi se lot qua toi tan buoc TenNhanVatDaDung.
+func TestTaoNhanVat_TenCam_TuChoi(t *testing.T) {
+	b := boXuLyDaDangNhap(t)
+	s, docGoi := phienGia(t)
+	r := protocol.NewReader(thanTaoNhanVat(t, "admin", 0, 5)) // trong danhSachTenCam
+	if err := b.xuLyTaoNhanVat(s, r); err != nil {
+		t.Fatalf("xuLyTaoNhanVat loi: %v", err)
 	}
+	kiemTraDungMotGoiTuChoi(t, docGoi())
 }
 
 func TestTaoNhanVat_LangKhongHopLe_TuChoi(t *testing.T) {
@@ -165,9 +203,7 @@ func TestTaoNhanVat_LangKhongHopLe_TuChoi(t *testing.T) {
 	s, docGoi := phienGia(t)
 	r := protocol.NewReader(thanTaoNhanVat(t, "Naruto", 99, 5)) // lang 99 khong ton tai
 	_ = b.xuLyTaoNhanVat(s, r)
-	if goi := docGoi(); len(goi) == 0 || goi[0].Command != -26 {
-		t.Errorf("lang khong hop le phai tra -26, nhan %+v", goi)
-	}
+	kiemTraDungMotGoiTuChoi(t, docGoi())
 }
 
 func TestTaoNhanVat_TenDaDung_TuChoi(t *testing.T) {
@@ -176,9 +212,7 @@ func TestTaoNhanVat_TenDaDung_TuChoi(t *testing.T) {
 	s, docGoi := phienGia(t)
 	r := protocol.NewReader(thanTaoNhanVat(t, "Naruto", 0, 5))
 	_ = b.xuLyTaoNhanVat(s, r)
-	if goi := docGoi(); len(goi) == 0 || goi[0].Command != -26 {
-		t.Errorf("ten da dung phai tra -26, nhan %+v", goi)
-	}
+	kiemTraDungMotGoiTuChoi(t, docGoi())
 }
 
 func TestTaoNhanVat_ChuaDangNhap_BoQua(t *testing.T) {
@@ -204,5 +238,47 @@ func TestTaoNhanVat_ThanhCong_VaoTheGioi(t *testing.T) {
 	// vaoTheGioi (stub) phai gan nhan vat vao phien.
 	if b.nhanVat == nil || b.nhanVat.ID != 42 {
 		t.Errorf("tao thanh cong phai gan nhan vat vao phien, b.nhanVat=%+v", b.nhanVat)
+	}
+}
+
+// TestXuLy_Khung28_DieuPhoiToiTaoNhanVat la kiem thu DAU-CUOI duy nhat cua
+// Task 6 di qua chinh XuLy(s, m) that (khong goi thang xuLyTaoNhanVat nhu cac
+// test o tren) — dung dungPhienThat (login_test.go) giong het cac test dang
+// nhap dau-cuoi, nen KHONG can lo deadlock net.Pipe: PhucVu chay tren goroutine
+// rieng cua no, doc/ghi doc lap voi goroutine cua test.
+//
+// Bat dot bien cho xuLyKhongTrenBanDo (vi du bo mat nhanh "case
+// lenhConTaoNhanVat: return b.xuLyTaoNhanVat(s, r)"): neu day dieu phoi
+// -28 -> lenh con 2 -> xuLyTaoNhanVat bi dut o bat ky khau nao, se KHONG co
+// goi -26 nao duoc gui ve va ReadMessage() o day se timeout/loi, lam test do.
+func TestXuLy_Khung28_DieuPhoiToiTaoNhanVat(t *testing.T) {
+	b := NewBoXuLy(&khoGia{})
+	b.taiKhoan = &store.TaiKhoan{ID: 1, TenDangNhap: "nguoidung"} // da dang nhap
+
+	fClient, dong := dungPhienThat(t, b)
+	defer dong()
+
+	// Dong goi khung -28 dung y het client that: byte lenh con (2 = tao nhan
+	// vat) roi toi ten/lang/kieu toc. Dung ten "abc" (qua ngan) — chi can
+	// bat duoc RANG BUOC xuLyTaoNhanVat co duoc goi toi hay khong, khong quan
+	// tam nhanh tu choi nao kich hoat.
+	w := protocol.NewWriter()
+	w.Byte(lenhConTaoNhanVat) // 2
+	if err := w.UTF("abc"); err != nil {
+		t.Fatal(err)
+	}
+	w.Byte(0) // lang
+	w.Byte(5) // kieu toc
+
+	if err := fClient.WriteMessage(protocol.NewMessage(-28, w)); err != nil {
+		t.Fatalf("gui goi -28 that bai: %v", err)
+	}
+
+	m, err := fClient.ReadMessage()
+	if err != nil {
+		t.Fatalf("khong doc duoc goi tra ve tu goi -28: %v — neu bo dieu phoi -28 khong goi toi xuLyTaoNhanVat, se khong co goi nao duoc gui va dong nay se timeout", err)
+	}
+	if m.Command != -26 {
+		t.Fatalf("lenh = %d, mong doi -26 (dieu phoi -28 -> lenh con 2 -> xuLyTaoNhanVat)", m.Command)
 	}
 }

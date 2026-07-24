@@ -8,6 +8,8 @@ package game
 
 import (
 	_ "embed"
+
+	"nroserver/internal/protocol"
 )
 
 // duLieuPart: du lieu sprite nhan vat (dau/than/chan). Day la PLACEHOLDER cua
@@ -41,3 +43,46 @@ const (
 	lenhConCatalogItem  byte = 8  // client xin item / may chu tra
 	lenhConClientOk     byte = 13 // client bao san sang
 )
+
+// lenhKhongTrenBanDo: khung dong bo du lieu tinh, co trong login.go (ngoai goi nay).
+// Bay gio tai day co the lua chon import "nroserver/internal/protocol" de dung.
+// Nguon: login.go cua tam Ke hoach 2, day la cai da tim thay tuy chon cua no.
+// Khong the import lai o dongbo.go vi Go cam import khong dung (phat hien bang vet).
+// Chi trong ngoai goi nay de cung co chong chi ghi chep.
+
+// goiVersionGame dung goi -28/4: bao client 4 phien ban du lieu tinh + bang moc
+// kinh nghiem rong. Client so 4 phien ban nay voi cache; lech thi tu xin cap nhat.
+// Xem tai lieu giao thuc §2.
+func goiVersionGame() *protocol.Message {
+	w := protocol.NewWriter()
+	w.Byte(lenhConVersionGame) // 4
+	w.Byte(vsData)
+	w.Byte(vsMap)
+	w.Byte(vsSkill)
+	w.Byte(vsItem)
+	w.Byte(0) // byte dem, client doc roi bo
+	w.Byte(0) // countCaption = 0 (bang moc kinh nghiem rong, an toan cho vao map)
+	return protocol.NewMessage(lenhKhongTrenBanDo, w)
+}
+
+// goiCatalogData dung goi -87: vsData roi 6 blob (dart/arrow/effect/image/part/
+// skill) theo dung thu tu. Chi part co noi dung (du lieu sprite nhan vat); 5 blob
+// kia rong (do dai 2 = mot short 0). Client chi LUU raw vao RMS, khong parse ngay
+// — loi part chi lo khi VE nhan vat (Ke hoach 4). Xem tai lieu giao thuc §3.
+func goiCatalogData() *protocol.Message {
+	w := protocol.NewWriter()
+	w.Byte(vsData)
+	// blob rong = do dai 2 byte, noi dung la mot short 0 (count = 0 phan tu).
+	blobRong := func() {
+		w.Int(2)
+		w.Short(0)
+	}
+	blobRong()                    // dart
+	blobRong()                    // arrow
+	blobRong()                    // effect
+	blobRong()                    // image
+	w.Int(int32(len(duLieuPart))) // part: do dai that
+	w.ThemMang(duLieuPart)        // part: noi dung
+	blobRong()                    // skill
+	return protocol.NewMessage(lenhDuLieu, w)
+}

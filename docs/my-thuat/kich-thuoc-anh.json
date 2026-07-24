@@ -1,0 +1,1426 @@
+{
+"boss_zabuza_x4.png": [
+160,
+160
+],
+"ui_khung_hoithoai_x4.png": [
+480,
+160
+],
+"ui_nut_thuong_x4.png": [
+96,
+48
+],
+"ui_nut_nhan_x4.png": [
+96,
+48
+],
+"ui_nut_khoa_x4.png": [
+96,
+48
+],
+"ui_thanh_theluc_nen_x4.png": [
+240,
+32
+],
+"ui_thanh_theluc_fill_x4.png": [
+240,
+32
+],
+"ui_thanh_chakra_nen_x4.png": [
+240,
+32
+],
+"ui_thanh_chakra_fill_x4.png": [
+240,
+32
+],
+"ui_o_vatpham_x4.png": [
+64,
+64
+],
+"ui_o_dangchon_x4.png": [
+64,
+64
+],
+"ui_khung_avatar_x4.png": [
+96,
+96
+],
+"ui_logo_game_x4.png": [
+512,
+256
+],
+"ui_khung_tuido_x4.png": [
+480,
+480
+],
+"ui_khung_ruong_x4.png": [
+480,
+480
+],
+"ui_khung_shop_x4.png": [
+480,
+400
+],
+"ui_khung_nhiemvu_x4.png": [
+400,
+480
+],
+"ui_khung_thongbao_x4.png": [
+400,
+120
+],
+"ui_khung_canhbao_x4.png": [
+400,
+120
+],
+"ui_thanh_kinhnghiem_x4.png": [
+240,
+24
+],
+"ui_thanh_nap_x4.png": [
+400,
+48
+],
+"ui_nut_dong_x4.png": [
+64,
+64
+],
+"ui_nut_caidat_x4.png": [
+64,
+64
+],
+"ui_nut_chat_x4.png": [
+64,
+64
+],
+"ui_nut_bando_x4.png": [
+64,
+64
+],
+"ui_nut_tuido_x4.png": [
+64,
+64
+],
+"ui_nut_kynang_x4.png": [
+64,
+64
+],
+"ui_nut_nhiemvu_x4.png": [
+64,
+64
+],
+"ui_nut_toidoi_x4.png": [
+64,
+64
+],
+"ui_nut_xephang_x4.png": [
+64,
+64
+],
+"ui_nut_thu_x4.png": [
+64,
+64
+],
+"ui_nut_danh_x4.png": [
+128,
+128
+],
+"ui_muiten_len_x4.png": [
+48,
+48
+],
+"ui_muiten_xuong_x4.png": [
+48,
+48
+],
+"ui_muiten_trai_x4.png": [
+48,
+48
+],
+"ui_muiten_phai_x4.png": [
+48,
+48
+],
+"ui_tien_ryo_x4.png": [
+64,
+64
+],
+"ui_tien_ngoc_x4.png": [
+64,
+64
+],
+"ui_tien_xu_x4.png": [
+64,
+64
+],
+"ui_tien_thoivang_x4.png": [
+64,
+64
+],
+"ui_lang_la_x4.png": [
+64,
+64
+],
+"ui_lang_cat_x4.png": [
+64,
+64
+],
+"ui_lang_suong_x4.png": [
+64,
+64
+],
+"ui_lang_da_x4.png": [
+64,
+64
+],
+"ui_lang_may_x4.png": [
+64,
+64
+],
+"ui_he_hoa_x4.png": [
+64,
+64
+],
+"ui_he_phong_x4.png": [
+64,
+64
+],
+"ui_he_thuy_x4.png": [
+64,
+64
+],
+"ui_he_tho_x4.png": [
+64,
+64
+],
+"ui_he_loi_x4.png": [
+64,
+64
+],
+"ui_bac_hocvien_x4.png": [
+64,
+64
+],
+"ui_bac_genin_x4.png": [
+64,
+64
+],
+"ui_bac_chunin_x4.png": [
+64,
+64
+],
+"ui_bac_jonin_x4.png": [
+64,
+64
+],
+"ui_bac_tinhanh_x4.png": [
+64,
+64
+],
+"ui_bac_anbu_x4.png": [
+64,
+64
+],
+"ui_bac_kage_x4.png": [
+64,
+64
+],
+"ui_bac_hiennhan_x4.png": [
+64,
+64
+],
+"ui_bac_lucdao_x4.png": [
+64,
+64
+],
+"ui_joystick_nen_x4.png": [
+192,
+192
+],
+"ui_joystick_num_x4.png": [
+96,
+96
+],
+"ui_nen_dangnhap_x4.png": [
+1024,
+576
+],
+"ui_nen_chonlang_x4.png": [
+1024,
+576
+],
+"vp_ao_t1_x4.png": [
+64,
+64
+],
+"vp_ao_t2_x4.png": [
+64,
+64
+],
+"vp_ao_t3_x4.png": [
+64,
+64
+],
+"vp_ao_t4_x4.png": [
+64,
+64
+],
+"vp_ao_t5_x4.png": [
+64,
+64
+],
+"vp_ao_t6_x4.png": [
+64,
+64
+],
+"vp_ao_t7_x4.png": [
+64,
+64
+],
+"vp_ao_t8_x4.png": [
+64,
+64
+],
+"vp_quan_t1_x4.png": [
+64,
+64
+],
+"vp_quan_t2_x4.png": [
+64,
+64
+],
+"vp_quan_t3_x4.png": [
+64,
+64
+],
+"vp_quan_t4_x4.png": [
+64,
+64
+],
+"vp_quan_t5_x4.png": [
+64,
+64
+],
+"vp_quan_t6_x4.png": [
+64,
+64
+],
+"vp_quan_t7_x4.png": [
+64,
+64
+],
+"vp_quan_t8_x4.png": [
+64,
+64
+],
+"vp_gang_t1_x4.png": [
+64,
+64
+],
+"vp_gang_t2_x4.png": [
+64,
+64
+],
+"vp_gang_t3_x4.png": [
+64,
+64
+],
+"vp_gang_t4_x4.png": [
+64,
+64
+],
+"vp_gang_t5_x4.png": [
+64,
+64
+],
+"vp_gang_t6_x4.png": [
+64,
+64
+],
+"vp_gang_t7_x4.png": [
+64,
+64
+],
+"vp_gang_t8_x4.png": [
+64,
+64
+],
+"vp_giay_t1_x4.png": [
+64,
+64
+],
+"vp_giay_t2_x4.png": [
+64,
+64
+],
+"vp_giay_t3_x4.png": [
+64,
+64
+],
+"vp_giay_t4_x4.png": [
+64,
+64
+],
+"vp_giay_t5_x4.png": [
+64,
+64
+],
+"vp_giay_t6_x4.png": [
+64,
+64
+],
+"vp_giay_t7_x4.png": [
+64,
+64
+],
+"vp_giay_t8_x4.png": [
+64,
+64
+],
+"vp_bangtran_t1_x4.png": [
+64,
+64
+],
+"vp_bangtran_t2_x4.png": [
+64,
+64
+],
+"vp_bangtran_t3_x4.png": [
+64,
+64
+],
+"vp_bangtran_t4_x4.png": [
+64,
+64
+],
+"vp_bangtran_t5_x4.png": [
+64,
+64
+],
+"vp_bangtran_t6_x4.png": [
+64,
+64
+],
+"vp_bangtran_t7_x4.png": [
+64,
+64
+],
+"vp_bangtran_t8_x4.png": [
+64,
+64
+],
+"vp_vien_theluc_1_x4.png": [
+64,
+64
+],
+"vp_vien_theluc_2_x4.png": [
+64,
+64
+],
+"vp_vien_theluc_3_x4.png": [
+64,
+64
+],
+"vp_vien_chakra_1_x4.png": [
+64,
+64
+],
+"vp_vien_chakra_2_x4.png": [
+64,
+64
+],
+"vp_vien_chakra_3_x4.png": [
+64,
+64
+],
+"vp_thuoc_giai_x4.png": [
+64,
+64
+],
+"vp_bang_gac_x4.png": [
+64,
+64
+],
+"vp_binh_luong_x4.png": [
+64,
+64
+],
+"vp_mi_ramen_x4.png": [
+64,
+64
+],
+"vp_dango_x4.png": [
+64,
+64
+],
+"vp_binh_nuoc_x4.png": [
+64,
+64
+],
+"vp_manh_thep_x4.png": [
+64,
+64
+],
+"vp_cuon_trang_x4.png": [
+64,
+64
+],
+"vp_muc_x4.png": [
+64,
+64
+],
+"vp_long_chim_x4.png": [
+64,
+64
+],
+"vp_da_chakra_tho_x4.png": [
+64,
+64
+],
+"vp_da_chakra_tinh_x4.png": [
+64,
+64
+],
+"vp_soi_chakra_x4.png": [
+64,
+64
+],
+"vp_da_thu_x4.png": [
+64,
+64
+],
+"vp_go_cung_x4.png": [
+64,
+64
+],
+"vp_day_thep_x4.png": [
+64,
+64
+],
+"vp_bot_no_x4.png": [
+64,
+64
+],
+"vp_ngoc_lua_x4.png": [
+64,
+64
+],
+"vp_ngoc_gio_x4.png": [
+64,
+64
+],
+"vp_ngoc_nuoc_x4.png": [
+64,
+64
+],
+"vp_ngoc_set_x4.png": [
+64,
+64
+],
+"vp_cuon_phanthan_x4.png": [
+64,
+64
+],
+"vp_cuon_thaythe_x4.png": [
+64,
+64
+],
+"vp_cuon_anthan_x4.png": [
+64,
+64
+],
+"vp_cuon_hoadon_x4.png": [
+64,
+64
+],
+"vp_cuon_kunaibay_x4.png": [
+64,
+64
+],
+"vp_cuon_tuchakra_x4.png": [
+64,
+64
+],
+"vp_cuon_hoiphuc_x4.png": [
+64,
+64
+],
+"vp_cuon_lienhoan_x4.png": [
+64,
+64
+],
+"vp_meo_tora_x4.png": [
+64,
+64
+],
+"vp_cuon_troi_x4.png": [
+64,
+64
+],
+"vp_cuon_dat_x4.png": [
+64,
+64
+],
+"vp_giayphep_thi_x4.png": [
+64,
+64
+],
+"vp_the_dangky_x4.png": [
+64,
+64
+],
+"vp_bando_xusong_x4.png": [
+64,
+64
+],
+"vp_thu_hokage_x4.png": [
+64,
+64
+],
+"vp_manh_matna_x4.png": [
+64,
+64
+],
+"vp_kiem_gay_x4.png": [
+64,
+64
+],
+"vp_hop_com_x4.png": [
+64,
+64
+],
+"vp_ruong_go_x4.png": [
+64,
+64
+],
+"vp_ruong_sat_x4.png": [
+64,
+64
+],
+"vp_tui_ninja_x4.png": [
+64,
+64
+],
+"vp_tui_shuriken_x4.png": [
+64,
+64
+],
+"vp_hop_qua_x4.png": [
+64,
+64
+],
+"vp_chia_khoa_x4.png": [
+64,
+64
+],
+"vp_ve_dichuyen_x4.png": [
+64,
+64
+],
+"vp_bua_hosinh_x4.png": [
+64,
+64
+],
+"vp_da_maylan_x4.png": [
+64,
+64
+],
+"vp_da_baove_x4.png": [
+64,
+64
+],
+"vp_da_nangcap_x4.png": [
+64,
+64
+],
+"vp_hop_gacha_x4.png": [
+64,
+64
+],
+"vp_the_doiten_x4.png": [
+64,
+64
+],
+"vp_binh_tayky_x4.png": [
+64,
+64
+],
+"vp_da_thanhtay_x4.png": [
+64,
+64
+],
+"tp_hocvien_dau_x4.png": [
+128,
+128
+],
+"tp_hocvien_than_x4.png": [
+128,
+160
+],
+"tp_hocvien_chan_x4.png": [
+128,
+128
+],
+"tp_genin_co_dau_x4.png": [
+128,
+128
+],
+"tp_genin_co_than_x4.png": [
+128,
+160
+],
+"tp_genin_co_chan_x4.png": [
+128,
+128
+],
+"tp_genin_cai_dau_x4.png": [
+128,
+128
+],
+"tp_genin_cai_than_x4.png": [
+128,
+160
+],
+"tp_genin_cai_chan_x4.png": [
+128,
+128
+],
+"tp_chunin_luoi_dau_x4.png": [
+128,
+128
+],
+"tp_chunin_luoi_than_x4.png": [
+128,
+160
+],
+"tp_chunin_luoi_chan_x4.png": [
+128,
+128
+],
+"tp_chunin_giap_dau_x4.png": [
+128,
+128
+],
+"tp_chunin_giap_than_x4.png": [
+128,
+160
+],
+"tp_chunin_giap_chan_x4.png": [
+128,
+128
+],
+"tp_jonin_giap_dau_x4.png": [
+128,
+128
+],
+"tp_jonin_giap_than_x4.png": [
+128,
+160
+],
+"tp_jonin_giap_chan_x4.png": [
+128,
+128
+],
+"tp_anbu_dau_x4.png": [
+128,
+128
+],
+"tp_anbu_than_x4.png": [
+128,
+160
+],
+"tp_anbu_chan_x4.png": [
+128,
+128
+],
+"tp_kage_dau_x4.png": [
+128,
+128
+],
+"tp_kage_than_x4.png": [
+128,
+160
+],
+"tp_kage_chan_x4.png": [
+128,
+128
+],
+"tp_tuluyen_dau_x4.png": [
+128,
+128
+],
+"tp_tuluyen_than_x4.png": [
+128,
+160
+],
+"tp_tuluyen_chan_x4.png": [
+128,
+128
+],
+"tp_lehoi_dau_x4.png": [
+128,
+128
+],
+"tp_lehoi_than_x4.png": [
+128,
+160
+],
+"tp_lehoi_chan_x4.png": [
+128,
+128
+],
+"tp_aomua_dau_x4.png": [
+128,
+128
+],
+"tp_aomua_than_x4.png": [
+128,
+160
+],
+"tp_aomua_chan_x4.png": [
+128,
+128
+],
+"tp_anthan_dau_x4.png": [
+128,
+128
+],
+"tp_anthan_than_x4.png": [
+128,
+160
+],
+"tp_anthan_chan_x4.png": [
+128,
+128
+],
+"vk_kunai_thuong_x4.png": [
+96,
+48
+],
+"vk_kunai_thep_x4.png": [
+96,
+48
+],
+"vk_kunai_no_x4.png": [
+96,
+48
+],
+"vk_kunai_ba_x4.png": [
+96,
+48
+],
+"vk_shuriken_x4.png": [
+64,
+64
+],
+"vk_shuriken_lon_x4.png": [
+96,
+96
+],
+"vk_senbon_x4.png": [
+96,
+48
+],
+"vk_tanto_x4.png": [
+96,
+48
+],
+"vk_kiem_ngan_x4.png": [
+96,
+48
+],
+"vk_dao_doi_x4.png": [
+96,
+48
+],
+"vk_cuon_no_x4.png": [
+64,
+64
+],
+"vk_bom_khoi_x4.png": [
+64,
+64
+],
+"vk_bom_dinh_x4.png": [
+64,
+64
+],
+"vk_day_thep_cuon_x4.png": [
+64,
+64
+],
+"vk_quat_gio_x4.png": [
+96,
+48
+],
+"vk_bua_lon_x4.png": [
+96,
+48
+],
+"vk_giao_x4.png": [
+96,
+48
+],
+"vk_chuy_x4.png": [
+96,
+48
+],
+"vk_cung_x4.png": [
+96,
+48
+],
+"vk_con_roi_tay_x4.png": [
+96,
+96
+],
+"quai_bia_go_x4.png": [
+96,
+96
+],
+"quai_soi_rung_x4.png": [
+96,
+96
+],
+"quai_lon_rung_x4.png": [
+96,
+96
+],
+"quai_chim_ung_x4.png": [
+96,
+96
+],
+"quai_nhen_doc_x4.png": [
+96,
+96
+],
+"quai_ca_sau_x4.png": [
+96,
+96
+],
+"quai_ran_lon_x4.png": [
+96,
+96
+],
+"quai_khi_rung_x4.png": [
+96,
+96
+],
+"quai_bo_cap_x4.png": [
+96,
+96
+],
+"quai_ninja_gia_x4.png": [
+96,
+96
+],
+"quai_linh_danhthue_x4.png": [
+96,
+96
+],
+"quai_nguoi_rom_x4.png": [
+96,
+96
+],
+"boss_mizuki_x4.png": [
+160,
+160
+],
+"boss_haku_x4.png": [
+160,
+160
+],
+"boss_ran_khonglo_x4.png": [
+160,
+160
+],
+"boss_trom_bitmat_x4.png": [
+160,
+160
+],
+"boss_orochimaru_x4.png": [
+160,
+160
+],
+"_x4.png": [
+96,
+128
+],
+"npc_hokage3_x4.png": [
+96,
+128
+],
+"cd_hokage3_x4.png": [
+200,
+200
+],
+"npc_iruka_x4.png": [
+96,
+128
+],
+"cd_iruka_x4.png": [
+200,
+200
+],
+"npc_kakashi_x4.png": [
+96,
+128
+],
+"cd_kakashi_x4.png": [
+200,
+200
+],
+"npc_chu_ramen_x4.png": [
+96,
+128
+],
+"cd_chu_ramen_x4.png": [
+200,
+200
+],
+"npc_ba_vukhi_x4.png": [
+96,
+128
+],
+"cd_ba_vukhi_x4.png": [
+200,
+200
+],
+"npc_thay_hocvien_x4.png": [
+96,
+128
+],
+"cd_thay_hocvien_x4.png": [
+200,
+200
+],
+"npc_linh_gac_x4.png": [
+96,
+128
+],
+"cd_linh_gac_x4.png": [
+200,
+200
+],
+"npc_nguoi_giao_nv_x4.png": [
+96,
+128
+],
+"cd_nguoi_giao_nv_x4.png": [
+200,
+200
+],
+"npc_y_ta_x4.png": [
+96,
+128
+],
+"cd_y_ta_x4.png": [
+200,
+200
+],
+"npc_ong_tazuna_x4.png": [
+96,
+128
+],
+"cd_ong_tazuna_x4.png": [
+200,
+200
+],
+"npc_co_be_hoa_x4.png": [
+96,
+128
+],
+"cd_co_be_hoa_x4.png": [
+200,
+200
+],
+"npc_tho_ren_x4.png": [
+96,
+128
+],
+"cd_tho_ren_x4.png": [
+200,
+200
+],
+"npc_nguoi_dua_thu_x4.png": [
+96,
+128
+],
+"cd_nguoi_dua_thu_x4.png": [
+200,
+200
+],
+"npc_trongtai_thi_x4.png": [
+96,
+128
+],
+"cd_trongtai_thi_x4.png": [
+200,
+200
+],
+"npc_nha_chep_cuon_x4.png": [
+96,
+128
+],
+"cd_nha_chep_cuon_x4.png": [
+200,
+200
+],
+"hu_phanthan_x4.png": [
+1200,
+480
+],
+"hu_thaythe_x4.png": [
+1200,
+480
+],
+"hu_anthan_x4.png": [
+1200,
+480
+],
+"hu_hoadon_x4.png": [
+1200,
+480
+],
+"hu_kunaibay_x4.png": [
+1200,
+480
+],
+"hu_tuchakra_x4.png": [
+1200,
+480
+],
+"hu_hoiphuc_x4.png": [
+1200,
+480
+],
+"hu_choang_x4.png": [
+1200,
+480
+],
+"hu_chimang_x4.png": [
+1200,
+480
+],
+"hu_bangkinh_x4.png": [
+1200,
+480
+],
+"map_la_dat_1_x4.png": [
+96,
+96
+],
+"map_la_dat_2_x4.png": [
+96,
+96
+],
+"map_la_dat_3_x4.png": [
+96,
+96
+],
+"map_la_co_1_x4.png": [
+96,
+96
+],
+"map_la_co_2_x4.png": [
+96,
+96
+],
+"map_la_co_3_x4.png": [
+96,
+96
+],
+"map_la_datlat_1_x4.png": [
+96,
+96
+],
+"map_la_datlat_2_x4.png": [
+96,
+96
+],
+"map_la_datlat_3_x4.png": [
+96,
+96
+],
+"map_la_soi_1_x4.png": [
+96,
+96
+],
+"map_la_soi_2_x4.png": [
+96,
+96
+],
+"map_la_soi_3_x4.png": [
+96,
+96
+],
+"map_la_maingoi_1_x4.png": [
+96,
+96
+],
+"map_la_maingoi_2_x4.png": [
+96,
+96
+],
+"map_la_maingoi_3_x4.png": [
+96,
+96
+],
+"map_la_tuonggo_1_x4.png": [
+96,
+96
+],
+"map_la_tuonggo_2_x4.png": [
+96,
+96
+],
+"map_la_tuonggo_3_x4.png": [
+96,
+96
+],
+"map_la_tuongvua_1_x4.png": [
+96,
+96
+],
+"map_la_tuongvua_2_x4.png": [
+96,
+96
+],
+"map_la_cua_x4.png": [
+96,
+96
+],
+"map_la_cuaso_x4.png": [
+96,
+96
+],
+"map_la_hangrao_1_x4.png": [
+96,
+96
+],
+"map_la_hangrao_2_x4.png": [
+96,
+96
+],
+"map_la_denlong_x4.png": [
+96,
+96
+],
+"map_la_conglang_x4.png": [
+192,
+192
+],
+"map_rung_thancay_1_x4.png": [
+96,
+96
+],
+"map_rung_thancay_2_x4.png": [
+96,
+96
+],
+"map_rung_thancay_3_x4.png": [
+96,
+96
+],
+"map_rung_thancay_4_x4.png": [
+96,
+96
+],
+"map_rung_tanla_1_x4.png": [
+96,
+96
+],
+"map_rung_tanla_2_x4.png": [
+96,
+96
+],
+"map_rung_tanla_3_x4.png": [
+96,
+96
+],
+"map_rung_tanla_4_x4.png": [
+96,
+96
+],
+"map_rung_bui_1_x4.png": [
+96,
+96
+],
+"map_rung_bui_2_x4.png": [
+96,
+96
+],
+"map_rung_bui_3_x4.png": [
+96,
+96
+],
+"map_rung_da_1_x4.png": [
+96,
+96
+],
+"map_rung_da_2_x4.png": [
+96,
+96
+],
+"map_rung_da_3_x4.png": [
+96,
+96
+],
+"map_rung_re_1_x4.png": [
+96,
+96
+],
+"map_rung_re_2_x4.png": [
+96,
+96
+],
+"map_song_nuoc_1_x4.png": [
+96,
+96
+],
+"map_song_nuoc_2_x4.png": [
+96,
+96
+],
+"map_song_nuoc_3_x4.png": [
+96,
+96
+],
+"map_song_bo_1_x4.png": [
+96,
+96
+],
+"map_song_bo_2_x4.png": [
+96,
+96
+],
+"map_cau_van_1_x4.png": [
+96,
+96
+],
+"map_cau_van_2_x4.png": [
+96,
+96
+],
+"map_cau_van_3_x4.png": [
+96,
+96
+],
+"map_cau_cot_1_x4.png": [
+96,
+96
+],
+"map_cau_cot_2_x4.png": [
+96,
+96
+],
+"map_bien_song_1_x4.png": [
+96,
+96
+],
+"map_bien_song_2_x4.png": [
+96,
+96
+],
+"map_suongmu_1_x4.png": [
+96,
+96
+],
+"map_suongmu_2_x4.png": [
+96,
+96
+],
+"map_hv_sango_1_x4.png": [
+96,
+96
+],
+"map_hv_sango_2_x4.png": [
+96,
+96
+],
+"map_hv_bang_x4.png": [
+96,
+96
+],
+"map_hv_ban_x4.png": [
+96,
+96
+],
+"map_hv_ke_x4.png": [
+96,
+96
+],
+"map_hv_chieu_1_x4.png": [
+96,
+96
+],
+"map_hv_chieu_2_x4.png": [
+96,
+96
+],
+"map_hv_tuong_1_x4.png": [
+96,
+96
+],
+"map_hv_tuong_2_x4.png": [
+96,
+96
+],
+"map_hv_bia_x4.png": [
+96,
+96
+],
+"map_nui_da_1_x4.png": [
+96,
+96
+],
+"map_nui_da_2_x4.png": [
+96,
+96
+],
+"map_nui_da_3_x4.png": [
+96,
+96
+],
+"map_nui_da_4_x4.png": [
+96,
+96
+],
+"map_nui_dinh_1_x4.png": [
+96,
+96
+],
+"map_nui_dinh_2_x4.png": [
+96,
+96
+],
+"map_nen_troi_1_x4.png": [
+96,
+96
+],
+"map_nen_troi_2_x4.png": [
+96,
+96
+],
+"map_nen_troi_3_x4.png": [
+96,
+96
+],
+"map_nen_may_1_x4.png": [
+96,
+96
+],
+"map_nen_may_2_x4.png": [
+96,
+96
+],
+"map_nen_may_3_x4.png": [
+96,
+96
+],
+"map_nen_nuihokage_x4.png": [
+384,
+192
+]
+}

@@ -156,12 +156,70 @@ nào "phẳng"/"thiếu nền trong suốt"/"viền sáng" để làm lại. **C
 
 ---
 
-## Ghi chú thành thật
+---
+
+# PHẦN 5 — CÁCH LÀM TỐI ƯU (cập nhật: tách nền OK, chỉ vướng kích thước)
+
+Bạn xác nhận: **ảnh tách nền được, chỉ không thu nhỏ được.** Vậy chia việc thế này
+là tối ưu nhất cho bạn — bạn lo phần sáng tạo (Flow, thứ bạn thích), tôi lo phần
+cơ học (thu nhỏ + kiểm chất lượng, thứ máy làm nhanh):
+
+```
+BẠN (trong Flow):  tạo ảnh TO, đã tách nền, ĐẶT ĐÚNG TÊN (theo DOT-1B)
+        │  gửi tôi folder / zip
+        ▼
+TÔI (tự động):     thu nhỏ đúng size + lọc ảnh phẳng  →  trả ảnh chuẩn game
+```
+
+## 5.1 Kích thước — ĐÃ GIẢI QUYẾT
+
+Có công cụ **`THU-NHO-ANH.ps1`** (cạnh file này) + bảng **`kich-thuoc-anh.json`**
+(356 ảnh, tôi trích sẵn từ DOT-1B). Nó **tự tra kích thước đích của từng ảnh theo
+tên file** rồi thu nhỏ, **giữ nguyên nền trong suốt**. Bạn không phải nhập size.
+
+- Cách dùng: chuột phải `THU-NHO-ANH.ps1` → Run with PowerShell → dán đường dẫn
+  folder ảnh Flow xuất → xong, ảnh nhỏ nằm trong `da-thu-nho\`.
+- Đã kiểm chạy thật: boss→160×160, logo→512×256, alpha giữ nguyên.
+- **Điều kiện duy nhất: ĐẶT ĐÚNG TÊN FILE** (theo DOT-1B). Ảnh nào sai tên nó sẽ
+  báo "không có trong bảng" để bạn sửa tên. Nên khi tạo trong Flow, **đặt tên ảnh
+  đúng ngay** là mọi thứ tự động khớp.
+- Hoặc đơn giản hơn: **bạn cứ gửi tôi folder ảnh to, tôi chạy và trả về ảnh chuẩn**
+  (đúng cách mình vẫn làm — "AI làm xong gửi file zip").
+
+## 5.2 "Nhét file của tôi + ảnh tham chiếu vào tool tự làm" — làm được tới đâu
+
+Sự thật về Flow: Nano Banana làm **từng ảnh một, kiểu hội thoại** — nó KHÔNG tự
+đọc cả file 343 dòng rồi chạy hết một mạch không cần bạn. Nên có hai mức:
+
+**Mức A — Bán tự động, trong Flow (miễn phí, hợp với bạn):**
+1. Tạo Custom Tool = Master prompt (Phần 1) + gắn 3 ảnh tham chiếu (Phần 3) cố định.
+2. Mở file `DOT-1B` → **copy từng NHÓM** (ví dụ 6 dòng boss) → dán vào tool → nó ra
+   6 ảnh → bạn chọn/sửa nhanh. Rồi nhóm tiếp.
+   → "nhét file + ảnh tham chiếu" = tool giữ sẵn phong cách + tham chiếu, bạn chỉ
+   dán danh sách theo lô. Đây là mức Flow hỗ trợ, và đủ tốt.
+
+**Mức B — Tự động hoàn toàn (nếu sau này muốn):**
+Dùng **Nano Banana qua API (Google AI Studio)** + một script tôi viết: script đọc
+thẳng file DOT-1B, với mỗi dòng tự gửi (phong cách khoá + nội dung dòng + 3 ảnh
+tham chiếu) → nhận ảnh → đặt đúng tên → thu nhỏ → tự kiểm. **Nhét file một phát,
+chạy hết 343 ảnh không cần ngồi canh.** Đổi lại: cần khoá API (có thể tốn phí mỗi
+ảnh, khác bản Flow miễn phí). Khi nào bạn muốn, nói tôi dựng cái này.
+
+## 5.3 Khuyến nghị
+
+Bắt đầu **Mức A** (Flow miễn phí): tạo tool + 5 ảnh gốc 5 làng → thấy ổn thì nhân
+ra theo nhóm. Thu nhỏ + kiểm chất lượng để tôi lo (Mức 5.1). Nếu thấy làm tay 343
+ảnh mệt, chuyển **Mức B** (tôi dựng script API) để chạy hàng loạt thật sự.
+
+---
+
+# Ghi chú thành thật
 
 - Tôi xác nhận từ tài liệu Google (2/2026): Flow đã gộp Whisk+ImageFX+Flow, engine
   ảnh là Nano Banana Pro, nhận 3 ảnh tham chiếu, có Custom Tools. Nhưng **giao diện
-  cụ thể của Custom Tool có thể khác chút** so với mô tả ở đây — bạn thử tạo, chỗ
-  nào Flow hỏi "prompt gốc" thì dán Phần 1, chỗ nào cho "reference/ingredient" thì
-  gắn ảnh Phần 3. Master prompt viết theo cách bám được dù giao diện đổi.
+  cụ thể của Custom Tool có thể khác chút** — chỗ nào Flow hỏi "prompt gốc" thì dán
+  Phần 1, chỗ nào cho "reference/ingredient" thì gắn ảnh Phần 3.
+- Nano Banana làm việc từng ảnh (hội thoại), không tự chạy cả danh sách — nên
+  "tự làm hết một mạch" chỉ có ở Mức B (API + script, mục 5.2).
 - Phần **nhân vật người chơi chuyển động** (đầu/thân/chân nhiều khung hình) là định
   dạng khó hơn ảnh đứng lẻ — để tính riêng sau khi bộ ảnh đứng này ổn.

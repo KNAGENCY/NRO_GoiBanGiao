@@ -230,6 +230,33 @@ func (cl *clientGia) choLenh(t *testing.T, lenh int8) bool {
 	return true
 }
 
+// choVaoTheGioiRoiImLang khang dinh phien nhan DUNG MOT goi -28/4 (versionGame)
+// — Ke hoach 3: vaoTheGioi khong con la stub im lang cua Ke hoach 2 nua, ma
+// gui goi nay ngay sau khi gan b.nhanVat (xem vaoTheGioi trong login.go) —
+// ROI moi im lang tiep. Dung thay cho khongConGoiGi()/choDungMotLenh() o MOI
+// diem trong file nay ngay sau mot diem vaoTheGioi thanh cong (tao nhan vat
+// xong, hoac dang nhap lai tai khoan da co nhan vat) — cac diem do TRUOC Ke
+// hoach 3 la "hoan toan im lang", gio la "dung mot goi -28/4 roi moi im lang".
+func (cl *clientGia) choVaoTheGioiRoiImLang(t *testing.T) bool {
+	t.Helper()
+	m, err := cl.f.ReadMessage()
+	if err != nil {
+		t.Logf("khong doc duoc goi -28/4 (versionGame) ngay sau vaoTheGioi: %v", err)
+		return false
+	}
+	if m.Command != lenhKhongTrenBanDo {
+		t.Logf("nhan lenh %d ngay sau vaoTheGioi, mong doi -28 (versionGame)", m.Command)
+		return false
+	}
+	r := protocol.NewReader(m.Data)
+	sub, errSub := r.Byte()
+	if errSub != nil || sub != lenhConVersionGame {
+		t.Logf("lenh con sau vaoTheGioi = %d (loi doc: %v), mong doi %d (versionGame)", sub, errSub, lenhConVersionGame)
+		return false
+	}
+	return cl.khongConGoiGi(t)
+}
+
 // khongConGoiGi dat han gio NGAN (hanChoImLang) roi thu doc mot goi: bao true
 // NEU VA CHI NEU het han ma khong co goi nao toi — tuc la thuc su im lang.
 // Neu doc duoc mot goi (bat ky lenh nao) thi that bai ro rang (gui thua, dang
@@ -334,9 +361,14 @@ type ketQuaDocSauKhiTao struct {
 }
 
 // docPhanHoiTaoNhanVat dat han gio NGAN (hanChoImLang) roi doc DUNG MOT lan:
-//   - het han ma khong co gi toi -> Ke hoach 2 khong gui goi nao khi THANH
-//     CONG (xem vaoTheGioi trong nhanvat.go), nen day la thanh cong.
-//   - nhan duoc -26 -> bi tu choi.
+//   - nhan duoc -28/4 (versionGame) -> THANH CONG (ben thang cuoc dua). Ke
+//     hoach 3: vaoTheGioi gio gui goi nay ngay khi gan duoc b.nhanVat (xem
+//     vaoTheGioi trong login.go) — truoc day (Ke hoach 2) thanh cong la hoan
+//     toan im lang, gio thanh cong la nhan dung goi nay.
+//   - nhan duoc -26 -> bi tu choi (ben thua cuoc dua).
+//   - het han ma khong co gi toi -> KHONG con duoc coi la thanh cong nua (do
+//     Ke hoach 3 luon gui -28/4 khi thanh cong) — day la mot ket qua bat
+//     thuong, tra ve qua truong loi.
 //   - bat ky truong hop nao khac (loi khac timeout, hoac lenh la khong mong
 //     doi trong kich ban nay) -> tra ve qua truong loi, de goroutine chinh
 //     lam that bai ro rang thay vi phan loai nham thanh cong/tu choi.
@@ -348,12 +380,20 @@ func (cl *clientGia) docPhanHoiTaoNhanVat() ketQuaDocSauKhiTao {
 	if err != nil {
 		var netErr net.Error
 		if errors.As(err, &netErr) && netErr.Timeout() {
-			return ketQuaDocSauKhiTao{biTuChoi: false} // im lang -> thanh cong
+			return ketQuaDocSauKhiTao{loi: fmt.Errorf("het han gio ma khong nhan duoc gi — Ke hoach 3 luon gui -28/4 khi thanh cong, im lang hoan toan khong con la ket qua hop le")}
 		}
 		return ketQuaDocSauKhiTao{loi: fmt.Errorf("loi doc KHONG PHAI het han gio (nghi ngo may chu sap/dong ket noi): %w", err)}
 	}
+	if m.Command == lenhKhongTrenBanDo {
+		r := protocol.NewReader(m.Data)
+		sub, errSub := r.Byte()
+		if errSub != nil || sub != lenhConVersionGame {
+			return ketQuaDocSauKhiTao{loi: fmt.Errorf("nhan goi -28 lenh con %d (loi doc: %v), mong doi %d (versionGame, dau hieu thanh cong)", sub, errSub, lenhConVersionGame)}
+		}
+		return ketQuaDocSauKhiTao{biTuChoi: false} // -28/4 -> thanh cong (ben thang cuoc dua)
+	}
 	if m.Command != lenhThongBaoOK {
-		return ketQuaDocSauKhiTao{loi: fmt.Errorf("nhan lenh %d ngoai du kien, mong doi -26 hoac im lang", m.Command)}
+		return ketQuaDocSauKhiTao{loi: fmt.Errorf("nhan lenh %d ngoai du kien, mong doi -26 (tu choi) hoac -28/4 (thanh cong)", m.Command)}
 	}
 	dr := protocol.NewReader(m.Data)
 	cau, _ := dr.UTF()
@@ -377,7 +417,8 @@ func TestTaoRoiDangNhapLai_ThayNhanVat(t *testing.T) {
 	tenNV := "Naru" + hauToNganNgau(t)
 
 	// Lan 1: dang nhap -> chua co nhan vat -> DUNG MOT lenh 2 -> tao nhan vat
-	// hop le -> hoan toan im lang (thanh cong khong tra loi goi nao).
+	// hop le -> vaoTheGioi gui DUNG MOT goi -28/4 (versionGame) roi im lang
+	// tiep (Ke hoach 3; truoc day la hoan toan im lang).
 	{
 		cl := moPhienClientGia(t, khoThat)
 		defer cl.dong()
@@ -388,8 +429,8 @@ func TestTaoRoiDangNhapLai_ThayNhanVat(t *testing.T) {
 		}
 
 		cl.taoNhanVat(tenNV, 0, 5)
-		if !cl.khongConGoiGi(t) {
-			t.Fatal("tao nhan vat hop le khong duoc tra ve goi nao (dac biet la -26)")
+		if !cl.choVaoTheGioiRoiImLang(t) {
+			t.Fatal("tao nhan vat hop le phai nhan DUNG MOT goi -28/4 (versionGame) roi im lang (khong duoc -26)")
 		}
 	}
 
@@ -446,13 +487,14 @@ func TestTaoRoiDangNhapLai_ThayNhanVat(t *testing.T) {
 
 	// Lan 2: NGAT phien cu (defer cl.dong() o tren da chay), mo PHIEN MOI,
 	// dang nhap lai CUNG tai khoan -> da co nhan vat -> KHONG duoc nhan lenh
-	// 2 nua (hoan toan im lang, vaoTheGioi stub Ke hoach 2 khong gui gi).
+	// 2 nua, nhung PHAI nhan DUNG MOT goi -28/4 (versionGame) roi im lang tiep
+	// (Ke hoach 3; vaoTheGioi khong con la stub im lang cua Ke hoach 2).
 	{
 		cl := moPhienClientGia(t, khoThat)
 		defer cl.dong()
 		cl.dangNhap(tenTK, matKhau)
-		if !cl.khongConGoiGi(t) {
-			t.Fatal("da co nhan vat -> dang nhap lai KHONG duoc nhan goi nao (dac biet la lenh 2)")
+		if !cl.choVaoTheGioiRoiImLang(t) {
+			t.Fatal("da co nhan vat -> dang nhap lai phai nhan DUNG MOT goi -28/4 (versionGame) roi im lang (dac biet khong lenh 2)")
 		}
 	}
 }
@@ -492,8 +534,8 @@ func TestTichHop_TenTrungGiuaHaiTaiKhoan_TuChoi(t *testing.T) {
 			t.Fatal("TK1: lan dau dang nhap phai nhan DUNG MOT lenh 2")
 		}
 		cl.taoNhanVat(tenNV, 0, 5)
-		if !cl.khongConGoiGi(t) {
-			t.Fatal("TK1: tao nhan vat hop le khong duoc tra ve goi nao")
+		if !cl.choVaoTheGioiRoiImLang(t) {
+			t.Fatal("TK1: tao nhan vat hop le phai nhan DUNG MOT goi -28/4 (versionGame) roi im lang")
 		}
 	}
 
@@ -544,21 +586,22 @@ func TestTichHop_TaiKhoanDaCoNhanVat_TuChoiTaoTiep(t *testing.T) {
 			t.Fatal("lan dau dang nhap phai nhan DUNG MOT lenh 2")
 		}
 		cl.taoNhanVat(tenNV, 0, 5)
-		if !cl.khongConGoiGi(t) {
-			t.Fatal("tao nhan vat lan dau hop le khong duoc tra ve goi nao")
+		if !cl.choVaoTheGioiRoiImLang(t) {
+			t.Fatal("tao nhan vat lan dau hop le phai nhan DUNG MOT goi -28/4 (versionGame) roi im lang")
 		}
 	}
 
-	// Phien MOI, dang nhap lai: da co nhan vat -> hoan toan im lang (khong co
-	// lenh 2) -> b.nhanVat da duoc gan tu CSDL qua vaoTheGioi. Van gui tiep
-	// -28/2 (mo phong client hong/ke gia lap co tinh gui lai) -> phai bi tu
-	// choi bang DUNG MOT goi -26 ("Ban da co nhan vat.").
+	// Phien MOI, dang nhap lai: da co nhan vat -> khong co lenh 2, nhung PHAI
+	// nhan DUNG MOT goi -28/4 (versionGame) roi im lang tiep (b.nhanVat da
+	// duoc gan tu CSDL qua vaoTheGioi — Ke hoach 3). Van gui tiep -28/2 (mo
+	// phong client hong/ke gia lap co tinh gui lai) -> phai bi tu choi bang
+	// DUNG MOT goi -26 ("Ban da co nhan vat.").
 	cl := moPhienClientGia(t, khoThat)
 	defer cl.dong()
 
 	cl.dangNhap(tenTK, matKhau)
-	if !cl.khongConGoiGi(t) {
-		t.Fatal("dang nhap lai voi tai khoan da co nhan vat -> khong duoc nhan goi nao (dac biet la lenh 2)")
+	if !cl.choVaoTheGioiRoiImLang(t) {
+		t.Fatal("dang nhap lai voi tai khoan da co nhan vat phai nhan DUNG MOT goi -28/4 (versionGame) roi im lang (dac biet khong lenh 2)")
 	}
 
 	cl.taoNhanVat("Khac"+hauToNganNgau(t), 0, 5)
@@ -747,7 +790,7 @@ func TestTaoNhanVat_DuaTranhCungTen(t *testing.T) {
 			t.Logf("phien %s: bi tu choi -26, cau bao %q", kq.phien, kq.cauThongBao)
 		} else {
 			soThanhCong++
-			t.Logf("phien %s: thanh cong (im lang)", kq.phien)
+			t.Logf("phien %s: thanh cong (nhan -28/4 versionGame)", kq.phien)
 		}
 	}
 

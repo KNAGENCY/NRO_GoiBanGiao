@@ -155,6 +155,13 @@ func decodeModifiedUTF8(b []byte) (string, error) {
 	return string(runes), nil
 }
 
+// ThemMang ghi ca khoi byte THO vao cuoi bo dem, KHONG kem tien to do dai (khac
+// UTF). Dung cho cac blob nhi phan da co san (vi du du lieu part 87KB trong goi
+// -87), nơi do dai da duoc ghi rieng bang Int() truoc do.
+func (w *Writer) ThemMang(p []byte) {
+	w.buf = append(w.buf, p...)
+}
+
 func (w *Writer) Bytes() []byte { return w.buf }
 
 // Reader doc nguoc lai nhung gi Writer ghi.

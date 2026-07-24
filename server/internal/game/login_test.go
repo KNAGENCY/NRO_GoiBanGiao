@@ -245,6 +245,20 @@ func dungPhienThat(t *testing.T, b *BoXuLy) (fClient *protocol.Framer, dong func
 	return fClient, func() { benClient.Close() }
 }
 
+// docMotGoi doc DUNG MOT goi ma may chu gui ra qua fClient (framer client gia
+// tra ve tu dungPhienThat), dung han gio 5 giay da dat san tren benClient.
+// Dung cho cac test dieu phoi goi xin cap nhat (Ke hoach 3): khac chayDangNhap
+// (doc TOI KHI ranh, tra ve ca danh sach) o cho ham nay chi can DUNG MOT goi
+// duy nhat va bao loi ro rang (t.Fatal) neu khong doc duoc.
+func docMotGoi(t *testing.T, f *protocol.Framer) *protocol.Message {
+	t.Helper()
+	m, err := f.ReadMessage()
+	if err != nil {
+		t.Fatalf("khong doc duoc goi may chu tra ve: %v", err)
+	}
+	return m
+}
+
 // chayDangNhap dung mot BoXuLy tren kho da cho, gui goi dang nhap that qua
 // net.Pipe (dungPhienThat), roi doc HET cac goi may chu tra ve cho toi khi
 // ket noi RANH — tuc la ReadMessage het han gio (xem han 5 giay dat trong
@@ -415,6 +429,20 @@ func TestDangNhapDaCoNhanVat_KhongGuiManTao(t *testing.T) {
 	if coLenh(goiGuiRa, 2) {
 		t.Error("da co nhan vat -> KHONG duoc gui lenh 2 (khong quay lai man tao)")
 	}
+	// Ke hoach 3: vaoTheGioi khong con la stub im lang nua — no gui DUNG MOT
+	// goi -28/4 (versionGame) de kich client so phien ban. Truoc day (Ke hoach
+	// 2) day la truong hop hoan toan im lang; gio phai co dung goi nay.
+	if len(goiGuiRa) != 1 {
+		t.Fatalf("so goi gui ra = %d, mong doi DUNG MOT (goi -28/4 versionGame): %v", len(goiGuiRa), goiGuiRa)
+	}
+	if goiGuiRa[0].Command != lenhKhongTrenBanDo {
+		t.Fatalf("lenh = %d, mong doi -28 (versionGame)", goiGuiRa[0].Command)
+	}
+	r := protocol.NewReader(goiGuiRa[0].Data)
+	sub, _ := r.Byte()
+	if sub != lenhConVersionGame {
+		t.Errorf("lenh con = %d, mong doi %d (versionGame)", sub, lenhConVersionGame)
+	}
 }
 
 // TestSaiMatKhauTrenTaiKhoanBiKhoaVanBaoSaiThongTin khoa cung THU TU kiem tra
@@ -537,5 +565,263 @@ func TestTenSaiDinhDangBiChanKhongGoiKho(t *testing.T) {
 					kq.LyDo, LyDoSaiThongTin)
 			}
 		})
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Ke hoach 3: dieu phoi goi xin cap nhat (-87 than rong, -28/6, -28/7, -28/8)
+// sau khi da vao the gioi. Dat b.nhanVat truoc (mo phong da vao the gioi) —
+// khong di qua toan bo duong dang nhap/tao nhan vat vi da co rieng cac test
+// tren cho duong do; o day chi kiem TANG DIEU PHOI (XuLy/xuLyKhongTrenBanDo)
+// co goi dung ham dung goi (Task 3-4) hay khong.
+// ---------------------------------------------------------------------------
+
+// khoaThuCong mo phong con tro cua protocol.KeyStream (key[cur] ^ b, con tro
+// tang roi quay vong) NHUNG tu cai lai o day, vi KeyStream/Framer.ks khong
+// xuat khoi package protocol nen goi game khong the muon lai con tro that. Chi
+// dung cho guiGoiXinDataThuCong/docGoiLenhDacBietThuCong duoi day — xem hai
+// ham do de biet tai sao can doc/ghi thu cong thay vi qua Framer.
+type khoaThuCong struct {
+	khoa []byte
+	cur  int
+}
+
+func (k *khoaThuCong) xor(b byte) byte {
+	out := k.khoa[k.cur] ^ b
+	k.cur++
+	if k.cur >= len(k.khoa) {
+		k.cur %= len(k.khoa)
+	}
+	return out
+}
+
+// guiGoiXinDataThuCong ghi THU CONG goi yeu cau -87 than rong (client xin
+// data) dung DUNG dinh dang HAI byte do dai ma client that gui (Session_ME.cs,
+// doSendMessage — luon hai byte cho MOI goi client gui LEN, bat ke lenh gi).
+//
+// KHONG duoc dung fClient.WriteMessage() cho buoc nay: ham do (protocol/
+// frame.go) quyet dinh hai hay BA byte do dai CHI dua vao gia tri lenh, khong
+// biet gi ve chieu truyen — vi -87 nam trong danh sach lenh dac biet cua
+// chieu may-chu-gui-xuong (WriteMessage se tu dong bat che do ba byte cho MOI
+// goi mang lenh -87, ke ca than tin rong), dung ham do de gia lam client GUI
+// LEN se tao ra mot goi SAI dinh dang thuc te. Hau qua da kiem chung: may chu
+// (Framer.ReadMessage — CO Y CHI ho tro hai byte, vi client that khong bao
+// gio gui lenh dac biet len may chu) doc lem byte thu ba cua truong do dai
+// thanh mot phan than tin, roi cho doc them mai khong bao gio toi — treo han
+// ca ket noi (i/o timeout tren net.Pipe).
+func guiGoiXinDataThuCong(t *testing.T, conn net.Conn, khoa []byte) {
+	t.Helper()
+	k := &khoaThuCong{khoa: khoa}
+	cmd := lenhDuLieu // bien (khong phai hang), de byte(cmd) la chuyen doi kieu binh thuong
+	goi := []byte{
+		k.xor(byte(cmd)),
+		k.xor(0), k.xor(0), // do dai = 0 (than rong), dung HAI byte thuong
+	}
+	if _, err := conn.Write(goi); err != nil {
+		t.Fatalf("gui goi xin data thu cong that bai: %v", err)
+	}
+}
+
+// docGoiLenhDacBietThuCong doc THU CONG mot goi may chu gui xuong, dung DUNG
+// thuat toan client that (Session_ME.cs, readMessage/readMessage2): can cu
+// VAO LENH (khong can cu than tin) de quyet dinh doc hai hay BA byte do dai.
+// O day chi biet phan biet lenhDuLieu (-87, package game co dung) — du de cho
+// muc dich cua file nay, khong co tham vong lam lai toan bo danh sach lenh
+// dac biet cua package protocol (lenhDoDaiBaByte, khong xuat).
+//
+// KHONG duoc dung fClient.ReadMessage()/docMotGoi cho goi -87: ham do (mo
+// hinh chieu client->server) CO Y CHI ho tro hai byte do dai, trong khi may
+// chu tra loi -87 bang BA byte (goiCatalogData ~87 KB, vuot gioi han hai byte
+// 65535). Dung sai ham se lam chinh TEST nay doc lem, treo ket noi — day
+// chinh la ly do can ham nay. Xem docGoiNhuClientThat trong
+// protocol/integration_test.go cho ban dang bien the y het (khong tai su
+// dung truc tiep duoc vi ham do khong xuat va khac package).
+func docGoiLenhDacBietThuCong(t *testing.T, conn net.Conn, khoa []byte) *protocol.Message {
+	t.Helper()
+	k := &khoaThuCong{khoa: khoa}
+
+	var cmdByte [1]byte
+	if _, err := io.ReadFull(conn, cmdByte[:]); err != nil {
+		t.Fatalf("khong doc duoc lenh: %v", err)
+	}
+	cmd := int8(k.xor(cmdByte[0]))
+
+	var n int
+	if cmd == lenhDuLieu {
+		var doDai [3]byte
+		for i := range doDai {
+			var b [1]byte
+			if _, err := io.ReadFull(conn, b[:]); err != nil {
+				t.Fatalf("khong doc duoc byte do dai thu %d: %v", i, err)
+			}
+			doDai[i] = k.xor(b[0]) + 128
+		}
+		n = int(doDai[0]) | int(doDai[1])<<8 | int(doDai[2])<<16
+	} else {
+		var b [2]byte
+		if _, err := io.ReadFull(conn, b[:]); err != nil {
+			t.Fatalf("khong doc duoc do dai: %v", err)
+		}
+		hi := k.xor(b[0])
+		lo := k.xor(b[1])
+		n = int(hi)<<8 | int(lo)
+	}
+
+	data := make([]byte, n)
+	if n > 0 {
+		if _, err := io.ReadFull(conn, data); err != nil {
+			t.Fatalf("khong doc duoc than tin %d byte: %v", n, err)
+		}
+		for i := range data {
+			data[i] = k.xor(data[i])
+		}
+	}
+	return &protocol.Message{Command: cmd, Data: data}
+}
+
+// TestPhucVuGoiXinData kiem tra dieu phoi -87 (xuLyXinData): client gui -87
+// than rong, may chu phai tra loi bang goi -87 day du (goiCatalogData).
+//
+// Test nay KHONG dung dungPhienThat/docMotGoi nhu cac test dieu phoi khac
+// trong file nay: -87 la lenh dac biet (do dai BA byte, vi goiCatalogData
+// ~87 KB vuot qua gioi han HAI byte 65535 — xem lenhDoDaiBaByte trong
+// protocol/frame.go), ma ca hai ham do deu CO Y CHI ho tro dinh dang hai byte
+// (xem chu thich cua guiGoiXinDataThuCong/docGoiLenhDacBietThuCong o tren).
+// Nen o day tu dung bat tay thu cong (docGoiKhoaThuCong, da dung o
+// dungPhienThat) roi ghi/doc than tin bang hai ham thu cong nay.
+func TestPhucVuGoiXinData(t *testing.T) {
+	b := NewBoXuLy(&khoGia{})
+	b.nhanVat = &store.NhanVat{ID: 1, Lang: 0}
+
+	benClient, benServer := net.Pipe()
+	go mynet.PhucVu(benServer, func() mynet.XuLyGoiTin { return b })
+	defer benClient.Close()
+
+	benClient.SetReadDeadline(time.Now().Add(5 * time.Second))
+
+	fBatTay := protocol.NewFramer(benClient, benClient)
+	if err := fBatTay.WriteMessage(&protocol.Message{Command: -27}); err != nil {
+		t.Fatalf("gui goi bat tay that bai: %v", err)
+	}
+	khoaTho := docGoiKhoaThuCong(t, benClient)
+	khoa := protocol.DeriveKey(khoaTho)
+
+	// Client xin data: gui -87 than rong.
+	guiGoiXinDataThuCong(t, benClient, khoa)
+
+	m := docGoiLenhDacBietThuCong(t, benClient, khoa)
+	if m.Command != -87 {
+		t.Errorf("tra loi xin data = lenh %d, mong doi -87", m.Command)
+	}
+}
+
+func TestPhucVuGoiXinSkill5Lang(t *testing.T) {
+	b := NewBoXuLy(&khoGia{})
+	b.nhanVat = &store.NhanVat{ID: 1, Lang: 0}
+	fClient, dong := dungPhienThat(t, b)
+	defer dong()
+	// Client xin skill: -28 lenh con 7.
+	w := protocol.NewWriter()
+	w.Byte(7)
+	if err := fClient.WriteMessage(protocol.NewMessage(-28, w)); err != nil {
+		t.Fatal(err)
+	}
+	m := docMotGoi(t, fClient)
+	r := protocol.NewReader(m.Data)
+	sub, _ := r.Byte()
+	if m.Command != -28 || sub != 7 {
+		t.Fatalf("tra loi xin skill = lenh %d/%d, mong doi -28/7", m.Command, sub)
+	}
+	r.Byte() // vsSkill
+	r.Byte() // countOption
+	countClass, _ := r.Byte()
+	if countClass < 5 {
+		t.Errorf("catalog skill tra ve %d lop, phai >= 5 lang", countClass)
+	}
+}
+
+// TestPhucVuGoiXinMap kiem tra dieu phoi lenh con 6 (client xin catalog map)
+// trong xuLyKhongTrenBanDo. Cung mau voi TestPhucVuGoiXinSkill5Lang: -28
+// khong nam trong lenhDoDaiBaByte nen phan hoi map dung dinh dang HAI byte do
+// dai thuong, doc duoc bang dungPhienThat/docMotGoi binh thuong (khong can
+// bat tay/doc thu cong nhu goi -87).
+func TestPhucVuGoiXinMap(t *testing.T) {
+	b := NewBoXuLy(&khoGia{})
+	b.nhanVat = &store.NhanVat{ID: 1, Lang: 0}
+	fClient, dong := dungPhienThat(t, b)
+	defer dong()
+	// Client xin map: -28 lenh con 6.
+	w := protocol.NewWriter()
+	w.Byte(6)
+	if err := fClient.WriteMessage(protocol.NewMessage(-28, w)); err != nil {
+		t.Fatal(err)
+	}
+	m := docMotGoi(t, fClient)
+	r := protocol.NewReader(m.Data)
+	sub, _ := r.Byte()
+	if m.Command != -28 || sub != 6 {
+		t.Fatalf("tra loi xin map = lenh %d/%d, mong doi -28/6", m.Command, sub)
+	}
+	vsMapNhan, _ := r.Byte()
+	if vsMapNhan != vsMap {
+		t.Errorf("vsMap tra ve = %d, mong doi %d (goiCatalogMap)", vsMapNhan, vsMap)
+	}
+}
+
+// TestPhucVuGoiXinItem kiem tra dieu phoi lenh con 8 (client xin catalog
+// item) trong xuLyKhongTrenBanDo. QUAN TRONG NHAT trong ba lenh con moi kiem
+// o day: day la goi KICH clientOk phia client that (client chi gui -28/13 khi
+// ca 4 phien ban da khop, VA da nhan du catalog item) — thieu dieu phoi lenh
+// con nay se lam client ket vinh vien man hinh "Xin cho" (soft-lock), khong
+// he co trieu chung loi ro rang phia may chu (khong log, khong crash).
+func TestPhucVuGoiXinItem(t *testing.T) {
+	b := NewBoXuLy(&khoGia{})
+	b.nhanVat = &store.NhanVat{ID: 1, Lang: 0}
+	fClient, dong := dungPhienThat(t, b)
+	defer dong()
+	// Client xin item: -28 lenh con 8.
+	w := protocol.NewWriter()
+	w.Byte(8)
+	if err := fClient.WriteMessage(protocol.NewMessage(-28, w)); err != nil {
+		t.Fatal(err)
+	}
+	m := docMotGoi(t, fClient)
+	r := protocol.NewReader(m.Data)
+	sub, _ := r.Byte()
+	if m.Command != -28 || sub != 8 {
+		t.Fatalf("tra loi xin item = lenh %d/%d, mong doi -28/8", m.Command, sub)
+	}
+}
+
+// TestNhanClientOk kiem tra dieu phoi lenh con 13 (client bao san sang) trong
+// xuLyKhongTrenBanDo. Khac hai test tren: xuLyClientOk KHONG goi s.Gui (chi
+// ghi nhan b.clientSanSang = true va log), nen khong co goi phan hoi nao de
+// doc — phai kiem TRANG THAI PHIEN (b.clientSanSang) thay vi goi tin.
+//
+// dungPhienThat nhan thang *BoXuLy do test tao (khong tu tao ben trong), nen
+// giu duoc con tro b o day de doc lai truong sau khi gui goi.
+//
+// Ve khoang nghi: mynet.PhucVu chay b.XuLy() TREN GOROUTINE RIENG (khac
+// goroutine cua test) — WriteMessage() cua client tra ve ngay khi may chu DOC
+// xong goi (net.Pipe dong bo o muc Read/Write), nhung KHONG dam bao may chu
+// da XU LY xong (goi toi xuLyClientOk, gan b.clientSanSang) tai thoi diem do.
+// Cho mot khoang nghi ngan (net.Pipe khong co do tre mang that nen vai chuc ms
+// la du du) truoc khi doc b.clientSanSang — dung cach phienGia trong
+// nhanvat_test.go da lam cho tinh huong tuong tu (doi goroutine doc nen kip
+// gom goi).
+func TestNhanClientOk(t *testing.T) {
+	b := NewBoXuLy(&khoGia{})
+	b.nhanVat = &store.NhanVat{ID: 1, Lang: 0}
+	fClient, dong := dungPhienThat(t, b)
+	defer dong()
+	// Client bao san sang: -28 lenh con 13.
+	w := protocol.NewWriter()
+	w.Byte(13)
+	if err := fClient.WriteMessage(protocol.NewMessage(-28, w)); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(100 * time.Millisecond)
+	if !b.clientSanSang {
+		t.Error("gui -28/13 (clientOk) khong lam b.clientSanSang = true")
 	}
 }

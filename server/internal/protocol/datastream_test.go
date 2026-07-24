@@ -176,3 +176,24 @@ func TestDocQuaCuoiBaoLoi(t *testing.T) {
 		t.Fatal("doc Int tu 1 byte phai bao loi")
 	}
 }
+
+func TestThemMangGhiThoKhongTienTo(t *testing.T) {
+	w := NewWriter()
+	w.Byte(0xAA)
+	w.ThemMang([]byte{0x01, 0x02, 0x03})
+	w.Byte(0xBB)
+	got := w.Bytes()
+	want := []byte{0xAA, 0x01, 0x02, 0x03, 0xBB}
+	if !bytes.Equal(got, want) {
+		t.Errorf("ThemMang sai: got %v, want %v", got, want)
+	}
+}
+
+func TestThemMangRong(t *testing.T) {
+	w := NewWriter()
+	w.Byte(0xAA)
+	w.ThemMang(nil)
+	if got := w.Bytes(); !bytes.Equal(got, []byte{0xAA}) {
+		t.Errorf("ThemMang(nil) phai khong doi bo dem, got %v", got)
+	}
+}

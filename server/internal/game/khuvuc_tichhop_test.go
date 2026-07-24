@@ -181,3 +181,154 @@ func TestTichHop_HaiNguoiThayNhauVaDiChuyen(t *testing.T) {
 		t.Fatal("A tu di chuyen -> KHONG duoc nhan lai goi -7 cua chinh minh")
 	}
 }
+
+// TestTichHop_DiChuyenVuotNguongBiChan la kich ban 1 cua Task 8: hai phien
+// THAT (giong het TestTichHop_HaiNguoiThayNhauVaDiChuyen) da thay nhau qua
+// -5, roi A gui -7 voi dich CACH vi tri hien tai > NguongBuoc (500, xem
+// dichuyen.go) — actor (kiemDiChuyenHopLe trong khuvuc.go, case
+// suKienDiChuyen) phai BO goi nay va KHONG phat cho ai, nen B khong duoc
+// nhan goi -7 nao trong han cho im lang. Sau do A gui tiep MOT -7 HOP LE
+// (dich gan, trong nguong) de chung minh ket noi VAN SONG BINH THUONG — chi
+// goi bat hop le bi bo, may chu khong ngat ket noi vi no.
+func TestTichHop_DiChuyenVuotNguongBiChan(t *testing.T) {
+	khoThat := moKhoThatChoTest(t)
+	ctx := context.Background()
+
+	soKhuVuc := MoSoKhuVuc()
+	defer soKhuVuc.DungTatCa()
+
+	matKhau := "matkhau123"
+	tenTKA := "teleA" + hauToNganNgau(t)
+	tenTKB := "teleB" + hauToNganNgau(t)
+	taiKhoanA := taoTaiKhoanCoMatKhau(t, tenTKA, matKhau)
+	taiKhoanB := taoTaiKhoanCoMatKhau(t, tenTKB, matKhau)
+	tenNVA := "TeleA" + hauToNganNgau(t)
+	tenNVB := "TeleB" + hauToNganNgau(t)
+
+	clA := moPhienClientGiaKhuVuc(t, khoThat, soKhuVuc)
+	defer clA.dong()
+	clB := moPhienClientGiaKhuVuc(t, khoThat, soKhuVuc)
+	defer clB.dong()
+
+	dangNhapTaoNhanVatVaoTheGioi(t, clA, tenTKA, matKhau, tenNVA)
+	dangNhapTaoNhanVatVaoTheGioi(t, clB, tenTKB, matKhau, tenNVB)
+
+	nvA, err := khoThat.LayNhanVatTheoTaiKhoan(ctx, taiKhoanA)
+	if err != nil {
+		t.Fatalf("LayNhanVatTheoTaiKhoan A that bai: %v", err)
+	}
+	nvB, err := khoThat.LayNhanVatTheoTaiKhoan(ctx, taiKhoanB)
+	if err != nil {
+		t.Fatalf("LayNhanVatTheoTaiKhoan B that bai: %v", err)
+	}
+	if nvA.MapID != 1 || nvB.MapID != 1 {
+		t.Fatalf("ca hai nhan vat phai o mapId 1 (lang 0), nhan duoc A=%d B=%d", nvA.MapID, nvB.MapID)
+	}
+
+	clA.baoVaoKhuVuc()
+	if !clA.khongConGoiGi(t) {
+		t.Fatal("A vao khu vuc mot minh -> khong duoc nhan goi nao (chua co ai khac)")
+	}
+	clB.baoVaoKhuVuc()
+
+	goiChoB := clB.doiGoiLenh(t, -5)
+	khangDinhIdTrongGoi(t, goiChoB, nvA.ID)
+	goiChoA := clA.doiGoiLenh(t, -5)
+	khangDinhIdTrongGoi(t, goiChoA, nvB.ID)
+
+	// A gui -7 toi dich CACH vi tri hien tai RAT XA (>> NguongBuoc = 500) —
+	// van trong bien ban do [0, BienRongToiDa=4096] nen khong bi chan boi kiem
+	// bien, CHI bi chan boi kiem khoang cach. Dung toa do co dinh xa han (2000,
+	// 2000) thay vi cong tuong doi vao nvA.ViTriX/Y nhu test hop le o tren, de
+	// khoang cach chac chan >> 500 bat ke spawn cua lang 0 nam o dau trong
+	// bien 4096 (ViTriXKhoiDau=100 trong TestTaoRoiDangNhapLai_ThayNhanVat).
+	toXQuaXa := int16(2000)
+	toYQuaXa := int16(2000)
+	clA.guiDiChuyen(toXQuaXa, toYQuaXa)
+
+	// Khang dinh B KHONG nhan goi -7 nao trong han cho im lang: actor bo goi
+	// bat hop le TRUOC khi phat (return som trong case suKienDiChuyen), nen
+	// khong ai — ke ca B — nhan duoc gi.
+	if !clB.khongConGoiGi(t) {
+		t.Fatal("A gui -7 vuot nguong buoc -> B KHONG duoc nhan goi -7 nao (may chu phai bo goi bat hop le)")
+	}
+
+	// Chung minh ket noi CUA A VAN SONG BINH THUONG (khong bi ngat vi goi bat
+	// hop le): gui tiep MOT -7 HOP LE (dich gan, trong nguong) -> B phai nhan
+	// dung goi -7 chuyen tiep nhu kich ban duong hanh phuc.
+	toXHopLe := int16(nvA.ViTriX) + 40
+	toYHopLe := int16(nvA.ViTriY) + 10
+	clA.guiDiChuyen(toXHopLe, toYHopLe)
+
+	goiDiChuyenChoB := clB.doiGoiLenh(t, -7)
+	r := protocol.NewReader(goiDiChuyenChoB.Data)
+	if id, errID := r.Int(); errID != nil || id != int32(nvA.ID) {
+		t.Fatalf("id trong goi -7 (hop le, sau khi goi vuot nguong bi bo) = %d (loi %v), mong doi %d", id, errID, nvA.ID)
+	}
+	if x, errX := r.Short(); errX != nil || x != toXHopLe {
+		t.Fatalf("toX trong goi -7 hop le = %d (loi %v), mong doi %d", x, errX, toXHopLe)
+	}
+	if y, errY := r.Short(); errY != nil || y != toYHopLe {
+		t.Fatalf("toY trong goi -7 hop le = %d (loi %v), mong doi %d", y, errY, toYHopLe)
+	}
+}
+
+// TestTichHop_RoiKhuVucPhatGoi6 la kich ban 2 cua Task 8: hai phien THAT da
+// thay nhau qua -5, roi DONG ket noi cua A — PhucVu (session.go) chay defer
+// KhiDong() khi vong doc goi tin loi (ket noi dong), KhiDong gui suKienRa cho
+// actor khu vuc, actor xoa A khoi map va phat -6 [idA] cho nguoi con lai (B).
+func TestTichHop_RoiKhuVucPhatGoi6(t *testing.T) {
+	khoThat := moKhoThatChoTest(t)
+	ctx := context.Background()
+
+	soKhuVuc := MoSoKhuVuc()
+	defer soKhuVuc.DungTatCa()
+
+	matKhau := "matkhau123"
+	tenTKA := "roiA" + hauToNganNgau(t)
+	tenTKB := "roiB" + hauToNganNgau(t)
+	taiKhoanA := taoTaiKhoanCoMatKhau(t, tenTKA, matKhau)
+	taiKhoanB := taoTaiKhoanCoMatKhau(t, tenTKB, matKhau)
+	tenNVA := "RoiA" + hauToNganNgau(t)
+	tenNVB := "RoiB" + hauToNganNgau(t)
+
+	clA := moPhienClientGiaKhuVuc(t, khoThat, soKhuVuc)
+	clB := moPhienClientGiaKhuVuc(t, khoThat, soKhuVuc)
+	defer clB.dong()
+
+	dangNhapTaoNhanVatVaoTheGioi(t, clA, tenTKA, matKhau, tenNVA)
+	dangNhapTaoNhanVatVaoTheGioi(t, clB, tenTKB, matKhau, tenNVB)
+
+	nvA, err := khoThat.LayNhanVatTheoTaiKhoan(ctx, taiKhoanA)
+	if err != nil {
+		t.Fatalf("LayNhanVatTheoTaiKhoan A that bai: %v", err)
+	}
+	nvB, err := khoThat.LayNhanVatTheoTaiKhoan(ctx, taiKhoanB)
+	if err != nil {
+		t.Fatalf("LayNhanVatTheoTaiKhoan B that bai: %v", err)
+	}
+	if nvA.MapID != 1 || nvB.MapID != 1 {
+		t.Fatalf("ca hai nhan vat phai o mapId 1 (lang 0), nhan duoc A=%d B=%d", nvA.MapID, nvB.MapID)
+	}
+
+	clA.baoVaoKhuVuc()
+	if !clA.khongConGoiGi(t) {
+		t.Fatal("A vao khu vuc mot minh -> khong duoc nhan goi nao (chua co ai khac)")
+	}
+	clB.baoVaoKhuVuc()
+
+	// Xa het hang doi -5 truoc khi dong A, de goi -6 sau nay khong bi lan voi
+	// -5 con sot lai trong bo dem doc.
+	goiChoB := clB.doiGoiLenh(t, -5)
+	khangDinhIdTrongGoi(t, goiChoB, nvA.ID)
+	goiChoA := clA.doiGoiLenh(t, -5)
+	khangDinhIdTrongGoi(t, goiChoA, nvB.ID)
+
+	// DONG ket noi cua A som (thay vi doi defer cuoi ham) de kich hoat KhiDong
+	// ngay tai day: vong doc cua PhucVu phia may chu se gap loi doc (ket noi
+	// dong) -> defer KhiDong() chay -> actor nhan suKienRa -> phat -6 cho B.
+	clA.dong()
+
+	goiRaChoB := clB.doiGoiLenh(t, -6)
+	khangDinhIdTrongGoi(t, goiRaChoB, nvA.ID)
+}

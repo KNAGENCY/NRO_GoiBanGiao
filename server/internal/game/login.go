@@ -39,6 +39,7 @@ const (
 	lenhThongBaoOK      int8 = -26
 	lenhDangNhapThatBai int8 = -102
 	lenhTaoNhanVat      int8 = 2
+	lenhVaoKhuVuc       int8 = -39 // client bao da tai xong map
 )
 
 // reTenDangNhapHopLe khop dung quy tac ma CSDL da ap dung bang rang buoc CHECK
@@ -74,11 +75,14 @@ type BoXuLy struct {
 	taiKhoan *store.TaiKhoan // nil khi chua dang nhap
 	nhanVat  *store.NhanVat  // nil khi chua co / chua vao the gioi
 
-	clientSanSang bool    // client da gui -28/13 (bat tay xong)
-	khuVuc        *KhuVuc // khu vuc nhan vat dang o (dung o KH4; nen mong cho KH5)
+	clientSanSang bool      // client da gui -28/13 (bat tay xong)
+	khuVuc        *KhuVuc   // khu vuc nhan vat dang o (dung o KH4; nen mong cho KH5)
+	soKhuVuc      *SoKhuVuc // so khu vuc CHUNG (5 map), tra khu vuc theo mapId cua nhan vat
 }
 
-func NewBoXuLy(kho Kho) *BoXuLy { return &BoXuLy{kho: kho} }
+func NewBoXuLy(kho Kho, soKhuVuc *SoKhuVuc) *BoXuLy {
+	return &BoXuLy{kho: kho, soKhuVuc: soKhuVuc}
+}
 
 // KiemTraDangNhap chua toan bo luat dang nhap, tach khoi phan mang de kiem thu.
 func (b *BoXuLy) KiemTraDangNhap(ctx context.Context, ten, matKhau string) (KetQuaDangNhap, error) {
@@ -118,6 +122,10 @@ func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 		return b.xuLyKhongTrenBanDo(s, m)
 	case lenhDuLieu: // -87 — client xin data
 		return b.xuLyXinData(s)
+	case lenhVaoKhuVuc: // -39 — client bao da tai xong map
+		return b.xuLyVaoKhuVuc(s)
+	case lenhDiChuyen: // -7 — client xin di chuyen
+		return b.xuLyDiChuyen(m)
 	default:
 		// Lenh chua ho tro: bo qua, khong ngat ket noi — client gui vai goi
 		// phu ngay sau khi noi (vi du setClientType), day la chuyen BINH
@@ -201,9 +209,11 @@ func (b *BoXuLy) xuLyClientOk(s *mynet.Session) error {
 		return nil
 	}
 
-	// Dung khu vuc toi thieu cho phien nay va dua nhan vat vao (nen mong cho KH5).
-	b.khuVuc = MoKhuVuc(bd)
-	b.khuVuc.ThemNguoiChoi(b.nhanVat)
+	// Ke hoach 5: dung khu vuc CHUNG tu so (nhieu nguoi cung mapId thay nhau).
+	// CHUA gui suKienVao o day — doi -39 (client tai xong map) moi dua vao khu vuc.
+	if b.soKhuVuc != nil {
+		b.khuVuc = b.soKhuVuc.Tra(b.nhanVat.MapID)
+	}
 
 	// -82 tileset — BAT BUOC truoc -24.
 	if err := s.Gui(goiTileSetInfo()); err != nil {
@@ -231,6 +241,47 @@ func (b *BoXuLy) xuLyClientOk(s *mynet.Session) error {
 	slog.Info("da gui the gioi (tileset + ME_INFO + MAP INFO), client se render",
 		"ten", b.nhanVat.Ten, "mapId", bd.MapID, "lang", b.nhanVat.Lang, "id", b.nhanVat.ID)
 	return nil
+}
+
+// xuLyVaoKhuVuc: client gui -39 (da tai xong map) -> dua nhan vat vao khu vuc chung
+// (actor phat -5 cua nguoi cu cho minh, va phat -5 cua minh cho nguoi cu).
+func (b *BoXuLy) xuLyVaoKhuVuc(s *mynet.Session) error {
+	if b.khuVuc == nil || b.nhanVat == nil {
+		return nil
+	}
+	b.khuVuc.Gui(suKienVao{nv: b.nhanVat, phien: s})
+	return nil
+}
+
+// xuLyDiChuyen: client gui -7 (byte co bay + short toX + short toY). Ke hoach 5:
+// KHONG kiem hop le o day (doc nv.ViTri se dua voi actor ghi) — chuyen tiep toX/toY
+// tho cho actor, actor kiem bang vi tri authoritative. Thieu toX/toY -> bo goi.
+func (b *BoXuLy) xuLyDiChuyen(m *protocol.Message) error {
+	if b.khuVuc == nil || b.nhanVat == nil {
+		return nil
+	}
+	r := protocol.NewReader(m.Data)
+	if _, err := r.Byte(); err != nil { // co bay (khinh cong) — KH5 doc bo qua
+		return nil
+	}
+	toX, err := r.Short()
+	if err != nil {
+		return nil
+	}
+	toY, err := r.Short()
+	if err != nil {
+		return nil // KH5: thieu toY -> bo goi (client that luon gui du ca hai)
+	}
+	b.khuVuc.Gui(suKienDiChuyen{idNhanVat: b.nhanVat.ID, x: toX, y: toY})
+	return nil
+}
+
+// KhiDong duoc PhucVu goi khi phien dong (defer). Neu nhan vat da vao khu vuc,
+// bao actor go no ra (actor phat -6 cho nguoi con lai). An toan goi khi khuVuc nil.
+func (b *BoXuLy) KhiDong() {
+	if b.khuVuc != nil && b.nhanVat != nil {
+		b.khuVuc.Gui(suKienRa{idNhanVat: b.nhanVat.ID})
+	}
 }
 
 // xuLyDangNhap xu ly khung -29 (dang nhap). Goi long hai tang: byte lenh con

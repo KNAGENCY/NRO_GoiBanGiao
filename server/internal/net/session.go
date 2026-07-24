@@ -99,6 +99,13 @@ func PhucVu(conn net.Conn, taoXuLy func() XuLyGoiTin) {
 
 	xuLy := taoXuLy()
 
+	// Neu bo xu ly co diem moc "khi dong" (KH5: bao actor khu vuc go nguoi choi),
+	// goi no khi phien ket thuc. Dung type-assert de KHONG bat buoc moi XuLyGoiTin
+	// phai co KhiDong (mock test cu khong can doi).
+	if c, ok := xuLy.(interface{ KhiDong() }); ok {
+		defer c.KhiDong()
+	}
+
 	if err := batTay(s); err != nil {
 		slog.Warn("bat tay that bai", "ip", diaChi, "loi", err)
 		return

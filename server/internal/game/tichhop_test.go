@@ -167,7 +167,7 @@ type clientGia struct {
 // la khoThat, *store.Store that) va thuc hien bat tay y het dungPhienThat.
 func moPhienClientGia(t *testing.T, kho Kho) *clientGia {
 	t.Helper()
-	b := NewBoXuLy(kho)
+	b := NewBoXuLy(kho, nil)
 
 	benClient, benServer := net.Pipe()
 	go mynet.PhucVu(benServer, func() mynet.XuLyGoiTin { return b })

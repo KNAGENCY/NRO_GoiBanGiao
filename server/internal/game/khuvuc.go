@@ -160,12 +160,18 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 	case suKienDiChuyen:
 		nguoi, co := k.nguoiTrong[sk.idNhanVat]
 		if !co {
-			return // khong co trong khu vuc — bo qua an toan
+			return
 		}
-		// Cap nhat vi tri THAT (authoritative). ViTriX/Y la int32.
+		// KE HOACH 5: kiem hop le PHAI o day (actor so huu nguoi.nv), KHONG o luong
+		// phien — luong phien doc nv.ViTri se DUA voi actor ghi chung con tro. Kiem
+		// bang vi tri AUTHORITATIVE hien tai.
+		if !kiemDiChuyenHopLe(k.banDo, int16(nguoi.nv.ViTriX), int16(nguoi.nv.ViTriY), sk.x, sk.y) {
+			slog.Debug("bo goi di chuyen bat hop le (ngoai bien / vuot nguong buoc)",
+				"id", sk.idNhanVat, "mapId", k.banDo.MapID, "toX", sk.x, "toY", sk.y)
+			return // giu vi tri cu, KHONG phat
+		}
 		nguoi.nv.ViTriX = int32(sk.x)
 		nguoi.nv.ViTriY = int32(sk.y)
-		// Phat -7 cho NGUOI KHAC (client tu ve chuyen dong cua chinh minh).
 		k.phatChoNguoiKhac(sk.idNhanVat, goiDiChuyen(sk.idNhanVat, sk.x, sk.y))
 
 	case suKienRa:

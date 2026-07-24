@@ -28,7 +28,7 @@ import (
 // KiemTraDangNhap.
 func boXuLyDaDangNhap(t *testing.T) *BoXuLy {
 	t.Helper()
-	b := NewBoXuLy(&khoGia{})
+	b := NewBoXuLy(&khoGia{}, nil)
 	b.taiKhoan = &store.TaiKhoan{ID: 1, TenDangNhap: "nguoidung"}
 	return b
 }
@@ -216,7 +216,7 @@ func TestTaoNhanVat_TenDaDung_TuChoi(t *testing.T) {
 }
 
 func TestTaoNhanVat_ChuaDangNhap_BoQua(t *testing.T) {
-	b := NewBoXuLy(&khoGia{}) // b.taiKhoan == nil: chua dang nhap
+	b := NewBoXuLy(&khoGia{}, nil) // b.taiKhoan == nil: chua dang nhap
 	s, docGoi := phienGia(t)
 	r := protocol.NewReader(thanTaoNhanVat(t, "Naruto", 0, 5))
 	if err := b.xuLyTaoNhanVat(s, r); err != nil {
@@ -252,7 +252,7 @@ func TestTaoNhanVat_ThanhCong_VaoTheGioi(t *testing.T) {
 // -28 -> lenh con 2 -> xuLyTaoNhanVat bi dut o bat ky khau nao, se KHONG co
 // goi -26 nao duoc gui ve va ReadMessage() o day se timeout/loi, lam test do.
 func TestXuLy_Khung28_DieuPhoiToiTaoNhanVat(t *testing.T) {
-	b := NewBoXuLy(&khoGia{})
+	b := NewBoXuLy(&khoGia{}, nil)
 	b.taiKhoan = &store.TaiKhoan{ID: 1, TenDangNhap: "nguoidung"} // da dang nhap
 
 	fClient, dong := dungPhienThat(t, b)

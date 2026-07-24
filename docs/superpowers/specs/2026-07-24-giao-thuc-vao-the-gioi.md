@@ -65,8 +65,13 @@ cũ là `vsData=10, vsMap=2, vsSkill=1, vsItem=4` (`DataGame.java:44-47`). Đặ
 
 Ghi: `DataGame.java:54-72`. Đọc: `Controller.cs:5441-5578`.
 
+> Gói dùng `messageNotMap((byte)4)` = `Message(-28)` + byte lệnh con `4` **là byte
+> đầu thân**. Mọi gói `-28/X` đều vậy (byte lệnh con đầu thân). Riêng `-87` là
+> `Message(-87)` trực tiếp, KHÔNG có byte lệnh con.
+
 | # | Trường | Kiểu | Giá trị |
 |---|---|---|---|
+| 0 | **lệnh con** | byte | **4** |
 | 1 | vsData | byte | 20 |
 | 2 | vsMap | byte | 20 |
 | 3 | vsSkill | byte | 20 |

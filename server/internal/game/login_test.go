@@ -809,6 +809,68 @@ func TestPhucVuGoiXinItem(t *testing.T) {
 // la du du) truoc khi doc b.clientSanSang — dung cach phienGia trong
 // nhanvat_test.go da lam cho tinh huong tuong tu (doi goroutine doc nen kip
 // gom goi).
+// fClientHetHanNgan khang dinh KHONG con goi nao may chu gui ra: doc mot goi va
+// mong doi loi (ket noi ranh -> ReadMessage het han theo deadline da dat trong
+// dungPhienThat). Tra ve true neu dung la khong co goi.
+func fClientHetHanNgan(t *testing.T, f *protocol.Framer) bool {
+	t.Helper()
+	if _, err := f.ReadMessage(); err == nil {
+		t.Error("nhan duoc goi NGOAI DU KIEN khi mong doi im lang")
+		return false
+	}
+	return true
+}
+
+func TestClientOkGuiVaoTheGioi(t *testing.T) {
+	// Client gui -28/13 khi da vao the gioi -> may chu gui DUNG 3 goi theo thu tu
+	// -82 (tileset) -> -30 (ME_INFO) -> -24 (MAP INFO). -82 PHAI truoc -24 (§7).
+	b := NewBoXuLy(&khoGia{})
+	b.nhanVat = &store.NhanVat{ID: 7, Ten: "Naruto", Lang: 0, KieuToc: 5,
+		SucManh: 100, Vang: 1000, Ngoc: 0, MapID: 1, ViTriX: 100, ViTriY: 384}
+	fClient, dong := dungPhienThat(t, b)
+	defer dong()
+
+	// Gui -28/13 (client ok).
+	w := protocol.NewWriter()
+	w.Byte(lenhConClientOk) // 13
+	if err := fClient.WriteMessage(protocol.NewMessage(lenhKhongTrenBanDo, w)); err != nil {
+		t.Fatal(err)
+	}
+
+	m82 := docMotGoi(t, fClient)
+	if m82.Command != -82 {
+		t.Fatalf("goi 1 = lenh %d, mong doi -82 (tileset, BAT BUOC truoc -24)", m82.Command)
+	}
+	m30 := docMotGoi(t, fClient)
+	if m30.Command != -30 {
+		t.Fatalf("goi 2 = lenh %d, mong doi -30 (ME_INFO)", m30.Command)
+	}
+	m24 := docMotGoi(t, fClient)
+	if m24.Command != -24 {
+		t.Fatalf("goi 3 = lenh %d, mong doi -24 (MAP INFO)", m24.Command)
+	}
+	// MAP INFO byte dau (sau khong co lenh con) = mapId = 1.
+	if len(m24.Data) == 0 || m24.Data[0] != 1 {
+		t.Errorf("MAP INFO mapId = %v, mong doi 1 (mapId cua nhan vat)", m24.Data)
+	}
+}
+
+func TestClientOkChuaVaoTheGioiKhongGui(t *testing.T) {
+	// Chua co nhan vat (b.nhanVat == nil): -28/13 bi bo qua im lang, khong gui gi,
+	// khong sap. Client that khong bao gio lam vay; chi ke gia lap moi gui.
+	b := NewBoXuLy(&khoGia{}) // b.nhanVat = nil
+	fClient, dong := dungPhienThat(t, b)
+	defer dong()
+
+	w := protocol.NewWriter()
+	w.Byte(lenhConClientOk)
+	if err := fClient.WriteMessage(protocol.NewMessage(lenhKhongTrenBanDo, w)); err != nil {
+		t.Fatal(err)
+	}
+	// Khong duoc gui goi nao: dat han doc ngan, mong doi timeout.
+	_ = fClientHetHanNgan(t, fClient)
+}
+
 func TestNhanClientOk(t *testing.T) {
 	b := NewBoXuLy(&khoGia{})
 	b.nhanVat = &store.NhanVat{ID: 1, Lang: 0}

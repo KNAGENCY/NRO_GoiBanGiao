@@ -422,6 +422,40 @@ func TestTaoRoiDangNhapLai_ThayNhanVat(t *testing.T) {
 	if nv.Cap != 1 {
 		t.Errorf("cap = %d, mong doi 1 (nhan vat vua tao)", nv.Cap)
 	}
+	// Khang dinh round-trip map/vi tri/kieu toc: cac truong nay duoc
+	// xuLyTaoNhanVat/store.TaoNhanVat ghi dung (da doc code xac nhan), nhung
+	// truoc ban sua nay chua co khang dinh nao trong kiem thu dau-cuoi bat
+	// duoc neu ai do vo tinh ghi sai/hoan doi truong — vd gan nham ViTriY vao
+	// cot vi_tri_x, hay cong nham 1 vao kieu toc truoc khi luu.
+	//
+	// QUAN TRONG: map/vi-tri so sanh voi GIA TRI GHIM (khong goi lai
+	// TimLang(0) nhu HP/Chakra o tren) — vi ca duong ghi CSDL
+	// (xuLyTaoNhanVat goi TimLang(0)) LAN mot phep so sanh dua vao TimLang(0)
+	// deu doc CHUNG mot nguon (danhSachLang trong lang.go), nen mot dot bien
+	// sua THANG so lieu trong bang do (vd MapKhoiDau lang 0 tu 1 thanh 99) se
+	// lam CA HAI phia doi theo nhau — da tu kiem chung tren mot ban sao
+	// (scratchpad, khong dung toi repo goc): sua MapKhoiDau lang 0 thanh 99
+	// roi chay lai, neu so sanh dua vao langMongDoi.MapKhoiDau thi test VAN
+	// XANH (khong bat duoc dot bien). Ghim gia tri HIEN TAI cua lang 0 (xem
+	// danhSachLang trong lang.go) truc tiep o day de dong dung lo hong do;
+	// neu sau nay chu dinh can bang lai chi so khoi dau lang 0 (lang.go da
+	// ghi chu "se can bang lai o Ke hoach 4"), sua gia tri ghim duoi day
+	// theo cho khop.
+	if nv.MapID != 1 {
+		t.Errorf("map id = %d, mong doi 1 (MapKhoiDau ghim cua lang 0, xem danhSachLang trong lang.go)", nv.MapID)
+	}
+	if nv.ViTriX != 100 {
+		t.Errorf("vi tri x = %d, mong doi 100 (ViTriXKhoiDau ghim cua lang 0)", nv.ViTriX)
+	}
+	if nv.ViTriY != 384 {
+		t.Errorf("vi tri y = %d, mong doi 384 (ViTriYKhoiDau ghim cua lang 0)", nv.ViTriY)
+	}
+	// 5 la byte kieu toc that su gui trong goi tao nhan vat o tren
+	// (cl.taoNhanVat(tenNV, 0, 5)) — khong lien quan TimLang, khong co van de
+	// "cung nguon" nhu tren.
+	if nv.KieuToc != int16(5) {
+		t.Errorf("kieu toc = %d, mong doi 5 (byte kieu toc da gui trong goi tao nhan vat)", nv.KieuToc)
+	}
 
 	// Lan 2: NGAT phien cu (defer cl.dong() o tren da chay), mo PHIEN MOI,
 	// dang nhap lai CUNG tai khoan -> da co nhan vat -> KHONG duoc nhan lenh

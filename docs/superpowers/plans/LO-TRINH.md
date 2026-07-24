@@ -6,20 +6,28 @@ Mỗi kế hoạch là một tài liệu riêng, viết theo skill `superpowers:
 thi công theo skill `superpowers:subagent-driven-development`.
 
 **Mức độ chắc chắn của lộ trình này:** Kế hoạch 1 và 2 đã xong và gộp. Kế hoạch
-3, 9 đã chốt phạm vi. Các kế hoạch còn lại là bản phác — thứ tự và ranh giới sẽ
-chỉnh khi tới nơi, vì làm xong cái trước mới biết cái sau cần gì.
+3, 4, 5, 10 đã chốt phạm vi. Các kế hoạch còn lại là bản phác.
 
-**Kế hoạch 3 tiếp theo — nhắc trước khi bắt tay:** phần Global Constraints của
-Kế hoạch 3 PHẢI nhét bảng số ở §4.3 của
+**Tách "vào thế giới" (24/07/2026):** khi giải mã giao thức mới thấy đưa nhân
+vật vào bản đồ là hai hệ con tách bạch: (a) **đồng bộ dữ liệu tĩnh** — bắt tay
+phiên bản + phục vụ bốn catalog (data/map/skill/item), nơi thay 3 lớp Dragon
+Ball bằng 5 làng Naruto; (b) **vào thế giới** — ME_INFO + MAP INFO + tileset +
+mô hình khu vực → client render. Mỗi cái một cột mốc kiểm thử riêng nên tách
+thành Kế hoạch 3 và 4. Mô hình actor + di chuyển dời thành Kế hoạch 5; các kế
+hoạch sau dời xuống một bậc. Byte-table ở
+[`../specs/2026-07-24-giao-thuc-vao-the-gioi.md`](../specs/2026-07-24-giao-thuc-vao-the-gioi.md).
+
+**Kế hoạch 5 (di chuyển + actor) — nhắc trước khi bắt tay:** Global Constraints
+PHẢI nhét bảng số §4.3 của
 [`../specs/2026-07-23-hoa-giai-muot-va-chong-gian-lan.md`](../specs/2026-07-23-hoa-giai-muot-va-chong-gian-lan.md)
 (nhịp 100ms, bình tín dụng di chuyển, phát lại một-đổi-một không gom, kiểm địa
-hình, nới trần cho admin theo `la_admin`). Chốt sai mấy con số này thì tới Kế
-hoạch 9 mới lộ, lúc đó sửa là viết lại tầng khu vực. Ba sửa đổi client C1/C2/C3
-(§4.1) làm cùng đợt dựng lại client.
+hình, nới trần admin theo `la_admin`). Chốt sai thì tới "cảm giác chơi" mới lộ,
+lúc đó sửa là viết lại tầng khu vực. Ba sửa đổi client C1/C2/C3 (§4.1) làm cùng
+đợt dựng lại client.
 
 **Nợ kỹ thuật mang sang** (ghi ở `.superpowers/sdd/progress.md`): chưa chạy được
-`go test -race` (máy thiếu trình biên dịch C) — nên xử lý trước Kế hoạch 3 vì đó
-là lúc có tranh chấp luồng thật; test package `game` chậm ~34s (áp mẫu
+`go test -race` (máy thiếu trình biên dịch C) — nên xử lý trước Kế hoạch 5 (actor)
+vì đó là lúc có tranh chấp luồng thật; test package `game` chậm ~34s (áp mẫu
 `clientGia` hạn giờ 1s cho `chayDangNhap`); chưa có chống dò mật khẩu / giới hạn
 kết nối theo IP (Kế hoạch bảo mật B, là bước lùi so với bản Java cũ có AntiLogin).
 
@@ -30,19 +38,21 @@ kết nối theo IP (Kế hoạch bảo mật B, là bước lùi so với bản
 | # | Tên | Trạng thái | Phụ thuộc |
 |---|---|---|---|
 | 1 | Lõi giao thức + Đăng nhập | ✅ **Xong** (gộp `6529d35`) | — |
-| 2 | **Nhân vật: tạo, lưu, tải** | ✅ **Xong** (gộp `0816c89`) | 1 |
-| 3 | Mô hình actor cho khu vực + di chuyển | Chưa bắt đầu | 1, 2 |
-| 4 | Chiến đấu, chiêu thức, quái, boss | Chưa bắt đầu | 3 |
-| 5 | Vật phẩm, hành trang, cửa hàng, giao dịch | Chưa bắt đầu | 3 |
-| 6 | Kho nội dung YAML + nạp nóng | Chưa bắt đầu | 4, 5 |
-| 7 | Nhiệm vụ, cốt truyện, NPC | Chưa bắt đầu | 6 |
-| 8 | Web + Panel quản trị (Next.js) | Chưa bắt đầu | 2 |
-| 9 | **Cảm giác chơi** — hoạt ảnh, chuyển màn, hướng dẫn người mới | Chưa bắt đầu | 3, 4 |
-| B | Bảo mật: chống gian lận, chống dò mật khẩu, chống DDoS | Chưa bắt đầu | 3, 4 |
+| 2 | Nhân vật: tạo, lưu, tải | ✅ **Xong** (gộp `0816c89`) | 1 |
+| 3 | **Đồng bộ dữ liệu tĩnh** (bắt tay + 4 catalog, 5 làng) | Đang thi công | 1, 2 |
+| 4 | Vào thế giới (ME_INFO + MAP INFO + tileset + khu vực) | Chưa bắt đầu | 3 |
+| 5 | Di chuyển + mô hình actor cho khu vực | Chưa bắt đầu | 4 |
+| 6 | Chiến đấu, chiêu thức, quái, boss | Chưa bắt đầu | 5 |
+| 7 | Vật phẩm, hành trang, cửa hàng, giao dịch | Chưa bắt đầu | 5 |
+| 8 | Kho nội dung YAML + nạp nóng | Chưa bắt đầu | 6, 7 |
+| 9 | Nhiệm vụ, cốt truyện, NPC | Chưa bắt đầu | 8 |
+| 10 | **Cảm giác chơi** — hoạt ảnh, chuyển màn, hướng dẫn người mới | Chưa bắt đầu | 5, 6 |
+| W | Web + Panel quản trị (Next.js) | Chưa bắt đầu | 2 |
+| B | Bảo mật: chống gian lận, chống dò mật khẩu, chống DDoS | Chưa bắt đầu | 5, 6 |
 | V | Triển khai VPS, giám sát, phát hành | Chưa bắt đầu | tất cả |
 
-Kế hoạch **B** và **V** không đánh số vì chúng cắt ngang mọi kế hoạch khác,
-không nằm gọn ở một chỗ trong thứ tự.
+Kế hoạch **W** (web), **B** (bảo mật) và **V** (triển khai) đánh chữ vì chúng
+cắt ngang mọi kế hoạch khác, không nằm gọn ở một chỗ trong thứ tự.
 
 > **Ghi chú Kế hoạch 2 (24/07/2026):** ban đầu định là "chuyển dữ liệu cũ".
 > Nhưng CSDL cũ chỉ có **3 tài khoản + 3 nhân vật thử nghiệm** (đếm thật từ
@@ -55,7 +65,7 @@ không nằm gọn ở một chỗ trong thứ tự.
 
 ---
 
-## Kế hoạch 9 — Cảm giác chơi
+## Kế hoạch 10 — Cảm giác chơi
 
 ### Tại sao tách riêng
 
@@ -86,11 +96,12 @@ rồi cuối cùng game chắp vá.
   bắt đọc chữ mà không có gì để bấm
 - Dạy bằng cách cho làm, không phải bằng bảng chữ dài
 
-### ⚠️ Phần phải quyết SỚM, không đợi tới Kế hoạch 9
+### ⚠️ Phần phải quyết SỚM, không đợi tới Kế hoạch 10
 
-Đây là lý do thật sự khiến Kế hoạch 9 nguy hiểm nếu để cuối. Ba con số dưới
-đây là **ràng buộc của máy chủ**, phải chốt và nhét vào **Kế hoạch 3**. Chốt
-sai thì tới Kế hoạch 9 mới phát hiện, lúc đó sửa là viết lại tầng khu vực.
+Đây là lý do thật sự khiến Kế hoạch 10 nguy hiểm nếu để cuối. Ba con số dưới
+đây là **ràng buộc của máy chủ**, phải chốt và nhét vào **Kế hoạch 5** (di
+chuyển + actor). Chốt sai thì tới Kế hoạch 10 mới phát hiện, lúc đó sửa là viết
+lại tầng khu vực.
 
 | Thứ phải chốt | Vì sao không đợi được |
 |---|---|
@@ -100,10 +111,10 @@ sai thì tới Kế hoạch 9 mới phát hiện, lúc đó sửa là viết l�
 
 **✅ Đã giải quyết** — xem [`../specs/2026-07-23-hoa-giai-muot-va-chong-gian-lan.md`](../specs/2026-07-23-hoa-giai-muot-va-chong-gian-lan.md).
 Bảng số chốt ở §4.3 của tài liệu đó, đưa nguyên vào Global Constraints của
-Kế hoạch 3. Ba sửa đổi client ở §4.1 làm cùng đợt dựng lại client.
+Kế hoạch 5. Ba sửa đổi client ở §4.1 làm cùng đợt dựng lại client.
 
 ### Chưa viết chi tiết vì
 
-Kế hoạch 9 đụng vào client Unity và phụ thuộc máy chủ gửi xuống những gì —
-mà điều đó do Kế hoạch 3 và 4 quyết định. Viết 50 bước chi tiết bây giờ là
-viết ra thứ sẽ phải bỏ đi. Sẽ viết đầy đủ khi Kế hoạch 4 xong.
+Kế hoạch 10 đụng vào client Unity và phụ thuộc máy chủ gửi xuống những gì —
+mà điều đó do Kế hoạch 5 (di chuyển) và 6 (chiến đấu) quyết định. Viết 50 bước
+chi tiết bây giờ là viết ra thứ sẽ phải bỏ đi. Sẽ viết đầy đủ khi Kế hoạch 6 xong.

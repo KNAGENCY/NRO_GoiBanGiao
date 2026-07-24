@@ -92,12 +92,15 @@ func main() {
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
 
+	// Ke hoach 5: tao 5 khu vuc actor (mapId 1-5) MOT lan, dung chung cho moi phien.
+	soKhuVuc := game.MoSoKhuVuc()
+
 	// LangNghe chay vo han (Accept trong vong lap), nen phai chay tren
 	// goroutine rieng de goroutine chinh con ranh tay cho tin hieu dung.
 	loiMayChu := make(chan error, 1)
 	go func() {
 		loiMayChu <- mynet.LangNghe(diaChi, func() mynet.XuLyGoiTin {
-			return game.NewBoXuLy(kho)
+			return game.NewBoXuLy(kho, soKhuVuc)
 		})
 	}()
 
@@ -106,6 +109,7 @@ func main() {
 	select {
 	case sig := <-sigCh:
 		slog.Info("da nhan tin hieu dung, dang dong may chu...", "tin_hieu", sig.String())
+		soKhuVuc.DungTatCa()
 		kho.Close()
 		slog.Info("da dong CSDL. Thoat may chu.")
 		os.Exit(0)
@@ -114,6 +118,7 @@ func main() {
 		// LangNghe() chi tra ve khi khong the mo cong nghe (loi khoi dong):
 		// than vong lap Accept cua no tu bat loi tung ket noi va khong bao
 		// gio tu thoat, nen err o day luon khac nil.
+		soKhuVuc.DungTatCa()
 		kho.Close()
 		slog.Error("MAY CHU DUNG DO LOI: khong mo duoc cong de lang nghe ket noi.", "loi", err)
 		os.Exit(1)

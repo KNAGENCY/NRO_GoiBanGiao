@@ -92,7 +92,7 @@ func TestBocTachGoiDangNhap(t *testing.T) {
 
 func TestDangNhapDungMatKhau(t *testing.T) {
 	bam, _ := auth.Hash("matkhau")
-	b := NewBoXuLy(&khoGia{tk: &store.TaiKhoan{ID: 7, TenDangNhap: "nguoi", MatKhauBam: bam}})
+	b := NewBoXuLy(&khoGia{tk: &store.TaiKhoan{ID: 7, TenDangNhap: "nguoi", MatKhauBam: bam}}, nil)
 
 	kq, err := b.KiemTraDangNhap(context.Background(), "nguoi", "matkhau")
 	if err != nil {
@@ -108,7 +108,7 @@ func TestDangNhapDungMatKhau(t *testing.T) {
 
 func TestDangNhapSaiMatKhau(t *testing.T) {
 	bam, _ := auth.Hash("matkhau")
-	b := NewBoXuLy(&khoGia{tk: &store.TaiKhoan{ID: 7, MatKhauBam: bam}})
+	b := NewBoXuLy(&khoGia{tk: &store.TaiKhoan{ID: 7, MatKhauBam: bam}}, nil)
 
 	kq, _ := b.KiemTraDangNhap(context.Background(), "nguoi", "sai")
 	if kq.ThanhCong {
@@ -122,7 +122,7 @@ func TestDangNhapSaiMatKhau(t *testing.T) {
 // Tai khoan khong ton tai va sai mat khau phai tra ve CUNG MOT cau bao,
 // de ke xau khong do duoc tai khoan nao co that.
 func TestTaiKhoanKhongTonTaiBaoGiongSaiMatKhau(t *testing.T) {
-	b := NewBoXuLy(&khoGia{err: store.ErrKhongThayTaiKhoan})
+	b := NewBoXuLy(&khoGia{err: store.ErrKhongThayTaiKhoan}, nil)
 
 	kq, _ := b.KiemTraDangNhap(context.Background(), "khong-co", "gi-do")
 	if kq.ThanhCong {
@@ -135,7 +135,7 @@ func TestTaiKhoanKhongTonTaiBaoGiongSaiMatKhau(t *testing.T) {
 
 func TestTaiKhoanBiKhoa(t *testing.T) {
 	bam, _ := auth.Hash("matkhau")
-	b := NewBoXuLy(&khoGia{tk: &store.TaiKhoan{ID: 7, MatKhauBam: bam, BiKhoa: true}})
+	b := NewBoXuLy(&khoGia{tk: &store.TaiKhoan{ID: 7, MatKhauBam: bam, BiKhoa: true}}, nil)
 
 	kq, _ := b.KiemTraDangNhap(context.Background(), "nguoi", "matkhau")
 	if kq.ThanhCong {
@@ -148,7 +148,7 @@ func TestTaiKhoanBiKhoa(t *testing.T) {
 
 // Ten dang nhap rong khong duoc cham toi CSDL.
 func TestTenRongBiTuChoiNgay(t *testing.T) {
-	b := NewBoXuLy(&khoGia{err: context.Canceled}) // kho se loi neu bi goi
+	b := NewBoXuLy(&khoGia{err: context.Canceled}, nil) // kho se loi neu bi goi
 	kq, err := b.KiemTraDangNhap(context.Background(), "", "gi-do")
 	if err != nil {
 		t.Fatalf("khong duoc goi toi kho: %v", err)
@@ -272,7 +272,7 @@ func docMotGoi(t *testing.T, f *protocol.Framer) *protocol.Message {
 func chayDangNhap(t *testing.T, kho Kho, ten, matKhau string) []*protocol.Message {
 	t.Helper()
 
-	b := NewBoXuLy(kho)
+	b := NewBoXuLy(kho, nil)
 	fClient, dong := dungPhienThat(t, b)
 	defer dong()
 
@@ -325,7 +325,7 @@ func coLenh(goi []*protocol.Message, lenh int8) bool {
 // ket qua o trang thai cho — dung loi that da tung xay ra o ban Java cu).
 func TestTuChoiDangNhapGuiDuHaiGoiDungThuTu(t *testing.T) {
 	bam, _ := auth.Hash("dungmatkhau")
-	b := NewBoXuLy(&khoGia{tk: &store.TaiKhoan{ID: 1, TenDangNhap: "nguoi", MatKhauBam: bam}})
+	b := NewBoXuLy(&khoGia{tk: &store.TaiKhoan{ID: 1, TenDangNhap: "nguoi", MatKhauBam: bam}}, nil)
 
 	fClient, dong := dungPhienThat(t, b)
 	defer dong()
@@ -384,7 +384,7 @@ func TestDangNhapDungGuiLenhTaoNhanVat(t *testing.T) {
 	b := NewBoXuLy(&khoGia{
 		tk:            &store.TaiKhoan{ID: 1, TenDangNhap: "nguoi", MatKhauBam: bam},
 		loiLayNhanVat: store.ErrKhongThayNhanVat,
-	})
+	}, nil)
 
 	fClient, dong := dungPhienThat(t, b)
 	defer dong()
@@ -458,7 +458,7 @@ func TestDangNhapDaCoNhanVat_KhongGuiManTao(t *testing.T) {
 // khau truoc gio deu dung rieng, khong ket hop ca hai dieu kien cung luc).
 func TestSaiMatKhauTrenTaiKhoanBiKhoaVanBaoSaiThongTin(t *testing.T) {
 	bam, _ := auth.Hash("matkhau-dung")
-	b := NewBoXuLy(&khoGia{tk: &store.TaiKhoan{ID: 7, MatKhauBam: bam, BiKhoa: true}})
+	b := NewBoXuLy(&khoGia{tk: &store.TaiKhoan{ID: 7, MatKhauBam: bam, BiKhoa: true}}, nil)
 
 	kq, _ := b.KiemTraDangNhap(context.Background(), "nguoi", "mat-khau-sai")
 	if kq.ThanhCong {
@@ -507,7 +507,7 @@ func TestGoiLenhLaKhongGhiNhatKy(t *testing.T) {
 	slog.SetDefault(slog.New(dem))
 	defer slog.SetDefault(cu)
 
-	b := NewBoXuLy(&khoGia{err: context.Canceled}) // kho khong duoc goi toi
+	b := NewBoXuLy(&khoGia{err: context.Canceled}, nil) // kho khong duoc goi toi
 
 	// 1. Lenh top-level la (khac -29 = lenhChuaDangNhap).
 	if err := b.XuLy(&mynet.Session{}, &protocol.Message{Command: 42}); err != nil {
@@ -539,7 +539,7 @@ func TestGoiLenhLaKhongGhiNhatKy(t *testing.T) {
 //
 // Dung khoGia bao loi neu bi goi de bat dung viec "khong goi toi kho".
 func TestTenSaiDinhDangBiChanKhongGoiKho(t *testing.T) {
-	b := NewBoXuLy(&khoGia{err: context.Canceled}) // kho se loi neu bi goi
+	b := NewBoXuLy(&khoGia{err: context.Canceled}, nil) // kho se loi neu bi goi
 
 	truongHop := []struct {
 		mota string
@@ -690,7 +690,7 @@ func docGoiLenhDacBietThuCong(t *testing.T, conn net.Conn, khoa []byte) *protoco
 // Nen o day tu dung bat tay thu cong (docGoiKhoaThuCong, da dung o
 // dungPhienThat) roi ghi/doc than tin bang hai ham thu cong nay.
 func TestPhucVuGoiXinData(t *testing.T) {
-	b := NewBoXuLy(&khoGia{})
+	b := NewBoXuLy(&khoGia{}, nil)
 	b.nhanVat = &store.NhanVat{ID: 1, Lang: 0}
 
 	benClient, benServer := net.Pipe()
@@ -716,7 +716,7 @@ func TestPhucVuGoiXinData(t *testing.T) {
 }
 
 func TestPhucVuGoiXinSkill5Lang(t *testing.T) {
-	b := NewBoXuLy(&khoGia{})
+	b := NewBoXuLy(&khoGia{}, nil)
 	b.nhanVat = &store.NhanVat{ID: 1, Lang: 0}
 	fClient, dong := dungPhienThat(t, b)
 	defer dong()
@@ -746,7 +746,7 @@ func TestPhucVuGoiXinSkill5Lang(t *testing.T) {
 // dai thuong, doc duoc bang dungPhienThat/docMotGoi binh thuong (khong can
 // bat tay/doc thu cong nhu goi -87).
 func TestPhucVuGoiXinMap(t *testing.T) {
-	b := NewBoXuLy(&khoGia{})
+	b := NewBoXuLy(&khoGia{}, nil)
 	b.nhanVat = &store.NhanVat{ID: 1, Lang: 0}
 	fClient, dong := dungPhienThat(t, b)
 	defer dong()
@@ -775,7 +775,7 @@ func TestPhucVuGoiXinMap(t *testing.T) {
 // con nay se lam client ket vinh vien man hinh "Xin cho" (soft-lock), khong
 // he co trieu chung loi ro rang phia may chu (khong log, khong crash).
 func TestPhucVuGoiXinItem(t *testing.T) {
-	b := NewBoXuLy(&khoGia{})
+	b := NewBoXuLy(&khoGia{}, nil)
 	b.nhanVat = &store.NhanVat{ID: 1, Lang: 0}
 	fClient, dong := dungPhienThat(t, b)
 	defer dong()
@@ -824,7 +824,7 @@ func fClientHetHanNgan(t *testing.T, f *protocol.Framer) bool {
 func TestClientOkGuiVaoTheGioi(t *testing.T) {
 	// Client gui -28/13 khi da vao the gioi -> may chu gui DUNG 3 goi theo thu tu
 	// -82 (tileset) -> -30 (ME_INFO) -> -24 (MAP INFO). -82 PHAI truoc -24 (§7).
-	b := NewBoXuLy(&khoGia{})
+	b := NewBoXuLy(&khoGia{}, nil)
 	b.nhanVat = &store.NhanVat{ID: 7, Ten: "Naruto", Lang: 0, KieuToc: 5,
 		SucManh: 100, Vang: 1000, Ngoc: 0, MapID: 1, ViTriX: 100, ViTriY: 384}
 	fClient, dong := dungPhienThat(t, b)
@@ -858,7 +858,7 @@ func TestClientOkGuiVaoTheGioi(t *testing.T) {
 func TestClientOkChuaVaoTheGioiKhongGui(t *testing.T) {
 	// Chua co nhan vat (b.nhanVat == nil): -28/13 bi bo qua im lang, khong gui gi,
 	// khong sap. Client that khong bao gio lam vay; chi ke gia lap moi gui.
-	b := NewBoXuLy(&khoGia{}) // b.nhanVat = nil
+	b := NewBoXuLy(&khoGia{}, nil) // b.nhanVat = nil
 	fClient, dong := dungPhienThat(t, b)
 	defer dong()
 
@@ -872,7 +872,7 @@ func TestClientOkChuaVaoTheGioiKhongGui(t *testing.T) {
 }
 
 func TestNhanClientOk(t *testing.T) {
-	b := NewBoXuLy(&khoGia{})
+	b := NewBoXuLy(&khoGia{}, nil)
 	b.nhanVat = &store.NhanVat{ID: 1, Lang: 0}
 	fClient, dong := dungPhienThat(t, b)
 	defer dong()
@@ -885,5 +885,104 @@ func TestNhanClientOk(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 	if !b.clientSanSang {
 		t.Error("gui -28/13 (clientOk) khong lam b.clientSanSang = true")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Vá chốt chống gọi lại cho xuLyClientOk (-28/13) va xuLyVaoKhuVuc (-39).
+//
+// Boi canh: soi phat hien ca hai handler nay KHONG co chot chong tai nhap. Loi
+// quan trong (tranh chap): neu client gui LAI -28/13 sau khi da gui -39 (nhan
+// vat da "giao" cho actor khu vuc quan ly vi tri), xuLyClientOk chay lai se
+// GOI goiMapInfo(b.nhanVat, bd) — DOC nv.ViTriX/Y tren luong phien, CUNG LUC
+// actor co the dang GHI hai truong do (xuLyDiChuyen -> suKienDiChuyen) — doc
+// cap toa do "xe" (nua cu nua moi). Day dung loai tranh chap Ke hoach 5 Task 7
+// da xoa o noi khac; hai handler vao-the-gioi nay bi sot.
+// ---------------------------------------------------------------------------
+
+// TestClientOkKhongChayLaiLanHai la kiem chung QUAN TRONG cho chot chong goi
+// lai cua xuLyClientOk. Gui -28/13 lan 1 phai nhan du 3 goi -82/-30/-24 (dung
+// nhu TestClientOkGuiVaoTheGioi). Gui LAI -28/13 lan 2 (client that khong lam
+// vay, nhung mot con gia hoac goi lap tren mang co the) PHAI bi bo qua HOAN
+// TOAN im lang — khong duoc gui THEM bat ky goi nao, chung to xuLyClientOk
+// khong chay lai than ham (tranh doc nv.ViTriX/Y tranh chap voi actor ghi).
+func TestClientOkKhongChayLaiLanHai(t *testing.T) {
+	b := NewBoXuLy(&khoGia{}, nil)
+	b.nhanVat = &store.NhanVat{ID: 7, Ten: "Naruto", Lang: 0, KieuToc: 5,
+		SucManh: 100, Vang: 1000, Ngoc: 0, MapID: 1, ViTriX: 100, ViTriY: 384}
+	fClient, dong := dungPhienThat(t, b)
+	defer dong()
+
+	guiClientOk := func() {
+		t.Helper()
+		w := protocol.NewWriter()
+		w.Byte(lenhConClientOk) // 13
+		if err := fClient.WriteMessage(protocol.NewMessage(lenhKhongTrenBanDo, w)); err != nil {
+			t.Fatalf("gui -28/13 that bai: %v", err)
+		}
+	}
+
+	// Lan 1: phai nhan du 3 goi theo dung thu tu (nhu TestClientOkGuiVaoTheGioi).
+	guiClientOk()
+	m82 := docMotGoi(t, fClient)
+	if m82.Command != -82 {
+		t.Fatalf("lan 1, goi 1 = lenh %d, mong doi -82", m82.Command)
+	}
+	m30 := docMotGoi(t, fClient)
+	if m30.Command != -30 {
+		t.Fatalf("lan 1, goi 2 = lenh %d, mong doi -30", m30.Command)
+	}
+	m24 := docMotGoi(t, fClient)
+	if m24.Command != -24 {
+		t.Fatalf("lan 1, goi 3 = lenh %d, mong doi -24", m24.Command)
+	}
+
+	// Lan 2: gui LAI -28/13 — PHAI khong nhan them goi nao (chot chong goi lai).
+	guiClientOk()
+	if !fClientHetHanNgan(t, fClient) {
+		t.Fatal("gui -28/13 lan hai van khien xuLyClientOk gui them goi tin — thieu chot chong goi lai")
+	}
+}
+
+// TestVaoKhuVucLanHaiKhongPhatGoiTrung la kiem chung cho chot chong goi lai
+// cua xuLyVaoKhuVuc. Kich ban: client gui -39 (bao da tai xong map) HAI LAN
+// LIEN TIEP. Neu khong co chot: lan -39 THU HAI se khien actor xu ly LAI
+// suKienVao — buoc 1 cua KhuVuc.xuLy (xem khuvuc.go) phat -5 cua TUNG "nguoi
+// cu" trong khu vuc cho nguoi moi; nhung nguoi "cu" do gio CHINH LA nguoi nay
+// (da duoc them vao khu vuc boi lan -39 thu nhat) — ket qua actor gui cho
+// chinh nguoi choi goi -5 CUA CHINH HO, mot goi trung/nhieu thua tren day.
+// Voi chot dung, lan -39 thu hai la no-op hoan toan, khong co goi nao them.
+func TestVaoKhuVucLanHaiKhongPhatGoiTrung(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	k.BatDau()
+	defer k.Dung()
+	soKhuVuc := &SoKhuVuc{theoMap: map[int32]*KhuVuc{1: k}}
+
+	b := NewBoXuLy(&khoGia{}, soKhuVuc)
+	b.nhanVat = &store.NhanVat{ID: 7, Ten: "Naruto", Lang: 0, KieuToc: 5,
+		SucManh: 100, Vang: 1000, Ngoc: 0, MapID: 1, ViTriX: 100, ViTriY: 384}
+	fClient, dong := dungPhienThat(t, b)
+	defer dong()
+
+	// Bat tay -28/13 truoc de b.khuVuc duoc gan (xuLyClientOk). Doc het 3 goi.
+	w := protocol.NewWriter()
+	w.Byte(lenhConClientOk)
+	if err := fClient.WriteMessage(protocol.NewMessage(lenhKhongTrenBanDo, w)); err != nil {
+		t.Fatalf("gui -28/13 that bai: %v", err)
+	}
+	docMotGoi(t, fClient) // -82
+	docMotGoi(t, fClient) // -30
+	docMotGoi(t, fClient) // -24
+
+	// Gui -39 (vao khu vuc) HAI LAN LIEN TIEP — mo phong client gui trung.
+	if err := fClient.WriteMessage(&protocol.Message{Command: lenhVaoKhuVuc}); err != nil {
+		t.Fatalf("gui -39 lan 1 that bai: %v", err)
+	}
+	if err := fClient.WriteMessage(&protocol.Message{Command: lenhVaoKhuVuc}); err != nil {
+		t.Fatalf("gui -39 lan 2 that bai: %v", err)
+	}
+
+	if !fClientHetHanNgan(t, fClient) {
+		t.Fatal("gui -39 lan hai lam actor phat them goi tin (vd -5 cua chinh nguoi nay cho chinh ho) — thieu chot chong goi lai")
 	}
 }

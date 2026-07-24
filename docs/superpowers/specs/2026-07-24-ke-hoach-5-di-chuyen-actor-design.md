@@ -84,7 +84,7 @@ Thứ tự byte đầy đủ (từ `Zone.infoPlayer`, đã xác minh từng dòn
 |---|--------|----------|-------------------|
 | 1 | playerId | writeInt | `nv.ID` |
 | 2 | clanId | writeInt | -1 (chưa có bang hội) |
-| 3 | level | writeByte | 1 (map level; chưa có hệ cấp — dùng 1) |
+| 3 | level | writeByte | `byte(nv.Cap)` — cấp thật của nhân vật (field `Cap` đã có; nhân vật mới mặc định Cap=1 nên hành vi hiện tại y hệt "dùng 1", nhưng đúng ngay khi có hệ lên cấp) |
 | 4 | cờ cố định | writeBoolean | false |
 | 5 | typePk | writeByte | 0 |
 | 6 | gender | writeByte | `byte(nv.Lang)` |

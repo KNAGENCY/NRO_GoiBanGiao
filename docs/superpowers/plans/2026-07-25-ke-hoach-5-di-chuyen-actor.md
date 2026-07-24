@@ -14,7 +14,7 @@
 - **Server authoritative:** vị trí thật chỉ do luồng khu vực đổi; phiên không tự chạm trạng thái khu vực — chỉ gửi sự kiện.
 - **Chống gian lận "vừa phải":** kiểm biên map + khoảng cách Euclid mỗi bước ≤ `NGUONG_BUOC = 500`, áp **mọi map**. Từ chối = **im lặng bỏ gói + giữ vị trí cũ**, KHÔNG ngắt kết nối.
 - **Không dội `-7` lại cho chính người vừa đi** — chỉ phát cho người khác trong khu vực (`sendMessAnotherNotMeInMap`).
-- **Sạch race:** test actor chạy với `-race`.
+- **Sạch tranh chấp:** máy này KHÔNG có trình biên dịch C nên `-race` không chạy được (cgo báo "gcc not found"; không quyền admin để cài). Thay bằng: (1) **kỷ luật actor** — mọi trạng thái khu vực (danh sách người, vị trí) CHỈ luồng `vongLap` chạm tới; phiên chỉ gửi sự kiện, không đọc/ghi trực tiếp — kiểm bằng SOI MÃ; (2) **stress test** chạy nhiều lần liên tiếp không treo/flake. (Người dùng có thể chạy `-race` sau trên máy có gcc.)
 - **Go:** `D:\Go\bin\go.exe`, gofmt `D:\Go\bin\gofmt.exe`. Windows PowerShell (KHÔNG `&&`). Test cần CSDL: `$env:NRO_TEST_DSN='postgres://postgres:nrodev123@127.0.0.1:5433/nro_test'` (dòng riêng).
 - **Ghi chú tiếng Việt** giải thích *tại sao*. Danh tính Naruto; giữ mapId/đồ hoạ cũ chỉ như bản mã.
 - File dưới `server/`. Không đụng `1-MAY-CHU-GAME/`.

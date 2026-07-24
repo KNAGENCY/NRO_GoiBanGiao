@@ -231,8 +231,13 @@ có sẵn trong file này thì forward nguyên file là đủ.
 Ghi: `Service.java:776-897` (+ `DataGame.sendHeadAvatar:455-464`). Đọc:
 `Controller.cs:5820-6009`.
 
+> Gói dùng `messageSubCommand((byte)0)` = `Message(-30)` + **byte lệnh con `0`
+> là byte đầu thân** (`Service.java:782`). ĐỪNG QUÊN byte 0 này — quên là client
+> đọc lệch, kẹt "Xin chờ".
+
 | # | Trường | Kiểu | Nguồn (nhân vật) |
 |---|---|---|---|
+| 0 | **lệnh con** | byte | **0** |
 | 1 | id | int | `NhanVat.ID` |
 | 2 | taskMain.id | byte | 0 (chưa có nhiệm vụ) |
 | 3 | gender | byte | **`NhanVat.Lang`** (0-4) |

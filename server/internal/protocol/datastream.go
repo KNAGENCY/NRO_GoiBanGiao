@@ -205,6 +205,17 @@ func (r *Reader) Int() (int32, error) {
 	return int32(binary.BigEndian.Uint32(b)), nil
 }
 
+// Long doc 8 byte big-endian thanh int64 — nghich dao cua Writer.Long, khop
+// java.io.DataInputStream.readLong. Dung cho cac truong long trong ME_INFO
+// (power, gold): client luon readLong() nen ta ghi/doc dung 8 byte.
+func (r *Reader) Long() (int64, error) {
+	b, err := r.con(8)
+	if err != nil {
+		return 0, err
+	}
+	return int64(binary.BigEndian.Uint64(b)), nil
+}
+
 // UTF doc chuoi theo dinh dang readUTF cua java.io.DataInputStream: 2 byte
 // do dai (so byte modified UTF-8 tiep theo) roi giai ma modified UTF-8 thanh
 // chuoi Go (UTF-8 chuan). Xem chu thich cua Writer.UTF de biet ly do phai

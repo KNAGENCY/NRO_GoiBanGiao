@@ -197,3 +197,32 @@ func TestThemMangRong(t *testing.T) {
 		t.Errorf("ThemMang(nil) phai khong doi bo dem, got %v", got)
 	}
 }
+
+func TestWriterLongReaderLongVongTron(t *testing.T) {
+	// Ghi bang Writer.Long roi doc lai bang Reader.Long phai ra dung so ban dau,
+	// ke ca so am va so lon (long 64-bit). Big-endian, khop java DataOutputStream.
+	cacGiaTri := []int64{0, 1, -1, 250, 1_000_000, 9_223_372_036_854_775_807, -9_223_372_036_854_775_808}
+	for _, muon := range cacGiaTri {
+		w := NewWriter()
+		w.Long(muon)
+		r := NewReader(w.Bytes())
+		got, err := r.Long()
+		if err != nil {
+			t.Fatalf("Long(%d): doc loi %v", muon, err)
+		}
+		if got != muon {
+			t.Errorf("Long vong tron: ghi %d, doc %d", muon, got)
+		}
+		if _, err := r.Byte(); err == nil {
+			t.Errorf("Long(%d): con byte thua sau 8 byte, phai het buffer", muon)
+		}
+	}
+}
+
+func TestReaderLongThieuByteBaoLoi(t *testing.T) {
+	// Bo dem chi 7 byte -> Long phai bao loi (khong doc lem sang vung khong co).
+	r := NewReader([]byte{0, 0, 0, 0, 0, 0, 0})
+	if _, err := r.Long(); err == nil {
+		t.Error("Long tren bo dem 7 byte phai bao loi thieu byte")
+	}
+}

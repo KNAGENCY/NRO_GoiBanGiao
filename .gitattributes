@@ -1,0 +1,11 @@
+# Chuan hoa xuong dong: LF cho moi file van ban, khong phu thuoc core.autocrlf.
+# Ly do: may Windows nay dat core.autocrlf=true, khien git checkout ra CRLF con
+# gofmt/go luon dung LF -> moi lan `git status`/`gofmt -l` bao nhieu that ma noi
+# dung y het. Ep LF dut diem tieng on do.
+* text=auto eol=lf
+
+# Nhi phan: khong dong xuong dong. part.bin la du lieu sprite nhan vat nhung.
+*.bin binary
+*.jar binary
+*.png binary
+*.zip binary

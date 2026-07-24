@@ -383,6 +383,39 @@ func kiemMeInfo(t *testing.T, m *protocol.Message, nv *store.NhanVat) {
 	if gem, err := r.Int(); err != nil || gem != int32(nv.Ngoc) {
 		t.Fatalf("gem = %d (loi %v), mong doi %d (= Ngoc)", gem, err, nv.Ngoc)
 	}
+
+	// Duoi goi -30: 3 mang item + headAvatar + 3 conMeo + fusion + deltaTime +
+	// isNewMember, deu 0 cho nhan vat moi. Khang dinh byte-dung CA duoi de test
+	// dau-cuoi chung minh TRON goi -30 (khong dung o gem), roi HET buffer — 3 truong
+	// cuoi (aura/effFront/hat) da bo han (§8 note e). Neu thieu doan nay, sai byte o
+	// duoi goi se "xanh gia".
+	meByte := func(ten string, muon byte) {
+		g, err := r.Byte()
+		if err != nil || g != muon {
+			t.Fatalf("%s = %d (loi %v), mong doi %d", ten, g, err, muon)
+		}
+	}
+	meShort := func(ten string, muon int16) {
+		g, err := r.Short()
+		if err != nil || g != muon {
+			t.Fatalf("%s = %d (loi %v), mong doi %d", ten, g, err, muon)
+		}
+	}
+	meByte("itemsBody.size", 0)
+	meByte("itemsBag.size", 0)
+	meByte("itemsBox.size", 0)
+	meShort("headAvatar.size", 0)
+	meShort("conMeo0", 0)
+	meShort("conMeo1", 0)
+	meShort("conMeo2", 0)
+	meByte("fusion", 0)
+	if dt, err := r.Int(); err != nil || dt != 0 {
+		t.Fatalf("deltaTime = %d (loi %v), mong doi 0", dt, err)
+	}
+	meByte("isNewMember", 0)
+	if _, err := r.Byte(); err == nil {
+		t.Error("ME_INFO con byte thua sau isNewMember — 3 truong cuoi (aura/effFront/hat) phai bo han (§8 note e)")
+	}
 }
 
 // kiemMapInfo khang dinh goi -24 khop ban do cua nhan vat: mapId/tileId/name +

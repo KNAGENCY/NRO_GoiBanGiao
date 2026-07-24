@@ -1,5 +1,13 @@
 package game
 
+import "nroserver/internal/protocol"
+
+// Lệnh di chuyển
+const (
+	lenhDiChuyen  int8 = -7 // Phát di chuyển: báo người khác trong khu vực rằng nhân vật đã tới (x, y)
+	lenhRoiKhuVuc int8 = -6 // Rời khu vực: báo nhân vật đã rời khỏi khu vực
+)
+
 // NguongBuoc: mỗi bước di chuyển không vượt quá 500 đơn vị (tránh teleport chống lag).
 // Đơn vị: pixel/cell trên bản đồ.
 const NguongBuoc = 500
@@ -33,4 +41,21 @@ func kiemDiChuyenHopLe(bd *BanDo, cuX, cuY, toX, toY int16) bool {
 	thresholdSq := NguongBuoc * NguongBuoc
 
 	return distSq <= thresholdSq
+}
+
+// goiDiChuyen dùng gói -7 phát cho NGƯỜI KHÁC trong khu vực: nhân vật `idNhanVat`
+// vừa tới (x, y). (Server KHÔNG đối lại cho chính người vừa di — client tự về.)
+func goiDiChuyen(idNhanVat int64, x, y int16) *protocol.Message {
+	w := protocol.NewWriter()
+	w.Int(int32(idNhanVat)) // playerId (client đọc readInt)
+	w.Short(x)
+	w.Short(y)
+	return protocol.NewMessage(lenhDiChuyen, w)
+}
+
+// goiRoiKhuVuc dùng gói -6: nhân vật `idNhanVat` đã rời khu vực, client gỡ hình.
+func goiRoiKhuVuc(idNhanVat int64) *protocol.Message {
+	w := protocol.NewWriter()
+	w.Int(int32(idNhanVat))
+	return protocol.NewMessage(lenhRoiKhuVuc, w)
 }

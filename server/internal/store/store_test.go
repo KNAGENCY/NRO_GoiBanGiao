@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"os"
+	"strconv"
 	"strings"
+	"sync/atomic"
 	"testing"
 
 	"github.com/jackc/pgx/v5/pgconn"
@@ -205,5 +207,113 @@ func TestLayTaiKhoanDungThuTuCotBoolean(t *testing.T) {
 			t.Fatalf("tai khoan %q: LaAdmin = %v, mong doi %v (nghi ngo cot bi_khoa/la_admin bi hoan doi trong Scan)",
 				tc.ten, tk.LaAdmin, tc.laAdmin)
 		}
+	}
+}
+
+var demHauTo int64
+
+// hauToNganNgau tra mot chuoi so duy nhat trong moi lan chay test, de ten khong
+// dung nhau. Dung bo dem nguyen tu thay vi dia chi con tro (%p co the trung khi
+// stack duoc tai su dung) — vua duy nhat that su, vua ngan (1-2 chu so voi so
+// luong test o day), nen "Naruto"+hau_to luon <= 10 ky tu, khop CHECK
+// nhan_vat_ten_hop_le (5-10 ky tu) ma Task 2 dat.
+func hauToNganNgau(t *testing.T) string {
+	t.Helper()
+	return strconv.FormatInt(atomic.AddInt64(&demHauTo, 1), 10)
+}
+
+// taoTaiKhoanThu tao mot tai khoan that trong CSDL thu de lam khoa ngoai cho
+// nhan vat, va tu dang ky don dep (ca nhan vat lan tai khoan) qua t.Cleanup.
+func taoTaiKhoanThu(t *testing.T, s *Store, ten string) int64 {
+	t.Helper()
+	var id int64
+	err := s.pool.QueryRow(context.Background(),
+		`INSERT INTO tai_khoan (ten_dang_nhap, mat_khau_bam) VALUES ($1, 'x') RETURNING id`,
+		ten,
+	).Scan(&id)
+	if err != nil {
+		t.Fatalf("tao tai khoan thu loi: %v", err)
+	}
+	t.Cleanup(func() {
+		_, _ = s.pool.Exec(context.Background(), `DELETE FROM nhan_vat WHERE tai_khoan_id = $1`, id)
+		_, _ = s.pool.Exec(context.Background(), `DELETE FROM tai_khoan WHERE id = $1`, id)
+	})
+	return id
+}
+
+func TestTaoVaLayNhanVat(t *testing.T) {
+	s := moKetNoiThu(t)
+	ctx := context.Background()
+
+	// Nhan vat can mot tai khoan co that (khoa ngoai). Tao tai khoan thu.
+	taiKhoanID := taoTaiKhoanThu(t, s, "chunin"+hauToNganNgau(t))
+
+	nv, err := s.TaoNhanVat(ctx, NhanVatMoi{
+		TaiKhoanID: taiKhoanID, Ten: "Naruto" + hauToNganNgau(t),
+		Lang: 0, KieuToc: 5, MapID: 1, ViTriX: 100, ViTriY: 384,
+		HpToiDa: 150, ChakraToiDa: 150, Vang: 1000,
+	})
+	if err != nil {
+		t.Fatalf("TaoNhanVat loi: %v", err)
+	}
+	if nv.ID == 0 {
+		t.Error("nhan vat moi phai co ID")
+	}
+	// Gia tri suy ra phai dung: mau/chakra hien tai bang toi da, cap = 1.
+	if nv.HpHienTai != 150 || nv.ChakraHienTai != 150 {
+		t.Errorf("hp/chakra hien tai = %d/%d, mong doi 150/150", nv.HpHienTai, nv.ChakraHienTai)
+	}
+	if nv.Cap != 1 {
+		t.Errorf("cap = %d, mong doi 1", nv.Cap)
+	}
+
+	// Lay lai theo tai khoan phai ra dung nhan vat do, dung tung truong.
+	lay, err := s.LayNhanVatTheoTaiKhoan(ctx, taiKhoanID)
+	if err != nil {
+		t.Fatalf("LayNhanVatTheoTaiKhoan loi: %v", err)
+	}
+	if lay.ID != nv.ID || lay.Ten != nv.Ten || lay.Lang != 0 || lay.MapID != 1 {
+		t.Errorf("lay lai khong khop: %+v", lay)
+	}
+}
+
+func TestLayNhanVatChuaCo(t *testing.T) {
+	s := moKetNoiThu(t)
+	taiKhoanID := taoTaiKhoanThu(t, s, "genin"+hauToNganNgau(t))
+	_, err := s.LayNhanVatTheoTaiKhoan(context.Background(), taiKhoanID)
+	if !errors.Is(err, ErrKhongThayNhanVat) {
+		t.Errorf("mong doi ErrKhongThayNhanVat, nhan %v", err)
+	}
+}
+
+func TestTenNhanVatTrungBiTuChoi(t *testing.T) {
+	s := moKetNoiThu(t)
+	ctx := context.Background()
+	ten := "Sasuke" + hauToNganNgau(t)
+
+	tk1 := taoTaiKhoanThu(t, s, "acc1"+hauToNganNgau(t))
+	tk2 := taoTaiKhoanThu(t, s, "acc2"+hauToNganNgau(t))
+
+	if _, err := s.TaoNhanVat(ctx, NhanVatMoi{TaiKhoanID: tk1, Ten: ten, Lang: 0, KieuToc: 5, MapID: 1, ViTriX: 100, ViTriY: 384, HpToiDa: 150, ChakraToiDa: 150, Vang: 1000}); err != nil {
+		t.Fatalf("tao nhan vat 1 loi: %v", err)
+	}
+	// Ten y het (khac hoa thuong) tu tai khoan khac -> phai bi tu choi.
+	_, err := s.TaoNhanVat(ctx, NhanVatMoi{TaiKhoanID: tk2, Ten: strings.ToUpper(ten), Lang: 0, KieuToc: 5, MapID: 1, ViTriX: 100, ViTriY: 384, HpToiDa: 150, ChakraToiDa: 150, Vang: 1000})
+	if !errors.Is(err, ErrTenNhanVatDaDung) {
+		t.Errorf("mong doi ErrTenNhanVatDaDung, nhan %v", err)
+	}
+}
+
+func TestMotTaiKhoanChiMotNhanVat(t *testing.T) {
+	s := moKetNoiThu(t)
+	ctx := context.Background()
+	tk := taoTaiKhoanThu(t, s, "solo"+hauToNganNgau(t))
+
+	if _, err := s.TaoNhanVat(ctx, NhanVatMoi{TaiKhoanID: tk, Ten: "First" + hauToNganNgau(t), Lang: 0, KieuToc: 5, MapID: 1, ViTriX: 100, ViTriY: 384, HpToiDa: 150, ChakraToiDa: 150, Vang: 1000}); err != nil {
+		t.Fatalf("tao nhan vat dau loi: %v", err)
+	}
+	_, err := s.TaoNhanVat(ctx, NhanVatMoi{TaiKhoanID: tk, Ten: "Second" + hauToNganNgau(t), Lang: 1, KieuToc: 5, MapID: 2, ViTriX: 100, ViTriY: 384, HpToiDa: 100, ChakraToiDa: 250, Vang: 1000})
+	if !errors.Is(err, ErrDaCoNhanVat) {
+		t.Errorf("mong doi ErrDaCoNhanVat, nhan %v", err)
 	}
 }

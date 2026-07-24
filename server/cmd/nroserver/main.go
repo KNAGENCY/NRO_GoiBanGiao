@@ -96,7 +96,9 @@ func main() {
 	// goroutine rieng de goroutine chinh con ranh tay cho tin hieu dung.
 	loiMayChu := make(chan error, 1)
 	go func() {
-		loiMayChu <- mynet.LangNghe(diaChi, game.NewBoXuLy(kho))
+		loiMayChu <- mynet.LangNghe(diaChi, func() mynet.XuLyGoiTin {
+			return game.NewBoXuLy(kho)
+		})
 	}()
 
 	slog.Info("may chu san sang. Nhan Ctrl+C de dung may chu an toan.")

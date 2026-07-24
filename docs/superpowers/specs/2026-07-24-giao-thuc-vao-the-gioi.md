@@ -288,8 +288,8 @@ Ghi: `Zone.java:738-869`. Đọc: `Controller.cs:5027-5346` → `switchToMe()` (
 | 5 | type | byte | 0 (MAP_NORMAL) |
 | 6 | mapName | UTF | tên làng |
 | 7 | zoneId | byte | 0 (< số zone của map) |
-| 8 | x | short | vị trí spawn X |
-| 9 | y | short | vị trí spawn Y |
+| 8 | x | short | vị trí X **hiện tại của nhân vật** (`pl.location` — KHÔNG phải spawn mặc định của map; KH5 dùng lại sau khi người chơi đã di chuyển) |
+| 9 | y | short | vị trí Y hiện tại của nhân vật |
 | 10 | waypointCount | byte (≤127) | **0** |
 | 11 | mobCount | byte (≤127) | **0** |
 | 12 | **byte dự phòng** | byte | **0** ← ĐỪNG QUÊN, nằm giữa mob và npc |

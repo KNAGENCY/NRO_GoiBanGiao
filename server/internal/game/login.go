@@ -74,7 +74,8 @@ type BoXuLy struct {
 	taiKhoan *store.TaiKhoan // nil khi chua dang nhap
 	nhanVat  *store.NhanVat  // nil khi chua co / chua vao the gioi
 
-	clientSanSang bool // client da gui -28/13 (bat tay xong) — Ke hoach 4 se gui ME_INFO/MAP INFO
+	clientSanSang bool    // client da gui -28/13 (bat tay xong)
+	khuVuc        *KhuVuc // khu vuc nhan vat dang o (dung o KH4; nen mong cho KH5)
 }
 
 func NewBoXuLy(kho Kho) *BoXuLy { return &BoXuLy{kho: kho} }
@@ -180,15 +181,55 @@ func (b *BoXuLy) phucVuCatalog(s *mynet.Session, m *protocol.Message) error {
 	return s.Gui(m)
 }
 
-// xuLyClientOk: client bao da nhan du 4 catalog va san sang. Ke hoach 3 chi
-// ghi nhan; Ke hoach 4 se gui ME_INFO + MAP INFO tai day de client render.
+// xuLyClientOk: client bao da nhan du 4 catalog va san sang (-28/13). Ke hoach 4
+// gui NGAY 3 goi de client render: -82 tileset -> -30/0 ME_INFO -> -24 MAP INFO.
+// Thu tu quan trong: -82 PHAI truoc -24 (§7), khong thi client thoat han app.
 func (b *BoXuLy) xuLyClientOk(s *mynet.Session) error {
 	if b.nhanVat == nil {
 		return nil
 	}
 	b.clientSanSang = true
-	slog.Info("client san sang (da gui -28/13), bat tay phien ban xong",
-		"ten", b.nhanVat.Ten, "id", b.nhanVat.ID)
+
+	bd := TimBanDo(b.nhanVat.MapID)
+	if bd == nil {
+		// Nhan vat o mapId khong co trong danh muc ban do: khong the gui MAP INFO
+		// hop le. Ghi log (SU KIEN HIEM — khong phai goi rac lap lai, nen log o day
+		// KHONG vi pham luat chong ngap nhat ky) va dung. Client se ket "Xin cho"
+		// nhung KHONG sap — tot hon la gui -24 rac lam client thoat app.
+		slog.Error("nhan vat o mapId khong co ban do trong danh muc",
+			"mapId", b.nhanVat.MapID, "ten", b.nhanVat.Ten, "id", b.nhanVat.ID)
+		return nil
+	}
+
+	// Dung khu vuc toi thieu cho phien nay va dua nhan vat vao (nen mong cho KH5).
+	b.khuVuc = MoKhuVuc(bd)
+	b.khuVuc.ThemNguoiChoi(b.nhanVat)
+
+	// -82 tileset — BAT BUOC truoc -24.
+	if err := s.Gui(goiTileSetInfo()); err != nil {
+		return err
+	}
+
+	// -30/0 ME_INFO.
+	meInfo, err := goiMeInfo(b.nhanVat)
+	if err != nil {
+		return err
+	}
+	if err := s.Gui(meInfo); err != nil {
+		return err
+	}
+
+	// -24 MAP INFO — gio kich switchToMe(), client roi "Xin cho".
+	mapInfo, err := goiMapInfo(b.nhanVat, bd)
+	if err != nil {
+		return err
+	}
+	if err := s.Gui(mapInfo); err != nil {
+		return err
+	}
+
+	slog.Info("da gui the gioi (tileset + ME_INFO + MAP INFO), client se render",
+		"ten", b.nhanVat.Ten, "mapId", bd.MapID, "lang", b.nhanVat.Lang, "id", b.nhanVat.ID)
 	return nil
 }
 

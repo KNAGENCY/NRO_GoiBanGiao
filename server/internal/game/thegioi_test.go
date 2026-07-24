@@ -111,3 +111,76 @@ func TestGoiMeInfoByteDung(t *testing.T) {
 		t.Error("ME_INFO con byte thua sau isNewMember — 3 truong cuoi (aura/effFront/hat) phai bo han (§8 note d)")
 	}
 }
+
+func TestGoiMapInfoByteDung(t *testing.T) {
+	nv := &store.NhanVat{MapID: 4, ViTriX: 100, ViTriY: 384}
+	bd := TimBanDo(4) // Lang Da: planet 0, tile 2, bg 1, bgType 0, loai 0, ten "Làng Đá"
+	m, err := goiMapInfo(nv, bd)
+	if err != nil {
+		t.Fatalf("goiMapInfo loi: %v", err)
+	}
+	if m.Command != -24 {
+		t.Fatalf("lenh = %d, mong doi -24", m.Command)
+	}
+
+	r := protocol.NewReader(m.Data)
+	b := func(ten string, muon byte) {
+		g, err := r.Byte()
+		if err != nil || g != muon {
+			t.Fatalf("%s = %d (loi %v), mong doi %d", ten, g, err, muon)
+		}
+	}
+	sh := func(ten string, muon int16) {
+		g, err := r.Short()
+		if err != nil || g != muon {
+			t.Fatalf("%s = %d (loi %v), mong doi %d", ten, g, err, muon)
+		}
+	}
+
+	b("mapId", 4)
+	b("planetId", 0)
+	b("tileId", 2) // ∈ [1,39]
+	b("bgId", 1)
+	b("type", 0) // MAP_NORMAL
+	if ten, err := r.UTF(); err != nil || ten != "Làng Đá" {
+		t.Fatalf("mapName = %q (loi %v), mong doi \"Làng Đá\"", ten, err)
+	}
+	b("zoneId", 0)
+	sh("x", 100) // = NhanVat.ViTriX
+	sh("y", 384) // = NhanVat.ViTriY
+	b("waypointCount", 0)
+	b("mobCount", 0)
+	b("byte du phong", 0) // Zone.java:805 — giua mob va npc, DUNG QUEN
+	b("npcCount", 0)
+	b("itemCount", 0)
+	sh("bgItem", 0) // short 0 (KHONG bo trang)
+	sh("effMap", 0) // short 0
+	b("bgType", 0)
+	b("idSpaceShip", 0)
+	b("isMapDouble", 0) // mapId != 148
+
+	if _, err := r.Byte(); err == nil {
+		t.Error("MAP INFO con byte thua sau isMapDouble — phai het buffer")
+	}
+}
+
+func TestGoiMapInfoDungViTriNhanVat(t *testing.T) {
+	// x/y trong MAP INFO lay tu VI TRI NHAN VAT (nv.ViTriX/Y), khong phai spawn
+	// mac dinh cua ban do — de KH5 (di chuyen) van dung sau khi nguoi choi da dich.
+	nv := &store.NhanVat{MapID: 1, ViTriX: 512, ViTriY: 240}
+	m, err := goiMapInfo(nv, TimBanDo(1))
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := protocol.NewReader(m.Data)
+	for i := 0; i < 5; i++ {
+		r.Byte() // mapId,planet,tile,bg,type
+	}
+	r.UTF()  // mapName
+	r.Byte() // zoneId
+	x, _ := r.Short()
+	y, _ := r.Short()
+	if x != 512 || y != 240 {
+		t.Errorf("x/y = %d/%d, mong doi 512/240 (vi tri nhan vat, khong phai spawn ban do)", x, y)
+	}
+}

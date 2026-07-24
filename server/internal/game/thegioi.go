@@ -91,3 +91,49 @@ func goiMeInfo(nv *store.NhanVat) (*protocol.Message, error) {
 	// (e) BO 3 truong cuoi (aura/effFront/hat).
 	return protocol.NewMessage(lenhMeInfo, w), nil
 }
+
+// goiMapInfo dung goi -24 MAP INFO: gio kich switchToMe() ben client (roi man
+// "Xin cho"). Byte-exact theo tai lieu §9 (da doi chieu Zone.mapInfo, Zone.java:
+// 738-869). Map TRONG: 0 waypoint/mob/npc/item. LUU Y bay cam:
+//
+//	(a) BYTE DU PHONG 0 giua mob va npc (Zone.java:805) — QUEN la lech toan bo phan sau.
+//	(b) bg-item RONG van phai short 0 (2 byte), KHONG bo trang.
+//	(c) x/y lay tu VI TRI NHAN VAT (nv.ViTriX/Y) — Zone dung pl.location, khong phai
+//	    spawn ban do; giu dung de KH5 van dung sau khi nguoi choi da di chuyen.
+//	(d) -82 PHAI da duoc gui truoc goi nay (xuLyClientOk dam bao thu tu), va tileId
+//	    phai ∈ [1,numTileMap] — neu khong client THOAT HAN app.
+func goiMapInfo(nv *store.NhanVat, bd *BanDo) (*protocol.Message, error) {
+	w := protocol.NewWriter()
+	w.Byte(byte(bd.MapID)) // mapId (client doc unsigned byte, <=255)
+	w.Byte(bd.PlanetID)    // planetId
+	w.Byte(bd.TileID)      // tileId ∈ [1,39]
+	w.Byte(bd.BgID)        // bgId
+	w.Byte(bd.Loai)        // type = 0 MAP_NORMAL
+	if err := w.UTF(bd.Ten); err != nil {
+		return nil, err
+	}
+	w.Byte(0) // zoneId = 0 (map mot zone)
+
+	w.Short(int16(nv.ViTriX)) // (c) x = vi tri nhan vat
+	w.Short(int16(nv.ViTriY)) // (c) y
+
+	w.Byte(0) // waypointCount = 0
+	w.Byte(0) // mobCount = 0
+	w.Byte(0) // (a) BYTE DU PHONG — giua mob va npc, DUNG QUEN
+	w.Byte(0) // npcCount = 0
+	w.Byte(0) // itemCount = 0
+
+	w.Short(0) // (b) bg-item: short 0 (map trong, khong bo trang)
+	w.Short(0) // effMapCount = 0
+
+	w.Byte(bd.BgType) // bgType
+	w.Byte(0)         // idSpaceShip = 0
+	// isMapDouble: rieng mapId 148 la map doi (Zone.java:861). Lang 1-5 khong phai
+	// 148 nen luon 0, nhung tinh theo mapId de dung ca khi them map 148 sau nay.
+	if bd.MapID == 148 {
+		w.Byte(1)
+	} else {
+		w.Byte(0)
+	}
+	return protocol.NewMessage(lenhMapInfo, w), nil
+}

@@ -46,6 +46,23 @@ func (f *Framer) SetKey(key []byte) {
 
 func (f *Framer) coKhoa() bool { return f.ks != nil }
 
+// KeyStream tra ve CHINH con tro KeyStream dang dung cua Framer nay (nil neu
+// chua goi SetKey), khong phai ban sao. Dung cho kiem thu dau-cuoi can doc/ghi
+// THU CONG mot goi mang lenh dac biet (do dai BA byte, xem lenhDoDaiBaByte) o
+// CHIEU NGUOC voi chieu Framer nay dang mo hinh (xem chu thich kieu Framer o
+// tren): mot "client gia" trong test dung MOT Framer de vua gui vua nhan (hop
+// le vi sau khi co khoa hai chieu doi xung VOI LENH THUONG), nhung dinh dang
+// dac biet chi dung o MOT chieu that su (may-chu-gui-xuong) — WriteMessage/
+// ReadMessage cua CHINH Framer nay se sai dinh dang neu dung thang cho chieu
+// nguoc. Goi ham nay de tu tay doc/ghi dung dinh dang, nhung PHAI dung con
+// tro TRA VE TU DAY (khong tao KeyStream moi tu cung khoa) de con tro
+// doc/ghi tich luy dung tiep tuc voi cac goi da trao doi truoc/sau do qua
+// Framer nay — ca client that lan may chu that chi dung DUNG MOT KeyStream
+// lien tuc cho toan bo phien (xem Session trong internal/net/session.go),
+// dung hai con tro doc lap (bat dau lai tu 0) se lam lech khoa tu goi dau
+// tien dung con tro moi tro di.
+func (f *Framer) KeyStream() *KeyStream { return f.ks }
+
 func (f *Framer) docMotByte() (byte, error) {
 	var b [1]byte
 	if _, err := io.ReadFull(f.r, b[:]); err != nil {

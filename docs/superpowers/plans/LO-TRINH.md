@@ -49,7 +49,7 @@ kết nối theo IP (Kế hoạch bảo mật B, là bước lùi so với bản
 | 2 | Nhân vật: tạo, lưu, tải | ✅ **Xong** (gộp `0816c89`) | 1 |
 | 3 | Đồng bộ dữ liệu tĩnh (bắt tay + 4 catalog, 5 làng) | ✅ **Xong** (gộp `7a85431`) | 1, 2 |
 | 4 | **Vào thế giới** (ME_INFO + MAP INFO + tileset + khu vực) | ✅ **Xong** (gộp `aef5f71`) — còn B9: bạn tự kiểm bằng client Unity thật | 3 |
-| 5 | Di chuyển + mô hình actor cho khu vực | Chưa bắt đầu | 4 |
+| 5 | Di chuyển + mô hình actor cho khu vực | ✅ **Xong** (gộp `e1ddc44`) — actor 100ms, chống gian lận vừa phải, thấy nhau + di chuyển | 4 |
 | 6 | Chiến đấu, chiêu thức, quái, boss | Chưa bắt đầu | 5 |
 | 7 | Vật phẩm, hành trang, cửa hàng, giao dịch | Chưa bắt đầu | 5 |
 | 8 | Kho nội dung YAML + nạp nóng | Chưa bắt đầu | 6, 7 |

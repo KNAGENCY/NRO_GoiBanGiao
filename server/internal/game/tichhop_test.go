@@ -394,16 +394,18 @@ func TestTaoRoiDangNhapLai_ThayNhanVat(t *testing.T) {
 	}
 
 	// Kiem CSDL: dung hang nhan vat, dung ten, dung lang, dung mau/chakra
-	// khoi dau THEO LANG (lay TimLang(0) lam gia tri doi chieu — dam bao ca
-	// duong ong xuLyTaoNhanVat -> store.TaoNhanVat khong lam sai lech du lieu
-	// giua buoc tra cuu lang va buoc ghi CSDL).
+	// khoi dau. MOI khang dinh chi so dung GIA TRI GHIM (150...) chu KHONG
+	// doi chieu voi TimLang(0): duong ghi CSDL (xuLyTaoNhanVat) da goi
+	// TimLang, nen neu phep so sanh cung goi TimLang thi ca hai phia doc CHUNG
+	// mot nguon (danhSachLang trong lang.go) — mot dot bien sua thang so lieu
+	// trong bang se lam CA HAI phia doi theo nhau va test khong bat duoc (da
+	// kiem chung tren ban sao). Ghim gia tri HIEN TAI cua lang 0 (xem
+	// danhSachLang) truc tiep; neu sau nay can bang lai chi so khoi dau
+	// (lang.go ghi "se can bang lai o Ke hoach 4") thi sua cac gia tri ghim
+	// duoi day cho khop.
 	nv, err := khoThat.LayNhanVatTheoTaiKhoan(ctx, taiKhoanID)
 	if err != nil {
 		t.Fatalf("LayNhanVatTheoTaiKhoan sau khi tao that bai: %v", err)
-	}
-	langMongDoi := TimLang(0)
-	if langMongDoi == nil {
-		t.Fatal("TimLang(0) tra ve nil - lang 0 phai luon ton tai")
 	}
 	if nv.Ten != tenNV {
 		t.Errorf("ten nhan vat = %q, mong doi %q", nv.Ten, tenNV)
@@ -411,36 +413,21 @@ func TestTaoRoiDangNhapLai_ThayNhanVat(t *testing.T) {
 	if nv.Lang != 0 {
 		t.Errorf("lang = %d, mong doi 0", nv.Lang)
 	}
-	if nv.HpToiDa != langMongDoi.HpKhoiDau || nv.HpHienTai != langMongDoi.HpKhoiDau {
-		t.Errorf("hp toi da/hien tai = %d/%d, mong doi ca hai deu = %d (HpKhoiDau cua lang 0)",
-			nv.HpToiDa, nv.HpHienTai, langMongDoi.HpKhoiDau)
+	if nv.HpToiDa != 150 || nv.HpHienTai != 150 {
+		t.Errorf("hp toi da/hien tai = %d/%d, mong doi ca hai deu = 150 (HpKhoiDau ghim cua lang 0)",
+			nv.HpToiDa, nv.HpHienTai)
 	}
-	if nv.ChakraToiDa != langMongDoi.ChakraKhoiDau || nv.ChakraHienTai != langMongDoi.ChakraKhoiDau {
-		t.Errorf("chakra toi da/hien tai = %d/%d, mong doi ca hai deu = %d (ChakraKhoiDau cua lang 0)",
-			nv.ChakraToiDa, nv.ChakraHienTai, langMongDoi.ChakraKhoiDau)
+	if nv.ChakraToiDa != 150 || nv.ChakraHienTai != 150 {
+		t.Errorf("chakra toi da/hien tai = %d/%d, mong doi ca hai deu = 150 (ChakraKhoiDau ghim cua lang 0)",
+			nv.ChakraToiDa, nv.ChakraHienTai)
 	}
 	if nv.Cap != 1 {
 		t.Errorf("cap = %d, mong doi 1 (nhan vat vua tao)", nv.Cap)
 	}
-	// Khang dinh round-trip map/vi tri/kieu toc: cac truong nay duoc
-	// xuLyTaoNhanVat/store.TaoNhanVat ghi dung (da doc code xac nhan), nhung
-	// truoc ban sua nay chua co khang dinh nao trong kiem thu dau-cuoi bat
-	// duoc neu ai do vo tinh ghi sai/hoan doi truong — vd gan nham ViTriY vao
-	// cot vi_tri_x, hay cong nham 1 vao kieu toc truoc khi luu.
-	//
-	// QUAN TRONG: map/vi-tri so sanh voi GIA TRI GHIM (khong goi lai
-	// TimLang(0) nhu HP/Chakra o tren) — vi ca duong ghi CSDL
-	// (xuLyTaoNhanVat goi TimLang(0)) LAN mot phep so sanh dua vao TimLang(0)
-	// deu doc CHUNG mot nguon (danhSachLang trong lang.go), nen mot dot bien
-	// sua THANG so lieu trong bang do (vd MapKhoiDau lang 0 tu 1 thanh 99) se
-	// lam CA HAI phia doi theo nhau — da tu kiem chung tren mot ban sao
-	// (scratchpad, khong dung toi repo goc): sua MapKhoiDau lang 0 thanh 99
-	// roi chay lai, neu so sanh dua vao langMongDoi.MapKhoiDau thi test VAN
-	// XANH (khong bat duoc dot bien). Ghim gia tri HIEN TAI cua lang 0 (xem
-	// danhSachLang trong lang.go) truc tiep o day de dong dung lo hong do;
-	// neu sau nay chu dinh can bang lai chi so khoi dau lang 0 (lang.go da
-	// ghi chu "se can bang lai o Ke hoach 4"), sua gia tri ghim duoi day
-	// theo cho khop.
+	// Round-trip map/vi tri/kieu toc — cung dung GIA TRI GHIM nhu HP/Chakra o
+	// tren, cung mot ly do (tranh diem mu "cung nguon" voi TimLang). Bat duoc
+	// neu ai do ghi sai/hoan doi truong: vd gan nham ViTriY vao cot vi_tri_x,
+	// hay cong nham 1 vao kieu toc truoc khi luu.
 	if nv.MapID != 1 {
 		t.Errorf("map id = %d, mong doi 1 (MapKhoiDau ghim cua lang 0, xem danhSachLang trong lang.go)", nv.MapID)
 	}

@@ -47,32 +47,49 @@ func TestGoiCatalogDataDungCauTruc(t *testing.T) {
 	if b, _ := r.Byte(); b != vsData {
 		t.Errorf("byte dau = %d, mong doi vsData %d", b, vsData)
 	}
-	// 6 blob theo thu tu dart/arrow/effect/image/part/skill; chi part co noi dung.
-	doDaiBlob := func(ten string) int32 {
+	// 6 blob theo thu tu dart/arrow/effect/image/part/skill.
+	// Blob rong (dart/arrow/effect/image/skill): do dai 2, noi dung [0x00, 0x00].
+	// Part: do dai 87707, noi dung la duLieuPart 87707 byte.
+	doKiemBlob := func(ten string, khongRong bool) int32 {
 		n, err := r.Int()
 		if err != nil {
 			t.Fatalf("doc do dai %s loi: %v", ten, err)
 		}
-		// bo qua noi dung blob
-		for i := int32(0); i < n; i++ {
-			if _, err := r.Byte(); err != nil {
-				t.Fatalf("doc noi dung %s loi: %v", ten, err)
+		if !khongRong {
+			// Blob rong: do dai phai 2, noi dung [0x00, 0x00]
+			if n != 2 {
+				t.Errorf("%s do dai %d, mong doi 2 (blob rong)", ten, n)
+			}
+			b1, err1 := r.Byte()
+			b2, err2 := r.Byte()
+			if err1 != nil || err2 != nil || b1 != 0 || b2 != 0 {
+				t.Errorf("%s noi dung khong dung, doc [%d, %d], mong doi [0, 0]", ten, b1, b2)
+			}
+		} else {
+			// Part: chi kiem do dai, bo qua noi dung 87707 byte
+			if n != 87707 {
+				t.Errorf("%s do dai %d, mong doi 87707", ten, n)
+			}
+			for i := int32(0); i < n; i++ {
+				if _, err := r.Byte(); err != nil {
+					t.Fatalf("doc noi dung %s loi: %v", ten, err)
+				}
 			}
 		}
 		return n
 	}
-	if n := doDaiBlob("dart"); n != 2 {
-		t.Errorf("dart do dai %d, mong doi 2 (rong)", n)
-	}
-	doDaiBlob("arrow")
-	doDaiBlob("effect")
-	doDaiBlob("image")
-	if n := doDaiBlob("part"); n != 87707 {
-		t.Errorf("part do dai %d, mong doi 87707", n)
-	}
-	doDaiBlob("skill")
+	doKiemBlob("dart", false)
+	doKiemBlob("arrow", false)
+	doKiemBlob("effect", false)
+	doKiemBlob("image", false)
+	doKiemBlob("part", true)
+	doKiemBlob("skill", false)
 	// Toan goi phai < 100000 byte (moc mark(100000) client).
 	if len(m.Data) >= 100000 {
 		t.Errorf("goi -87 = %d byte, phai < 100000", len(m.Data))
+	}
+	// Kiem khong co byte thua sau 6 blob.
+	if _, err := r.Byte(); err == nil {
+		t.Error("goi -87 con byte thua sau 6 blob — phai het buffer")
 	}
 }

@@ -44,12 +44,6 @@ const (
 	lenhConClientOk     byte = 13 // client bao san sang
 )
 
-// lenhKhongTrenBanDo: khung dong bo du lieu tinh, co trong login.go (ngoai goi nay).
-// Bay gio tai day co the lua chon import "nroserver/internal/protocol" de dung.
-// Nguon: login.go cua tam Ke hoach 2, day la cai da tim thay tuy chon cua no.
-// Khong the import lai o dongbo.go vi Go cam import khong dung (phat hien bang vet).
-// Chi trong ngoai goi nay de cung co chong chi ghi chep.
-
 // goiVersionGame dung goi -28/4: bao client 4 phien ban du lieu tinh + bang moc
 // kinh nghiem rong. Client so 4 phien ban nay voi cache; lech thi tu xin cap nhat.
 // Xem tai lieu giao thuc §2.

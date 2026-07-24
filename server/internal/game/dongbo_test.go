@@ -114,21 +114,24 @@ func TestGoiCatalogSkillCoDu5Lang(t *testing.T) {
 		t.Errorf("countOption = %d, mong doi 0", opt)
 	}
 	countClass, _ := r.Byte()
-	dsLang := DanhSachLang()
-	if int(countClass) != len(dsLang) {
-		t.Fatalf("countClass = %d, mong doi %d (so lang)", countClass, len(dsLang))
+	// Ghim 5 ten lang doc lap voi DanhSachLang() de bat duoc neu ai do go sai/dao
+	// thu tu/dich nham ten lang trong lang.go — day la noi dung loi cua ke hoach
+	// (5 lang Naruto thay 3 lop Dragon Ball).
+	tenLangMongDoi := []string{"Làng Lá", "Làng Cát", "Làng Sương Mù", "Làng Đá", "Làng Mây"}
+	if int(countClass) != len(tenLangMongDoi) {
+		t.Fatalf("countClass = %d, mong doi %d (so lang Naruto)", countClass, len(tenLangMongDoi))
 	}
 	if countClass < 5 {
 		t.Errorf("countClass = %d, phai >= 5 de id lang 0-4 hop le trong ME_INFO", countClass)
 	}
-	// Doc tung lang: ten (UTF) + countTemplate (0). Ten phai khop danh muc lang.
+	// Doc tung lang: ten (UTF) + countTemplate (0). Ten phai khop danh muc lang (ghim doc lap).
 	for i := 0; i < int(countClass); i++ {
 		ten, err := r.UTF()
 		if err != nil {
 			t.Fatalf("doc ten lang %d loi: %v", i, err)
 		}
-		if ten != dsLang[i].Ten {
-			t.Errorf("ten lang %d = %q, mong doi %q", i, ten, dsLang[i].Ten)
+		if ten != tenLangMongDoi[i] {
+			t.Errorf("ten lang %d = %q, mong doi %q", i, ten, tenLangMongDoi[i])
 		}
 		if ct, _ := r.Byte(); ct != 0 {
 			t.Errorf("countTemplate lang %d = %d, mong doi 0", i, ct)

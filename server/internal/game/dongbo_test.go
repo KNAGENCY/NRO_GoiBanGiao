@@ -93,3 +93,69 @@ func TestGoiCatalogDataDungCauTruc(t *testing.T) {
 		t.Error("goi -87 con byte thua sau 6 blob — phai het buffer")
 	}
 }
+
+func TestGoiCatalogSkillCoDu5Lang(t *testing.T) {
+	m, err := goiCatalogSkill()
+	if err != nil {
+		t.Fatalf("goiCatalogSkill loi: %v", err)
+	}
+	if m.Command != -28 {
+		t.Fatalf("lenh = %d, mong doi -28", m.Command)
+	}
+	r := protocol.NewReader(m.Data)
+	sub, _ := r.Byte()
+	if sub != lenhConCatalogSkill { // 7
+		t.Errorf("lenh con = %d, mong doi 7", sub)
+	}
+	if v, _ := r.Byte(); v != vsSkill {
+		t.Errorf("vsSkill = %d, mong doi %d", v, vsSkill)
+	}
+	if opt, _ := r.Byte(); opt != 0 {
+		t.Errorf("countOption = %d, mong doi 0", opt)
+	}
+	countClass, _ := r.Byte()
+	dsLang := DanhSachLang()
+	if int(countClass) != len(dsLang) {
+		t.Fatalf("countClass = %d, mong doi %d (so lang)", countClass, len(dsLang))
+	}
+	if countClass < 5 {
+		t.Errorf("countClass = %d, phai >= 5 de id lang 0-4 hop le trong ME_INFO", countClass)
+	}
+	// Doc tung lang: ten (UTF) + countTemplate (0). Ten phai khop danh muc lang.
+	for i := 0; i < int(countClass); i++ {
+		ten, err := r.UTF()
+		if err != nil {
+			t.Fatalf("doc ten lang %d loi: %v", i, err)
+		}
+		if ten != dsLang[i].Ten {
+			t.Errorf("ten lang %d = %q, mong doi %q", i, ten, dsLang[i].Ten)
+		}
+		if ct, _ := r.Byte(); ct != 0 {
+			t.Errorf("countTemplate lang %d = %d, mong doi 0", i, ct)
+		}
+	}
+}
+
+func TestGoiCatalogMapRong(t *testing.T) {
+	m := goiCatalogMap()
+	if m.Command != -28 {
+		t.Fatalf("lenh = %d, mong doi -28", m.Command)
+	}
+	// [6][vsMap][countMap=0][countNpc=0][countMob=0]
+	want := []byte{6, 20, 0, 0, 0}
+	if !bytes.Equal(m.Data, want) {
+		t.Errorf("than catalog map = %v, mong doi %v", m.Data, want)
+	}
+}
+
+func TestGoiCatalogItemSubtype2Rong(t *testing.T) {
+	m := goiCatalogItem()
+	if m.Command != -28 {
+		t.Fatalf("lenh = %d, mong doi -28", m.Command)
+	}
+	// [8][vsItem][subtype=2][start short=0][end short=0]
+	want := []byte{8, 20, 2, 0, 0, 0, 0}
+	if !bytes.Equal(m.Data, want) {
+		t.Errorf("than catalog item = %v, mong doi %v", m.Data, want)
+	}
+}

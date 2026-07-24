@@ -80,3 +80,48 @@ func goiCatalogData() *protocol.Message {
 	blobRong()                    // skill
 	return protocol.NewMessage(lenhDuLieu, w)
 }
+
+// goiCatalogSkill dung goi -28/7: DANH SACH 5 LANG NARUTO thay cho 3 lop Dragon
+// Ball cu. Client dung byte "gender" trong ME_INFO lam chi so nClasss[] nen
+// countClass PHAI >= so lang (5) — id lang 3/4 se sap neu client con cache 3 lop
+// cu. Moi lang gui ten + 0 template (chua co skill). Xem tai lieu §5.
+func goiCatalogSkill() (*protocol.Message, error) {
+	w := protocol.NewWriter()
+	w.Byte(lenhConCatalogSkill) // 7
+	w.Byte(vsSkill)
+	w.Byte(0) // countOption = 0
+	dsLang := DanhSachLang()
+	w.Byte(byte(len(dsLang))) // countClass = 5
+	for _, l := range dsLang {
+		if err := w.UTF(l.Ten); err != nil {
+			return nil, err
+		}
+		w.Byte(0) // countTemplate = 0 (chua co skill)
+	}
+	return protocol.NewMessage(lenhKhongTrenBanDo, w), nil
+}
+
+// goiCatalogMap dung goi -28/6 RONG: 0 map, 0 npc, 0 mob. Du de qua bat tay;
+// noi dung map/npc/mob that se them o cac ke hoach sau. Xem tai lieu §4.
+func goiCatalogMap() *protocol.Message {
+	w := protocol.NewWriter()
+	w.Byte(lenhConCatalogMap) // 6
+	w.Byte(vsMap)
+	w.Byte(0) // countMap
+	w.Byte(0) // countNpc
+	w.Byte(0) // countMob
+	return protocol.NewMessage(lenhKhongTrenBanDo, w)
+}
+
+// goiCatalogItem dung goi -28/8 toi thieu: dung MOT message con subtype 2 rong.
+// Chi subtype 2 moi kich clientOk (khi du 4 phien ban khop). Nhan vat moi khong
+// do van ve duoc voi catalog item rong. Xem tai lieu §6.
+func goiCatalogItem() *protocol.Message {
+	w := protocol.NewWriter()
+	w.Byte(lenhConCatalogItem) // 8
+	w.Byte(vsItem)
+	w.Byte(2)  // subtype 2 (item them)
+	w.Short(0) // start
+	w.Short(0) // end
+	return protocol.NewMessage(lenhKhongTrenBanDo, w)
+}

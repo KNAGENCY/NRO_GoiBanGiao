@@ -24,12 +24,22 @@ export default async function TrangChu() {
           <p className="text-slate-300">
             Xin chào, <span className="font-semibold text-white">{phien.ten}</span>
           </p>
-          <Link
-            href="/tai-khoan"
-            className="rounded-lg bg-orange-500 px-6 py-3 font-semibold text-white shadow-lg shadow-orange-500/20 transition hover:bg-orange-400"
-          >
-            Vào trang cá nhân
-          </Link>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Link
+              href="/tai-khoan"
+              className="rounded-lg bg-orange-500 px-6 py-3 font-semibold text-white shadow-lg shadow-orange-500/20 transition hover:bg-orange-400"
+            >
+              Vào trang cá nhân
+            </Link>
+            {phien.laAdmin && (
+              <Link
+                href="/admin"
+                className="rounded-lg border border-slate-600 px-6 py-3 font-semibold text-slate-100 transition hover:border-slate-400 hover:bg-slate-800/50"
+              >
+                Panel quản trị
+              </Link>
+            )}
+          </div>
         </div>
       ) : (
         <div className="flex flex-col gap-3 sm:flex-row">
@@ -47,6 +57,13 @@ export default async function TrangChu() {
           </Link>
         </div>
       )}
+
+      <Link
+        href="/bang-xep-hang"
+        className="text-sm font-medium text-slate-400 underline-offset-4 hover:text-orange-300 hover:underline"
+      >
+        Xem bảng xếp hạng
+      </Link>
     </main>
   );
 }

@@ -34,12 +34,14 @@ package game
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"net"
 	"testing"
 	"time"
 
 	"nroserver/internal/protocol"
+	"nroserver/internal/store"
 )
 
 // hanDoiGoi la han gio cho MOI lan doi mot goi cu the qua doiGoi/doiGoiLenh —
@@ -322,6 +324,115 @@ func kiemCatalogItemSubtype2(t *testing.T, m *protocol.Message) {
 	}
 }
 
+// kiemTileSetInfo khang dinh goi -82: lenh dung, than = NGUYEN file tileset.
+func kiemTileSetInfo(t *testing.T, m *protocol.Message) {
+	t.Helper()
+	if m.Command != -82 {
+		t.Fatalf("lenh goi tileset = %d, mong doi -82", m.Command)
+	}
+	if !bytes.Equal(m.Data, duLieuTileSet) {
+		t.Fatalf("than -82 khong bang nguyen file tileset (dai %d, mong doi %d)", len(m.Data), len(duLieuTileSet))
+	}
+}
+
+// kiemMeInfo khang dinh goi -30/0 khop nhan vat da tao: byte lenh con 0, id/gender/
+// name/gold/gem dung, gender lan 2 < 5. Doi chieu voi nv lay tu CSDL that.
+func kiemMeInfo(t *testing.T, m *protocol.Message, nv *store.NhanVat) {
+	t.Helper()
+	if m.Command != -30 {
+		t.Fatalf("lenh ME_INFO = %d, mong doi -30", m.Command)
+	}
+	r := protocol.NewReader(m.Data)
+	if sub, err := r.Byte(); err != nil || sub != 0 {
+		t.Fatalf("byte lenh con ME_INFO = %d (loi %v), mong doi 0", sub, err)
+	}
+	if id, err := r.Int(); err != nil || id != int32(nv.ID) {
+		t.Fatalf("id = %d (loi %v), mong doi %d", id, err, nv.ID)
+	}
+	if _, err := r.Byte(); err != nil { // taskMain
+		t.Fatal(err)
+	}
+	if g, err := r.Byte(); err != nil || g != byte(nv.Lang) {
+		t.Fatalf("gender = %d (loi %v), mong doi %d (= lang)", g, err, nv.Lang)
+	}
+	if _, err := r.Short(); err != nil { // head
+		t.Fatal(err)
+	}
+	if ten, err := r.UTF(); err != nil || ten != nv.Ten {
+		t.Fatalf("name = %q (loi %v), mong doi %q", ten, err, nv.Ten)
+	}
+	r.Byte()  // cPK
+	r.Byte()  // typePk
+	r.Long()  // power
+	r.Short() // buffHp
+	r.Short() // buffMp
+	g2, err := r.Byte()
+	if err != nil || g2 != byte(nv.Lang) {
+		t.Fatalf("gender lan 2 = %d (loi %v), mong doi %d (= lang)", g2, err, nv.Lang)
+	}
+	if g2 >= 5 {
+		t.Fatalf("gender lan 2 = %d, phai < countClass (5) — khong client IndexOutOfRange", g2)
+	}
+	if sc, err := r.Byte(); err != nil || sc != 0 {
+		t.Fatalf("skillCount = %d (loi %v), mong doi 0", sc, err)
+	}
+	if gold, err := r.Long(); err != nil || gold != nv.Vang {
+		t.Fatalf("gold = %d (loi %v), mong doi %d (long 8 byte = Vang)", gold, err, nv.Vang)
+	}
+	r.Int() // ruby
+	if gem, err := r.Int(); err != nil || gem != int32(nv.Ngoc) {
+		t.Fatalf("gem = %d (loi %v), mong doi %d (= Ngoc)", gem, err, nv.Ngoc)
+	}
+}
+
+// kiemMapInfo khang dinh goi -24 khop ban do cua nhan vat: mapId/tileId/name +
+// byte du phong (decode het buffer den cuoi khong loi = du phong dung cho).
+func kiemMapInfo(t *testing.T, m *protocol.Message, nv *store.NhanVat, bd *BanDo) {
+	t.Helper()
+	if m.Command != -24 {
+		t.Fatalf("lenh MAP INFO = %d, mong doi -24", m.Command)
+	}
+	r := protocol.NewReader(m.Data)
+	must := func(ten string, muon byte) {
+		g, err := r.Byte()
+		if err != nil || g != muon {
+			t.Fatalf("%s = %d (loi %v), mong doi %d", ten, g, err, muon)
+		}
+	}
+	must("mapId", byte(bd.MapID))
+	must("planetId", bd.PlanetID)
+	must("tileId", bd.TileID)
+	must("bgId", bd.BgID)
+	must("type", bd.Loai)
+	if ten, err := r.UTF(); err != nil || ten != bd.Ten {
+		t.Fatalf("mapName = %q (loi %v), mong doi %q", ten, err, bd.Ten)
+	}
+	must("zoneId", 0)
+	if x, err := r.Short(); err != nil || x != int16(nv.ViTriX) {
+		t.Fatalf("x = %d (loi %v), mong doi %d", x, err, nv.ViTriX)
+	}
+	if y, err := r.Short(); err != nil || y != int16(nv.ViTriY) {
+		t.Fatalf("y = %d (loi %v), mong doi %d", y, err, nv.ViTriY)
+	}
+	must("waypointCount", 0)
+	must("mobCount", 0)
+	must("byte du phong", 0) // giua mob va npc
+	must("npcCount", 0)
+	must("itemCount", 0)
+	if bg, err := r.Short(); err != nil || bg != 0 {
+		t.Fatalf("bgItem = %d (loi %v), mong doi short 0", bg, err)
+	}
+	if ef, err := r.Short(); err != nil || ef != 0 {
+		t.Fatalf("effMap = %d (loi %v), mong doi short 0", ef, err)
+	}
+	must("bgType", bd.BgType)
+	must("idSpaceShip", 0)
+	must("isMapDouble", 0)
+	if _, err := r.Byte(); err == nil {
+		t.Error("MAP INFO con byte thua sau isMapDouble — byte du phong co the sai vi tri")
+	}
+}
+
 // ---------------------------------------------------------------------------
 // TestVersionDanceDayDu: kich ban dau-cuoi day du.
 // ---------------------------------------------------------------------------
@@ -335,9 +446,10 @@ func kiemCatalogItemSubtype2(t *testing.T, m *protocol.Message) {
 func TestVersionDanceDayDu(t *testing.T) {
 	khoThat := moKhoThatChoTest(t)
 
+	ctx := context.Background()
 	tenTK := "vaogame" + hauToNganNgau(t)
 	matKhau := "matkhau123"
-	taoTaiKhoanCoMatKhau(t, tenTK, matKhau)
+	taiKhoanID := taoTaiKhoanCoMatKhau(t, tenTK, matKhau)
 
 	cl := moPhienClientGia(t, khoThat)
 	defer cl.dong()
@@ -366,15 +478,23 @@ func TestVersionDanceDayDu(t *testing.T) {
 	cl.xinCatalog(lenhConCatalogItem)
 	kiemCatalogItemSubtype2(t, cl.doiGoi(t, lenhKhongTrenBanDo, lenhConCatalogItem))
 
-	// Gui client ok -> may chu ghi nhan (khong sap, khong loi). Ke hoach 3
-	// dung o day: may chu KHONG gui ME_INFO/MAP INFO (do la Ke hoach 4).
+	// Gui client ok -> Ke hoach 4: may chu gui NOT 3 goi vao the gioi theo thu tu
+	// -82 (tileset) -> -30/0 (ME_INFO) -> -24 (MAP INFO). Doc va khang dinh byte-dung.
 	cl.guiClientOk()
 
-	// Xac nhan may chu CON SONG sau -28/13: xin lai catalog skill mot lan nua
-	// va van phai nhan duoc tra loi. doiGoi tu that bai ro rang qua t.Fatalf
-	// neu khong tim thay goi truoc khi het han, nen chi can goi la du khang
-	// dinh (khong can kiem tra nil rieng — Fatalf da dung ca test truoc do
-	// neu that bai).
-	cl.xinCatalog(lenhConCatalogSkill)
-	cl.doiGoi(t, lenhKhongTrenBanDo, lenhConCatalogSkill)
+	// Lay nhan vat vua tao tu CSDL de doi chieu ME_INFO/MAP INFO byte-dung.
+	nv, err := khoThat.LayNhanVatTheoTaiKhoan(ctx, taiKhoanID)
+	if err != nil {
+		t.Fatalf("LayNhanVatTheoTaiKhoan sau khi tao that bai: %v", err)
+	}
+	bd := TimBanDo(nv.MapID)
+	if bd == nil {
+		t.Fatalf("nhan vat o mapId %d khong co ban do trong danh muc", nv.MapID)
+	}
+
+	// doiGoiLenh khop THEO LENH (bo qua goi khac), dung duoc cho -82/-30/-24 vi ca
+	// ba dung do dai 2 byte (khong nam trong lenhDoDaiBaByte). Thu tu: -82 truoc -24.
+	kiemTileSetInfo(t, cl.doiGoiLenh(t, -82))
+	kiemMeInfo(t, cl.doiGoiLenh(t, -30), nv)
+	kiemMapInfo(t, cl.doiGoiLenh(t, -24), nv, bd)
 }

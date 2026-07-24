@@ -28,3 +28,12 @@ func TestThemNguoiChoiVaoKhuVuc(t *testing.T) {
 		t.Errorf("sau khi them 2 nguoi, SoNguoiChoi = %d, mong doi 2", k.SoNguoiChoi())
 	}
 }
+
+func TestKhuVucActorKhoiDongVaDungSach(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	k.BatDau()
+	k.Gui(suKienRa{idNhanVat: 999}) // no-op: khong co ai
+	k.Dung()                        // phai tra ve, khong treo
+	// gui sau khi dung khong duoc panic:
+	k.Gui(suKienRa{idNhanVat: 1})
+}

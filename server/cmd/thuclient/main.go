@@ -14,18 +14,22 @@
 //	-27  goi bat tay dau tien: client gui rong, may chu tra ve khoa tho
 //	-29  khung "chua dang nhap", than tin: 1 byte lenh con roi du lieu
 //	  0  lenh con: dang nhap
-//	-26  may chu hien hop thoai co nut OK (dang nhap that bai se kem theo)
-//	-102 may chu bao client thoat khoi trang thai "dang cho"
-//	   2 may chu bao chuyen sang man tao nhan vat (= dang nhap thanh cong)
+//	-28  hop thu "khong tren ban do", than tin: 1 byte lenh con roi du lieu
+//	  2  lenh con cua khung -28: tao nhan vat (ten, lang, kieu toc)
+//	-26  may chu hien hop thoai co nut OK (dang nhap/tao nhan vat that bai se kem)
+//	-102 may chu bao client thoat khoi trang thai "dang cho" (chi khung -29)
+//	   2 may chu bao chuyen sang man tao nhan vat (= dang nhap thanh cong, chua co nhan vat)
 package main
 
 import (
 	"bufio"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"net"
 	"os"
+	"time"
 
 	"nroserver/internal/protocol"
 )
@@ -34,9 +38,20 @@ const (
 	lenhBatTay          int8 = -27
 	lenhChuaDangNhap    int8 = -29
 	lenhConDangNhap     byte = 0
+	lenhKhongTrenBanDo  int8 = -28 // hop thu "khong tren ban do" (Controller.java messageNotMap)
+	lenhConTaoNhanVat   byte = 2   // lenh con cua khung -28: tao nhan vat
 	lenhThongBaoOK      int8 = -26
 	lenhDangNhapThatBai int8 = -102
 	lenhTaoNhanVat      int8 = 2
+
+	// hanChoPhanHoiTaoNhanVat: sau khi gui yeu cau tao nhan vat, doi toi da
+	// ngan nay de xem may chu co tra loi gi khong. Ke hoach 2: tao nhan vat
+	// THANH CONG khong gui goi nao ca (xem vaoTheGioi trong
+	// internal/game/nhanvat.go) — cong cu chay tay nay khong the tu khang
+	// dinh "thanh cong", chi phat hien duoc LOI ro rang (-26); het han ma
+	// khong nhan duoc gi la dau hieu (khong chac chan) cua thanh cong, nguoi
+	// dung phai tu doi chieu bang log may chu / psql.
+	hanChoPhanHoiTaoNhanVat = 5 * time.Second
 
 	// gioiHanThan chan than tin bao do dai khong lo, tranh cap phat het bo
 	// nho neu noi nham vao mot thu khong phai may chu that.
@@ -56,12 +71,30 @@ func main() {
 	diaChi := flag.String("dia-chi", "127.0.0.1:14445", "dia chi may chu (host:port)")
 	tenDangNhap := flag.String("ten", "", "ten dang nhap (bat buoc)")
 	matKhau := flag.String("mat-khau", "", "mat khau (bat buoc)")
+	coTaoNhanVat := flag.Bool("tao-nhan-vat", false,
+		"neu dang nhap thanh cong va may chu tra ve lenh 2 (chua co nhan vat), tu dong gui tiep goi tao nhan vat voi -ten-nhan-vat/-lang/-kieu-toc")
+	tenNhanVat := flag.String("ten-nhan-vat", "Naruto01",
+		"ten nhan vat se thu tao (5-10 ky tu, chi chu cai va chu so) — chi dung khi -tao-nhan-vat")
+	langNhanVat := flag.Int("lang", 0,
+		"id lang cho nhan vat moi (0..4, xem internal/game/lang.go) — chi dung khi -tao-nhan-vat")
+	kieuTocNhanVat := flag.Int("kieu-toc", 5,
+		"id kieu toc cho nhan vat moi — chi dung khi -tao-nhan-vat")
 	flag.Parse()
 
 	if *tenDangNhap == "" || *matKhau == "" {
 		fmt.Fprintln(os.Stderr, "LOI: phai truyen ten dang nhap va mat khau.")
 		fmt.Fprintln(os.Stderr, "Vi du:  thuclient -ten thutest -mat-khau 1")
 		fmt.Fprintln(os.Stderr, "Xem tat ca tham so:  thuclient -h")
+		os.Exit(1)
+	}
+	// lang/kieu-toc di xuong 1 byte tren day (xem guiGoiTaoNhanVat) — chan
+	// som gia tri ngoai [0,255] thay vi de ep kieu am tham sai lech.
+	if *coTaoNhanVat && (*langNhanVat < 0 || *langNhanVat > 255) {
+		fmt.Fprintln(os.Stderr, "LOI: -lang phai trong khoang 0..255 (mot byte).")
+		os.Exit(1)
+	}
+	if *coTaoNhanVat && (*kieuTocNhanVat < 0 || *kieuTocNhanVat > 255) {
+		fmt.Fprintln(os.Stderr, "LOI: -kieu-toc phai trong khoang 0..255 (mot byte).")
 		os.Exit(1)
 	}
 
@@ -145,11 +178,27 @@ func main() {
 	fmt.Println("Dang cho may chu phan hoi...")
 	fmt.Println()
 
-	// Buoc 4: doc va dien giai cac goi may chu tra ve, cho toi khi ro ket qua
-	// dang nhap (thanh cong hoac that bai) hoac may chu dong ket noi.
+	// Buoc 4: doc va dien giai cac goi may chu tra ve.
+	//
+	// Neu -tao-nhan-vat duoc bat: khi thay lenh 2 (chua co nhan vat), THAY VI
+	// dung lai nhu binh thuong, gui tiep goi -28/2 tao nhan vat roi doc THEM
+	// mot vong nua de xem may chu tra loi gi:
+	//   - -26 (loi)   -> dienGiaiGoi da in thong bao, dung lai luon (da ro).
+	//   - het han doc -> Ke hoach 2 khong gui gi khi THANH CONG, nen day la
+	//     dau hieu (khong chac chan 100%) cua thanh cong; nguoi dung phai tu
+	//     doi chieu bang log may chu / psql (xem hanChoPhanHoiTaoNhanVat).
+	daGuiTaoNhanVat := false
+	dangChoPhanHoiTaoNhanVat := false
 	for {
 		cmd, than, err := docGoiDaMaHoa(r, ks)
 		if err != nil {
+			var netErr net.Error
+			if dangChoPhanHoiTaoNhanVat && errors.As(err, &netErr) && netErr.Timeout() {
+				fmt.Println("Khong nhan duoc goi nao trong vong cho phan hoi tao nhan vat.")
+				fmt.Println("Ke hoach 2: tao nhan vat THANH CONG khong tra ve goi nao (chi -26 khi LOI).")
+				fmt.Println("=> Kiem tra log may chu (dong \"tao nhan vat thanh cong\") va CSDL (psql) de xac nhan chac chan.")
+				return
+			}
 			if err == io.EOF {
 				fmt.Println("May chu da dong ket noi.")
 			} else {
@@ -157,10 +206,48 @@ func main() {
 			}
 			return
 		}
-		if dungLai := dienGiaiGoi(cmd, than); dungLai {
+
+		dungLai := dienGiaiGoi(cmd, than)
+
+		// Da co phan hoi RO RANG (vd -26) cho yeu cau tao nhan vat vua gui ->
+		// dienGiaiGoi da in thong bao, khong can doi them, dung lai o day.
+		if dangChoPhanHoiTaoNhanVat && cmd == lenhThongBaoOK {
+			return
+		}
+
+		if cmd == lenhTaoNhanVat && *coTaoNhanVat && !daGuiTaoNhanVat {
+			daGuiTaoNhanVat = true
+			fmt.Println()
+			fmt.Printf("Thu tao nhan vat: ten=%q lang=%d kieu-toc=%d\n", *tenNhanVat, *langNhanVat, *kieuTocNhanVat)
+			if err := guiGoiTaoNhanVat(conn, ks, *tenNhanVat, byte(*langNhanVat), byte(*kieuTocNhanVat)); err != nil {
+				fmt.Fprintf(os.Stderr, "LOI khi gui goi tao nhan vat: %v\n", err)
+				return
+			}
+			fmt.Printf("Da gui goi tao nhan vat. Dang cho may chu phan hoi (toi da %s)...\n", hanChoPhanHoiTaoNhanVat)
+			_ = conn.SetReadDeadline(time.Now().Add(hanChoPhanHoiTaoNhanVat))
+			dangChoPhanHoiTaoNhanVat = true
+			continue
+		}
+
+		if dungLai {
 			return
 		}
 	}
+}
+
+// guiGoiTaoNhanVat dong goi va gui goi -28/2 (tao nhan vat), dung dung dinh
+// dang than tin ma xuLyTaoNhanVat (server, internal/game/nhanvat.go) mong
+// doi: byte lenh con (lenhConTaoNhanVat), roi chuoi ten kieu UTF, roi 1 byte
+// lang, roi 1 byte kieu toc.
+func guiGoiTaoNhanVat(w io.Writer, ks *protocol.KeyStream, ten string, lang, kieuToc byte) error {
+	dat := protocol.NewWriter()
+	dat.Byte(lenhConTaoNhanVat)
+	if err := dat.UTF(ten); err != nil {
+		return fmt.Errorf("ten nhan vat khong hop le: %w", err)
+	}
+	dat.Byte(lang)
+	dat.Byte(kieuToc)
+	return guiGoiDaMaHoa(w, ks, lenhKhongTrenBanDo, dat.Bytes())
 }
 
 // dienGiaiGoi in ra bang tieng Viet de nguoi khong lap trinh cung doc duoc.

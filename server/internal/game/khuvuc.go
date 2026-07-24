@@ -121,18 +121,72 @@ func (k *KhuVuc) vongLap() {
 	}
 }
 
-// xuLy xu ly mot su kien lay tu hop thu. Ke hoach 5 Task 1 CHI dung khung —
-// suKienVao/suKienDiChuyen chua co logic that (xem Task 5); suKienRa la stub
-// an toan: neu nhan vat khong co trong khu vuc thi bo qua, khong panic.
+// xuLy xu ly mot su kien lay tu hop thu — day la NOI DUY NHAT doc/ghi trang
+// thai khu vuc (goi tu vongLap, hoac truc tiep tu test khi actor CHUA BatDau).
+//
+// THU TU phat tin (quan trong, xem brief KH5 Task 5):
+//   - suKienVao: gui -5 cua TUNG nguoi CU cho nguoi MOI TRUOC (nguoi moi thay
+//     nguoi cu), roi moi them nguoi moi vao map (de khong tu gui -5 cho chinh
+//     minh o buoc sau), roi phat -5 cua nguoi moi cho nhung nguoi con lai.
+//   - suKienDiChuyen: cap nhat vi tri THAT (authoritative) truoc, roi phat -7
+//     cho NGUOI KHAC (client tu ve chuyen dong cua chinh minh, khong gui lai).
+//   - suKienRa: xoa khoi map TRUOC, roi phat -6 cho nguoi con lai (nguoi da
+//     ra khong con trong map nen tu nhien khong nhan duoc goi cua chinh minh).
 func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
-	switch sk.(type) {
+	switch sk := sk.(type) {
 	case suKienVao:
-		// TODO(KH5 Task 5): xu ly
+		// 1) Gui -5 cua TUNG nguoi CU cho nguoi MOI (de nguoi moi thay nguoi cu).
+		//    Lam TRUOC khi them nguoi moi vao map, de nguoi moi khong tu thay minh.
+		for _, cu := range k.nguoiTrong {
+			m, err := goiXuatHien(cu.nv)
+			if err != nil {
+				slog.Error("dung goi -5 nguoi cu that bai", "id", cu.nv.ID, "loi", err)
+				continue
+			}
+			if err := sk.phien.Gui(m); err != nil {
+				slog.Warn("gui -5 nguoi cu cho nguoi moi that bai", "loi", err)
+			}
+		}
+		// 2) Them nguoi moi vao khu vuc.
+		k.nguoiTrong[sk.nv.ID] = &nguoiTrongKhuVuc{nv: sk.nv, phien: sk.phien}
+		// 3) Phat -5 cua nguoi moi cho NGUOI KHAC (khong gui lai chinh minh).
+		m, err := goiXuatHien(sk.nv)
+		if err != nil {
+			slog.Error("dung goi -5 nguoi moi that bai", "id", sk.nv.ID, "loi", err)
+			return
+		}
+		k.phatChoNguoiKhac(sk.nv.ID, m)
+
 	case suKienDiChuyen:
-		// TODO(KH5 Task 5): xu ly
+		nguoi, co := k.nguoiTrong[sk.idNhanVat]
+		if !co {
+			return // khong co trong khu vuc — bo qua an toan
+		}
+		// Cap nhat vi tri THAT (authoritative). ViTriX/Y la int32.
+		nguoi.nv.ViTriX = int32(sk.x)
+		nguoi.nv.ViTriY = int32(sk.y)
+		// Phat -7 cho NGUOI KHAC (client tu ve chuyen dong cua chinh minh).
+		k.phatChoNguoiKhac(sk.idNhanVat, goiDiChuyen(sk.idNhanVat, sk.x, sk.y))
+
 	case suKienRa:
-		// stub an toan: chua co ai trong nguoiTrong nen khong lam gi.
-		// Task 5 se xoa nguoi khoi nguoiTrong + broadcast roi khoi zone.
+		if _, co := k.nguoiTrong[sk.idNhanVat]; !co {
+			return // stub an toan
+		}
+		delete(k.nguoiTrong, sk.idNhanVat)
+		// Phat -6 cho nhung nguoi CON LAI (nguoi ra da bi xoa nen khong nhan).
+		k.phatChoNguoiKhac(sk.idNhanVat, goiRoiKhuVuc(sk.idNhanVat))
+	}
+}
+
+// phatChoNguoiKhac gui goi tin `m` cho MOI nguoi trong khu vuc TRU nguoi co id `truId`.
+func (k *KhuVuc) phatChoNguoiKhac(truId int64, m *protocol.Message) {
+	for id, nguoi := range k.nguoiTrong {
+		if id == truId {
+			continue
+		}
+		if err := nguoi.phien.Gui(m); err != nil {
+			slog.Warn("phat goi tin that bai", "id", id, "loi", err)
+		}
 	}
 }
 

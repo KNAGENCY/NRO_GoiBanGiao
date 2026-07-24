@@ -73,6 +73,8 @@ type BoXuLy struct {
 	kho      Kho
 	taiKhoan *store.TaiKhoan // nil khi chua dang nhap
 	nhanVat  *store.NhanVat  // nil khi chua co / chua vao the gioi
+
+	clientSanSang bool // client da gui -28/13 (bat tay xong) — Ke hoach 4 se gui ME_INFO/MAP INFO
 }
 
 func NewBoXuLy(kho Kho) *BoXuLy { return &BoXuLy{kho: kho} }
@@ -113,6 +115,8 @@ func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 		return b.xuLyDangNhap(s, m)
 	case lenhKhongTrenBanDo: // -28
 		return b.xuLyKhongTrenBanDo(s, m)
+	case lenhDuLieu: // -87 — client xin data
+		return b.xuLyXinData(s)
 	default:
 		// Lenh chua ho tro: bo qua, khong ngat ket noi — client gui vai goi
 		// phu ngay sau khi noi (vi du setClientType), day la chuyen BINH
@@ -127,8 +131,9 @@ func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 	}
 }
 
-// xuLyKhongTrenBanDo doc byte lenh con roi dieu phoi. Ke hoach 2 chi lam lenh
-// con 2 (tao nhan vat); cac lenh con khac la Ke hoach 3.
+// xuLyKhongTrenBanDo doc byte lenh con roi dieu phoi. Ke hoach 2 lam lenh con
+// 2 (tao nhan vat); Ke hoach 3 them 6/7/8 (client xin catalog map/skill/item)
+// va 13 (client bao san sang).
 func (b *BoXuLy) xuLyKhongTrenBanDo(s *mynet.Session, m *protocol.Message) error {
 	r := protocol.NewReader(m.Data)
 	lenhCon, err := r.Byte()
@@ -138,11 +143,53 @@ func (b *BoXuLy) xuLyKhongTrenBanDo(s *mynet.Session, m *protocol.Message) error
 	switch lenhCon {
 	case lenhConTaoNhanVat: // 2
 		return b.xuLyTaoNhanVat(s, r)
+	case lenhConCatalogMap: // 6
+		return b.phucVuCatalog(s, goiCatalogMap())
+	case lenhConCatalogSkill: // 7
+		m, err := goiCatalogSkill()
+		if err != nil {
+			return err
+		}
+		return b.phucVuCatalog(s, m)
+	case lenhConCatalogItem: // 8
+		return b.phucVuCatalog(s, goiCatalogItem())
+	case lenhConClientOk: // 13
+		return b.xuLyClientOk(s)
 	default:
-		// Lenh con khac la Ke hoach 3, bo qua im lang (cung ly do khong ghi
+		// Lenh con khac chua ho tro, bo qua im lang (cung ly do khong ghi
 		// log nhu nhanh "lenh chua ho tro" o XuLy).
 		return nil
 	}
+}
+
+// xuLyXinData tra goi -87 khi client xin du lieu tinh (part...). Chi phuc vu
+// khi phien da vao the gioi (vaoTheGioi da chay); truoc do bo qua im lang
+// (khong log — cung ly do chong ngap nhat ky nhu nhanh "lenh chua ho tro").
+func (b *BoXuLy) xuLyXinData(s *mynet.Session) error {
+	if b.nhanVat == nil {
+		return nil
+	}
+	return s.Gui(goiCatalogData())
+}
+
+// phucVuCatalog gui mot goi catalog khi client xin, chi khi da vao the gioi.
+func (b *BoXuLy) phucVuCatalog(s *mynet.Session, m *protocol.Message) error {
+	if b.nhanVat == nil {
+		return nil
+	}
+	return s.Gui(m)
+}
+
+// xuLyClientOk: client bao da nhan du 4 catalog va san sang. Ke hoach 3 chi
+// ghi nhan; Ke hoach 4 se gui ME_INFO + MAP INFO tai day de client render.
+func (b *BoXuLy) xuLyClientOk(s *mynet.Session) error {
+	if b.nhanVat == nil {
+		return nil
+	}
+	b.clientSanSang = true
+	slog.Info("client san sang (da gui -28/13), bat tay phien ban xong",
+		"ten", b.nhanVat.Ten, "id", b.nhanVat.ID)
+	return nil
 }
 
 // xuLyDangNhap xu ly khung -29 (dang nhap). Goi long hai tang: byte lenh con
@@ -218,13 +265,15 @@ func guiChuyenSangTaoNhanVat(s *mynet.Session) error {
 }
 
 // vaoTheGioi la diem hen chung cho ca hai duong: dang nhap co san nhan vat, va
-// vua tao nhan vat xong. Ke hoach 2 chi ghi nhan nhan vat vao phien va log —
-// Ke hoach 3 se gui du chuoi goi (-28/7 danh sach lang, -30/0 ME_INFO, -24 MAP
-// INFO) de client roi man "Xin cho". Voi Ke hoach 2, client Unity that se treo
-// o day: dung du kien, kiem thu bang client gia.
+// vua tao nhan vat xong. Ke hoach 2 chi ghi nhan nhan vat vao phien va log; Ke
+// hoach 3 them buoc gui goi -28/4 (versionGame) de kich client so 4 phien ban
+// du lieu tinh voi cache cua no va tu xin cap nhat (xem dongbo.go).
 func (b *BoXuLy) vaoTheGioi(s *mynet.Session, nv *store.NhanVat) error {
 	b.nhanVat = nv
-	slog.Info("nhan vat vao the gioi (stub Ke hoach 2)",
-		"ten", nv.Ten, "lang", nv.Lang, "id", nv.ID, "map", nv.MapID)
-	return nil
+	slog.Info("nhan vat vao the gioi, bat dau bat tay phien ban",
+		"ten", nv.Ten, "lang", nv.Lang, "id", nv.ID)
+	// Gui versionGame de kich client so phien ban va tu xin 4 catalog. Client
+	// gui -28/13 khi ca 4 phien ban khop; luc do Ke hoach 4 se gui ME_INFO + MAP
+	// INFO. Ke hoach 3 dung o buoc client gui -28/13.
+	return s.Gui(goiVersionGame())
 }

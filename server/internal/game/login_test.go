@@ -739,3 +739,89 @@ func TestPhucVuGoiXinSkill5Lang(t *testing.T) {
 		t.Errorf("catalog skill tra ve %d lop, phai >= 5 lang", countClass)
 	}
 }
+
+// TestPhucVuGoiXinMap kiem tra dieu phoi lenh con 6 (client xin catalog map)
+// trong xuLyKhongTrenBanDo. Cung mau voi TestPhucVuGoiXinSkill5Lang: -28
+// khong nam trong lenhDoDaiBaByte nen phan hoi map dung dinh dang HAI byte do
+// dai thuong, doc duoc bang dungPhienThat/docMotGoi binh thuong (khong can
+// bat tay/doc thu cong nhu goi -87).
+func TestPhucVuGoiXinMap(t *testing.T) {
+	b := NewBoXuLy(&khoGia{})
+	b.nhanVat = &store.NhanVat{ID: 1, Lang: 0}
+	fClient, dong := dungPhienThat(t, b)
+	defer dong()
+	// Client xin map: -28 lenh con 6.
+	w := protocol.NewWriter()
+	w.Byte(6)
+	if err := fClient.WriteMessage(protocol.NewMessage(-28, w)); err != nil {
+		t.Fatal(err)
+	}
+	m := docMotGoi(t, fClient)
+	r := protocol.NewReader(m.Data)
+	sub, _ := r.Byte()
+	if m.Command != -28 || sub != 6 {
+		t.Fatalf("tra loi xin map = lenh %d/%d, mong doi -28/6", m.Command, sub)
+	}
+	vsMapNhan, _ := r.Byte()
+	if vsMapNhan != vsMap {
+		t.Errorf("vsMap tra ve = %d, mong doi %d (goiCatalogMap)", vsMapNhan, vsMap)
+	}
+}
+
+// TestPhucVuGoiXinItem kiem tra dieu phoi lenh con 8 (client xin catalog
+// item) trong xuLyKhongTrenBanDo. QUAN TRONG NHAT trong ba lenh con moi kiem
+// o day: day la goi KICH clientOk phia client that (client chi gui -28/13 khi
+// ca 4 phien ban da khop, VA da nhan du catalog item) — thieu dieu phoi lenh
+// con nay se lam client ket vinh vien man hinh "Xin cho" (soft-lock), khong
+// he co trieu chung loi ro rang phia may chu (khong log, khong crash).
+func TestPhucVuGoiXinItem(t *testing.T) {
+	b := NewBoXuLy(&khoGia{})
+	b.nhanVat = &store.NhanVat{ID: 1, Lang: 0}
+	fClient, dong := dungPhienThat(t, b)
+	defer dong()
+	// Client xin item: -28 lenh con 8.
+	w := protocol.NewWriter()
+	w.Byte(8)
+	if err := fClient.WriteMessage(protocol.NewMessage(-28, w)); err != nil {
+		t.Fatal(err)
+	}
+	m := docMotGoi(t, fClient)
+	r := protocol.NewReader(m.Data)
+	sub, _ := r.Byte()
+	if m.Command != -28 || sub != 8 {
+		t.Fatalf("tra loi xin item = lenh %d/%d, mong doi -28/8", m.Command, sub)
+	}
+}
+
+// TestNhanClientOk kiem tra dieu phoi lenh con 13 (client bao san sang) trong
+// xuLyKhongTrenBanDo. Khac hai test tren: xuLyClientOk KHONG goi s.Gui (chi
+// ghi nhan b.clientSanSang = true va log), nen khong co goi phan hoi nao de
+// doc — phai kiem TRANG THAI PHIEN (b.clientSanSang) thay vi goi tin.
+//
+// dungPhienThat nhan thang *BoXuLy do test tao (khong tu tao ben trong), nen
+// giu duoc con tro b o day de doc lai truong sau khi gui goi.
+//
+// Ve khoang nghi: mynet.PhucVu chay b.XuLy() TREN GOROUTINE RIENG (khac
+// goroutine cua test) — WriteMessage() cua client tra ve ngay khi may chu DOC
+// xong goi (net.Pipe dong bo o muc Read/Write), nhung KHONG dam bao may chu
+// da XU LY xong (goi toi xuLyClientOk, gan b.clientSanSang) tai thoi diem do.
+// Cho mot khoang nghi ngan (net.Pipe khong co do tre mang that nen vai chuc ms
+// la du du) truoc khi doc b.clientSanSang — dung cach phienGia trong
+// nhanvat_test.go da lam cho tinh huong tuong tu (doi goroutine doc nen kip
+// gom goi).
+func TestNhanClientOk(t *testing.T) {
+	b := NewBoXuLy(&khoGia{})
+	b.nhanVat = &store.NhanVat{ID: 1, Lang: 0}
+	fClient, dong := dungPhienThat(t, b)
+	defer dong()
+	// Client bao san sang: -28 lenh con 13.
+	w := protocol.NewWriter()
+	w.Byte(13)
+	if err := fClient.WriteMessage(protocol.NewMessage(-28, w)); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(100 * time.Millisecond)
+	if !b.clientSanSang {
+		t.Error("gui -28/13 (clientOk) khong lam b.clientSanSang = true")
+	}
+}

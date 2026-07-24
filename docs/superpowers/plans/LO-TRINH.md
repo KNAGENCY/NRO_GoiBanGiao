@@ -5,9 +5,23 @@
 Mỗi kế hoạch là một tài liệu riêng, viết theo skill `superpowers:writing-plans`,
 thi công theo skill `superpowers:subagent-driven-development`.
 
-**Mức độ chắc chắn của lộ trình này:** Kế hoạch 1 đã xong. Kế hoạch 2, 3, 9 đã
-chốt phạm vi. Các kế hoạch còn lại là bản phác — thứ tự và ranh giới sẽ chỉnh
-khi tới nơi, vì làm xong cái trước mới biết cái sau cần gì.
+**Mức độ chắc chắn của lộ trình này:** Kế hoạch 1 và 2 đã xong và gộp. Kế hoạch
+3, 9 đã chốt phạm vi. Các kế hoạch còn lại là bản phác — thứ tự và ranh giới sẽ
+chỉnh khi tới nơi, vì làm xong cái trước mới biết cái sau cần gì.
+
+**Kế hoạch 3 tiếp theo — nhắc trước khi bắt tay:** phần Global Constraints của
+Kế hoạch 3 PHẢI nhét bảng số ở §4.3 của
+[`../specs/2026-07-23-hoa-giai-muot-va-chong-gian-lan.md`](../specs/2026-07-23-hoa-giai-muot-va-chong-gian-lan.md)
+(nhịp 100ms, bình tín dụng di chuyển, phát lại một-đổi-một không gom, kiểm địa
+hình, nới trần cho admin theo `la_admin`). Chốt sai mấy con số này thì tới Kế
+hoạch 9 mới lộ, lúc đó sửa là viết lại tầng khu vực. Ba sửa đổi client C1/C2/C3
+(§4.1) làm cùng đợt dựng lại client.
+
+**Nợ kỹ thuật mang sang** (ghi ở `.superpowers/sdd/progress.md`): chưa chạy được
+`go test -race` (máy thiếu trình biên dịch C) — nên xử lý trước Kế hoạch 3 vì đó
+là lúc có tranh chấp luồng thật; test package `game` chậm ~34s (áp mẫu
+`clientGia` hạn giờ 1s cho `chayDangNhap`); chưa có chống dò mật khẩu / giới hạn
+kết nối theo IP (Kế hoạch bảo mật B, là bước lùi so với bản Java cũ có AntiLogin).
 
 ---
 
@@ -16,7 +30,7 @@ khi tới nơi, vì làm xong cái trước mới biết cái sau cần gì.
 | # | Tên | Trạng thái | Phụ thuộc |
 |---|---|---|---|
 | 1 | Lõi giao thức + Đăng nhập | ✅ **Xong** (gộp `6529d35`) | — |
-| 2 | **Nhân vật: tạo, lưu, tải** | Chưa bắt đầu | 1 |
+| 2 | **Nhân vật: tạo, lưu, tải** | ✅ **Xong** (gộp `0816c89`) | 1 |
 | 3 | Mô hình actor cho khu vực + di chuyển | Chưa bắt đầu | 1, 2 |
 | 4 | Chiến đấu, chiêu thức, quái, boss | Chưa bắt đầu | 3 |
 | 5 | Vật phẩm, hành trang, cửa hàng, giao dịch | Chưa bắt đầu | 3 |

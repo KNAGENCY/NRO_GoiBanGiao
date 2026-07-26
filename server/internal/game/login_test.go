@@ -986,3 +986,57 @@ func TestVaoKhuVucLanHaiKhongPhatGoiTrung(t *testing.T) {
 		t.Fatal("gui -39 lan hai lam actor phat them goi tin (vd -5 cua chinh nguoi nay cho chinh ho) — thieu chot chong goi lai")
 	}
 }
+
+// TestXuLyChonChieuGuiSuKienKhongGhiThang la kiem chung QUAN TRONG cho ky
+// luat actor (dac ta §3.2 + brief KH6 Task 2): xuLyChonChieu (luong phien) CHI
+// duoc gui su kien vao hop thu actor, TUYET DOI KHONG tu tra ChieuCuaLang/ghi
+// chieuDangChon truc tiep.
+//
+// Ky thuat kiem: tao KhuVuc nhung KHONG BatDau() (khong co goroutine vongLap
+// nao chay song song) — chi tu gan k.hopThu bang tay. Vi khong co goroutine
+// thu hai, doc lai hopThu ngay trong test la AN TOAN (khong dua tranh voi
+// actor), dung nhu k.xuLy() duoc goi truc tiep o khuvuc_test.go. Sau do kiem
+// k.nguoiTrong VAN RONG — chung minh xuLyChonChieu khong dung truc tiep vao
+// trang thai actor so huu.
+func TestXuLyChonChieuGuiSuKienKhongGhiThang(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	k.hopThu = make(chan suKienKhuVuc, 4) // khong BatDau: tu cap hop thu de doc lai an toan trong cung goroutine
+
+	b := NewBoXuLy(&khoGia{}, nil)
+	b.khuVuc = k
+	b.nhanVat = &store.NhanVat{ID: 42, Ten: "A", Lang: 0}
+
+	w := protocol.NewWriter()
+	w.Short(2) // templateId
+	if err := b.xuLyChonChieu(protocol.NewMessage(lenhChonChieu, w)); err != nil {
+		t.Fatalf("xuLyChonChieu loi: %v", err)
+	}
+
+	select {
+	case sk := <-k.hopThu:
+		ev, ok := sk.(suKienChonChieu)
+		if !ok {
+			t.Fatalf("su kien gui vao hop thu la %T, mong doi suKienChonChieu", sk)
+		}
+		if ev.idNhanVat != 42 || ev.mauChieuId != 2 {
+			t.Fatalf("suKienChonChieu = %+v, mong doi {idNhanVat:42 mauChieuId:2}", ev)
+		}
+	default:
+		t.Fatal("xuLyChonChieu khong gui su kien nao vao hop thu actor")
+	}
+
+	if len(k.nguoiTrong) != 0 {
+		t.Fatal("xuLyChonChieu khong duoc tu dong ghi vao k.nguoiTrong — do la viec cua actor, khong phai luong phien")
+	}
+}
+
+// TestXuLyChonChieuChuaVaoTheGioiKhongPanic: b.khuVuc/b.nhanVat con nil (chua
+// bat tay / chua vao khu vuc) -> xuLyChonChieu phai la no-op an toan.
+func TestXuLyChonChieuChuaVaoTheGioiKhongPanic(t *testing.T) {
+	b := NewBoXuLy(&khoGia{}, nil)
+	w := protocol.NewWriter()
+	w.Short(1)
+	if err := b.xuLyChonChieu(protocol.NewMessage(lenhChonChieu, w)); err != nil {
+		t.Fatalf("xuLyChonChieu voi nhanVat/khuVuc nil phai tra nil, nhan duoc: %v", err)
+	}
+}

@@ -7,6 +7,12 @@ package game
 
 import "nroserver/internal/protocol"
 
+// lenhChonChieu: goi LEN client gui de chon mot chieu de dung (dac ta §3.2,
+// bang §3.1). Than goi: `short templateId` — la MauChieu.Id (template.id),
+// TUYET DOI KHONG PHAI skillId (hai truong khac kieu O KHAC O CHO, xem bang
+// §3.2 cua dac ta — nham la loi im lang, khong triệu chung).
+const lenhChonChieu int8 = 34
+
 // ghiChuChieu la truong "ghiChu" ghi cho MOI chieu. Ban Java ghi cung
 // "Ngoc Rong Kame" (dau vet thuong hieu cu) — spec §3.7 diem 3 yeu cau ghi
 // chuoi rong de xoa dau vet do, khong phat lai ten thuong hieu cu.

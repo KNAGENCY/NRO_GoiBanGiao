@@ -127,6 +127,8 @@ func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 		return b.xuLyVaoKhuVuc(s)
 	case lenhDiChuyen: // -7 — client xin di chuyen
 		return b.xuLyDiChuyen(m)
+	case lenhChonChieu: // 34 — client chon chieu
+		return b.xuLyChonChieu(m)
 	default:
 		// Lenh chua ho tro: bo qua, khong ngat ket noi — client gui vai goi
 		// phu ngay sau khi noi (vi du setClientType), day la chuyen BINH
@@ -285,6 +287,30 @@ func (b *BoXuLy) xuLyDiChuyen(m *protocol.Message) error {
 		return nil // KH5: thieu toY -> bo goi (client that luon gui du ca hai)
 	}
 	b.khuVuc.Gui(suKienDiChuyen{idNhanVat: b.nhanVat.ID, x: toX, y: toY})
+	return nil
+}
+
+// xuLyChonChieu: client gui 34 (short templateId — day la MauChieu.Id, KHONG
+// PHAI skillId, xem dac ta §3.2). Luong phien CHI doc gói va CHUYEN TIEP mot
+// su kien cho actor khu vuc; TUYET DOI KHONG tu tra ChieuCuaLang/ghi
+// chieuDangChon o day — do la trach nhiem cua actor (khuvuc.go: xuLy case
+// suKienChonChieu), vi luong phien ghi + actor doc/ghi CUNG mot truong se
+// tranh chap du lieu (bay §6.9, KH5 da vap voi nv.ViTriX/Y).
+func (b *BoXuLy) xuLyChonChieu(m *protocol.Message) error {
+	if b.khuVuc == nil || b.nhanVat == nil {
+		return nil
+	}
+	r := protocol.NewReader(m.Data)
+	templateId, err := r.Short()
+	if err != nil {
+		return nil // goi ngan hon khuon -> bo qua an toan, khong ngat ket noi
+	}
+	// templateId chi co gia tri 1..4 tren thuc te (4 slot chieu/lang, xem
+	// chieuthuc.go) nen luon vua byte; ep kieu ve byte de khop kieu
+	// suKienChonChieu.mauChieuId (MauChieu.Id la byte trong catalog -28/7).
+	// Gia tri gia mao ngoai khoang byte se wrap nhung khong khop Id nao trong
+	// ChieuCuaLang nen actor tu bo qua (xem xuLy case suKienChonChieu).
+	b.khuVuc.Gui(suKienChonChieu{idNhanVat: b.nhanVat.ID, mauChieuId: byte(templateId)})
 	return nil
 }
 

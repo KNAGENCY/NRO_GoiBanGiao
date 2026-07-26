@@ -49,6 +49,13 @@ type guiTin interface {
 type nguoiTrongKhuVuc struct {
 	nv    *store.NhanVat
 	phien guiTin
+
+	// chieuDangChon la CapChieu (cap 1) cua chieu nguoi choi vua chon bang goi
+	// 34 (xem suKienChonChieu). nil = chua chon chieu nao. CHI luong vongLap
+	// cua actor duoc doc/ghi truong nay — day chinh la trang thai dac ta §3.2
+	// yeu cau dat trong actor (khong trong BoXuLy) de tranh tranh chap voi
+	// luong tinh sat thuong doc no sau nay (Ke hoach 6 Task 3+).
+	chieuDangChon *CapChieu
 }
 
 // suKienKhuVuc la kieu su kien actor xu ly qua hop thu. Ke hoach 5 Task 5 se
@@ -70,6 +77,17 @@ type suKienDiChuyen struct {
 // suKienRa bao actor mot nhan vat vua roi khu vuc.
 type suKienRa struct {
 	idNhanVat int64
+}
+
+// suKienChonChieu bao actor mot nhan vat vua chon mot chieu (goi len `34`,
+// dac ta §3.2). mauChieuId la template.id (KHONG phai skillId — hai truong
+// khac nhau, xem bang §3.2 cua dac ta). Luong phien CHI gui su kien nay, actor
+// moi la noi tra cuu ChieuCuaLang + kiem chieu co thuoc lang nhan vat khong
+// va ghi chieuDangChon — tranh dung bay §6.9 (tranh chap doc/ghi nv.ViTriX/Y
+// ma Ke hoach 5 da vap).
+type suKienChonChieu struct {
+	idNhanVat  int64
+	mauChieuId byte
 }
 
 // MoKhuVuc tao mot khu vuc giu ban do da cho, chua co nguoi choi nao.
@@ -181,6 +199,28 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 		delete(k.nguoiTrong, sk.idNhanVat)
 		// Phat -6 cho nhung nguoi CON LAI (nguoi ra da bi xoa nen khong nhan).
 		k.phatChoNguoiKhac(sk.idNhanVat, goiRoiKhuVuc(sk.idNhanVat))
+
+	case suKienChonChieu:
+		nguoi, co := k.nguoiTrong[sk.idNhanVat]
+		if !co {
+			return
+		}
+		// Tim MauChieu co Id == mauChieuId TRONG DANH MUC CUA LANG nhan vat
+		// (ChieuCuaLang(nv.Lang)) — day la buoc "kiem chieu thuoc lang" ma dac
+		// ta §3.2 doi hoi actor lam (khong phai luong phien). Lang khong hop
+		// le (ngoai 0..4) hoac templateId khong co trong 4 chieu cua lang do
+		// -> khong tim thay -> BO QUA, GIU NGUYEN chieuDangChon cu (dung dac
+		// ta: "chon chieu khong thuoc lang -> khong doi gi").
+		danhMuc := ChieuCuaLang(byte(nguoi.nv.Lang))
+		for i := range danhMuc {
+			if danhMuc[i].Id == sk.mauChieuId && len(danhMuc[i].CacCap) > 0 {
+				// Luon lay cap 1 (CacCap[0]): Ke hoach 6 Task 2 chua co mo hinh
+				// cap do chieu cua tung nguoi choi (se den o task sau) — chon
+				// chieu la chon LOAI, cap that do task khac quyet dinh.
+				nguoi.chieuDangChon = &danhMuc[i].CacCap[0]
+				return
+			}
+		}
 	}
 }
 

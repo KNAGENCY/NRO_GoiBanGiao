@@ -138,6 +138,58 @@ func TestKhuVucXuLySuKien(t *testing.T) {
 	}
 }
 
+// TestKhuVucChonChieuCapNhatChieuDangChon: gui suKienChonChieu voi templateId
+// HOP LE (thuoc lang cua nhan vat) -> actor phai cap nhat chieuDangChon dung
+// CapChieu cap 1 cua chieu do. Kiem tra bang gia tri GHIM CUNG (khong doi
+// module gian tiep), tinh tu cong thuc taoCapChieu/xayDungChieuTheoLang trong
+// chieuthuc.go: lang=0 (La), templateId=2 (slot 1, tam xa) ->
+// skillIdGoc = 1 + (0*4+1)*3 = 4, cap 1 -> SkillId=4, Diem=1.
+func TestKhuVucChonChieuCapNhatChieuDangChon(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	nvA := &store.NhanVat{ID: 1, Ten: "A", Lang: 0}
+	pA := &phienGiaKhuVuc{}
+	k.xuLy(suKienVao{nv: nvA, phien: pA})
+
+	if k.nguoiTrong[nvA.ID].chieuDangChon != nil {
+		t.Fatal("truoc khi chon chieu, chieuDangChon phai la nil")
+	}
+
+	k.xuLy(suKienChonChieu{idNhanVat: nvA.ID, mauChieuId: 2})
+
+	cap := k.nguoiTrong[nvA.ID].chieuDangChon
+	if cap == nil {
+		t.Fatal("sau khi chon chieu HOP LE, chieuDangChon khong duoc la nil")
+	}
+	if cap.SkillId != 4 || cap.Diem != 1 {
+		t.Fatalf("chieuDangChon = {SkillId:%d Diem:%d}, mong doi {SkillId:4 Diem:1} (gia tri ghim cung)",
+			cap.SkillId, cap.Diem)
+	}
+}
+
+// TestKhuVucChonChieuKhongThuocLangKhongDoiGi: nhan vat co Lang khong hop le
+// (5, ngoai khoang 0..4) chon templateId=1 (ton tai o MOI lang hop le, nhung
+// KHONG co lang nao cho nhan vat nay) -> ChieuCuaLang tra nil -> khong tim
+// thay -> chieuDangChon PHAI GIU NGUYEN (khong doi gi), dung dac ta §3.2.
+func TestKhuVucChonChieuKhongThuocLangKhongDoiGi(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	nvA := &store.NhanVat{ID: 1, Ten: "A", Lang: 5}
+	pA := &phienGiaKhuVuc{}
+	k.xuLy(suKienVao{nv: nvA, phien: pA})
+
+	k.xuLy(suKienChonChieu{idNhanVat: nvA.ID, mauChieuId: 1})
+
+	if k.nguoiTrong[nvA.ID].chieuDangChon != nil {
+		t.Fatal("chon chieu khong thuoc lang: chieuDangChon phai VAN LA nil (khong doi gi)")
+	}
+}
+
+// TestKhuVucChonChieuNguoiKhongTrongKhuVucKhongPanic: idNhanVat khong co
+// trong khu vuc (chua vao, hoac da ra) -> phai la no-op an toan, khong panic.
+func TestKhuVucChonChieuNguoiKhongTrongKhuVucKhongPanic(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	k.xuLy(suKienChonChieu{idNhanVat: 999, mauChieuId: 1})
+}
+
 // khangDinhIdTrongGoi doc truong dau tien (playerId, writeInt) cua mot goi -5
 // va khang dinh no khop id mong doi.
 func khangDinhIdTrongGoi(t *testing.T, m *protocol.Message, idMongDoi int64) {

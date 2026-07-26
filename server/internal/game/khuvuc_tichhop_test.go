@@ -19,11 +19,13 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"sync"
 	"testing"
 	"time"
 
 	mynet "nroserver/internal/net"
 	"nroserver/internal/protocol"
+	"nroserver/internal/store"
 )
 
 // moPhienClientGiaKhuVuc giong het moPhienClientGia (tichhop_test.go) — cung
@@ -1445,4 +1447,520 @@ func TestTichHop_DanhNguoiChoiConSong(t *testing.T) {
 	if !clA.khongConGoiGi(t) {
 		t.Fatal("A khong duoc nhan them goi nao ngoai -60 va -30/9 da kiem")
 	}
+}
+
+// ---------------------------------------------------------------------------
+// Ke hoach 6 Task 14 — test dau-cuoi (E2E) TOAN BO chuoi chien dau qua HAI
+// client THAT (mang that qua net.Pipe + mynet.PhucVu that + CSDL that
+// nro_test): A danh quai con song -> A ha quai chet -> quai hoi sinh sau 5s
+// -> quai danh tra A -> A danh B toi chet -> B hoi sinh. Day la cot moc
+// nghiem thu tu dong cua toan bo Ke hoach 6 (brief Task 14): tung manh
+// (Task 1-13) da co test rieng, nhung chua co test nao GHEP CA CHUOI lai
+// thanh MOT kich ban lien tuc nhu nguoi choi that se trai qua.
+// ---------------------------------------------------------------------------
+
+// dongHoDauCuoi la DONG HO TIEM DUOC (k.dongHo) rieng cho test nay: mot moc
+// thoi gian TEST tu tay "tien toi" de vuot qua cac nguong cho (hoi chieu 1s,
+// hoi sinh quai 5s) MA KHONG sleep that — dung y het rang buoc cua brief:
+// "Dong ho tiem duoc (k.dongHo()) de khong cho 5s that". Boc mutex vi CA test
+// (ghi qua tienToi) LAN cac lan goi k.xuLy/k.nhipTim (doc qua k.dongHo(), moi
+// lan chay tren MOT GOROUTINE RIENG qua ky thuat "fire-and-forget" cua
+// chayVaDocDongThoi duoi day) co the cham vao gia tri nay quanh cung thoi
+// diem — dung mot khoa don gian thay vi phai chung minh happens-before tinh
+// vi cho tung buoc.
+type dongHoDauCuoi struct {
+	mu  sync.Mutex
+	luc time.Time
+}
+
+func (d *dongHoDauCuoi) bayGio() time.Time {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	return d.luc
+}
+
+func (d *dongHoDauCuoi) datLai(t time.Time) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.luc = t
+}
+
+func (d *dongHoDauCuoi) tienToi(khoang time.Duration) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.luc = d.luc.Add(khoang)
+}
+
+// moKhuVucDauCuoiMotQuai xay MOT KhuVuc CHUA goi BatDau() — cung ky thuat voi
+// TestTichHop_DanhQuaiChet/TestTichHop_ChetVaHoiSinh: hopThu duoc CAP PHAT TAY
+// nhung KHONG co goroutine vongLap nao tieu thu no. Test tu bom su kien/goi
+// k.nhipTim() TRUC TIEP de LAM CHU HOAN TOAN thu tu xay ra, thay vi phu thuoc
+// vao mot ticker 100ms that chay song song voi HAI ket noi mang — can thiet o
+// day vi kich ban co toi 5 buoc noi tiep brief doi hoi DUNG THU TU; mot AI
+// quai "tu y" xen vao som (vd tan cong truoc khi A kip danh no) qua mot ticker
+// that se pha vo dung thu tu ma khong cach nao dam bao duoc tu phia test.
+//
+// Quai DUY NHAT Hp=HpToiDa=3 (thay vi 100 mac dinh cua taoQuaiMacDinh): sat
+// thuong lang0/cap1 chi ~2 moi don (xem chu thich dau nhom
+// TestTichHop_DanhQuaiConSong), can hang chuc don that moi ha du 100 mau — qua
+// cham cho muc dich Task 14 (kiem CHUOI GOI dau-cuoi, khong phai tich luy sat
+// thuong qua nhieu don, cai do da co test rieng). Voi Hp=3: don 1 (2 sat
+// thuong) con lai 1 mau -> con song (-9, dung brief buoc 1); don 2 (dame goc 2
+// nhung quai chi con 1 mau -> kep con 1, §1.2) -> het mau (-12, dung brief
+// buoc 2) — DUNG 2 don khop brief, khong can quai gia (Hp=1) nhu
+// TestTichHop_DanhQuaiChet vi o day CAN mot don "con song" THAT truoc khi
+// don chet, de co goi -9 cho ca hai client kiem.
+func moKhuVucDauCuoiMotQuai(t *testing.T, dh *dongHoDauCuoi) (*KhuVuc, *SoKhuVuc) {
+	t.Helper()
+	bd := TimBanDo(1)
+	k := MoKhuVuc(bd)
+	k.dongHo = dh.bayGio
+	k.quai = []*Quai{{
+		Id: 0, MauId: 1, Cap: 1, CapTinhAnh: 1,
+		Hp: 3, HpToiDa: 3,
+		X: bd.SpawnX + 30, Y: bd.SpawnY,
+		SatThuongCoBan: 7,
+	}}
+	k.hopThu = make(chan suKienKhuVuc, 16) // KHONG goi BatDau() — xem chu thich ham
+
+	return k, &SoKhuVuc{theoMap: map[int32]*KhuVuc{1: k}}
+}
+
+// chayVaDocDongThoi chay `viec` (thuong la MOT lan k.xuLy(<-k.hopThu) hoac
+// k.nhipTim()) TRONG MOT GOROUTINE RIENG — `viec` co the goi Gui() qua mang
+// BEN TRONG, se BLOCK cho toi khi dau kia doc (xem canh bao bomSuKienKhongPhatGoi
+// dau file nay) — CHAY DONG THOI moi ham trong `docs` (moi ham MOT goroutine
+// RIENG cua no: actor co the ghi xen ke vao NHIEU ket noi cung luc, doc TUAN
+// TU tung ket noi se be tac, cung ly do voi doiGoiLenhKhongFatal), ROI CHO
+// `viec` HOAN TOAN tra ve (kenh xong) truoc khi ham nay tra ve. Diem dong bo
+// cuoi cung nay la BAT BUOC de test duoc phep CHAM TRUC TIEP trang thai actor
+// (vd k.nguoiTrong[...].nv.ViTriX/HpHienTai) NGAY SAU khi goi ham nay — dung
+// tinh than voi bomSuKienKhongPhatGoi, mo rong cho truong hop CO Gui() ben
+// trong (khac han bomSuKienKhongPhatGoi chi an toan khi KHONG co Gui() nao).
+func chayVaDocDongThoi(t *testing.T, viec func(), docs ...func() error) {
+	t.Helper()
+	xong := make(chan struct{})
+	go func() {
+		viec()
+		close(xong)
+	}()
+
+	ketQuaCh := make(chan error, len(docs))
+	for _, doc := range docs {
+		doc := doc
+		go func() { ketQuaCh <- doc() }()
+	}
+	for i := 0; i < len(docs); i++ {
+		if err := <-ketQuaCh; err != nil {
+			t.Fatal(err)
+		}
+	}
+	<-xong
+}
+
+// kiemGoi3015 kiem than goi -30/15 (goiAiDoHoiSinh, dac ta §3.4): sub=15,
+// id=nvNguoiHoiSinh.ID, hp/mp = DAY DU (HpToiDa/ChakraToiDa — hoi sinh luon
+// day mau/chakra, dac ta §6.4). x/y chi doc de tieu thu du than goi (khong
+// gan cho bien nao dang quan tam — vi tri khong doi luc chet/hoi sinh, da co
+// test rieng TestTichHop_ChetVaHoiSinh kiem dieu do).
+func kiemGoi3015(m *protocol.Message, nvNguoiHoiSinh *store.NhanVat) error {
+	r := protocol.NewReader(m.Data)
+	sub, e1 := r.Byte()
+	id, e2 := r.Int()
+	hp, e3 := r.Int()
+	mp, e4 := r.Int()
+	_, e5 := r.Short() // x — khong kiem o day, xem chu thich ham
+	_, e6 := r.Short() // y — khong kiem o day, xem chu thich ham
+	if e1 != nil || e2 != nil || e3 != nil || e4 != nil || e5 != nil || e6 != nil {
+		return fmt.Errorf("doc -30/15 loi: sub=%v id=%v hp=%v mp=%v x=%v y=%v", e1, e2, e3, e4, e5, e6)
+	}
+	if sub != subAiDoHoiSinh || id != int32(nvNguoiHoiSinh.ID) || hp != nvNguoiHoiSinh.HpToiDa || mp != nvNguoiHoiSinh.ChakraToiDa {
+		return fmt.Errorf("-30/15 sai: sub=%d id=%d hp=%d mp=%d, mong sub=%d id=%d hp=%d mp=%d",
+			sub, id, hp, mp, subAiDoHoiSinh, nvNguoiHoiSinh.ID, nvNguoiHoiSinh.HpToiDa, nvNguoiHoiSinh.ChakraHienTai)
+	}
+	return nil
+}
+
+// TestTichHop_DauCuoiHaiNguoiChoiChienDauVaQuai la kich ban chinh cua Task 14
+// (brief Step 1): hai client THAT dang nhap that, tao nhan vat that, vao CUNG
+// khu vuc, roi dien TRON chuoi chien dau brief doi hoi:
+//
+//  1. A chon chieu, danh quai -> B thay 54 va -9.
+//  2. A danh quai toi chet -> B thay -12; sau 5s (dong ho tiem duoc, KHONG
+//     sleep that) ca hai thay -13.
+//  3. Quai danh A -> A nhan -11, B nhan -10.
+//  4. A danh B toi chet -> ca hai thay -60, A thay -8 cua B.
+//  5. B hoi sinh -> ca hai thay -30/15.
+func TestTichHop_DauCuoiHaiNguoiChoiChienDauVaQuai(t *testing.T) {
+	khoThat := moKhoThatChoTest(t)
+	ctx := context.Background()
+
+	dh := &dongHoDauCuoi{}
+	dh.datLai(time.Now())
+	k, soKhuVuc := moKhuVucDauCuoiMotQuai(t, dh)
+	bd := k.BanDo()
+	// KHONG defer soKhuVuc.DungTatCa(): khu vuc nay KHONG goi BatDau() (xem chu
+	// thich moKhuVucDauCuoiMotQuai) nen k.dung/k.xong con nil — Dung() se PANIC
+	// (close(nil)) roi treo vinh vien (<-nil), dung y het ly do
+	// TestTichHop_DanhQuaiChet/TestTichHop_ChetVaHoiSinh o tren KHONG defer no.
+
+	matKhau := "matkhau123"
+	tenTKA := "e2eA" + hauToNganNgau(t)
+	tenTKB := "e2eB" + hauToNganNgau(t)
+	taiKhoanA := taoTaiKhoanCoMatKhau(t, tenTKA, matKhau)
+	taiKhoanB := taoTaiKhoanCoMatKhau(t, tenTKB, matKhau)
+	tenNVA := "E2eA" + hauToNganNgau(t)
+	tenNVB := "E2eB" + hauToNganNgau(t)
+
+	clA := moPhienClientGiaKhuVuc(t, khoThat, soKhuVuc)
+	defer clA.dong()
+	clB := moPhienClientGiaKhuVuc(t, khoThat, soKhuVuc)
+	defer clB.dong()
+
+	dangNhapTaoNhanVatVaoTheGioi(t, clA, tenTKA, matKhau, tenNVA)
+	<-k.hopThu // xa suKienXinDanhSachQuai cua A, xem chu thich TestTichHop_DanhQuaiChet
+	dangNhapTaoNhanVatVaoTheGioi(t, clB, tenTKB, matKhau, tenNVB)
+	<-k.hopThu // xa suKienXinDanhSachQuai cua B
+
+	nvA, err := khoThat.LayNhanVatTheoTaiKhoan(ctx, taiKhoanA)
+	if err != nil {
+		t.Fatalf("LayNhanVatTheoTaiKhoan A that bai: %v", err)
+	}
+	nvB, err := khoThat.LayNhanVatTheoTaiKhoan(ctx, taiKhoanB)
+	if err != nil {
+		t.Fatalf("LayNhanVatTheoTaiKhoan B that bai: %v", err)
+	}
+	if nvA.MapID != 1 || nvB.MapID != 1 {
+		t.Fatalf("ca hai nhan vat phai o mapId 1 (lang 0), nhan duoc A=%d B=%d", nvA.MapID, nvB.MapID)
+	}
+
+	// A vao khu vuc mot minh -> suKienVao KHONG Gui() gi ca (map con rong
+	// truoc do) -> an toan bomSuKienKhongPhatGoi, dung ky thuat
+	// TestTichHop_DanhQuaiChet.
+	clA.baoVaoKhuVuc()
+	bomSuKienKhongPhatGoi(k, <-k.hopThu)
+	if _, co := k.nguoiTrong[nvA.ID]; !co {
+		t.Fatal("A phai co trong k.nguoiTrong sau khi xu ly suKienVao")
+	}
+
+	// B vao sau -> suKienVao PHAT -5 cho CA HAI chieu (B thay A, A thay B) ->
+	// can doc dong thoi tren ca hai ket noi (xem chu thich chayVaDocDongThoi).
+	clB.baoVaoKhuVuc()
+	chayVaDocDongThoi(t, func() { k.xuLy(<-k.hopThu) },
+		func() error {
+			m, err := clB.doiGoiLenhKhongFatal(-5)
+			if err != nil {
+				return fmt.Errorf("B doc -5 (thay A) loi: %w", err)
+			}
+			r := protocol.NewReader(m.Data)
+			id, errID := r.Int()
+			if errID != nil || id != int32(nvA.ID) {
+				return fmt.Errorf("B: id trong -5 = %d (loi %v), mong doi %d (A)", id, errID, nvA.ID)
+			}
+			return nil
+		},
+		func() error {
+			m, err := clA.doiGoiLenhKhongFatal(-5)
+			if err != nil {
+				return fmt.Errorf("A doc -5 (thay B) loi: %w", err)
+			}
+			r := protocol.NewReader(m.Data)
+			id, errID := r.Int()
+			if errID != nil || id != int32(nvB.ID) {
+				return fmt.Errorf("A: id trong -5 = %d (loi %v), mong doi %d (B)", id, errID, nvB.ID)
+			}
+			return nil
+		},
+	)
+
+	// Dua B ra XA quai (nhung VAN trong tam can chien 100 cua A) NGAY SAU khi
+	// B vao khu vuc — CHI MOT LAN, dung suot phan con lai cua kich ban. Vi sao
+	// can: brief buoc (3) "quai danh A" dua vao AI tang 2 (chonMucTieu,
+	// quai.go) — "bat ky ai TRONG TAM 100, GAN NHAT" — quai vua hoi sinh o
+	// buoc (2) MAT SACH danh sach "da tung danh" (tang 1), nen KHONG con ly do
+	// nao de AI uu tien A hon B. Neu A/B dung CUNG mot diem (ca hai spawn tai
+	// (100,384) cua lang 0), khoang cach toi quai BANG NHAU -> AI chon ai la
+	// NGAU NHIEN (thu tu duyet map[int64]*nguoiTrongKhuVuc cua Go KHONG dinh)
+	// -> vi pham yeu cau "khong chap chon" cua task. Chon do lech de CA HAI
+	// dieu kien cung thoa MOT LUC, deu co bien an toan, khong ke sat bien:
+	//   - quai o (SpawnX+30, SpawnY); A dung nguyen (SpawnX, SpawnY) -> cach
+	//     quai 30 (trong tam AI 100, con nhieu bien).
+	//   - B doi sang (SpawnX-90, SpawnY) -> cach A DUNG 90 (<=100, VAN trong
+	//     tam can chien cua A cho brief buoc (4) sau nay, bien 10) NHUNG cach
+	//     quai 30+90=120 (>100, NGOAI tam AI, bien 20) -> AI tang 2 CHI CON
+	//     MOT ung vien hop le (A), khong con gi de "boc tham".
+	// Ghi TRUC TIEP nv.ViTriX (KHONG qua goi -7/kiemDiChuyenHopLe): AN TOAN vi
+	// dung SAU khi chayVaDocDongThoi() o tren da tra ve (<-xong da xay ra —
+	// khong goroutine nao khac dang cham k.nguoiTrong luc nay), dung ky thuat
+	// "cham truc tiep trang thai actor giua hai diem dong bo" da dung cho
+	// k.quai[0].Hp trong TestTichHop_DanhQuaiChet.
+	k.nguoiTrong[nvB.ID].nv.ViTriX = int32(bd.SpawnX) - 90
+
+	// A chon chieu can chien (templateId=1, tam 100) — suKienChonChieu KHONG
+	// Gui() gi (xem khuvuc.go) -> an toan bomSuKienKhongPhatGoi.
+	clA.chonChieu(1)
+	bomSuKienKhongPhatGoi(k, <-k.hopThu)
+	if k.nguoiTrong[nvA.ID].chieuDangChon == nil {
+		t.Fatal("A phai co chieuDangChon sau khi xu ly suKienChonChieu")
+	}
+
+	// docChuoi54RoiTiep doc goi 54 (kiem idDanh/skillId/mobId co dinh cua kich
+	// ban nay) ROI goi `lenhSau` (vd -9 hoac -12), giao than goi do cho
+	// `kiemThan` kiem tiep — dung chung cho ca hai buoc "A danh quai" (con
+	// song va toi chet) de khong lap code doc 54.
+	docChuoi54RoiTiep := func(cl *clientGia, lenhSau int8, kiemThan func(*protocol.Message) error, taiSao string) func() error {
+		return func() error {
+			goi54, err := cl.doiGoiLenhKhongFatal(lenhNguoiDanhQuai)
+			if err != nil {
+				return fmt.Errorf("%s: doc 54 loi: %w", taiSao, err)
+			}
+			r := protocol.NewReader(goi54.Data)
+			idDanh, e1 := r.Int()
+			skillId, e2 := r.Byte()
+			mobId, e3 := r.Byte()
+			if e1 != nil || e2 != nil || e3 != nil || idDanh != int32(nvA.ID) || skillId != 1 || mobId != 0 {
+				return fmt.Errorf("%s: goi 54 sai: idDanh=%d skillId=%d mobId=%d (loi %v/%v/%v), mong idDanh=%d skillId=1 mobId=0",
+					taiSao, idDanh, skillId, mobId, e1, e2, e3, nvA.ID)
+			}
+			goiSau, err := cl.doiGoiLenhKhongFatal(lenhSau)
+			if err != nil {
+				return fmt.Errorf("%s: doc %d loi: %w", taiSao, lenhSau, err)
+			}
+			if err := kiemThan(goiSau); err != nil {
+				return fmt.Errorf("%s: %w", taiSao, err)
+			}
+			return nil
+		}
+	}
+
+	// --- Brief buoc (1): A danh quai (con song) -> CA HAI thay 54 va -9. ---
+	kiemGoi9 := func(m *protocol.Message) error {
+		r := protocol.NewReader(m.Data)
+		mobId, e1 := r.Byte()
+		hpConLai, e2 := r.Int()
+		satThuong, e3 := r.Int()
+		chiMang, e4 := r.Byte() // bool tren day la 1 byte (0/1), KHONG co r.Bool()
+		hieuUngId, e5 := r.Byte()
+		if e1 != nil || e2 != nil || e3 != nil || e4 != nil || e5 != nil {
+			return fmt.Errorf("doc -9 loi: %v/%v/%v/%v/%v", e1, e2, e3, e4, e5)
+		}
+		if mobId != 0 || hpConLai != 1 || satThuong != 2 || chiMang != 0 || hieuUngId != 255 {
+			return fmt.Errorf("-9 sai: mobId=%d hpConLai=%d satThuong=%d chiMang=%d hieuUngId=%d, mong mobId=0 hpConLai=1 satThuong=2 chiMang=0 hieuUngId=255",
+				mobId, hpConLai, satThuong, chiMang, hieuUngId)
+		}
+		return nil
+	}
+	clA.guiDanhQuai(0)
+	chayVaDocDongThoi(t, func() { k.xuLy(<-k.hopThu) },
+		docChuoi54RoiTiep(clA, lenhQuaiConSong, kiemGoi9, "A (nguoi danh, buoc 1)"),
+		docChuoi54RoiTiep(clB, lenhQuaiConSong, kiemGoi9, "B (nguoi ngoai, buoc 1 — brief doi hoi B thay 54 va -9)"),
+	)
+
+	// Vuot qua hoi chieu 1000ms (cap 1 = 1000ms + noi cho phep 50ms tre mang,
+	// chotkiem.go) MA KHONG sleep that — dung dong ho tiem duoc.
+	dh.tienToi(1100 * time.Millisecond)
+
+	// --- Brief buoc (2) phan 1: A danh quai TOI CHET -> ca hai thay -12. ---
+	kiemGoi12 := func(m *protocol.Message) error {
+		r := protocol.NewReader(m.Data)
+		mobId, e1 := r.Byte()
+		satThuong, e2 := r.Int()
+		chiMang, e3 := r.Byte()
+		soDoRoi, e4 := r.Byte()
+		if e1 != nil || e2 != nil || e3 != nil || e4 != nil {
+			return fmt.Errorf("doc -12 loi: %v/%v/%v/%v", e1, e2, e3, e4)
+		}
+		if mobId != 0 || satThuong != 1 || chiMang != 0 || soDoRoi != 0 {
+			return fmt.Errorf("-12 sai: mobId=%d satThuong=%d chiMang=%d soDoRoi=%d, mong mobId=0 satThuong=1 chiMang=0 soDoRoi=0",
+				mobId, satThuong, chiMang, soDoRoi)
+		}
+		return nil
+	}
+	clA.guiDanhQuai(0)
+	chayVaDocDongThoi(t, func() { k.xuLy(<-k.hopThu) },
+		docChuoi54RoiTiep(clA, lenhQuaiChet, kiemGoi12, "A (nguoi danh, buoc 2 — quai chet)"),
+		docChuoi54RoiTiep(clB, lenhQuaiChet, kiemGoi12, "B (nguoi ngoai, buoc 2 — brief doi hoi B thay -12)"),
+	)
+
+	// --- Brief buoc (2) phan 2: "sau 5s ca hai thay -13" — tien dong ho qua
+	// nguong hoi sinh 5s MOT LAN, goi TRUC TIEP k.nhipTim() (KHONG phai su
+	// kien tu hop thu — day la ham vong lap goi dinh ky, o day test goi thay
+	// cho ticker that de "khong cho 5s that"). GHIM SO 5*time.Second THANG
+	// (KHONG doc lai hang so thoiGianHoiSinhQuai cua khuvuc.go) — co tinh,
+	// dung y het TestNhipTimQuaiHoiSinhDung5Giay (quai_test.go): neu test doc
+	// lai chinh hang so san xuat de tinh khoang tien, mot dot bien sua hang so
+	// do (vd 5s -> 50s) se KHONG BAO GIO bi test nay bat duoc (ca hai phia
+	// "tu dong khop nhau"). Ghim boc lap thanh 100ms bien an toan cho tre xu
+	// ly noi bo (khong phai tre mang — actor duoc goi TRUC TIEP, khong qua
+	// ticker that). ---
+	dh.tienToi(5*time.Second + 100*time.Millisecond)
+	kiemGoi13 := func(m *protocol.Message) error {
+		r := protocol.NewReader(m.Data)
+		mobId, e1 := r.Byte()
+		sys, e2 := r.Byte()
+		levelBoss, e3 := r.Byte()
+		hp, e4 := r.Int()
+		if e1 != nil || e2 != nil || e3 != nil || e4 != nil {
+			return fmt.Errorf("doc -13 loi: %v/%v/%v/%v", e1, e2, e3, e4)
+		}
+		if mobId != 0 || sys != 0 || levelBoss != 0 || hp != 3 {
+			return fmt.Errorf("-13 sai: mobId=%d sys=%d levelBoss=%d hp=%d, mong mobId=0 sys=0 levelBoss=0 hp=3 (HpToiDa)",
+				mobId, sys, levelBoss, hp)
+		}
+		return nil
+	}
+	chayVaDocDongThoi(t, func() { k.nhipTim() },
+		func() error {
+			m, err := clA.doiGoiLenhKhongFatal(lenhQuaiHoiSinh)
+			if err != nil {
+				return fmt.Errorf("A doc -13 loi: %w", err)
+			}
+			return kiemGoi13(m)
+		},
+		func() error {
+			m, err := clB.doiGoiLenhKhongFatal(lenhQuaiHoiSinh)
+			if err != nil {
+				return fmt.Errorf("B doc -13 loi: %w", err)
+			}
+			return kiemGoi13(m)
+		},
+	)
+
+	// --- Brief buoc (3): quai (vua hoi sinh, con song) danh TRA A qua AI (goi
+	// TRUC TIEP k.nhipTim() LAN HAI — lan dau chi lam hoi sinh roi "continue",
+	// KHONG chay AI trong CUNG mot lan goi, xem chu thich nhipTim/hoiSinhQuai
+	// trong khuvuc.go) -> A nhan -11 (rieng), B nhan -10 (nguoi khac). B da bi
+	// day ra ngoai tam AI (xem buoc dua B o tren) nen day la ket qua TAT DINH,
+	// khong phai may run. ---
+	chayVaDocDongThoi(t, func() { k.nhipTim() },
+		func() error {
+			m, err := clA.doiGoiLenhKhongFatal(lenhQuaiDanhTrungMinh)
+			if err != nil {
+				return fmt.Errorf("A doc -11 loi: %w", err)
+			}
+			r := protocol.NewReader(m.Data)
+			mobId, e1 := r.Byte()
+			satThuong, e2 := r.Int()
+			if e1 != nil || e2 != nil || mobId != 0 || satThuong != 7 {
+				return fmt.Errorf("A: -11 sai: mobId=%d(loi %v) satThuong=%d(loi %v), mong mobId=0 satThuong=7 (SatThuongCoBan)",
+					mobId, e1, satThuong, e2)
+			}
+			return nil
+		},
+		func() error {
+			m, err := clB.doiGoiLenhKhongFatal(lenhQuaiDanhTrungNguoiKhac)
+			if err != nil {
+				return fmt.Errorf("B doc -10 loi: %w", err)
+			}
+			r := protocol.NewReader(m.Data)
+			mobId, e1 := r.Byte()
+			idNanNhan, e2 := r.Int()
+			hpConLai, e3 := r.Int()
+			if e1 != nil || e2 != nil || e3 != nil || mobId != 0 || idNanNhan != int32(nvA.ID) || hpConLai != nvA.HpToiDa-7 {
+				return fmt.Errorf("B: -10 sai: mobId=%d idNanNhan=%d hpConLai=%d, mong mobId=0 idNanNhan=%d hpConLai=%d",
+					mobId, idNanNhan, hpConLai, nvA.ID, nvA.HpToiDa-7)
+			}
+			return nil
+		},
+	)
+
+	// Vuot qua hoi chieu cua A (lan danh gan nhat la don ha quai o buoc (2);
+	// don quai danh TRA A o tren KHONG cham nguoiTrongKhuVuc.lanDanhCuoi cua
+	// A — do la truong rieng cua PHIA A tan cong, khac Quai.LanDanhCuoi cua
+	// phia quai tan cong) truoc khi A ra don PvP o brief buoc (4).
+	dh.tienToi(1100 * time.Millisecond)
+
+	// Ha thang HP cua B xuong du thap de MOT don PvP (~2 sat thuong, cung cong
+	// thuc lang0/cap1 nhu danh quai vi B cung lang0) la CHET NGAY — tranh phai
+	// grind hang chuc don that (B mac dinh 150 mau). Ghi TRUC TIEP
+	// nv.HpHienTai: AN TOAN vi dang o giua hai diem dong bo (chayVaDocDongThoi
+	// truoc do da tra ve), dung ky thuat da dung cho k.quai[0].Hp
+	// (TestTichHop_DanhQuaiChet) va k.nguoiTrong[nvB.ID].nv.ViTriX (o tren) —
+	// KHONG vi pham ky luat actor vi KHONG co goroutine nao khac dang chay tai
+	// thoi diem nay.
+	k.nguoiTrong[nvB.ID].nv.HpHienTai = 2
+
+	// --- Brief buoc (4): A danh B TOI CHET -> ca hai thay -60, A thay -8 (bao
+	// "nguoi khac" B da chet) — B KHONG nhan -8 cua chinh minh, thay vao do
+	// nhan -17 (rieng chinh chu, xem xuLyNguoiChoiChet). ---
+	clA.guiDanhNguoiChoi(int32(nvB.ID))
+	chayVaDocDongThoi(t, func() { k.xuLy(<-k.hopThu) },
+		func() error {
+			m, err := clA.doiGoiLenhKhongFatal(lenhNguoiDanhNguoi)
+			if err != nil {
+				return fmt.Errorf("A doc -60 loi: %w", err)
+			}
+			g, err := docGoi60(m.Data)
+			if err != nil {
+				return fmt.Errorf("A: doc than -60 loi: %w", err)
+			}
+			if g.idDanh != int32(nvA.ID) || g.idTrung != int32(nvB.ID) || g.satThuong != 2 || g.daChet != 1 {
+				return fmt.Errorf("A: -60 sai: %+v, mong idDanh=%d idTrung=%d satThuong=2 daChet=1", g, nvA.ID, nvB.ID)
+			}
+			// A la "nguoi khac" cua B (khong phai chinh B) -> nhan THEM -8 bao
+			// B da chet (dac ta §3.4, brief "A thay -8 cua B"). doiGoiLenhKhongFatal
+			// bo qua duoc goi -30/9 (cap nhat mau) xen giua ma khong lam sai
+			// ket qua — day chinh la ly do dung ham doc "bo qua goi khac" thay
+			// vi doc dung MOT goi ke tiep.
+			m8, err := clA.doiGoiLenhKhongFatal(lenhAiDoChet)
+			if err != nil {
+				return fmt.Errorf("A doc -8 loi: %w", err)
+			}
+			r := protocol.NewReader(m8.Data)
+			id, e1 := r.Int()
+			if e1 != nil || id != int32(nvB.ID) {
+				return fmt.Errorf("A: id trong -8 = %d (loi %v), mong doi %d (B)", id, e1, nvB.ID)
+			}
+			return nil
+		},
+		func() error {
+			m, err := clB.doiGoiLenhKhongFatal(lenhNguoiDanhNguoi)
+			if err != nil {
+				return fmt.Errorf("B doc -60 loi: %w", err)
+			}
+			g, err := docGoi60(m.Data)
+			if err != nil {
+				return fmt.Errorf("B: doc than -60 loi: %w", err)
+			}
+			if g.idDanh != int32(nvA.ID) || g.idTrung != int32(nvB.ID) || g.satThuong != 2 || g.daChet != 1 {
+				return fmt.Errorf("B: -60 sai: %+v, mong idDanh=%d idTrung=%d satThuong=2 daChet=1", g, nvA.ID, nvB.ID)
+			}
+			// B la CHINH CHU vua chet -> nhan -17 (RIENG, KHONG phai -8, xem
+			// dac ta §3.4/§7.2) — kiem them de chac chan hai chieu khong lan.
+			m17, err := clB.doiGoiLenhKhongFatal(lenhNguoiChet)
+			if err != nil {
+				return fmt.Errorf("B doc -17 loi: %w", err)
+			}
+			if len(m17.Data) != 5 {
+				return fmt.Errorf("B: -17 dai %d byte, mong 5 (dac ta §7.2)", len(m17.Data))
+			}
+			return nil
+		},
+	)
+
+	// --- Brief buoc (5): B hoi sinh -> ca hai thay -30/15. ---
+	clB.guiHoiSinh()
+	chayVaDocDongThoi(t, func() { k.xuLy(<-k.hopThu) },
+		func() error {
+			m16, err := clB.doiGoiLenhKhongFatal(lenhHoiSinh)
+			if err != nil {
+				return fmt.Errorf("B doc -16 loi: %w", err)
+			}
+			if len(m16.Data) != 0 {
+				return fmt.Errorf("B: -16 dai %d byte, mong RONG (dac ta §3.4)", len(m16.Data))
+			}
+			m30, err := clB.doiGoiLenhKhongFatal(lenhMeInfo)
+			if err != nil {
+				return fmt.Errorf("B doc -30/15 loi: %w", err)
+			}
+			return kiemGoi3015(m30, nvB)
+		},
+		func() error {
+			m30, err := clA.doiGoiLenhKhongFatal(lenhMeInfo)
+			if err != nil {
+				return fmt.Errorf("A doc -30/15 loi: %w", err)
+			}
+			return kiemGoi3015(m30, nvB)
+		},
+	)
 }

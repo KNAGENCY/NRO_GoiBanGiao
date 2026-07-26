@@ -15,7 +15,9 @@ Người dùng nói thêm: $ARGUMENTS
 Nạp bối cảnh. Đọc thật, đừng nhớ theo trí nhớ:
 
 1. `git status --short --branch` và `git log --oneline -15` — trạng thái thật.
-2. `NHAT-KY-AGENT.md` — **ai vừa làm gì**, có ai đang mở cùng vùng code không.
+2. `NHAT-KY-AGENT.md` — đọc khối **"⏳ ĐANG CHỜ GÌ NGAY LÚC NÀY"** ở đầu file trước tiên
+   (đây là chỗ nói dự án đang dừng ở đâu, đang chờ ai), rồi tới bảng: **ai vừa làm gì**,
+   có ai đang mở cùng vùng code không.
 3. `BAT-DAU-TU-DAY.md` — §4 đã làm, §5 còn lại, **§6 các lỗi đã vấp** (đọc kỹ, đừng lặp
    lại), §9 bẫy môi trường của máy này.
 
@@ -92,8 +94,13 @@ npm run build
 
 Test đỏ → ghi vào sổ là **đang dở, đỏ ở đâu**. Đừng ghi là xong.
 
-## 3. Ghi `NHAT-KY-AGENT.md`
-Thêm **một dòng vào CUỐI bảng** (mới nhất nằm dưới cùng — hook đọc 12 dòng cuối):
+## 3. Ghi `NHAT-KY-AGENT.md` — hai chỗ, đừng bỏ chỗ nào
+
+**(a) Sửa lại khối "⏳ ĐANG CHỜ GÌ NGAY LÚC NÀY"** ở đầu file cho đúng hiện tại: việc vừa
+xong thì xoá khỏi khối, việc mới lộ ra thì thêm vào, sửa ngày. Khối này cũ = gây hại hơn
+là không có, vì phiên sau tin nó.
+
+**(b)** Thêm **một dòng vào CUỐI bảng** (mới nhất nằm dưới cùng — hook đọc 12 dòng cuối):
 
 `| <dd/mm/yyyy> | <ai> | <làm gì, một câu> | <nhánh> / <commit> | <còn dở gì, hoặc —> |`
 

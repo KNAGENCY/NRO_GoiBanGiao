@@ -1,5 +1,23 @@
 # Nhật ký agent — ai đã làm gì
 
+## ⏳ ĐANG CHỜ GÌ NGAY LÚC NÀY — cập nhật: 26/07/2026
+
+> Ai vào cũng đọc khối này trước. **Xong việc thì phải sửa lại khối này**, nếu không nó
+> thành thông tin cũ gây hại hơn là không có.
+
+- **Việc đang chờ người khác:** nhánh `kh6-nghien-cuu-chien-dau` (worktree
+  `.claude\worktrees\vao-viec-b4ec16`) phải sửa **5 việc** ở
+  [`docs/superpowers/plans/KH6-VIEC-CAN-SUA-TRUOC-KHI-GOP.md`](docs/superpowers/plans/KH6-VIEC-CAN-SUA-TRUOC-KHI-GOP.md).
+- **Việc kế tiếp của phiên điều phối:** khi nhánh đó báo xong → **soi lại lần hai** (đối
+  chiếu bằng chứng trong file trên) → nếu sạch thì **gộp `--no-ff` vào `main`** rồi xoá nhánh.
+- **Sau khi gộp, làm ngay 1 việc nhỏ:** chuyển bài học *"không dùng PowerShell
+  `Get-Content -Raw` + `Set-Content` để sửa file tiếng Việt — mojibake cả file"* thành một
+  mục trong §6 của `BAT-DAU-TU-DAY.md` (giờ chưa làm để tránh rối số mục lúc merge).
+- **Rồi mới tới:** thi công KH6 theo kế hoạch 15 task. Task 12 (đọc client Unity xác minh
+  gói `-8`/`-17`) làm được song song ngay từ đầu.
+
+---
+
 Sổ chung cho **mọi agent và mọi người** làm dự án này. Mục đích: phiên sau (hoặc
 agent khác đang làm song song) biết ngay ai vừa chạm vào cái gì, để không sửa đè
 lên nhau.
@@ -26,5 +44,5 @@ lên nhau.
 | 26/07/2026 | Claude Code (phiên chính) | Dựng cơ chế nhiều agent: sổ này + hook tự nạp bối cảnh + `AGENTS.md` + `MO-AGENT.bat` | `main` / `db34f6c` | — |
 | 26/07/2026 | Claude Code (phiên chính) | Gộp `/vao-viec` + `/ghi-so` thành **một lệnh `/viec`** tự nhận biết chế độ (theo yêu cầu người dùng cho nhanh) | `main` / `280a774` | — |
 | 26/07/2026 | Claude Code (worktree `vao-viec-b4ec16`) | **KH6 — thiết kế**: nghiên cứu giao thức chiến đấu + đặc tả bảng byte + kế hoạch thi công. Không sửa code Go | `kh6-nghien-cuu-chien-dau` / `3f7d23a` | Nhánh chưa gộp. Ai lấy KH6 làm tiếp thì **cả `server/internal/game/` là vùng của người đó** — đừng để agent khác vào cùng |
-| 26/07/2026 | Claude Code (phiên chính) | **Soi commit `3f7d23a`** (KH6 thiết kế, của worktree `vao-viec-b4ec16`): đối chiếu từng bảng byte + 12 con số hành vi + 4 "lỗi bản gốc" với code Java → **khớp hết**; chạy lại `go test ./...` toàn xanh trên cổng 5432. Sửa `server/README.md` dạy cách **tự kiểm cổng** thay vì ghim số | `main` | ⚠️ **Nhánh `kh6-nghien-cuu-chien-dau` rẽ từ `db34f6c`, CHƯA có `280a774`** → gộp thẳng sẽ xung đột `BAT-DAU-TU-DAY.md` + sổ này và **có thể xoá mất lệnh `/viec`**. Phải `git merge main` vào nhánh đó trước, giải xung đột theo hướng GIỮ `/viec`. Còn 3 lỗi nhỏ trong nhánh chờ sửa: sót gói `87` (`Mob.java:525` gửi kèm sau `-13`), commit-message Task 10 ghi "14B/10B" (đúng là 18B/11B), Task 5 chỉ sai file (`-24` dựng ở `thegioi.go:105`) |
-| 26/07/2026 | Claude Code (phiên chính) | **Bài học mới, chưa kịp đưa vào §6** (đợi gộp xong để không rối số mục): **KHÔNG dùng PowerShell `Get-Content -Raw` + `Set-Content` để sửa file tiếng Việt** — PS 5.1 đọc UTF-8 bằng codepage ANSI rồi ghi lại UTF-8 → mojibake sạch cả file, và diff phình ra như viết lại toàn bộ. Đã tự vấp khi sửa `server/README.md`, phải `git checkout --` rồi làm lại bằng công cụ Edit. Sửa file có dấu thì **luôn dùng Edit/Write**, không dùng shell | `main` | ✅ Đã chuyển thành §6.15 khi gộp KH6 |
+| 26/07/2026 | Claude Code (phiên chính) | **Soi commit `3f7d23a`** (KH6 thiết kế, của worktree `vao-viec-b4ec16`): đối chiếu từng bảng byte + 12 con số hành vi + 4 "lỗi bản gốc" với code Java → **khớp hết**; chạy lại `go test ./...` toàn xanh trên cổng 5432. Sửa `server/README.md` dạy cách **tự kiểm cổng** thay vì ghim số | `main` | ⚠️ **Nhánh `kh6-nghien-cuu-chien-dau` rẽ từ `db34f6c`, CHƯA có `280a774`** → gộp thẳng sẽ xung đột `BAT-DAU-TU-DAY.md` + sổ này và **có thể xoá mất lệnh `/viec`**. Phải `git merge main` vào nhánh đó trước, giải xung đột theo hướng GIỮ `/viec`. **5 việc phải sửa trước khi gộp — đã viết đầy đủ, kèm bằng chứng, ở [`docs/superpowers/plans/KH6-VIEC-CAN-SUA-TRUOC-KHI-GOP.md`](docs/superpowers/plans/KH6-VIEC-CAN-SUA-TRUOC-KHI-GOP.md)**: sót gói `87`, số byte 14B/10B sai, Task 5 chỉ sai file, §9 kết luận sai về cổng, và việc merge `main` để không mất `/viec` |
+| 26/07/2026 | Claude Code (phiên chính) | **Bài học mới, chưa kịp đưa vào §6** (đợi gộp xong để không rối số mục): **KHÔNG dùng PowerShell `Get-Content -Raw` + `Set-Content` để sửa file tiếng Việt** — PS 5.1 đọc UTF-8 bằng codepage ANSI rồi ghi lại UTF-8 → mojibake sạch cả file, và diff phình ra như viết lại toàn bộ. Đã tự vấp khi sửa `server/README.md`, phải `git checkout --` rồi làm lại bằng công cụ Edit. Sửa file có dấu thì **luôn dùng Edit/Write**, không dùng shell | `main` | ✅ Đã chuyển thành **§6.15** khi gộp KH6 |

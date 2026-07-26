@@ -374,3 +374,42 @@ func TestGoiAiDoHoiSinhByteDung(t *testing.T) {
 			m.Data, len(m.Data), muon, len(muon))
 	}
 }
+
+// ---------------------------------------------------------------------------
+// Ke hoach 6 Task 11 — goi -30/9 "cap nhat mau nguoi choi" (dac ta §3.4),
+// bao NHUNG NGUOI KHAC (KHAC voi -30/15 o tren la "ca khu vuc") mot nguoi
+// choi vua doi mau sau mot don PvP (goi -60 khong tu mang hpConLai).
+// ---------------------------------------------------------------------------
+
+// TestGoiCapNhatMauByteDung: goi -30/9, dac ta §3.4 — 3 truong
+// (idNguoiChoi, hp, hpMax), dung LAI ma lenh -30 voi byte lenh con 9 (KHAC 15
+// cua -30/15 "ai do hoi sinh" — hai gia tri nay KHONG duoc trung nhau, neu
+// khong client se hieu nham hai su kien khac han nhau thanh mot).
+func TestGoiCapNhatMauByteDung(t *testing.T) {
+	m := goiCapNhatMau(1001, 80, 150)
+
+	if m.Command != -30 {
+		t.Fatalf("Command = %d, muon -30 (dung lai ma lenh cua ME_INFO, khac byte lenh con)", m.Command)
+	}
+	muon := []byte{
+		9,            // byte lenh con = 9 (cap nhat mau) — KHAC 15 (ai do hoi sinh)
+		0, 0, 3, 233, // idNguoiChoi = 1001
+		0, 0, 0, 80, // hp = 80
+		0, 0, 0, 150, // hpMax = 150
+	}
+	if !bytes.Equal(m.Data, muon) {
+		t.Fatalf("goi -30/9 byte sai:\n got  = %v (%d byte)\n muon = %v (%d byte)",
+			m.Data, len(m.Data), muon, len(muon))
+	}
+}
+
+// TestGoiCapNhatMauSubKhacAiDoHoiSinh: doi chieu truc tiep hai hang so byte
+// lenh con dung chung ma lenh -30 (subCapNhatMau va subAiDoHoiSinh,
+// goichiendau.go) — neu ai lo gan trung gia tri (vd copy-paste doi 15 thanh
+// 9 nhung quen sua o cho khac), test nay bat duoc NGAY o muc hang so, truoc
+// ca khi can so byte goi that.
+func TestGoiCapNhatMauSubKhacAiDoHoiSinh(t *testing.T) {
+	if subCapNhatMau == subAiDoHoiSinh {
+		t.Fatalf("subCapNhatMau (%d) == subAiDoHoiSinh (%d) — hai su kien PHAI co byte lenh con KHAC NHAU, neu khong client se hieu nham 'cap nhat mau' thanh 'ai do hoi sinh' hoac nguoc lai", subCapNhatMau, subAiDoHoiSinh)
+	}
+}

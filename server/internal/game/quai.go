@@ -240,13 +240,39 @@ const (
 // bool dai roi dua vao thu tu &&/||. Day chinh la bay ban Java mac phai
 // (Mob.java:402-404): voi big boss, sai thu tu toan tu lam MOI bo loc phia
 // truoc — KE CA bo loc "chua chet" — bi bo qua, boss nham ca xac chet.
-func (q *Quai) chonMucTieu(nguoi []*nguoiTrongKhuVuc) (*nguoiTrongKhuVuc, time.Duration) {
-	// Tang 1 (uu tien cao hon): nguoi DA TUNG danh quai nay, con song, tam 300.
+//
+// bayGio (Ke hoach 6 Task 11 Phan B, BAN GIAO tu Task 13): THAM SO MOI —
+// truoc Task 11 ham nay KHONG nhan bayGio nen KHONG THE kiem bat tu, day
+// chinh la LO HONG dac ta §1.7 ("bat tu 1500ms sau hoi sinh — MOI don vao
+// muc tieu vua hoi sinh bi tu choi, KHONG gioi han huong"): suKienDanhQuai
+// (khuvuc.go) co KiemDanhHopLe kiem bat tu cho HUONG nguoi-danh-quai, nhung
+// KHONG co gi kiem HUONG quai-danh-nguoi ca — mot nguoi vua hoi sinh se bi
+// quai AI danh trung NGAY o tick ke tiep (100ms), vi pham "KHONG gioi han
+// huong" cua dac ta. Them bayGio + dieu kien hopLeBatTu duoi day o CA HAI
+// tang de va lo hong nay, TAI DUNG thoiGianBatTuSauHoiSinh (chotkiem.go, hang
+// so da chot chung cho toan bo he chien dau — KHONG dinh nghia hang so rieng
+// o day). Ham VAN LA THUAN (bayGio la tham so, khong doc dong ho he thong).
+func (q *Quai) chonMucTieu(nguoi []*nguoiTrongKhuVuc, bayGio time.Time) (*nguoiTrongKhuVuc, time.Duration) {
+	// hopLeBatTu: n VUA hoi sinh (< 1500ms truoc bayGio) thi KHONG duoc chon
+	// lam muc tieu — dac ta §1.7 "KHONG gioi han huong", ap dung cho CA HAI
+	// tang uu tien ben duoi. n.lucHoiSinh la zero value (time.Time{}) cho
+	// nguoi CHUA TUNG hoi sinh lan nao -> bayGio.Sub(zero) ra khoang RAT LON
+	// -> tu nhien hopLe (KHONG bi mien nhiem oan), dung tinh than voi moi noi
+	// khac dung zero value cua truong lucHoiSinh trong file nay.
+	hopLeBatTu := func(n *nguoiTrongKhuVuc) bool {
+		return bayGio.Sub(n.lucHoiSinh) >= thoiGianBatTuSauHoiSinh
+	}
+
+	// Tang 1 (uu tien cao hon): nguoi DA TUNG danh quai nay, con song, tam 300,
+	// KHONG dang trong 1500ms bat tu sau hoi sinh.
 	if mt := timGanNhatTrongTam(q, nguoi, tamTraThu, func(n *nguoiTrongKhuVuc) bool {
-		if n.nv.HpHienTai <= 0 { // (a) da chet -> loai, DOC LAP voi (b)
+		if n.nv.HpHienTai <= 0 { // (a) da chet -> loai, DOC LAP voi (b)/(c)
 			return false
 		}
 		if !q.DaTungDanh[n.nv.ID] { // (b) chua tung danh quai nay -> loai
+			return false
+		}
+		if !hopLeBatTu(n) { // (c) vua hoi sinh <1500ms -> bat tu, Ke hoach 6 Task 11 Phan B
 			return false
 		}
 		return true
@@ -254,9 +280,15 @@ func (q *Quai) chonMucTieu(nguoi []*nguoiTrongKhuVuc) (*nguoiTrongKhuVuc, time.D
 		return mt, nhipTraThu
 	}
 
-	// Tang 2: bat ky ai con song, tam 100.
+	// Tang 2: bat ky ai con song, tam 100, KHONG dang trong 1500ms bat tu.
 	if mt := timGanNhatTrongTam(q, nguoi, tamTuGaySu, func(n *nguoiTrongKhuVuc) bool {
-		return n.nv.HpHienTai > 0 // CHI mot dieu kien -> tu no da tuong minh
+		if n.nv.HpHienTai <= 0 { // (a) da chet -> loai, DOC LAP voi (b)
+			return false
+		}
+		if !hopLeBatTu(n) { // (b) vua hoi sinh <1500ms -> bat tu, Ke hoach 6 Task 11 Phan B
+			return false
+		}
+		return true
 	}); mt != nil {
 		return mt, nhipTuGaySu
 	}

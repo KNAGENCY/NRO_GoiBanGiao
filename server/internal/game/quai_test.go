@@ -545,6 +545,14 @@ func nguoiGia(id int64, x, y int32, hpHienTai int32) *nguoiTrongKhuVuc {
 	return &nguoiTrongKhuVuc{nv: &store.NhanVat{ID: id, ViTriX: x, ViTriY: y, HpHienTai: hpHienTai}}
 }
 
+// bayGioChonMucTieuGia la "bay gio" gia dung CHUNG cho cac test chonMucTieu
+// KHONG lien quan toi bat tu (Ke hoach 6 Task 11 Phan B them tham so bayGio
+// vao chu ky ham) — nguoiGia() KHONG dat lucHoiSinh (zero value, nam 1) nen
+// bat ky moc "bay gio" nao du xa trong tuong lai cung an toan (khong bi loc
+// oan boi kiem bat tu moi them). Cac test RIENG kiem CHINH tinh nang bat tu
+// (TestChonMucTieu...VuaHoiSinh... o duoi) tu dinh nghia moc gio cua minh.
+var bayGioChonMucTieuGia = time.Date(2026, 7, 27, 12, 0, 0, 0, time.UTC)
+
 // TestChonMucTieuTangMotUuTienNguoiDaTungDanh: quai co MOT nguoi DA TUNG danh
 // no (tam 300) VA mot nguoi KHAC gan hon nhieu nhung CHUA TUNG danh (chi hop
 // le o tam 2 100) — tang 1 PHAI thang tuyet doi, khong so khoang cach xuyen
@@ -556,7 +564,7 @@ func TestChonMucTieuTangMotUuTienNguoiDaTungDanh(t *testing.T) {
 	nguoiA := nguoiGia(1, 50, 0, 100)  // gan (50), NHUNG chua tung danh quai -> chi hop le o tang 2
 	nguoiB := nguoiGia(2, 250, 0, 100) // xa hon nhieu (250), NHUNG da tung danh -> hop le tang 1
 
-	mt, nhip := q.chonMucTieu([]*nguoiTrongKhuVuc{nguoiA, nguoiB})
+	mt, nhip := q.chonMucTieu([]*nguoiTrongKhuVuc{nguoiA, nguoiB}, bayGioChonMucTieuGia)
 
 	if mt == nil {
 		t.Fatal("chonMucTieu tra nil, mong doi chon nguoiB (tang 1)")
@@ -577,7 +585,7 @@ func TestChonMucTieuTangHaiBatKyGanNhat(t *testing.T) {
 	xa := nguoiGia(10, 80, 0, 50)  // trong tam 100, nhung xa hon
 	gan := nguoiGia(11, 30, 0, 50) // trong tam 100, gan nhat
 
-	mt, nhip := q.chonMucTieu([]*nguoiTrongKhuVuc{xa, gan})
+	mt, nhip := q.chonMucTieu([]*nguoiTrongKhuVuc{xa, gan}, bayGioChonMucTieuGia)
 
 	if mt == nil {
 		t.Fatal("chonMucTieu tra nil, mong doi chon nguoi gan nhat (tang 2)")
@@ -600,7 +608,7 @@ func TestChonMucTieuMucTieuDaChetKhongDuocChon(t *testing.T) {
 
 	nguoiChet := nguoiGia(1, 10, 0, 0) // da tung danh + rat gan (ca hai tam) + HP=0
 
-	mt, nhip := q.chonMucTieu([]*nguoiTrongKhuVuc{nguoiChet})
+	mt, nhip := q.chonMucTieu([]*nguoiTrongKhuVuc{nguoiChet}, bayGioChonMucTieuGia)
 
 	if mt != nil {
 		t.Fatalf("chonMucTieu chon nguoi id=%d dang CHET (HpHienTai<=0) — vi pham dac ta §5.4.3 (bay big-boss nham xac chet cua ban Java)", mt.nv.ID)
@@ -619,13 +627,145 @@ func TestChonMucTieuMucTieuDaChetKhongDuocChon(t *testing.T) {
 func TestChonMucTieuKhongAiTraNilVaKhongTieuNhip(t *testing.T) {
 	q := &Quai{X: 0, Y: 0}
 
-	mt, nhip := q.chonMucTieu(nil)
+	mt, nhip := q.chonMucTieu(nil, bayGioChonMucTieuGia)
 
 	if mt != nil {
 		t.Fatalf("chonMucTieu tra muc tieu %+v, mong doi nil khi danh sach nguoi rong", mt)
 	}
 	if nhip != 0 {
 		t.Fatalf("nhip = %v, mong doi 0 khi khong co muc tieu", nhip)
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Ke hoach 6 Task 11 Phan B — VA GAP bat tu cho quai (ban giao tu Task 13):
+// chonMucTieu (va do do aiQuai/nhipTim, khuvuc.go) truoc day CHI loc
+// HpHienTai<=0, KHONG kiem lucHoiSinh — vi pham dac ta §1.7 ("bat tu 1500ms
+// sau hoi sinh — MOI don vao muc tieu vua hoi sinh bi tu choi, KHONG gioi han
+// huong"): huong nguoi-danh-quai da duoc KiemDanhHopLe (chotkiem.go, Task 3)
+// bao ve tu truoc, nhung huong quai-danh-nguoi thi KHONG co gi chan ca. Bon
+// test duoi day la TEST BAT BUOC cua brief Task 11 Phan B: "quai KHONG danh
+// nguoi vua hoi sinh <1500ms; sau 1500ms thi danh lai duoc" — kiem ca hai
+// tang uu tien (dac ta §1.7 khong gioi han huong/tang).
+// ---------------------------------------------------------------------------
+
+// TestChonMucTieuTangHaiBoQuaNguoiVuaHoiSinh: nguoi duy nhat trong tam (tang
+// 2, "tu gay su") vua hoi sinh 500ms truoc bayGio (< 1500ms bat tu) — PHAI bi
+// loai, chonMucTieu tra nil, DU la ung vien HOP LE duy nhat (con song, trong
+// tam). Day la TEST DOT BIEN CHINH cua Phan B: bo dieu kien hopLeBatTu o tang
+// 2 (chonMucTieu, quai.go) se lam test nay DO.
+func TestChonMucTieuTangHaiBoQuaNguoiVuaHoiSinh(t *testing.T) {
+	t0 := time.Date(2026, 7, 27, 12, 0, 0, 0, time.UTC)
+	q := &Quai{X: 0, Y: 0}
+
+	nguoiVuaHoiSinh := nguoiGia(1, 10, 0, 100) // rat gan (tam 2 = 100), con song
+	nguoiVuaHoiSinh.lucHoiSinh = t0
+
+	bayGio := t0.Add(500 * time.Millisecond) // 500ms < 1500ms bat tu
+
+	mt, nhip := q.chonMucTieu([]*nguoiTrongKhuVuc{nguoiVuaHoiSinh}, bayGio)
+
+	if mt != nil {
+		t.Fatalf("chonMucTieu chon nguoi id=%d dang BAT TU (vua hoi sinh 500ms truoc) — vi pham dac ta §1.7", mt.nv.ID)
+	}
+	if nhip != 0 {
+		t.Fatalf("nhip = %v, mong doi 0 khi khong co muc tieu", nhip)
+	}
+}
+
+// TestChonMucTieuTangHaiDanhDuocSauKhiHetBatTu: nguoi CUNG nguoi cua test
+// tren, nhung bayGio gio la DUNG 1500ms sau lucHoiSinh (bien tren cua nguong,
+// giong quy uoc ">= " cua KiemDanhHopLe) — PHAI duoc chon lai binh thuong.
+func TestChonMucTieuTangHaiDanhDuocSauKhiHetBatTu(t *testing.T) {
+	t0 := time.Date(2026, 7, 27, 12, 0, 0, 0, time.UTC)
+	q := &Quai{X: 0, Y: 0}
+
+	nguoi := nguoiGia(1, 10, 0, 100)
+	nguoi.lucHoiSinh = t0
+
+	bayGio := t0.Add(1500 * time.Millisecond) // DUNG 1500ms — het bat tu
+
+	mt, nhip := q.chonMucTieu([]*nguoiTrongKhuVuc{nguoi}, bayGio)
+
+	if mt == nil {
+		t.Fatal("chonMucTieu tra nil, mong doi chon lai nguoi sau khi het 1500ms bat tu")
+	}
+	if mt.nv.ID != 1 {
+		t.Fatalf("chon nguoi id=%d, mong doi id=1", mt.nv.ID)
+	}
+	if nhip != nhipTuGaySu {
+		t.Fatalf("nhip = %v, mong doi %v (nhip tang 2)", nhip, nhipTuGaySu)
+	}
+}
+
+// TestChonMucTieuTangMotCungBoQuaNguoiVuaHoiSinh: dac ta §1.7 ghi ro "KHONG
+// gioi han huong" — ap dung cho CA tang 1 (tra thu), khong chi tang 2. Nguoi
+// duy nhat THOA tat ca dieu kien khac cua tang 1 (da tung danh quai, trong
+// tam 300) nhung vua hoi sinh 100ms truoc -> van phai bi loai, KHONG duoc
+// "tut" xuong tang 2 (vi tang 2 cung loai nguoi nay boi cung mot ly do).
+func TestChonMucTieuTangMotCungBoQuaNguoiVuaHoiSinh(t *testing.T) {
+	t0 := time.Date(2026, 7, 27, 12, 0, 0, 0, time.UTC)
+	q := &Quai{X: 0, Y: 0, DaTungDanh: map[int64]bool{1: true}}
+
+	nguoi := nguoiGia(1, 10, 0, 100) // da tung danh + rat gan (ca hai tam)
+	nguoi.lucHoiSinh = t0
+
+	bayGio := t0.Add(100 * time.Millisecond) // 100ms < 1500ms bat tu
+
+	mt, nhip := q.chonMucTieu([]*nguoiTrongKhuVuc{nguoi}, bayGio)
+
+	if mt != nil {
+		t.Fatalf("chonMucTieu chon nguoi id=%d dang BAT TU o tang 1 (tra thu) — dac ta §1.7 khong gioi han tang", mt.nv.ID)
+	}
+	if nhip != 0 {
+		t.Fatalf("nhip = %v, mong doi 0 khi khong co muc tieu", nhip)
+	}
+}
+
+// TestNhipTimAiQuaiBoQuaNguoiVuaHoiSinhRoiDanhLaiSauBatTu la kich ban O MUC
+// ACTOR (nhipTim/aiQuai, khuvuc.go) — bo sung cho ba test chonMucTieu thuan o
+// tren bang mot kich ban CO THAT qua actor that su: quai AI khong duoc phat
+// goi -11 nao trong khoang bat tu, roi PHAI danh duoc ngay khi het bat tu (tai
+// khoang khac voi nhip 2000ms cua tang 2, vi day la lan danh DAU TIEN — dac ta
+// §5.4.2 "quai vua thay nguoi phai duoc danh NGAY" van dung song song voi bat
+// tu, khong tron lan hai co che).
+func TestNhipTimAiQuaiBoQuaNguoiVuaHoiSinhRoiDanhLaiSauBatTu(t *testing.T) {
+	t0 := time.Date(2026, 7, 27, 12, 0, 0, 0, time.UTC)
+	luc := t0
+	k, p := khuVucNhipTimGia(&luc)
+	k.nguoiTrong[1].nv.HpHienTai = 100
+	k.nguoiTrong[1].nv.ViTriX = 0
+	k.nguoiTrong[1].nv.ViTriY = 0
+	k.nguoiTrong[1].lucHoiSinh = t0 // vua hoi sinh DUNG luc t0
+	k.quai = []*Quai{{Id: 0, Hp: 30, HpToiDa: 30, X: 0, Y: 0, SatThuongCoBan: 5, LanHoiMauCuoi: t0}}
+
+	// Tick tai t0+500ms: van trong 1500ms bat tu -> quai KHONG duoc danh, du
+	// nguoi choi dang dung ngay trong tam (0,0) va khong ai khac de chon.
+	luc = t0.Add(500 * time.Millisecond)
+	k.nhipTim()
+	if len(p.nhan) != 0 {
+		t.Fatalf("nhan %d goi trong khoang bat tu (500ms sau hoi sinh), mong doi 0 — dac ta §1.7", len(p.nhan))
+	}
+	if !k.quai[0].LanDanhCuoi.IsZero() {
+		t.Fatalf("LanDanhCuoi = %v, mong doi VAN LA zero value — khong co muc tieu (bi bat tu loai) thi TUYET DOI khong duoc cham truong nay (dac ta §5.4.2)", k.quai[0].LanDanhCuoi)
+	}
+
+	// Tick tai t0+1500ms (DUNG nguong bat tu): quai duoc phep danh NGAY (lan
+	// danh dau tien, LanDanhCuoi con la zero value nen khong bi chan boi nhip).
+	luc = t0.Add(1500 * time.Millisecond)
+	k.nhipTim()
+	if len(p.nhan) != 1 {
+		t.Fatalf("nhan %d goi tai t0+1500ms (het bat tu), mong doi DUNG 1 (-11)", len(p.nhan))
+	}
+	if p.nhan[0].Command != -11 {
+		t.Fatalf("Command = %d, mong doi -11", p.nhan[0].Command)
+	}
+	muon := []byte{
+		0,          // mobId
+		0, 0, 0, 5, // satThuong = SatThuongCoBan = 5
+	}
+	if !bytes.Equal(p.nhan[0].Data, muon) {
+		t.Fatalf("goi -11 byte sai:\n got  = %v\n muon = %v", p.nhan[0].Data, muon)
 	}
 }
 

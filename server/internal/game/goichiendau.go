@@ -16,6 +16,12 @@
 // sinh, cung ma lenh ca hai chieu), -30/15 (ai do hoi sinh, dung lai ma lenh
 // -30 cua ME_INFO voi byte lenh con khac).
 //
+// Task 11 them: dieu phoi goi len -60 (nguoi danh nguoi, xem case
+// suKienDanhNguoiChoi trong khuvuc.go) VA goi XUONG -30/9 (cap nhat mau cho
+// nguoi khac thay, dac ta §3.4) — goi -60 (dang don danh) KHONG mang truong
+// hpConLai nao nen can mot goi rieng de nhung nguoi KHONG PHAI muc tieu ve lai
+// dung thanh mau cua muc tieu.
+//
 // Ca file chi dung goi (byte-exact), KHONG tinh sat thuong/AI/kiem tra dieu
 // kien — do la viec cua cac Task/file khac (satthuong.go, chotkiem.go, quai.go).
 package game
@@ -264,6 +270,7 @@ const (
 	lenhHoiSinh   int8 = -16 // Hoi sinh — CUNG ma lenh ca hai chieu, than LUON rong
 
 	subAiDoHoiSinh byte = 15 // byte lenh con cua -30 bao "ai do vua hoi sinh" (dac ta §3.4)
+	subCapNhatMau  byte = 9  // byte lenh con cua -30 bao "cap nhat mau nguoi choi" (dac ta §3.4, Ke hoach 6 Task 11)
 )
 
 // goiNguoiChet dung goi XUONG -17: bao RIENG chinh chu vua chet. Than gui
@@ -336,5 +343,32 @@ func goiAiDoHoiSinh(idNguoiChoi int32, hp, mp int32, x, y int16) *protocol.Messa
 	w.Int(mp)
 	w.Short(x)
 	w.Short(y)
+	return protocol.NewMessage(lenhMeInfo, w)
+}
+
+// ---------------------------------------------------------------------------
+// Ke hoach 6 Task 11 them: -30/9 (cap nhat mau nguoi choi, dac ta §3.4) — mot
+// phan cua Nhom F "nguoi danh nguoi" (§2.1/§3.3). Goi -60 (dang don danh,
+// goiDanhNguoiChoi o tren) KHONG mang truong hpConLai nao (khac han -9 nguoi
+// danh quai hay -10 quai danh nguoi khac, ca hai da co san hpConLai) — thieu
+// goi nay thi NHUNG NGUOI KHAC (khong phai chinh muc tieu) se khong biet ve
+// lai dung thanh mau cua muc tieu sau mot don PvP.
+// ---------------------------------------------------------------------------
+
+// goiCapNhatMau dung goi XUONG -30/9: bao NHUNG NGUOI KHAC (khong phai chinh
+// nguoi vua doi mau — dac ta §3.4 cot "Gui cho": "Người khác", KHAC voi -30/15
+// o tren la "Ca khu vuc") mot nguoi choi vua doi mau, kem hp/hpMax hien tai.
+//
+// Dung LAI ma lenh -30 (lenhMeInfo, thegioi.go) voi byte lenh con 9 — cung ky
+// thuat voi goiAiDoHoiSinh (-30/15), client phan biet bang chinh byte lenh
+// con dau tien. Noi GOI ham nay (case suKienDanhNguoiChoi, khuvuc.go) PHAI
+// dung k.phatChoNguoiKhac(idMucTieu, ...), KHONG dung phatChoCaKhuVuc — sai
+// ham se gui goi nay CA cho chinh muc tieu, di nguoc dac ta.
+func goiCapNhatMau(idNguoiChoi int32, hp, hpMax int32) *protocol.Message {
+	w := protocol.NewWriter()
+	w.Byte(subCapNhatMau)
+	w.Int(idNguoiChoi)
+	w.Int(hp)
+	w.Int(hpMax)
 	return protocol.NewMessage(lenhMeInfo, w)
 }

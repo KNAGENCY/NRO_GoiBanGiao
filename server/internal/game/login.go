@@ -131,6 +131,8 @@ func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 		return b.xuLyChonChieu(m)
 	case lenhNguoiDanhQuai: // 54 — client gui danh quai (dac ta §3.1)
 		return b.xuLyDanhQuai(m)
+	case lenhNguoiDanhNguoi: // -60 — client gui danh nguoi choi (dac ta §3.1, Ke hoach 6 Task 11)
+		return b.xuLyDanhNguoiChoi(m)
 	case lenhHoiSinh: // -16 — client xin hoi sinh (dac ta §3.1, Ke hoach 6 Task 13)
 		return b.xuLyHoiSinh()
 	default:
@@ -360,6 +362,29 @@ func (b *BoXuLy) xuLyDanhQuai(m *protocol.Message) error {
 		}
 	}
 	b.khuVuc.Gui(suKienDanhQuai{idNhanVat: b.nhanVat.ID, mobId: mobIdRaw})
+	return nil
+}
+
+// xuLyDanhNguoiChoi xu ly goi LEN `-60` (dac ta §3.1, Ke hoach 6 Task 11, Nhom
+// F "nguoi danh nguoi"): client bao muon danh nguoi choi co id = doc duoc.
+// Than goi CHI CO MOT truong `int idNguoiBiDanh` (dac ta §3.1) — KHONG co do
+// dai bien thien nhu goi 54 (danh quai), nen ham nay don gian hon xuLyDanhQuai.
+//
+// Ky luat actor (dac ta §1.6 + brief Task 11): ham nay CHI doc idNguoiBiDanh
+// tu goi roi gui suKienDanhNguoiChoi vao hop thu actor khu vuc — TUYET DOI
+// KHONG tu tra k.nguoiTrong, KHONG tu tinh sat thuong o day. Toan bo kiem tra
+// + tinh toan + phat goi nam TRONG vongLap (xem case suKienDanhNguoiChoi,
+// khuvuc.go).
+func (b *BoXuLy) xuLyDanhNguoiChoi(m *protocol.Message) error {
+	if b.khuVuc == nil || b.nhanVat == nil {
+		return nil
+	}
+	r := protocol.NewReader(m.Data)
+	idMucTieu, err := r.Int()
+	if err != nil {
+		return nil // goi ngan hon khuon -> bo qua an toan, khong ngat ket noi
+	}
+	b.khuVuc.Gui(suKienDanhNguoiChoi{idNhanVat: b.nhanVat.ID, idMucTieu: int64(idMucTieu)})
 	return nil
 }
 

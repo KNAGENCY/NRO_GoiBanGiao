@@ -24,3 +24,4 @@ lên nhau.
 | 26/07/2026 | Claude Code (phiên chính) | Xong KH5 (di chuyển + actor), gộp về main | `main` / `e1ddc44` | — |
 | 26/07/2026 | Claude Code (phiên chính) | Tạo `BAT-DAU-TU-DAY.md` làm điểm vào duy nhất | `main` / `24514d1` | — |
 | 26/07/2026 | Claude Code (phiên chính) | Dựng cơ chế nhiều agent: sổ này + `/vao-viec` + `/ghi-so` + hook tự nạp bối cảnh | `main` | — |
+| 26/07/2026 | Claude Code (worktree `vao-viec-b4ec16`) | **KH6 — thiết kế**: nghiên cứu giao thức chiến đấu + đặc tả bảng byte + kế hoạch 15 task. Không sửa code Go | `kh6-nghien-cuu-chien-dau` | **Nhánh chưa gộp** — chỉ có tài liệu, test xanh, gộp được. **Task 12 của kế hoạch là việc chặn**: phải mở client Unity ở `D:\NRO_Project` xác minh kiểu trường id trong gói `-8` và `-17` trước khi làm nhóm "chết & hồi sinh". Ai lấy KH6 làm tiếp thì **cả `server/internal/game/` là vùng của người đó** — đừng để agent khác vào cùng |

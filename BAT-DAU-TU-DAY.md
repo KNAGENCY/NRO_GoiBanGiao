@@ -8,7 +8,7 @@
 > một bản vá, một phát hiện lỗi) thì **phải cập nhật file này ngay** rồi mới commit.
 > Cách cập nhật xem mục [11. Quy ước cập nhật](#11-quy-ước-cập-nhật-file-này).
 
-**Cập nhật lần cuối:** 26/07/2026 · **Nhánh chính:** `main` · **Commit HEAD:** `18269a4`
+**Cập nhật lần cuối:** 26/07/2026 · **Nhánh chính:** `main` · **Commit HEAD:** `db34f6c`
 
 ---
 
@@ -56,20 +56,26 @@ thường**, nói *tại sao* trước khi nói *làm thế nào*.
 
 ## 3. Chạy và kiểm thử — lệnh cụ thể
 
-Môi trường máy đang dùng: **Go ở `D:\Go`** · **PostgreSQL 16.4 cổng 5433**, CSDL `nro`
-(chạy thật) và `nro_test` (kiểm thử) · Windows + PowerShell.
+Môi trường máy đang dùng: **Go ở `D:\Go`** · **PostgreSQL 16.4 ở `D:\PostgreSQL`,
+cổng 5432**, CSDL `nro` (chạy thật) và `nro_test` (kiểm thử) · Windows + PowerShell.
+
+PostgreSQL **không chạy như dịch vụ** — bật tay trước khi test:
+
+```powershell
+D:\PostgreSQL\bin\pg_ctl.exe -D D:\PostgreSQL\data start
+```
 
 ```powershell
 # --- Máy chủ game ---
 cd D:\NRO_GoiBanGiao\server
-$env:NRO_DSN = "postgres://postgres:nrodev123@127.0.0.1:5433/nro"
+$env:NRO_DSN = "postgres://postgres:nrodev123@127.0.0.1:5432/nro"
 D:\Go\bin\go.exe run ./cmd/nroserver          # lắng nghe :14445
 
 # --- Client giả để thử, không cần mở Unity ---
 D:\Go\bin\go.exe run ./cmd/thuclient -dia-chi 127.0.0.1:14445 -ten thutest -mat-khau 1
 
 # --- Chạy toàn bộ test (PHẢI xanh trước khi commit) ---
-$env:NRO_TEST_DSN = "postgres://postgres:nrodev123@127.0.0.1:5433/nro_test"
+$env:NRO_TEST_DSN = "postgres://postgres:nrodev123@127.0.0.1:5432/nro_test"
 D:\Go\bin\go.exe test ./... -count=1
 D:\Go\bin\gofmt.exe -l internal/ cmd/         # phải không in gì (trừ nhiễu CRLF, xem §9)
 D:\Go\bin\go.exe vet ./...
@@ -115,7 +121,7 @@ Xếp theo thứ tự nên làm:
 
 | Ưu tiên | Việc | Ghi chú |
 |---|---|---|
-| 1 | **KH6 — Chiến đấu, chiêu thức, quái, boss** | Phần nặng nhất còn lại. Chưa có thiết kế |
+| 1 | **KH6 — Chiến đấu, chiêu thức, quái** | 📐 **Đã có thiết kế + kế hoạch 15 task, chưa thi công.** [Nghiên cứu](docs/superpowers/research/kh6-goi-chien-dau.md) · [đặc tả](docs/superpowers/specs/2026-07-26-giao-thuc-chien-dau.md) · [kế hoạch](docs/superpowers/plans/2026-07-26-ke-hoach-6-chien-dau.md). **Boss đã tách ra khỏi KH6.** Task 12 (xác minh gói `-8`/`-17` bằng client Unity) làm được song song ngay |
 | 2 | KH7 — Vật phẩm, hành trang, cửa hàng, giao dịch | |
 | 3 | KH8 — Kho nội dung YAML + nạp nóng | Để thêm chiêu/quái mà không phải sửa code |
 | 4 | KH9 — Nhiệm vụ, cốt truyện, NPC | |
@@ -147,39 +153,47 @@ Xếp theo thứ tự nên làm:
    cách > 500). Đây là lỗ hổng thật, bản Go đã vá chặt.
 5. **Máy chủ Java cũ có lỗi treo "Xin chờ"**: tài khoản bị khoá chỉ gửi `-26`, không gửi
    `-102` và không `return` (`NDVSqlFetcher.java:127-129`). Bản Go **không** lặp lại lỗi này.
+6. **Một mã lệnh có thể là HAI gói khác độ dài** (phát hiện 26/07 khi giải mã chiến đấu).
+   `-60` có byte thứ 10 (`docTiep`): bằng `1` thì còn 7 byte nữa (đòn đánh, thân 18 byte),
+   bằng `0` thì **hết gói ngay** (chiêu hồi máu, thân 11 byte). Tên biến gốc là
+   "read continue" nên rất dễ tưởng là hằng số. Tương tự: gói **lên** `54` dài 1 byte
+   *hoặc* 5 byte tuỳ `mobId == -1`; `-45/0` và `-124` cũng biến thiên.
+   **Cách tránh: dựng mỗi dạng bằng một hàm riêng, không dùng một hàm có cờ** — hàm có cờ
+   thì người sửa sau ghi thừa trường lúc nào không hay, và triệu chứng là client lệch
+   dòng byte vĩnh viễn, không có thông báo lỗi nào.
 
 ### Về cơ sở dữ liệu
 
-6. **`lower()` của PostgreSQL dưới locale C không hạ được chữ có dấu** → `Anguoi` và
+7. **`lower()` của PostgreSQL dưới locale C không hạ được chữ có dấu** → `Anguoi` và
    `anguoi` (có dấu) thành hai tài khoản khác nhau. Đã vá bằng ràng buộc
    `CHECK '^[A-Za-z0-9_]{4,20}$'` — chặn được cả trò giả mạo bằng chữ Kirin/Hy Lạp
    trông giống Latin, thứ mà đổi collation **không** chặn nổi.
-7. **Vòng lặp băm mật khẩu phải có trần.** Chuỗi băm hỏng làm `Verify` treo hàng phút
+8. **Vòng lặp băm mật khẩu phải có trần.** Chuỗi băm hỏng làm `Verify` treo hàng phút
    (Java tình cờ an toàn nhờ số 32-bit tràn; Go 64-bit thì chạy thật). Đã chặn ở 1.000.000 vòng.
 
 ### Về luồng / đồng thời (quan trọng nhất từ KH5)
 
-8. **Kiểm tra hợp lệ phải nằm TRONG actor.** Kế hoạch ban đầu định kiểm nước đi ở luồng
+9. **Kiểm tra hợp lệ phải nằm TRONG actor.** Kế hoạch ban đầu định kiểm nước đi ở luồng
    phiên (đọc `nv.ViTriX/Y`) — nhưng actor **ghi** đúng hai trường đó → tranh chấp dữ liệu.
    Luật: **chỉ luồng `vongLap` của khu vực được chạm vào trạng thái khu vực.**
-9. **Gói `-28/13` (clientOk) bị gửi lại lần hai** cũng gây tranh chấp tương tự. Đã chốt
-   guard chống chạy lại; tương tự cho `-39`.
+10. **Gói `-28/13` (clientOk) bị gửi lại lần hai** cũng gây tranh chấp tương tự. Đã chốt
+    guard chống chạy lại; tương tự cho `-39`.
 
 ### Về kiểm thử (bài học lặp lại nhiều lần nhất)
 
-10. **Bộ test có thể xanh trong khi code sai.** Đã xảy ra ít nhất 3 lần:
+11. **Bộ test có thể xanh trong khi code sai.** Đã xảy ra ít nhất 3 lần:
     - Xoá hẳn gói `-102` → 6/6 test vẫn đạt.
     - Xoá cả đoạn điều phối `-28/2` (tạo nhân vật) → 24/24 test vẫn xanh.
     - Test đếm số làng bằng chính nguồn dữ liệu nó phải kiểm → điểm mù oracle.
     **Cách chữa duy nhất hiệu quả: kiểm thử đột biến** — cố tình phá code, test phải đỏ.
     Không đỏ nghĩa là test vô dụng, phải viết lại test chứ không phải mừng.
-11. **Test dùng giá trị ghim (hard-code), đừng lấy từ chính nguồn đang kiểm.**
+12. **Test dùng giá trị ghim (hard-code), đừng lấy từ chính nguồn đang kiểm.**
 
 ### Về quy trình
 
-12. **Đừng commit việc ngoài phạm vi task xen vào giữa một task** — gói review bị lẫn,
+13. **Đừng commit việc ngoài phạm vi task xen vào giữa một task** — gói review bị lẫn,
     người soi đọc nhầm. Commit việc lẻ **trước khi** bắt đầu task hoặc **sau khi** review xong.
-13. Khi người thi công thấy thứ trông như lỗi nhưng không chắc → **dừng lại hỏi**, đừng tự
+14. Khi người thi công thấy thứ trông như lỗi nhưng không chắc → **dừng lại hỏi**, đừng tự
     sửa. Đã cứu được một lần (vụ byte-order §6.3).
 
 ---
@@ -222,6 +236,14 @@ Gom lại thành **Kế hoạch B**, sửa lẻ từng cái là vô nghĩa:
   thiết kế "một chủ sở hữu" chứ không từ khoá.
 - **`gofmt -l` báo bẩn ở vài file cũ do CRLF cục bộ** — vô hại. Đã kiểm:
   `git add --renormalize` không stage gì (blob trong repo đã là LF nhờ `.gitattributes`).
+- **PostgreSQL nghe cổng `5432`, KHÔNG phải `5433`** (phát hiện 26/07). `postgresql.conf`
+  ở `D:\PostgreSQL\data` để `#port = 5432` (mặc định), và hai CSDL `nro` + `nro_test` nằm
+  trên instance đó. §3 của file này từng ghi `5433` — **sai**, đã sửa. Triệu chứng khi
+  dùng nhầm cổng: **mọi test cần CSDL đỏ hàng loạt** với `connectex: No connection could
+  be made because the target machine actively refused it`, trong khi các gói không cần
+  CSDL (`auth`, `net`, `protocol`) vẫn xanh — dễ tưởng là mình vừa làm hỏng code.
+- **PostgreSQL không chạy như dịch vụ Windows** — phải bật tay sau khi khởi động máy:
+  `D:\PostgreSQL\bin\pg_ctl.exe -D D:\PostgreSQL\data start`.
 - **PowerShell không có `&&`** — dùng `;` hoặc `if ($?) { ... }`.
 - **Windows dùng `python`, không phải `python3`.** Thứ cần GPU/CUDA thì dùng `py -3.12`.
 - Đặt biến môi trường phải là **dòng riêng**, không nối cùng dòng lệnh.
@@ -291,3 +313,4 @@ Commit riêng cho việc cập nhật tài liệu thì dùng tiền tố `docs:`
 | 25/07/2026 | Xong **KH4** (vào thế giới) gộp `aef5f71`; web **W1** + **W2** lên `main` |
 | 26/07/2026 | Xong **KH5** (di chuyển + actor) gộp `e1ddc44`. Tạo file `BAT-DAU-TU-DAY.md` này làm điểm vào duy nhất cho người/agent mới |
 | 26/07/2026 | Dựng cơ chế **nhiều agent song song**: sổ `NHAT-KY-AGENT.md`, lệnh `/vao-viec` + `/ghi-so`, `AGENTS.md` cho agent ngoài, `MO-AGENT.bat`, hook `SessionStart` tự nạp bối cảnh (xem §10b) |
+| 26/07/2026 | **KH6 xong phần thiết kế**: nghiên cứu giao thức chiến đấu (gói đánh quái/đánh người/chiêu/chết/hồi sinh, AI quái, nhịp 100 ms) → đặc tả có bảng byte → kế hoạch thi công 15 task. **Chưa viết code.** Phát hiện mới: gói `-60` có **hai dạng độ dài** (§6.6), cổng PostgreSQL thật là **5432** không phải 5433 (§9) |

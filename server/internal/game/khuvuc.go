@@ -290,7 +290,6 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 			ban[i] = &cp
 		}
 		sk.traLoi <- ban
->>>>>>> worktree-agent-a70b8c909184e8147
 	}
 }
 

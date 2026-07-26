@@ -3,6 +3,7 @@ package game
 import (
 	"bytes"
 	"testing"
+	"time"
 
 	"nroserver/internal/protocol"
 	"nroserver/internal/store"
@@ -211,5 +212,51 @@ func TestQuaiSoLuongVuot127BiCat(t *testing.T) {
 	n, err := r.Byte()
 	if err != nil || n != 127 {
 		t.Fatalf("soQuai = %d (loi %v), mong doi cat con 127", n, err)
+	}
+}
+
+// TestDanhSachQuaiSnapshotQuaHopThuActor kham nghiem VONG SUA 1 (theo review
+// coordinator): duong lay quai cho goi -24 PHAI di qua hop thu actor
+// (suKienXinDanhSachQuai), KHONG doc truc tiep truong k.quai tu luong khac
+// (dac ta §1.6). Vi test nam CUNG package (game), co the so sanh dia chi con
+// tro giua ban sao tra ve va phan tu goc trong k.quai — chung minh
+// DanhSachQuaiSnapshot tra CON TRO MOI (sao gia tri), khong phai con tro goc.
+func TestDanhSachQuaiSnapshotQuaHopThuActor(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	k.BatDau()
+	defer k.Dung()
+
+	snap := k.DanhSachQuaiSnapshot()
+
+	if len(snap) != len(k.quai) {
+		t.Fatalf("snapshot co %d quai, mong doi %d (bang so quai noi bo cua khu vuc)",
+			len(snap), len(k.quai))
+	}
+	for i, q := range snap {
+		goc := k.quai[i]
+		if q == goc {
+			t.Fatalf("quai thu %d: snapshot tra VE CUNG con tro voi k.quai — phai la BAN SAO GIA TRI (dac ta §1.6), khong duoc lo con tro goc ra ngoai vongLap", i)
+		}
+		if *q != *goc {
+			t.Fatalf("quai thu %d: gia tri snapshot khac gia tri goc: %+v != %+v", i, *q, *goc)
+		}
+	}
+}
+
+// TestDanhSachQuaiSnapshotActorChuaBatDauTraNilNgay: khu vuc chua BatDau() thi
+// chua co hop thu (k.hopThu == nil) — DanhSachQuaiSnapshot PHAI tra ve nil
+// NGAY, khong duoc cho het 100ms timeout (luong phien khong bi treo vo ich).
+func TestDanhSachQuaiSnapshotActorChuaBatDauTraNilNgay(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1)) // KHONG goi BatDau()
+
+	batDau := time.Now()
+	snap := k.DanhSachQuaiSnapshot()
+	trongVongMs := time.Since(batDau)
+
+	if snap != nil {
+		t.Fatalf("actor chua BatDau(), snapshot phai nil, duoc %v", snap)
+	}
+	if trongVongMs > 20*time.Millisecond {
+		t.Fatalf("DanhSachQuaiSnapshot mat %v de tra ve khi actor chua BatDau — phai tra NGAY (khong hop thu de gui), khong duoc cho het 100ms timeout", trongVongMs)
 	}
 }

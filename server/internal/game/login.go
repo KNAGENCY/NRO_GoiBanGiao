@@ -235,17 +235,17 @@ func (b *BoXuLy) xuLyClientOk(s *mynet.Session) error {
 	}
 
 	// -24 MAP INFO — gio kich switchToMe(), client roi "Xin cho". Danh sach quai
-	// (Ke hoach 6 Task 5): lay tu KhuVuc NEU da co (b.khuVuc vua gan o tren);
-	// khong co khu vuc (vd. mapId khong dung SoKhuVuc trong test) thi gui map
-	// trong quai nhu KH4. LUU Y: buoc nay chay TRUOC khi nhan vat vao khu vuc
-	// (-39, xuLyVaoKhuVuc), nen doc danhSachQuai() o day la doc mot LAT CAT tai
-	// thoi diem hien tai, KHONG qua hop thu actor — chap nhan duoc trong Task 5
-	// vi nhipTim() con la mac rong (chua co AI/chien dau sua quai dong thoi);
-	// Task 7+ khi vongLap bat dau sua HP quai that su can xet lai duong nay
-	// (vd. chuyen sang doc qua su kien actor) de tranh tranh chap doc/ghi.
+	// (Ke hoach 6 Task 5): lay tu KhuVuc NEU da co (b.khuVuc vua gan o tren),
+	// qua DanhSachQuaiSnapshot() — ham nay di qua hop thu actor (dac ta §1.6:
+	// chi vongLap duoc cham trang thai quai) roi tra ve BAN SAO, khong doc
+	// truc tiep truong quai cua KhuVuc tu luong phien nay. Buoc nay chay
+	// TRUOC khi nhan vat vao khu vuc (-39, xuLyVaoKhuVuc) nhung actor CUA KHU
+	// VUC da chay san tu luc may chu khoi dong (MoSoKhuVuc goi BatDau() ngay),
+	// nen van co the co nguoi khac dang chien dau lam quai doi HP dong thoi —
+	// buoc nay PHAI an toan voi truong hop do.
 	var quai []*Quai
 	if b.khuVuc != nil {
-		quai = b.khuVuc.danhSachQuai()
+		quai = b.khuVuc.DanhSachQuaiSnapshot()
 	}
 	mapInfo, err := goiMapInfo(b.nhanVat, bd, quai)
 	if err != nil {

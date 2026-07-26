@@ -32,6 +32,14 @@ type KhuVuc struct {
 
 	nguoiTrong map[int64]*nguoiTrongKhuVuc
 
+	// quai la danh sach quai dang song trong khu vuc nay (Ke hoach 6 Task 5).
+	// Tao MOT LAN trong MoKhuVuc; sau do CHI luong vongLap duoc doc/ghi (dac ta
+	// §1.6: "chi luong vongLap duoc cham trang thai quai va trang thai chien
+	// dau"). KHONG co getter doc truc tiep tu ben ngoai — luong khac (vd
+	// luong phien khi dung goi -24) phai gui suKienXinDanhSachQuai qua hop thu
+	// va nhan BAN SAO qua kenh traLoi (xem suKienXinDanhSachQuai ben duoi).
+	quai []*Quai
+
 	hopThu     chan suKienKhuVuc
 	dung       chan struct{}
 	xong       chan struct{}
@@ -99,16 +107,55 @@ type suKienChonChieu struct {
 	mauChieuId byte
 }
 
-// MoKhuVuc tao mot khu vuc giu ban do da cho, chua co nguoi choi nao.
+// suKienXinDanhSachQuai la su kien TRUY VAN (khac cac su kien "lam viec" o
+// tren): mot luong BEN NGOAI vongLap (vd luong phien khi dung goi -24 MAP
+// INFO o xuLyClientOk, TRUOC khi nhan vat duoc giao cho actor qua -39) can
+// biet quai hien co trong khu vuc, nhung KHONG duoc doc truc tiep k.quai (dac
+// ta §1.6). Luong do gui su kien nay qua Gui() roi cho tra loi tren traLoi;
+// vongLap la noi DUY NHAT xu ly no va tra ve BAN SAO GIA TRI (con tro moi,
+// KHONG PHAI con tro goc trong k.quai) de ben nhan khong the vo tinh sua
+// trang thai actor tu ben ngoai.
+type suKienXinDanhSachQuai struct {
+	traLoi chan []*Quai
+}
+
+// MoKhuVuc tao mot khu vuc giu ban do da cho, chua co nguoi choi nao. Quai
+// (Ke hoach 6 Task 5) duoc sinh MOT LAN o day bang taoQuaiMacDinh — day la
+// diem duy nhat gan quai vao mot khu vuc, giu dung nguyen tac "quai thuoc
+// actor, sinh luc MoKhuVuc" cua brief Task 5.
 func MoKhuVuc(bd *BanDo) *KhuVuc {
 	return &KhuVuc{
 		banDo:      bd,
 		nguoiTrong: make(map[int64]*nguoiTrongKhuVuc),
+		quai:       taoQuaiMacDinh(bd),
 	}
 }
 
 // BanDo tra ban do cua khu vuc (client can no de dung MAP INFO).
 func (k *KhuVuc) BanDo() *BanDo { return k.banDo }
+
+// DanhSachQuaiSnapshot tra BAN SAO danh sach quai hien co trong khu vuc, AN
+// TOAN goi tu BEN NGOAI vongLap (vd luong phien o xuLyClientOk khi dung goi
+// -24 MAP INFO). Di qua hop thu actor (suKienXinDanhSachQuai) thay vi doc
+// truc tiep k.quai — dung dac ta §1.6 "chi luong vongLap duoc cham trang
+// thai quai". Cho toi da 100ms; qua han (actor da Dung(), hop thu day bat
+// thuong, hoac k.hopThu chua duoc cap phat vi BatDau() chua chay) thi tra ve
+// nil — luong phien khong bi treo, chi gui MAP INFO voi 0 quai (giong hanh
+// vi KH4 cu, khong sap goi).
+func (k *KhuVuc) DanhSachQuaiSnapshot() []*Quai {
+	if k.hopThu == nil {
+		return nil // actor chua BatDau() -> khong co hop thu de gui
+	}
+	traLoi := make(chan []*Quai, 1)
+	k.Gui(suKienXinDanhSachQuai{traLoi: traLoi})
+	select {
+	case ds := <-traLoi:
+		return ds
+	case <-time.After(100 * time.Millisecond):
+		slog.Warn("xin danh sach quai qua hop thu actor het gio cho", "mapId", k.banDo.MapID)
+		return nil
+	}
+}
 
 // ThemNguoiChoi dua mot nhan vat vao khu vuc. Ke hoach 5 se broadcast su xuat
 // hien nay cho nguoi khac; Ke hoach 4 chi giu danh sach de lam nen.
@@ -230,6 +277,20 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 				return
 			}
 		}
+
+	case suKienXinDanhSachQuai:
+		// SAO GIA TRI tung con quai — KHONG duoc tra thang k.quai (mang con
+		// tro goc) hay tung con tro trong do ra ngoai, vi ben nhan chay tren
+		// luong khac va co the giu con tro do lau hon nhip actor tiep theo
+		// (dac ta §1.6). traLoi co buffer 1 nen gui khong bao gio block du
+		// ben goi da het gio cho va bo di.
+		ban := make([]*Quai, len(k.quai))
+		for i, q := range k.quai {
+			cp := *q
+			ban[i] = &cp
+		}
+		sk.traLoi <- ban
+>>>>>>> worktree-agent-a70b8c909184e8147
 	}
 }
 

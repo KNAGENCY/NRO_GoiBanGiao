@@ -813,3 +813,200 @@ func TestTichHop_DanhQuaiThuCungDocDu5ByteKhongLechDong(t *testing.T) {
 			goi9.Data, len(goi9.Data), muon, len(muon))
 	}
 }
+
+// ---------------------------------------------------------------------------
+// Vong sua 1 (review coordinator, 27/07): hai luoi an toan bi bo sot o vong
+// dau — logic da dung nhung khong test nao thuc su kich hoat nhanh do.
+// ---------------------------------------------------------------------------
+
+// TestTichHop_DanhQuaiDayMauKhongChetBoiMotDon la Finding 1: quy tac §1.3
+// "quai dang DAY MAU khong chet boi MOT don" (khuvuc.go, nhanh
+// `if mucTieu.Hp == mucTieu.HpToiDa && satThuong >= mucTieu.Hp { satThuong =
+// mucTieu.Hp - 1 }`) TRUOC DO khong test nao thuc su kich hoat: Test 1
+// (TestTichHop_DanhQuaiConSong) danh voi sat thuong nho hon nhieu HP; Test 2
+// (TestTichHop_DanhQuaiChet) CO CHU DICH ha Hp=1 nhung GIU HpToiDa=100 (!=Hp)
+// de NE dung nhanh nay. Neu ai doi `>=` thanh `>` hay xoa han nhanh, khong
+// test nao truoc do phat hien.
+//
+// Ky thuat giong het TestTichHop_DanhQuaiChet (khu vuc RIENG, KHONG BatDau(),
+// bom tay su kien) — nhung dat CA Hp VA HpToiDa cua quai Id=0 DEU = 2 (thay
+// vi chi Hp=1) de dieu kien "Hp == HpToiDa" cua §1.3 THUC SU dung. Sat thuong
+// tho tinh duoc (lang0 slot0 cap1) la 2 — dung bang Hp/HpToiDa nen kich hoat
+// DUNG nhanh §1.3: quai phai CON SONG voi 1 mau, nhan `-9` (KHONG PHAI
+// `-12`), satThuong bao xuong = 1 (khong phai 2 tho).
+func TestTichHop_DanhQuaiDayMauKhongChetBoiMotDon(t *testing.T) {
+	khoThat := moKhoThatChoTest(t)
+	ctx := context.Background()
+
+	k := MoKhuVuc(TimBanDo(1))
+	k.hopThu = make(chan suKienKhuVuc, 8) // KHONG goi k.BatDau() — xem TestTichHop_DanhQuaiChet
+
+	soKhuVuc := &SoKhuVuc{theoMap: map[int32]*KhuVuc{1: k}}
+
+	matKhau := "matkhau123"
+	tenTK := "fullA" + hauToNganNgau(t)
+	taiKhoanA := taoTaiKhoanCoMatKhau(t, tenTK, matKhau)
+	tenNV := "FullA" + hauToNganNgau(t)
+
+	clA := moPhienClientGiaKhuVuc(t, khoThat, soKhuVuc)
+	defer clA.dong()
+	dangNhapTaoNhanVatVaoTheGioi(t, clA, tenTK, matKhau, tenNV)
+
+	nvA, err := khoThat.LayNhanVatTheoTaiKhoan(ctx, taiKhoanA)
+	if err != nil {
+		t.Fatalf("LayNhanVatTheoTaiKhoan A that bai: %v", err)
+	}
+	if nvA.MapID != 1 {
+		t.Fatalf("nhan vat phai o mapId 1 (lang 0), nhan duoc %d", nvA.MapID)
+	}
+
+	// Vet su kien suKienXinDanhSachQuai con sot lai tu xuLyClientOk (xem chu
+	// thich chi tiet o TestTichHop_DanhQuaiChet).
+	<-k.hopThu
+
+	clA.baoVaoKhuVuc()
+	bomSuKienKhongPhatGoi(k, <-k.hopThu)
+	if _, co := k.nguoiTrong[nvA.ID]; !co {
+		t.Fatal("A phai co trong k.nguoiTrong sau khi xu ly suKienVao")
+	}
+
+	clA.chonChieu(1)
+	bomSuKienKhongPhatGoi(k, <-k.hopThu)
+	if k.nguoiTrong[nvA.ID].chieuDangChon == nil {
+		t.Fatal("A phai co chieuDangChon sau khi xu ly suKienChonChieu")
+	}
+
+	// AN TOAN sua truc tiep k.quai o day (khong co goroutine thu hai nao
+	// dung toi, xem TestTichHop_DanhQuaiChet). DAT CA HAI Hp va HpToiDa = 2
+	// — khac ky thuat cua TestTichHop_DanhQuaiChet (chi Hp=1, HpToiDa=100
+	// giu nguyen) de dung THUC SU kich hoat nhanh "day mau" cua §1.3.
+	k.quai[0].Hp = 2
+	k.quai[0].HpToiDa = 2
+
+	clA.guiDanhQuai(0)
+	go k.xuLy(<-k.hopThu) // co the phat Gui() qua mang that -> fire-and-forget, xem TestTichHop_DanhQuaiChet
+
+	goi54 := clA.doiGoiLenh(t, lenhNguoiDanhQuai)
+	r := protocol.NewReader(goi54.Data)
+	idDanh, errID := r.Int()
+	if errID != nil || idDanh != int32(nvA.ID) {
+		t.Fatalf("goi 54: idNguoiDanh = %d (loi %v), mong doi %d", idDanh, errID, nvA.ID)
+	}
+	skillId, errSk := r.Byte()
+	if errSk != nil || skillId != 1 {
+		t.Fatalf("goi 54: skillId = %d (loi %v), mong doi 1 (lang0 slot0 cap1)", skillId, errSk)
+	}
+	mobId, errMob := r.Byte()
+	if errMob != nil || mobId != 0 {
+		t.Fatalf("goi 54: mobId = %d (loi %v), mong doi 0", mobId, errMob)
+	}
+
+	// PHAI la -9 (quai con song), KHONG duoc la -12 (quai chet) — day la
+	// khang dinh cot loi cua Finding 1: neu nhanh "day mau khong chet boi
+	// mot don" bi xoa/sai, quai se chet that (Hp 2-2=0) va gui -12 thay vi
+	// -9, lam doiGoiLenh(t, -9) duoi day cho het han 5s roi t.Fatal (do -12
+	// se bi bo qua vi khong khop lenh dang cho).
+	goi9 := clA.doiGoiLenh(t, -9)
+	muon := []byte{
+		0,          // mobId
+		0, 0, 0, 1, // hpConLai = 1 (2 mau - 1 mau bi §1.3 kep, KHONG PHAI 0)
+		0, 0, 0, 1, // satThuong = 1 (dame tho 2, nhung §1.3 ep xuong hp-1 = 1)
+		0,   // chiMang = false
+		255, // hieuUngId = -1
+	}
+	if !bytes.Equal(goi9.Data, muon) {
+		t.Fatalf("goi -9 byte sai:\n got  = %v (%d byte)\n muon = %v (%d byte)",
+			goi9.Data, len(goi9.Data), muon, len(muon))
+	}
+}
+
+// TestTichHop_DanhQuaiVuotTamVanPhatGoiChiMangFalse la Finding 2(b): dac ta
+// §1.9 "vuot tam -> sat thuong 0 NHUNG VAN PHAT GOI" — truoc do khong test
+// nao dung mot muc tieu THAT SU ngoai tam (ca ba test truoc deu dung quai
+// mac dinh, luon trong tam 100 tinh tu vi tri spawn). Kich ban: A di chuyen
+// ra xa (qua goi THAT -7) roi danh quai Id=0 tu khoang cach > 100 (tam can
+// chien) -> PHAI van nhan `-9` (KHONG im lang), voi satThuong=0 va
+// chiMang=false — khang dinh dong "EP TUONG MINH" moi them trong case
+// suKienDanhQuai (khuvuc.go, Finding 2a: `if ketQua.Truot { chiMang = false
+// }`), dam bao nghia vu bang giao Task 3 (chotkiem.go:75-81) khong con dung
+// tinh co (truoc do chiMang luon gan cung false o MOI nhanh nen "dung" ma
+// khong co gi thuc su ep rieng cho truong hop Truot).
+func TestTichHop_DanhQuaiVuotTamVanPhatGoiChiMangFalse(t *testing.T) {
+	khoThat := moKhoThatChoTest(t)
+	ctx := context.Background()
+
+	soKhuVuc := MoSoKhuVuc()
+	defer soKhuVuc.DungTatCa()
+
+	matKhau := "matkhau123"
+	tenTK := "farA" + hauToNganNgau(t)
+	taiKhoanA := taoTaiKhoanCoMatKhau(t, tenTK, matKhau)
+	tenNV := "FarA" + hauToNganNgau(t)
+
+	clA := moPhienClientGiaKhuVuc(t, khoThat, soKhuVuc)
+	defer clA.dong()
+	dangNhapTaoNhanVatVaoTheGioi(t, clA, tenTK, matKhau, tenNV)
+
+	nvA, err := khoThat.LayNhanVatTheoTaiKhoan(ctx, taiKhoanA)
+	if err != nil {
+		t.Fatalf("LayNhanVatTheoTaiKhoan A that bai: %v", err)
+	}
+	if nvA.MapID != 1 {
+		t.Fatalf("nhan vat phai o mapId 1 (lang 0), nhan duoc %d", nvA.MapID)
+	}
+
+	clA.baoVaoKhuVuc()
+	if !clA.khongConGoiGi(t) {
+		t.Fatal("A vao khu vuc mot minh -> khong duoc nhan goi nao (chua co ai khac)")
+	}
+
+	clA.chonChieu(1) // can chien, tam 100
+	if !clA.khongConGoiGi(t) {
+		t.Fatal("chon chieu (34) khong duoc phat goi tin nao")
+	}
+
+	// A di chuyen tu (100,384) toi (300,384) — hop le (khoang cach 200 <=
+	// NguongBuoc 500). Quai Id=0 mac dinh o (160,384) -> khoang cach SAU khi
+	// di chuyen = |300-160| = 140 > tam can chien 100 -> vuot tam.
+	toXXa := int16(nvA.ViTriX) + 200
+	toYXa := int16(nvA.ViTriY)
+	clA.guiDiChuyen(toXXa, toYXa)
+	// -7 chi phat cho NGUOI KHAC (client tu ve chuyen dong cua chinh minh) —
+	// A mot minh trong khu vuc nen KHONG nhan goi nao o buoc nay.
+	if !clA.khongConGoiGi(t) {
+		t.Fatal("A tu di chuyen -> khong duoc nhan lai goi -7 cua chinh minh")
+	}
+
+	clA.guiDanhQuai(0)
+
+	goi54 := clA.doiGoiLenh(t, lenhNguoiDanhQuai)
+	r := protocol.NewReader(goi54.Data)
+	idDanh, errID := r.Int()
+	if errID != nil || idDanh != int32(nvA.ID) {
+		t.Fatalf("goi 54: idNguoiDanh = %d (loi %v), mong doi %d", idDanh, errID, nvA.ID)
+	}
+	skillId, errSk := r.Byte()
+	if errSk != nil || skillId != 1 {
+		t.Fatalf("goi 54: skillId = %d (loi %v), mong doi 1 (lang0 slot0 cap1)", skillId, errSk)
+	}
+	mobId, errMob := r.Byte()
+	if errMob != nil || mobId != 0 {
+		t.Fatalf("goi 54: mobId = %d (loi %v), mong doi 0", mobId, errMob)
+	}
+
+	// VAN phai nhan -9 (khong im lang) — dac ta §1.9. satThuong=0, chiMang=
+	// false, hpConLai KHONG doi (100, vi khong co sat thuong that su cham
+	// muc tieu).
+	goi9 := clA.doiGoiLenh(t, -9)
+	muon := []byte{
+		0,            // mobId
+		0, 0, 0, 100, // hpConLai = 100 (khong doi, vuot tam nen khong gay sat thuong)
+		0, 0, 0, 0, // satThuong = 0
+		0,   // chiMang = false — khang dinh dong "EP TUONG MINH" (Finding 2a)
+		255, // hieuUngId = -1
+	}
+	if !bytes.Equal(goi9.Data, muon) {
+		t.Fatalf("goi -9 (vuot tam) byte sai:\n got  = %v (%d byte)\n muon = %v (%d byte)",
+			goi9.Data, len(goi9.Data), muon, len(muon))
+	}
+}

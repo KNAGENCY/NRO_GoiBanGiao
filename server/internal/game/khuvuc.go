@@ -403,6 +403,20 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 		// Truot=true (vuot tam): satThuong giu nguyen 0 (dac ta §1.9) — KHONG
 		// goi TinhSatThuong, vi don nay khong thuc su cham muc tieu.
 
+		// EP TUONG MINH: vuot tam thi KHONG duoc chi mang — BAN GIAO Task 3
+		// (chotkiem.go:75-81): "chiMang=false khi Truot=true", vi client CHI
+		// hien chu "miss" khi chiMang==false (Controller.cs:4356-4363, dac ta
+		// §3.3 diem 3) — Truot=true+chiMang=true se hien "-0" do thay vi
+		// "miss". Dat DONG NAY o day, SAU moi cho co the gan/tinh chiMang (ke
+		// ca cong thuc chi mang that trong tuong lai o nhanh !ketQua.Truot
+		// phia tren): hien tai chiMang luon false nen dong nay dung "tinh co"
+		// — mot khi co cong thuc chi mang that duoc nhet vao dung cho o tren,
+		// dong nay la RANH GIOI CUOI CUNG bao dam nghia vu khong bao gio vo
+		// lang le, du cong thuc do tinh sai o dau.
+		if ketQua.Truot {
+			chiMang = false
+		}
+
 		// §1.2: sat thuong khong duoc VUOT mau con lai cua muc tieu.
 		if satThuong > mucTieu.Hp {
 			satThuong = mucTieu.Hp

@@ -38,6 +38,38 @@ Nghiên cứu cho thấy hệ chiến đấu của bản Java trải rộng gấ
 | Chiêu `type = 4` (không cần nhắm) | Chưa biết gói lên nào mang `status == 20` | KH6b |
 | Thú cưng / mobMe (`54` với `mobId == -1`) | Hệ thú cưng chưa có | KH7+ |
 | PvP có luật (cờ `typePk`, khu PK) | Cần thiết kế luật chơi riêng | KH9 |
+| **Gói `87` gửi kèm sau `-13`** | **KHÔNG BAO GIỜ làm** — bản Java dùng sai mã lệnh, xem §0.1 | Bỏ hẳn |
+
+### 0.1 Gói `87` — bản Java gửi, nhưng bản Go KHÔNG gửi. Lý do:
+
+Bản Java, sau khi phát `-13` (quái hồi sinh), phát tiếp `Message(87)` mang `byte mobId +
+int maxHp` (`mob/Mob.java:525` gọi `sendMobMaxHp`, định nghĩa ở `mob/Mob.java:1480-1490`).
+Nhìn qua tưởng là gói bắt buộc. **Không phải.** Đã mở client kiểm tận nơi:
+
+```csharp
+// Controller.cs:3016-3018
+case 87:
+    ((Mob)GameScr.vMob.elementAt(msg.reader().readUnsignedByte())).isWind = msg.reader().readBool();
+    break;
+```
+
+**Mã `87` của client là lệnh "quái bị gió thổi", thân gói `byte mobId + bool isWind`
+— hoàn toàn không liên quan tới máu.** Bản Java dùng **cùng một mã lệnh cho hai việc
+khác nhau**: `sendWind` (`Mob.java:1468-1478`, khớp client, nhưng **không chỗ nào gọi**)
+và `sendMobMaxHp` (`Mob.java:1480-1490`, **không khớp client**).
+
+Ba lý do chốt **không gửi**:
+
+1. **Client đã tự đặt `maxHp` rồi.** Nhánh `-13` ở `Controller.cs:4274-4300` có
+   `mob15.hp = readIntToLongDQT(); mob15.maxHp = mob15.hp; mob15.updateHp_bar();`
+   → gửi thêm `87` là **thừa tuyệt đối**.
+2. **Gửi `87` gây hại thật.** Byte thứ hai client đọc thành `isWind` chính là **byte cao
+   nhất của `int maxHp`** (big-endian). Quái có `maxHp ≥ 16.777.216` → byte đó khác 0 →
+   `isWind = true` → `Mob.cs:1172` (`if (isDontMove || isWind)`) làm **con quái đứng im
+   không di chuyển nữa**. Đây là bug thật đang có trong bản Java đang chạy.
+3. **Muốn gửi maxHp riêng thì đã có mã đúng: `-84`** (`Controller.cs:767-783`,
+   `byte mobIndex + int maxHp`). Nhưng tra khắp `1-MAY-CHU-GAME/src/` **không có chỗ nào
+   tạo `Message(-84)`** — đường đúng mà server chưa bao giờ dùng. KH6 cũng chưa cần.
 
 **Nhóm F (người đánh người) vẫn ở trong KH6** dù PvP có luật bị hoãn — vì gói `-60` là
 gói *nguy hiểm nhất* của cả hệ (§2.1) và nên làm đúng ngay từ đầu, khi còn ít thứ phụ thuộc.
@@ -70,11 +102,44 @@ Sao chép nguyên khối này vào phần Global Constraints. Sai một dòng l�
 
 ## 2. Ba gói ĐỘ DÀI BIẾN THIÊN — rủi ro số một của KH6
 
-Đây là phần dễ làm hỏng client vĩnh viễn nhất. Đọc kỹ trước khi viết dòng code nào.
+### 2.0 Sai trường thì hỏng thế nào — ĐỌC TRƯỚC, đừng chẩn đoán nhầm
+
+Client đọc gói theo khung **có độ dài**: 1 byte lệnh → 2 byte độ dài → đọc **trọn** ngần
+ấy byte vào một mảng riêng, rồi mới phân tích mảng đó
+(`Session_ME.cs:181-219`). Hệ quả rất quan trọng:
+
+> **Ghi sai trường bên trong một gói KHÔNG làm hỏng dòng byte của các gói sau.**
+> Chỉ **gói đó** hỏng. Không có chuyện "client hỏng vĩnh viễn".
+
+Ba kiểu sai và triệu chứng thật:
+
+| Kiểu sai | Chuyện gì xảy ra | Triệu chứng người chơi thấy |
+|---|---|---|
+| **Ghi thiếu** (client đọc quá phần thân) | Client ném lỗi, bị `catch (Exception) {}` ở `Controller.cs:4600` nuốt | **Gói im lặng không làm gì** — quái không chết, sát thương không hiện |
+| **Ghi thừa** (client đọc ít hơn) | Byte dư bị vứt lúc `msg.cleanup()` | **Không triệu chứng** — im lặng đúng, nhưng phí băng thông |
+| **Sai thứ tự / sai kiểu, tổng độ dài vẫn khớp** | Client đọc giá trị rác vào đúng ô | **Số liệu vô lý** — máu âm, sát thương khổng lồ, quái đứng im |
+
+Cả ba đều **im lặng, không có log** — đó mới là chỗ nguy hiểm thật: không ai biết mà sửa.
+
+⚠️ **Một ngoại lệ cho hàng "ghi thừa": gói xuống `54`.** Gói này **không có trường đếm** —
+client đọc `mobId` trong vòng lặp **cho tới khi hết thân gói** (tối đa 10 lần,
+`Controller.cs:3851-3872`). Ghi thừa 1 byte ở đây **không im lặng**: client hiểu thành
+"người này đánh 2 con quái", nhân vật quay sai hướng và nhắm sai mục tiêu.
+→ **Với `54`, tuyệt đối không ghi thêm byte nào sau `mobId`.**
+
+**Ngoại lệ duy nhất làm hỏng cả dòng byte** là ghi sai **số byte của trường độ dài**
+(2 hay 3 byte) — đó là lỗi tầng khung, không phải tầng trường, và đã ghi ở §6.2 của
+`BAT-DAU-TU-DAY.md`. Client dùng khung **3 byte** cho đúng 7 mã lệnh
+(`Session_ME.cs:190`): `-32, -66, 11, -67, -74, -87, 66`. **Không mã chiến đấu nào nằm
+trong danh sách này** → toàn bộ gói của KH6 dùng khung **2 byte**.
+
+### 2.1 trở đi — ba gói biến thiên
+
+Đọc kỹ trước khi viết dòng code nào.
 
 ### 2.1 `-60` có **hai dạng**, không phải một gói có trường tuỳ chọn
 
-Byte thứ 10 (`docTiep`) quyết định gói dừng ở đó hay còn 8 byte nữa:
+Byte thứ **11** (`docTiep`) quyết định gói dừng ở đó hay còn **7** byte nữa:
 
 | Dạng | `docTiep` | Tổng thân | Dùng khi |
 |---|---|---|---|
@@ -89,6 +154,10 @@ Chênh lệch đúng **7 byte**.
 (`goiDanhNguoiChoi` và `goiHoiMauNguoiChoi`), **không** một hàm với tham số `docTiep`.
 Lý do: một hàm với cờ thì người sửa sau rất dễ ghi thừa trường; hai hàm thì lỗi đó
 không tồn tại được.
+
+Ghi nhầm ở đây rơi vào ô "ghi thừa" của bảng §2.0: **im lặng, không triệu chứng gì** —
+tức là sẽ không ai phát hiện cho tới khi có người ngồi so byte. Đó là lý do phải chặn
+bằng test đột biến chứ không trông vào chạy thử.
 
 ### 2.2 `-45 / 0` — choáng diện rộng, hai vòng lặp lồng nhau
 
@@ -145,16 +214,36 @@ ghi thẳng.
 
 | Lệnh | Tên | Thân gói | Gửi cho |
 |---|---|---|---|
-| `54` | Người đánh quái | `int idNguoiDanh, byte skillId, byte mobId` | Cả khu vực |
-| `-9` | Quái còn sống | `byte mobId, int hpConLai, int satThuong, bool chiMang, int −1` | Cả khu vực |
+| `54` | Người đánh quái | `int idNguoiDanh, byte skillId, byte mobId` — ⚠️ **danh sách quái kết thúc bằng ĐỘ DÀI GÓI, không có byte đếm**; tuyệt đối không ghi thêm gì sau `mobId` (§2.0) | Cả khu vực |
+| `-9` | Quái còn sống | `byte mobId, int hpConLai, int satThuong, bool chiMang, byte hieuUngId` | Cả khu vực |
 | `-12` | Quái chết | `byte mobId, int satThuong, bool chiMang, byte soDoRoi, {short itemMapId, short templateId, short x, short y, int idNguoiNhat}×soDoRoi` | Cả khu vực |
-| `-13` | Quái hồi sinh | `byte mobId, byte tempId, byte lvMob, int hp` | Cả khu vực |
+| `-13` | Quái hồi sinh | `byte mobId, byte sys, byte levelBoss, int hp` — **KHÔNG gửi `87` theo sau**, xem §0.1 | Cả khu vực |
 | `-11` | Quái đánh trúng **mình** | `byte mobId, int satThuong` | Riêng nạn nhân |
 | `-10` | Quái đánh trúng **ai đó** | `byte mobId, int idNanNhan, int hpConLai` | Người khác trong khu vực |
 | `-60` | Người đánh người | xem §2.1 | Cả khu vực |
 
-Trường cuối của `-9` là hằng `int −1`, **chưa rõ ý nghĩa** — ghi đúng `-1` và **chú thích
-rõ là chưa biết**, đừng giả vờ hiểu.
+⚠️ **Hai byte giữa của `-13` KHÔNG phải "loại quái" và "cấp quái"** dù bản Java đặt tên
+thế. Client ghi byte 2 vào `mob.sys` và byte 3 vào `mob.levelBoss`
+(`Controller.cs:4284-4288`) — **client không đổi loại quái khi hồi sinh**. Và
+`levelBoss != 0` sẽ **bật hiệu ứng siêu cấp ngẫu nhiên**. → **Bản Go ghi `0` cho cả hai.**
+Đây đúng kiểu lỗi "đặt đúng byte, sai ý nghĩa" đã bắt được ở `-17` (§7.2).
+
+**Hai gói `-11` / `-10` còn một trường tuỳ chọn ở cuối** mà bản Java không gửi và bản Go
+cũng không gửi (client bọc `try/catch`): `-11` có thêm `int satThuongChakra`, `-10` có
+thêm `int mpConLai`. Ghi ra đây để ai đọc log gói của bản Java không bối rối.
+
+**Ba chỗ của `-9` đã xác minh bằng client — bản Java sai, đừng chép:**
+
+1. **Trường cuối là `byte hieuUngId` (1 byte), `-1` = không hiệu ứng.** Bản Java ghi
+   `writeInt(-1)` = **4 byte** (`Mob.java:1369`); client chỉ đọc 1 byte
+   (`Controller.cs:4352`), 3 byte sau bị vứt. Tình cờ vẫn ra `-1` nên không ai phát hiện.
+   **Bản Go ghi 1 byte.**
+2. **Sát thương đúng bằng `1` là giá trị đặc biệt:** client bỏ qua toàn bộ phần vẽ
+   (`Controller.cs:4338`, `if (dame2 != 1.0)`). Tránh sinh ra sát thương bằng đúng 1.
+3. **Sát thương `0` = "trượt":** client hiện chữ *miss* và **kéo quái về vị trí gốc** —
+   nhưng **chỉ khi `chiMang = false`** (`Controller.cs:4356-4363`; nhánh chí mạng được
+   kiểm trước và hiện "-0" màu đỏ thay vì *miss*).
+   → **Ràng buộc bổ sung cho §1.9: gói vượt tầm phải ghi `chiMang = false`.**
 
 Chi tiết `-60` dạng đòn đánh:
 
@@ -176,14 +265,15 @@ Dạng hồi máu: các trường 1–4 giống hệt, trường 5 = **0**, **h�
 
 | Lệnh | Tên | Thân gói | Gửi cho |
 |---|---|---|---|
-| `-17` | Bạn đã chết | `byte idNguoiChoi ⚠️, short x, short y` | Riêng chính chủ |
-| `-8` | Ai đó đã chết | `int idNguoiChoi ⚠️, byte cPk=0, short x, short y` | Người khác |
+| `-17` | Bạn đã chết | `byte cPk, short x, short y` — **KHÔNG có id** | Riêng chính chủ |
+| `-8` | Ai đó đã chết | `int idNguoiChoi, byte cPk, short x, short y` | Người khác |
 | `-16` | Bạn đã hồi sinh | *(rỗng)* | Riêng chính chủ |
 | `-30/15` | Ai đó hồi sinh | `int idNguoiChoi, int hp, int mp, short x, short y` | Cả khu vực |
 | `-30/9` | Cập nhật máu | `int idNguoiChoi, int hp, int hpMax` | Người khác |
 
-⚠️ **Hai trường đánh dấu ⚠️ CHƯA ĐƯỢC XÁC MINH — xem §7.** Không viết `-8` và `-17` vào
-bản Go trước khi xử lý xong §7.
+✅ **Đã xác minh bằng client** (§7). Hai điều dễ chép sai:
+- `-17` **không có trường id** — byte đầu là `cPk`. Bản Java nhét id vào đó là **lỗi**.
+- `-8` dùng `int` cho id; bản Java có một chỗ ghi `short` — **lỗi**, đừng chép.
 
 ### 3.5 Gói XUỐNG — hoạt ảnh chiêu (`-45`)
 
@@ -324,16 +414,25 @@ biết khái niệm này. Nó thuần tuý là phép nhân phía server. **Khôn
 
 ### 4.3 Tập chiêu tối thiểu cho KH6
 
-Đề xuất **3 chiêu mỗi làng** (15 chiêu), đủ để chứng minh cả ba `type` chạy được:
+Đề xuất **4 chiêu mỗi làng** (20 chiêu), phủ đủ **cả ba `type` nằm trong phạm vi KH6**:
 
-| type | Vai trò | Ví dụ Làng Lá | Tầm |
-|---|---|---|---|
-| 1 | Đòn cận chiến | Cước Liên Hoàn | 100 |
-| 1 | Đòn tầm xa theo hệ | Hoả Độn · Hào Hoả Cầu | 300 |
-| 3 | Tự thân | Tụ Chakra (hồi chakra) | — |
+| type | Vai trò | Ví dụ Làng Lá | Tầm | Gói phát xuống |
+|---|---|---|---|---|
+| 1 | Đòn cận chiến | Cước Liên Hoàn | 100 | `54` / `-60` dạng đòn đánh |
+| 1 | Đòn tầm xa theo hệ | Hoả Độn · Hào Hoả Cầu | 300 | `54` / `-60` dạng đòn đánh |
+| **2** | **Hồi máu đồng đội** | **Y Liệu Nhẫn Thuật** | **300** | **`-60` dạng hồi máu** |
+| 3 | Tự thân | Tụ Chakra (hồi chakra) | — | *(không phát gói chiến đấu)* |
 
-Ba chiêu × 5 làng = 15 `SkillTemplate`, mỗi chiêu 3 cấp = 45 `Skill`. Vừa đủ nhỏ để
+⚠️ **Chiêu `type = 2` là bắt buộc, không phải cho đẹp.** Gói `-60` **dạng hồi máu**
+(§2.1) chỉ sinh ra từ chiêu `type = 2`. Không có chiêu nào type 2 thì hàm
+`goiHoiMauNguoiChoi` **không có đường chạy thật** — test của nó chỉ là mô phỏng, và lỗi
+sẽ chỉ lộ ra ở kế hoạch sau. Đây đúng loại bẫy "test xanh mà code sai" (§6.11 của
+`BAT-DAU-TU-DAY.md`).
+
+Bốn chiêu × 5 làng = 20 `SkillTemplate`, mỗi chiêu 3 cấp = 60 `Skill`. Vừa đủ nhỏ để
 kiểm thử tay, vừa đủ rộng để lộ mọi lỗi khuôn byte.
+
+*(`type = 4` — chiêu không cần nhắm — nằm ngoài KH6, xem §0.)*
 
 **Mở rộng lên bộ đầy đủ là việc của KH8** (thêm chiêu = thêm dòng YAML, không sửa code).
 Đó chính là lý do KH8 tồn tại.
@@ -375,7 +474,7 @@ Quái tinh anh (`lvMob > 0`) ở bản gốc bị ghi đè thành **10 % máu t�
 (`Mob.java:457-459`) — tức luôn 10 đòn là chết bất kể trang bị. Giữ ý này nhưng đưa vào
 **dữ liệu quái** (một cờ `satThuongTheoPhanTramMau`), không nhét `if` vào code.
 
-### 5.4 Bốn lỗi của bản gốc — KHÔNG chép
+### 5.4 Sáu lỗi của bản gốc — KHÔNG chép
 
 1. **Kẹp máu sai biến** (`MobPoint.java:34-40`): kiểm giá trị **cũ** rồi mới gán giá trị
    mới → không bao giờ kẹp được sàn 0. Bản Go kẹp `[0, hpMax]` ở **một chỗ duy nhất**.
@@ -387,6 +486,23 @@ Quái tinh anh (`lvMob > 0`) ở bản gốc bị ghi đè thành **10 % máu t�
    **và có test cho mục tiêu đã chết**.
 4. **Đổi nhịp đánh như tác dụng phụ của hàm tìm mục tiêu** (`Mob.java:412, 438`).
    Bản Go: hàm tìm mục tiêu **trả về cả mục tiêu lẫn nhịp**, không sửa trạng thái ngầm.
+5. **Hàm `lvMob()` trông như "đọc cấp quái" nhưng thật ra GHI hai trường**
+   (`Mob.java:510-514`):
+   ```java
+   public int lvMob() {
+       this.lvMob = 0;                          // ← đặt lại cấp
+       this.point.hp = this.point.maxHp;        // ← HỒI ĐẦY MÁU
+       return 0;                                // ← luôn trả 0
+   }
+   ```
+   Nó được gọi ngay trong lúc **dựng gói** `-13` (`Mob.java:522`). Hai hệ quả:
+   trường thứ 3 của gói `-13` **luôn bằng 0** trong bản gốc, và **bất cứ ai gọi
+   `sendMobHoiSinh()` đều vô tình hồi đầy máu con quái**.
+   ⚠️ Đừng vì thế mà tưởng byte đó vô nghĩa: **client CÓ dùng nó** — khác 0 thì bật hiệu
+   ứng siêu cấp (`Controller.cs:4285-4288`). Bản Go ghi đúng `0`.
+   Bản Go: hàm đọc thì **chỉ đọc**; hồi máu là việc riêng, gọi tường minh.
+6. **Dùng lại một mã lệnh cho hai gói khác nghĩa** — `Message(87)` vừa là "gió thổi"
+   vừa là "maxHp" (§0.1). Bản Go: **một mã lệnh, một ý nghĩa.**
 
 ---
 
@@ -409,7 +525,11 @@ Máy chủ → cả khu vực:  54    ← hoạt ảnh
 Máy chủ → cả khu vực:  -12   {mobId, satThuong, chiMang, soDoRoi=0}
   [5 giây sau, trong vòng lặp actor]
 Máy chủ → cả khu vực:  -13   {mobId, tempId, lvMob, hp}
+                             ← HET. Ban Java gui them goi 87 o day; ta KHONG gui (§0.1)
 ```
+
+Client tự đặt `maxHp = hp` khi xử lý `-13` (`Controller.cs:4294-4295`), nên không cần
+gói nào bổ sung máu tối đa.
 
 ### 6.3 Quái đánh người chơi
 
@@ -422,8 +542,8 @@ Máy chủ → người khác:    -10  {mobId, idNanNhan, hpConLai}
 ### 6.4 Người chơi chết rồi hồi sinh
 
 ```
-Máy chủ → chính chủ:   -17  {id, x, y}
-Máy chủ → người khác:  -8   {id, cPk=0, x, y}
+Máy chủ → chính chủ:   -17  {cPk=0, x, y}          ← KHONG co id
+Máy chủ → người khác:  -8   {id, cPk=0, x, y}     ← id la int 4 byte
   [người chơi bấm hồi sinh]
 Client → Máy chủ:      -16  (rỗng)
   [server trừ phí]
@@ -435,37 +555,76 @@ Ngoài ra, mỗi lần máu người chơi đổi vì bị đánh: `-30/9` cho n
 
 ---
 
-## 7. ⚠️ HAI CHỖ CHƯA XÁC MINH — chặn việc, phải xử trước
+## 7. ✅ ĐÃ XÁC MINH BẰNG CLIENT (26/07/2026) — hai chỗ nghi ngờ nay đã rõ
 
-Theo §6.14 của `BAT-DAU-TU-DAY.md` ("thấy thứ trông như lỗi nhưng không chắc → **dừng
-lại hỏi**, đừng tự sửa" — luật này đã cứu dự án một lần ở vụ byte-order):
+Đã mở source client Unity ở `D:\NRO_Project\Assets\Scripts\Game1\Controller.cs` và đọc
+tận nơi. **Client là bên đọc, nên client là trọng tài duy nhất** — kết luận dưới đây
+thay thế mọi suy đoán trước đó.
 
-### 7.1 Gói `-8`: trường id là `int` hay `short`?
+*(`Game2/Controller.cs` giống hệt `Game1`, chỉ khác `namespace`. Không cần soi riêng.)*
 
-Bản Java phát cùng lệnh `-8` ở hai chỗ với **kiểu khác nhau**:
+### 7.1 Gói `-8`: `writeInt` ĐÚNG — bản Java đang chạy có LỖI THẬT
 
-| Nơi | Trường 1 | Bối cảnh |
-|---|---|---|
-| `map/Zone.java:726` | `writeInt` (4B) | Đồng bộ cho người mới vào khu vực |
-| `services/Service.java:1157` | `writeShort` (2B) | Ngay khi có người chết |
+`Controller.cs:4548-4554`:
 
-Không thể cùng đúng. Suy đoán: `int` đúng (mọi `playerId` khác trong toàn giao thức đều
-là int). Nếu vậy thì **bản Java đang chạy có lỗi thật** — người khác nhìn thấy sai ai vừa chết.
+```csharp
+case -8:
+    @char = GameScr.findCharInMap(msg.reader().readInt());   // ← readInt, 4 byte
+    if (@char != null)
+    {
+        @char.cPk = msg.reader().readByte();
+        @char.waitToDie(msg.reader().readShort(), msg.reader().readShort());
+    }
+    break;
+```
 
-### 7.2 Gói `-17`: `writeByte((int) pl.id)` — id nhân vật nhét vào 1 byte?
+→ `map/Zone.java:726` (`writeInt`) **đúng**. `services/Service.java:1157` (`writeShort`)
+là **lỗi thật của bản Java đang chạy**: nó ghi 2 byte vào chỗ client đọc 4 byte, nên
+client lấy nhầm id → `findCharInMap` trả `null` → **cả gói bị bỏ qua**. Hậu quả trong
+game thật: **người chơi khác KHÔNG thấy ai đó vừa chết** (nhân vật vẫn đứng như thường),
+cho tới khi họ rời khu vực rồi vào lại — lúc đó `Zone.java` mới phát bản `writeInt` đúng.
 
-`services/Service.java:1147`. Id nhân vật là `long`; ép xuống 1 byte thì id 300 hoá 44.
-Gói chỉ gửi cho **chính chủ** nên có thể client bỏ qua trường id và lỗi không lộ. Cũng
-có thể client `readInt` → lệch 3 byte, toạ độ đọc ra rác.
+**Bản Go dùng `int` 4 byte.**
 
-### 7.3 Cách gỡ
+### 7.2 Gói `-17`: KHÔNG CÓ trường id — trường đầu là `cPk`
 
-**Cách dứt điểm:** mở source client Unity ở `D:\NRO_Project`, tìm chỗ đọc lệnh `-8` và
-`-17`. Client là bên đọc, nên client là trọng tài duy nhất.
+`Controller.cs:4533-4547`:
 
-**Ảnh hưởng nếu chưa gỡ được:** hai gói này chỉ thuộc **nhóm E (chết & hồi sinh)**. Các
-nhóm A–D và F **không phụ thuộc** và làm được ngay. → **Kế hoạch phải xếp nhóm E sau
-cùng**, và task đầu tiên của nhóm E là *đọc client để xác minh*.
+```csharp
+case -17:
+    Char.myCharz().meDead = true;
+    Char.myCharz().cPk = msg.reader().readByte();                              // ← cPk
+    Char.myCharz().startDie(msg.reader().readShort(), msg.reader().readShort());
+    try {
+        Char.myCharz().cPower = msg.reader().readLong();                       // ← TUỲ CHỌN
+        Char.myCharz().applyCharLevelPercent();
+    } catch (Exception) { Cout.println("Loi tai ME_DIE " + msg.command); }
+    Char.myCharz().countKill = 0;
+    break;
+```
+
+Gói `-17` chỉ gửi cho **chính chủ**, nên client dùng thẳng `Char.myCharz()` — **không cần
+id, và không đọc id**. Byte đầu là **`cPk`** (cờ trạng thái PK).
+
+→ `services/Service.java:1147` viết `writeByte((int) pl.id)` là **đặt nhầm dữ liệu vào
+đúng ô**: nó nhét id nhân vật vào ô `cPk`. Không làm lệch byte (vẫn 1 byte), nhưng
+**đặt sai giá trị `cPk` cho người vừa chết**. Dòng chú thích `// msg.writer().writeLong(-1);
+send Power` bị comment ở `Service.java:1150` khớp đúng với trường `cPower` tuỳ chọn ở
+client — client bọc `try/catch` nên thiếu cũng không sao.
+
+**Bảng đúng cho bản Go:**
+
+| # | Trường | Kiểu | Ghi chú |
+|---|---|---|---|
+| 1 | `cPk` | byte | **Cờ PK, KHÔNG phải id.** Ghi `0` khi chưa có hệ PK |
+| 2 | `x` | short | |
+| 3 | `y` | short | |
+| 4 | `power` | long (8B) | **Tuỳ chọn** — client bọc `try/catch`. Bản Go **bỏ**, khớp bản Java |
+
+### 7.3 Hệ quả cho kế hoạch
+
+Task 12 (xác minh) **đã xong ngay trong đợt này** → **nhóm E không còn bị chặn**, làm
+song song với A–D và F được. Xem Task 12 trong kế hoạch thi công.
 
 ---
 
@@ -503,3 +662,21 @@ cùng**, và task đầu tiên của nhóm E là *đọc client để xác minh*
 | Khuôn catalog chiêu | `data/DataGame.java:141-216` |
 | Danh sách quái trong `-24` | `map/Zone.java:779-800` |
 | Bất tử 1500 ms sau hồi sinh | `services/SkillService.java:69-71` |
+
+**Phía client Unity** (`D:\NRO_Project\Assets\Scripts\Game1\`) — đọc trực tiếp 26/07/2026:
+
+| Sự kiện | Vị trí |
+|---|---|
+| Khung gói: đọc trọn theo độ dài rồi mới phân tích | `Session_ME.cs:181-219` |
+| Danh sách 7 mã lệnh dùng khung **3 byte** | `Session_ME.cs:190` |
+| `catch (Exception) {}` nuốt lỗi phân tích gói | `Controller.cs:4600` |
+| `87` = **gió thổi** (`byte mobId + bool`), KHÔNG phải maxHp | `Controller.cs:3016-3018` |
+| `-84` = maxHp thật (`byte mobIndex + int`), server chưa từng dùng | `Controller.cs:767-783` |
+| `-13` client tự đặt `maxHp = hp` | `Controller.cs:4294-4295` |
+| `-8` đọc id bằng **`readInt`** | `Controller.cs:4548-4554` |
+| `-17` **không đọc id**, byte đầu là `cPk`; `power` là trường tuỳ chọn | `Controller.cs:4533-4547` |
+| `-12` thứ tự đồ rơi: 4×short + int playerId | `Controller.cs:4392-4434` |
+| `isWind` làm quái đứng im | `Mob.cs:1172` |
+| `ModFunc.isReadInt = true` (khớp `cn.readInt` bên server) | `ModFunc.cs:45` |
+
+*(`Game2/Controller.cs` giống hệt `Game1`, chỉ khác `namespace` — đã kiểm bằng diff.)*

@@ -25,10 +25,20 @@ Luồng phiên chỉ **gửi sự kiện** vào hộp thư actor, không chạm 
 - **Máu và sát thương là `int32` big-endian (4 byte)**, kẹp trần `2_147_483_647`,
   kẹp sàn `0`. Không dùng 8 byte. Ngoại lệ duy nhất: `powRequire` trong catalog chiêu
   là **`long` 8 byte**.
-- **BA GÓI ĐỘ DÀI BIẾN THIÊN** — rủi ro số một của kế hoạch này:
-  `-60` (hai dạng, tuỳ `docTiep`), `-45/0` (hai vòng lặp lồng nhau), `-124` (ba dạng).
-  Cộng thêm gói **lên** `54` (1 byte hoặc 5 byte tuỳ `mobId == -1`).
+- **GÓI ĐỘ DÀI BIẾN THIÊN TRONG PHẠM VI KH6** — rủi ro số một của kế hoạch này:
+  `-60` (hai dạng, tuỳ `docTiep`) và gói **lên** `54` (1 hoặc 5 byte tuỳ `mobId == -1`).
   → Mỗi dạng **một test byte-chính-xác riêng**, không gộp.
+  *(`-45/0` và `-124` cũng biến thiên nhưng **nằm ngoài KH6** — đặc tả §0 và §3.5. Khi nào
+  làm thì áp cùng luật test.)*
+- **Gói XUỐNG `54` không có trường đếm quái** — client đọc `mobId` cho tới hết thân gói
+  (`Controller.cs:3851-3872`). **Tuyệt đối không ghi thêm byte nào sau `mobId`**, ghi thừa
+  là nhân vật quay sai hướng và nhắm sai mục tiêu. Đặc tả §2.0.
+- **Sai trường bên trong một gói KHÔNG làm hỏng dòng byte** (client đọc trọn gói theo
+  độ dài rồi mới phân tích — đặc tả §2.0). Nó hỏng **im lặng**: gói đó không làm gì, hoặc
+  hiện số vô lý. Không có log. → **Không trông vào chạy thử để phát hiện; phải test byte.**
+- **KHÔNG phát gói `87`** sau `-13` dù bản Java có phát — mã `87` của client là "gió thổi",
+  không phải maxHp; gửi nhầm làm quái máu lớn **đứng im**. Đặc tả §0.1.
+- **Một mã lệnh, một ý nghĩa.** Bản Java dùng `87` cho hai việc khác nhau — không lặp lại.
 - **`-60` phải là HAI HÀM dựng gói riêng biệt**, không một hàm có cờ. Một hàm có cờ thì
   người sửa sau rất dễ ghi thừa trường; hai hàm thì lỗi đó không tồn tại được.
 - **Sát thương không vượt máu còn lại**; **quái đầy máu không chết bởi một đòn**
@@ -41,9 +51,11 @@ Luồng phiên chỉ **gửi sự kiện** vào hộp thư actor, không chạm 
 - **Dựng xong dữ liệu rồi mới ghi byte.** Lỗi giữa chừng → bỏ cả gói, không gửi nửa vời.
 - **Bất tử 1500 ms sau hồi sinh**; **hồi chiêu nới 50 ms**; tầm cận chiến `100`, tầm xa `300`.
 - **Go:** `D:\Go\bin\go.exe`, gofmt `D:\Go\bin\gofmt.exe`. Windows PowerShell (KHÔNG `&&`).
-  Test cần CSDL: `$env:NRO_TEST_DSN='postgres://postgres:nrodev123@127.0.0.1:5432/nro_test'`
-  (dòng riêng). ⚠️ **Cổng 5432**, không phải 5433 — xem §9 của `BAT-DAU-TU-DAY.md`.
-  PostgreSQL phải đang chạy: `D:\PostgreSQL\bin\pg_ctl.exe -D D:\PostgreSQL\data start`.
+  Test cần CSDL: `$env:NRO_TEST_DSN='postgres://postgres:nrodev123@127.0.0.1:CONG/nro_test'`
+  (dòng riêng). ⚠️ **`CONG` phải TỰ KIỂM, đừng ghim số** — cổng đổi giữa các lần khởi động:
+  `Get-NetTCPConnection -State Listen | Where-Object { $_.LocalPort -in 5432,5433 }`.
+  Không thấy gì = PostgreSQL chưa bật: `D:\PostgreSQL\bin\pg_ctl.exe -D D:\PostgreSQL\data start`.
+  Chi tiết + triệu chứng nhận dạng: `server/README.md` mục 0 và §9 của `BAT-DAU-TU-DAY.md`.
 - **Ghi chú tiếng Việt giải thích *tại sao***, không phải *cái gì*.
 - **Kiểm thử đột biến bắt buộc** sau mỗi task có gói byte: cố tình phá code, test **phải
   đỏ**. Không đỏ = test vô dụng, viết lại test. *(Dự án đã 3 lần dính test xanh mà code sai.)*
@@ -52,9 +64,9 @@ Luồng phiên chỉ **gửi sự kiện** vào hộp thư actor, không chạm 
 
 ## Thứ tự và lý do
 
-Nhóm **E (chết & hồi sinh)** xếp **sau cùng** vì hai gói `-8` và `-17` **chưa xác minh
-được** (đặc tả §7) — task đầu của nhóm E là đọc client Unity để gỡ. Mọi nhóm khác không
-phụ thuộc, làm được ngay.
+Nhóm **E (chết & hồi sinh)** trước đây bị chặn vì hai gói `-8` và `-17` chưa xác minh.
+**Task 12 đã xong trong đợt thiết kế** (đọc client Unity, kết quả ở đặc tả §7) →
+**không còn task nào bị chặn**, thứ tự dưới đây chỉ còn phụ thuộc kỹ thuật.
 
 | Task | Nhóm | Phụ thuộc |
 |---|---|---|
@@ -68,11 +80,14 @@ phụ thuộc, làm được ngay.
 | 8 Quái hồi sinh + hồi máu | B | 6 |
 | 9 AI quái + gói `-11` / `-10` | D | 5, 7 |
 | 10 Gói `-60` **hai dạng** | F | 4 |
-| 11 Người đánh người (nối điều phối) | F | 10 |
-| 12 **Xác minh client** cho `-8`/`-17` | E | — *(làm được song song từ đầu)* |
-| 13 Chết & hồi sinh | E | 12, 7 |
+| 11 Người đánh người (nối điều phối) | F | 10, **13** *(cần mốc `lucHoiSinh`)* |
+| 12 Xác minh client `-8`/`-17` | E | ✅ **đã xong 26/07** |
+| 13 Chết & hồi sinh | E | 7 |
 | 14 Test đầu-cuối 2 người chơi | — | tất cả |
 | 15 Nghiệm thu tay bằng client Unity | — | 14 |
+
+**Ba nhánh chạy song song được:** `1 → {2→3, 4}` · `5 → 6 → 8` · `12` (đã xong).
+Task 4 phải đợi Task 1 vì nó dùng kiểu `*CapChieu` do Task 1 sinh ra.
 
 ---
 
@@ -98,12 +113,16 @@ phụ thuộc, làm được ngay.
       né bằng cách không dùng số 0 thì nhánh đó không bao giờ chạy. Ghi chú rõ trong code.
       Trường `ghiChu` ghi chuỗi rỗng — **không** phát lại `"Ngoc Rong Kame"` của bản cũ.
 - [ ] **Step 4: Chạy — PASS.**
-- [ ] **Step 5: Điền 15 chiêu** — 3 chiêu × 5 làng theo đặc tả §4.3 (1 cận chiến `type=1`,
-      1 tầm xa theo hệ `type=1`, 1 tự thân `type=3`), mỗi chiêu 3 cấp. Test khẳng định
-      **mỗi làng đúng 3 chiêu** và **không chiêu nào có `templateId == 0`**.
+- [ ] **Step 5: Điền 20 chiêu** — 4 chiêu × 5 làng theo đặc tả §4.3 (1 cận chiến `type=1`,
+      1 tầm xa theo hệ `type=1`, **1 hồi máu đồng đội `type=2`**, 1 tự thân `type=3`),
+      mỗi chiêu 3 cấp. Test khẳng định **mỗi làng đúng 4 chiêu**, **không chiêu nào có
+      `templateId == 0`**, và **mỗi làng có đúng 1 chiêu `type=2`**.
+      *Tại sao bắt buộc có `type=2`:* gói `-60` **dạng hồi máu** (Task 10) chỉ sinh ra từ
+      chiêu type 2. Thiếu nó thì hàm `goiHoiMauNguoiChoi` không có đường chạy thật, test
+      chỉ là mô phỏng — đúng bẫy "test xanh mà code sai" (§6.11 `BAT-DAU-TU-DAY.md`).
 - [ ] **Step 6: Kiểm thử đột biến** — đổi `NhanLucCan` từ 8 byte sang 4 byte → test phải đỏ.
       Đổi `templateId` của một chiêu thành 0 → test phải đỏ.
-- [ ] **Step 7: Commit** — `feat(game): catalog -28/7 phat 15 chieu Naruto (3 chieu x 5 lang)`
+- [ ] **Step 7: Commit** — `feat(game): catalog -28/7 phat 20 chieu Naruto (4 chieu x 5 lang)`
 
 ---
 
@@ -140,15 +159,18 @@ phụ thuộc, làm được ngay.
 - Produces: `func KiemDanhHopLe(nguoiDanh *nguoiTrongKhuVuc, mucTieu ViTriCoMau, bayGio time.Time) KetQuaKiem`
 - Produces: `type KetQuaKiem struct { ChoPhep bool; Truot bool; LyDo string }`
 
-Bảng kiểm (đặc tả §2 của spec, đúng thứ tự):
+Bảng kiểm — **đúng thứ tự chạy của bản Java** (`nghiên cứu §2`, `SkillService.java:58-136`):
 
-| Kiểm | Kết quả khi hỏng |
-|---|---|
-| Mục tiêu vừa hồi sinh < 1500 ms | `ChoPhep = false` |
-| Mục tiêu đã chết | `ChoPhep = false` |
-| Không đủ chakra | `ChoPhep = false` |
-| Chiêu chưa hồi (`daTroiQua < hoiChieu − 50ms`) | `ChoPhep = false` |
-| **Vượt tầm** | `ChoPhep = true`, **`Truot = true`** |
+| # | Kiểm | Kết quả khi hỏng |
+|---|---|---|
+| 1 | Mục tiêu vừa hồi sinh < 1500 ms | `ChoPhep = false` |
+| 2 | Không đủ chakra | `ChoPhep = false` |
+| 3 | Chiêu chưa hồi (`daTroiQua < hoiChieu − 50ms`) | `ChoPhep = false` |
+| 4 | Mục tiêu đã chết | `ChoPhep = false` |
+| 5 | **Vượt tầm** | `ChoPhep = true`, **`Truot = true`**, và **`ChiMang = false`** |
+
+Hàng 5 phải ép `ChiMang = false`: client chỉ hiện chữ *miss* khi `chiMang == false`
+(đặc tả §3.3 điểm 3).
 
 - [ ] **Step 1: Viết test đỏ** — một test cho **mỗi dòng** trong bảng, giá trị **ghim
       cứng** (không lấy từ chính hằng số đang kiểm — §6.12 của `BAT-DAU-TU-DAY.md`).
@@ -198,7 +220,10 @@ Khắc chế ×1,25 · trung tính ×1,00 · bị khắc ×0,80.
 **Files:**
 - Create: `server/internal/game/quai.go`
 - Create: `server/internal/game/quai_test.go`
-- Modify: `server/internal/game/banDo.go` hoặc nơi dựng `-24` (phần `soQuai`)
+- Modify: `server/internal/game/thegioi.go` — hàm `goiMapInfo` (dòng 105), đổi dòng
+  `w.Byte(0) // mobCount = 0` (dòng 121) thành danh sách quái thật.
+  ⚠️ **Ngay dưới nó là `w.Byte(0) // (a) BYTE DU PHONG — DUNG QUEN`** — byte đệm giữa
+  phần quái và phần NPC. Chèn quái vào **không được nuốt mất byte này**.
 
 **Interfaces:**
 - Produces: `type Quai struct { Id byte; MauId byte; Cap byte; CapTinhAnh byte; Hp, HpToiDa int32; X, Y int16; TrangThai byte; ... }`
@@ -226,8 +251,10 @@ Khắc chế ×1,25 · trung tính ×1,00 · bị khắc ×0,80.
 - [ ] **Step 1: Viết test đỏ** — bốn test byte-chính-xác, mỗi gói một test, mảng byte
       ghim cứng theo đặc tả §3.3. `-12` test với `soDoRoi = 0`.
 - [ ] **Step 2: Chạy — fail.**
-- [ ] **Step 3: Cài đặt.** Trường cuối `-9` ghi hằng `int -1` **kèm chú thích rõ là chưa
-      biết ý nghĩa** — đừng giả vờ hiểu (đặc tả §3.3).
+- [ ] **Step 3: Cài đặt.** ⚠️ Trường cuối `-9` là **`byte hieuUngId` (1 byte)**, ghi `-1`
+      = không có hiệu ứng. **KHÔNG ghi `int` 4 byte như bản Java** (`Mob.java:1369`) —
+      client chỉ đọc 1 byte (`Controller.cs:4352`), bản Java tình cờ vẫn ra `-1` nên chưa
+      ai phát hiện. Đặc tả §3.3.
 - [ ] **Step 4: Chạy — PASS.**
 - [ ] **Step 5: Kiểm thử đột biến** — đổi `mobId` từ byte sang short trong `-9` → test phải đỏ.
 - [ ] **Step 6: Commit** — `feat(game): goi 54/-9/-12/-13 (byte-dung)`
@@ -264,6 +291,12 @@ Khắc chế ×1,25 · trung tính ×1,00 · bị khắc ×0,80.
 - [ ] **Step 1: Viết test đỏ** — dùng đồng hồ tiêm được (không `sleep` thật):
       quái chết → sau 4,9 s **chưa** hồi sinh; sau 5,0 s hồi sinh và phát `-13`.
       Quái mất máu → sau 30 s hồi đúng `hpToiDa/10`, không vượt `hpToiDa`.
+      **Test bắt buộc: sau `-13` KHÔNG có gói nào khác được phát** — đặc biệt **không
+      phát gói `87`**. *Tại sao:* bản Java phát `87` ngay sau `-13` (`Mob.java:525`),
+      rất dễ chép theo. Nhưng mã `87` của client là lệnh **"quái bị gió thổi"**
+      (`byte mobId + bool`), không phải maxHp — gửi vào đó thì với quái máu
+      ≥ 16.777.216 con quái sẽ **đứng im không di chuyển**. Client đã tự đặt
+      `maxHp = hp` khi xử lý `-13`. Xem đặc tả §0.1.
 - [ ] **Step 2: Chạy — fail.**
 - [ ] **Step 3: Cài đặt** trong `nhipTim` (móc để rỗng từ KH5 — nay dùng tới).
       Đồng hồ là **tham số/trường tiêm được**, không gọi `time.Now()` thẳng — *tại sao:*
@@ -323,13 +356,14 @@ Hai tầng ưu tiên (đặc tả §5.2):
       (`loaiChieu` 1 + `satThuong` 4 + `daChet` 1 + `chiMang` 1).
 - [ ] **Step 2: Chạy — fail.**
 - [ ] **Step 3: Cài đặt.** **Hai hàm tách hẳn**, không một hàm có cờ — *tại sao:* một hàm
-      có cờ thì người sửa sau rất dễ ghi thừa trường vào nhánh hồi máu, và triệu chứng là
-      client lệch dòng byte vĩnh viễn, cực khó chẩn đoán (đặc tả §2.1).
+      có cờ thì người sửa sau rất dễ ghi thừa trường vào nhánh hồi máu, mà ghi thừa là
+      lỗi **im lặng tuyệt đối**: client vứt byte dư, không lỗi, không triệu chứng, chạy
+      thử không phát hiện được (đặc tả §2.0 và §2.1).
 - [ ] **Step 4: Chạy — PASS.**
 - [ ] **Step 5: Kiểm thử đột biến (QUAN TRỌNG NHẤT CỦA CẢ KẾ HOẠCH)** — trong
       `goiHoiMauNguoiChoi` đổi `docTiep` từ 0 thành 1 → test **phải đỏ**. Ghi thêm 1 byte
       vào cuối gói hồi máu → test **phải đỏ**. Không đỏ = test vô dụng, viết lại.
-- [ ] **Step 6: Commit** — `feat(game): goi -60 hai dang (don danh 14B / hoi mau 10B)`
+- [ ] **Step 6: Commit** — `feat(game): goi -60 hai dang (don danh 18B / hoi mau 11B)`
 
 ---
 
@@ -350,31 +384,19 @@ Hai tầng ưu tiên (đặc tả §5.2):
 
 ---
 
-### Task 12: ⚠️ XÁC MINH CLIENT cho gói `-8` và `-17`
+### Task 12: ✅ XÁC MINH CLIENT cho `-8` và `-17` — ĐÃ XONG 26/07/2026
 
-> **Task này KHÔNG viết code.** Nó gỡ hai chỗ chưa chắc ở đặc tả §7. Làm được **song
-> song từ đầu kế hoạch** — không phụ thuộc task nào.
+> **Task này đã hoàn thành trong đợt thiết kế, không phải làm lại.** Giữ lại đây để
+> người thi công biết kết luận đến từ đâu. **Nhóm E không còn bị chặn.**
 
-**Files:**
-- Modify: `docs/superpowers/specs/2026-07-26-giao-thuc-chien-dau.md` (§3.4 và §7)
-- Modify: `docs/superpowers/research/kh6-goi-chien-dau.md` (§6)
+Kết quả đầy đủ + trích dẫn code client ở **đặc tả §7**. Tóm tắt:
 
-**Vấn đề:** bản Java phát `-8` ở hai chỗ với **kiểu trường đầu khác nhau**
-(`writeInt` ở `map/Zone.java:726`, `writeShort` ở `services/Service.java:1157`), và phát
-`-17` với id nhân vật nhét vào **1 byte** (`services/Service.java:1147`). Không thể cùng
-đúng — client là trọng tài duy nhất.
+| Gói | Kết luận | Bản Java |
+|---|---|---|
+| `-8` | Trường đầu là **`int`** (`Controller.cs:4548`, `findCharInMap(readInt())`) | `Zone.java:726` đúng; `Service.java:1157` ghi `short` là **LỖI THẬT** |
+| `-17` | **KHÔNG có trường id.** Byte đầu là **`cPk`**; sau đó `short x, short y`, rồi `long power` **tuỳ chọn** (`Controller.cs:4533-4547`) | `Service.java:1147` nhét id nhân vật vào ô `cPk` — **LỖI THẬT** |
 
-- [ ] **Step 1:** Mở source client Unity ở `D:\NRO_Project`, tìm chỗ đọc lệnh `-8`
-      (nhiều khả năng trong `Controller.cs`, cùng file đã dùng ở KH3/KH4).
-- [ ] **Step 2:** Ghi lại **kiểu đọc thật** của trường đầu: `readInt` / `readShort` / `readByte`.
-- [ ] **Step 3:** Làm y hệt cho `-17`.
-- [ ] **Step 4:** Cập nhật đặc tả §3.4 (bỏ dấu ⚠️) và §7 (ghi kết luận + bằng chứng số dòng).
-- [ ] **Step 5:** Nếu phát hiện bản Java **có lỗi thật**, ghi thêm một dòng vào
-      §6 của `BAT-DAU-TU-DAY.md` — đây là loại phát hiện đắt giá nhất.
-- [ ] **Step 6: Commit** — `docs(kh6): xac minh kieu truong id trong goi -8 va -17 tu client`
-
-> **Nếu không mở được client Unity:** dừng lại **hỏi chủ dự án**, đừng đoán.
-> §6.14 của `BAT-DAU-TU-DAY.md`: "thấy thứ trông như lỗi nhưng không chắc → dừng lại hỏi".
+Đã ghi vào `BAT-DAU-TU-DAY.md` §6.16.
 
 ---
 
@@ -384,12 +406,15 @@ Hai tầng ưu tiên (đặc tả §5.2):
 - Modify: `server/internal/game/goichiendau.go`, bộ điều phối, `khuvuc.go`
 - Modify: `server/internal/game/khuvuc_tichhop_test.go`
 
-**Phụ thuộc: Task 12 phải xong.** Không viết `-8` / `-17` trước khi biết kiểu trường thật.
+**Task 12 đã xong** → kiểu trường đã chốt, viết được ngay. Đọc **đặc tả §7** trước.
 
 - [ ] **Step 1: Viết test đỏ** — chuỗi đầy đủ theo đặc tả §6.4: máu về 0 → chính chủ nhận
       `-17`, người khác nhận `-8`. Client gửi `-16` → chính chủ nhận `-16`, cả khu vực
       nhận `-30/15`. Byte-chính-xác cho từng gói.
       Test: người đã chết gửi `54` → **không** đánh được.
+      **Hai test chống chép nhầm bản Java:**
+      (a) `-17` có thân **đúng 5 byte** (`byte cPk, short x, short y`) — **không có id**;
+      (b) `-8` có thân **đúng 9 byte**, trường đầu là **`int`** (không phải `short`).
 - [ ] **Step 2: Chạy — fail.**
 - [ ] **Step 3: Cài đặt.** Đặt mốc `lucHoiSinh` để chốt bất tử 1500 ms (Task 3 dùng tới).
 - [ ] **Step 4: Chạy — PASS** với `-count=5`.
@@ -428,8 +453,18 @@ Hai tầng ưu tiên (đặc tả §5.2):
 - [ ] Mở **2 client cùng lúc, cùng làng** → **người kia có thấy mình đánh nhau không?**
 - [ ] Để nhân vật chết → **có hiện màn hình chết và hồi sinh được không?**
 
-**Nếu có bất kỳ gói nào sai byte, triệu chứng sẽ là: client đứng hình, thoát app, hoặc
-hiện số sát thương vô lý.** Ghi lại triệu chứng chính xác rồi báo — đừng đoán nguyên nhân.
+**Triệu chứng khi gói sai byte — biết trước để mô tả cho đúng** (đặc tả §2.0): client
+đọc trọn từng gói theo độ dài rồi mới phân tích, nên sai trường **không** làm treo client.
+Nó **im lặng**:
+
+| Gặp phải | Nghĩa là |
+|---|---|
+| Bấm đánh mà **không có gì xảy ra** | Gói ghi **thiếu** byte → client ném lỗi rồi nuốt |
+| Số sát thương / máu **vô lý** (âm, khổng lồ) | Sai **thứ tự** trường |
+| Quái **đứng im không di chuyển** | Nhiều khả năng lỡ gửi gói `87` (xem đặc tả §0.1) |
+| Client **thoát app** hoặc đứng hình thật | Sai tầng **khung gói** (số byte độ dài), không phải tầng trường |
+
+Ghi lại triệu chứng **chính xác** rồi báo — đừng đoán nguyên nhân.
 
 ---
 
@@ -437,10 +472,11 @@ hiện số sát thương vô lý.** Ghi lại triệu chứng chính xác rồi
 
 **Chỗ dễ hỏng nhất, theo thứ tự:**
 
-1. **Gói `-60` hai dạng** (Task 10) — sai là client lệch dòng byte vĩnh viễn, không có
-   thông báo lỗi nào. Đã đặt kiểm thử đột biến riêng, gọi tên là "quan trọng nhất cả kế hoạch".
+1. **Gói `-60` hai dạng** (Task 10) — ghi thừa trường vào dạng hồi máu là lỗi **im lặng
+   tuyệt đối**: client vứt byte dư, không lỗi, không triệu chứng, chạy thử không phát hiện
+   được. Chỉ test byte-chính-xác + đột biến mới bắt. Đã gọi tên là "quan trọng nhất cả kế hoạch".
 2. **Gói lên `54` độ dài biến thiên** (Task 7) — KH6 không làm thú cưng nhưng vẫn phải
-   đọc đủ 5 byte. Đã có test riêng cho việc "gói kế tiếp vẫn đọc đúng".
+   đọc đủ 5 byte, nếu không phần thân còn lại bị hiểu sai. Đã có test riêng.
 3. **Thứ tự `hp` → `level` → `hpMax`** trong `-24` (Task 5) — phản trực giác. Đã có test riêng.
 4. **`powRequire` 8 byte** giữa một rừng trường 2/4 byte (Task 1). Đã có test riêng.
 5. **Tràn `int32`** khi nhân hệ số (Task 4). Đã bắt buộc tính bằng `int64` rồi mới kẹp.
@@ -448,6 +484,6 @@ hiện số sát thương vô lý.** Ghi lại triệu chứng chính xác rồi
 **Đã cố ý bỏ ra ngoài phạm vi:** rơi đồ (KH7), boss, hiệu ứng trạng thái đầy đủ, chiêu
 `type = 4`, thú cưng, PvP có luật. Lý do và đích đến ghi ở đặc tả §0.
 
-**Rủi ro lịch trình:** Task 12 (xác minh client) có thể **chặn** Task 13. Nếu không mở
-được source Unity thì nhóm E treo — nhưng 12/15 task còn lại vẫn chạy được, nên không
-chặn cả kế hoạch. Đó là lý do xếp nhóm E sau cùng.
+**Rủi ro lịch trình — ĐÃ TAN:** Task 12 (xác minh client) từng là nút chặn Task 13. Đã
+xác minh xong 26/07 bằng source Unity thật (đặc tả §7) → **nhóm E không còn bị chặn**;
+thứ tự còn lại chỉ là phụ thuộc kỹ thuật.

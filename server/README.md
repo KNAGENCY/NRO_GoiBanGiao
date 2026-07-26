@@ -6,13 +6,36 @@ tài khoản trên PostgreSQL (xem `internal/store`).
 
 ## Chạy lần đầu
 
+### 0. ⚠️ Tìm cổng PostgreSQL — ĐỪNG ghim con số
+
+Cổng **không cố định giữa các lần khởi động**: `postgresql.conf` để mặc định
+`5432`, nhưng nếu ai bật bằng `pg_ctl ... -o "-p 5433"` thì nó nghe `5433`.
+Ngày 26/07/2026 một agent đã mất thời gian vì tài liệu ghim `5433` trong khi máy
+đang nghe `5432`. **Luôn tự kiểm trước khi chạy:**
+
+```powershell
+Get-NetTCPConnection -State Listen | Where-Object { $_.LocalPort -in 5432,5433 } |
+  Select-Object LocalPort
+```
+
+Không thấy gì tức là PostgreSQL chưa chạy (nó **không** chạy như dịch vụ Windows):
+
+```powershell
+D:\PostgreSQL\bin\pg_ctl.exe -D D:\PostgreSQL\data start
+```
+
+**Triệu chứng khi dùng nhầm cổng:** các gói `auth` / `net` / `protocol` vẫn xanh,
+còn mọi kiểm thử cần CSDL **đỏ hàng loạt** với `connectex: ... actively refused
+it` — rất dễ tưởng mình vừa làm hỏng code. Dưới đây viết `CONG`, thay bằng số
+vừa tìm được.
+
 ### 1. Tạo cơ sở dữ liệu và nạp lược đồ
 
 CSDL `nro` (dùng thật) và `nro_test` (dùng cho kiểm thử) cần được tạo trước
 trên PostgreSQL. Sau đó nạp lược đồ:
 
 ```bash
-D:\PostgreSQL\bin\psql.exe -h 127.0.0.1 -p 5433 -U postgres -d nro -f internal/store/migrations/0001_tai_khoan.sql
+D:\PostgreSQL\bin\psql.exe -h 127.0.0.1 -p CONG -U postgres -d nro -f internal/store/migrations/0001_tai_khoan.sql
 ```
 
 ### 2. Tạo một tài khoản để thử
@@ -43,7 +66,7 @@ Biến môi trường:
 PowerShell:
 
 ```powershell
-$env:NRO_DSN = "postgres://postgres:nrodev123@127.0.0.1:5433/nro"
+$env:NRO_DSN = "postgres://postgres:nrodev123@127.0.0.1:CONG/nro"   # CONG: xem mục 0
 $env:NRO_DIA_CHI = ":14445"
 go run ./cmd/nroserver
 ```
@@ -51,7 +74,7 @@ go run ./cmd/nroserver
 cmd.exe:
 
 ```bat
-set NRO_DSN=postgres://postgres:nrodev123@127.0.0.1:5433/nro
+set NRO_DSN=postgres://postgres:nrodev123@127.0.0.1:CONG/nro
 set NRO_DIA_CHI=:14445
 go run ./cmd/nroserver
 ```
@@ -113,9 +136,9 @@ go test ./... -v
 Kiểm thử trong `internal/store` cần biến `NRO_TEST_DSN` (trỏ vào một CSDL
 PostgreSQL riêng để kiểm thử, ví dụ `nro_test`); không đặt thì các kiểm thử
 đó tự động bị bỏ qua (SKIP), các gói còn lại vẫn chạy và không phụ thuộc
-CSDL.
+CSDL. Nhưng **đặt sai cổng thì KHÔNG skip — nó đỏ hàng loạt** (xem mục 0).
 
 ```powershell
-$env:NRO_TEST_DSN = "postgres://postgres:nrodev123@127.0.0.1:5433/nro_test"
+$env:NRO_TEST_DSN = "postgres://postgres:nrodev123@127.0.0.1:CONG/nro_test"
 go test ./... -v
 ```

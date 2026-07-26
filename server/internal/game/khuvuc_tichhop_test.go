@@ -183,6 +183,15 @@ func (cl *clientGia) guiDanhQuaiThuCung(masterId int32) {
 	}
 }
 
+// guiHoiSinh gui goi len -16 than RONG (dac ta §3.1, Ke hoach 6 Task 13):
+// client xin hoi sinh sau khi chet.
+func (cl *clientGia) guiHoiSinh() {
+	cl.t.Helper()
+	if err := cl.f.WriteMessage(&protocol.Message{Command: lenhHoiSinh}); err != nil {
+		cl.t.Fatalf("gui goi -16 (xin hoi sinh) that bai: %v", err)
+	}
+}
+
 // doiGoiLenhKhongFatal giong het (cl *clientGia).doiGoiLenh (dongbo_tichhop_test.go)
 // ve tinh than — doc toi khi gap dung lenh mong doi, bo qua goi khac, co han
 // gio hanDoiGoi — nhung TRA LOI QUA ERROR thay vi goi t.Fatal, nen AN TOAN
@@ -1101,5 +1110,121 @@ func TestTichHop_DanhQuaiVuotTamVanPhatGoiChiMangFalse(t *testing.T) {
 	if !bytes.Equal(goi9.Data, muon) {
 		t.Fatalf("goi -9 (vuot tam) byte sai:\n got  = %v (%d byte)\n muon = %v (%d byte)",
 			goi9.Data, len(goi9.Data), muon, len(muon))
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Ke hoach 6 Task 13 — chet va hoi sinh nguoi choi qua mang THAT (dac ta
+// §3.4, §6.4).
+// ---------------------------------------------------------------------------
+
+// moKhuVucMotQuaiChetNguoiNgay tao MOT khu vuc (chi mapId 1 — du cho lang 0,
+// lang duy nhat cac test o day dung) voi DUNG MOT con quai dung tai diem
+// spawn (khoang cach 0 toi nguoi choi vua vao — chac chan trong CA HAI tam
+// AI, dac ta §5.2) va SatThuongCoBan RAT LON. Ghi truc tiep k.quai TRUOC khi
+// goi k.BatDau() la AN TOAN (goroutine vongLap CHUA duoc tao — dung ky thuat
+// da dung o moSoKhuVucKhongQuaiMacDinh, file nay, dong tren).
+//
+// Ly do can ham nay thay vi MoSoKhuVuc(): quai mac dinh (taoQuaiMacDinh,
+// SatThuongCoBan=5) can ~30 don (~40 giay o nhip tang 2 2000ms) moi ha het
+// 150 mau mac dinh cua lang 0 — qua cham cho muc dich test nay (kiem CHUOI
+// GOI khi nguoi choi chet, khong phai kiem tich luy sat thuong qua nhieu
+// don). SatThuong van bi kep boi §1.2 (khong vuot HpHienTai con lai) nen
+// KHONG lam mau am, chi vua du giet dung MOT don — kich hoat gan nhu ngay
+// (nhip 100ms) sau khi nguoi choi vao khu vuc.
+func moKhuVucMotQuaiChetNguoiNgay(t *testing.T) *SoKhuVuc {
+	t.Helper()
+	bd := TimBanDo(1)
+	k := MoKhuVuc(bd)
+	k.quai = []*Quai{{Id: 0, Hp: 100, HpToiDa: 100, X: bd.SpawnX, Y: bd.SpawnY, SatThuongCoBan: 1_000_000}}
+	k.BatDau()
+	return &SoKhuVuc{theoMap: map[int32]*KhuVuc{1: k}}
+}
+
+// TestTichHop_ChetVaHoiSinh la kich ban chinh cua Task 13 (dac ta §6.4): mot
+// client THAT bi quai AI ha CHET (nhan -17, than byte-chinh-xac 5 byte KHONG
+// co id — test bat buoc (a) cua brief) -> gui -16 xin hoi sinh -> nhan lai
+// -16 (rong) roi -30/15 (day mau/chakra, vi tri hien tai) — dung DUNG chuoi
+// cua dac ta §6.4. Chi mot nguoi choi (khong can nguoi thu hai): -8 (nguoi
+// khac thay chet) da duoc kiem BYTE-CHINH-XAC rieng o goichiendau_test.go
+// (test bat buoc (b)) va kiem SU KIEN "phat cho nguoi khac" rieng o
+// khuvuc_test.go (TestNhipTimAiQuaiHaChetPhatChuoiGoiChetChoCaHaiPhia) — dung
+// ca hai vi mot kich ban 2-nguoi qua mang that se can dieu khien AI nham
+// DUNG nguoi bi giet (khong the dam bao tat dinh, vi ca hai nguoi choi lang0
+// deu spawn CUNG mot diem), phuc tap khong can thiet cho phan con lai da
+// duoc hai test kia bao phu.
+func TestTichHop_ChetVaHoiSinh(t *testing.T) {
+	khoThat := moKhoThatChoTest(t)
+	ctx := context.Background()
+
+	soKhuVuc := moKhuVucMotQuaiChetNguoiNgay(t)
+	defer soKhuVuc.DungTatCa()
+
+	matKhau := "matkhau123"
+	tenTK := "chet" + hauToNganNgau(t)
+	taiKhoan := taoTaiKhoanCoMatKhau(t, tenTK, matKhau)
+	tenNV := "Chet" + hauToNganNgau(t)
+
+	cl := moPhienClientGiaKhuVuc(t, khoThat, soKhuVuc)
+	defer cl.dong()
+	dangNhapTaoNhanVatVaoTheGioi(t, cl, tenTK, matKhau, tenNV)
+
+	nv, err := khoThat.LayNhanVatTheoTaiKhoan(ctx, taiKhoan)
+	if err != nil {
+		t.Fatalf("LayNhanVatTheoTaiKhoan that bai: %v", err)
+	}
+	if nv.MapID != 1 {
+		t.Fatalf("nhan vat phai o mapId 1 (lang 0), nhan duoc %d", nv.MapID)
+	}
+
+	cl.baoVaoKhuVuc()
+
+	// --- Chet: -17 RIENG chinh chu, than DUNG 5 BYTE, KHONG co id (dac ta
+	// §7.2/§3.4 — test bat buoc (a) cua brief Task 13) ---
+	goi17 := cl.doiGoiLenh(t, -17)
+	if len(goi17.Data) != 5 {
+		t.Fatalf("goi -17 dai %d byte, dac ta doi hoi DUNG 5 (byte cPk + short x + short y, KHONG co id)", len(goi17.Data))
+	}
+	r := protocol.NewReader(goi17.Data)
+	cPk, errCPk := r.Byte()
+	if errCPk != nil || cPk != 0 {
+		t.Fatalf("cPk trong -17 = %d (loi %v), mong doi 0 (chua co he PK)", cPk, errCPk)
+	}
+	x, errX := r.Short()
+	y, errY := r.Short()
+	if errX != nil || errY != nil || x != int16(nv.ViTriX) || y != int16(nv.ViTriY) {
+		t.Fatalf("vi tri trong -17 = (%d,%d) (loi %v/%v), mong doi (%d,%d) (vi tri hien tai — chet KHONG doi vi tri)",
+			x, y, errX, errY, nv.ViTriX, nv.ViTriY)
+	}
+
+	// --- Hoi sinh: client gui -16 (rong) -> nhan lai -16 (rong) roi -30/15
+	// (day mau/chakra) — dac ta §6.4 ---
+	cl.guiHoiSinh()
+
+	goi16 := cl.doiGoiLenh(t, lenhHoiSinh)
+	if len(goi16.Data) != 0 {
+		t.Fatalf("goi -16 (xac nhan hoi sinh) dai %d byte, dac ta §3.4 doi hoi RONG", len(goi16.Data))
+	}
+
+	// -30 da bi tieu thu MOT LAN cho ME_INFO (-30/0) trong
+	// dangNhapTaoNhanVatVaoTheGioi -> lan toi goi -30 tren ket noi nay CHAC
+	// CHAN la -30/15 (ai do hoi sinh).
+	goi30 := cl.doiGoiLenh(t, -30)
+	r2 := protocol.NewReader(goi30.Data)
+	sub, errSub := r2.Byte()
+	if errSub != nil || sub != 15 {
+		t.Fatalf("byte lenh con cua -30 = %d (loi %v), mong doi 15 (ai do hoi sinh)", sub, errSub)
+	}
+	id, errID := r2.Int()
+	if errID != nil || id != int32(nv.ID) {
+		t.Fatalf("idNguoiChoi trong -30/15 = %d (loi %v), mong doi %d", id, errID, nv.ID)
+	}
+	hp, errHp := r2.Int()
+	if errHp != nil || hp != nv.HpToiDa {
+		t.Fatalf("hp trong -30/15 = %d (loi %v), mong doi %d (day mau)", hp, errHp, nv.HpToiDa)
+	}
+	mp, errMp := r2.Int()
+	if errMp != nil || mp != nv.ChakraToiDa {
+		t.Fatalf("mp trong -30/15 = %d (loi %v), mong doi %d (day chakra)", mp, errMp, nv.ChakraToiDa)
 	}
 }

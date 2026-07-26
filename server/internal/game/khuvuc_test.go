@@ -1,7 +1,9 @@
 package game
 
 import (
+	"bytes"
 	"testing"
+	"time"
 
 	"nroserver/internal/protocol"
 	"nroserver/internal/store"
@@ -188,6 +190,195 @@ func TestKhuVucChonChieuKhongThuocLangKhongDoiGi(t *testing.T) {
 func TestKhuVucChonChieuNguoiKhongTrongKhuVucKhongPanic(t *testing.T) {
 	k := MoKhuVuc(TimBanDo(1))
 	k.xuLy(suKienChonChieu{idNhanVat: 999, mauChieuId: 1})
+}
+
+// ---------------------------------------------------------------------------
+// Ke hoach 6 Task 13 — chet va hoi sinh nguoi choi (dac ta §3.4, §6.4).
+// nguoiChetHopLeMau/ chieu can chien tam 100 dung chung nhieu test o day —
+// khong tach helper rieng nhu chotkiem_test.go vi moi test can mot bo trang
+// thai khac nhau (co nguoi thu hai hay khong, quai o dau...).
+// ---------------------------------------------------------------------------
+
+// TestSuKienDanhQuaiNguoiDaChetKhongDuocDanh la TEST BAT BUOC cua brief Task
+// 13: nguoi choi HpHienTai<=0 (da chet) gui suKienDanhQuai (goi len 54) PHAI
+// bi tu choi HOAN TOAN — khong phat goi gi, khong tru mau quai. Day CUNG la
+// muc tieu cua kiem thu dot bien (brief buoc 5): bo chot nay o khuvuc.go ->
+// test nay phai do (xem bao cao Task 13 phan "Kiem thu dot bien").
+func TestSuKienDanhQuaiNguoiDaChetKhongDuocDanh(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	nvA := &store.NhanVat{ID: 1, Ten: "A", Lang: 0, ChakraHienTai: 100, HpHienTai: 0} // da chet
+	pA := &phienGiaKhuVuc{}
+	k.xuLy(suKienVao{nv: nvA, phien: pA})
+	// templateId=1: chieu can chien lang 0 (chieuthuc.go), tam 100 — moi kiem
+	// KHAC (chakra/hoi chieu/tam) deu HOP LE, de chung minh chi rieng "da
+	// chet" la ly do tu choi (loai tru kha nang bi chan boi ly do khac).
+	k.xuLy(suKienChonChieu{idNhanVat: nvA.ID, mauChieuId: 1})
+	pA.nhan = nil // don goi (neu co) tu hai buoc chuan bi tren
+
+	k.quai = []*Quai{{Id: 0, Hp: 100, HpToiDa: 150}} // Hp != HpToiDa: tranh nhanh luoi an toan §1.3 xen vao
+
+	k.xuLy(suKienDanhQuai{idNhanVat: nvA.ID, mobId: 0})
+
+	if len(pA.nhan) != 0 {
+		t.Fatalf("nguoi choi DA CHET (HpHienTai=0) van gui goi khi danh quai — nhan %d goi, mong doi 0 (test bat buoc cua brief Task 13)", len(pA.nhan))
+	}
+	if k.quai[0].Hp != 100 {
+		t.Fatalf("Hp quai = %d, mong doi VAN LA 100 — don danh cua nguoi da chet phai bi tu choi HOAN TOAN, khong duoc tru mau quai", k.quai[0].Hp)
+	}
+}
+
+// TestNhipTimAiQuaiHaChetPhatChuoiGoiChetChoCaHaiPhia: quai AI ha CHET mot
+// nguoi choi (SatThuongCoBan lon hon HpHienTai con lai, kep boi §1.2) PHAI
+// phat DUNG chuoi -11 roi -17 cho nan nhan (dac ta §6.3 roi §6.4 noi tiep
+// nhau), VA -10 roi -8 cho nguoi khac trong khu vuc — dung THU TU "dam sat
+// thuong truoc, bao chet sau".
+func TestNhipTimAiQuaiHaChetPhatChuoiGoiChetChoCaHaiPhia(t *testing.T) {
+	t0 := time.Date(2026, 7, 27, 12, 0, 0, 0, time.UTC)
+	luc := t0
+	k, pNanNhan := khuVucNhipTimGia(&luc)
+	k.nguoiTrong[1].nv.HpHienTai = 10 // it mau — mot don la chet
+	k.nguoiTrong[1].nv.ViTriX = 0
+	k.nguoiTrong[1].nv.ViTriY = 0
+
+	pNguoiKhac := &phienGiaKhuVuc{}
+	k.nguoiTrong[2] = &nguoiTrongKhuVuc{
+		nv:    &store.NhanVat{ID: 2, Ten: "NguoiKhac", HpHienTai: 100, ViTriX: 99_999}, // xa, ngoai CA HAI tam AI -> khong bao gio thanh muc tieu
+		phien: pNguoiKhac,
+	}
+
+	k.quai = []*Quai{{Id: 7, Hp: 30, HpToiDa: 30, X: 0, Y: 0, SatThuongCoBan: 999_999, LanHoiMauCuoi: t0}}
+
+	k.nhipTim()
+
+	if len(pNanNhan.nhan) != 2 {
+		t.Fatalf("nan nhan nhan %d goi, mong doi DUNG 2 (-11 roi -17)", len(pNanNhan.nhan))
+	}
+	if pNanNhan.nhan[0].Command != -11 {
+		t.Fatalf("goi dau cua nan nhan = %d, mong doi -11", pNanNhan.nhan[0].Command)
+	}
+	if pNanNhan.nhan[1].Command != -17 {
+		t.Fatalf("goi thu hai cua nan nhan = %d, mong doi -17 (chinh chu chet, PHAI den SAU -11)", pNanNhan.nhan[1].Command)
+	}
+	muon17 := []byte{0, 0, 0, 0, 0} // cPk=0, x=0, y=0
+	if !bytes.Equal(pNanNhan.nhan[1].Data, muon17) {
+		t.Fatalf("goi -17 byte sai:\n got  = %v\n muon = %v", pNanNhan.nhan[1].Data, muon17)
+	}
+
+	if len(pNguoiKhac.nhan) != 2 {
+		t.Fatalf("nguoi khac nhan %d goi, mong doi DUNG 2 (-10 roi -8)", len(pNguoiKhac.nhan))
+	}
+	if pNguoiKhac.nhan[0].Command != -10 {
+		t.Fatalf("goi dau cua nguoi khac = %d, mong doi -10", pNguoiKhac.nhan[0].Command)
+	}
+	if pNguoiKhac.nhan[1].Command != -8 {
+		t.Fatalf("goi thu hai cua nguoi khac = %d, mong doi -8 (ai do chet, PHAI den SAU -10)", pNguoiKhac.nhan[1].Command)
+	}
+	muon8 := []byte{
+		0, 0, 0, 1, // idNguoiChoi = 1 (int)
+		0,    // cPk = 0
+		0, 0, // x = 0
+		0, 0, // y = 0
+	}
+	if !bytes.Equal(pNguoiKhac.nhan[1].Data, muon8) {
+		t.Fatalf("goi -8 byte sai:\n got  = %v\n muon = %v", pNguoiKhac.nhan[1].Data, muon8)
+	}
+
+	if k.nguoiTrong[1].nv.HpHienTai != 0 {
+		t.Fatalf("HpHienTai nan nhan = %d, mong doi 0 (chet, kep boi §1.2 — khong am mau)", k.nguoiTrong[1].nv.HpHienTai)
+	}
+}
+
+// TestSuKienHoiSinhHoiDayMauChakraVaPhatGoi: nguoi choi DA CHET gui
+// suKienHoiSinh -> phai HOI DAY DU mau/chakra, dat lucHoiSinh = bayGio, va
+// phat DUNG chuoi -16 (rieng chinh chu) roi -30/15 (ca khu vuc) — dung dac ta
+// §6.4 "Máy chủ → chính chủ: -16 ... Máy chủ → cả khu vực: -30/15".
+func TestSuKienHoiSinhHoiDayMauChakraVaPhatGoi(t *testing.T) {
+	t0 := time.Date(2026, 7, 27, 12, 0, 0, 0, time.UTC)
+	k := MoKhuVuc(TimBanDo(1))
+	k.dongHo = func() time.Time { return t0 }
+
+	nvA := &store.NhanVat{
+		ID: 1, Ten: "A",
+		HpToiDa: 150, HpHienTai: 0, // da chet
+		ChakraToiDa: 100, ChakraHienTai: 0,
+		ViTriX: 200, ViTriY: 300,
+	}
+	pA := &phienGiaKhuVuc{}
+	k.xuLy(suKienVao{nv: nvA, phien: pA})
+
+	nvB := &store.NhanVat{ID: 2, Ten: "B", HpHienTai: 50}
+	pB := &phienGiaKhuVuc{}
+	k.xuLy(suKienVao{nv: nvB, phien: pB})
+	pA.nhan = nil // don goi -5 tu hai buoc vao khu vuc o tren
+	pB.nhan = nil
+
+	k.xuLy(suKienHoiSinh{idNhanVat: nvA.ID})
+
+	if nvA.HpHienTai != 150 {
+		t.Fatalf("HpHienTai sau hoi sinh = %d, mong doi 150 (day mau)", nvA.HpHienTai)
+	}
+	if nvA.ChakraHienTai != 100 {
+		t.Fatalf("ChakraHienTai sau hoi sinh = %d, mong doi 100 (day chakra)", nvA.ChakraHienTai)
+	}
+	if k.nguoiTrong[nvA.ID].lucHoiSinh != t0 {
+		t.Fatalf("lucHoiSinh = %v, mong doi %v (dac ta §1.7: chot bat tu 1500ms sau hoi sinh)", k.nguoiTrong[nvA.ID].lucHoiSinh, t0)
+	}
+
+	if len(pA.nhan) != 2 {
+		t.Fatalf("A (chinh chu) nhan %d goi, mong doi DUNG 2 (-16 roi -30/15)", len(pA.nhan))
+	}
+	if pA.nhan[0].Command != -16 || len(pA.nhan[0].Data) != 0 {
+		t.Fatalf("goi dau cua A = lenh %d (%d byte), mong doi -16 than RONG", pA.nhan[0].Command, len(pA.nhan[0].Data))
+	}
+	if pA.nhan[1].Command != -30 {
+		t.Fatalf("goi thu hai cua A = %d, mong doi -30 (ai do hoi sinh, dung lai ma lenh ME_INFO)", pA.nhan[1].Command)
+	}
+	muon30 := []byte{
+		15,         // byte lenh con = 15
+		0, 0, 0, 1, // idNguoiChoi = 1
+		0, 0, 0, 150, // hp = 150
+		0, 0, 0, 100, // mp = 100
+		0, 200, // x = 200
+		1, 44, // y = 300
+	}
+	if !bytes.Equal(pA.nhan[1].Data, muon30) {
+		t.Fatalf("goi -30/15 cua A byte sai:\n got  = %v\n muon = %v", pA.nhan[1].Data, muon30)
+	}
+
+	if len(pB.nhan) != 1 || pB.nhan[0].Command != -30 {
+		t.Fatalf("B (khac, dac ta doi 'ca khu vuc') phai nhan DUNG 1 goi -30/15, nhan %+v", pB.nhan)
+	}
+	if !bytes.Equal(pB.nhan[0].Data, muon30) {
+		t.Fatalf("goi -30/15 cua B (ca khu vuc) byte sai:\n got  = %v\n muon = %v", pB.nhan[0].Data, muon30)
+	}
+}
+
+// TestSuKienHoiSinhNguoiConSongBiBoQua: gui suKienHoiSinh cho nguoi CON SONG
+// (HpHienTai > 0) — phai la no-op HOAN TOAN (khong hoi mau oan, khong phat
+// goi gi). Bao ve chong client gui -16 khi khong can (bam nham/bam kep).
+func TestSuKienHoiSinhNguoiConSongBiBoQua(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	nvA := &store.NhanVat{ID: 1, HpHienTai: 50, HpToiDa: 150}
+	pA := &phienGiaKhuVuc{}
+	k.xuLy(suKienVao{nv: nvA, phien: pA})
+	pA.nhan = nil
+
+	k.xuLy(suKienHoiSinh{idNhanVat: nvA.ID})
+
+	if nvA.HpHienTai != 50 {
+		t.Fatalf("HpHienTai = %d, mong doi VAN LA 50 (dang song, khong duoc hoi sinh oan)", nvA.HpHienTai)
+	}
+	if len(pA.nhan) != 0 {
+		t.Fatalf("nhan %d goi khi dang song ma van gui suKienHoiSinh, mong doi 0 (im lang bo qua)", len(pA.nhan))
+	}
+}
+
+// TestSuKienHoiSinhNguoiKhongTrongKhuVucKhongPanic: idNhanVat khong co trong
+// khu vuc (chua vao, hoac da ra) -> phai la no-op an toan, khong panic —
+// dung tinh than voi TestKhuVucChonChieuNguoiKhongTrongKhuVucKhongPanic.
+func TestSuKienHoiSinhNguoiKhongTrongKhuVucKhongPanic(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	k.xuLy(suKienHoiSinh{idNhanVat: 999})
 }
 
 // khangDinhIdTrongGoi doc truong dau tien (playerId, writeInt) cua mot goi -5

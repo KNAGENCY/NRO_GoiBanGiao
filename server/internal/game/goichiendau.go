@@ -1,5 +1,6 @@
 // Package game — dung goi XUONG cua vong chien dau nguoi-vs-quai (Ke hoach 6
-// Task 6) VA nguoi-vs-nguoi (Task 10).
+// Task 6), nguoi-vs-nguoi (Task 10), quai-vs-nguoi (Task 9) VA chet/hoi sinh
+// nguoi choi (Task 13).
 //
 // Task 6 (giu nguyen, KHONG sua trong Task 10): 54 (nguoi danh quai), -9
 // (quai con song), -12 (quai chet), -13 (quai hoi sinh). Ca 4 gui CHO CA KHU
@@ -9,6 +10,11 @@
 // DANG DO DAI tuy truong docTiep, dung HAI HAM TACH RIENG goiDanhNguoiChoi
 // (dang don danh, 18 byte) va goiHoiMauNguoiChoi (dang hoi mau, 11 byte). Xem
 // chu thich hai ham do de biet ly do KHONG duoc gop thanh mot ham co co.
+//
+// Task 13 them: -17/-8 (chet, dac ta §3.4/§7 — hai loi THAT cua ban Java da
+// XAC MINH BANG CLIENT, xem chu thich goiNguoiChet/goiAiDoChet), -16 (hoi
+// sinh, cung ma lenh ca hai chieu), -30/15 (ai do hoi sinh, dung lai ma lenh
+// -30 cua ME_INFO voi byte lenh con khac).
 //
 // Ca file chi dung goi (byte-exact), KHONG tinh sat thuong/AI/kiem tra dieu
 // kien — do la viec cua cac Task/file khac (satthuong.go, chotkiem.go, quai.go).
@@ -230,4 +236,105 @@ func goiQuaiDanhTrungNguoiKhac(mobId byte, idNanNhan int32, hpConLai int32) *pro
 	w.Int(idNanNhan)
 	w.Int(hpConLai)
 	return protocol.NewMessage(lenhQuaiDanhTrungNguoiKhac, w)
+}
+
+// ---------------------------------------------------------------------------
+// Ke hoach 6 Task 13 them: CHET va HOI SINH nguoi choi (dac ta §3.4, §6.4).
+//
+// -17/-8 la HAI GOI DA DUOC XAC MINH BANG CLIENT (dac ta §7 — doc tan noi
+// Controller.cs, KHONG suy doan tu ban Java): ban Java dang chay co HAI LOI
+// THAT o day. Hai ham goiNguoiChet/goiAiDoChet duoi day CHONG CHEP dung hai
+// loi do, tung ham co chu thich rieng giai thich VI SAO.
+//
+// -16 dung CHUNG mot ma lenh CHO CA HAI CHIEU (dac ta §3.1 "goi len" va §3.4
+// "goi xuong" cung ghi -16, than deu RONG): client gui LEN -16 xin hoi sinh
+// (xuLyHoiSinh, login.go), may chu gui XUONG -16 RONG xac nhan (ham
+// goiHoiSinhChinhChu duoi day) — hai chieu khac nhau nhung TRUNG so hieu lenh
+// la binh thuong o giao thuc nay (khong phai loi).
+//
+// -30/15 DUNG LAI ma lenh -30 (lenhMeInfo, khai bao o thegioi.go — cung file
+// voi goiMeInfo/-30/0) VOI BYTE LENH CON KHAC (15 thay vi 0) — giong cach
+// -28 co nhieu lenh con (2/6/7/8/13). KHONG dinh nghia hang so lenh moi cho
+// -30, chi them subAiDoHoiSinh.
+// ---------------------------------------------------------------------------
+
+const (
+	lenhNguoiChet int8 = -17 // Chinh chu da chet — RIENG chinh chu, KHONG co truong id (dac ta §7.2)
+	lenhAiDoChet  int8 = -8  // Ai do da chet — NGUOI KHAC trong khu vuc, id la INT (dac ta §7.1)
+	lenhHoiSinh   int8 = -16 // Hoi sinh — CUNG ma lenh ca hai chieu, than LUON rong
+
+	subAiDoHoiSinh byte = 15 // byte lenh con cua -30 bao "ai do vua hoi sinh" (dac ta §3.4)
+)
+
+// goiNguoiChet dung goi XUONG -17: bao RIENG chinh chu vua chet. Than gui
+// DUNG 5 BYTE (byte cPk, short x, short y) — TUYET DOI KHONG co truong id
+// (dac ta §7.2/§3.4, TEST BAT BUOC (a) cua brief Task 13).
+//
+// ⚠️ Goi nay CHI gui cho chinh chu (client dung thang Char.myCharz(), khong
+// can tra id trong danh sach nguoi trong map — Controller.cs:4533-4547) nen
+// KHONG CO ly do gi de ghi id ca. Ban Java (services/Service.java:1147) ghi
+// `writeByte((int) pl.id)` VAO DUNG O `cPk` — khong lam lech tong do dai (van
+// 1 byte) nhung GHI SAI GIA TRI cPk cua nguoi vua chet. Day chinh la kieu loi
+// "dat dung o, sai y nghia" ma dac ta canh bao o §3.3 diem ve -13 (sys/
+// levelBoss) — TUYET DOI KHONG chep. cPk truyen 0 khi chua co he PK (KH6
+// chua co, xem dac ta §0 "Ngoai KH6": "PvP co luat -> KH9").
+//
+// x/y: dac ta ghi ro truong "power" (long, cPower) la TUY CHON o client
+// (boc try/catch, Controller.cs:4536-4541) — ban Go BO HAN, khop hanh vi ban
+// Java (dong comment "// msg.writer().writeLong(-1); send Power" bi comment
+// o Service.java:1150, dac ta §7.2).
+func goiNguoiChet(cPk byte, x, y int16) *protocol.Message {
+	w := protocol.NewWriter()
+	w.Byte(cPk)
+	w.Short(x)
+	w.Short(y)
+	return protocol.NewMessage(lenhNguoiChet, w)
+}
+
+// goiAiDoChet dung goi XUONG -8: bao NHUNG NGUOI KHAC trong khu vuc mot
+// nguoi choi vua chet. Than gui DUNG 9 BYTE, TRUONG DAU la INT 4 byte — dac
+// ta §7.1/§3.4, TEST BAT BUOC (b) cua brief Task 13.
+//
+// ⚠️ Client doc id BANG readInt() (Controller.cs:4548-4554, dac ta §7.1) —
+// ban Java co MOT CHO ghi SHORT (services/Service.java:1157) la LOI THAT
+// dang chay: client tra id hut (readInt doc ca 4 byte, lay nham 2 byte cPk/x
+// tiep theo lam mot phan cua id) -> findCharInMap tra null -> CA GOI BI BO
+// QUA. Hau qua that: nguoi choi khac KHONG THAY ai vua chet cho toi khi ho
+// roi khu vuc roi vao lai (luc do Zone.java lai phat dung ban writeInt).
+// TUYET DOI KHONG duoc chep loi nay — id PHAI la int (4 byte).
+func goiAiDoChet(idNguoiChoi int32, cPk byte, x, y int16) *protocol.Message {
+	w := protocol.NewWriter()
+	w.Int(idNguoiChoi)
+	w.Byte(cPk)
+	w.Short(x)
+	w.Short(y)
+	return protocol.NewMessage(lenhAiDoChet, w)
+}
+
+// goiHoiSinhChinhChu dung goi XUONG -16: xac nhan RIENG chinh chu vua hoi
+// sinh thanh cong. Than RONG (dac ta §3.4) — CUNG ma lenh voi goi LEN -16
+// (xin hoi sinh, cung rong, xem xuLyHoiSinh trong login.go) nhung o day la
+// chieu MAY CHU -> CLIENT.
+func goiHoiSinhChinhChu() *protocol.Message {
+	return protocol.NewMessage(lenhHoiSinh, protocol.NewWriter())
+}
+
+// goiAiDoHoiSinh dung goi XUONG -30/15: bao CA KHU VUC (ke ca chinh nguoi
+// vua hoi sinh — dac ta §3.4 cot "Gui cho": "Ca khu vuc", cung tinh than voi
+// 54/-9/-12 o Task 6: nguoi gay ra su kien cung nhan lai) mot nguoi choi vua
+// hoi sinh xong, kem mau/chakra DAY DU va vi tri hien tai.
+//
+// Dung LAI ma lenh -30 (lenhMeInfo, thegioi.go) voi byte lenh con 15 thay vi
+// 0 — dac ta khong danh rieng ma lenh nao khac cho su kien nay, giong cach
+// -28 da co nhieu lenh con. Truong dau tien LUON la subAiDoHoiSinh (15) —
+// client phan biet ME_INFO (0) va "ai do hoi sinh" (15) bang chinh byte nay.
+func goiAiDoHoiSinh(idNguoiChoi int32, hp, mp int32, x, y int16) *protocol.Message {
+	w := protocol.NewWriter()
+	w.Byte(subAiDoHoiSinh)
+	w.Int(idNguoiChoi)
+	w.Int(hp)
+	w.Int(mp)
+	w.Short(x)
+	w.Short(y)
+	return protocol.NewMessage(lenhMeInfo, w)
 }

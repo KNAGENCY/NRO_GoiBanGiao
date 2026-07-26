@@ -506,7 +506,11 @@ func TestSuKienDanhQuaiBatTuTrongKhoangSauHoiSinh(t *testing.T) {
 	k := MoKhuVuc(TimBanDo(1))
 	k.dongHo = func() time.Time { return luc }
 
-	nvA := &store.NhanVat{ID: 1, Ten: "A", Lang: 0, ChakraHienTai: 100}
+	// HpHienTai: 100 (con song) — Ke hoach 6 Task 13 them chot "nguoi da chet
+	// (HpHienTai<=0) khong danh duoc" vao case suKienDanhQuai (khuvuc.go); bo
+	// truong nay se mac dinh HpHienTai=0 (zero value) va bi CHOT DO chan
+	// TRUOC ca kiem dang test o day, lam sai lech y nghia test.
+	nvA := &store.NhanVat{ID: 1, Ten: "A", Lang: 0, ChakraHienTai: 100, HpHienTai: 100}
 	pA := &phienGiaKhuVuc{}
 	k.xuLy(suKienVao{nv: nvA, phien: pA})
 	// templateId=1 = slot can chien cua lang 0 (chieuthuc.go): SkillId=1,
@@ -636,7 +640,11 @@ func TestChonMucTieuKhongAiTraNilVaKhongTieuNhip(t *testing.T) {
 func TestSuKienDanhQuaiNapVaoDanhSachDaTungDanhKhiTrungDon(t *testing.T) {
 	k := MoKhuVuc(TimBanDo(1))
 
-	nvA := &store.NhanVat{ID: 1, Ten: "A", Lang: 0, ChakraHienTai: 100}
+	// HpHienTai: 100 (con song) — Ke hoach 6 Task 13 them chot "nguoi da chet
+	// (HpHienTai<=0) khong danh duoc" vao case suKienDanhQuai (khuvuc.go); bo
+	// truong nay se mac dinh HpHienTai=0 (zero value) va bi CHOT DO chan
+	// TRUOC ca kiem dang test o day, lam sai lech y nghia test.
+	nvA := &store.NhanVat{ID: 1, Ten: "A", Lang: 0, ChakraHienTai: 100, HpHienTai: 100}
 	pA := &phienGiaKhuVuc{}
 	k.xuLy(suKienVao{nv: nvA, phien: pA})
 	k.xuLy(suKienChonChieu{idNhanVat: nvA.ID, mauChieuId: 1}) // can chien, tam 100
@@ -660,7 +668,11 @@ func TestSuKienDanhQuaiNapVaoDanhSachDaTungDanhKhiTrungDon(t *testing.T) {
 func TestSuKienDanhQuaiXoaDanhSachDaTungDanhKhiQuaiChet(t *testing.T) {
 	k := MoKhuVuc(TimBanDo(1))
 
-	nvA := &store.NhanVat{ID: 1, Ten: "A", Lang: 0, ChakraHienTai: 100}
+	// HpHienTai: 100 (con song) — Ke hoach 6 Task 13 them chot "nguoi da chet
+	// (HpHienTai<=0) khong danh duoc" vao case suKienDanhQuai (khuvuc.go); bo
+	// truong nay se mac dinh HpHienTai=0 (zero value) va bi CHOT DO chan
+	// TRUOC ca kiem dang test o day, lam sai lech y nghia test.
+	nvA := &store.NhanVat{ID: 1, Ten: "A", Lang: 0, ChakraHienTai: 100, HpHienTai: 100}
 	pA := &phienGiaKhuVuc{}
 	k.xuLy(suKienVao{nv: nvA, phien: pA})
 	k.xuLy(suKienChonChieu{idNhanVat: nvA.ID, mauChieuId: 1})

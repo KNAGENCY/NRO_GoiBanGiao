@@ -278,3 +278,99 @@ func TestGoiQuaiDanhTrungNguoiKhacByteDung(t *testing.T) {
 			m.Data, len(m.Data), muon, len(muon))
 	}
 }
+
+// ---------------------------------------------------------------------------
+// Ke hoach 6 Task 13 — goi CHET va HOI SINH nguoi choi (dac ta §3.4, §6.4).
+// -17/-8 la HAI TEST BAT BUOC cua brief (danh dau (a)/(b) trong chu thich
+// tung ham) — CHONG CHEP dung hai loi THAT cua ban Java da xac minh bang
+// client (dac ta §7).
+// ---------------------------------------------------------------------------
+
+// TestGoiNguoiChetByteDung la TEST BAT BUOC (a) cua brief Task 13: than goi
+// -17 phai DUNG 5 BYTE (byte cPk + short x + short y) — TUYET DOI KHONG co
+// truong id. Ban Java (services/Service.java:1147) nhet id nhan vat vao DUNG
+// o cPk la SAI (dac ta §7.2) — khong lam lech DO DAI (van 5 byte) nen mot
+// test chi kiem do dai la CHUA DU; test nay con kiem GIA TRI tung truong de
+// bat duoc ca loi "dat dung o, sai y nghia".
+func TestGoiNguoiChetByteDung(t *testing.T) {
+	m := goiNguoiChet(0, 100, 384)
+
+	if m.Command != -17 {
+		t.Fatalf("Command = %d, muon -17", m.Command)
+	}
+	if len(m.Data) != 5 {
+		t.Fatalf("goi -17 dai %d byte, dac ta §7.2/§3.4 doi hoi DUNG 5 (byte cPk + short x + short y, KHONG co id)", len(m.Data))
+	}
+	muon := []byte{
+		0,      // cPk = 0 (chua co he PK)
+		0, 100, // x = 100
+		1, 128, // y = 384 (0x0180)
+	}
+	if !bytes.Equal(m.Data, muon) {
+		t.Fatalf("goi -17 byte sai:\n got  = %v (%d byte)\n muon = %v (%d byte)",
+			m.Data, len(m.Data), muon, len(muon))
+	}
+}
+
+// TestGoiAiDoChetByteDung la TEST BAT BUOC (b) cua brief Task 13: than goi -8
+// phai DUNG 9 BYTE, TRUONG DAU la INT (4 byte). Ban Java co mot cho ghi SHORT
+// (services/Service.java:1157) la LOI THAT dang chay — client doc bang
+// readInt() (dac ta §7.1) nen tra id hut, ca goi bi bo qua, nguoi choi khac
+// khong thay ai vua chet. Dung id > 65535 (khong vua trong 2 byte) de neu lo
+// quay ve short thi gia tri doc duoc SE SAI HOAN TOAN, khong chi lech byte.
+func TestGoiAiDoChetByteDung(t *testing.T) {
+	m := goiAiDoChet(70000, 0, 100, 384)
+
+	if m.Command != -8 {
+		t.Fatalf("Command = %d, muon -8", m.Command)
+	}
+	if len(m.Data) != 9 {
+		t.Fatalf("goi -8 dai %d byte, dac ta §7.1/§3.4 doi hoi DUNG 9 (int idNguoiChoi + byte cPk + short x + short y)", len(m.Data))
+	}
+	muon := []byte{
+		0, 1, 17, 112, // idNguoiChoi = 70000 (int32 BE — CHI dung neu la INT thuc su)
+		0,      // cPk = 0
+		0, 100, // x = 100
+		1, 128, // y = 384
+	}
+	if !bytes.Equal(m.Data, muon) {
+		t.Fatalf("goi -8 byte sai:\n got  = %v (%d byte)\n muon = %v (%d byte)",
+			m.Data, len(m.Data), muon, len(muon))
+	}
+}
+
+// TestGoiHoiSinhChinhChuByteDung: goi -16 XUONG (xac nhan chinh chu vua hoi
+// sinh) phai co than RONG (dac ta §3.4).
+func TestGoiHoiSinhChinhChuByteDung(t *testing.T) {
+	m := goiHoiSinhChinhChu()
+
+	if m.Command != -16 {
+		t.Fatalf("Command = %d, muon -16", m.Command)
+	}
+	if len(m.Data) != 0 {
+		t.Fatalf("goi -16 dai %d byte, dac ta §3.4 doi hoi RONG", len(m.Data))
+	}
+}
+
+// TestGoiAiDoHoiSinhByteDung: goi -30/15 (dac ta §3.4) — dung LAI ma lenh -30
+// cua ME_INFO (thegioi.go) voi byte lenh con 15. Kiem CA byte lenh con LAN 5
+// truong sau do, dung thu tu.
+func TestGoiAiDoHoiSinhByteDung(t *testing.T) {
+	m := goiAiDoHoiSinh(1001, 150, 100, 200, 300)
+
+	if m.Command != -30 {
+		t.Fatalf("Command = %d, muon -30 (dung lai ma lenh cua ME_INFO, khac byte lenh con)", m.Command)
+	}
+	muon := []byte{
+		15,           // byte lenh con = 15 (ai do hoi sinh)
+		0, 0, 3, 233, // idNguoiChoi = 1001
+		0, 0, 0, 150, // hp = 150
+		0, 0, 0, 100, // mp = 100
+		0, 200, // x = 200
+		1, 44, // y = 300 (0x012C)
+	}
+	if !bytes.Equal(m.Data, muon) {
+		t.Fatalf("goi -30/15 byte sai:\n got  = %v (%d byte)\n muon = %v (%d byte)",
+			m.Data, len(m.Data), muon, len(muon))
+	}
+}

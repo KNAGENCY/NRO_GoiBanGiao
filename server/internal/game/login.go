@@ -131,6 +131,8 @@ func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 		return b.xuLyChonChieu(m)
 	case lenhNguoiDanhQuai: // 54 — client gui danh quai (dac ta §3.1)
 		return b.xuLyDanhQuai(m)
+	case lenhHoiSinh: // -16 — client xin hoi sinh (dac ta §3.1, Ke hoach 6 Task 13)
+		return b.xuLyHoiSinh()
 	default:
 		// Lenh chua ho tro: bo qua, khong ngat ket noi — client gui vai goi
 		// phu ngay sau khi noi (vi du setClientType), day la chuyen BINH
@@ -358,6 +360,20 @@ func (b *BoXuLy) xuLyDanhQuai(m *protocol.Message) error {
 		}
 	}
 	b.khuVuc.Gui(suKienDanhQuai{idNhanVat: b.nhanVat.ID, mobId: mobIdRaw})
+	return nil
+}
+
+// xuLyHoiSinh xu ly goi LEN -16 (dac ta §3.1, Ke hoach 6 Task 13): client xin
+// hoi sinh sau khi chet. Than RONG — khong co gi de doc, khac han xuLyDanhQuai
+// (goi 54 co than). Luong phien CHI gui su kien vao hop thu actor (ky luat
+// actor §1.6 + brief Task 13) — actor moi la noi quyet dinh co dang THAT SU
+// chet hay khong + hoi mau/chakra day du + dat lucHoiSinh + phat goi
+// -16/-30-15 (xem case suKienHoiSinh, khuvuc.go).
+func (b *BoXuLy) xuLyHoiSinh() error {
+	if b.khuVuc == nil || b.nhanVat == nil {
+		return nil
+	}
+	b.khuVuc.Gui(suKienHoiSinh{idNhanVat: b.nhanVat.ID})
 	return nil
 }
 

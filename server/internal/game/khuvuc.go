@@ -85,6 +85,20 @@ type nguoiTrongKhuVuc struct {
 	// dung chieu nao) khien bayGio.Sub(lanDanhCuoi) ra mot khoang RAT LON, nen
 	// kiem hoi chieu tu nhien CHO PHEP ngay lan dau — khong can if/else rieng.
 	lanDanhCuoi time.Time
+
+	// lucHoiSinh la thoi diem nguoi choi nay HOI SINH GAN NHAT (Ke hoach 6
+	// Task 13, dac ta §1.7/§3.4/§6.4) — dat trong case suKienHoiSinh duoi
+	// day. CUNG CO CHE voi Quai.LucHoiSinh (quai.go, Task 8): CHI luong
+	// vongLap cua actor duoc doc/ghi (dac ta §1.6), va dung lam nguon cho
+	// ViTriCoMau.LucHoiSinh (chotkiem.go) khi Task 11 (PvP) can kiem bat tu
+	// 1500ms cho MUC TIEU la nguoi choi — nguoiTrongKhuVuc gio da du bo
+	// truong (X/Y qua nv.ViTriX/Y, HpHienTai qua nv.HpHienTai, LucHoiSinh qua
+	// truong nay) de dung lam nguon ViTriCoMau, dung y brief Task 13. Zero
+	// value (nguoi choi CHUA TUNG hoi sinh lan nao tu luc dang nhap) khien
+	// bayGio.Sub(zero) ra khoang thoi gian RAT LON -> kiem bat tu tu nhien
+	// CHO PHEP ngay tu dau, dung hanh vi mong doi — GIONG HET ly do zero
+	// value cua Quai.LucHoiSinh (quai.go) an toan.
+	lucHoiSinh time.Time
 }
 
 // suKienKhuVuc la kieu su kien actor xu ly qua hop thu. Ke hoach 5 Task 5 se
@@ -137,6 +151,17 @@ type suKienChonChieu struct {
 type suKienDanhQuai struct {
 	idNhanVat int64
 	mobId     byte
+}
+
+// suKienHoiSinh bao actor mot nhan vat vua gui goi len -16 (dac ta §3.1, Ke
+// hoach 6 Task 13): xin hoi sinh sau khi chet. Luong phien (xuLyHoiSinh,
+// login.go) CHI gui su kien nay — actor moi la noi kiem "dang THAT SU chet"
+// + hoi mau/chakra day du + dat lucHoiSinh + phat goi -16/-30-15 (dung ky
+// luat actor §1.6, xem case suKienHoiSinh duoi day). Dung ten truong
+// idNhanVat giong het cac su kien khac trong file nay (suKienDiChuyen,
+// suKienRa, suKienDanhQuai) de nhat quan.
+type suKienHoiSinh struct {
+	idNhanVat int64
 }
 
 // heQuaiChuaXacDinh la gia tri he nguyen to gan cho MOI con quai khi tinh sat
@@ -361,6 +386,19 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 			return
 		}
 
+		// Ke hoach 6 Task 13 (test bat buoc cua brief): NGUOI DA CHET khong
+		// duoc danh. Chu dinh dat CHOT NAY o day (truoc ca KiemDanhHopLe),
+		// khong nhet vao chotkiem.go: KiemDanhHopLe (Task 3) kiem MUC TIEU
+		// (mucTieu.HpHienTai — kiem #4), con day la kiem NGUOI DANH — hai
+		// huong khac nhau, brief Task 13 CHI liet ke goichiendau.go/khuvuc.go
+		// la file phai sua, KHONG co chotkiem.go. Ban Java (Controller.java
+		// case 54) KHONG co chot nay (chi -20 nhat do co !player.isDie()) —
+		// day la mot luat choi RO RANG can them, khong phai chep nguyen ban
+		// goc: nguoi choi dang cho hoi sinh khong the "tranh thu" danh quai.
+		if nguoi.nv.HpHienTai <= 0 {
+			return // im lang bo qua, giong het cach cac kiem khac cua case nay tu choi
+		}
+
 		// Tim con quai co Id == sk.mobId. mobId=255 (thu cung, xem chu thich
 		// suKienDanhQuai o tren) tu nhien khong khop quai nao -> mucTieu==nil
 		// -> bo qua, dung nhu suKienDiChuyen bo qua khi khong tim thay nguoi.
@@ -489,6 +527,39 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 			// hieuUngId=255 (=-1): KH6 chua co hieu ung trang thai (dac ta §0).
 			k.phatChoCaKhuVuc(goiQuaiConSong(mucTieu.Id, mucTieu.Hp, satThuong, chiMang, 255))
 		}
+
+	case suKienHoiSinh:
+		// Ke hoach 6 Task 13 (dac ta §3.4/§6.4): client gui -16 xin hoi sinh
+		// sau khi chet.
+		nguoi, co := k.nguoiTrong[sk.idNhanVat]
+		if !co {
+			return
+		}
+		if nguoi.nv.HpHienTai > 0 {
+			// CHUA chet (hoac da hoi sinh roi) -> bo qua im lang, tranh hoi
+			// sinh "khong" mot nguoi dang song. Day CUNG la lop chan chong
+			// gui -16 hai lan lien tiep (client bam nut kep, hoac goi den
+			// tre): lan dau xu ly xong HpHienTai da > 0 nen lan hai tu nhien
+			// roi vao nhanh nay, khong can them bo dem thoi gian rieng.
+			return
+		}
+
+		bayGio := k.dongHo() // Task 8/13: dong ho tiem duoc, KHONG goi time.Now() thang.
+		nguoi.nv.HpHienTai = nguoi.nv.HpToiDa
+		nguoi.nv.ChakraHienTai = nguoi.nv.ChakraToiDa
+		// Chot bat tu 1500ms sau hoi sinh (dac ta §1.7) — Task 11 (PvP) se
+		// doc truong nay qua ViTriCoMau.LucHoiSinh khi mucTieu la nguoi choi.
+		nguoi.lucHoiSinh = bayGio
+
+		// -16 RIENG chinh chu TRUOC, roi -30/15 CA KHU VUC — dung thu tu
+		// chuoi cua dac ta §6.4.
+		if err := nguoi.phien.Gui(goiHoiSinhChinhChu()); err != nil {
+			slog.Warn("gui -16 (xac nhan hoi sinh) that bai", "id", sk.idNhanVat, "loi", err)
+		}
+		k.phatChoCaKhuVuc(goiAiDoHoiSinh(
+			int32(nguoi.nv.ID), nguoi.nv.HpHienTai, nguoi.nv.ChakraHienTai,
+			int16(nguoi.nv.ViTriX), int16(nguoi.nv.ViTriY),
+		))
 
 	case suKienXinDanhSachQuai:
 		// SAO GIA TRI tung con quai — KHONG duoc tra thang k.quai (mang con
@@ -706,6 +777,40 @@ func (k *KhuVuc) aiQuai(q *Quai, nguoi []*nguoiTrongKhuVuc, bayGio time.Time) {
 	// "Gui cho": "Nguoi khac trong khu vuc"). phatChoNguoiKhac da co san (Ke
 	// hoach 5), dung dung nghia: loai tru id nan nhan.
 	k.phatChoNguoiKhac(mucTieu.nv.ID, goiQuaiDanhTrungNguoiKhac(q.Id, int32(mucTieu.nv.ID), mucTieu.nv.HpHienTai))
+
+	// Ke hoach 6 Task 13 (dac ta §3.4/§6.4): don nay VUA HA CHET nan nhan
+	// (HpHienTai vua xuong <= 0 o kep tren) -> phat THEM chuoi goi "chet"
+	// NGAY SAU -11/-10 (dam sat thuong truoc, roi moi bao chet — dung thu tu
+	// §6.4). chonMucTieu (quai.go) da LOC san nguoi HpHienTai<=0 ra khoi CA
+	// HAI tang AI (dac ta §5.4.3) nen KHONG bao gio quai nay (hay bat ky
+	// quai nao khac cung tick) danh trung mot nguoi DA CHET tu truoc — su
+	// kien "vua chet" o day CHAC CHAN la lan dau tien, khong can chot chong
+	// phat lai.
+	if mucTieu.nv.HpHienTai <= 0 {
+		k.xuLyNguoiChoiChet(mucTieu)
+	}
+}
+
+// xuLyNguoiChoiChet phat chuoi goi bao CHET cua mot nguoi choi (Ke hoach 6
+// Task 13, dac ta §3.4/§6.4): -17 RIENG chinh chu, -8 cho NHUNG NGUOI KHAC
+// trong khu vuc. GOI KHI nguoi.nv.HpHienTai VUA xuong <= 0 — ham nay KHONG
+// tu kiem lai dieu kien do (nguoi goi, hien tai la aiQuai, chiu trach nhiem
+// dam bao chi goi dung mot lan tai thoi diem chuyen tu song sang chet).
+//
+// cPk LUON 0: KH6 chua co he PK (dac ta §0 "Ngoai KH6": "PvP co luat -> KH9"),
+// dung tinh than voi cPk=0 cua goiMeInfo (thegioi.go). x/y la VI TRI HIEN TAI
+// — Java (PlayerService.hoiSinh) KHONG doi vi tri nguoi choi luc chet hay
+// luc hoi sinh, chi phat hoat anh chet/song tai cho (dac ta khong nhac toi
+// bat ky dich chuyen nao), nen ham nay doc THANG nv.ViTriX/Y, khong tinh
+// toan gi them.
+func (k *KhuVuc) xuLyNguoiChoiChet(nguoi *nguoiTrongKhuVuc) {
+	x := int16(nguoi.nv.ViTriX)
+	y := int16(nguoi.nv.ViTriY)
+
+	if err := nguoi.phien.Gui(goiNguoiChet(0, x, y)); err != nil {
+		slog.Warn("gui -17 (ban da chet) that bai", "id", nguoi.nv.ID, "loi", err)
+	}
+	k.phatChoNguoiKhac(nguoi.nv.ID, goiAiDoChet(int32(nguoi.nv.ID), 0, x, y))
 }
 
 // Gui day mot su kien vao hop thu cua actor. KHONG CHAN (non-blocking): neu

@@ -1,17 +1,29 @@
-// Package game — dung 4 goi XUONG cua vong "nguoi danh quai" (Ke hoach 6 Task
-// 6): 54 (nguoi danh quai), -9 (quai con song), -12 (quai chet), -13 (quai hoi
-// sinh). Ca 4 gui CHO CA KHU VUC (dac ta §3.3). Chi dung gio (byte-exact),
-// KHONG tinh sat thuong/AI — do la viec cua Task 7-9.
+// Package game — dung goi XUONG cua vong chien dau nguoi-vs-quai (Ke hoach 6
+// Task 6) VA nguoi-vs-nguoi (Task 10).
+//
+// Task 6 (giu nguyen, KHONG sua trong Task 10): 54 (nguoi danh quai), -9
+// (quai con song), -12 (quai chet), -13 (quai hoi sinh). Ca 4 gui CHO CA KHU
+// VUC (dac ta §3.3).
+//
+// Task 10 them: -60 (nguoi danh nguoi, Nhom F, dac ta §2.1/§3.3) — CO HAI
+// DANG DO DAI tuy truong docTiep, dung HAI HAM TACH RIENG goiDanhNguoiChoi
+// (dang don danh, 18 byte) va goiHoiMauNguoiChoi (dang hoi mau, 11 byte). Xem
+// chu thich hai ham do de biet ly do KHONG duoc gop thanh mot ham co co.
+//
+// Ca file chi dung goi (byte-exact), KHONG tinh sat thuong/AI/kiem tra dieu
+// kien — do la viec cua cac Task/file khac (satthuong.go, chotkiem.go, quai.go).
 package game
 
 import "nroserver/internal/protocol"
 
-// Bon ma lenh cua nhom "nguoi danh quai", dac ta §3.3.
+// Nam ma lenh dung trong file nay: bon ma nhom "nguoi danh quai" (Task 6, dac
+// ta §3.3) va mot ma nhom "nguoi danh nguoi" (Task 10, dac ta §2.1/§3.3).
 const (
-	lenhNguoiDanhQuai int8 = 54  // Nguoi danh quai — CHU Y: khong co truong dem
-	lenhQuaiConSong   int8 = -9  // Quai con song sau don danh
-	lenhQuaiChet      int8 = -12 // Quai chet, kem danh sach do roi (KH6 luon rong)
-	lenhQuaiHoiSinh   int8 = -13 // Quai hoi sinh
+	lenhNguoiDanhQuai  int8 = 54  // Nguoi danh quai — CHU Y: khong co truong dem
+	lenhQuaiConSong    int8 = -9  // Quai con song sau don danh
+	lenhQuaiChet       int8 = -12 // Quai chet, kem danh sach do roi (KH6 luon rong)
+	lenhQuaiHoiSinh    int8 = -13 // Quai hoi sinh
+	lenhNguoiDanhNguoi int8 = -60 // Nguoi danh nguoi — CO HAI DANG DO DAI, xem goiDanhNguoiChoi/goiHoiMauNguoiChoi
 )
 
 // DoRoi la mot vat pham roi ra khi quai chet (dac ta §3.3, truong lap trong
@@ -114,4 +126,64 @@ func goiQuaiHoiSinh(mobId byte, hp int32) *protocol.Message {
 	w.Byte(0) // levelBoss — LUON 0, xem chu thich ham
 	w.Int(hp)
 	return protocol.NewMessage(lenhQuaiHoiSinh, w)
+}
+
+// goiDanhNguoiChoi dung goi XUONG -60 DANG "DON DANH" (docTiep=1, 18 byte
+// than), dac ta §2.1/§3.3, Ke hoach 6 Task 10: nguoi choi gay sat thuong len
+// nguoi choi khac.
+//
+// ⚠️ HAM NAY VA goiHoiMauNguoiChoi BAT BUOC TACH HAN THANH HAI HAM, KHONG
+// DUOC gop lai thanh MOT HAM CO THAM SO CO (vi du mot tham so "docTiep byte"
+// hay "coDanhTiep bool" quyet dinh co ghi tiep 4 truong cuoi hay khong). Ly
+// do (dac ta §2.1, nhac lai §2.0):
+//
+//	Neu gop thanh mot ham co co, nguoi sua code sau nay RAT DE vo tinh ghi ca
+//	4 truong loaiChieu/satThuong/daChet/chiMang vao NHANH HOI MAU (vi du: sua
+//	default cua tham so co, hoac quen nhanh if/else khi them truong moi). Day
+//	la loi "ghi thua" cua bang §2.0 dac ta — tuc la IM LANG TUYET DOI: client
+//	vut byte du ngay luc msg.cleanup(), KHONG loi, KHONG trieu chung, chay thu
+//	trong game KHONG PHAT HIEN DUOC — chi lo ra khi co nguoi ngoi so byte tay.
+//	Tach thanh hai ham doc lap (khong dung chung mot ham noi bo co co) thi loi
+//	nay KHONG THE TON TAI: goiHoiMauNguoiChoi don gian KHONG CO cau lenh nao
+//	de ghi 4 truong do, du nguoi sua sau co can trong hay khong.
+//
+// soMucTieu va loaiChieu la HANG SO trong pham vi KH6 (dac ta §3.3: soMucTieu
+// "luon ghi 1" ngay trong ban Java goc — client ho tro nhieu muc tieu qua ten
+// bien nhung KH6 chi danh 1 nguoi/luot; loaiChieu "= 0" cung la hang so ngay
+// trong ban Java goc, chua ro y nghia nao khac) — vi vay KHONG lam tham so
+// ham, tranh nguy co nguoi goi truyen nham gia tri.
+func goiDanhNguoiChoi(idNguoiDanh int32, skillId byte, idNguoiTrung int32, satThuong int32, daChet bool, chiMang bool) *protocol.Message {
+	w := protocol.NewWriter()
+	w.Int(idNguoiDanh)
+	w.Byte(skillId)
+	w.Byte(1) // soMucTieu — LUON 1 o KH6, xem chu thich ham
+	w.Int(idNguoiTrung)
+	w.Byte(1) // docTiep = 1 -> danh dau day la DANG DON DANH (18 byte), dac ta §2.1
+	w.Byte(0) // loaiChieu — hang so 0, xem chu thich ham
+	w.Int(satThuong)
+	w.Bool(daChet)
+	w.Bool(chiMang)
+	return protocol.NewMessage(lenhNguoiDanhNguoi, w)
+}
+
+// goiHoiMauNguoiChoi dung goi XUONG -60 DANG "HOI MAU" (docTiep=0, 11 byte
+// than, HET GOI NGAY SAU docTiep), dac ta §2.1/§3.3, Ke hoach 6 Task 10: chieu
+// hoi mau/hoi sinh dong doi (vi du Y Lieu Nhan Thuat, chieu type=2 — dac ta
+// §4.3 noi ro chieu type=2 la BAT BUOC vi day la duong chay THAT DUY NHAT cua
+// ham nay).
+//
+// Chi ghi 4 truong dau (idNguoiDanh, skillId, soMucTieu, idNguoiTrung) roi
+// docTiep=0 la DUNG NGAY — KHONG duoc ghi them loaiChieu/satThuong/daChet/
+// chiMang. Xem chu thich goiDanhNguoiChoi de biet day du ly do BAT BUOC tach
+// rieng thanh hai ham thay vi mot ham co tham so co.
+func goiHoiMauNguoiChoi(idNguoiDanh int32, skillId byte, idNguoiTrung int32) *protocol.Message {
+	w := protocol.NewWriter()
+	w.Int(idNguoiDanh)
+	w.Byte(skillId)
+	w.Byte(1) // soMucTieu — LUON 1 o KH6, xem chu thich goiDanhNguoiChoi
+	w.Int(idNguoiTrung)
+	w.Byte(0) // docTiep = 0 -> danh dau day la DANG HOI MAU (11 byte), dac ta §2.1
+	// KHONG GHI GI THEM SAU DAY — dung o day la HET GOI. Xem chu thich ham va
+	// dac ta §2.0/§2.1 (ghi thua truong o day la loi im lang tuyet doi).
+	return protocol.NewMessage(lenhNguoiDanhNguoi, w)
 }

@@ -129,6 +129,8 @@ func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 		return b.xuLyDiChuyen(m)
 	case lenhChonChieu: // 34 — client chon chieu
 		return b.xuLyChonChieu(m)
+	case lenhNguoiDanhQuai: // 54 — client gui danh quai (dac ta §3.1)
+		return b.xuLyDanhQuai(m)
 	default:
 		// Lenh chua ho tro: bo qua, khong ngat ket noi — client gui vai goi
 		// phu ngay sau khi noi (vi du setClientType), day la chuyen BINH
@@ -323,6 +325,39 @@ func (b *BoXuLy) xuLyChonChieu(m *protocol.Message) error {
 	// Gia tri gia mao ngoai khoang byte se wrap nhung khong khop Id nao trong
 	// ChieuCuaLang nen actor tu bo qua (xem xuLy case suKienChonChieu).
 	b.khuVuc.Gui(suKienChonChieu{idNhanVat: b.nhanVat.ID, mauChieuId: byte(templateId)})
+	return nil
+}
+
+// xuLyDanhQuai xu ly goi LEN `54` (dac ta §3.1): client bao muon danh mot con
+// quai. THAN GOI DO DAI BIEN THIEN — day la goi RUI RO SO MOT cua Ke hoach 6
+// (dac ta §2): `byte mobId`; NEU mobId == -1 (thu cung, ngoai pham vi KH6 —
+// dac ta §0 "Ngoai KH6") thi con THEM `int masterId` (4 byte), tong 5 byte.
+// PHAI doc DU ca hai truong hop de goi tin nay duoc tieu thu dung so byte no
+// khai bao — khong doc du la nguyen nhan hang dau gay lech dong byte theo dac
+// ta, va la ly do Test 3 cua Task 7 kiem rieng kich ban nay.
+//
+// Ky luat actor (dac ta §1.6 + brief Task 7): ham nay CHI doc gia tri mobId
+// tu goi roi gui suKienDanhQuai vao hop thu actor khu vuc — TUYET DOI KHONG
+// tu tra k.quai, KHONG tu tinh sat thuong o day. Toan bo kiem tra + tinh toan
+// + phat goi nam TRONG vongLap (xem case suKienDanhQuai, khuvuc.go).
+func (b *BoXuLy) xuLyDanhQuai(m *protocol.Message) error {
+	if b.khuVuc == nil || b.nhanVat == nil {
+		return nil
+	}
+	r := protocol.NewReader(m.Data)
+	mobIdRaw, err := r.Byte()
+	if err != nil {
+		return nil // goi rong bat thuong -> bo qua an toan, khong ngat ket noi
+	}
+	if int8(mobIdRaw) == -1 {
+		// Thu cung (dac ta §0/§3.1): doc THEM 4 byte de tieu thu DU than goi
+		// 5-byte. Gia tri masterId khong dung toi o KH6 (chua co he thu
+		// cung) nen co tinh KHONG gan vao bien nao — chi doc de tranh lech.
+		if _, err := r.Int(); err != nil {
+			return nil // bao mobId=-1 nhung thieu du 4 byte con lai -> bo qua an toan
+		}
+	}
+	b.khuVuc.Gui(suKienDanhQuai{idNhanVat: b.nhanVat.ID, mobId: mobIdRaw})
 	return nil
 }
 

@@ -107,6 +107,55 @@ type suKienChonChieu struct {
 	mauChieuId byte
 }
 
+// suKienDanhQuai bao actor mot nhan vat vua gui goi len `54` (dac ta §3.1):
+// xin danh con quai co Id = mobId trong khu vuc. mobId la byte THO doc truc
+// tiep tu Reader (khong dau) — gia tri 255 (= -1 khi doc CO dau, dac ta §1.4)
+// la truong hop "thu cung" (dac ta §0 "Ngoai KH6", chua lam): actor KHONG can
+// nhanh rieng cho no, vi Quai.Id LUON nam trong [0,127] (taoQuaiMacDinh,
+// quai.go) nen 255 tu nhien khong khop con quai nao — roi thang vao nhanh
+// "khong tim thay muc tieu" -> im lang bo qua, dung tinh than voi cach
+// suKienDiChuyen bo qua khi khong tim thay nguoi trong k.nguoiTrong.
+//
+// Luong phien (xuLyDanhQuai, login.go) CHI doc gia tri mobId nay tu goi (ke
+// ca doc BO 4 byte masterId khi mobId==-1 de tieu thu DU than goi bien thien,
+// dac ta §2) roi gui su kien nay vao hop thu — KHONG tu tra k.quai, KHONG tu
+// tinh sat thuong. Toan bo kiem tra (KiemDanhHopLe) + tinh sat thuong + tru
+// mau + quyet chet + dung/phat goi nam TRONG vongLap (xem case duoi day) —
+// dung ky luat actor dac ta §1.6 va rang buoc cua Task 7.
+type suKienDanhQuai struct {
+	idNhanVat int64
+	mobId     byte
+}
+
+// heQuaiChuaXacDinh la gia tri he nguyen to gan cho MOI con quai khi tinh sat
+// thuong (Task 7): Quai (Task 5, quai.go) CHUA co truong theo doi he nguyen
+// to rieng cho tung con. Dat DUNG BANG soHeNguyenTo (satthuong.go) — tuc
+// NGOAI khoang hop le [0, soHeNguyenTo) — de heSoNguyenToPhanTram tu nhien
+// coi day la "he khong xac dinh" va tra ve 100% (trung tinh), khong can sua
+// ham do hay them nhanh dac biet o day. Neu sau nay quai co he nguyen to that
+// (vd theo mau quai), doi hang so nay thanh mot tra cuu that.
+const heQuaiChuaXacDinh byte = soHeNguyenTo
+
+// heNguyenToTheoLang anh xa Lang.ID (0..4, thu tu danhSachLang trong lang.go:
+// La, Cat, Suong Mu, Da, May) sang hang so he nguyen to cua satthuong.go
+// (HeHoa/HePhong/HeLoi/HeTho/HeThuy). HAI THU TU NAY LECH NHAU — KHONG duoc
+// suy dien "lang i = he i": lang 2 (Suong Mu) la He Thuy (hang so 4), lang 4
+// (May) la He Loi (hang so 2). Dung theo thiet ke tong §7.2 va chieuthuc.go
+// (xem tenChieuTheoLang: "Lang Suong Mu — Thuy", "Lang May — Loi").
+var heNguyenToTheoLang = [5]byte{HeHoa, HePhong, HeThuy, HeTho, HeLoi}
+
+// heNguyenToNguoiChoi tra he nguyen to cua mot nhan vat theo lang, dung lam
+// tham so heNguoiDanh cho TinhSatThuong (Task 7 — Task 4 chi dung ham, khong
+// quyet dinh nguon du lieu nay). Lang ngoai [0,4] (du lieu hong, ve ly thuyet
+// khong xay ra vi TimLang da chan luc tao nhan vat) tra heQuaiChuaXacDinh de
+// roi vao nhanh trung tinh, khong panic.
+func heNguyenToNguoiChoi(lang int16) byte {
+	if lang < 0 || int(lang) >= len(heNguyenToTheoLang) {
+		return heQuaiChuaXacDinh
+	}
+	return heNguyenToTheoLang[lang]
+}
+
 // suKienXinDanhSachQuai la su kien TRUY VAN (khac cac su kien "lam viec" o
 // tren): mot luong BEN NGOAI vongLap (vd luong phien khi dung goi -24 MAP
 // INFO o xuLyClientOk, TRUOC khi nhan vat duoc giao cho actor qua -39) can
@@ -278,6 +327,108 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 			}
 		}
 
+	case suKienDanhQuai:
+		// Dac ta §3.1 (goi len 54) + §1.6 (ky luat actor) + brief Task 7: toan
+		// bo kiem tra/tinh toan/phat goi cho MOT don danh quai nam TRON trong
+		// nhanh nay — luong phien (xuLyDanhQuai, login.go) chi gui su kien,
+		// khong tu lam gi trong cac buoc duoi day.
+		nguoi, co := k.nguoiTrong[sk.idNhanVat]
+		if !co {
+			return
+		}
+
+		// Tim con quai co Id == sk.mobId. mobId=255 (thu cung, xem chu thich
+		// suKienDanhQuai o tren) tu nhien khong khop quai nao -> mucTieu==nil
+		// -> bo qua, dung nhu suKienDiChuyen bo qua khi khong tim thay nguoi.
+		var mucTieu *Quai
+		for _, q := range k.quai {
+			if q.Id == sk.mobId {
+				mucTieu = q
+				break
+			}
+		}
+		if mucTieu == nil {
+			return
+		}
+
+		bayGio := time.Now()
+		ketQua := KiemDanhHopLe(nguoi, ViTriCoMau{
+			X:         mucTieu.X,
+			Y:         mucTieu.Y,
+			HpHienTai: mucTieu.Hp,
+			// LucHoiSinh: Quai (Task 5) CHUA co truong theo doi thoi diem hoi
+			// sinh (se them o Task 8) -> bo trong (zero value). Dung dac diem
+			// da ghi o chu thich truong LucHoiSinh (chotkiem.go): "chua tung
+			// hoi sinh lan nao" cho bayGio.Sub(zero) ra khoang RAT LON -> kiem
+			// bat tu tu nhien CHO PHEP, dung hanh vi mong doi cho quai moi
+			// spawn/chua tung chet.
+		}, bayGio)
+		if !ketQua.ChoPhep {
+			// 4 kiem dau (bat tu/chakra/hoi chieu/da chet) hong -> IM LANG,
+			// KHONG phat goi gi (khac han nhanh Truot duoi day — dac ta §1.9
+			// chi noi rieng ve vuot tam, KHONG ap dung cho 4 kiem nay).
+			return
+		}
+
+		// Cap nhat lanDanhCuoi CHI KHI duoc phep danh (brief Task 7). Mot don
+		// bi 4 kiem dau tu choi KHONG duoc tinh la "vua dung chieu", neu
+		// khong nguoi choi se bi khoa hoi chieu oan boi chinh don bi tu choi.
+		nguoi.lanDanhCuoi = bayGio
+
+		// chiMang: KH6 CHUA chot ty le/cong thuc chi mang that (khong dac ta
+		// nao, khong task truoc nao dinh nghia) -> luon false — lua chon an
+		// toan, xem bao cao Task 7. TinhSatThuong van nhan tham so nay dung
+		// chu ky da chot o Task 4; ty le chi mang that (neu co, co the la
+		// KH8) chi can thay DONG GAN chiMang nay, khong doi gi khac o day.
+		chiMang := false
+
+		var satThuong int32
+		if !ketQua.Truot {
+			lang := TimLang(nguoi.nv.Lang)
+			var satThuongGoc int64
+			if lang != nil {
+				// satThuongGoc: dung Lang.SatThuongKhoiDau (lang.go) — truong
+				// nay co san tu Ke hoach 2, chu thich goc ghi "dung o Ke
+				// hoach 4" (ten cu cua chien dau truoc khi tach thanh KH6),
+				// dam bao KHAC 0 cho ca 5 lang (10-16). nv.SucManh KHONG
+				// dung duoc o day: la diem xep hang hien thi rieng (bang xep
+				// hang web, xem web/app/bang-xep-hang), mac dinh 0 va KHONG
+				// duoc TaoNhanVat gan luc tao nhan vat — dung no se lam MOI
+				// nhan vat moi tao gay 0 sat thuong vinh vien.
+				satThuongGoc = int64(lang.SatThuongKhoiDau)
+			}
+			heNguoiDanh := heNguyenToNguoiChoi(nguoi.nv.Lang)
+			satThuong = TinhSatThuong(satThuongGoc, nguoi.chieuDangChon, heNguoiDanh, heQuaiChuaXacDinh, chiMang)
+		}
+		// Truot=true (vuot tam): satThuong giu nguyen 0 (dac ta §1.9) — KHONG
+		// goi TinhSatThuong, vi don nay khong thuc su cham muc tieu.
+
+		// §1.2: sat thuong khong duoc VUOT mau con lai cua muc tieu.
+		if satThuong > mucTieu.Hp {
+			satThuong = mucTieu.Hp
+		}
+		// §1.3: quai DANG DAY MAU khong chet boi MOT don — giat lai 1 mau.
+		if mucTieu.Hp == mucTieu.HpToiDa && satThuong >= mucTieu.Hp {
+			satThuong = mucTieu.Hp - 1
+		}
+
+		mucTieu.Hp -= satThuong
+		if mucTieu.Hp < 0 { // phong thu: ve ly thuyet khong xay ra sau hai kep tren
+			mucTieu.Hp = 0
+		}
+
+		// dac ta §3.2: skillId la BYTE trong goi 54 xuong (short trong catalog).
+		skillId := byte(nguoi.chieuDangChon.SkillId)
+		k.phatChoCaKhuVuc(goiNguoiDanhQuai(int32(nguoi.nv.ID), skillId, mucTieu.Id))
+
+		if mucTieu.Hp <= 0 {
+			// KH6 chua co he vat pham (dac ta §0) -> doRoi luon rong.
+			k.phatChoCaKhuVuc(goiQuaiChet(mucTieu.Id, satThuong, chiMang, nil))
+		} else {
+			// hieuUngId=255 (=-1): KH6 chua co hieu ung trang thai (dac ta §0).
+			k.phatChoCaKhuVuc(goiQuaiConSong(mucTieu.Id, mucTieu.Hp, satThuong, chiMang, 255))
+		}
+
 	case suKienXinDanhSachQuai:
 		// SAO GIA TRI tung con quai — KHONG duoc tra thang k.quai (mang con
 		// tro goc) hay tung con tro trong do ra ngoai, vi ben nhan chay tren
@@ -301,6 +452,20 @@ func (k *KhuVuc) phatChoNguoiKhac(truId int64, m *protocol.Message) {
 		}
 		if err := nguoi.phien.Gui(m); err != nil {
 			slog.Warn("phat goi tin that bai", "id", id, "loi", err)
+		}
+	}
+}
+
+// phatChoCaKhuVuc gui goi tin `m` cho TOAN BO nguoi dang trong khu vuc, KE CA
+// nguoi vua gay ra su kien (khac phatChoNguoiKhac o tren, loai tru nguoi gay
+// su kien). Cac goi chien dau (54/-9/-12, dac ta §3.3 cot "Gui cho: Ca khu
+// vuc") phai den ca nguoi danh de chinh ho cung thay hoat anh/ket qua don
+// danh cua minh — khac han goi di chuyen (-7) noi client tu ve chuyen dong
+// cua chinh minh nen khong can nhan lai.
+func (k *KhuVuc) phatChoCaKhuVuc(m *protocol.Message) {
+	for id, nguoi := range k.nguoiTrong {
+		if err := nguoi.phien.Gui(m); err != nil {
+			slog.Warn("phat goi tin (ca khu vuc) that bai", "id", id, "loi", err)
 		}
 	}
 }

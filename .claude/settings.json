@@ -9,7 +9,7 @@
             "shell": "bash",
             "timeout": 20,
             "statusMessage": "Nap boi canh du an...",
-            "command": "printf '=== BOI CANH DU AN NARUTO (tu dong nap luc mo phien) ===\\n' ; git -C D:/NRO_GoiBanGiao log --oneline -10 ; printf '\\n--- Ai vua lam gi (NHAT-KY-AGENT.md, 12 dong cuoi) ---\\n' ; grep '^|' D:/NRO_GoiBanGiao/NHAT-KY-AGENT.md | tail -12 ; printf '\\n--- Nhanh + viec dang do ---\\n' ; git -C D:/NRO_GoiBanGiao status --short --branch ; printf '\\nChi tiet: BAT-DAU-TU-DAY.md (S4 da lam, S5 con lai, S6 loi da vap). Xong viec PHAI chay /ghi-so.\\n'"
+            "command": "printf '=== BOI CANH DU AN NARUTO (tu dong nap luc mo phien) ===\\n' ; git -C D:/NRO_GoiBanGiao log --oneline -10 ; printf '\\n--- Ai vua lam gi (NHAT-KY-AGENT.md, 12 dong cuoi) ---\\n' ; grep '^|' D:/NRO_GoiBanGiao/NHAT-KY-AGENT.md | tail -12 ; printf '\\n--- Nhanh + viec dang do ---\\n' ; git -C D:/NRO_GoiBanGiao status --short --branch ; printf '\\nChi tiet: BAT-DAU-TU-DAY.md (S4 da lam, S5 con lai, S6 loi da vap). Bat dau VA ket thuc mot viec: go /viec (mot lenh, tu nhan biet).\\n'"
           }
         ]
       }

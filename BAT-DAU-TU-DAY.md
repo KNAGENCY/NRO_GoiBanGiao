@@ -56,26 +56,39 @@ thường**, nói *tại sao* trước khi nói *làm thế nào*.
 
 ## 3. Chạy và kiểm thử — lệnh cụ thể
 
-Môi trường máy đang dùng: **Go ở `D:\Go`** · **PostgreSQL 16.4 ở `D:\PostgreSQL`,
-cổng 5432**, CSDL `nro` (chạy thật) và `nro_test` (kiểm thử) · Windows + PowerShell.
+Môi trường máy đang dùng: **Go ở `D:\Go`** · **PostgreSQL 16.4 ở `D:\PostgreSQL`**,
+CSDL `nro` (chạy thật) và `nro_test` (kiểm thử) · Windows + PowerShell.
 
-PostgreSQL **không chạy như dịch vụ** — bật tay trước khi test:
+### ⚠️ Cổng PostgreSQL — TỰ KIỂM, đừng ghim con số
+
+Cổng **không cố định giữa các lần khởi động**: `postgresql.conf` để mặc định `5432`,
+nhưng bật bằng `pg_ctl ... -o "-p 5433"` thì nó nghe `5433`. Đã có agent mất thời gian
+vì tin con số ghi sẵn trong tài liệu. **Luôn tự kiểm trước khi chạy:**
+
+```powershell
+Get-NetTCPConnection -State Listen | Where-Object { $_.LocalPort -in 5432,5433 } |
+  Select-Object LocalPort
+```
+
+Không in ra gì tức là PostgreSQL **chưa chạy** (nó không chạy như dịch vụ Windows):
 
 ```powershell
 D:\PostgreSQL\bin\pg_ctl.exe -D D:\PostgreSQL\data start
 ```
 
+Dưới đây viết `CONG` — thay bằng số vừa tìm được. Chi tiết: `server/README.md` mục 0.
+
 ```powershell
 # --- Máy chủ game ---
 cd D:\NRO_GoiBanGiao\server
-$env:NRO_DSN = "postgres://postgres:nrodev123@127.0.0.1:5432/nro"
+$env:NRO_DSN = "postgres://postgres:nrodev123@127.0.0.1:CONG/nro"
 D:\Go\bin\go.exe run ./cmd/nroserver          # lắng nghe :14445
 
 # --- Client giả để thử, không cần mở Unity ---
 D:\Go\bin\go.exe run ./cmd/thuclient -dia-chi 127.0.0.1:14445 -ten thutest -mat-khau 1
 
 # --- Chạy toàn bộ test (PHẢI xanh trước khi commit) ---
-$env:NRO_TEST_DSN = "postgres://postgres:nrodev123@127.0.0.1:5432/nro_test"
+$env:NRO_TEST_DSN = "postgres://postgres:nrodev123@127.0.0.1:CONG/nro_test"
 D:\Go\bin\go.exe test ./... -count=1
 D:\Go\bin\gofmt.exe -l internal/ cmd/         # phải không in gì (trừ nhiễu CRLF, xem §9)
 D:\Go\bin\go.exe vet ./...
@@ -121,7 +134,7 @@ Xếp theo thứ tự nên làm:
 
 | Ưu tiên | Việc | Ghi chú |
 |---|---|---|
-| 1 | **KH6 — Chiến đấu, chiêu thức, quái** | 📐 **Đã có thiết kế + kế hoạch 15 task, chưa thi công.** [Nghiên cứu](docs/superpowers/research/kh6-goi-chien-dau.md) · [đặc tả](docs/superpowers/specs/2026-07-26-giao-thuc-chien-dau.md) · [kế hoạch](docs/superpowers/plans/2026-07-26-ke-hoach-6-chien-dau.md). **Boss đã tách ra khỏi KH6.** Task 12 (xác minh gói `-8`/`-17` bằng client Unity) làm được song song ngay |
+| 1 | **KH6 — Chiến đấu, chiêu thức, quái** | 📐 **Đã có thiết kế + kế hoạch 15 task, chưa thi công.** [Nghiên cứu](docs/superpowers/research/kh6-goi-chien-dau.md) · [đặc tả](docs/superpowers/specs/2026-07-26-giao-thuc-chien-dau.md) · [kế hoạch](docs/superpowers/plans/2026-07-26-ke-hoach-6-chien-dau.md). **Boss đã tách ra khỏi KH6.** Bảng byte đã đối chiếu **cả hai phía** (Java + client Unity) → **không còn task nào bị chặn**, bốn nhánh chạy song song được ngay |
 | 2 | KH7 — Vật phẩm, hành trang, cửa hàng, giao dịch | |
 | 3 | KH8 — Kho nội dung YAML + nạp nóng | Để thêm chiêu/quái mà không phải sửa code |
 | 4 | KH9 — Nhiệm vụ, cốt truyện, NPC | |
@@ -154,13 +167,13 @@ Xếp theo thứ tự nên làm:
 5. **Máy chủ Java cũ có lỗi treo "Xin chờ"**: tài khoản bị khoá chỉ gửi `-26`, không gửi
    `-102` và không `return` (`NDVSqlFetcher.java:127-129`). Bản Go **không** lặp lại lỗi này.
 6. **Một mã lệnh có thể là HAI gói khác độ dài** (phát hiện 26/07 khi giải mã chiến đấu).
-   `-60` có byte thứ 10 (`docTiep`): bằng `1` thì còn 7 byte nữa (đòn đánh, thân 18 byte),
+   `-60` có byte thứ **11** (`docTiep`): bằng `1` thì còn 7 byte nữa (đòn đánh, thân 18 byte),
    bằng `0` thì **hết gói ngay** (chiêu hồi máu, thân 11 byte). Tên biến gốc là
    "read continue" nên rất dễ tưởng là hằng số. Tương tự: gói **lên** `54` dài 1 byte
    *hoặc* 5 byte tuỳ `mobId == -1`; `-45/0` và `-124` cũng biến thiên.
    **Cách tránh: dựng mỗi dạng bằng một hàm riêng, không dùng một hàm có cờ** — hàm có cờ
-   thì người sửa sau ghi thừa trường lúc nào không hay, và triệu chứng là client lệch
-   dòng byte vĩnh viễn, không có thông báo lỗi nào.
+   thì người sửa sau ghi thừa trường lúc nào không hay, mà ghi thừa là lỗi **im lặng
+   tuyệt đối** (client vứt byte dư, không lỗi, không triệu chứng — xem §6.18).
 
 ### Về cơ sở dữ liệu
 
@@ -195,6 +208,37 @@ Xếp theo thứ tự nên làm:
     người soi đọc nhầm. Commit việc lẻ **trước khi** bắt đầu task hoặc **sau khi** review xong.
 14. Khi người thi công thấy thứ trông như lỗi nhưng không chắc → **dừng lại hỏi**, đừng tự
     sửa. Đã cứu được một lần (vụ byte-order §6.3).
+
+### Về công cụ
+
+15. **KHÔNG sửa file tiếng Việt bằng PowerShell `Get-Content -Raw` + `Set-Content`.**
+    PowerShell 5.1 đọc file UTF-8 bằng codepage ANSI rồi ghi lại thành UTF-8 → **mojibake
+    sạch cả file**, và `git diff` phình ra như vừa viết lại toàn bộ. Đã vấp khi sửa
+    `server/README.md`, phải `git checkout --` rồi làm lại. **File có dấu thì luôn dùng
+    công cụ Edit/Write**, không dùng shell.
+
+### Về giao thức nhị phân — bổ sung sau khi đọc CLIENT (26/07)
+
+16. **Client là trọng tài duy nhất — đọc code Java thôi là CHƯA ĐỦ.** Đọc server Java rồi
+    đối chiếu client Unity (`D:\NRO_Project\Assets\Scripts\Game1\Controller.cs`) đã lộ ra
+    **ba lỗi thật** mà đọc một phía không thể thấy:
+    - `-8`: `Service.java:1157` ghi `short` trong khi client `readInt` → **người chơi khác
+      không thấy ai vừa chết** (client tra id hụt, bỏ cả gói).
+    - `-17`: `Service.java:1147` nhét **id nhân vật vào ô `cPk`** — gói này không có
+      trường id, client dùng thẳng `Char.myCharz()`.
+    - `-9`: `Mob.java:1369` ghi `writeInt(-1)` (4 byte) trong khi client đọc **1 byte**
+      `hieuUngId`; tình cờ vẫn ra `-1` nên chưa ai phát hiện.
+    **Luật rút ra: gói nào quan trọng thì phải đọc CẢ HAI PHÍA trước khi chốt bảng byte.**
+17. **Một mã lệnh có thể bị bản gốc dùng cho HAI việc khác nhau.** `Message(87)` vừa là
+    "quái bị gió thổi" (`byte + bool`, khớp client) vừa là "gửi maxHp" (`byte + int`,
+    **không** khớp client). Chép mù theo bản Java sẽ khiến quái có máu ≥ 16.777.216
+    **đứng im không di chuyển**, vì byte cao của maxHp rơi đúng vào ô `isWind`.
+    Bản Go: **một mã lệnh, một ý nghĩa.**
+18. **Sai trường bên trong một gói KHÔNG làm hỏng dòng byte** — client đọc trọn gói theo
+    độ dài rồi mới phân tích (`Session_ME.cs:181-219`), và nuốt lỗi bằng `catch` rỗng.
+    Triệu chứng vì thế **im lặng**: gói không làm gì, hoặc hiện số vô lý — không treo,
+    không log. **Chạy thử bằng mắt sẽ không phát hiện được; phải test byte-chính-xác.**
+    (Thứ làm hỏng cả dòng byte là sai **số byte của trường độ dài** — đó là §6.2, khác hẳn.)
 
 ---
 
@@ -236,14 +280,17 @@ Gom lại thành **Kế hoạch B**, sửa lẻ từng cái là vô nghĩa:
   thiết kế "một chủ sở hữu" chứ không từ khoá.
 - **`gofmt -l` báo bẩn ở vài file cũ do CRLF cục bộ** — vô hại. Đã kiểm:
   `git add --renormalize` không stage gì (blob trong repo đã là LF nhờ `.gitattributes`).
-- **PostgreSQL nghe cổng `5432`, KHÔNG phải `5433`** (phát hiện 26/07). `postgresql.conf`
-  ở `D:\PostgreSQL\data` để `#port = 5432` (mặc định), và hai CSDL `nro` + `nro_test` nằm
-  trên instance đó. §3 của file này từng ghi `5433` — **sai**, đã sửa. Triệu chứng khi
-  dùng nhầm cổng: **mọi test cần CSDL đỏ hàng loạt** với `connectex: No connection could
-  be made because the target machine actively refused it`, trong khi các gói không cần
-  CSDL (`auth`, `net`, `protocol`) vẫn xanh — dễ tưởng là mình vừa làm hỏng code.
-- **PostgreSQL không chạy như dịch vụ Windows** — phải bật tay sau khi khởi động máy:
-  `D:\PostgreSQL\bin\pg_ctl.exe -D D:\PostgreSQL\data start`.
+- **Cổng PostgreSQL KHÔNG cố định giữa các lần khởi động — đừng tin con số ghi sẵn ở
+  bất cứ đâu, kể cả file này.** `postgresql.conf` để mặc định `5432`, nhưng ai bật bằng
+  `pg_ctl ... -o "-p 5433"` thì nó nghe `5433`. Cách kiểm 1 dòng ở §3 (hoặc
+  `server/README.md` mục 0).
+  **Triệu chứng khi dùng nhầm cổng — nhận ra ngay:** các gói `auth` / `net` / `protocol`
+  **vẫn xanh**, còn mọi kiểm thử cần CSDL **đỏ hàng loạt** với `connectex: ... actively
+  refused it`. Rất dễ tưởng mình vừa làm hỏng code, trong khi thực ra chỉ sai cổng
+  hoặc PostgreSQL chưa bật (nó **không** chạy như dịch vụ Windows).
+  *Vì sao ghi lại:* ngày 26/07 một agent thấy tài liệu ghi `5433` mà máy nghe `5432`, đã
+  kết luận nhầm là "tài liệu sai từ đầu" rồi ghim `5432` vào — chỉ dời quả mìn sang lần
+  khởi động sau. Bài học thật là **ghim số nào cũng sai; phải dạy cách tự kiểm.**
 - **PowerShell không có `&&`** — dùng `;` hoặc `if ($?) { ... }`.
 - **Windows dùng `python`, không phải `python3`.** Thứ cần GPU/CUDA thì dùng `py -3.12`.
 - Đặt biến môi trường phải là **dòng riêng**, không nối cùng dòng lệnh.
@@ -271,11 +318,13 @@ Mã nguồn viết **chú thích tiếng Việt giải thích *tại sao***, kh�
 
 | Việc | Dùng |
 |---|---|
-| Bắt đầu một phiên/agent mới | Gõ `/vao-viec` (tự đọc bối cảnh, xem ai đang làm gì, đề xuất việc tiếp) |
-| Kết thúc một việc | Gõ `/ghi-so` (kiểm chứng, ghi nhật ký, cập nhật tài liệu, commit) |
+| Bắt đầu **và** kết thúc một việc | Gõ **`/viec`** — lệnh duy nhất, tự nhận biết: cây git sạch → **nhận việc** (đọc bối cảnh, xem ai đang làm gì, tạo nhánh riêng, báo cáo); có thay đổi chưa commit → **ghi sổ** (chạy test, ghi nhật ký, cập nhật tài liệu, commit). Ép chế độ: `/viec ghi so` hoặc `/viec <việc muốn làm>` |
 | Xem ai vừa chạm vào gì | [`NHAT-KY-AGENT.md`](NHAT-KY-AGENT.md) — dòng mới nhất ở **cuối** bảng |
 | Mở agent đúng thư mục | Nhấn đúp `MO-AGENT.bat` |
 | Agent không phải Claude Code | Cho nó đọc [`AGENTS.md`](AGENTS.md) |
+
+`/viec` **dừng lại hỏi** nếu cây làm việc bẩn mà không phải phiên đó sửa — để không bao giờ
+commit lẫn việc dở của agent khác.
 
 **Chống đụng nhau:** mỗi agent một **nhánh git riêng** (`git switch -c <ten-viec>`); không hai
 agent cùng commit lên `main`. `server/` (game) và `web/` là hai vùng tách biệt → làm song song
@@ -298,7 +347,7 @@ Làm xong một việc đáng kể → sửa **đúng 3 chỗ** rồi commit chu
 4. Thêm một dòng vào **§12 Nhật ký** và sửa dòng "Cập nhật lần cuối" ở đầu file.
 5. Thêm một dòng vào cuối bảng **`NHAT-KY-AGENT.md`** (ai làm, nhánh nào, còn dở gì).
 
-Cách nhanh nhất: gõ `/ghi-so`, nó làm cả 5 bước trên.
+Cách nhanh nhất: gõ `/viec`, nó làm cả 5 bước trên.
 
 Commit riêng cho việc cập nhật tài liệu thì dùng tiền tố `docs:`.
 
@@ -312,5 +361,5 @@ Commit riêng cho việc cập nhật tài liệu thì dùng tiền tố `docs:`
 | 24/07/2026 | Xong **KH2** (nhân vật) gộp `0816c89`; **KH3** (đồng bộ tĩnh, 5 làng Naruto) gộp `7a85431`; giải mã xong giao thức di chuyển |
 | 25/07/2026 | Xong **KH4** (vào thế giới) gộp `aef5f71`; web **W1** + **W2** lên `main` |
 | 26/07/2026 | Xong **KH5** (di chuyển + actor) gộp `e1ddc44`. Tạo file `BAT-DAU-TU-DAY.md` này làm điểm vào duy nhất cho người/agent mới |
-| 26/07/2026 | Dựng cơ chế **nhiều agent song song**: sổ `NHAT-KY-AGENT.md`, lệnh `/vao-viec` + `/ghi-so`, `AGENTS.md` cho agent ngoài, `MO-AGENT.bat`, hook `SessionStart` tự nạp bối cảnh (xem §10b) |
-| 26/07/2026 | **KH6 xong phần thiết kế**: nghiên cứu giao thức chiến đấu (gói đánh quái/đánh người/chiêu/chết/hồi sinh, AI quái, nhịp 100 ms) → đặc tả có bảng byte → kế hoạch thi công 15 task. **Chưa viết code.** Phát hiện mới: gói `-60` có **hai dạng độ dài** (§6.6), cổng PostgreSQL thật là **5432** không phải 5433 (§9) |
+| 26/07/2026 | Dựng cơ chế **nhiều agent song song**: sổ `NHAT-KY-AGENT.md`, lệnh `/viec` (một lệnh tự nhận biết nhận việc / ghi sổ), `AGENTS.md` cho agent ngoài, `MO-AGENT.bat`, hook `SessionStart` tự nạp bối cảnh (xem §10b) |
+| 26/07/2026 | **KH6 xong phần thiết kế**: nghiên cứu giao thức chiến đấu (gói đánh quái/đánh người/chiêu/chết/hồi sinh, AI quái, nhịp 100 ms) → đặc tả có bảng byte → kế hoạch thi công 15 task. **Chưa viết code.** Phát hiện mới: gói `-60` có **hai dạng độ dài** (§6.6); đọc client Unity lộ ra **3 lỗi thật** của bản Java ở `-8`/`-17`/`-9` (§6.16) và vụ mã `87` dùng cho hai việc (§6.17); cổng PostgreSQL **không cố định giữa các lần khởi động** (§9) |

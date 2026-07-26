@@ -12,13 +12,14 @@ Trả lời bằng **tiếng Việt đời thường**. Chủ sở hữu **khôn
 
 ## Nhiều agent làm song song
 
-Dự án này có thể có nhiều agent cùng làm. Hai lệnh và một sổ:
+Dự án này có thể có nhiều agent cùng làm. **Một lệnh duy nhất và một sổ:**
 
 | Việc | Dùng |
 |---|---|
-| **Bắt đầu** một phiên/agent mới | `/vao-viec` — tự đọc bối cảnh, xem ai đang làm gì, đề xuất việc tiếp |
-| **Kết thúc** một việc | `/ghi-so` — kiểm chứng, ghi nhật ký, cập nhật tài liệu, commit |
+| Bắt đầu / kết thúc một việc | **`/viec`** — tự nhận biết: cây git sạch → nhận việc; có thay đổi chưa commit → ghi sổ + commit. Ép chế độ: `/viec ghi so` hoặc `/viec <việc muốn làm>` |
 | Xem ai vừa chạm vào gì | [`NHAT-KY-AGENT.md`](NHAT-KY-AGENT.md) — sổ chung, dòng mới nhất ở **cuối** bảng |
+
+`/viec` **dừng lại hỏi** nếu cây làm việc bẩn mà không phải phiên này sửa — không bao giờ commit việc dở của agent khác.
 
 **Chống đụng nhau:** mỗi agent một **nhánh git riêng** (`git switch -c <ten-viec>`), không hai agent cùng commit lên `main`. `server/` (game) và `web/` là hai vùng tách biệt — làm song song an toàn; hai agent cùng vào `server/internal/game/` thì chắc chắn đụng.
 

@@ -25,6 +25,9 @@ Rồi chạy `git log --oneline -15` và `git status --short --branch` để bi�
    `BAT-DAU-TU-DAY.md` theo §11 của file đó, commit chung với code. Không ghi = phiên sau
    và agent khác mất phương hướng.
 
+Quy trình đầy đủ của dự án (nhận việc + ghi sổ) viết ở `.claude/commands/viec.md` — đọc file
+đó và làm theo. Claude Code gọi nó bằng lệnh `/viec`; agent khác thì đọc trực tiếp.
+
 ## Chia vùng để không đụng nhau
 
 | Vùng | Đường dẫn | Ghi chú |

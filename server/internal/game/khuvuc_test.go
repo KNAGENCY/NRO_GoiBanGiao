@@ -649,6 +649,48 @@ func TestSuKienDanhNguoiChoiNguoiDanhDaChetKhongDuocDanh(t *testing.T) {
 	}
 }
 
+// TestSuKienDanhNguoiChoiChieuHoiMauKhongXuNhuDonDanh la TEST BAT BUOC cua Fix
+// wave cuoi (coordinator soi toan nhanh KH6, 27/07): A chon chieu HOI MAU
+// (mauChieuId=3 -> slot 2 "hoi mau dong doi" cua tung lang, Loai == loaiBuff,
+// xem xayDungChieuTheoLang trong chieuthuc.go) roi gui -60 nham B -> B TUYET
+// DOI KHONG duoc mat mau, VA KHONG co goi tin nao phat ra ca (dang don danh
+// cua goi -60 khong duoc dung cho chieu hoi mau — dac ta hoi mau PvP that con
+// thieu du de lam dung, xem chu thich dai o case suKienDanhNguoiChoi,
+// khuvuc.go). Day CUNG la kich ban dot bien: xoa nhanh "if
+// nguoi.loaiChieuDangChon == loaiBuff { return }" se lam test nay DO (B se bi
+// TinhSatThuong tinh sat thuong roi mat mau nhu mot don danh binh thuong).
+func TestSuKienDanhNguoiChoiChieuHoiMauKhongXuNhuDonDanh(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	nvA := &store.NhanVat{ID: 1, Ten: "A", Lang: 0, ChakraHienTai: 100, HpHienTai: 150, HpToiDa: 150}
+	nvB := &store.NhanVat{ID: 2, Ten: "B", Lang: 0, HpHienTai: 150, HpToiDa: 150}
+	pA := &phienGiaKhuVuc{}
+	pB := &phienGiaKhuVuc{}
+	k.xuLy(suKienVao{nv: nvA, phien: pA})
+	k.xuLy(suKienVao{nv: nvB, phien: pB})
+	k.xuLy(suKienChonChieu{idNhanVat: nvA.ID, mauChieuId: 3}) // slot 2: hoi mau dong doi
+	pA.nhan, pB.nhan = nil, nil
+
+	// Chuan bi test dung: xac nhan A THAT SU dang cam chieu hoi mau truoc khi
+	// kiem hanh vi cua case suKienDanhNguoiChoi — neu buoc nay sai, phan con
+	// lai cua test vo nghia (khong con kiem dung nhanh dang muon kiem).
+	if k.nguoiTrong[nvA.ID].loaiChieuDangChon != loaiBuff {
+		t.Fatalf("chuan bi test sai: loaiChieuDangChon = %d, mong doi %d (loaiBuff) sau khi chon mauChieuId=3",
+			k.nguoiTrong[nvA.ID].loaiChieuDangChon, loaiBuff)
+	}
+
+	k.xuLy(suKienDanhNguoiChoi{idNhanVat: nvA.ID, idMucTieu: nvB.ID})
+
+	if nvB.HpHienTai != 150 {
+		t.Fatalf("HpHienTai cua B sau khi bi 'danh' bang chieu hoi mau = %d, mong doi VAN LA 150 (khong duoc mat mau)", nvB.HpHienTai)
+	}
+	if len(pA.nhan) != 0 {
+		t.Fatalf("A nhan %d goi, mong doi 0 (chieu hoi mau PvP chua duoc noi day, khong phat goi tin nao)", len(pA.nhan))
+	}
+	if len(pB.nhan) != 0 {
+		t.Fatalf("B nhan %d goi, mong doi 0 (chieu hoi mau PvP chua duoc noi day, khong phat goi tin nao)", len(pB.nhan))
+	}
+}
+
 // TestSuKienDanhNguoiChoiMucTieuKhongTrongKhuVucKhongPanic: idMucTieu khong
 // khop ai trong k.nguoiTrong (da roi khu vuc, hoac id gia) -> no-op an toan.
 func TestSuKienDanhNguoiChoiMucTieuKhongTrongKhuVucKhongPanic(t *testing.T) {

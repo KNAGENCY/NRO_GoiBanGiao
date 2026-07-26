@@ -77,6 +77,19 @@ type nguoiTrongKhuVuc struct {
 	// luong tinh sat thuong doc no sau nay (Ke hoach 6 Task 3+).
 	chieuDangChon *CapChieu
 
+	// loaiChieuDangChon la truong "Loai" (type: 1 danh, 2 buff/hoi mau, 3 tu
+	// than) cua MauChieu CHA chua chieuDangChon (Fix wave cuoi Task 11, 27/07)
+	// — dat CUNG LUC voi chieuDangChon trong case suKienChonChieu duoi day.
+	// LY DO CAN TRUONG RIENG NAY (khong doc thang tu chieuDangChon): CapChieu
+	// (chieuthuc.go) la mot CAP CU THE cua chieu, KHONG mang truong Loai —
+	// Loai chi ton tai o MauChieu (SkillTemplate) cha, va chieuDangChon la con
+	// tro *CapChieu, khong con duong nao doc nguoc ve MauChieu cha tu con tro
+	// do. Zero value (0) KHONG trung loaiDanh/loaiBuff/loaiTuThan (1/2/3, xem
+	// chieuthuc.go) nen "chua chon chieu nao" tu nhien khong bi hieu nham la
+	// bat ky loai nao — an toan voi moi noi dang doc chieuDangChon==nil truoc
+	// Task 11 (case suKienDanhNguoiChoi la noi DAU TIEN dung truong nay).
+	loaiChieuDangChon byte
+
 	// lanDanhCuoi la thoi diem nguoi choi nay DUNG THANH CONG mot chieu lan
 	// gan nhat — Task 3 (chotkiem.go) can truong nay de tinh "da troi qua bao
 	// lau" cho kiem hoi chieu. store.NhanVat KHONG co truong thoi gian nao
@@ -386,6 +399,11 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 				// cap do chieu cua tung nguoi choi (se den o task sau) — chon
 				// chieu la chon LOAI, cap that do task khac quyet dinh.
 				nguoi.chieuDangChon = &danhMuc[i].CacCap[0]
+				// Fix wave cuoi Task 11: ghi CUNG LUC loaiChieuDangChon (xem
+				// chu thich truong do o dau file) — day la DIEM DUY NHAT trong
+				// ca actor gan chieuDangChon nen la noi DUNG NHAT de giu hai
+				// truong nay dong bo, khong the lech nhau.
+				nguoi.loaiChieuDangChon = danhMuc[i].Loai
 				return
 			}
 		}
@@ -563,6 +581,41 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 		// case suKienDanhQuai), ap dung DOI XUNG cho ca hai huong danh.
 		if nguoi.nv.HpHienTai <= 0 {
 			return // im lang bo qua
+		}
+
+		// Fix wave cuoi (coordinator soi toan nhanh KH6, 27/07): chieu HOI
+		// MAU (Loai == loaiBuff, chieuthuc.go) TUYET DOI KHONG duoc xu ly nhu
+		// mot don danh — truoc dong nay, moi chieu deu roi thang xuong
+		// TinhSatThuong ben duoi bat ke Loai, nen ai chon chieu hoi mau (vd Y
+		// Lieu Nhan Thuat) roi gui -60 se lam MUC TIEU MAT MAU thay vi duoc
+		// hoi — sai nguoc hoan toan y nghia chieu.
+		//
+		// CO CHU DICH CHUA xay co che hoi mau PvP that o day: dac ta chua du
+		// de lam dung — con thieu (a) luong hoi bao nhieu (khong co cong
+		// thuc nao duoc chot, khac han satThuongGoc/heSoChieu cua don danh),
+		// (b) nguoi DUOC HOI biet mau moi cua minh qua goi nao (goi -60 dang
+		// hoi mau, goiHoiMauNguoiChoi, dac ta §2.1 CHI co 4 truong dau roi
+		// dung — KHONG mang hpConLai; va -30/9 §3.4 chi gui cho "nguoi khac",
+		// tuc chinh nguoi duoc hoi KHONG tu biet mau minh qua goi nay, giong
+		// he qua tuong tu vua gap voi don danh o Task 11 Phan A). Xay ngay
+		// bay gio la DOAN giao thuc — dung bay "giai bai toan chua ton tai"
+		// (dac ta chien dau §4.1 "cong thuc chua chot" + BAT-DAU-TU-DAY §6.11
+		// "test xanh ma code sai"). PvP co luat (doi/dong minh — ai duoc hoi,
+		// ai bi cam hoi ke dich) cung da hoan sang KH9 (dac ta §0).
+		//
+		// BO QUA AN TOAN: khong tinh sat thuong, khong tru mau ai, KHONG
+		// phat goi tin nao ca (khac han nhanh "vuot tam" — day KHONG PHAI
+		// mot don thuc su duoc thu, nen khong ap dung dac ta §1.9 "van phat
+		// goi"). goiHoiMauNguoiChoi (goichiendau.go, dung xong tu Task 10,
+		// van con nguyen ham + test byte-chinh-xac cua no) CO CHU DICH CHUA
+		// duoc noi vao day — giu lai de dung NGAY khi co dac ta hoi mau PvP
+		// day du, khong phai viet lai tu dau.
+		//
+		// Dung nguoi.loaiChieuDangChon (KHONG PHAI nguoi.chieuDangChon.Loai —
+		// CapChieu, chieuthuc.go, khong co truong Loai; Loai chi ton tai o
+		// MauChieu cha, xem chu thich truong loaiChieuDangChon o dau file).
+		if nguoi.loaiChieuDangChon == loaiBuff {
+			return
 		}
 
 		// Tim nguoi BI DANH trong khu vuc theo idMucTieu. Khong tim thay (da

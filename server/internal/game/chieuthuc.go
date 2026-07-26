@@ -163,6 +163,15 @@ func xayDungChieuTheoLang() [5][]MauChieu {
 			// skillId goc: moi mot trong 20 chieu chiem 3 skillId lien tiep
 			// (3 cap), khong trung giua cac chieu/lang.
 			skillIdGoc := int16(1 + (lang*4+slot)*3)
+			// iconId sinh THEO VI TRI (lang*4+slot) — placeholder tam thoi cua
+			// Task 1, CHUA phai ID icon bo, dung kieu loi "chi so = danh tinh"
+			// (thiet ke tong §2.3): thu tu chieu ma doi (them/bot/sap xep lai
+			// mot chieu o giua danh sach) se lam LECH icon cua TAT CA chieu
+			// dung sau no, du chinh chieu do khong doi gi ca. KH7/KH8 (kho
+			// noi dung YAML) PHAI thay bang mot bang tra ID icon BEN (gan co
+			// dinh theo chieu, khong theo vi tri) — khi them ID icon moi,
+			// THEM O CUOI bang tra, TUYET DOI khong chen giua/doi thu tu cac
+			// ID da co, neu khong se doi icon cua nhung chieu KHONG lien quan.
 			iconId := int16(1 + lang*4 + slot)
 			manaGoc := int16(10 + slot*5)
 			dameGoc := int16(20 + slot*10)

@@ -234,8 +234,20 @@ func (b *BoXuLy) xuLyClientOk(s *mynet.Session) error {
 		return err
 	}
 
-	// -24 MAP INFO — gio kich switchToMe(), client roi "Xin cho".
-	mapInfo, err := goiMapInfo(b.nhanVat, bd)
+	// -24 MAP INFO — gio kich switchToMe(), client roi "Xin cho". Danh sach quai
+	// (Ke hoach 6 Task 5): lay tu KhuVuc NEU da co (b.khuVuc vua gan o tren);
+	// khong co khu vuc (vd. mapId khong dung SoKhuVuc trong test) thi gui map
+	// trong quai nhu KH4. LUU Y: buoc nay chay TRUOC khi nhan vat vao khu vuc
+	// (-39, xuLyVaoKhuVuc), nen doc danhSachQuai() o day la doc mot LAT CAT tai
+	// thoi diem hien tai, KHONG qua hop thu actor — chap nhan duoc trong Task 5
+	// vi nhipTim() con la mac rong (chua co AI/chien dau sua quai dong thoi);
+	// Task 7+ khi vongLap bat dau sua HP quai that su can xet lai duong nay
+	// (vd. chuyen sang doc qua su kien actor) de tranh tranh chap doc/ghi.
+	var quai []*Quai
+	if b.khuVuc != nil {
+		quai = b.khuVuc.danhSachQuai()
+	}
+	mapInfo, err := goiMapInfo(b.nhanVat, bd, quai)
 	if err != nil {
 		return err
 	}

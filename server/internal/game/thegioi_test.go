@@ -114,8 +114,8 @@ func TestGoiMeInfoByteDung(t *testing.T) {
 
 func TestGoiMapInfoByteDung(t *testing.T) {
 	nv := &store.NhanVat{MapID: 4, ViTriX: 100, ViTriY: 384}
-	bd := TimBanDo(4) // Lang Da: planet 0, tile 2, bg 1, bgType 0, loai 0, ten "Làng Đá"
-	m, err := goiMapInfo(nv, bd)
+	bd := TimBanDo(4)                 // Lang Da: planet 0, tile 2, bg 1, bgType 0, loai 0, ten "Làng Đá"
+	m, err := goiMapInfo(nv, bd, nil) // nil = map trong quai, giong KH4
 	if err != nil {
 		t.Fatalf("goiMapInfo loi: %v", err)
 	}
@@ -168,7 +168,7 @@ func TestGoiMapInfoDungViTriNhanVat(t *testing.T) {
 	// x/y trong MAP INFO lay tu VI TRI NHAN VAT (nv.ViTriX/Y), khong phai spawn
 	// mac dinh cua ban do — de KH5 (di chuyen) van dung sau khi nguoi choi da dich.
 	nv := &store.NhanVat{MapID: 1, ViTriX: 512, ViTriY: 240}
-	m, err := goiMapInfo(nv, TimBanDo(1))
+	m, err := goiMapInfo(nv, TimBanDo(1), nil)
 	if err != nil {
 		t.Fatal(err)
 	}

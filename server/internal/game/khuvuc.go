@@ -32,6 +32,11 @@ type KhuVuc struct {
 
 	nguoiTrong map[int64]*nguoiTrongKhuVuc
 
+	// quai la danh sach quai dang song trong khu vuc nay (Ke hoach 6 Task 5).
+	// Tao MOT LAN trong MoKhuVuc; sau do CHI luong vongLap duoc doc/ghi (cung
+	// quy tac da ap dung cho nguoiTrong) — dung danhSachQuai() de doc.
+	quai []*Quai
+
 	hopThu     chan suKienKhuVuc
 	dung       chan struct{}
 	xong       chan struct{}
@@ -72,16 +77,26 @@ type suKienRa struct {
 	idNhanVat int64
 }
 
-// MoKhuVuc tao mot khu vuc giu ban do da cho, chua co nguoi choi nao.
+// MoKhuVuc tao mot khu vuc giu ban do da cho, chua co nguoi choi nao. Quai
+// (Ke hoach 6 Task 5) duoc sinh MOT LAN o day bang taoQuaiMacDinh — day la
+// diem duy nhat gan quai vao mot khu vuc, giu dung nguyen tac "quai thuoc
+// actor, sinh luc MoKhuVuc" cua brief Task 5.
 func MoKhuVuc(bd *BanDo) *KhuVuc {
 	return &KhuVuc{
 		banDo:      bd,
 		nguoiTrong: make(map[int64]*nguoiTrongKhuVuc),
+		quai:       taoQuaiMacDinh(bd),
 	}
 }
 
 // BanDo tra ban do cua khu vuc (client can no de dung MAP INFO).
 func (k *KhuVuc) BanDo() *BanDo { return k.banDo }
+
+// danhSachQuai tra danh sach quai dang song trong khu vuc. CHI duoc goi tu
+// trong vongLap (actor da BatDau) HOAC truoc khi BatDau (khoi tao/test dong
+// bo) — giong quy uoc SoNguoiChoi/ThemNguoiChoi da co san o file nay. Task 6+
+// se doc/ghi HP quai qua ham nay tu ben trong xuLy/nhipTim.
+func (k *KhuVuc) danhSachQuai() []*Quai { return k.quai }
 
 // ThemNguoiChoi dua mot nhan vat vao khu vuc. Ke hoach 5 se broadcast su xuat
 // hien nay cho nguoi khac; Ke hoach 4 chi giu danh sach de lam nen.

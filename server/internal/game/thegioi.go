@@ -94,7 +94,7 @@ func goiMeInfo(nv *store.NhanVat) (*protocol.Message, error) {
 
 // goiMapInfo dung goi -24 MAP INFO: gio kich switchToMe() ben client (roi man
 // "Xin cho"). Byte-exact theo tai lieu §9 (da doi chieu Zone.mapInfo, Zone.java:
-// 738-869). Map TRONG: 0 waypoint/mob/npc/item. LUU Y bay cam:
+// 738-869). LUU Y bay cam:
 //
 //	(a) BYTE DU PHONG 0 giua mob va npc (Zone.java:805) — QUEN la lech toan bo phan sau.
 //	(b) bg-item RONG van phai short 0 (2 byte), KHONG bo trang.
@@ -102,7 +102,13 @@ func goiMeInfo(nv *store.NhanVat) (*protocol.Message, error) {
 //	    spawn ban do; giu dung de KH5 van dung sau khi nguoi choi da di chuyen.
 //	(d) -82 PHAI da duoc gui truoc goi nay (xuLyClientOk dam bao thu tu), va tileId
 //	    phai ∈ [1,numTileMap] — neu khong client THOAT HAN app.
-func goiMapInfo(nv *store.NhanVat, bd *BanDo) (*protocol.Message, error) {
+//
+// Ke hoach 6 Task 5: tham so `quai` la danh sach quai dang song trong khu vuc
+// nay tai THOI DIEM goi nay dung (§3.6). Ham nay CHI GHI byte — khong tu doc
+// trang thai KhuVuc — de giu logic ma hoa THUAN (dev thuan tien test byte-
+// chinh-xac ma khong can dung actor). Noi GOI ham nay (xuLyClientOk trong
+// login.go) chiu trach nhiem lay dung danh sach quai truoc khi truyen vao.
+func goiMapInfo(nv *store.NhanVat, bd *BanDo, quai []*Quai) (*protocol.Message, error) {
 	w := protocol.NewWriter()
 	w.Byte(byte(bd.MapID)) // mapId (client doc unsigned byte, <=255)
 	w.Byte(bd.PlanetID)    // planetId
@@ -117,11 +123,11 @@ func goiMapInfo(nv *store.NhanVat, bd *BanDo) (*protocol.Message, error) {
 	w.Short(int16(nv.ViTriX)) // (c) x = vi tri nhan vat
 	w.Short(int16(nv.ViTriY)) // (c) y
 
-	w.Byte(0) // waypointCount = 0
-	w.Byte(0) // mobCount = 0
-	w.Byte(0) // (a) BYTE DU PHONG — giua mob va npc, DUNG QUEN
-	w.Byte(0) // npcCount = 0
-	w.Byte(0) // itemCount = 0
+	w.Byte(0)                // waypointCount = 0
+	ghiDanhSachQuai(w, quai) // mobCount + tung con quai (§3.6, Ke hoach 6 Task 5)
+	w.Byte(0)                // (a) BYTE DU PHONG — giua mob va npc, DUNG QUEN
+	w.Byte(0)                // npcCount = 0
+	w.Byte(0)                // itemCount = 0
 
 	w.Short(0) // (b) bg-item: short 0 (map trong, khong bo trang)
 	w.Short(0) // effMapCount = 0

@@ -8,7 +8,7 @@
 > một bản vá, một phát hiện lỗi) thì **phải cập nhật file này ngay** rồi mới commit.
 > Cách cập nhật xem mục [11. Quy ước cập nhật](#11-quy-ước-cập-nhật-file-này).
 
-**Cập nhật lần cuối:** 26/07/2026 · **Nhánh chính:** `main` · **Commit HEAD:** `db34f6c`
+**Cập nhật lần cuối:** 27/07/2026 · **Nhánh chính:** `main` (KH6 thiết kế đã gộp `c812617`; thi công đang trên nhánh `kh6-thi-cong`)
 
 ---
 
@@ -134,9 +134,11 @@ Xếp theo thứ tự nên làm:
 
 | Ưu tiên | Việc | Ghi chú |
 |---|---|---|
-| 1 | **KH6 — Chiến đấu, chiêu thức, quái** | 📐 **Đã có thiết kế + kế hoạch 15 task, chưa thi công.** [Nghiên cứu](docs/superpowers/research/kh6-goi-chien-dau.md) · [đặc tả](docs/superpowers/specs/2026-07-26-giao-thuc-chien-dau.md) · [kế hoạch](docs/superpowers/plans/2026-07-26-ke-hoach-6-chien-dau.md). **Boss đã tách ra khỏi KH6.** Bảng byte đã đối chiếu **cả hai phía** (Java + client Unity) → **không còn task nào bị chặn**, bốn nhánh chạy song song được ngay |
+| 1 | **KH6 — Chiến đấu, chiêu thức, quái** | 🔨 **Đang thi công** trên nhánh `kh6-thi-cong` (Task 1–7 + 10 đã xong review đối kháng; còn 8, 9, 13, 11, 14, 15). [Nghiên cứu](docs/superpowers/research/kh6-goi-chien-dau.md) · [đặc tả](docs/superpowers/specs/2026-07-26-giao-thuc-chien-dau.md) · [kế hoạch](docs/superpowers/plans/2026-07-26-ke-hoach-6-chien-dau.md). **Hệ số khắc chế ×1,25/×1,00/×0,80 đã chốt 27/07/2026** (spec §4.2) |
+| 1b | **KH6b — Boss** (hệ riêng, tách khỏi KH6) | Bản Java là 12 file, phức tạp hơn quái thường nhiều. Thiết kế sau khi KH6 gộp |
+| 1c | **KH6c — Stress test 20 client cùng khu vực** | Cùng xả chiêu, đo gói rơi hộp thư actor (trần 256, rơi im lặng) + trễ nhịp 100ms. Dựng trên `thuclient`/`clientGia`. Chạy ngay sau Task 14 |
 | 2 | KH7 — Vật phẩm, hành trang, cửa hàng, giao dịch | |
-| 3 | KH8 — Kho nội dung YAML + nạp nóng | Để thêm chiêu/quái mà không phải sửa code |
+| 3 | KH8 — Kho nội dung YAML + nạp nóng | Để thêm chiêu/quái mà không phải sửa code. **Kèm cân bằng thực nghiệm** (đơn vị `SatThuong` phải chốt — TODO trong `satthuong.go`) |
 | 4 | KH9 — Nhiệm vụ, cốt truyện, NPC | |
 | 5 | KH10 — Cảm giác chơi (hoạt ảnh, chuyển màn, hướng dẫn người mới) | Ba con số ràng buộc đã chốt ở KH5 |
 | — | **W3 — Web:** cấu hình / nhật ký / nạp thẻ, phân trang, thu hồi phiên JWT | Một phần phụ thuộc hệ thống game chưa có |
@@ -363,3 +365,4 @@ Commit riêng cho việc cập nhật tài liệu thì dùng tiền tố `docs:`
 | 26/07/2026 | Xong **KH5** (di chuyển + actor) gộp `e1ddc44`. Tạo file `BAT-DAU-TU-DAY.md` này làm điểm vào duy nhất cho người/agent mới |
 | 26/07/2026 | Dựng cơ chế **nhiều agent song song**: sổ `NHAT-KY-AGENT.md`, lệnh `/viec` (một lệnh tự nhận biết nhận việc / ghi sổ), `AGENTS.md` cho agent ngoài, `MO-AGENT.bat`, hook `SessionStart` tự nạp bối cảnh (xem §10b) |
 | 26/07/2026 | **KH6 xong phần thiết kế**: nghiên cứu giao thức chiến đấu (gói đánh quái/đánh người/chiêu/chết/hồi sinh, AI quái, nhịp 100 ms) → đặc tả có bảng byte → kế hoạch thi công 15 task. **Chưa viết code.** Bảng byte đã đối chiếu **cả hai phía** (Java + client Unity). Phát hiện mới: gói `-60` có **hai dạng độ dài** (§6.6); client lộ ra **3 lỗi thật** của bản Java ở `-8`/`-17`/`-9` (§6.16); mã `87` bị dùng cho hai việc (§6.17); sai trường **không** làm hỏng cả dòng byte, chỉ hỏng im lặng (§6.18); cổng PostgreSQL **không cố định giữa các lần khởi động** (§9) |
+| 27/07/2026 | **KH6 thiết kế gộp vào `main`** (`c812617`, sau soi lần hai: gói 87 đối chiếu client khớp, test 7/7 xanh). **Thi công KH6 trên nhánh `kh6-thi-cong`**: Task 1 (catalog 20 chiêu) → 2 (chọn chiêu qua actor) → 3 (chốt kiểm) → 4 (sát thương ngũ hành) → 5 (quái trong actor + `-24`, vá kỷ luật actor bằng snapshot qua hộp thư) → 6 (gói 54/-9/-12/-13) → 10 (gói `-60` hai dạng) → 7 (điều phối đánh quái + 2 test lưới an toàn) — **mỗi task đều qua review đối kháng + kiểm thử đột biến**. Chủ dự án **chốt hệ số khắc chế ×1,25/×1,00/×0,80**; thêm **KH6b (Boss)** và **KH6c (stress 20 client)** vào lộ trình |

@@ -1,20 +1,14 @@
 # Nhật ký agent — ai đã làm gì
 
-## ⏳ ĐANG CHỜ GÌ NGAY LÚC NÀY — cập nhật: 26/07/2026
+## ⏳ ĐANG CHỜ GÌ NGAY LÚC NÀY — cập nhật: 27/07/2026
 
 > Ai vào cũng đọc khối này trước. **Xong việc thì phải sửa lại khối này**, nếu không nó
 > thành thông tin cũ gây hại hơn là không có.
 
-- **ĐANG CHỜ SOI LẦN HAI:** nhánh `kh6-nghien-cuu-chien-dau` (worktree
-  `.claude\worktrees\vao-viec-b4ec16`) đã **sửa xong cả 5 việc** ở
-  [`docs/superpowers/plans/KH6-VIEC-CAN-SUA-TRUOC-KHI-GOP.md`](docs/superpowers/plans/KH6-VIEC-CAN-SUA-TRUOC-KHI-GOP.md)
-  (khối ✅ ở đầu file đó ghi rõ làm gì), đã `git merge main` tới `6c8cbec`, test toàn xanh.
-  **Nhánh chưa gộp — chờ phiên điều phối soi rồi gộp `--no-ff`.**
-- **Việc kế tiếp của phiên điều phối:** soi lần hai → nếu sạch thì **gộp `--no-ff` vào
-  `main`** rồi xoá nhánh.
-- ~~Chuyển bài học PowerShell/mojibake vào §6~~ → **đã làm**, nay là **§6.15**.
-- **Rồi mới tới:** thi công KH6 theo kế hoạch 15 task. **Task 12 đã xong** (đã đọc client
-  Unity xác minh `-8`/`-17`) → **không còn task nào bị chặn**, ba nhánh chạy song song được.
+- ~~Soi lần hai nhánh `kh6-nghien-cuu-chien-dau`~~ → **đã soi + gộp `main` (`c812617`), nhánh đã xoá.**
+- **ĐANG THI CÔNG KH6** trên nhánh `kh6-thi-cong` (phiên điều phối Fable 5 + subagent, mỗi task một agent + review đối kháng). Đã xong review: Task 1, 2, 3, 4, 5, 6, 7, 10. Còn: 8 → 9 → 13 → 11 → 14, rồi soi toàn nhánh → gộp `main`. **Đừng agent nào khác chạm `server/internal/game/` lúc này.**
+- Chủ dự án đã **chốt hệ số khắc chế ×1,25/×1,00/×0,80** (spec KH6 §4.2) và thêm **KH6b (Boss)**, **KH6c (stress 20 client)** vào lộ trình.
+- Task 15 (nghiệm thu tay bằng client Unity thật) vẫn thuộc chủ dự án sau khi gộp.
 
 ---
 
@@ -47,3 +41,4 @@ lên nhau.
 | 26/07/2026 | Claude Code (phiên chính) | **Soi commit `3f7d23a`** (KH6 thiết kế, của worktree `vao-viec-b4ec16`): đối chiếu từng bảng byte + 12 con số hành vi + 4 "lỗi bản gốc" với code Java → **khớp hết**; chạy lại `go test ./...` toàn xanh trên cổng 5432. Sửa `server/README.md` dạy cách **tự kiểm cổng** thay vì ghim số | `main` | ⚠️ **Nhánh `kh6-nghien-cuu-chien-dau` rẽ từ `db34f6c`, CHƯA có `280a774`** → gộp thẳng sẽ xung đột `BAT-DAU-TU-DAY.md` + sổ này và **có thể xoá mất lệnh `/viec`**. Phải `git merge main` vào nhánh đó trước, giải xung đột theo hướng GIỮ `/viec`. **5 việc phải sửa trước khi gộp — đã viết đầy đủ, kèm bằng chứng, ở [`docs/superpowers/plans/KH6-VIEC-CAN-SUA-TRUOC-KHI-GOP.md`](docs/superpowers/plans/KH6-VIEC-CAN-SUA-TRUOC-KHI-GOP.md)**: sót gói `87`, số byte 14B/10B sai, Task 5 chỉ sai file, §9 kết luận sai về cổng, và việc merge `main` để không mất `/viec` |
 | 26/07/2026 | Claude Code (phiên chính) | **Bài học mới, chưa kịp đưa vào §6** (đợi gộp xong để không rối số mục): **KHÔNG dùng PowerShell `Get-Content -Raw` + `Set-Content` để sửa file tiếng Việt** — PS 5.1 đọc UTF-8 bằng codepage ANSI rồi ghi lại UTF-8 → mojibake sạch cả file, và diff phình ra như viết lại toàn bộ. Đã tự vấp khi sửa `server/README.md`, phải `git checkout --` rồi làm lại bằng công cụ Edit. Sửa file có dấu thì **luôn dùng Edit/Write**, không dùng shell | `main` | ✅ Đã chuyển thành **§6.15** khi gộp KH6 |
 | 26/07/2026 | Claude Code (worktree `vao-viec-b4ec16`) | **Sửa xong 5 việc soi ra** + gộp `main` (tới `6c8cbec`). Đọc client Unity nên **Task 12 xong luôn** → nhóm E hết bị chặn. Lộ thêm: gói `87` là "gió thổi" chứ không phải maxHp (bản Go **không gửi**), `-9` trường cuối là **1 byte** không phải 4, `-13` hai byte giữa là `sys`/`levelBoss`, gói xuống `54` **không có trường đếm**. Tự sửa một chỗ mình viết sai: "sai trường → client hỏng vĩnh viễn" là **SAI**, chỉ hỏng gói đó và hỏng **im lặng** | `kh6-nghien-cuu-chien-dau` | **Chưa gộp — chờ soi lần hai.** Test 7/7 gói xanh, vet + gofmt sạch. Hai thứ chủ dự án cần chốt trước khi thi công: **hệ số ngũ hành** (đề xuất 1,25 / 1,00 / 0,80) và **20 chiêu (4 mỗi làng)** |
+| 27/07/2026 | Claude Fable 5 (phiên điều phối) | **Soi lần hai KH6 thiết kế → gộp `main` (`c812617`), xoá nhánh.** Bắt đầu **thi công KH6** trên nhánh `kh6-thi-cong` bằng subagent (TDD + đột biến + review đối kháng từng task): xong Task 1 (catalog 20 chiêu), 2 (chọn chiêu qua actor), 3 (chốt kiểm), 4 (sát thương ngũ hành), 5 (quái + `-24`, vá kỷ luật actor qua snapshot hộp thư), 6 (gói 54/-9/-12/-13), 10 (`-60` hai dạng), 7 (điều phối đánh quái + 2 test lưới an toàn). Chủ dự án **chốt hệ số ×1,25/×1,00/×0,80**; thêm **KH6b Boss + KH6c stress 20 client** vào lộ trình | `kh6-thi-cong` | Còn Task 8 → 9 → 13 → 11 → 14 rồi soi toàn nhánh → gộp `main`. Sổ chi tiết: `.superpowers/sdd/2026-07-26-ke-hoach-6-chien-dau/progress.md`. **Đừng agent khác chạm `server/internal/game/`** |

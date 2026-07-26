@@ -8,7 +8,7 @@
 > một bản vá, một phát hiện lỗi) thì **phải cập nhật file này ngay** rồi mới commit.
 > Cách cập nhật xem mục [11. Quy ước cập nhật](#11-quy-ước-cập-nhật-file-này).
 
-**Cập nhật lần cuối:** 27/07/2026 (Task 13 KH6 — chết/hồi sinh) · **Nhánh chính:** `main` (KH6 thiết kế đã gộp `c812617`; thi công đang trên nhánh `kh6-thi-cong`)
+**Cập nhật lần cuối:** 27/07/2026 (**KH6 xong, gộp `main`**) · **Nhánh chính:** `main` · **Commit HEAD:** `162bbe9`
 
 ---
 
@@ -116,15 +116,19 @@ Mỗi kế hoạch đều đi qua: thiết kế → kế hoạch → thi công t
 | 3 | Đồng bộ dữ liệu tĩnh | 4 catalog (data/map/skill/item), **5 làng Naruto thay 3 hành tinh** | `7a85431` |
 | 4 | Vào thế giới | Nhân vật hiện ra đứng trong làng (tileset + ME_INFO + MAP INFO) | `aef5f71` |
 | 5 | Di chuyển + mô hình actor | Nhiều người **thấy nhau**, đi lại, chống dịch chuyển tức thời | `e1ddc44` |
+| 6 | **Chiến đấu, chiêu thức, quái** | 20 chiêu Naruto (4/làng) + sát thương ngũ hành (×1,25/×1,00/×0,80); đánh quái, quái đánh lại + hồi sinh, **PvP**, chết & hồi sinh; nhiều người cùng khu vực **thấy toàn bộ diễn biến** | `162bbe9` |
 | W1 | Web nền tảng | Đăng ký, đăng nhập, phiên cookie, dùng chung CSDL với game | `af5a2e4` |
 | W2 | Web tính năng | Trang cá nhân, đổi mật khẩu, bảng xếp hạng, panel admin (chặn quyền 3 lớp) | trên `main` |
 
-**Tình trạng chất lượng hiện tại:** `go test ./...` — **125 test xanh, 0 đỏ**, chạy lặp
-5 lần không chập chờn. `gofmt` sạch, `go vet` sạch.
+**Tình trạng chất lượng hiện tại:** `go test ./...` — **toàn bộ 6 gói xanh, 0 đỏ**
+(gói `game` ~70s), chạy lặp `-count=5` không chập chờn. `gofmt` sạch (trừ nhiễu CRLF file
+cũ, §9), `go vet` sạch. KH6 còn được **soi toàn nhánh (opus)** + **2 canary** (thả bug thật
+để kiểm: reviewer bắt được lỗi byte im lặng, test E2E bắt được lỗi tích hợp).
 
 **Người chơi hiện đã làm được gì:** đăng ký trên web → đăng nhập vào game → tạo nhân
-vật, chọn làng → vào bản đồ làng → đi lại và nhìn thấy người chơi khác đi lại.
-Chưa đánh nhau được.
+vật, chọn làng → vào bản đồ làng → đi lại, thấy người khác → **chọn chiêu, đánh quái,
+bị quái đánh, đánh nhau (PvP), chết rồi hồi sinh**. Còn chờ **nghiệm thu tay bằng client
+Unity thật** (Task 15) — đó là việc chỉ chủ dự án làm được.
 
 ---
 
@@ -134,10 +138,11 @@ Xếp theo thứ tự nên làm:
 
 | Ưu tiên | Việc | Ghi chú |
 |---|---|---|
-| 1 | **KH6 — Chiến đấu, chiêu thức, quái** | 🔨 **Đang thi công** trên nhánh `kh6-thi-cong` (Task 1–10 đã xong review đối kháng; Task 13 — chết/hồi sinh — vừa xong bởi implementer, chờ review đối kháng; còn 11, 14; Task 15 là nghiệm thu tay chủ dự án). [Nghiên cứu](docs/superpowers/research/kh6-goi-chien-dau.md) · [đặc tả](docs/superpowers/specs/2026-07-26-giao-thuc-chien-dau.md) · [kế hoạch](docs/superpowers/plans/2026-07-26-ke-hoach-6-chien-dau.md). **Hệ số khắc chế ×1,25/×1,00/×0,80 đã chốt 27/07/2026** (spec §4.2) |
+| ✅ | ~~KH6 — Chiến đấu~~ | **Xong, gộp `162bbe9`.** Còn **Task 15 — nghiệm thu tay bằng client Unity** (chỉ chủ dự án làm). Hồi máu PvP (`goiHoiMauNguoiChoi`) cố ý hoãn — xem §8 |
+| 1 | **KH11 — Lưu trạng thái sống** (đề xuất mới, [chi tiết](docs/superpowers/plans/BO-SUNG-LO-TRINH.md) Khối 1) | 🔴🧱 **Nguy hiểm nhất, kiến trúc, làm ngay sau KH6.** Server hiện **không lưu gì** sau lúc tạo nhân vật (`store.go` không có UPDATE) → tắt server là mất sạch tiến độ. Phải thiết kế lưu bất đồng bộ TRƯỚC KH7 |
 | 1b | **KH6b — Boss** (hệ riêng, tách khỏi KH6) | Bản Java là 12 file, phức tạp hơn quái thường nhiều. Thiết kế sau khi KH6 gộp |
-| 1c | **KH6c — Stress test 20 client cùng khu vực** | Cùng xả chiêu, đo gói rơi hộp thư actor (trần 256, rơi im lặng) + trễ nhịp 100ms. Dựng trên `thuclient`/`clientGia`. Chạy ngay sau Task 14 |
-| 2 | KH7 — Vật phẩm, hành trang, cửa hàng, giao dịch | |
+| 1c | **KH6c — Stress test 20 client cùng khu vực** | Cùng xả chiêu, đo gói rơi hộp thư actor (trần 256, rơi im lặng) + trễ nhịp 100ms. Dựng trên `thuclient`/`clientGia` |
+| 2 | KH7 — Vật phẩm, hành trang, cửa hàng, giao dịch | 🧱 **Phải chốt căn cước vật phẩm + chống nhân bản trong đặc tả TRƯỚC khi viết code** ([BO-SUNG](docs/superpowers/plans/BO-SUNG-LO-TRINH.md) Khối 3). Tách rõ 4 thứ: cửa hàng NPC / giao dịch 2 người / ký gửi / kho |
 | 3 | KH8 — Kho nội dung YAML + nạp nóng | Để thêm chiêu/quái mà không phải sửa code. **Kèm cân bằng thực nghiệm** (đơn vị `SatThuong` phải chốt — TODO trong `satthuong.go`) |
 | 4 | KH9 — Nhiệm vụ, cốt truyện, NPC | |
 | 5 | KH10 — Cảm giác chơi (hoạt ảnh, chuyển màn, hướng dẫn người mới) | Ba con số ràng buộc đã chốt ở KH5 |
@@ -281,13 +286,20 @@ Gom lại thành **Kế hoạch B**, sửa lẻ từng cái là vô nghĩa:
 - `context.Background()` ở `login.go`: truy vấn CSDL không hạn giờ, không huỷ khi client ngắt.
 - Vòng `Accept()` không nghỉ giãn → cạn file descriptor sẽ quay nóng CPU.
 - Mã chết: `Writer.Bool`, `Writer.Long`; `TaiKhoan.LaAdmin` đọc từ CSDL nhưng chưa ai dùng.
-- Test package `game` chậm (~54 giây) do nhiều test đầu-cuối chờ hết hạn giờ đọc.
-- **KH6 Task 13**: `aiQuai`/`chonMucTieu` (quái đánh người, `quai.go`) chưa tôn trọng
-  bất tử 1500ms sau hồi sinh — chỉ lọc mục tiêu "đã chết" (`HpHienTai<=0`), không lọc
-  "vừa hồi sinh" qua `nguoiTrongKhuVuc.lucHoiSinh` (trường mới của Task 13). Một người
-  vừa bấm hồi sinh có thể bị quái AI đánh trúng ngay tick kế tiếp (100ms). Cần sửa
-  `chonMucTieu` (thêm tham số `bayGio`, lọc thêm điều kiện) — việc của Task 11 (PvP,
-  cũng cần đọc `lucHoiSinh`) hoặc một task vá nhỏ riêng.
+- Test package `game` chậm (~70 giây) do nhiều test đầu-cuối chờ hết hạn giờ đọc.
+- ~~KH6 Task 13: quái không tôn trọng bất tử 1500ms~~ → **đã vá ở Task 11** (`chonMucTieu`
+  thêm tham số `bayGio` + lọc `lucHoiSinh`, có test thuần + test nhịp thật).
+- **KH6 — hồi máu PvP hoãn có kỷ luật:** `goiHoiMauNguoiChoi` (gói `-60` dạng hồi máu, 11
+  byte) đã dựng + test byte nhưng **cố ý CHƯA nối dây** — cơ chế hồi máu chưa đặc tả đủ
+  (lượng hồi bao nhiêu; người được hồi biết máu mới qua gói nào — `-30/9` §3.4 chỉ gửi
+  "người khác"). Chiêu type=2 (hồi máu) hiện có **chốt không xử như đòn đánh** để không gây
+  sát thương sai (`khuvuc.go`, `case suKienDanhNguoiChoi`). Khi có đặc tả hồi máu (KH riêng
+  hoặc cùng PvP-có-luật KH9) thì nối `chieuDangChon.Loai==2` → `goiHoiMauNguoiChoi`.
+- **KH6 — `iconId` sinh theo vị trí** (`chieuthuc.go:166` `int16(1+lang*4+slot)`): bug lớp
+  "chỉ số = danh tính" (§2.3 thiết kế tổng) — chèn làng/đổi thứ tự chiêu làm lệch icon các
+  chiêu sau. Chưa cắn (5 làng cố định). KH7/KH8 thay bằng bảng tra ID bền, thêm ID ở cuối.
+- **KH6 Task 11**: chưa chặn tự đánh chính mình (`-60` với `idMucTieu==idNhanVat`) — vô hại
+  ở KH6 (chưa có luật đội/PvP), hoãn tới KH9.
 
 ---
 
@@ -383,4 +395,5 @@ Commit riêng cho việc cập nhật tài liệu thì dùng tiền tố `docs:`
 | 26/07/2026 | Dựng cơ chế **nhiều agent song song**: sổ `NHAT-KY-AGENT.md`, lệnh `/viec` (một lệnh tự nhận biết nhận việc / ghi sổ), `AGENTS.md` cho agent ngoài, `MO-AGENT.bat`, hook `SessionStart` tự nạp bối cảnh (xem §10b) |
 | 26/07/2026 | **KH6 xong phần thiết kế**: nghiên cứu giao thức chiến đấu (gói đánh quái/đánh người/chiêu/chết/hồi sinh, AI quái, nhịp 100 ms) → đặc tả có bảng byte → kế hoạch thi công 15 task. **Chưa viết code.** Bảng byte đã đối chiếu **cả hai phía** (Java + client Unity). Phát hiện mới: gói `-60` có **hai dạng độ dài** (§6.6); client lộ ra **3 lỗi thật** của bản Java ở `-8`/`-17`/`-9` (§6.16); mã `87` bị dùng cho hai việc (§6.17); sai trường **không** làm hỏng cả dòng byte, chỉ hỏng im lặng (§6.18); cổng PostgreSQL **không cố định giữa các lần khởi động** (§9) |
 | 27/07/2026 | **KH6 thiết kế gộp vào `main`** (`c812617`, sau soi lần hai: gói 87 đối chiếu client khớp, test 7/7 xanh). **Thi công KH6 trên nhánh `kh6-thi-cong`**: Task 1 (catalog 20 chiêu) → 2 (chọn chiêu qua actor) → 3 (chốt kiểm) → 4 (sát thương ngũ hành) → 5 (quái trong actor + `-24`, vá kỷ luật actor bằng snapshot qua hộp thư) → 6 (gói 54/-9/-12/-13) → 10 (gói `-60` hai dạng) → 7 (điều phối đánh quái + 2 test lưới an toàn) — **mỗi task đều qua review đối kháng + kiểm thử đột biến**. Chủ dự án **chốt hệ số khắc chế ×1,25/×1,00/×0,80**; thêm **KH6b (Boss)** và **KH6c (stress 20 client)** vào lộ trình |
-| 27/07/2026 | **KH6 tiếp tục**: Task 8 (quái hồi sinh 5s + hồi máu 30s trong nhịp actor, `e41678b`) → Task 9 (AI quái 2 tầng ưu tiên + gói `-11`/`-10`, `b22152c`) → Task 13 (chết & hồi sinh người chơi, gói `-17`/`-8`/`-16`/`-30/15`, `67e6650`) — implementer xong, chờ review đối kháng. Task 13 chỉ cần thêm **một** trường mới vào `nguoiTrongKhuVuc` (`lucHoiSinh`) chứ không phải Hp/HpToiDa như rủi ro đã lường trước (Task 9 đã dùng `nv.HpHienTai` trực tiếp từ trước); phát hiện gap mới **chưa sửa**: quái AI chưa tôn trọng bất tử 1500ms sau hồi sinh (§8) |
+| 27/07/2026 | **KH6 tiếp tục**: Task 8 (quái hồi sinh 5s + hồi máu 30s trong nhịp actor, `e41678b`) → Task 9 (AI quái 2 tầng ưu tiên + gói `-11`/`-10`, `b22152c`) → Task 13 (chết & hồi sinh người chơi, gói `-17`/`-8`/`-16`/`-30/15`, `67e6650`). Task 13 chỉ cần thêm **một** trường `lucHoiSinh` chứ không phải Hp/HpToiDa như rủi ro đã lường (Task 9 đã dùng `nv.HpHienTai`) |
+| 27/07/2026 | **KH6 XONG — gộp `main` `162bbe9`.** Task 11 (PvP `-60` + gói `-30/9` + **vá gap bất tử quái** của Task 13) → Task 14 (**test đầu-cuối 2 người qua mạng + CSDL thật**, diễn trọn chuỗi chiến đấu). **Soi toàn nhánh bằng opus** → bắt được `goiHoiMauNguoiChoi` là mã chết (chiêu type=2 gây sát thương sai) → đợt sửa cuối chốt hoãn có kỷ luật. **2 canary** (thả bug thật): reviewer bắt được lỗi byte im lặng, test E2E bắt được lỗi tích hợp — pipeline review đáng tin. Phân tích **bổ sung lộ trình** (9 khối thiếu, [`BO-SUNG-LO-TRINH.md`](docs/superpowers/plans/BO-SUNG-LO-TRINH.md)) + **mapping ảnh** đã lưu. Còn **Task 15 nghiệm thu tay bằng Unity** (chủ dự án) |

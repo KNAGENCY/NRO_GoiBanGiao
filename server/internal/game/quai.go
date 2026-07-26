@@ -4,7 +4,11 @@
 // tac da ap dung cho nguoiTrong o Ke hoach 5).
 package game
 
-import "nroserver/internal/protocol"
+import (
+	"time"
+
+	"nroserver/internal/protocol"
+)
 
 // Quai la mot con quai dang song trong PHAM VI mot KhuVuc. Cac Task sau cua Ke
 // hoach 6 (6-9, 13) se doc/ghi them cac truong nay tu trong vongLap (AI, chien
@@ -42,6 +46,39 @@ type Quai struct {
 	// TrangThai la truong "status" (dac ta §3.6 truong 13) — 0 = binh thuong;
 	// Task sau (choang, buff...) se dung gia tri khac.
 	TrangThai byte
+
+	// --- Ba truong duoi day la Ke hoach 6 Task 8 (hoi sinh 5s + hoi mau 30s,
+	// dac ta §5.2) — trang thai NOI BO cua actor, KHONG xuat hien trong than
+	// goi -24 (ghiQuai o duoi khong dung toi). Chi luong vongLap cua KhuVuc
+	// duoc doc/ghi (dac ta §1.6), giong moi truong khac cua Quai.
+
+	// LucChet la thoi diem Hp xuong <= 0 GAN NHAT — nhipTim (khuvuc.go) dung
+	// truong nay de tinh "da troi qua bao lau tu luc chet" cho nguong 5 giay
+	// hoi sinh. Duoc gan trong case suKienDanhQuai (khuvuc.go) ngay khi phat
+	// hien Hp <= 0, TRUOC khi phat goi -12. Zero value (chua tung chet) khong
+	// gay hai: quai moi taoQuaiMacDinh luon Hp > 0 nen nhanh "dang chet" cua
+	// nhipTim khong bao gio doc truong nay khi con zero.
+	LucChet time.Time
+
+	// LucHoiSinh la thoi diem quai HOI SINH GAN NHAT (nhipTim gan khi qua du
+	// 5 giay ke tu LucChet). Dung lam ViTriCoMau.LucHoiSinh (chotkiem.go) khi
+	// nguoi choi xin danh quai nay — kich hoat bat tu 1500ms sau hoi sinh (dac
+	// ta §1.7), CUNG CO CHE voi nguoiTrongKhuVuc ma Task 13 se dung cho nguoi
+	// choi. Zero value (quai moi spawn, CHUA TUNG hoi sinh lan nao — khac voi
+	// "vua hoi sinh") khien bayGio.Sub(zero) ra khoang RAT LON -> kiem bat tu
+	// tu nhien CHO PHEP ngay, dung hanh vi mong doi: quai moi mo ban do khong
+	// bi coi la "vua hoi sinh" nen khong duoc mien nhiem oan.
+	LucHoiSinh time.Time
+
+	// LanHoiMauCuoi la thoi diem GAN NHAT nhipTim DA KIEM (khong nhat thiet
+	// DA HOI — neu dang day mau thi kiem xong khong hoi gi) chu ky hoi mau 30
+	// giay (dac ta §5.2). Khoi tao = thoi diem spawn (MoKhuVuc gan sau khi goi
+	// taoQuaiMacDinh) de lan kiem DAU TIEN dung 30 giay sau khi ban do mo, chu
+	// khong hoi ngay lap tuc do zero value nam 1 tao ra khoang cach "da troi
+	// qua" khong lo. Sau moi lan hoi sinh (nhipTim), truong nay CUNG duoc dat
+	// lai ve thoi diem hoi sinh — tranh mot con quai vua hoi (da day mau) van
+	// bi tinh "no du 30s roi" tu truoc luc chet va hoi "thua" ngay tick ke tiep.
+	LanHoiMauCuoi time.Time
 }
 
 // ghiQuai ghi MOT con quai vao than goi -24 MAP INFO, DUNG THEO THU TU dac ta

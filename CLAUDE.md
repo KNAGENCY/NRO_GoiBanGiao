@@ -4,7 +4,28 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Trả lời bằng **tiếng Việt đời thường**. Chủ sở hữu **không phải lập trình viên** — luôn nói *tại sao* trước khi nói *làm thế nào*.
 
-## Đây là gì
+## ⚠️ ĐỌC `BAT-DAU-TU-DAY.md` TRƯỚC
+
+[`BAT-DAU-TU-DAY.md`](BAT-DAU-TU-DAY.md) ở gốc repo là **điểm vào duy nhất**: dự án đang làm gì, đã xong tới đâu, còn gì chưa làm, đã vấp những lỗi nào. Đọc nó trước khi động vào bất cứ thứ gì.
+
+**Bắt buộc:** làm xong việc gì đáng kể (một task, một kế hoạch, một bản vá, một phát hiện lỗi) thì **cập nhật `BAT-DAU-TU-DAY.md` ngay** rồi mới commit — cách cập nhật ghi ở §11 của chính file đó. Không cập nhật = phiên sau (người hay agent) mất phương hướng.
+
+## Việc đang làm: viết lại thành game Naruto
+
+Dự án thật sự hiện nay là **xây game Naruto mới**, viết lại máy chủ bằng **Go + PostgreSQL** (`server/`) và web/panel bằng **Next.js** (`web/`), dựa trên phần lõi giao thức của server Ngọc Rồng đã mua. Đây là **game mới hoàn toàn** — 5 làng Naruto thay 3 hành tinh Dragon Ball; dấu vết game cũ xoá dần.
+
+| Thư mục | Vai trò |
+|---|---|
+| `server/`, `web/`, `docs/superpowers/`, `docs/my-thuat/` | 🟢 **Đang sống** — mọi việc mới nằm ở đây |
+| `1-MAY-CHU-GAME/`, `2-WEB/`, `3-CO-SO-DU-LIEU/`, `4-BO-CAI-DAT/`, `5-TAI-LIEU/` | 📖 **Chỉ tra cứu** — code Java/PHP cũ, dùng để giải mã giao thức nhị phân mà client Unity nói. Đừng sửa để "chạy game" |
+
+Lộ trình: `docs/superpowers/plans/LO-TRINH.md`. Cách làm việc (subagent + TDD + review đối kháng): §10 của `BAT-DAU-TU-DAY.md`.
+
+---
+
+## Phần dưới đây mô tả DI SẢN (server Java/PHP cũ)
+
+Giữ lại vì đây là nguồn tra cứu giao thức và là bản đang chạy thật. **Không phải hướng dẫn cho việc đang làm.**
 
 **Gói bàn giao** của server private Ngọc Rồng Online, thương hiệu **Ngọc Rồng Kame**, tên miền **nrokame.com**. Không phải một project mà là 4 mảnh dính chặt nhau, đóng gói lại để dựng server mới trên VPS Windows:
 
@@ -64,7 +85,10 @@ Phân chia dữ liệu: **logic + chỉ số game nằm trong MySQL**; `1-MAY-CH
 - **`index.php` là trang nguỵ trang** (site học tập giả "EduVerse"). Trang game thật ở `/sv1/trangchu`.
 - **Không mở cổng 3306 ra internet.** Mật khẩu root đang rỗng trong gói và MariaDB đang nghe mọi card mạng. Chỉ mở 80 + 14445.
 
-## Chưa làm / đang treo
+## Chưa làm / đang treo (của bản Java/PHP cũ)
+
+> Việc còn lại của **dự án Naruto đang làm** nằm ở `BAT-DAU-TU-DAY.md` §5 (còn gì chưa làm) và §7 (nợ bảo mật). Phần dưới chỉ nói về bản cũ.
+
 
 Chưa có HTTPS (mật khẩu đăng nhập đi qua mạng dạng thô) · chưa có sao lưu DB tự động · `server.debug=true` nên đổi `false` trước ngày mở cửa (log phình ăn hết ổ C:) · `$SITE_OPEN_TIME` trong `sv1\config.php` vẫn là `2026-07-01` (quá khứ, đồng hồ đếm ngược hiện số âm) · link Zalo/Facebook đang trỏ vòng về chính website · iOS còn thiếu tài khoản Apple Developer.
 

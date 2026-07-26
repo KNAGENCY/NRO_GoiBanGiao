@@ -140,3 +140,94 @@ func TestGoiQuaiHoiSinhByteDung(t *testing.T) {
 			m.Data, len(m.Data), muon, len(muon))
 	}
 }
+
+// ---------------------------------------------------------------------------
+// Task 10 — goi -60 "nguoi danh nguoi", dac ta §2.1/§3.3. HAI DANG DO DAI,
+// dung HAI HAM TACH RIENG (goiDanhNguoiChoi / goiHoiMauNguoiChoi) — KHONG mot
+// ham co tham so co "docTiep". Xem chu thich hai ham trong goichiendau.go de
+// biet ly do: mot ham co co thi nguoi sua sau rat de vo tinh ghi thua 4
+// truong cuoi vao nhanh hoi mau, ma ghi thua la loi IM LANG TUYET DOI (dac ta
+// §2.0: client vut byte du, khong loi, khong trieu chung, chay thu KHONG PHAT
+// HIEN DUOC).
+// ---------------------------------------------------------------------------
+
+// TestGoiDanhNguoiChoiByteDung: goi -60 DANG "DON DANH" (docTiep=1, 18 byte
+// than), dac ta §2.1/§3.3. daChet va chiMang co tinh CHU Y dung hai gia tri
+// KHAC NHAU (true/false) de test bat duoc loi doi cho giua hai truong bool
+// lien nhau (vi du lo viet nguoc thu tu Bool(daChet)/Bool(chiMang)).
+func TestGoiDanhNguoiChoiByteDung(t *testing.T) {
+	m := goiDanhNguoiChoi(2001, 9, 3002, 500, true, false)
+
+	if m.Command != -60 {
+		t.Fatalf("Command = %d, muon -60", m.Command)
+	}
+
+	muon := []byte{
+		0, 0, 7, 209, // idNguoiDanh = 2001 (int32 BE)
+		9,             // skillId
+		1,             // soMucTieu = 1 (luon 1 o KH6, dac ta §3.3)
+		0, 0, 11, 186, // idNguoiTrung = 3002 (int32 BE)
+		1,            // docTiep = 1 -> danh dau DANG DON DANH, dac ta §2.1
+		0,            // loaiChieu = 0 (hang so ngay trong ban Java goc)
+		0, 0, 1, 244, // satThuong = 500 (int32 BE)
+		1, // daChet = true
+		0, // chiMang = false
+	}
+	if len(muon) != 18 {
+		t.Fatalf("mang 'muon' cua test tu viet sai, dai %d byte, phai 18 — sua lai test truoc", len(muon))
+	}
+	if !bytes.Equal(m.Data, muon) {
+		t.Fatalf("goi -60 (don danh) byte sai:\n got  = %v (%d byte)\n muon = %v (%d byte)",
+			m.Data, len(m.Data), muon, len(muon))
+	}
+}
+
+// TestGoiHoiMauNguoiChoiByteDung: goi -60 DANG "HOI MAU" (docTiep=0, 11 byte
+// than, HET GOI NGAY SAU docTiep — khong con truong nao nua), dac ta §2.1/§3.3.
+// Day la test QUAN TRONG NHAT cua Task 10 (theo nguyen van brief) — hai test
+// dot bien o cuoi file nay (chay tay, khong nam trong bo test tu dong) xac
+// nhan test nay THAT SU bat duoc loi ghi thua truong vao dang hoi mau.
+func TestGoiHoiMauNguoiChoiByteDung(t *testing.T) {
+	m := goiHoiMauNguoiChoi(4004, 12, 5005)
+
+	if m.Command != -60 {
+		t.Fatalf("Command = %d, muon -60", m.Command)
+	}
+
+	muon := []byte{
+		0, 0, 15, 164, // idNguoiDanh = 4004 (int32 BE)
+		12,            // skillId
+		1,             // soMucTieu = 1 (luon 1 o KH6, dac ta §3.3)
+		0, 0, 19, 141, // idNguoiTrung = 5005 (int32 BE)
+		0, // docTiep = 0 -> danh dau DANG HOI MAU, HET GOI — dac ta §2.1
+	}
+	if len(muon) != 11 {
+		t.Fatalf("mang 'muon' cua test tu viet sai, dai %d byte, phai 11 — sua lai test truoc", len(muon))
+	}
+	if !bytes.Equal(m.Data, muon) {
+		t.Fatalf("goi -60 (hoi mau) byte sai:\n got  = %v (%d byte)\n muon = %v (%d byte)",
+			m.Data, len(m.Data), muon, len(muon))
+	}
+}
+
+// TestGoiNguoiDanhNguoiChenhLech7Byte: doi chieu truc tiep dac ta §2.1 — hai
+// dang cua goi -60 phai chenh nhau DUNG 7 byte (loaiChieu 1 + satThuong 4 +
+// daChet 1 + chiMang 1 = 7). Test nay chi doc DO DAI than goi (khong doc gia
+// tri byte), bo sung cho hai test byte-chinh-xac o tren — huu ich rieng cho
+// truong hop sau nay co ai doi thu tu truong ben trong ma quen cap nhat tong
+// do dai (hai test kia se bat duoc ngay, nhung test nay noi thang vao dung
+// con so ma dac ta nhac toi).
+func TestGoiNguoiDanhNguoiChenhLech7Byte(t *testing.T) {
+	donDanh := goiDanhNguoiChoi(1, 1, 2, 1, false, false)
+	hoiMau := goiHoiMauNguoiChoi(1, 1, 2)
+
+	if len(donDanh.Data) != 18 {
+		t.Fatalf("than goi -60 (don danh) dai %d byte, dac ta §2.1 doi hoi 18", len(donDanh.Data))
+	}
+	if len(hoiMau.Data) != 11 {
+		t.Fatalf("than goi -60 (hoi mau) dai %d byte, dac ta §2.1 doi hoi 11", len(hoiMau.Data))
+	}
+	if chenh := len(donDanh.Data) - len(hoiMau.Data); chenh != 7 {
+		t.Fatalf("hai dang goi -60 chenh %d byte, dac ta §2.1 doi hoi DUNG 7 (loaiChieu 1 + satThuong 4 + daChet 1 + chiMang 1)", chenh)
+	}
+}

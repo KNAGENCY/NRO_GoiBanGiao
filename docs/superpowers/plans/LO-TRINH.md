@@ -50,7 +50,7 @@ kết nối theo IP (Kế hoạch bảo mật B, là bước lùi so với bản
 | 3 | Đồng bộ dữ liệu tĩnh (bắt tay + 4 catalog, 5 làng) | ✅ **Xong** (gộp `7a85431`) | 1, 2 |
 | 4 | **Vào thế giới** (ME_INFO + MAP INFO + tileset + khu vực) | ✅ **Xong** (gộp `aef5f71`) — còn B9: bạn tự kiểm bằng client Unity thật | 3 |
 | 5 | Di chuyển + mô hình actor cho khu vực | ✅ **Xong** (gộp `e1ddc44`) — actor 100ms, chống gian lận vừa phải, thấy nhau + di chuyển | 4 |
-| 6 | Chiến đấu, chiêu thức, quái, boss | Chưa bắt đầu | 5 |
+| 6 | Chiến đấu, chiêu thức, quái | 📐 **Đã có thiết kế + kế hoạch**, chưa thi công — [đặc tả](../specs/2026-07-26-giao-thuc-chien-dau.md) · [kế hoạch](2026-07-26-ke-hoach-6-chien-dau.md) · [nghiên cứu](../research/kh6-goi-chien-dau.md). **Boss tách khỏi KH6** | 5 |
 | 7 | Vật phẩm, hành trang, cửa hàng, giao dịch | Chưa bắt đầu | 5 |
 | 8 | Kho nội dung YAML + nạp nóng | Chưa bắt đầu | 6, 7 |
 | 9 | Nhiệm vụ, cốt truyện, NPC | Chưa bắt đầu | 8 |

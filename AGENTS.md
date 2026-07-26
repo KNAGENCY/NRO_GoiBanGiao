@@ -43,9 +43,14 @@ cùng làm `server/internal/game/` thì **chắc chắn** sẽ đụng — đừ
 ## Lệnh kiểm chứng (phải xanh trước khi báo xong)
 
 ```powershell
-# Máy chủ game
+# TU KIEM CONG TRUOC — dung ghim so, no doi giua cac lan khoi dong
+Get-NetTCPConnection -State Listen | Where-Object { $_.LocalPort -in 5432,5433 }
+# khong thay gi = PostgreSQL chua chay:
+#   D:\PostgreSQL\bin\pg_ctl.exe -D D:\PostgreSQL\data start
+
+# Máy chủ game — thay CONG bằng số vừa tìm được
 cd server
-$env:NRO_TEST_DSN = "postgres://postgres:nrodev123@127.0.0.1:5433/nro_test"
+$env:NRO_TEST_DSN = "postgres://postgres:nrodev123@127.0.0.1:CONG/nro_test"
 D:\Go\bin\go.exe test ./... -count=1
 D:\Go\bin\go.exe vet ./...
 

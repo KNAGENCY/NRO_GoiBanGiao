@@ -1,5 +1,30 @@
 # KH6 — 5 việc phải sửa trước khi gộp nhánh `kh6-nghien-cuu-chien-dau`
 
+> ## ✅ ĐÃ SỬA XONG CẢ 5 (26/07/2026) — chờ soi lần hai
+>
+> | # | Việc | Đã làm gì |
+> |---|---|---|
+> | 1 | Sót gói `87` | **Đã đọc client để quyết.** Mã `87` của client là lệnh **"quái bị gió thổi"** (`byte mobId + bool`, `Controller.cs:3016-3018`), **không phải maxHp** → bản Go **không gửi**. Ghi vào đặc tả **§0.1** (kèm lý do + hậu quả nếu gửi nhầm), chuỗi gói **§6.2**, và **Task 8** có test cấm phát `87` |
+> | 2 | `14B/10B` → `18B/11B` | Sửa ở Task 10 (commit message + Interfaces) **và** ở nghiên cứu §3.2 (chỗ này người soi chưa thấy, tôi tự tìm ra khi soi lại) |
+> | 3 | Task 5 sai file | Đổi thành `server/internal/game/thegioi.go` hàm `goiMapInfo` (dòng 105), chỉ đúng dòng `mobCount = 0` (dòng 121), kèm cảnh báo byte đệm ngay dưới nó |
+> | 4 | Diễn giải về cổng | Bỏ hẳn lối ghim số. `BAT-DAU-TU-DAY.md` §3 + §9 nay **dạy tự kiểm** bằng `Get-NetTCPConnection`, giữ phần triệu chứng nhận dạng. Sửa luôn **`.claude/commands/viec.md`** và **`AGENTS.md`** — hai file lệnh sống vẫn ghim `5433`, chính là quả mìn |
+> | 5 | Gộp `main` | Đã `git merge main` **hai lần** (`4f61dea` rồi `6c8cbec`). Giữ `/viec`, giữ **cả hai bên** dòng nhật ký, §6 đánh số liền mạch |
+>
+> **Làm thêm ngoài 5 việc** (vì đọc client thì lộ ra):
+> - **Task 12 đã xong luôn** — `-8` dùng `int` (bản Java có chỗ ghi `short` là **lỗi thật**),
+>   `-17` **không có trường id** (byte đầu là `cPk`; bản Java nhét id vào đó — **lỗi thật**).
+>   → **Nhóm E hết bị chặn.**
+> - Trường cuối `-9` là **`byte hieuUngId`**, không phải `int` (bản Java ghi thừa 3 byte).
+> - `-13` hai byte giữa là **`sys` / `levelBoss`**, không phải `tempId` / `lvMob`.
+> - Gói xuống `54` **không có trường đếm** → ghi thừa byte làm nhân vật nhắm sai mục tiêu.
+> - Sửa một chỗ **tôi viết sai** ở bản trước: "sai trường → client hỏng vĩnh viễn" là **SAI**;
+>   client đọc trọn gói theo độ dài nên chỉ hỏng **gói đó**, và hỏng **im lặng**.
+> - Thêm chiêu **`type = 2`** vào tập chiêu KH6 — thiếu nó thì gói `-60` dạng hồi máu
+>   không có đường chạy thật.
+> - Chuyển bài học PowerShell/mojibake thành **§6.15** của `BAT-DAU-TU-DAY.md` (việc `main` để lại).
+>
+> Chi tiết bằng chứng: đặc tả **§7** (client), **§0.1** (gói 87), **§2.0** (khung gói).
+
 **Bối cảnh:** commit `3f7d23a` (nghiên cứu + đặc tả + kế hoạch 15 task cho Kế hoạch 6)
 đã được soi ngày 26/07/2026. **Nội dung ĐÚNG** — người soi đối chiếu từng bảng byte,
 12 con số hành vi và cả 4 "lỗi bản gốc" với code Java gốc, khớp hết; `go test ./...`

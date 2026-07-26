@@ -81,6 +81,14 @@ const (
 // SatThuong (du lieu), KHONG biet chieu ten gi, khong switch theo ten chieu.
 func TinhSatThuong(goc int64, chieu *CapChieu, heNguoiDanh, heMucTieu byte, chiMang bool) int32 {
 	// heSoChieu: SatThuong cua cap chieu la PHAN TRAM cua sat thuong goc.
+	//
+	// TODO(KH8 - can bang so lieu): day la DIEN GIAI TAM THOI, CHUA duoc chu
+	// du an chot. Du lieu Task 1 (chieuthuc.go, taoCapChieu: "dameGoc := 20 +
+	// slot*10") trong GIONG sat thuong TUYET DOI hon la phan tram — KH8 phai
+	// chot lai don vi that su cua truong nay voi chu du an. Neu chot la sat
+	// thuong tuyet doi (cong don, khong nhan phan tram), sua CONG THUC ngay
+	// tai day (dong duoi) — chu ky ham TinhSatThuong va phan he nguyen to
+	// (HeSoNguyenTo, heSoNguyenToPhanTram) KHONG doi.
 	ketQua := goc * int64(chieu.SatThuong) / 100
 
 	// heSoHeNguyenTo: nhan roi chia 100, van la so nguyen.

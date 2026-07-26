@@ -23,4 +23,5 @@ lên nhau.
 |---|---|---|---|---|
 | 26/07/2026 | Claude Code (phiên chính) | Xong KH5 (di chuyển + actor), gộp về main | `main` / `e1ddc44` | — |
 | 26/07/2026 | Claude Code (phiên chính) | Tạo `BAT-DAU-TU-DAY.md` làm điểm vào duy nhất | `main` / `24514d1` | — |
-| 26/07/2026 | Claude Code (phiên chính) | Dựng cơ chế nhiều agent: sổ này + `/vao-viec` + `/ghi-so` + hook tự nạp bối cảnh | `main` | — |
+| 26/07/2026 | Claude Code (phiên chính) | Dựng cơ chế nhiều agent: sổ này + hook tự nạp bối cảnh + `AGENTS.md` + `MO-AGENT.bat` | `main` / `db34f6c` | — |
+| 26/07/2026 | Claude Code (phiên chính) | Gộp `/vao-viec` + `/ghi-so` thành **một lệnh `/viec`** tự nhận biết chế độ (theo yêu cầu người dùng cho nhanh) | `main` | — |

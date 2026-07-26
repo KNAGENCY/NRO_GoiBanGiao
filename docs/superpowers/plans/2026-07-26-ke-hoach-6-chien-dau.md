@@ -374,7 +374,10 @@ Hai tầng ưu tiên (đặc tả §5.2):
 - Modify: `server/internal/game/khuvuc_tichhop_test.go`
 
 - [ ] **Step 1: Viết test đỏ** — hai client giả trong cùng khu vực; A gửi `-60` đánh B →
-      **cả hai** nhận gói `-60`, và B nhận thêm `-30/9` cập nhật máu.
+      **cả hai** nhận gói `-60`, và **A (người khác) nhận thêm `-30/9`** cập nhật máu
+      của B — theo đặc tả §3.4 `-30/9` gửi cho "Người khác" (trừ chính B; B tự biết
+      máu mình qua trường `satThuong` trong `-60`). *(Sửa 27/07: bản plan cũ ghi nhầm
+      "B nhận thêm", đối lập với chính đặc tả — Task 11 đã làm đúng theo §3.4.)*
       Test: đánh người vừa hồi sinh < 1500 ms → không có gói nào phát ra.
 - [ ] **Step 2: Chạy — fail.**
 - [ ] **Step 3: Cài đặt** qua sự kiện vào hộp thư actor.

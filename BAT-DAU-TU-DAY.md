@@ -245,6 +245,26 @@ Mã nguồn viết **chú thích tiếng Việt giải thích *tại sao***, kh�
 
 ---
 
+## 10b. Nhiều agent làm song song
+
+| Việc | Dùng |
+|---|---|
+| Bắt đầu một phiên/agent mới | Gõ `/vao-viec` (tự đọc bối cảnh, xem ai đang làm gì, đề xuất việc tiếp) |
+| Kết thúc một việc | Gõ `/ghi-so` (kiểm chứng, ghi nhật ký, cập nhật tài liệu, commit) |
+| Xem ai vừa chạm vào gì | [`NHAT-KY-AGENT.md`](NHAT-KY-AGENT.md) — dòng mới nhất ở **cuối** bảng |
+| Mở agent đúng thư mục | Nhấn đúp `MO-AGENT.bat` |
+| Agent không phải Claude Code | Cho nó đọc [`AGENTS.md`](AGENTS.md) |
+
+**Chống đụng nhau:** mỗi agent một **nhánh git riêng** (`git switch -c <ten-viec>`); không hai
+agent cùng commit lên `main`. `server/` (game) và `web/` là hai vùng tách biệt → làm song song
+an toàn. Hai agent cùng vào `server/internal/game/` thì **chắc chắn** đụng.
+
+Hook `SessionStart` (`.claude/settings.json`) tự nạp `git log` + nhật ký vào đầu mỗi phiên,
+nên phiên mới luôn biết người/agent khác vừa làm gì — **chỉ hoạt động khi mở Claude Code
+trong thư mục dự án này.**
+
+---
+
 ## 11. Quy ước cập nhật file này
 
 Làm xong một việc đáng kể → sửa **đúng 3 chỗ** rồi commit chung với việc đó:
@@ -254,6 +274,9 @@ Làm xong một việc đáng kể → sửa **đúng 3 chỗ** rồi commit chu
 3. **§6 Lỗi sai** — nếu vấp lỗi nào mới, ghi lại **kèm lý do vì sao vấp**. Đây là phần
    giá trị nhất, đừng bỏ qua vì "lỗi nhỏ".
 4. Thêm một dòng vào **§12 Nhật ký** và sửa dòng "Cập nhật lần cuối" ở đầu file.
+5. Thêm một dòng vào cuối bảng **`NHAT-KY-AGENT.md`** (ai làm, nhánh nào, còn dở gì).
+
+Cách nhanh nhất: gõ `/ghi-so`, nó làm cả 5 bước trên.
 
 Commit riêng cho việc cập nhật tài liệu thì dùng tiền tố `docs:`.
 
@@ -267,3 +290,4 @@ Commit riêng cho việc cập nhật tài liệu thì dùng tiền tố `docs:`
 | 24/07/2026 | Xong **KH2** (nhân vật) gộp `0816c89`; **KH3** (đồng bộ tĩnh, 5 làng Naruto) gộp `7a85431`; giải mã xong giao thức di chuyển |
 | 25/07/2026 | Xong **KH4** (vào thế giới) gộp `aef5f71`; web **W1** + **W2** lên `main` |
 | 26/07/2026 | Xong **KH5** (di chuyển + actor) gộp `e1ddc44`. Tạo file `BAT-DAU-TU-DAY.md` này làm điểm vào duy nhất cho người/agent mới |
+| 26/07/2026 | Dựng cơ chế **nhiều agent song song**: sổ `NHAT-KY-AGENT.md`, lệnh `/vao-viec` + `/ghi-so`, `AGENTS.md` cho agent ngoài, `MO-AGENT.bat`, hook `SessionStart` tự nạp bối cảnh (xem §10b) |

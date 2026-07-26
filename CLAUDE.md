@@ -10,6 +10,22 @@ Trả lời bằng **tiếng Việt đời thường**. Chủ sở hữu **khôn
 
 **Bắt buộc:** làm xong việc gì đáng kể (một task, một kế hoạch, một bản vá, một phát hiện lỗi) thì **cập nhật `BAT-DAU-TU-DAY.md` ngay** rồi mới commit — cách cập nhật ghi ở §11 của chính file đó. Không cập nhật = phiên sau (người hay agent) mất phương hướng.
 
+## Nhiều agent làm song song
+
+Dự án này có thể có nhiều agent cùng làm. Hai lệnh và một sổ:
+
+| Việc | Dùng |
+|---|---|
+| **Bắt đầu** một phiên/agent mới | `/vao-viec` — tự đọc bối cảnh, xem ai đang làm gì, đề xuất việc tiếp |
+| **Kết thúc** một việc | `/ghi-so` — kiểm chứng, ghi nhật ký, cập nhật tài liệu, commit |
+| Xem ai vừa chạm vào gì | [`NHAT-KY-AGENT.md`](NHAT-KY-AGENT.md) — sổ chung, dòng mới nhất ở **cuối** bảng |
+
+**Chống đụng nhau:** mỗi agent một **nhánh git riêng** (`git switch -c <ten-viec>`), không hai agent cùng commit lên `main`. `server/` (game) và `web/` là hai vùng tách biệt — làm song song an toàn; hai agent cùng vào `server/internal/game/` thì chắc chắn đụng.
+
+Agent không phải Claude Code (Codex, Cursor…) đọc [`AGENTS.md`](AGENTS.md).
+
+Hook `SessionStart` trong `.claude/settings.json` tự nạp `git log` + nhật ký agent vào đầu mỗi phiên — **chỉ hoạt động khi mở Claude Code trong thư mục dự án này** (dùng `MO-AGENT.bat` cho chắc).
+
 ## Việc đang làm: viết lại thành game Naruto
 
 Dự án thật sự hiện nay là **xây game Naruto mới**, viết lại máy chủ bằng **Go + PostgreSQL** (`server/`) và web/panel bằng **Next.js** (`web/`), dựa trên phần lõi giao thức của server Ngọc Rồng đã mua. Đây là **game mới hoàn toàn** — 5 làng Naruto thay 3 hành tinh Dragon Ball; dấu vết game cũ xoá dần.

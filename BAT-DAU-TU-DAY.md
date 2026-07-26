@@ -193,6 +193,17 @@ Xếp theo thứ tự nên làm:
    Luật: **chỉ luồng `vongLap` của khu vực được chạm vào trạng thái khu vực.**
 10. **Gói `-28/13` (clientOk) bị gửi lại lần hai** cũng gây tranh chấp tương tự. Đã chốt
     guard chống chạy lại; tương tự cho `-39`.
+10b. **Actor tự đi phát gói mạng = một kết nối treo làm đứng cả khu vực** (phát hiện
+    27/07 khi AI quái của Task 9 thành nguồn lưu lượng tự phát). `phatChoNguoiKhac` /
+    `phatChoCaKhuVuc` gọi `phien.Gui()` **đồng bộ ngay trên goroutine `vongLap`**; `Gui()`
+    có hạn giờ ghi **30 giây** (`net/session.go`). Một client ngừng đọc (mạng chập chờn,
+    app xuống nền, hoặc cố ý) làm `vongLap` đứng tối đa 30s → cả bản đồ đứng hình, quái
+    ngừng hồi sinh. Tệ hơn: `Gui()` lỗi chỉ ghi log, **không gạch tên** người đó khỏi
+    `nguoiTrong` → lần phát sau lại treo tiếp, **lặp vô hạn**. Thiết kế KH5 đã yêu cầu gỡ
+    phiên hỏng nhưng phần đó **chưa vào code**. Đây là **lỗ hổng Nghiêm trọng #1** của
+    review toàn dự án 27/07 — **Kế hoạch B phải tách gửi mạng khỏi actor** (mỗi phiên một
+    hàng đợi gửi riêng, actor chỉ ném gói vào rồi đi tiếp). Task 9 né tạm trong test, chưa
+    sửa gốc.
 
 ### Về kiểm thử (bài học lặp lại nhiều lần nhất)
 

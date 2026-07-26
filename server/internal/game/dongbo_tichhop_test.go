@@ -307,8 +307,17 @@ func kiemCatalogSkill5Lang(t *testing.T, m *protocol.Message) {
 		if ten != tenLangMongDoi[i] {
 			t.Errorf("ten lang %d = %q, mong doi %q (ghim doc lap voi lang.go)", i, ten, tenLangMongDoi[i])
 		}
-		if ct, err := r.Byte(); err != nil || ct != 0 {
-			t.Errorf("countTemplate lang %d = %d (loi doc: %v), mong doi 0", i, ct, err)
+		ct, err := r.Byte()
+		if err != nil {
+			t.Fatalf("doc countTemplate lang %d that bai: %v", i, err)
+		}
+		if ct != 4 {
+			t.Errorf("countTemplate lang %d = %d, mong doi 4 (4 chieu x 5 lang, Task 1 KH6)", i, ct)
+		}
+		for j := 0; j < int(ct); j++ {
+			if err := boQuaMotMauChieu(r); err != nil {
+				t.Fatalf("doc chieu %d cua lang %d that bai: %v", j, i, err)
+			}
 		}
 	}
 }

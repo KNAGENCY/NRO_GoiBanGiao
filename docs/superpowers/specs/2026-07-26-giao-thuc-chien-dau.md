@@ -404,7 +404,7 @@ Hoả → Phong → Lôi → Thổ → Thuỷ → Hoả
 | Trung tính | ×1,00 |
 | Bị khắc | ×0,80 |
 
-**Đây là con số đề xuất, chủ dự án chốt.** Lý do phải chốt trong KH6 chứ không để sau:
+**✅ ĐÃ CHỐT (27/07/2026, chủ dự án): giữ nguyên ×1,25 / ×1,00 / ×0,80.** Lý do phải chốt trong KH6 chứ không để sau:
 hệ số này nằm trong công thức sát thương lõi; thêm sau nghĩa là viết lại và kiểm thử lại
 toàn bộ tầng chiến đấu — đúng kiểu sai lầm mà §"phần phải quyết sớm" của KH10 cảnh báo.
 

@@ -50,9 +50,11 @@ kết nối theo IP (Kế hoạch bảo mật B, là bước lùi so với bản
 | 3 | Đồng bộ dữ liệu tĩnh (bắt tay + 4 catalog, 5 làng) | ✅ **Xong** (gộp `7a85431`) | 1, 2 |
 | 4 | **Vào thế giới** (ME_INFO + MAP INFO + tileset + khu vực) | ✅ **Xong** (gộp `aef5f71`) — còn B9: bạn tự kiểm bằng client Unity thật | 3 |
 | 5 | Di chuyển + mô hình actor cho khu vực | ✅ **Xong** (gộp `e1ddc44`) — actor 100ms, chống gian lận vừa phải, thấy nhau + di chuyển | 4 |
-| 6 | Chiến đấu, chiêu thức, quái | 📐 **Đã có thiết kế + kế hoạch**, chưa thi công — [đặc tả](../specs/2026-07-26-giao-thuc-chien-dau.md) · [kế hoạch](2026-07-26-ke-hoach-6-chien-dau.md) · [nghiên cứu](../research/kh6-goi-chien-dau.md). **Boss tách khỏi KH6** | 5 |
+| 6 | Chiến đấu, chiêu thức, quái | 🔨 **Đang thi công** (nhánh `kh6-thi-cong`, Task 1–7 + 10 xong review) — [đặc tả](../specs/2026-07-26-giao-thuc-chien-dau.md) · [kế hoạch](2026-07-26-ke-hoach-6-chien-dau.md) · [nghiên cứu](../research/kh6-goi-chien-dau.md). Hệ số khắc chế **×1,25/×1,00/×0,80 đã chốt 27/07/2026** | 5 |
+| 6b | **Boss** — hệ riêng tách khỏi KH6 (bản Java là 12 file, phức tạp hơn quái thường nhiều; xem đặc tả KH6 §0) | Chưa bắt đầu — thiết kế sau khi KH6 gộp | 6 |
+| 6c | **Stress test đông người**: 20 client giả cùng khu vực cùng xả chiêu — đo gói rơi ở hộp thư actor (trần 256, `Gui()` rơi im lặng khi đầy) + độ trễ nhịp 100ms; dựng trên `thuclient`/`clientGia` sẵn có | Chưa bắt đầu — chạy ngay sau Task 14 của KH6 | 6 |
 | 7 | Vật phẩm, hành trang, cửa hàng, giao dịch | Chưa bắt đầu | 5 |
-| 8 | Kho nội dung YAML + nạp nóng | Chưa bắt đầu | 6, 7 |
+| 8 | Kho nội dung YAML + nạp nóng — **kèm cân bằng thực nghiệm**: đổ số liệu chiêu thật (đơn vị `SatThuong` phải chốt — TODO trong `satthuong.go`), chơi thử rồi đo làng nào thắng nhiều, chỉnh số trong YAML không sửa code | Chưa bắt đầu | 6, 7 |
 | 9 | Nhiệm vụ, cốt truyện, NPC | Chưa bắt đầu | 8 |
 | 10 | **Cảm giác chơi** — hoạt ảnh, chuyển màn, hướng dẫn người mới | Chưa bắt đầu | 5, 6 |
 | W | Web + Panel quản trị (Next.js) | 🔨 **Đang làm** — W1 (đăng ký/đăng nhập) + W2 (trang cá nhân, đổi mật khẩu, bảng xếp hạng, panel admin) đã lên main. Còn W3 (cấu hình/nhật ký/nạp thẻ, phân trang, thu hồi phiên) | 2 |

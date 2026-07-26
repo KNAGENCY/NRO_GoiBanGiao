@@ -127,6 +127,14 @@ func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 		return b.xuLyVaoKhuVuc(s)
 	case lenhDiChuyen: // -7 — client xin di chuyen
 		return b.xuLyDiChuyen(m)
+	case lenhChonChieu: // 34 — client chon chieu
+		return b.xuLyChonChieu(m)
+	case lenhNguoiDanhQuai: // 54 — client gui danh quai (dac ta §3.1)
+		return b.xuLyDanhQuai(m)
+	case lenhNguoiDanhNguoi: // -60 — client gui danh nguoi choi (dac ta §3.1, Ke hoach 6 Task 11)
+		return b.xuLyDanhNguoiChoi(m)
+	case lenhHoiSinh: // -16 — client xin hoi sinh (dac ta §3.1, Ke hoach 6 Task 13)
+		return b.xuLyHoiSinh()
 	default:
 		// Lenh chua ho tro: bo qua, khong ngat ket noi — client gui vai goi
 		// phu ngay sau khi noi (vi du setClientType), day la chuyen BINH
@@ -234,8 +242,20 @@ func (b *BoXuLy) xuLyClientOk(s *mynet.Session) error {
 		return err
 	}
 
-	// -24 MAP INFO — gio kich switchToMe(), client roi "Xin cho".
-	mapInfo, err := goiMapInfo(b.nhanVat, bd)
+	// -24 MAP INFO — gio kich switchToMe(), client roi "Xin cho". Danh sach quai
+	// (Ke hoach 6 Task 5): lay tu KhuVuc NEU da co (b.khuVuc vua gan o tren),
+	// qua DanhSachQuaiSnapshot() — ham nay di qua hop thu actor (dac ta §1.6:
+	// chi vongLap duoc cham trang thai quai) roi tra ve BAN SAO, khong doc
+	// truc tiep truong quai cua KhuVuc tu luong phien nay. Buoc nay chay
+	// TRUOC khi nhan vat vao khu vuc (-39, xuLyVaoKhuVuc) nhung actor CUA KHU
+	// VUC da chay san tu luc may chu khoi dong (MoSoKhuVuc goi BatDau() ngay),
+	// nen van co the co nguoi khac dang chien dau lam quai doi HP dong thoi —
+	// buoc nay PHAI an toan voi truong hop do.
+	var quai []*Quai
+	if b.khuVuc != nil {
+		quai = b.khuVuc.DanhSachQuaiSnapshot()
+	}
+	mapInfo, err := goiMapInfo(b.nhanVat, bd, quai)
 	if err != nil {
 		return err
 	}
@@ -285,6 +305,100 @@ func (b *BoXuLy) xuLyDiChuyen(m *protocol.Message) error {
 		return nil // KH5: thieu toY -> bo goi (client that luon gui du ca hai)
 	}
 	b.khuVuc.Gui(suKienDiChuyen{idNhanVat: b.nhanVat.ID, x: toX, y: toY})
+	return nil
+}
+
+// xuLyChonChieu: client gui 34 (short templateId — day la MauChieu.Id, KHONG
+// PHAI skillId, xem dac ta §3.2). Luong phien CHI doc gói va CHUYEN TIEP mot
+// su kien cho actor khu vuc; TUYET DOI KHONG tu tra ChieuCuaLang/ghi
+// chieuDangChon o day — do la trach nhiem cua actor (khuvuc.go: xuLy case
+// suKienChonChieu), vi luong phien ghi + actor doc/ghi CUNG mot truong se
+// tranh chap du lieu (bay §6.9, KH5 da vap voi nv.ViTriX/Y).
+func (b *BoXuLy) xuLyChonChieu(m *protocol.Message) error {
+	if b.khuVuc == nil || b.nhanVat == nil {
+		return nil
+	}
+	r := protocol.NewReader(m.Data)
+	templateId, err := r.Short()
+	if err != nil {
+		return nil // goi ngan hon khuon -> bo qua an toan, khong ngat ket noi
+	}
+	// templateId chi co gia tri 1..4 tren thuc te (4 slot chieu/lang, xem
+	// chieuthuc.go) nen luon vua byte; ep kieu ve byte de khop kieu
+	// suKienChonChieu.mauChieuId (MauChieu.Id la byte trong catalog -28/7).
+	// Gia tri gia mao ngoai khoang byte se wrap nhung khong khop Id nao trong
+	// ChieuCuaLang nen actor tu bo qua (xem xuLy case suKienChonChieu).
+	b.khuVuc.Gui(suKienChonChieu{idNhanVat: b.nhanVat.ID, mauChieuId: byte(templateId)})
+	return nil
+}
+
+// xuLyDanhQuai xu ly goi LEN `54` (dac ta §3.1): client bao muon danh mot con
+// quai. THAN GOI DO DAI BIEN THIEN — day la goi RUI RO SO MOT cua Ke hoach 6
+// (dac ta §2): `byte mobId`; NEU mobId == -1 (thu cung, ngoai pham vi KH6 —
+// dac ta §0 "Ngoai KH6") thi con THEM `int masterId` (4 byte), tong 5 byte.
+// PHAI doc DU ca hai truong hop de goi tin nay duoc tieu thu dung so byte no
+// khai bao — khong doc du la nguyen nhan hang dau gay lech dong byte theo dac
+// ta, va la ly do Test 3 cua Task 7 kiem rieng kich ban nay.
+//
+// Ky luat actor (dac ta §1.6 + brief Task 7): ham nay CHI doc gia tri mobId
+// tu goi roi gui suKienDanhQuai vao hop thu actor khu vuc — TUYET DOI KHONG
+// tu tra k.quai, KHONG tu tinh sat thuong o day. Toan bo kiem tra + tinh toan
+// + phat goi nam TRONG vongLap (xem case suKienDanhQuai, khuvuc.go).
+func (b *BoXuLy) xuLyDanhQuai(m *protocol.Message) error {
+	if b.khuVuc == nil || b.nhanVat == nil {
+		return nil
+	}
+	r := protocol.NewReader(m.Data)
+	mobIdRaw, err := r.Byte()
+	if err != nil {
+		return nil // goi rong bat thuong -> bo qua an toan, khong ngat ket noi
+	}
+	if int8(mobIdRaw) == -1 {
+		// Thu cung (dac ta §0/§3.1): doc THEM 4 byte de tieu thu DU than goi
+		// 5-byte. Gia tri masterId khong dung toi o KH6 (chua co he thu
+		// cung) nen co tinh KHONG gan vao bien nao — chi doc de tranh lech.
+		if _, err := r.Int(); err != nil {
+			return nil // bao mobId=-1 nhung thieu du 4 byte con lai -> bo qua an toan
+		}
+	}
+	b.khuVuc.Gui(suKienDanhQuai{idNhanVat: b.nhanVat.ID, mobId: mobIdRaw})
+	return nil
+}
+
+// xuLyDanhNguoiChoi xu ly goi LEN `-60` (dac ta §3.1, Ke hoach 6 Task 11, Nhom
+// F "nguoi danh nguoi"): client bao muon danh nguoi choi co id = doc duoc.
+// Than goi CHI CO MOT truong `int idNguoiBiDanh` (dac ta §3.1) — KHONG co do
+// dai bien thien nhu goi 54 (danh quai), nen ham nay don gian hon xuLyDanhQuai.
+//
+// Ky luat actor (dac ta §1.6 + brief Task 11): ham nay CHI doc idNguoiBiDanh
+// tu goi roi gui suKienDanhNguoiChoi vao hop thu actor khu vuc — TUYET DOI
+// KHONG tu tra k.nguoiTrong, KHONG tu tinh sat thuong o day. Toan bo kiem tra
+// + tinh toan + phat goi nam TRONG vongLap (xem case suKienDanhNguoiChoi,
+// khuvuc.go).
+func (b *BoXuLy) xuLyDanhNguoiChoi(m *protocol.Message) error {
+	if b.khuVuc == nil || b.nhanVat == nil {
+		return nil
+	}
+	r := protocol.NewReader(m.Data)
+	idMucTieu, err := r.Int()
+	if err != nil {
+		return nil // goi ngan hon khuon -> bo qua an toan, khong ngat ket noi
+	}
+	b.khuVuc.Gui(suKienDanhNguoiChoi{idNhanVat: b.nhanVat.ID, idMucTieu: int64(idMucTieu)})
+	return nil
+}
+
+// xuLyHoiSinh xu ly goi LEN -16 (dac ta §3.1, Ke hoach 6 Task 13): client xin
+// hoi sinh sau khi chet. Than RONG — khong co gi de doc, khac han xuLyDanhQuai
+// (goi 54 co than). Luong phien CHI gui su kien vao hop thu actor (ky luat
+// actor §1.6 + brief Task 13) — actor moi la noi quyet dinh co dang THAT SU
+// chet hay khong + hoi mau/chakra day du + dat lucHoiSinh + phat goi
+// -16/-30-15 (xem case suKienHoiSinh, khuvuc.go).
+func (b *BoXuLy) xuLyHoiSinh() error {
+	if b.khuVuc == nil || b.nhanVat == nil {
+		return nil
+	}
+	b.khuVuc.Gui(suKienHoiSinh{idNhanVat: b.nhanVat.ID})
 	return nil
 }
 

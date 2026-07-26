@@ -8,7 +8,7 @@
 > một bản vá, một phát hiện lỗi) thì **phải cập nhật file này ngay** rồi mới commit.
 > Cách cập nhật xem mục [11. Quy ước cập nhật](#11-quy-ước-cập-nhật-file-này).
 
-**Cập nhật lần cuối:** 26/07/2026 · **Nhánh chính:** `main` · **Commit HEAD:** `db34f6c`
+**Cập nhật lần cuối:** 27/07/2026 (Task 13 KH6 — chết/hồi sinh) · **Nhánh chính:** `main` (KH6 thiết kế đã gộp `c812617`; thi công đang trên nhánh `kh6-thi-cong`)
 
 ---
 
@@ -134,9 +134,11 @@ Xếp theo thứ tự nên làm:
 
 | Ưu tiên | Việc | Ghi chú |
 |---|---|---|
-| 1 | **KH6 — Chiến đấu, chiêu thức, quái** | 📐 **Đã có thiết kế + kế hoạch 15 task, chưa thi công.** [Nghiên cứu](docs/superpowers/research/kh6-goi-chien-dau.md) · [đặc tả](docs/superpowers/specs/2026-07-26-giao-thuc-chien-dau.md) · [kế hoạch](docs/superpowers/plans/2026-07-26-ke-hoach-6-chien-dau.md). **Boss đã tách ra khỏi KH6.** Bảng byte đã đối chiếu **cả hai phía** (Java + client Unity) → **không còn task nào bị chặn**, bốn nhánh chạy song song được ngay |
+| 1 | **KH6 — Chiến đấu, chiêu thức, quái** | 🔨 **Đang thi công** trên nhánh `kh6-thi-cong` (Task 1–10 đã xong review đối kháng; Task 13 — chết/hồi sinh — vừa xong bởi implementer, chờ review đối kháng; còn 11, 14; Task 15 là nghiệm thu tay chủ dự án). [Nghiên cứu](docs/superpowers/research/kh6-goi-chien-dau.md) · [đặc tả](docs/superpowers/specs/2026-07-26-giao-thuc-chien-dau.md) · [kế hoạch](docs/superpowers/plans/2026-07-26-ke-hoach-6-chien-dau.md). **Hệ số khắc chế ×1,25/×1,00/×0,80 đã chốt 27/07/2026** (spec §4.2) |
+| 1b | **KH6b — Boss** (hệ riêng, tách khỏi KH6) | Bản Java là 12 file, phức tạp hơn quái thường nhiều. Thiết kế sau khi KH6 gộp |
+| 1c | **KH6c — Stress test 20 client cùng khu vực** | Cùng xả chiêu, đo gói rơi hộp thư actor (trần 256, rơi im lặng) + trễ nhịp 100ms. Dựng trên `thuclient`/`clientGia`. Chạy ngay sau Task 14 |
 | 2 | KH7 — Vật phẩm, hành trang, cửa hàng, giao dịch | |
-| 3 | KH8 — Kho nội dung YAML + nạp nóng | Để thêm chiêu/quái mà không phải sửa code |
+| 3 | KH8 — Kho nội dung YAML + nạp nóng | Để thêm chiêu/quái mà không phải sửa code. **Kèm cân bằng thực nghiệm** (đơn vị `SatThuong` phải chốt — TODO trong `satthuong.go`) |
 | 4 | KH9 — Nhiệm vụ, cốt truyện, NPC | |
 | 5 | KH10 — Cảm giác chơi (hoạt ảnh, chuyển màn, hướng dẫn người mới) | Ba con số ràng buộc đã chốt ở KH5 |
 | — | **W3 — Web:** cấu hình / nhật ký / nạp thẻ, phân trang, thu hồi phiên JWT | Một phần phụ thuộc hệ thống game chưa có |
@@ -191,6 +193,17 @@ Xếp theo thứ tự nên làm:
    Luật: **chỉ luồng `vongLap` của khu vực được chạm vào trạng thái khu vực.**
 10. **Gói `-28/13` (clientOk) bị gửi lại lần hai** cũng gây tranh chấp tương tự. Đã chốt
     guard chống chạy lại; tương tự cho `-39`.
+10b. **Actor tự đi phát gói mạng = một kết nối treo làm đứng cả khu vực** (phát hiện
+    27/07 khi AI quái của Task 9 thành nguồn lưu lượng tự phát). `phatChoNguoiKhac` /
+    `phatChoCaKhuVuc` gọi `phien.Gui()` **đồng bộ ngay trên goroutine `vongLap`**; `Gui()`
+    có hạn giờ ghi **30 giây** (`net/session.go`). Một client ngừng đọc (mạng chập chờn,
+    app xuống nền, hoặc cố ý) làm `vongLap` đứng tối đa 30s → cả bản đồ đứng hình, quái
+    ngừng hồi sinh. Tệ hơn: `Gui()` lỗi chỉ ghi log, **không gạch tên** người đó khỏi
+    `nguoiTrong` → lần phát sau lại treo tiếp, **lặp vô hạn**. Thiết kế KH5 đã yêu cầu gỡ
+    phiên hỏng nhưng phần đó **chưa vào code**. Đây là **lỗ hổng Nghiêm trọng #1** của
+    review toàn dự án 27/07 — **Kế hoạch B phải tách gửi mạng khỏi actor** (mỗi phiên một
+    hàng đợi gửi riêng, actor chỉ ném gói vào rồi đi tiếp). Task 9 né tạm trong test, chưa
+    sửa gốc.
 
 ### Về kiểm thử (bài học lặp lại nhiều lần nhất)
 
@@ -269,6 +282,12 @@ Gom lại thành **Kế hoạch B**, sửa lẻ từng cái là vô nghĩa:
 - Vòng `Accept()` không nghỉ giãn → cạn file descriptor sẽ quay nóng CPU.
 - Mã chết: `Writer.Bool`, `Writer.Long`; `TaiKhoan.LaAdmin` đọc từ CSDL nhưng chưa ai dùng.
 - Test package `game` chậm (~54 giây) do nhiều test đầu-cuối chờ hết hạn giờ đọc.
+- **KH6 Task 13**: `aiQuai`/`chonMucTieu` (quái đánh người, `quai.go`) chưa tôn trọng
+  bất tử 1500ms sau hồi sinh — chỉ lọc mục tiêu "đã chết" (`HpHienTai<=0`), không lọc
+  "vừa hồi sinh" qua `nguoiTrongKhuVuc.lucHoiSinh` (trường mới của Task 13). Một người
+  vừa bấm hồi sinh có thể bị quái AI đánh trúng ngay tick kế tiếp (100ms). Cần sửa
+  `chonMucTieu` (thêm tham số `bayGio`, lọc thêm điều kiện) — việc của Task 11 (PvP,
+  cũng cần đọc `lucHoiSinh`) hoặc một task vá nhỏ riêng.
 
 ---
 
@@ -363,3 +382,5 @@ Commit riêng cho việc cập nhật tài liệu thì dùng tiền tố `docs:`
 | 26/07/2026 | Xong **KH5** (di chuyển + actor) gộp `e1ddc44`. Tạo file `BAT-DAU-TU-DAY.md` này làm điểm vào duy nhất cho người/agent mới |
 | 26/07/2026 | Dựng cơ chế **nhiều agent song song**: sổ `NHAT-KY-AGENT.md`, lệnh `/viec` (một lệnh tự nhận biết nhận việc / ghi sổ), `AGENTS.md` cho agent ngoài, `MO-AGENT.bat`, hook `SessionStart` tự nạp bối cảnh (xem §10b) |
 | 26/07/2026 | **KH6 xong phần thiết kế**: nghiên cứu giao thức chiến đấu (gói đánh quái/đánh người/chiêu/chết/hồi sinh, AI quái, nhịp 100 ms) → đặc tả có bảng byte → kế hoạch thi công 15 task. **Chưa viết code.** Bảng byte đã đối chiếu **cả hai phía** (Java + client Unity). Phát hiện mới: gói `-60` có **hai dạng độ dài** (§6.6); client lộ ra **3 lỗi thật** của bản Java ở `-8`/`-17`/`-9` (§6.16); mã `87` bị dùng cho hai việc (§6.17); sai trường **không** làm hỏng cả dòng byte, chỉ hỏng im lặng (§6.18); cổng PostgreSQL **không cố định giữa các lần khởi động** (§9) |
+| 27/07/2026 | **KH6 thiết kế gộp vào `main`** (`c812617`, sau soi lần hai: gói 87 đối chiếu client khớp, test 7/7 xanh). **Thi công KH6 trên nhánh `kh6-thi-cong`**: Task 1 (catalog 20 chiêu) → 2 (chọn chiêu qua actor) → 3 (chốt kiểm) → 4 (sát thương ngũ hành) → 5 (quái trong actor + `-24`, vá kỷ luật actor bằng snapshot qua hộp thư) → 6 (gói 54/-9/-12/-13) → 10 (gói `-60` hai dạng) → 7 (điều phối đánh quái + 2 test lưới an toàn) — **mỗi task đều qua review đối kháng + kiểm thử đột biến**. Chủ dự án **chốt hệ số khắc chế ×1,25/×1,00/×0,80**; thêm **KH6b (Boss)** và **KH6c (stress 20 client)** vào lộ trình |
+| 27/07/2026 | **KH6 tiếp tục**: Task 8 (quái hồi sinh 5s + hồi máu 30s trong nhịp actor, `e41678b`) → Task 9 (AI quái 2 tầng ưu tiên + gói `-11`/`-10`, `b22152c`) → Task 13 (chết & hồi sinh người chơi, gói `-17`/`-8`/`-16`/`-30/15`, `67e6650`) — implementer xong, chờ review đối kháng. Task 13 chỉ cần thêm **một** trường mới vào `nguoiTrongKhuVuc` (`lucHoiSinh`) chứ không phải Hp/HpToiDa như rủi ro đã lường trước (Task 9 đã dùng `nv.HpHienTai` trực tiếp từ trước); phát hiện gap mới **chưa sửa**: quái AI chưa tôn trọng bất tử 1500ms sau hồi sinh (§8) |

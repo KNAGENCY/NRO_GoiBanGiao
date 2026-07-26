@@ -56,6 +56,15 @@ type nguoiTrongKhuVuc struct {
 	// yeu cau dat trong actor (khong trong BoXuLy) de tranh tranh chap voi
 	// luong tinh sat thuong doc no sau nay (Ke hoach 6 Task 3+).
 	chieuDangChon *CapChieu
+
+	// lanDanhCuoi la thoi diem nguoi choi nay DUNG THANH CONG mot chieu lan
+	// gan nhat — Task 3 (chotkiem.go) can truong nay de tinh "da troi qua bao
+	// lau" cho kiem hoi chieu. store.NhanVat KHONG co truong thoi gian nao
+	// (da kiem: chi co cac truong chi so), nen buoc phai dat o day — dung vi
+	// tri voi chieuDangChon (chi actor duoc doc/ghi). Zero value (chua tung
+	// dung chieu nao) khien bayGio.Sub(lanDanhCuoi) ra mot khoang RAT LON, nen
+	// kiem hoi chieu tu nhien CHO PHEP ngay lan dau — khong can if/else rieng.
+	lanDanhCuoi time.Time
 }
 
 // suKienKhuVuc la kieu su kien actor xu ly qua hop thu. Ke hoach 5 Task 5 se

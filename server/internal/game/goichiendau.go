@@ -17,13 +17,17 @@ package game
 import "nroserver/internal/protocol"
 
 // Nam ma lenh dung trong file nay: bon ma nhom "nguoi danh quai" (Task 6, dac
-// ta §3.3) va mot ma nhom "nguoi danh nguoi" (Task 10, dac ta §2.1/§3.3).
+// ta §3.3), mot ma nhom "nguoi danh nguoi" (Task 10, dac ta §2.1/§3.3), va hai
+// ma nhom "quai danh nguoi" (Task 9, dac ta §3.3).
 const (
 	lenhNguoiDanhQuai  int8 = 54  // Nguoi danh quai — CHU Y: khong co truong dem
 	lenhQuaiConSong    int8 = -9  // Quai con song sau don danh
 	lenhQuaiChet       int8 = -12 // Quai chet, kem danh sach do roi (KH6 luon rong)
 	lenhQuaiHoiSinh    int8 = -13 // Quai hoi sinh
 	lenhNguoiDanhNguoi int8 = -60 // Nguoi danh nguoi — CO HAI DANG DO DAI, xem goiDanhNguoiChoi/goiHoiMauNguoiChoi
+
+	lenhQuaiDanhTrungMinh      int8 = -11 // Quai danh TRUNG chinh nan nhan — gui RIENG nan nhan
+	lenhQuaiDanhTrungNguoiKhac int8 = -10 // Quai danh trung ai do — gui NGUOI KHAC trong khu vuc (khong gui nan nhan)
 )
 
 // DoRoi la mot vat pham roi ra khi quai chet (dac ta §3.3, truong lap trong
@@ -186,4 +190,44 @@ func goiHoiMauNguoiChoi(idNguoiDanh int32, skillId byte, idNguoiTrung int32) *pr
 	// KHONG GHI GI THEM SAU DAY — dung o day la HET GOI. Xem chu thich ham va
 	// dac ta §2.0/§2.1 (ghi thua truong o day la loi im lang tuyet doi).
 	return protocol.NewMessage(lenhNguoiDanhNguoi, w)
+}
+
+// ---------------------------------------------------------------------------
+// Task 9 them: -11 (quai danh trung minh) va -10 (quai danh trung ai do) —
+// Nhom D "Quai danh nguoi", dac ta §3.3, AI hai tang uu tien o quai.go.
+// ---------------------------------------------------------------------------
+
+// goiQuaiDanhTrungMinh dung goi XUONG -11: bao RIENG cho nan nhan mot con
+// quai vua danh TRUNG chinh minh (dac ta §3.3). Than gui CHI 2 truong
+// (mobId, satThuong) — dac ta ghi ro con mot truong tuy chon o cuoi
+// (int satThuongChakra) ma CA ban Java LAN ban Go deu KHONG gui (client boc
+// try/catch), nen ham nay KHONG ghi them gi sau satThuong.
+//
+// ⚠️ Goi cho AI QUAI (khuvuc.go, aiQuai): -11 phai gui THANG qua phien cua
+// CHINH nan nhan, KHONG dung phatChoNguoiKhac/phatChoCaKhuVuc — ca hai deu
+// SAI doi tuong ("gui cho: Rieng nan nhan" khac han "ca khu vuc" hay "nguoi
+// khac", xem bang §3.3 cua dac ta).
+func goiQuaiDanhTrungMinh(mobId byte, satThuong int32) *protocol.Message {
+	w := protocol.NewWriter()
+	w.Byte(mobId)
+	w.Int(satThuong)
+	return protocol.NewMessage(lenhQuaiDanhTrungMinh, w)
+}
+
+// goiQuaiDanhTrungNguoiKhac dung goi XUONG -10: bao NHUNG NGUOI KHAC (khong
+// phai nan nhan) trong khu vuc mot con quai vua danh trung ai do (dac ta
+// §3.3). Than gui 3 truong (mobId, idNanNhan, hpConLai) — cung nhu -11,
+// truong tuy chon cuoi (int mpConLai) ca hai ban deu khong gui, KHONG ghi
+// them gi sau hpConLai.
+//
+// ⚠️ Goi cho AI QUAI (khuvuc.go, aiQuai): dung k.phatChoNguoiKhac(idNanNhan, m)
+// (co san tu Ke hoach 5) — dung nghia "nguoi khac" cua dac ta: loai tru CHINH
+// nan nhan (nan nhan da nhan -11 rieng o tren, khong can/khong duoc nhan lai
+// -10 cua chinh minh).
+func goiQuaiDanhTrungNguoiKhac(mobId byte, idNanNhan int32, hpConLai int32) *protocol.Message {
+	w := protocol.NewWriter()
+	w.Byte(mobId)
+	w.Int(idNanNhan)
+	w.Int(hpConLai)
+	return protocol.NewMessage(lenhQuaiDanhTrungNguoiKhac, w)
 }

@@ -16,6 +16,7 @@ package game
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"testing"
@@ -48,6 +49,80 @@ func moPhienClientGiaKhuVuc(t *testing.T, kho Kho, soKhuVuc *SoKhuVuc) *clientGi
 	f.SetKey(protocol.DeriveKey(khoaTho))
 
 	return &clientGia{t: t, f: f, conn: benClient}
+}
+
+// moSoKhuVucKhongQuaiMacDinh xay 5 khu vuc GIONG HET MoSoKhuVuc (san xuat
+// that) NHUNG XOA SACH quai mac dinh (taoQuaiMacDinh, quai.go) TRUOC KHI
+// BatDau() — Ke hoach 6 Task 9 them ham nay VI: AI quai (aiQuai, khuvuc.go)
+// nay chay tren TICKER THAT ma MoSoKhuVuc() khoi dong, va nhan vat MOI TAO
+// luon spawn dung diem SpawnX/SpawnY cua ban do (lang.go: ViTriXKhoiDau/
+// ViTriYKhoiDau) — CACH DUNG 60 don vi voi CA HAI quai mac dinh
+// (taoQuaiMacDinh), nam TRONG tam tang 2 cua AI (100, dac ta §5.2). Cac test
+// KHONG lien quan gi toi quai (di chuyen, vao/roi khu vuc) se bi quai TU DONG
+// DANH ngay khi nhan vat vua vao khu vuc mot minh, pha vo gia dinh "khong ai
+// gui goi gi neu khong co hanh dong nao cua nguoi choi that".
+//
+// AN TOAN tuyet doi de ghi truc tiep k.quai = nil o day (khong dua tranh du
+// lieu voi goroutine vongLap): thoi diem nay goroutine ay CHUA duoc tao —
+// BatDau() (dong goi tao goroutine) duoc goi SAU dong gan k.quai = nil, dung
+// ky thuat "AN TOAN sua truc tiep k.quai" da dung o TestTichHop_DanhQuaiChet,
+// chi khac o CHO trong vong doi (truoc BatDau(), khong phai sau khi bom su
+// kien tay).
+//
+// Cac test "danh quai" (TestTichHop_DanhQuai...) VAN can quai that de danh ->
+// KHONG dung ham nay, GIU MoSoKhuVuc() nhu cu va tu xu ly nhieu AI rieng bang
+// khongConGoiGiTruQuaiDanh (xem ham do o duoi).
+func moSoKhuVucKhongQuaiMacDinh(t *testing.T) *SoKhuVuc {
+	t.Helper()
+	s := &SoKhuVuc{theoMap: make(map[int32]*KhuVuc)}
+	for mapId := int32(1); mapId <= 5; mapId++ {
+		k := MoKhuVuc(TimBanDo(mapId))
+		k.quai = nil // AN TOAN: goroutine vongLap CHUA chay (BatDau() o duoi)
+		k.BatDau()
+		s.theoMap[mapId] = k
+	}
+	return s
+}
+
+// khongConGoiGiTruQuaiDanh giong het khongConGoiGi (tichhop_test.go) NHUNG
+// BO QUA (ghi log, KHONG that bai) cac goi -11/-10 roi doc tiep — Ke hoach 6
+// Task 9: cac test "danh quai" trong file nay CO CHU DICH GIU quai mac dinh
+// (taoQuaiMacDinh) that de lam doi tuong danh, ma quai do dung CACH 60 don vi
+// diem spawn — nam TRONG tam tang 2 cua AI (100, dac ta §5.2) nen co the TU
+// DONG danh nhan vat NGAY khi vua vao khu vuc, truoc ca khi test kip lam gi.
+// Day la NHIEU NEN HOP LE tu tinh nang AI that (khong phai loi), khac han cac
+// lenh khac (van phai that su im lang tuyet doi).
+//
+// CHI dung ham nay o nhung diem ket noi VAN DANG DUOC DOC (client con song
+// binh thuong) — Gui() phia actor se hoan tat NHANH (khong co rui ro chan lau
+// toi thoiGianChoGui=30s nhu khi ket noi sap dong, xem session.go). KHONG dung
+// cho kich ban dong ket noi giua chung (TestTichHop_RoiKhuVucPhatGoi6) — noi
+// do dung moSoKhuVucKhongQuaiMacDinh de loai bo quai HOAN TOAN thay vi khoan
+// dung nhieu, vi mot ket noi dang dong co the khien actor CHAN THAT SU toi
+// 30s moi lan Gui() that bai (da do duoc: 120s cho 3 lan thu tren mot khu
+// vuc that khi chua co ham nay).
+func (cl *clientGia) khongConGoiGiTruQuaiDanh(t *testing.T) bool {
+	t.Helper()
+	for {
+		_ = cl.conn.SetReadDeadline(time.Now().Add(hanChoImLang))
+		m, err := cl.f.ReadMessage()
+		if err != nil {
+			cl.conn.SetReadDeadline(time.Now().Add(5 * time.Second))
+			var netErr net.Error
+			if errors.As(err, &netErr) && netErr.Timeout() {
+				return true // het han, khong con goi nao (ke ca nhieu AI) -> thuc su im lang
+			}
+			t.Fatalf("ket noi gap loi KHONG PHAI het han gio khi dang cho xac nhan im lang: %v", err)
+			return false
+		}
+		if m.Command == -11 || m.Command == -10 {
+			t.Logf("bo qua goi quai AI (nhieu hop le, Ke hoach 6 Task 9): lenh=%d du_lieu=%v", m.Command, m.Data)
+			continue // doc tiep voi han gio MOI — quai co the danh nhieu lan trong khoang cho
+		}
+		cl.conn.SetReadDeadline(time.Now().Add(5 * time.Second))
+		t.Logf("nhan duoc goi NGOAI DU KIEN trong luc cho im lang: lenh=%d du_lieu=%v", m.Command, m.Data)
+		return false
+	}
 }
 
 // baoVaoKhuVuc gui goi -39 than rong (client bao da tai xong map).
@@ -179,7 +254,10 @@ func TestTichHop_HaiNguoiThayNhauVaDiChuyen(t *testing.T) {
 	khoThat := moKhoThatChoTest(t)
 	ctx := context.Background()
 
-	soKhuVuc := MoSoKhuVuc()
+	// Task 9: khong dung MoSoKhuVuc() — test nay khong lien quan gi toi quai,
+	// dung ban khong quai de tranh AI tu danh nhan vat dang doc (xem chu
+	// thich moSoKhuVucKhongQuaiMacDinh).
+	soKhuVuc := moSoKhuVucKhongQuaiMacDinh(t)
 	defer soKhuVuc.DungTatCa()
 
 	matKhau := "matkhau123"
@@ -264,7 +342,9 @@ func TestTichHop_DiChuyenVuotNguongBiChan(t *testing.T) {
 	khoThat := moKhoThatChoTest(t)
 	ctx := context.Background()
 
-	soKhuVuc := MoSoKhuVuc()
+	// Task 9: xem chu thich moSoKhuVucKhongQuaiMacDinh — test nay khong lien
+	// quan gi toi quai.
+	soKhuVuc := moSoKhuVucKhongQuaiMacDinh(t)
 	defer soKhuVuc.DungTatCa()
 
 	matKhau := "matkhau123"
@@ -351,7 +431,12 @@ func TestTichHop_RoiKhuVucPhatGoi6(t *testing.T) {
 	khoThat := moKhoThatChoTest(t)
 	ctx := context.Background()
 
-	soKhuVuc := MoSoKhuVuc()
+	// Task 9: BAT BUOC dung ban khong quai — test nay DONG ket noi cua A giua
+	// chung (xem clA.dong() ben duoi). Neu quai that con trong khu vuc, AI co
+	// the dang thu Gui() toi A dung luc do -> chan actor toi 30s/lan (da do
+	// duoc that: 120s cho 3 lan thu truoc khi co ham nay). Xem chu thich
+	// moSoKhuVucKhongQuaiMacDinh.
+	soKhuVuc := moSoKhuVucKhongQuaiMacDinh(t)
 	defer soKhuVuc.DungTatCa()
 
 	matKhau := "matkhau123"
@@ -511,8 +596,11 @@ func TestTichHop_DanhQuaiConSong(t *testing.T) {
 	}
 
 	clA.baoVaoKhuVuc()
-	if !clA.khongConGoiGi(t) {
-		t.Fatal("A vao khu vuc mot minh -> khong duoc nhan goi nao (chua co ai khac)")
+	// Task 9: khongConGoiGiTruQuaiDanh (khong phai khongConGoiGi) — quai mac
+	// dinh dung canh diem spawn (tam tang 2 AI, dac ta §5.2) co the tu danh A
+	// ngay khi vua vao, day la nhieu hop le (xem chu thich ham).
+	if !clA.khongConGoiGiTruQuaiDanh(t) {
+		t.Fatal("A vao khu vuc mot minh -> khong duoc nhan goi nao NGOAI quai AI (chua co ai khac)")
 	}
 	clB.baoVaoKhuVuc()
 	khangDinhIdTrongGoi(t, clB.doiGoiLenh(t, -5), nvA.ID)
@@ -521,8 +609,8 @@ func TestTichHop_DanhQuaiConSong(t *testing.T) {
 	// A chon chieu can chien (templateId=1, tam 100) — khong phat goi gi ca
 	// (dac ta §3.2: chon chieu la trang thai noi bo, khong co goi xuong).
 	clA.chonChieu(1)
-	if !clA.khongConGoiGi(t) {
-		t.Fatal("chon chieu (34) khong duoc phat goi tin nao")
+	if !clA.khongConGoiGiTruQuaiDanh(t) {
+		t.Fatal("chon chieu (34) khong duoc phat goi tin nao NGOAI quai AI")
 	}
 
 	// A danh quai Id=0 — trong tam, chieu da chon, chua tung danh -> hoi chieu
@@ -762,22 +850,24 @@ func TestTichHop_DanhQuaiThuCungDocDu5ByteKhongLechDong(t *testing.T) {
 	}
 
 	clA.baoVaoKhuVuc()
-	if !clA.khongConGoiGi(t) {
-		t.Fatal("A vao khu vuc mot minh -> khong duoc nhan goi nao (chua co ai khac)")
+	// Task 9: khongConGoiGiTruQuaiDanh — quai mac dinh (Id=1) trong tam tang 2
+	// AI co the tu danh A ngay, xem chu thich ham.
+	if !clA.khongConGoiGiTruQuaiDanh(t) {
+		t.Fatal("A vao khu vuc mot minh -> khong duoc nhan goi nao NGOAI quai AI (chua co ai khac)")
 	}
 
 	// Chon chieu can chien (tam 100) — quai Id=1 mac dinh o bd.SpawnX-60, cach
 	// A dung 60 don vi, trong tam.
 	clA.chonChieu(1)
-	if !clA.khongConGoiGi(t) {
-		t.Fatal("chon chieu (34) khong duoc phat goi tin nao")
+	if !clA.khongConGoiGiTruQuaiDanh(t) {
+		t.Fatal("chon chieu (34) khong duoc phat goi tin nao NGOAI quai AI")
 	}
 
 	// Goi 54 DANG THU CUNG: 5 byte. KHONG co quai nao Id=255 trong khu vuc ->
 	// may chu PHAI im lang, KHONG duoc sap ket noi hay tra loi gi ca.
 	clA.guiDanhQuaiThuCung(999999)
-	if !clA.khongConGoiGi(t) {
-		t.Fatal("goi 54 dang thu cung (mobId=-1) phai bi lang le bo qua (KH6 chua co he thu cung), khong duoc phat goi nao")
+	if !clA.khongConGoiGiTruQuaiDanh(t) {
+		t.Fatal("goi 54 dang thu cung (mobId=-1) phai bi lang le bo qua (KH6 chua co he thu cung) NGOAI quai AI, khong duoc phat goi nao khac")
 	}
 
 	// NGAY SAU DAY, tren CUNG ket noi: goi 54 THUONG, mobId=1 -> phai nhan
@@ -956,13 +1046,15 @@ func TestTichHop_DanhQuaiVuotTamVanPhatGoiChiMangFalse(t *testing.T) {
 	}
 
 	clA.baoVaoKhuVuc()
-	if !clA.khongConGoiGi(t) {
-		t.Fatal("A vao khu vuc mot minh -> khong duoc nhan goi nao (chua co ai khac)")
+	// Task 9: khongConGoiGiTruQuaiDanh — quai mac dinh trong tam tang 2 AI co
+	// the tu danh A ngay, xem chu thich ham.
+	if !clA.khongConGoiGiTruQuaiDanh(t) {
+		t.Fatal("A vao khu vuc mot minh -> khong duoc nhan goi nao NGOAI quai AI (chua co ai khac)")
 	}
 
 	clA.chonChieu(1) // can chien, tam 100
-	if !clA.khongConGoiGi(t) {
-		t.Fatal("chon chieu (34) khong duoc phat goi tin nao")
+	if !clA.khongConGoiGiTruQuaiDanh(t) {
+		t.Fatal("chon chieu (34) khong duoc phat goi tin nao NGOAI quai AI")
 	}
 
 	// A di chuyen tu (100,384) toi (300,384) — hop le (khoang cach 200 <=
@@ -972,9 +1064,10 @@ func TestTichHop_DanhQuaiVuotTamVanPhatGoiChiMangFalse(t *testing.T) {
 	toYXa := int16(nvA.ViTriY)
 	clA.guiDiChuyen(toXXa, toYXa)
 	// -7 chi phat cho NGUOI KHAC (client tu ve chuyen dong cua chinh minh) —
-	// A mot minh trong khu vuc nen KHONG nhan goi nao o buoc nay.
-	if !clA.khongConGoiGi(t) {
-		t.Fatal("A tu di chuyen -> khong duoc nhan lai goi -7 cua chinh minh")
+	// A mot minh trong khu vuc nen KHONG nhan goi nao o buoc nay (ngoai co
+	// the co quai AI con sot lai TU TRUOC luc di chuyen).
+	if !clA.khongConGoiGiTruQuaiDanh(t) {
+		t.Fatal("A tu di chuyen -> khong duoc nhan lai goi -7 cua chinh minh (ngoai quai AI)")
 	}
 
 	clA.guiDanhQuai(0)

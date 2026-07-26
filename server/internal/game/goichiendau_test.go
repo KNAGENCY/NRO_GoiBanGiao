@@ -231,3 +231,50 @@ func TestGoiNguoiDanhNguoiChenhLech7Byte(t *testing.T) {
 		t.Fatalf("hai dang goi -60 chenh %d byte, dac ta §2.1 doi hoi DUNG 7 (loaiChieu 1 + satThuong 4 + daChet 1 + chiMang 1)", chenh)
 	}
 }
+
+// ---------------------------------------------------------------------------
+// Ke hoach 6 Task 9 — goi -11 (quai danh trung minh) va -10 (quai danh trung
+// nguoi khac), dac ta §3.3 Nhom D "Quai danh nguoi". Ca hai goi KHONG co
+// truong chiMang/hieuUng — chi cac truong lay thang tu bang byte dac ta.
+// ---------------------------------------------------------------------------
+
+// TestGoiQuaiDanhTrungMinhByteDung: goi -11, dac ta §3.3 — CHI 2 truong
+// (mobId, satThuong), KHONG co truong nao khac (truong satThuongChakra tuy
+// chon ma dac ta nhac toi la KHONG duoc ban Java lan ban Go gui).
+func TestGoiQuaiDanhTrungMinhByteDung(t *testing.T) {
+	m := goiQuaiDanhTrungMinh(3, 42)
+
+	if m.Command != -11 {
+		t.Fatalf("Command = %d, muon -11", m.Command)
+	}
+
+	muon := []byte{
+		3,           // mobId
+		0, 0, 0, 42, // satThuong (int32 BE)
+	}
+	if !bytes.Equal(m.Data, muon) {
+		t.Fatalf("goi -11 byte sai:\n got  = %v (%d byte)\n muon = %v (%d byte)",
+			m.Data, len(m.Data), muon, len(muon))
+	}
+}
+
+// TestGoiQuaiDanhTrungNguoiKhacByteDung: goi -10, dac ta §3.3 — 3 truong
+// (mobId, idNanNhan, hpConLai). idNanNhan la int32 BE (id nguoi choi la int,
+// dac ta §3 quy uoc).
+func TestGoiQuaiDanhTrungNguoiKhacByteDung(t *testing.T) {
+	m := goiQuaiDanhTrungNguoiKhac(7, 1001, 58)
+
+	if m.Command != -10 {
+		t.Fatalf("Command = %d, muon -10", m.Command)
+	}
+
+	muon := []byte{
+		7,            // mobId
+		0, 0, 3, 233, // idNanNhan = 1001 (int32 BE, 0x3E9)
+		0, 0, 0, 58, // hpConLai
+	}
+	if !bytes.Equal(m.Data, muon) {
+		t.Fatalf("goi -10 byte sai:\n got  = %v (%d byte)\n muon = %v (%d byte)",
+			m.Data, len(m.Data), muon, len(muon))
+	}
+}

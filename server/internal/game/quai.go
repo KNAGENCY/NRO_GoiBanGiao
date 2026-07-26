@@ -79,6 +79,45 @@ type Quai struct {
 	// lai ve thoi diem hoi sinh — tranh mot con quai vua hoi (da day mau) van
 	// bi tinh "no du 30s roi" tu truoc luc chet va hoi "thua" ngay tick ke tiep.
 	LanHoiMauCuoi time.Time
+
+	// --- Ba truong duoi day la Ke hoach 6 Task 9 (AI hai tang uu tien + goi
+	// -11/-10, dac ta §5.2) — trang thai NOI BO cua actor, CHI luong vongLap
+	// duoc doc/ghi, dung nguyen tac da ap dung cho ba truong Task 8 o tren.
+
+	// DaTungDanh la TAP HOP id nhung nguoi choi DA TUNG danh TRUNG quai nay
+	// (dac ta §5.2 tang uu tien 1: "nguoi da tung danh no"). Nap mot phan tu
+	// (id -> true) trong case suKienDanhQuai (khuvuc.go), CHI trong nhanh don
+	// TRUNG (khong phai nhanh Truot=true — "trung don" nghia la thuc su gay
+	// sat thuong, khac "vuot tam" noi don khong thuc su cham muc tieu). XOA
+	// SACH (gan nil) khi quai CHET (mucTieu.Hp <= 0, cung case do) — dung
+	// nguyen van brief Task 9: "danh sach da tung danh no nap khi trung don,
+	// xoa sach khi quai chet". map nil van doc an toan (tra false cho moi
+	// khoa, len()==0) nen khong can khoi tao rong o taoQuaiMacDinh.
+	DaTungDanh map[int64]bool
+
+	// LanDanhCuoi la thoi diem CHINH QUAI NAY that su danh TRUNG mot nguoi
+	// choi GAN NHAT — khac han nguoiTrongKhuVuc.lanDanhCuoi (do la nguoi choi
+	// danh quai; day la quai danh nguoi choi, huong nguoc lai). aiQuai
+	// (khuvuc.go) CHI dat lai truong nay trong nhanh "that su danh" (sau khi
+	// da kiem bayGio.Sub(LanDanhCuoi) >= nhip ma chonMucTieu tra ve) — TUYET
+	// DOI khong dat lai khi chonMucTieu tra ve muc tieu nil (dac ta §5.4.2:
+	// bay ban Java dat lai moc thoi gian NGOAI nhanh "co muc tieu", khien
+	// quai vua thay nguoi phai cho THEM mot nhip nua moi duoc danh, thay vi
+	// danh NGAY — xem chu thich ham aiQuai). Zero value (chua tung danh ai)
+	// khien bayGio.Sub(zero) ra khoang RAT LON -> lan danh DAU TIEN tu nhien
+	// duoc phep ngay, khong can nhanh if rieng cho truong hop nay.
+	LanDanhCuoi time.Time
+
+	// SatThuongCoBan la sat thuong CO DINH quai gay ra MOI don len nguoi
+	// choi. Dac ta §5.3 dinh nghia cong thuc DAY DU ("dame rieng ±1%" hoac
+	// "hpMax×pDame%±theo cap") nhung can them truong "dame rieng"/"pDame%"
+	// MA QUAI (Task 5) CHUA CO — dinh nghia du lieu quai day du NGOAI pham vi
+	// Task 9 (task nay chi duoc giao chonMucTieu + goi -11/-10, KHONG duoc
+	// giao cong thuc sat thuong quai day du). Dung mot gia tri CO DINH don
+	// gian de AI co "duong chay THAT" (khong the phat goi -11/-10 ma khong
+	// co con so sat thuong nao) trong luc cho KH8 chot cong thuc that.
+	// TODO(KH8 - can bang so lieu): thay bang cong thuc §5.3 day du.
+	SatThuongCoBan int32
 }
 
 // ghiQuai ghi MOT con quai vao than goi -24 MAP INFO, DUNG THEO THU TU dac ta
@@ -147,11 +186,111 @@ func taoQuaiMacDinh(bd *BanDo) []*Quai {
 			Id: 0, MauId: 1, Cap: 1, CapTinhAnh: 1,
 			Hp: 100, HpToiDa: 100,
 			X: bd.SpawnX + 60, Y: bd.SpawnY,
+			SatThuongCoBan: 5, // Task 9: gia tri CO DINH tam thoi, xem chu thich truong SatThuongCoBan
 		},
 		{
 			Id: 1, MauId: 1, Cap: 1, CapTinhAnh: 1,
 			Hp: 100, HpToiDa: 100,
 			X: bd.SpawnX - 60, Y: bd.SpawnY,
+			SatThuongCoBan: 5,
 		},
 	}
+}
+
+// ---------------------------------------------------------------------------
+// Ke hoach 6 Task 9 — AI quai hai tang uu tien (dac ta §5.2), goi -11/-10.
+// ---------------------------------------------------------------------------
+
+// Bon hang so hanh vi AI DA CHOT (dac ta §5.2, nguon Mob.java:423/438 va
+// Mob.java:398/412) — nguon su that duy nhat, dung trong chonMucTieu ben
+// duoi. Dat kieu hang so (khong phai bien) de kiem thu dot bien sua truc
+// tiep gia tri o day roi chay lai test bien, khong can sua noi khac.
+const (
+	// tamTraThu/nhipTraThu: tang uu tien 1 — nguoi DA TUNG danh quai nay.
+	// Tam XA HON va nhip NHANH HON tang 2 — "da danh thi phai chiu tran"
+	// (dac ta §5.2, dong "Luat 'tra thu nhanh gap doi, tam gap ba' la luat
+	// choi tot ... da danh thi phai chiu tran").
+	tamTraThu  int64         = 300
+	nhipTraThu time.Duration = 1000 * time.Millisecond
+
+	// tamTuGaySu/nhipTuGaySu: tang uu tien 2 — nguoi BAT KY di ngang qua.
+	// Tam GAN HON va nhip CHAM HON tang 1 — "nguoi choi di ngang qua thi
+	// tuong doi an toan" (dac ta §5.2).
+	tamTuGaySu  int64         = 100
+	nhipTuGaySu time.Duration = 2000 * time.Millisecond
+)
+
+// chonMucTieu chon MUC TIEU + NHIP DANH cho quai q trong so danh sach nguoi
+// choi hien co trong khu vuc (dac ta §5.2, brief Task 9). HAM THUAN: chi doc
+// q.X/Y/DaTungDanh va tung phan tu cua nguoi, KHONG sua bat ky trang thai nao
+// (khong ghi q.LanDanhCuoi, khong ghi gi vao tung nguoiTrongKhuVuc) — noi GOI
+// (aiQuai, khuvuc.go) moi la noi quyet dinh "co that su danh hay khong" va
+// cham q.LanDanhCuoi. Dung dung dac diem ban giao cua brief: "tra ve CA muc
+// tieu LAN nhip danh, KHONG sua trang thai ngam" — sua loi #4 cua dac ta §5.4
+// ("doi nhip danh nhu tac dung phu cua ham tim muc tieu", Mob.java:412,438).
+//
+// Tra ve (nil, 0) khi khong tim thay muc tieu o CA HAI tang — ben goi (aiQuai)
+// PHAI hieu day la "khong lam gi ca", TUYET DOI khong duoc dung ket qua nay
+// de dat lai q.LanDanhCuoi (dac ta §5.4.2: quai vua thay nguoi phai duoc
+// danh NGAY, khong phai cho them mot nhip — xem chu thich ham aiQuai).
+//
+// NGOAC DIEU KIEN LOC TUONG MINH (dac ta §5.4.3): moi dieu kien loc (con
+// song, da tung danh, trong tam) la MOT cau if/return DOC LAP trong closure
+// hopLe truyen cho timGanNhatTrongTam — KHONG gop chung thanh MOT bieu thuc
+// bool dai roi dua vao thu tu &&/||. Day chinh la bay ban Java mac phai
+// (Mob.java:402-404): voi big boss, sai thu tu toan tu lam MOI bo loc phia
+// truoc — KE CA bo loc "chua chet" — bi bo qua, boss nham ca xac chet.
+func (q *Quai) chonMucTieu(nguoi []*nguoiTrongKhuVuc) (*nguoiTrongKhuVuc, time.Duration) {
+	// Tang 1 (uu tien cao hon): nguoi DA TUNG danh quai nay, con song, tam 300.
+	if mt := timGanNhatTrongTam(q, nguoi, tamTraThu, func(n *nguoiTrongKhuVuc) bool {
+		if n.nv.HpHienTai <= 0 { // (a) da chet -> loai, DOC LAP voi (b)
+			return false
+		}
+		if !q.DaTungDanh[n.nv.ID] { // (b) chua tung danh quai nay -> loai
+			return false
+		}
+		return true
+	}); mt != nil {
+		return mt, nhipTraThu
+	}
+
+	// Tang 2: bat ky ai con song, tam 100.
+	if mt := timGanNhatTrongTam(q, nguoi, tamTuGaySu, func(n *nguoiTrongKhuVuc) bool {
+		return n.nv.HpHienTai > 0 // CHI mot dieu kien -> tu no da tuong minh
+	}); mt != nil {
+		return mt, nhipTuGaySu
+	}
+
+	return nil, 0
+}
+
+// timGanNhatTrongTam duyet nguoi, loc bang hopLe(n), giu lai nguoi GAN q NHAT
+// trong pham vi tam (so sanh khoang cach BINH PHUONG, tranh sqrt/float — cung
+// ky thuat voi kiemDiChuyenHopLe va KiemDanhHopLe da dung o cac Task truoc).
+// nil-safe: phan tu nil hoac n.nv nil bi bo qua (phong thu, khong panic) —
+// ve ly thuyet khong xay ra (k.nguoiTrong luon gan nv khac nil khi them vao,
+// xem case suKienVao), nhung giu cho an toan khong doi hoi nguoi goi dam bao.
+func timGanNhatTrongTam(q *Quai, nguoi []*nguoiTrongKhuVuc, tam int64, hopLe func(*nguoiTrongKhuVuc) bool) *nguoiTrongKhuVuc {
+	tamSq := tam * tam
+	var ganNhat *nguoiTrongKhuVuc
+	var ganNhatSq int64
+	for _, n := range nguoi {
+		if n == nil || n.nv == nil {
+			continue
+		}
+		if !hopLe(n) {
+			continue
+		}
+		dx := int64(n.nv.ViTriX) - int64(q.X)
+		dy := int64(n.nv.ViTriY) - int64(q.Y)
+		distSq := dx*dx + dy*dy
+		if distSq > tamSq {
+			continue
+		}
+		if ganNhat == nil || distSq < ganNhatSq {
+			ganNhat = n
+			ganNhatSq = distSq
+		}
+	}
+	return ganNhat
 }

@@ -424,6 +424,18 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 			}
 			heNguoiDanh := heNguyenToNguoiChoi(nguoi.nv.Lang)
 			satThuong = TinhSatThuong(satThuongGoc, nguoi.chieuDangChon, heNguoiDanh, heQuaiChuaXacDinh, chiMang)
+
+			// Ke hoach 6 Task 9: don TRUNG (nhanh nay, khac nhanh Truot o
+			// duoi) -> ghi nhan nguoi nay vao danh sach "da tung danh" cua
+			// quai, kich hoat tang uu tien 1 cua AI (dac ta §5.2, quai.go/
+			// chonMucTieu) cho NHUNG DON SAU. Dat NGAY trong nhanh "trung
+			// don" (khong phai nhanh Truot) vi "trung don" (brief Task 9)
+			// nghia la thuc su gay sat thuong, khac "vuot tam" noi don khong
+			// thuc su cham muc tieu.
+			if mucTieu.DaTungDanh == nil {
+				mucTieu.DaTungDanh = make(map[int64]bool)
+			}
+			mucTieu.DaTungDanh[nguoi.nv.ID] = true
 		}
 		// Truot=true (vuot tam): satThuong giu nguyen 0 (dac ta §1.9) — KHONG
 		// goi TinhSatThuong, vi don nay khong thuc su cham muc tieu.
@@ -467,6 +479,10 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 			// noi bo actor truoc, giong cach nguoi.lanDanhCuoi duoc ghi truoc
 			// khi phat goi 54/-9 phia tren.
 			mucTieu.LucChet = bayGio
+			// Task 9: quai CHET -> xoa sach danh sach "da tung danh no" (dung
+			// nguyen van brief: "xoa sach khi quai chet") — lan hoi sinh sau
+			// la mot "vong doi" moi, khong ai duoc coi la da tung danh no nua.
+			mucTieu.DaTungDanh = nil
 			// KH6 chua co he vat pham (dac ta §0) -> doRoi luon rong.
 			k.phatChoCaKhuVuc(goiQuaiChet(mucTieu.Id, satThuong, chiMang, nil))
 		} else {
@@ -532,11 +548,12 @@ const (
 )
 
 // nhipTim chay moi 100ms (goi tu vongLap) — Ke hoach 6 Task 8 dung mooc nay
-// (de rong tu Ke hoach 5) cho hai viec cua tung con quai trong k.quai: HOI
-// SINH neu da chet du 5 giay, va HOI MAU dinh ky 30 giay neu con song nhung
-// chua day mau. Day la NOI DUY NHAT ngoai case suKienDanhQuai cham vao
-// Hp/HpToiDa/LucChet/LucHoiSinh/LanHoiMauCuoi cua quai — dung dac ta §1.6
-// (chi luong vongLap duoc cham trang thai quai).
+// (de rong tu Ke hoach 5) cho ba viec cua tung con quai trong k.quai: HOI
+// SINH neu da chet du 5 giay (hoiSinhQuai), HOI MAU dinh ky 30 giay neu con
+// song nhung chua day mau (hoiMauQuai), va AI hai tang uu tien danh nguoi
+// choi (aiQuai, Task 9). Day la NOI DUY NHAT ngoai case suKienDanhQuai cham
+// vao trang thai quai/nguoiTrong — dung dac ta §1.6 (chi luong vongLap duoc
+// cham trang thai quai va trang thai chien dau).
 //
 // bayGio LAY MOT LAN o dau ham (khong goi k.dongHo() lai trong vong lap) de
 // TOAN BO quai trong cung mot nhip duoc xet tren CUNG mot moc thoi gian —
@@ -545,63 +562,150 @@ const (
 // nhich len vai micro-giay giua hai lan goi — khong xay ra trong that te vi
 // nhip 100ms qua tho, nhung day la thoi quen dung, tranh phu thuoc vao thu tu
 // lap qua slice).
+//
+// Task 9: nhipTim da ~55 dong tu Task 8 (brief Task 9 de nghi tach ham khi
+// them logic) nen ba viec tren duoc tach thanh ba ham rieng (hoiSinhQuai/
+// hoiMauQuai/aiQuai) — chi vongLap goi chung, van chi luong nay cham trang
+// thai (khong doi ky luat §1.6, chi doi cach to chuc code).
 func (k *KhuVuc) nhipTim() {
 	bayGio := k.dongHo()
 
+	// Task 9: snapshot nguoi choi thanh SLICE MOT LAN cho ca nhip nay, dung
+	// chung cho AI cua MOI con quai — tranh xay map->slice lai N lan (N = so
+	// quai). Con tro TRO THANG vao k.nguoiTrong (KHONG sao gia tri) vi ham
+	// nay chay TRONG vongLap nen doc truc tiep la an toan (dac ta §1.6); AI
+	// (aiQuai) cung CHI DOC qua slice nay, khong ghi.
+	var nguoi []*nguoiTrongKhuVuc
+	if len(k.nguoiTrong) > 0 {
+		nguoi = make([]*nguoiTrongKhuVuc, 0, len(k.nguoiTrong))
+		for _, n := range k.nguoiTrong {
+			nguoi = append(nguoi, n)
+		}
+	}
+
 	for _, q := range k.quai {
 		if q.Hp <= 0 {
-			// Dang cho hoi sinh. Chua du 5 giay ke tu luc chet -> chua lam gi,
-			// bo qua con quai nay o tick nay (dac ta §5.2, brief Task 8 buoc
-			// "sau 4.9s CHUA hoi sinh").
-			if bayGio.Sub(q.LucChet) < thoiGianHoiSinhQuai {
-				continue
-			}
-
-			// Du/qua 5 giay -> hoi sinh DAY DU mau (dac ta §5.4 diem 5: ban
-			// Java hoi day mau ngau nhien qua loi ham lvMob() khi dung goi
-			// -13 — ban Go LAM VIEC NAY TUONG MINH o day, khong an sau ham
-			// doc). Ghi LucHoiSinh = bayGio de kich hoat bat tu 1500ms (dac ta
-			// §1.7) qua ViTriCoMau.LucHoiSinh (xem case suKienDanhQuai). Ghi lai
-			// LanHoiMauCuoi = bayGio de tranh hoi mau "thua" ngay tick sau —
-			// quai vua hoi sinh da DAY MAU, khong can cong don thoi gian tu
-			// TRUOC luc chet vao chu ky hoi mau moi.
-			q.Hp = q.HpToiDa
-			q.LucHoiSinh = bayGio
-			q.LanHoiMauCuoi = bayGio
-
-			// CHI phat DUNG MOT goi -13, KHONG phat gi them sau do — dac ta
-			// §0.1 tuyet doi cam goi 87 theo sau (client hieu nham thanh "quai
-			// bi gio thoi", quai mau >= 16.777.216 se dung im khong di chuyen
-			// nua). goiQuaiHoiSinh (goichiendau.go, Task 6) da tu no LUON ghi
-			// sys=0/levelBoss=0, khong nhan tham so nao co the vo tinh mo
-			// duong cho mot gia tri khac 0.
-			k.phatChoCaKhuVuc(goiQuaiHoiSinh(q.Id, q.Hp))
-
-			// continue (khong roi xuong nhanh hoi mau ben duoi): quai vua hoi
-			// sinh chac chan Hp == HpToiDa nen dieu kien "chua day mau" cua
-			// nhanh do se tu nhien la false — continue o day chi de code doc
-			// RO RANG hon la dua vao if o duoi tu loai truong hop nay.
+			// Dang chet (cho hoi sinh, hoac vua hoi sinh xong NGAY trong
+			// hoiSinhQuai() o duoi). Ca hai truong hop deu continue — quai
+			// dang chet khong the hoi mau/AI, va quai vua hoi sinh chac
+			// chan Hp==HpToiDa nen nhanh hoi mau se tu nhien khong lam gi;
+			// AI cho quai vua hoi sinh doi sang tick SAU (khong danh ngay
+			// trong chinh tick hoi sinh) — don gian hoa, khong dac ta nao
+			// doi hoi phai danh NGAY trong cung tick hoi sinh.
+			k.hoiSinhQuai(q, bayGio)
 			continue
 		}
 
-		// Con song. Chi hoi mau khi CHUA day va da du 30 giay ke tu lan kiem
-		// truoc (dac ta §5.2). Quai vua day mau (Hp == HpToiDa) khong vao
-		// nhanh nay -> LanHoiMauCuoi KHONG bi cap nhat khi dang day mau, dung
-		// y dinh "chi dem thoi gian tu lan KIEM GAN NHAT", khong phai tu luc
-		// spawn co dinh.
-		if q.Hp < q.HpToiDa && bayGio.Sub(q.LanHoiMauCuoi) >= khoangHoiMauQuai {
-			q.LanHoiMauCuoi = bayGio
-
-			q.Hp += q.HpToiDa / 10
-			if q.Hp > q.HpToiDa { // khong duoc vuot hpToiDa (dac ta §5.2)
-				q.Hp = q.HpToiDa
-			}
-			// KHONG phat goi gi o day: dac ta khong dinh nghia goi nao cho
-			// hoi mau dinh ky (khac han goi -9 khi bi danh) — client chi thay
-			// mau moi qua mot don danh (-9) hoac lan vao lai khu vuc (-24)
-			// sau nay, dung hanh vi "hoi mau tham lang" cua ban goc.
-		}
+		k.hoiMauQuai(q, bayGio)
+		k.aiQuai(q, nguoi, bayGio)
 	}
+}
+
+// hoiSinhQuai xu ly nhanh "quai dang cho hoi sinh" cua nhipTim — GOI KHI
+// q.Hp <= 0. Neu CHUA du 5 giay tu LucChet thi khong lam gi (dac ta §5.2,
+// brief Task 8 "sau 4.9s CHUA hoi sinh"); du/qua 5 giay thi hoi sinh DAY DU
+// mau + phat DUNG MOT goi -13 (khong phat gi them sau do, dac ta §0.1 tuyet
+// doi cam goi 87 theo sau). Tach nguyen ven logic Task 8, chi doi vi tri.
+func (k *KhuVuc) hoiSinhQuai(q *Quai, bayGio time.Time) {
+	if bayGio.Sub(q.LucChet) < thoiGianHoiSinhQuai {
+		return
+	}
+
+	// Du/qua 5 giay -> hoi sinh DAY DU mau (dac ta §5.4 diem 5: ban Java hoi
+	// day mau ngau nhien qua loi ham lvMob() khi dung goi -13 — ban Go LAM
+	// VIEC NAY TUONG MINH o day, khong an sau ham doc). Ghi LucHoiSinh = bayGio
+	// de kich hoat bat tu 1500ms (dac ta §1.7) qua ViTriCoMau.LucHoiSinh (xem
+	// case suKienDanhQuai). Ghi lai LanHoiMauCuoi = bayGio de tranh hoi mau
+	// "thua" ngay tick sau — quai vua hoi sinh da DAY MAU, khong can cong don
+	// thoi gian tu TRUOC luc chet vao chu ky hoi mau moi.
+	q.Hp = q.HpToiDa
+	q.LucHoiSinh = bayGio
+	q.LanHoiMauCuoi = bayGio
+
+	// CHI phat DUNG MOT goi -13, KHONG phat gi them sau do — dac ta §0.1
+	// tuyet doi cam goi 87 theo sau (client hieu nham thanh "quai bi gio
+	// thoi", quai mau >= 16.777.216 se dung im khong di chuyen nua).
+	// goiQuaiHoiSinh (goichiendau.go, Task 6) da tu no LUON ghi sys=0/
+	// levelBoss=0, khong nhan tham so nao co the vo tinh mo duong cho mot
+	// gia tri khac 0.
+	k.phatChoCaKhuVuc(goiQuaiHoiSinh(q.Id, q.Hp))
+}
+
+// hoiMauQuai xu ly nhanh "hoi mau dinh ky" cua nhipTim — GOI KHI q.Hp > 0
+// (nguoi goi, nhipTim, da loai truong hop Hp<=0 truoc do). Chi hoi mau khi
+// CHUA day va da du 30 giay ke tu lan kiem truoc (dac ta §5.2). Quai vua day
+// mau (Hp == HpToiDa) khong vao nhanh if -> LanHoiMauCuoi KHONG bi cap nhat
+// khi dang day mau, dung y dinh "chi dem thoi gian tu lan KIEM GAN NHAT",
+// khong phai tu luc spawn co dinh. Tach nguyen ven logic Task 8.
+func (k *KhuVuc) hoiMauQuai(q *Quai, bayGio time.Time) {
+	if q.Hp < q.HpToiDa && bayGio.Sub(q.LanHoiMauCuoi) >= khoangHoiMauQuai {
+		q.LanHoiMauCuoi = bayGio
+
+		q.Hp += q.HpToiDa / 10
+		if q.Hp > q.HpToiDa { // khong duoc vuot hpToiDa (dac ta §5.2)
+			q.Hp = q.HpToiDa
+		}
+		// KHONG phat goi gi o day: dac ta khong dinh nghia goi nao cho hoi
+		// mau dinh ky (khac han goi -9 khi bi danh) — client chi thay mau
+		// moi qua mot don danh (-9) hoac lan vao lai khu vuc (-24) sau nay,
+		// dung hanh vi "hoi mau tham lang" cua ban goc.
+	}
+}
+
+// aiQuai la AI hai tang uu tien cua Ke hoach 6 Task 9 (dac ta §5.2) — GOI KHI
+// q.Hp > 0, MOI nhip 100ms, cho MOI con quai (goi tu nhipTim, sau hoiMauQuai).
+// Dung q.chonMucTieu (ham THUAN, quai.go) de TIM muc tieu + nhip yeu cau; ham
+// nay (chay trong vongLap) la noi DUY NHAT quyet dinh co "that su danh" hay
+// khong va cham q.LanDanhCuoi — dung dac ta §5.4 diem 4 ("doi nhip danh nhu
+// tac dung phu cua ham tim muc tieu la loi, phai tach rieng ham tra ve +
+// nguoi goi tu quyet dinh") va brief Task 9 (dot bien bat buoc: "chuyen viec
+// dat lai nhip ra ngoai nhanh that su danh -> test phai do").
+func (k *KhuVuc) aiQuai(q *Quai, nguoi []*nguoiTrongKhuVuc, bayGio time.Time) {
+	mucTieu, nhip := q.chonMucTieu(nguoi)
+	if mucTieu == nil {
+		// KHONG CO MUC TIEU: TUYET DOI khong dung toi q.LanDanhCuoi o day
+		// (dac ta §5.4.2 — bay ban Java Mob.java:386-390 dat lai moc thoi
+		// gian NGOAI nhanh "co nguoi choi", khien quai vua thay nguoi phai
+		// cho THEM gan mot nhip nua moi duoc danh, thay vi danh NGAY).
+		// Return som, KHONG cham trang thai gi ca.
+		return
+	}
+	if bayGio.Sub(q.LanDanhCuoi) < nhip {
+		return // con trong nhip hoi cua tang uu tien vua chon
+	}
+
+	// THAT SU DANH — CHI o day q.LanDanhCuoi moi duoc dat lai (dung nhanh
+	// "that su danh" ma dot bien bat buoc cua brief doi hoi).
+	q.LanDanhCuoi = bayGio
+
+	// §1.2: sat thuong khong duoc vuot mau con lai cua nan nhan. SatThuongCoBan
+	// la gia tri CO DINH tam thoi (xem chu thich truong Quai.SatThuongCoBan,
+	// quai.go) — cong thuc day du §5.3 la viec cua KH8, ngoai pham vi Task 9.
+	satThuong := q.SatThuongCoBan
+	if satThuong < 0 { // phong thu: cau hinh hong (SatThuongCoBan am) khong lam mau am
+		satThuong = 0
+	}
+	if satThuong > mucTieu.nv.HpHienTai {
+		satThuong = mucTieu.nv.HpHienTai
+	}
+
+	mucTieu.nv.HpHienTai -= satThuong
+	if mucTieu.nv.HpHienTai < 0 { // phong thu: ve ly thuyet khong xay ra sau kep tren
+		mucTieu.nv.HpHienTai = 0
+	}
+
+	// -11: RIENG nan nhan (dac ta §3.3 cot "Gui cho": "Rieng nan nhan") —
+	// KHONG dung phatChoNguoiKhac/phatChoCaKhuVuc (ca hai deu sai doi tuong:
+	// mot loai tru nan nhan, mot gui thua cho nguoi khac). Gui THANG qua
+	// phien cua chinh nan nhan, giong cach case suKienVao gui -5 rieng cho
+	// tung nguoi cu (xem k.xuLy o tren).
+	if err := mucTieu.phien.Gui(goiQuaiDanhTrungMinh(q.Id, satThuong)); err != nil {
+		slog.Warn("gui -11 (quai danh trung minh) that bai", "idNanNhan", mucTieu.nv.ID, "loi", err)
+	}
+	// -10: NGUOI KHAC trong khu vuc, khong phai nan nhan (dac ta §3.3 cot
+	// "Gui cho": "Nguoi khac trong khu vuc"). phatChoNguoiKhac da co san (Ke
+	// hoach 5), dung dung nghia: loai tru id nan nhan.
+	k.phatChoNguoiKhac(mucTieu.nv.ID, goiQuaiDanhTrungNguoiKhac(q.Id, int32(mucTieu.nv.ID), mucTieu.nv.HpHienTai))
 }
 
 // Gui day mot su kien vao hop thu cua actor. KHONG CHAN (non-blocking): neu

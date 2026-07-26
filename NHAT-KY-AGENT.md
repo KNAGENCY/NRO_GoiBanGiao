@@ -1,5 +1,23 @@
 # Nhật ký agent — ai đã làm gì
 
+## ⏳ ĐANG CHỜ GÌ NGAY LÚC NÀY — cập nhật: 26/07/2026
+
+> Ai vào cũng đọc khối này trước. **Xong việc thì phải sửa lại khối này**, nếu không nó
+> thành thông tin cũ gây hại hơn là không có.
+
+- **Việc đang chờ người khác:** nhánh `kh6-nghien-cuu-chien-dau` (worktree
+  `.claude\worktrees\vao-viec-b4ec16`) phải sửa **5 việc** ở
+  [`docs/superpowers/plans/KH6-VIEC-CAN-SUA-TRUOC-KHI-GOP.md`](docs/superpowers/plans/KH6-VIEC-CAN-SUA-TRUOC-KHI-GOP.md).
+- **Việc kế tiếp của phiên điều phối:** khi nhánh đó báo xong → **soi lại lần hai** (đối
+  chiếu bằng chứng trong file trên) → nếu sạch thì **gộp `--no-ff` vào `main`** rồi xoá nhánh.
+- **Sau khi gộp, làm ngay 1 việc nhỏ:** chuyển bài học *"không dùng PowerShell
+  `Get-Content -Raw` + `Set-Content` để sửa file tiếng Việt — mojibake cả file"* thành một
+  mục trong §6 của `BAT-DAU-TU-DAY.md` (giờ chưa làm để tránh rối số mục lúc merge).
+- **Rồi mới tới:** thi công KH6 theo kế hoạch 15 task. Task 12 (đọc client Unity xác minh
+  gói `-8`/`-17`) làm được song song ngay từ đầu.
+
+---
+
 Sổ chung cho **mọi agent và mọi người** làm dự án này. Mục đích: phiên sau (hoặc
 agent khác đang làm song song) biết ngay ai vừa chạm vào cái gì, để không sửa đè
 lên nhau.

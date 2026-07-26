@@ -124,7 +124,10 @@ func TestGoiCatalogSkillCoDu5Lang(t *testing.T) {
 	if countClass < 5 {
 		t.Errorf("countClass = %d, phai >= 5 de id lang 0-4 hop le trong ME_INFO", countClass)
 	}
-	// Doc tung lang: ten (UTF) + countTemplate (0). Ten phai khop danh muc lang (ghim doc lap).
+	// Doc tung lang: ten (UTF) + countTemplate (4, tu Task 1 KH6) + noi dung tung
+	// chieu. Ten phai khop danh muc lang (ghim doc lap). Kiem noi dung chi tiet
+	// (4 chieu/lang, khong templateId==0, dung 1 chieu type=2) o
+	// chieuthuc_test.go — o day chi doc du de khong con byte thua.
 	for i := 0; i < int(countClass); i++ {
 		ten, err := r.UTF()
 		if err != nil {
@@ -133,10 +136,93 @@ func TestGoiCatalogSkillCoDu5Lang(t *testing.T) {
 		if ten != tenLangMongDoi[i] {
 			t.Errorf("ten lang %d = %q, mong doi %q", i, ten, tenLangMongDoi[i])
 		}
-		if ct, _ := r.Byte(); ct != 0 {
-			t.Errorf("countTemplate lang %d = %d, mong doi 0", i, ct)
+		countTemplate, err := r.Byte()
+		if err != nil {
+			t.Fatalf("doc countTemplate lang %d loi: %v", i, err)
+		}
+		if countTemplate != 4 {
+			t.Errorf("countTemplate lang %d = %d, mong doi 4 (4 chieu x 5 lang, dac ta §4.3)", i, countTemplate)
+		}
+		for j := 0; j < int(countTemplate); j++ {
+			if err := boQuaMotMauChieu(r); err != nil {
+				t.Fatalf("doc chieu %d cua lang %d loi: %v", j, i, err)
+			}
 		}
 	}
+	// Het du lieu — khong con byte thua sau khi doc du 5 lang.
+	if _, err := r.Byte(); err == nil {
+		t.Error("goi -28/7 con byte thua sau khi doc du 5 lang x 4 chieu — sai khuon byte")
+	}
+}
+
+// boQuaMotMauChieu doc va bo qua mot MauChieu theo dung khuon dac ta §3.7, chi
+// de xac nhan khuon byte tu-nhat-quan (doc het khong loi, khong lech). Kiem
+// gia tri that duoc lam o TestCatalogChieu* (chieuthuc_test.go).
+func boQuaMotMauChieu(r *protocol.Reader) error {
+	if _, err := r.Byte(); err != nil { // templateId
+		return err
+	}
+	if _, err := r.UTF(); err != nil { // ten
+		return err
+	}
+	if _, err := r.Byte(); err != nil { // maxPoint
+		return err
+	}
+	if _, err := r.Byte(); err != nil { // manaUseType
+		return err
+	}
+	if _, err := r.Byte(); err != nil { // type
+		return err
+	}
+	if _, err := r.Short(); err != nil { // iconId
+		return err
+	}
+	if _, err := r.UTF(); err != nil { // damInfo
+		return err
+	}
+	if _, err := r.UTF(); err != nil { // ghiChu
+		return err
+	}
+	countSkill, err := r.Byte()
+	if err != nil {
+		return err
+	}
+	for i := 0; i < int(countSkill); i++ {
+		if _, err := r.Short(); err != nil { // skillId
+			return err
+		}
+		if _, err := r.Byte(); err != nil { // point
+			return err
+		}
+		if _, err := r.Long(); err != nil { // powRequire (8 byte)
+			return err
+		}
+		if _, err := r.Short(); err != nil { // manaUse
+			return err
+		}
+		if _, err := r.Int(); err != nil { // coolDown
+			return err
+		}
+		if _, err := r.Short(); err != nil { // dx
+			return err
+		}
+		if _, err := r.Short(); err != nil { // dy
+			return err
+		}
+		if _, err := r.Byte(); err != nil { // maxFight
+			return err
+		}
+		if _, err := r.Short(); err != nil { // damage
+			return err
+		}
+		if _, err := r.Short(); err != nil { // price
+			return err
+		}
+		if _, err := r.UTF(); err != nil { // moreInfo
+			return err
+		}
+	}
+	return nil
 }
 
 func TestGoiCatalogMapRong(t *testing.T) {

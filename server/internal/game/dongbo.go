@@ -84,7 +84,8 @@ func goiCatalogData() *protocol.Message {
 // goiCatalogSkill dung goi -28/7: DANH SACH 5 LANG NARUTO thay cho 3 lop Dragon
 // Ball cu. Client dung byte "gender" trong ME_INFO lam chi so nClasss[] nen
 // countClass PHAI >= so lang (5) — id lang 3/4 se sap neu client con cache 3 lop
-// cu. Moi lang gui ten + 0 template (chua co skill). Xem tai lieu §5.
+// cu. Moi lang gui ten + 4 MauChieu that (Ke hoach 6, Task 1) — xem chieuthuc.go
+// va tai lieu giao thuc chien dau §3.7/§4.3.
 func goiCatalogSkill() (*protocol.Message, error) {
 	w := protocol.NewWriter()
 	w.Byte(lenhConCatalogSkill) // 7
@@ -96,7 +97,13 @@ func goiCatalogSkill() (*protocol.Message, error) {
 		if err := w.UTF(l.Ten); err != nil {
 			return nil, err
 		}
-		w.Byte(0) // countTemplate = 0 (chua co skill)
+		chieu := ChieuCuaLang(byte(l.ID))
+		w.Byte(byte(len(chieu))) // countTemplate = 4
+		for _, m := range chieu {
+			if err := ghiMauChieu(w, m); err != nil {
+				return nil, err
+			}
+		}
 	}
 	return protocol.NewMessage(lenhKhongTrenBanDo, w), nil
 }

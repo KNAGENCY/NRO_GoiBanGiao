@@ -1560,23 +1560,34 @@ func chayVaDocDongThoi(t *testing.T, viec func(), docs ...func() error) {
 
 // kiemGoi3015 kiem than goi -30/15 (goiAiDoHoiSinh, dac ta §3.4): sub=15,
 // id=nvNguoiHoiSinh.ID, hp/mp = DAY DU (HpToiDa/ChakraToiDa — hoi sinh luon
-// day mau/chakra, dac ta §6.4). x/y chi doc de tieu thu du than goi (khong
-// gan cho bien nao dang quan tam — vi tri khong doi luc chet/hoi sinh, da co
-// test rieng TestTichHop_ChetVaHoiSinh kiem dieu do).
-func kiemGoi3015(m *protocol.Message, nvNguoiHoiSinh *store.NhanVat) error {
+// day mau/chakra, dac ta §6.4), x/y = vi tri HIEN TAI cua nguoi hoi sinh
+// (KHONG doi luc chet/hoi sinh — xuLyNguoiChoiChet/case suKienHoiSinh deu
+// chi doc thang nv.ViTriX/Y, khong tinh toan lai, xem khuvuc.go).
+//
+// xMongDoi/yMongDoi GHIM CUNG (Vong sua 1, theo yeu cau nguoi soi): truyen tu
+// noi goi thay vi doc lai nv.ViTriX/Y cua actor — o day cu the la vi tri B
+// ĐA BI TEST DOI (k.nguoiTrong[nvB.ID].nv.ViTriX = bd.SpawnX-90, xem chu
+// thich buoc "dua B ra xa quai" trong TestTichHop_DauCuoiHaiNguoiChoiChienDauVaQuai),
+// KHONG con la vi tri spawn goc trong nvNguoiHoiSinh (snapshot CSDL lay TRUOC
+// khi doi vi tri) — vi vay ham nay KHONG the tu suy ra x/y mong doi tu chinh
+// nvNguoiHoiSinh, phai nhan tu tham so. Day chinh la khang dinh dong vong: neu
+// goiAiDoHoiSinh vo tinh doc sai truong (vd tra ve vi tri spawn goc thay vi vi
+// tri hien tai) test se bat duoc, khac voi truoc Vong sua 1 (chi doc de tieu
+// thu du than goi, khong kiem gia tri).
+func kiemGoi3015(m *protocol.Message, nvNguoiHoiSinh *store.NhanVat, xMongDoi, yMongDoi int16) error {
 	r := protocol.NewReader(m.Data)
 	sub, e1 := r.Byte()
 	id, e2 := r.Int()
 	hp, e3 := r.Int()
 	mp, e4 := r.Int()
-	_, e5 := r.Short() // x — khong kiem o day, xem chu thich ham
-	_, e6 := r.Short() // y — khong kiem o day, xem chu thich ham
+	x, e5 := r.Short()
+	y, e6 := r.Short()
 	if e1 != nil || e2 != nil || e3 != nil || e4 != nil || e5 != nil || e6 != nil {
 		return fmt.Errorf("doc -30/15 loi: sub=%v id=%v hp=%v mp=%v x=%v y=%v", e1, e2, e3, e4, e5, e6)
 	}
-	if sub != subAiDoHoiSinh || id != int32(nvNguoiHoiSinh.ID) || hp != nvNguoiHoiSinh.HpToiDa || mp != nvNguoiHoiSinh.ChakraToiDa {
-		return fmt.Errorf("-30/15 sai: sub=%d id=%d hp=%d mp=%d, mong sub=%d id=%d hp=%d mp=%d",
-			sub, id, hp, mp, subAiDoHoiSinh, nvNguoiHoiSinh.ID, nvNguoiHoiSinh.HpToiDa, nvNguoiHoiSinh.ChakraHienTai)
+	if sub != subAiDoHoiSinh || id != int32(nvNguoiHoiSinh.ID) || hp != nvNguoiHoiSinh.HpToiDa || mp != nvNguoiHoiSinh.ChakraToiDa || x != xMongDoi || y != yMongDoi {
+		return fmt.Errorf("-30/15 sai: sub=%d id=%d hp=%d mp=%d x=%d y=%d, mong sub=%d id=%d hp=%d mp=%d x=%d y=%d",
+			sub, id, hp, mp, x, y, subAiDoHoiSinh, nvNguoiHoiSinh.ID, nvNguoiHoiSinh.HpToiDa, nvNguoiHoiSinh.ChakraToiDa, xMongDoi, yMongDoi)
 	}
 	return nil
 }
@@ -1939,6 +1950,11 @@ func TestTichHop_DauCuoiHaiNguoiChoiChienDauVaQuai(t *testing.T) {
 	)
 
 	// --- Brief buoc (5): B hoi sinh -> ca hai thay -30/15. ---
+	// xB/yB mong doi = vi tri B DA BI TEST DOI toi (buoc "dua B ra xa quai" o
+	// tren: k.nguoiTrong[nvB.ID].nv.ViTriX = bd.SpawnX-90) — GHIM CUNG tai
+	// day (khong doc lai qua k.nguoiTrong) dung yeu cau "ghim cung" cua nguoi
+	// soi, xem chu thich day du o kiemGoi3015.
+	xB, yB := bd.SpawnX-90, bd.SpawnY
 	clB.guiHoiSinh()
 	chayVaDocDongThoi(t, func() { k.xuLy(<-k.hopThu) },
 		func() error {
@@ -1953,14 +1969,47 @@ func TestTichHop_DauCuoiHaiNguoiChoiChienDauVaQuai(t *testing.T) {
 			if err != nil {
 				return fmt.Errorf("B doc -30/15 loi: %w", err)
 			}
-			return kiemGoi3015(m30, nvB)
+			return kiemGoi3015(m30, nvB, xB, yB)
 		},
 		func() error {
 			m30, err := clA.doiGoiLenhKhongFatal(lenhMeInfo)
 			if err != nil {
 				return fmt.Errorf("A doc -30/15 loi: %w", err)
 			}
-			return kiemGoi3015(m30, nvB)
+			return kiemGoi3015(m30, nvB, xB, yB)
 		},
 	)
+
+	// --- Vong sua 1 (theo yeu cau nguoi soi): chot CUOI kiem KHONG CON goi
+	// thua nao chua doc tren CA HAI ket noi, sau khi da doc HET chuoi 5 buoc —
+	// bat lop loi "gui thua goi cho SAI nguoi" o PHAN DUOI cua kich ban (vd A
+	// vo tinh nhan them -10 cua buoc (3) danh cho B, B vo tinh nhan them
+	// -11/-8 danh cho A) MA cac buoc giua khong the tu bat, vi
+	// doiGoiLenhKhongFatal CHU DICH bo qua goi khong khop de tim goi dang cho
+	// (vd doc -8 cua A o buoc (4) chu dong bo qua -30/9 hop le xen giua — xem
+	// chu thich buoc do).
+	//
+	// AN TOAN dat CUOI cung (KHONG lam test chap chon): kich ban nay KHONG
+	// BAO GIO goi BatDau() — khong co goroutine vongLap/ticker nao chay song
+	// song nen khong co "nhieu AI" tu phat sinh ngoai y muon nhu cac test
+	// dung MoSoKhuVuc() (xem khongConGoiGiTruQuaiDanh). Moi goi tren day ket
+	// noi la KET QUA TAT DINH cua dung cac lan test tu tay goi k.xuLy/k.nhipTim,
+	// va tat ca da duoc doc HET qua tung buoc o tren — goi con SOT lai o day
+	// (neu co) chi co the la dau hieu that su cua loi "gui sai nguoi", khong
+	// phai nhieu hop le.
+	//
+	// Han che CON LAI (chot nay KHONG khac phuc duoc): mot goi sai nguoi bi
+	// "nuot" GIUA CHUNG boi mot lan doiGoiLenhKhongFatal dang bo qua de tim
+	// goi khac (truong hop -8 cua A o buoc (4) neu vi du co them -10 sai gui
+	// toi A xen vao) se KHONG bi bat o day, vi da bi doc mat truoc do. Lop loi
+	// do (mid-stream) da duoc phu boi cac test byte-chinh-xac/kiem-tung-buoc
+	// cua tung Task rieng (Task 9: TestTichHop_DanhQuaiConSong; Task 11:
+	// TestTichHop_DanhNguoiChoiConSong dung khongConGoiGi ngay sau MOI buoc;
+	// Task 13: cac test muc actor trong khuvuc_test.go).
+	if !clA.khongConGoiGi(t) {
+		t.Fatal("A khong duoc nhan them goi nao sau khi ca chuoi 5 buoc ket thuc (nghi ngo gui thua goi cho sai nguoi)")
+	}
+	if !clB.khongConGoiGi(t) {
+		t.Fatal("B khong duoc nhan them goi nao sau khi ca chuoi 5 buoc ket thuc (nghi ngo gui thua goi cho sai nguoi)")
+	}
 }

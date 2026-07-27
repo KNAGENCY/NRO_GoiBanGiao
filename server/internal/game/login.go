@@ -68,6 +68,18 @@ type Kho interface {
 	TaoNhanVat(ctx context.Context, nv store.NhanVatMoi) (*store.NhanVat, error)
 }
 
+// GhiKhiRoi la phan toi thieu cua ThoGhi (thogi.go) ma BoXuLy can de luu
+// nguoi choi khi phien mat ket noi (Ke hoach 11 Task 5, dac ta
+// 2026-07-27-luu-trang-thai-song.md §4 diem B) — dung khuon voi Kho o tren va
+// KhoLuu (thogi.go): interface HEP chi doi hoi dung phuong thuc can dung
+// (Xep), de kiem thu duoc bang mot "tho ghi gia" ghi nhan NGAY vao bo nho,
+// khong phai dung *ThoGhi that (di qua goroutine nen + ticker that se bat
+// test phai cho/doan thoi gian, de flaky). *ThoGhi thoa man interface nay tu
+// nhien, khong can glue code them.
+type GhiKhiRoi interface {
+	Xep(nv store.NhanVat)
+}
+
 // BoXuLy giu trang thai cua MOT phien (mot ket noi). Xem Task 1: moi ket noi
 // mot BoXuLy rieng, nen cac truong duoi day khong bao gio bi hai phien tranh.
 type BoXuLy struct {
@@ -79,10 +91,29 @@ type BoXuLy struct {
 	daVaoKhuVuc   bool      // da gui suKienVao (chan -39 goi lap gay -5 trung)
 	khuVuc        *KhuVuc   // khu vuc nhan vat dang o (dung o KH4; nen mong cho KH5)
 	soKhuVuc      *SoKhuVuc // so khu vuc CHUNG (5 map), tra khu vuc theo mapId cua nhan vat
+
+	// thoGhi (Ke hoach 11 Task 5): noi KhiDong() Xep() anh chup nguoi choi vao
+	// khi phien mat ket noi (dac ta §4 diem B). nil la gia tri mac dinh HOP LE
+	// (chua goi DatThoGhi) — KhiDong tu bo qua buoc luu trong truong hop do,
+	// KHONG panic (xem KhiDong). Tach khoi tham so constructor (xem DatThoGhi
+	// ben duoi) THAY VI them tham so thu ba vao NewBoXuLy, vi rat nhieu noi
+	// trong repo dang goi NewBoXuLy(kho, soKhuVuc) voi DUNG 2 tham so
+	// (nhanvat_test.go, tichhop_test.go, khuvuc_tichhop_test.go...) khong lien
+	// quan gi toi luu tru — doi chu ky constructor se bat het cac noi do phai
+	// sua theo, khong can thiet cho task nay.
+	thoGhi GhiKhiRoi
 }
 
 func NewBoXuLy(kho Kho, soKhuVuc *SoKhuVuc) *BoXuLy {
 	return &BoXuLy{kho: kho, soKhuVuc: soKhuVuc}
+}
+
+// DatThoGhi gan tho ghi cho phien nay (Ke hoach 11 Task 5) — goi TU main.go
+// SAU NewBoXuLy, dung khuon "thiet lap sau khoi tao" thay vi tham so
+// constructor thu ba (xem ly do o chu thich truong thoGhi phia tren). An toan
+// KHONG goi ham nay (thoGhi giu nguyen nil) — KhiDong() tu bo qua buoc luu.
+func (b *BoXuLy) DatThoGhi(t GhiKhiRoi) {
+	b.thoGhi = t
 }
 
 // KiemTraDangNhap chua toan bo luat dang nhap, tach khoi phan mang de kiem thu.
@@ -406,10 +437,38 @@ func (b *BoXuLy) xuLyHoiSinh() error {
 // bao actor go no ra (actor phat -6 cho nguoi con lai). An toan goi khi khuVuc nil.
 // Chi gui suKienRa neu da thuc su vao (daVaoKhuVuc) — chua vao thi khong can go,
 // du actor xu ly suKienRa cua id khong co van la no-op an toan.
+//
+// Ke hoach 11 Task 5 (dac ta §4 diem B): TRUOC khi bao actor go nguoi choi ra
+// (Gui(suKienRa)), xin "anh chup" trang thai nguoi choi (AnhChupNguoiChoi,
+// khuvuc.go) roi Xep() vao tho ghi de luu xuong dia. THU TU NAY BAT BUOC,
+// TUYET DOI KHONG DUOC DAO NGUOC:
+//
+//	DUNG:  AnhChupNguoiChoi(id) ──► Xep(ban)     ──► khuVuc.Gui(suKienRa)
+//	SAI :  khuVuc.Gui(suKienRa) ──► AnhChupNguoiChoi(id) tra VE RONG
+//
+// Ly do: case suKienRa (khuvuc.go) XOA nguoi choi khoi k.nguoiTrong NGAY khi
+// actor xu ly su kien do. Neu goi Gui(suKienRa) truoc, den luc
+// AnhChupNguoiChoi duoc goi thi actor rat co the (thuong la se) DA xu ly xong
+// suKienRa va xoa nguoi nay khoi map — AnhChupNguoiChoi(id) khong con tim
+// thay ai, tra ve slice RONG, nghia la MAT SACH tien do vua choi ngay truoc
+// luc ngat ket noi. Nguoi sua sau TUYET DOI giu dung thu tu nay.
+//
+// AnhChupNguoiChoi da tu co han gio rieng (100ms, khuvuc.go) va Xep khong bao
+// gio chan (thogi.go, Ke hoach 11 Task 3) nen ca hai buoc o day an toan de
+// goi tren luong phien luc dong ket noi — KHONG duoc them buoc cho nao khac
+// vao ham nay (dac ta §3: actor/luong phien khong bao gio duoc cho o dia).
 func (b *BoXuLy) KhiDong() {
-	if b.khuVuc != nil && b.nhanVat != nil && b.daVaoKhuVuc {
-		b.khuVuc.Gui(suKienRa{idNhanVat: b.nhanVat.ID})
+	if b.khuVuc == nil || b.nhanVat == nil || !b.daVaoKhuVuc {
+		return // chua vao khu vuc -> khong co gi de luu, khong can bao actor
 	}
+
+	if b.thoGhi != nil {
+		if ban := b.khuVuc.AnhChupNguoiChoi(b.nhanVat.ID); len(ban) > 0 {
+			b.thoGhi.Xep(ban[0])
+		}
+	}
+
+	b.khuVuc.Gui(suKienRa{idNhanVat: b.nhanVat.ID})
 }
 
 // xuLyDangNhap xu ly khung -29 (dang nhap). Goi long hai tang: byte lenh con

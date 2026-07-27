@@ -818,3 +818,380 @@ func TestTaoNhanVat_DuaTranhCungTen(t *testing.T) {
 		t.Fatalf("CSDL co %d hang nhan_vat ten %q (khong phan biet hoa thuong), mong doi DUNG MOT", soHangTrungTen, tenNV)
 	}
 }
+
+// ---------------------------------------------------------------------------
+// Ke hoach 11 Task 8 (dac ta 2026-07-27-luu-trang-thai-song.md §10, muc 1 va
+// 2) — HAI test dau-cuoi BAT BUOC cho luu trang thai song, khong chi mot.
+//
+// LY DO CAN CA HAI (khong gop lam mot, khong bo bot mot cai): review Task 5
+// phat hien MOI test dau-cuoi hien co trong repo (tatmaychu_test.go,
+// moluutru_test.go, dangnhaptrung_tichhop_test.go...) deu di qua duong TAT
+// MAY CHU (LuuTatCa/TatMayChu). Neu ai do lo QUEN noi day.DatThoGhi o mot
+// nhanh nao do cua duong "ngat ket noi THUONG" (KhiDong, login.go), duong do
+// se CAU LANG khong luu (Xep() tren thoGhi nil bi bo qua im lang, xem
+// KhiDong) MA KHONG MOT TEST NAO O TREN bat duoc — vi khong test nao trong so
+// do cham toi nhanh KhiDong qua mot BoXuLy da DatThoGhi that. Day chinh la
+// loai loi nguy hiem nhat cua ca KH11: test xanh, san xuat mat du lieu.
+//
+// Test 1 (duoi day) phu duong TAT MAY CHU (nhu cac test da co, nhung qua CSDL
+// that + mang that + mo lai kho doc lap). Test 2 (sau Test 1) phu RIENG duong
+// "ngat ket noi thuong", BAT BUOC di qua MoLuuTru (duong noi day SAN XUAT
+// that, cmd/nroserver/main.go dung y het) thay vi tu tay goi
+// NewBoXuLy+DatThoGhi — day la diem KHAC BIET CO CHU DICH voi
+// dangnhaptrung_tichhop_test.go (Task 7), noi tu tay noi day vi muc dich cua
+// file do la kiem logic da-phien-cu, khong phai kiem CHINH duong noi day.
+// ---------------------------------------------------------------------------
+
+// TestTichHop_TatBatMayChu_LuuDungViTriVaMau la Test 1 (dac ta §10 muc 1): hai
+// client THAT (A, B) trong CUNG khu vuc — A di chuyen toi mot VI TRI GHIM
+// CUNG roi bi B danh mat MAU GHIM CUNG (cong thuc sat thuong lang0/cap1 da
+// biet: 12*20/100 = 2, giong het TestTichHop_DanhNguoiChoiConSong,
+// khuvuc_tichhop_test.go) -> chay duong TAT MAY CHU THAT (TatMayChu,
+// tatmaychu.go — dung y het production, khac tatmaychu_test.go chi dung
+// khoLuuGia) -> MO LAI kho (mot *store.Store MOI, ket noi CSDL rieng, hoan
+// toan doc lap voi khoThat — chung minh du lieu THAT SU nam duoi dia, khong
+// phai tinh co con "nong" trong mot cache/bien nao cua khoThat) -> doc nhan
+// vat A -> phai dung VI TRI va MAU vua ghim.
+func TestTichHop_TatBatMayChu_LuuDungViTriVaMau(t *testing.T) {
+	khoThat := moKhoThatChoTest(t)
+	ctx := context.Background()
+
+	// Ban khong quai (Task 9, khuvuc_tichhop_test.go): kich ban nay khong lien
+	// quan gi toi quai, tranh AI tu danh xen vao lam mau ngoai y muon.
+	soKhuVuc := moSoKhuVucKhongQuaiMacDinh(t)
+	// Luoi an toan don dep NEU mot t.Fatalf xay ra TRUOC khi toi duoc buoc
+	// TatMayChu ben duoi (TatMayChu tu no se DungTatCa() dung luc trong
+	// duong hanh phuc) — AN TOAN goi hai lan, KhuVuc.Dung dung sync.Once.
+	defer soKhuVuc.DungTatCa()
+
+	matKhau := "matkhau123"
+	tenTKA := "tatA" + hauToNganNgau(t)
+	tenTKB := "tatB" + hauToNganNgau(t)
+	taiKhoanA := taoTaiKhoanCoMatKhau(t, tenTKA, matKhau)
+	taiKhoanB := taoTaiKhoanCoMatKhau(t, tenTKB, matKhau)
+	tenNVA := "TatA" + hauToNganNgau(t)
+	tenNVB := "TatB" + hauToNganNgau(t)
+
+	clA := moPhienClientGiaKhuVuc(t, khoThat, soKhuVuc)
+	defer clA.dong()
+	clB := moPhienClientGiaKhuVuc(t, khoThat, soKhuVuc)
+	defer clB.dong()
+
+	dangNhapTaoNhanVatVaoTheGioi(t, clA, tenTKA, matKhau, tenNVA)
+	dangNhapTaoNhanVatVaoTheGioi(t, clB, tenTKB, matKhau, tenNVB)
+
+	nvA, err := khoThat.LayNhanVatTheoTaiKhoan(ctx, taiKhoanA)
+	if err != nil {
+		t.Fatalf("LayNhanVatTheoTaiKhoan A that bai: %v", err)
+	}
+	nvB, err := khoThat.LayNhanVatTheoTaiKhoan(ctx, taiKhoanB)
+	if err != nil {
+		t.Fatalf("LayNhanVatTheoTaiKhoan B that bai: %v", err)
+	}
+	if nvA.MapID != 1 || nvB.MapID != 1 {
+		t.Fatalf("ca hai nhan vat phai o mapId 1 (lang 0), nhan duoc A=%d B=%d", nvA.MapID, nvB.MapID)
+	}
+
+	clA.baoVaoKhuVuc()
+	if !clA.khongConGoiGi(t) {
+		t.Fatal("A vao khu vuc mot minh -> khong duoc nhan goi nao (chua co ai khac)")
+	}
+	clB.baoVaoKhuVuc()
+	khangDinhIdTrongGoi(t, clB.doiGoiLenh(t, -5), nvA.ID)
+	khangDinhIdTrongGoi(t, clA.doiGoiLenh(t, -5), nvB.ID)
+
+	// A di chuyen toi VI TRI GHIM CUNG (cong lech co dinh vao vi tri spawn,
+	// dung khuon voi TestKhiDongLuuViTriMoiNhatKhiDaVaoKhuVuc/
+	// TestDangNhapTrung_DaPhienCuChoLuuXongRoiDocViTriMoiNhat — trong nguong
+	// buoc 500 va trong tam can chien 100 voi B con dung tai spawn). Doi B
+	// nhan -7 truoc khi lam gi tiep — day la diem DONG BO xac nhan actor DA
+	// xu ly xong buoc di chuyen (net.Pipe Gui() dong bo lam nhiem vu
+	// "happens-before" tu nhien, dung tinh than moi test khac trong file nay).
+	viTriGhimCungX := int16(nvA.ViTriX) + 50
+	viTriGhimCungY := int16(nvA.ViTriY) + 16
+	clA.guiDiChuyen(viTriGhimCungX, viTriGhimCungY)
+
+	goiDiChuyenChoB := clB.doiGoiLenh(t, lenhDiChuyen)
+	rDiChuyen := protocol.NewReader(goiDiChuyenChoB.Data)
+	if _, errID := rDiChuyen.Int(); errID != nil {
+		t.Fatalf("doc id trong goi -7 that bai: %v", errID)
+	}
+	if x, errX := rDiChuyen.Short(); errX != nil || x != viTriGhimCungX {
+		t.Fatalf("toX trong goi -7 = %d (loi %v), mong doi %d (vi tri ghim cung)", x, errX, viTriGhimCungX)
+	}
+	if y, errY := rDiChuyen.Short(); errY != nil || y != viTriGhimCungY {
+		t.Fatalf("toY trong goi -7 = %d (loi %v), mong doi %d (vi tri ghim cung)", y, errY, viTriGhimCungY)
+	}
+
+	// B DANH A -> A mat MAU GHIM CUNG (satThuong = 2). Doc DONG THOI tren ca
+	// hai ket noi (KHONG tuan tu): actor phat -60 qua phatChoCaKhuVuc CHO CA
+	// HAI (net.Pipe Gui() CHAN toi khi dau kia doc), roi -30/9 rieng cho
+	// B/"nguoi khac" cua A — doc tuan tu se be tac, dung tinh than
+	// doiGoiLenhKhongFatal + goroutine cua TestTichHop_DanhNguoiChoiConSong
+	// (khuvuc_tichhop_test.go).
+	clB.chonChieu(1)
+	if !clB.khongConGoiGi(t) {
+		t.Fatal("chon chieu (34) khong duoc phat goi tin nao")
+	}
+	clB.guiDanhNguoiChoi(int32(nvA.ID))
+
+	hpMongDoi := nvA.HpToiDa - 2 // ghim cung: 150 - 2 = 148
+
+	loiA := make(chan error, 1)
+	loiB := make(chan error, 1)
+	go func() {
+		goi60, errG := clA.doiGoiLenhKhongFatal(lenhNguoiDanhNguoi)
+		if errG != nil {
+			loiA <- errG
+			return
+		}
+		g, errDoc := docGoi60(goi60.Data)
+		if errDoc != nil {
+			loiA <- fmt.Errorf("A: doc goi -60 loi: %w", errDoc)
+			return
+		}
+		if g.idDanh != int32(nvB.ID) || g.idTrung != int32(nvA.ID) || g.satThuong != 2 || g.daChet != 0 {
+			loiA <- fmt.Errorf("A: goi -60 noi dung sai: %+v (mong idDanh=%d idTrung=%d satThuong=2 daChet=0)", g, nvB.ID, nvA.ID)
+			return
+		}
+		loiA <- nil
+	}()
+	go func() {
+		if _, errG := clB.doiGoiLenhKhongFatal(lenhNguoiDanhNguoi); errG != nil {
+			loiB <- errG
+			return
+		}
+		if _, errG := clB.doiGoiLenhKhongFatal(-30); errG != nil {
+			loiB <- errG
+			return
+		}
+		loiB <- nil
+	}()
+	if errA := <-loiA; errA != nil {
+		t.Fatalf("doc goi cho A that bai: %v", errA)
+	}
+	if errB := <-loiB; errB != nil {
+		t.Fatalf("doc goi cho B that bai: %v", errB)
+	}
+
+	// TAT MAY CHU qua duong THAT (tatmaychu.go, dung y het production): thoGhi
+	// RIENG, khong gan voi bat ky BoXuLy nao — kich ban nay KHONG di qua
+	// KhiDong/ngat ket noi (day la nhanh RIENG; Test 2 duoi day moi la nhanh
+	// KhiDong qua MoLuuTru).
+	thoGhiTat := MoThoGhi(khoThat, 2)
+	ctxTat, huyTat := context.WithTimeout(context.Background(), 5*time.Second)
+	defer huyTat()
+	if err := TatMayChu(ctxTat, soKhuVuc, thoGhiTat); err != nil {
+		t.Fatalf("TatMayChu tra loi: %v", err)
+	}
+
+	// MO LAI kho: mot *store.Store MOI, ket noi CSDL rieng, HOAN TOAN doc lap
+	// voi khoThat — day chinh la "mo lai kho" ma brief doi hoi, chung minh du
+	// lieu that su nam DUOI DIA (Postgres) chu khong phai tinh co con "nong"
+	// trong bat ky cache/bien nao o phia khoThat.
+	khoMoLai, err := store.Open(ctx, os.Getenv("NRO_TEST_DSN"))
+	if err != nil {
+		t.Fatalf("mo lai kho sau khi tat may chu that bai: %v", err)
+	}
+	defer khoMoLai.Close()
+
+	nvASauTat, err := khoMoLai.LayNhanVatTheoTaiKhoan(ctx, taiKhoanA)
+	if err != nil {
+		t.Fatalf("LayNhanVatTheoTaiKhoan A SAU KHI TAT may chu (qua kho MOI mo lai) that bai: %v", err)
+	}
+	if nvASauTat.ViTriX != int32(viTriGhimCungX) || nvASauTat.ViTriY != int32(viTriGhimCungY) {
+		t.Fatalf("sau tat-bat may chu, vi tri A = (%d,%d), mong doi VI TRI GHIM CUNG (%d,%d)",
+			nvASauTat.ViTriX, nvASauTat.ViTriY, viTriGhimCungX, viTriGhimCungY)
+	}
+	if nvASauTat.HpHienTai != hpMongDoi {
+		t.Fatalf("sau tat-bat may chu, mau A = %d, mong doi MAU GHIM CUNG %d (150 - satThuong 2)",
+			nvASauTat.HpHienTai, hpMongDoi)
+	}
+}
+
+// TestTichHop_NgatKetNoiThuong_LuuQuaDuongNoiDayDayDu la Test 2 (dac ta §10
+// muc 2), BAT BUOC theo brief Task 8 — xem chu thich nhom o dau khoi Task 8 ve
+// ly do CAN THIET (khong the thay the boi Test 1 o tren).
+//
+// Kich ban: A dang nhap QUA taoXuLy() (tra ve tu MoLuuTru — duong noi day SAN
+// XUAT that) -> vao khu vuc -> di chuyen toi VI TRI GHIM CUNG -> bi B danh
+// mat MAU GHIM CUNG (B dung duong thuong qua moPhienClientGiaKhuVuc, KHONG
+// phai doi tuong dang kiem duong noi day cua test nay) -> A TU NGAT KET NOI
+// (dong ket noi phia client, TUYET DOI KHONG goi TatMayChu) -> doi KhiDong()
+// cua A chay XONG HOAN TOAN (choKhiDongXong, dangnhaptrung_tichhop_test.go)
+// -> ep thoGhi xa het hang doi (DongVaChoXong) -> doc CSDL qua khoThat ->
+// dung vi tri, dung mau.
+//
+// BAT BUOC goi MoLuuTru(khoThat, soKhuVuc, N) that de tao thoGhi/taoXuLy CHO
+// PHIEN A — TUYET DOI KHONG tu goi NewBoXuLy(khoThat, soKhuVuc) roi
+// b.DatThoGhi(...) thu cong (khac dangnhaptrung_tichhop_test.go, noi lam vay
+// vi muc dich file do la kiem RIENG logic da-phien-cu, khong phai kiem chinh
+// duong noi day san xuat). Neu MoLuuTru (moluutru.go) quen goi
+// b.DatThoGhi(thoGhi) ben trong taoXuLy, KhiDong() cua A se Xep() vao thoGhi
+// nil -> nhanh do bi bo qua im lang (xem KhiDong, login.go) -> nhan vat KHONG
+// duoc luu -> assert vi tri/mau ben duoi that bai — DAY CHINH LA dot bien ma
+// test nay ton tai de bat, ma KHONG mot test dau-cuoi nao khac trong repo bat
+// duoc (tat ca deu di qua duong TAT MAY CHU, xem Test 1 o tren).
+func TestTichHop_NgatKetNoiThuong_LuuQuaDuongNoiDayDayDu(t *testing.T) {
+	khoThat := moKhoThatChoTest(t)
+	ctx := context.Background()
+
+	soKhuVuc := moSoKhuVucKhongQuaiMacDinh(t)
+	defer soKhuVuc.DungTatCa()
+
+	// DUNG DUONG NOI DAY SAN XUAT THAT (moluutru.go, dung y het main.go) — xem
+	// chu thich ham ve ly do day la diem BAT BUOC cua test nay.
+	thoGhi, boLuu, taoXuLy := MoLuuTru(khoThat, soKhuVuc, 2)
+	defer boLuu.Dung()
+	defer func() {
+		// Luoi an toan don dep (an toan goi NHIEU LAN — DongVaChoXong dung
+		// sync.Once noi bo): buoc goi tuong minh o giua ham (duoi day) da xa
+		// het hang doi trong duong hanh phuc; day chi la phong ho khi mot
+		// t.Fatalf xay ra TRUOC buoc do.
+		ctxD, huy := context.WithTimeout(context.Background(), 5*time.Second)
+		defer huy()
+		_ = thoGhi.DongVaChoXong(ctxD)
+	}()
+
+	matKhau := "matkhau123"
+	tenTKA := "ngatA" + hauToNganNgau(t)
+	tenTKB := "ngatB" + hauToNganNgau(t)
+	taiKhoanA := taoTaiKhoanCoMatKhau(t, tenTKA, matKhau)
+	taiKhoanB := taoTaiKhoanCoMatKhau(t, tenTKB, matKhau)
+	tenNVA := "NgatA" + hauToNganNgau(t)
+	tenNVB := "NgatB" + hauToNganNgau(t)
+
+	// Phien A: BAT BUOC qua taoXuLy() (tra ve tu MoLuuTru) — giu lai bA de doi
+	// bA.daXongDon o buoc "ngat ket noi" duoi day (dung tinh than
+	// moPhienDangNhapTrungChoTest/choKhiDongXong, dangnhaptrung_tichhop_test.go).
+	bA := taoXuLy()
+	clA := moPhienDangNhapTrungChoTest(t, bA)
+	// KHONG defer clA.dong(): ban than kich ban CHU DONG dong ket noi cua A O
+	// GIUA ham (buoc "ngat ket noi thuong" ben duoi) — do la chinh xac thoi
+	// diem can kich hoat KhiDong(), khong phai luc ham tra ve.
+
+	// Phien B: duong thuong (khong phai doi tuong dang kiem duong noi day cua
+	// test nay) — dung moPhienClientGiaKhuVuc nhu moi kich ban PvP khac.
+	clB := moPhienClientGiaKhuVuc(t, khoThat, soKhuVuc)
+	defer clB.dong()
+
+	dangNhapTaoNhanVatVaoTheGioi(t, clA, tenTKA, matKhau, tenNVA)
+	dangNhapTaoNhanVatVaoTheGioi(t, clB, tenTKB, matKhau, tenNVB)
+
+	nvA, err := khoThat.LayNhanVatTheoTaiKhoan(ctx, taiKhoanA)
+	if err != nil {
+		t.Fatalf("LayNhanVatTheoTaiKhoan A that bai: %v", err)
+	}
+	nvB, err := khoThat.LayNhanVatTheoTaiKhoan(ctx, taiKhoanB)
+	if err != nil {
+		t.Fatalf("LayNhanVatTheoTaiKhoan B that bai: %v", err)
+	}
+	if nvA.MapID != 1 || nvB.MapID != 1 {
+		t.Fatalf("ca hai nhan vat phai o mapId 1 (lang 0), nhan duoc A=%d B=%d", nvA.MapID, nvB.MapID)
+	}
+
+	clA.baoVaoKhuVuc()
+	if !clA.khongConGoiGi(t) {
+		t.Fatal("A vao khu vuc mot minh -> khong duoc nhan goi nao (chua co ai khac)")
+	}
+	clB.baoVaoKhuVuc()
+	khangDinhIdTrongGoi(t, clB.doiGoiLenh(t, -5), nvA.ID)
+	khangDinhIdTrongGoi(t, clA.doiGoiLenh(t, -5), nvB.ID)
+
+	// A di chuyen toi VI TRI GHIM CUNG — cung khuon voi Test 1 o tren.
+	viTriGhimCungX := int16(nvA.ViTriX) + 50
+	viTriGhimCungY := int16(nvA.ViTriY) + 16
+	clA.guiDiChuyen(viTriGhimCungX, viTriGhimCungY)
+
+	goiDiChuyenChoB := clB.doiGoiLenh(t, lenhDiChuyen)
+	rDiChuyen := protocol.NewReader(goiDiChuyenChoB.Data)
+	if _, errID := rDiChuyen.Int(); errID != nil {
+		t.Fatalf("doc id trong goi -7 that bai: %v", errID)
+	}
+	if x, errX := rDiChuyen.Short(); errX != nil || x != viTriGhimCungX {
+		t.Fatalf("toX trong goi -7 = %d (loi %v), mong doi %d (vi tri ghim cung)", x, errX, viTriGhimCungX)
+	}
+	if y, errY := rDiChuyen.Short(); errY != nil || y != viTriGhimCungY {
+		t.Fatalf("toY trong goi -7 = %d (loi %v), mong doi %d (vi tri ghim cung)", y, errY, viTriGhimCungY)
+	}
+
+	// B DANH A -> A mat MAU GHIM CUNG (satThuong = 2) — cung khuon voi Test 1.
+	clB.chonChieu(1)
+	if !clB.khongConGoiGi(t) {
+		t.Fatal("chon chieu (34) khong duoc phat goi tin nao")
+	}
+	clB.guiDanhNguoiChoi(int32(nvA.ID))
+
+	hpMongDoi := nvA.HpToiDa - 2 // ghim cung: 150 - 2 = 148
+
+	loiA := make(chan error, 1)
+	loiB := make(chan error, 1)
+	go func() {
+		goi60, errG := clA.doiGoiLenhKhongFatal(lenhNguoiDanhNguoi)
+		if errG != nil {
+			loiA <- errG
+			return
+		}
+		g, errDoc := docGoi60(goi60.Data)
+		if errDoc != nil {
+			loiA <- fmt.Errorf("A: doc goi -60 loi: %w", errDoc)
+			return
+		}
+		if g.idDanh != int32(nvB.ID) || g.idTrung != int32(nvA.ID) || g.satThuong != 2 || g.daChet != 0 {
+			loiA <- fmt.Errorf("A: goi -60 noi dung sai: %+v (mong idDanh=%d idTrung=%d satThuong=2 daChet=0)", g, nvB.ID, nvA.ID)
+			return
+		}
+		loiA <- nil
+	}()
+	go func() {
+		if _, errG := clB.doiGoiLenhKhongFatal(lenhNguoiDanhNguoi); errG != nil {
+			loiB <- errG
+			return
+		}
+		if _, errG := clB.doiGoiLenhKhongFatal(-30); errG != nil {
+			loiB <- errG
+			return
+		}
+		loiB <- nil
+	}()
+	if errA := <-loiA; errA != nil {
+		t.Fatalf("doc goi cho A that bai: %v", errA)
+	}
+	if errB := <-loiB; errB != nil {
+		t.Fatalf("doc goi cho B that bai: %v", errB)
+	}
+
+	// NGAT KET NOI THUONG (KHONG tat may chu): dong ket noi PHIA CLIENT cua A
+	// — kich hoat mynet.PhucVu chay defer KhiDong() (login.go) khi vong doc
+	// gap loi. Doi bA.daXongDon (choKhiDongXong) de dam bao KhiDong() CHAY
+	// XONG HOAN TOAN — dung tinh than TestDangNhapTrung_..., khong du chi dong
+	// ket noi va suy dien.
+	clA.dong()
+	choKhiDongXong(t, bA, 5*time.Second)
+
+	// KhiDong() chi Xep() vao HANG DOI TRONG BO NHO cua thoGhi (Xep KHONG BAO
+	// GIO CHAN — xem thogi.go), CHUA chac da ghi xuong dia luc choKhiDongXong
+	// tra ve (goroutine nen cua thoGhi ghi lech nhip, toi da khoangCachThuLai
+	// = 50ms sau). Ep xa het hang doi + cho xong (DongVaChoXong) truoc khi
+	// doc CSDL — dung y het buoc cuoi cua TatMayChu.
+	ctxXa, huyXa := context.WithTimeout(context.Background(), 5*time.Second)
+	defer huyXa()
+	if err := thoGhi.DongVaChoXong(ctxXa); err != nil {
+		t.Fatalf("thoGhi.DongVaChoXong sau khi A ngat ket noi thuong that bai: %v", err)
+	}
+
+	nvASauNgat, err := khoThat.LayNhanVatTheoTaiKhoan(ctx, taiKhoanA)
+	if err != nil {
+		t.Fatalf("LayNhanVatTheoTaiKhoan A SAU KHI NGAT ket noi thuong that bai: %v", err)
+	}
+	if nvASauNgat.ViTriX != int32(viTriGhimCungX) || nvASauNgat.ViTriY != int32(viTriGhimCungY) {
+		t.Fatalf("sau khi A ngat ket noi THUONG (khong tat may chu), vi tri = (%d,%d), mong doi VI TRI GHIM CUNG (%d,%d) — "+
+			"neu that bai o day, nghi ngo duong noi day MoLuuTru (moluutru.go) quen goi DatThoGhi cho phien tao qua taoXuLy()",
+			nvASauNgat.ViTriX, nvASauNgat.ViTriY, viTriGhimCungX, viTriGhimCungY)
+	}
+	if nvASauNgat.HpHienTai != hpMongDoi {
+		t.Fatalf("sau khi A ngat ket noi THUONG (khong tat may chu), mau = %d, mong doi MAU GHIM CUNG %d — "+
+			"neu that bai o day, nghi ngo duong noi day MoLuuTru (moluutru.go) quen goi DatThoGhi cho phien tao qua taoXuLy()",
+			nvASauNgat.HpHienTai, hpMongDoi)
+	}
+}

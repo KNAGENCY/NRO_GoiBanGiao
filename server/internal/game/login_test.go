@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -1038,5 +1039,134 @@ func TestXuLyChonChieuChuaVaoTheGioiKhongPanic(t *testing.T) {
 	w.Short(1)
 	if err := b.xuLyChonChieu(protocol.NewMessage(lenhChonChieu, w)); err != nil {
 		t.Fatalf("xuLyChonChieu voi nhanVat/khuVuc nil phai tra nil, nhan duoc: %v", err)
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Ke hoach 11 Task 5 — KhiDong(): luu nguoi choi khi phien mat ket noi, dac ta
+// 2026-07-27-luu-trang-thai-song.md §4 diem B. THU TU BAT BUOC: KhiDong PHAI
+// xin anh chup (AnhChupNguoiChoi) TRUOC khi bao actor go nguoi choi ra
+// (khuVuc.Gui(suKienRa)) — case suKienRa (khuvuc.go) XOA nguoi choi khoi
+// k.nguoiTrong NGAY khi actor xu ly, nen goi nguoc thu tu se chup phai mot
+// khu vuc DA XOA nguoi do -> anh chup rong -> mat sach tien do vua choi. Xem
+// chu thich day du tai KhiDong (login.go).
+// ---------------------------------------------------------------------------
+
+// ghiKhiRoiGia la "tho ghi gia" thoa man interface GhiKhiRoi (login.go) — ghi
+// nhan NGAY vao slice trong bo nho, KHONG di qua goroutine nen + ticker that
+// cua ThoGhi that (thogi.go) — tranh test phai cho/doan thoi gian ghi dia.
+// Dung khuon voi khoGia (dau file nay) / khoLuuGia (thogi_test.go): fake toi
+// thieu, chi lam dung viec BoXuLy can toi.
+type ghiKhiRoiGia struct {
+	mu   sync.Mutex
+	nhan []store.NhanVat
+}
+
+func (g *ghiKhiRoiGia) Xep(nv store.NhanVat) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	g.nhan = append(g.nhan, nv)
+}
+
+func (g *ghiKhiRoiGia) banDaNhan() []store.NhanVat {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	ban := make([]store.NhanVat, len(g.nhan))
+	copy(ban, g.nhan)
+	return ban
+}
+
+// TestKhiDongLuuViTriMoiNhatKhiDaVaoKhuVuc la Task 5 buoc 1 kich ban 1 (dac ta
+// §4 diem B, §10 nghiem thu muc 2): "client gia" (mot store.NhanVat dua thang
+// vao khu vuc qua suKienVao, dung khuon voi khuVucAnhChupGia o khuvuc_test.go)
+// DI CHUYEN QUA ACTOR toi mot vi tri ghim cung, roi "ngat ket noi" bang cach
+// goi KhiDong() TRUC TIEP — dung y het cach mynet.PhucVu goi no qua defer luc
+// vong doc gap loi (session.go:104-106; xem ca TestTichHop_RoiKhuVucPhatGoi6
+// o khuvuc_tichhop_test.go cho kich ban tuong tu nhung qua mang that).
+//
+// Ky vong: tho ghi gia nhan DUNG MOT ban ghi, vi tri la VI TRI MOI NHAT (sau
+// di chuyen) — KHONG PHAI vi tri luc vao khu vuc.
+func TestKhiDongLuuViTriMoiNhatKhiDaVaoKhuVuc(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	k.quai = nil // tat AI quai (dung tinh than moSoKhuVucKhongQuaiMacDinh, khuvuc_tichhop_test.go): test nay chi kiem VI TRI, khong de quai xen vao gay nhieu ngoai y muon
+	k.BatDau()
+	t.Cleanup(k.Dung)
+
+	viTriLucVaoX, viTriLucVaoY := int32(100), int32(100)
+	viTriGhimCungX, viTriGhimCungY := int16(300), int16(300) // cach (100,100) ~283 don vi < NguongBuoc=500 (dichuyen.go) -> hop le
+
+	nv := &store.NhanVat{ID: 55, Ten: "RoiKhuVuc", Lang: 0, MapID: 1, ViTriX: viTriLucVaoX, ViTriY: viTriLucVaoY}
+	k.Gui(suKienVao{nv: nv, phien: &phienGiaKhuVuc{}})
+
+	// Gui di chuyen QUA ACTOR (khong tu gan nv.ViTriX/Y tu ben ngoai — actor
+	// moi la nguon authoritative, dac ta §2.1). k.Gui la mot hop thu (channel)
+	// FIFO CHI mot nguoi gui (goroutine test nay) nen suKienVao roi
+	// suKienDiChuyen CHAC CHAN duoc actor xu ly DUNG THU TU da gui — khong can
+	// sleep/poll de "cho actor kip xu ly".
+	k.Gui(suKienDiChuyen{idNhanVat: nv.ID, x: viTriGhimCungX, y: viTriGhimCungY})
+
+	ghiGia := &ghiKhiRoiGia{}
+	b := &BoXuLy{khuVuc: k, nhanVat: nv, daVaoKhuVuc: true, thoGhi: ghiGia}
+
+	b.KhiDong() // = "ngat ket noi"
+
+	nhan := ghiGia.banDaNhan()
+	if len(nhan) != 1 {
+		t.Fatalf("tho ghi gia nhan %d ban ghi, mong doi 1", len(nhan))
+	}
+	if nhan[0].ID != nv.ID {
+		t.Fatalf("ban ghi sai nguoi: ID=%d, mong doi %d", nhan[0].ID, nv.ID)
+	}
+	if nhan[0].ViTriX != int32(viTriGhimCungX) || nhan[0].ViTriY != int32(viTriGhimCungY) {
+		t.Fatalf("ban ghi vi tri = (%d,%d), mong doi VI TRI MOI NHAT sau di chuyen (%d,%d) — khong phai vi tri luc vao (%d,%d)",
+			nhan[0].ViTriX, nhan[0].ViTriY, viTriGhimCungX, viTriGhimCungY, viTriLucVaoX, viTriLucVaoY)
+	}
+
+	// Bang chung THEM cho LY DO buoc thu tu bat buoc (xem chu thich KhiDong):
+	// sau KhiDong, actor DA xu ly xong suKienRa va xoa nv khoi k.nguoiTrong —
+	// goi AnhChupNguoiChoi LAI (mo phong ai do lo dao thu tu, chup SAU khi da
+	// gui suKienRa) gio se tra RONG. Day chinh la ly do KhiDong PHAI chup
+	// truoc.
+	banSau := k.AnhChupNguoiChoi(nv.ID)
+	if len(banSau) != 0 {
+		t.Fatalf("sau KhiDong, AnhChupNguoiChoi(%d) van tra %d ban — actor le ra da xoa nguoi nay khoi k.nguoiTrong (case suKienRa, khuvuc.go)", nv.ID, len(banSau))
+	}
+}
+
+// TestKhiDongChuaVaoKhuVucKhongLuuKhongPanic la Task 5 buoc 1 kich ban 2: mot
+// phien CHUA thuc su vao khu vuc (b.daVaoKhuVuc == false) — du dang o buoc
+// nao (chua dang nhap, moi co nhan vat nhung chua chon khu vuc, hay da chon
+// khu vuc nhung chua gui -39) — bi "ngat ket noi" thi KhiDong KHONG duoc goi
+// Xep (khong luu bua) va KHONG panic.
+func TestKhiDongChuaVaoKhuVucKhongLuuKhongPanic(t *testing.T) {
+	ghiGia := &ghiKhiRoiGia{}
+	kChuaVao := MoKhuVuc(TimBanDo(1)) // mo phong da xuLyClientOk (co khuVuc) nhung chua gui -39
+
+	truongHop := []struct {
+		ten string
+		b   *BoXuLy
+	}{
+		{"chua dang nhap (khuVuc va nhanVat deu nil)", &BoXuLy{thoGhi: ghiGia}},
+		{"da co nhan vat nhung chua tung chon khu vuc", &BoXuLy{
+			nhanVat: &store.NhanVat{ID: 9, Ten: "ChuaVao"}, thoGhi: ghiGia,
+		}},
+		{"da chon khu vuc nhung chua gui -39 (daVaoKhuVuc=false)", &BoXuLy{
+			khuVuc: kChuaVao, nhanVat: &store.NhanVat{ID: 10, Ten: "ChuaVao2"}, thoGhi: ghiGia,
+		}},
+	}
+
+	for _, tc := range truongHop {
+		t.Run(tc.ten, func(t *testing.T) {
+			defer func() {
+				if r := recover(); r != nil {
+					t.Fatalf("KhiDong panic: %v", r)
+				}
+			}()
+			tc.b.KhiDong()
+		})
+	}
+
+	if nhan := ghiGia.banDaNhan(); len(nhan) != 0 {
+		t.Fatalf("tho ghi gia nhan %d ban ghi, mong doi 0 (chua vao khu vuc thi khong duoc luu)", len(nhan))
 	}
 }

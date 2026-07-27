@@ -1,8 +1,10 @@
 package game
 
 import (
+	"fmt"
 	"log/slog"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"nroserver/internal/protocol"
@@ -56,6 +58,25 @@ type KhuVuc struct {
 	dung       chan struct{}
 	xong       chan struct{}
 	dungMotLan sync.Once
+
+	// soLanGuiRoi dem so lan Gui() BO ROI mot su kien vi hop thu day (nhanh
+	// default cua Gui(), duoi day) — Ke hoach 11 Task 2 (dac ta
+	// 2026-07-27-luu-trang-thai-song.md §5, canh bao rieng cua task). TRUOC
+	// Task 2, nhanh do chi ghi slog.Debug roi thoi — muc Debug thuong TAT
+	// trong production nen day la ROI IM LANG THAT SU. Hau qua xau nhat: bo
+	// dinh ky luu (§4 diem A) gui suKienXinAnhChup cho MOI khu vuc de xin anh
+	// chup dem luu; mot khu vuc dang qua tai (hop thu day vi dang xu ly nhieu
+	// su kien chien dau) roi DUNG LUC bi roi -> khu vuc do IM LANG bi bo qua
+	// CA LUOT LUU ma khong ai biet, nguoi choi trong do mat tien do khi sap
+	// dien ra su co.
+	//
+	// atomic.Int64 (KHONG PHAI int64 thuong) vi Gui() duoc goi TU NHIEU
+	// goroutine cung luc: moi luong phien (mot goroutine/ket noi) + luong
+	// dinh ky auto-save (§4 diem A) + luong xu ly tat may chu (§4 diem C) deu
+	// co the goi Gui() DONG THOI — bien thuong se la data race (go vet -race
+	// se bat), atomic.Int64 la kieu zero-value-san-sang, an toan doc/ghi tu
+	// nhieu goroutine ma khong can mutex rieng.
+	soLanGuiRoi atomic.Int64
 }
 
 // guiTin la phan toi thieu cua mot phien (session) ma actor can de gui goi tin
@@ -232,6 +253,35 @@ type suKienXinDanhSachQuai struct {
 	traLoi chan []*Quai
 }
 
+// suKienXinAnhChup la su kien TRUY VAN THU HAI cung mo hinh voi
+// suKienXinDanhSachQuai o tren (Ke hoach 11 Task 2, dac ta
+// 2026-07-27-luu-trang-thai-song.md §5): mot luong BEN NGOAI vongLap — bo
+// dinh ky luu (§4 diem A), noi xu ly mat ket noi (§4 diem B,
+// BoXuLy.KhiDong), hoac nhanh tat may chu (§4 diem C) — can "chup anh" trang
+// thai store.NhanVat cua nguoi choi dang trong khu vuc DE DEM DI LUU XUONG
+// DIA, nhung KHONG duoc doc truc tiep k.nguoiTrong (dac ta chien dau §1.6, ap
+// dung y het cho truong hop nay: chi luong vongLap duoc cham trang thai
+// nguoi choi trong actor).
+//
+// idNhanVat = 0 nghia la xin TAT CA nguoi trong khu vuc (dung cho bo dinh ky
+// luu, §4 diem A: moi nhip luu xin het mot luot roi day vao hang doi cho tho
+// ghi); idNhanVat != 0 nghia la xin DUNG mot nguoi co ID do (dung cho luc mot
+// phien mat ket noi, §4 diem B: chi can luu dung nguoi vua roi, khong can ca
+// khu vuc).
+//
+// traLoi tra ve []store.NhanVat — GIA TRI, KHONG PHAI []*store.NhanVat — day
+// la diem khac CO CHU DICH so voi suKienXinDanhSachQuai (tra []*Quai): con
+// tro nguoiTrongKhuVuc.nv la con tro DUNG CHUNG voi luong phien (dac ta §2.1
+// "Chúng là cùng một ô nhớ, không phải hai bản sao"), trong khi con tro *Quai
+// goc chi mot minh actor giu — dua *store.NhanVat ra ngoai (du la con tro toi
+// mot BAN SAO moi tinh) van de lai thoi quen nguy hiem; buoc kieu tra ve phai
+// la GIA TRI xoa han kha nang do o ca goc do bien dich, khong con dua vao ky
+// luat lap trinh vien.
+type suKienXinAnhChup struct {
+	idNhanVat int64
+	traLoi    chan []store.NhanVat
+}
+
 // MoKhuVuc tao mot khu vuc giu ban do da cho, chua co nguoi choi nao. Quai
 // (Ke hoach 6 Task 5) duoc sinh MOT LAN o day bang taoQuaiMacDinh — day la
 // diem duy nhat gan quai vao mot khu vuc, giu dung nguyen tac "quai thuoc
@@ -278,6 +328,37 @@ func (k *KhuVuc) DanhSachQuaiSnapshot() []*Quai {
 		return ds
 	case <-time.After(100 * time.Millisecond):
 		slog.Warn("xin danh sach quai qua hop thu actor het gio cho", "mapId", k.banDo.MapID)
+		return nil
+	}
+}
+
+// AnhChupNguoiChoi tra BAN SAO GIA TRI store.NhanVat cua nguoi choi dang
+// trong khu vuc, AN TOAN goi tu BEN NGOAI vongLap (Ke hoach 11 Task 2, dac ta
+// §5) — cung khuon voi DanhSachQuaiSnapshot ngay tren, chi doi doi tuong tu
+// quai sang nguoi choi (xem chu thich suKienXinAnhChup ve ly do doi kieu tra
+// ve tu con tro sang gia tri).
+//
+// idNhanVat = 0 -> TAT CA nguoi trong khu vuc; idNhanVat != 0 -> DUNG mot
+// nguoi co ID do (khong tim thay -> nil, dung tinh than "khong tim thay ->
+// im lang" cua cac case suKien... khac trong file nay).
+//
+// Cho toi da 100ms; qua han (actor da Dung(), hop thu day bat thuong, hoac
+// k.hopThu chua duoc cap phat vi BatDau() chua chay) thi tra ve nil — dung
+// nguyen tac actor KHONG BAO GIO CHO O DIA (dac ta §3): ben goi (bo dinh ky
+// luu, xu ly ngat ket noi, nhanh tat may chu) khong duoc treo vo han cho mot
+// actor co the da chet.
+func (k *KhuVuc) AnhChupNguoiChoi(idNhanVat int64) []store.NhanVat {
+	if k.hopThu == nil {
+		return nil // actor chua BatDau() -> khong co hop thu de gui
+	}
+	traLoi := make(chan []store.NhanVat, 1)
+	k.Gui(suKienXinAnhChup{idNhanVat: idNhanVat, traLoi: traLoi})
+	select {
+	case ban := <-traLoi:
+		return ban
+	case <-time.After(100 * time.Millisecond):
+		slog.Warn("xin anh chup nguoi choi qua hop thu actor het gio cho",
+			"mapId", k.banDo.MapID, "idNhanVat", idNhanVat)
 		return nil
 	}
 }
@@ -780,6 +861,32 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 			ban[i] = &cp
 		}
 		sk.traLoi <- ban
+
+	case suKienXinAnhChup:
+		// Ke hoach 11 Task 2: SAO GIA TRI tung nguoi (*nguoi.nv, KHONG PHAI
+		// nguoi.nv) — dung khuon voi case suKienXinDanhSachQuai o tren, doi
+		// "con tro moi toi ban sao" (*Quai) thanh "gia tri thang" (store.
+		// NhanVat) vi ly do da giai thich o chu thich struct suKienXinAnhChup:
+		// nguoiTrongKhuVuc.nv la con tro dung CHUNG voi luong phien (khac han
+		// *Quai chi minh actor giu), tuyet doi khong duoc lo ra ngoai duoi
+		// bat ky hinh thuc con tro nao — *nguoi.nv (dereference) luon tao MOT
+		// GIA TRI MOI doc lap o day, gan vao slice/struct la sao chep GIA TRI
+		// that su (store.NhanVat khong co truong con tro/slice/map nao ben
+		// trong nen khong con duong nao de "vo tinh" con lai tham chieu).
+		//
+		// traLoi co buffer 1 nen gui khong bao gio block du ben goi da het
+		// gio cho va bo di — dung tinh than voi suKienXinDanhSachQuai.
+		if sk.idNhanVat == 0 {
+			ban := make([]store.NhanVat, 0, len(k.nguoiTrong))
+			for _, nguoi := range k.nguoiTrong {
+				ban = append(ban, *nguoi.nv)
+			}
+			sk.traLoi <- ban
+		} else if nguoi, co := k.nguoiTrong[sk.idNhanVat]; co {
+			sk.traLoi <- []store.NhanVat{*nguoi.nv}
+		} else {
+			sk.traLoi <- nil // khong tim thay -> nil, dung tinh than "khong tim thay" cua cac case khac trong file nay
+		}
 	}
 }
 
@@ -1025,16 +1132,24 @@ func (k *KhuVuc) xuLyNguoiChoiChet(nguoi *nguoiTrongKhuVuc) {
 }
 
 // Gui day mot su kien vao hop thu cua actor. KHONG CHAN (non-blocking): neu
-// hop thu day thi bo goi va ghi log debug; neu actor da Dung() thi cung bo
-// goi an toan (khong panic, vi hopThu khong bao gio bi close — chi kenh dung
-// bi close).
+// hop thu day thi bo goi — DEM + LOG muc Warn (Ke hoach 11 Task 2, xem chu
+// thich truong soLanGuiRoi o dinh nghia KhuVuc: TRUOC Task 2 nhanh nay chi
+// ghi slog.Debug, muc thuong TAT trong production nen la roi IM LANG THAT
+// SU; mot su kien roi co the la mot yeu cau chup anh de luu, khien ca khu
+// vuc bi bo qua mot luot luu ma khong ai biet). fmt.Sprintf("%T", sk) ghi
+// kieu su kien bi roi — phan biet "roi mot goi di chuyen" (vo hai, se co goi
+// moi hon ngay sau) voi "roi mot yeu cau chup anh" (dang lo ngai hon nhieu)
+// khi doc log. Neu actor da Dung() thi cung bo goi an toan (khong panic, vi
+// hopThu khong bao gio bi close — chi kenh dung bi close).
 func (k *KhuVuc) Gui(sk suKienKhuVuc) {
 	select {
 	case k.hopThu <- sk:
 	case <-k.dung:
 		// actor da dung, bo su kien.
 	default:
-		slog.Debug("hop thu day, bo su kien", "mapId", k.banDo.MapID)
+		tong := k.soLanGuiRoi.Add(1)
+		slog.Warn("hop thu actor day, bo su kien — mot luot xu ly (vd chup anh de luu) co the bi bo qua",
+			"mapId", k.banDo.MapID, "kieuSuKien", fmt.Sprintf("%T", sk), "tongSoLanRoi", tong)
 	}
 }
 

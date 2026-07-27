@@ -55,7 +55,7 @@ kết nối theo IP (Kế hoạch bảo mật B, là bước lùi so với bản
 | 6c | **Stress test đông người**: 20 client giả cùng khu vực cùng xả chiêu — đo gói rơi ở hộp thư actor (trần 256, `Gui()` rơi im lặng khi đầy) + độ trễ nhịp 100ms; dựng trên `thuclient`/`clientGia` sẵn có | Chưa bắt đầu | 6 |
 | 11 | **Lưu trạng thái sống** (đề xuất mới — [BO-SUNG-LO-TRINH](BO-SUNG-LO-TRINH.md) Khối 1) | 🔴🧱 Chưa bắt đầu — **nguy hiểm nhất, làm trước KH7**: server chưa có UPDATE nhân vật, tắt là mất tiến độ | 6 |
 | 7 | Vật phẩm, hành trang, cửa hàng, giao dịch | Chưa bắt đầu — 🧱 chốt căn cước vật phẩm + chống nhân bản TRƯỚC khi viết code ([BO-SUNG](BO-SUNG-LO-TRINH.md) Khối 3) | 5, 11 |
-| 8 | Kho nội dung YAML + nạp nóng — **kèm cân bằng thực nghiệm**: đổ số liệu chiêu thật (đơn vị `SatThuong` phải chốt — TODO trong `satthuong.go`), chơi thử rồi đo làng nào thắng nhiều, chỉnh số trong YAML không sửa code | Chưa bắt đầu | 6, 7 |
+| 8 | Kho nội dung YAML + nạp nóng — **kèm cân bằng thực nghiệm**: đổ số liệu chiêu thật (đơn vị `SatThuong` phải chốt — TODO trong `satthuong.go`), chơi thử rồi đo làng nào thắng nhiều, chỉnh số trong YAML không sửa code. **⚠️ PHẢI CHỐT TRƯỚC KHI BẮT ĐẦU: số chiêu và số KIỂU chiêu** — xem ghi chú dưới bảng | Chưa bắt đầu | 6, 7 |
 | 9 | Nhiệm vụ, cốt truyện, NPC | Chưa bắt đầu | 8 |
 | 10 | **Cảm giác chơi** — hoạt ảnh, chuyển màn, hướng dẫn người mới | Chưa bắt đầu | 5, 6 |
 | W | Web + Panel quản trị (Next.js) | 🔨 **Đang làm** — W1 (đăng ký/đăng nhập) + W2 (trang cá nhân, đổi mật khẩu, bảng xếp hạng, panel admin) đã lên main. Còn W3 (cấu hình/nhật ký/nạp thẻ, phân trang, thu hồi phiên) | 2 |
@@ -64,6 +64,27 @@ kết nối theo IP (Kế hoạch bảo mật B, là bước lùi so với bản
 
 Kế hoạch **W** (web), **B** (bảo mật) và **V** (triển khai) đánh chữ vì chúng
 cắt ngang mọi kế hoạch khác, không nằm gọn ở một chỗ trong thứ tự.
+
+> ### ⚠️ Phải chốt trước KH8: bao nhiêu chiêu, và bao nhiêu KIỂU chiêu
+>
+> **KH6 mới có 20 chiêu (4 mỗi làng) — ít, và đó là cố ý.** Bốn chiêu đó không
+> phải nội dung game mà là **bộ xương tối thiểu** để chứng minh mọi kiểu chiêu
+> chạy được: 2 chiêu đánh (`type=1`), 1 hồi máu (`type=2` — *bắt buộc phải có*,
+> nếu không hàm dựng gói hồi máu không có đường chạy thật, test thành mô phỏng),
+> 1 tự thân (`type=3`).
+>
+> So sánh: game cũ có **21 kỹ năng (~7 mỗi chủng tộc) + 25 nội tại**. Bản mới
+> hiện **4 chiêu/làng, 0 nội tại** — mỗi người chơi chỉ có 4 nút bấm.
+>
+> **Ranh giới quan trọng khi thêm:**
+> - Thêm chiêu **cùng kiểu đã có** → chỉ là **thêm dữ liệu YAML**, rẻ, làm hàng loạt.
+> - Thêm **KIỂU mới** (làm choáng, đẩy lùi, độc theo thời gian, khiên, hút máu)
+>   → **phải viết code máy chủ mới**. Hiện chỉ có 3 kiểu.
+>
+> → Câu hỏi thật không phải "bao nhiêu chiêu" mà **"bao nhiêu kiểu chiêu"**, vì
+> nó quyết định KH8 phải viết thêm bao nhiêu code chứ không chỉ đổ dữ liệu.
+> **Đề xuất khi mở cửa: 8 chiêu/làng (40 chiêu), phủ ~6 kiểu.** Chủ dự án chốt
+> trước khi thiết kế KH8. *(Nêu 27/07/2026.)*
 
 > **Ghi chú Kế hoạch 2 (24/07/2026):** ban đầu định là "chuyển dữ liệu cũ".
 > Nhưng CSDL cũ chỉ có **3 tài khoản + 3 nhân vật thử nghiệm** (đếm thật từ

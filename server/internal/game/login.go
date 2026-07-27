@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"regexp"
 	"strings"
+	"sync"
 
 	"nroserver/internal/auth"
 	mynet "nroserver/internal/net"
@@ -68,8 +69,39 @@ type Kho interface {
 	TaoNhanVat(ctx context.Context, nv store.NhanVatMoi) (*store.NhanVat, error)
 }
 
+// GhiKhiRoi la phan toi thieu cua ThoGhi (thogi.go) ma BoXuLy can de luu
+// nguoi choi khi phien mat ket noi (Ke hoach 11 Task 5, dac ta
+// 2026-07-27-luu-trang-thai-song.md §4 diem B) — dung khuon voi Kho o tren va
+// KhoLuu (thogi.go): interface HEP chi doi hoi dung phuong thuc can dung
+// (Xep), de kiem thu duoc bang mot "tho ghi gia" ghi nhan NGAY vao bo nho,
+// khong phai dung *ThoGhi that (di qua goroutine nen + ticker that se bat
+// test phai cho/doan thoi gian, de flaky). *ThoGhi thoa man interface nay tu
+// nhien, khong can glue code them.
+type GhiKhiRoi interface {
+	Xep(nv store.NhanVat)
+}
+
+// ghiDongBoKhiBiDa la phan MO RONG khong xuat (Ke hoach 11 Task 7, dac ta
+// §7.1) ma KhiDong() can KHI PHIEN NAY VUA BI DA boi mot dang nhap moi cung
+// tai khoan: ghi DONG BO, cho ket qua that su truoc khi tra ve — khac han
+// Xep() (GhiKhiRoi o tren, KHONG BAO GIO CHAN, chi cham hang doi trong bo
+// nho). *ThoGhi thoa man interface nay tu nhien (XepVaCho, thogi.go).
+//
+// TACH RIENG khoi GhiKhiRoi (khong nhet XepVaCho vao do) de MOI fake thoGhi
+// hien co trong cac test KHONG lien quan kich ban "bi da" (chi implement
+// Xep) khong phai sua gi ca — KhiDong() type-assert interface nay CHI khi
+// can (xem daBiDa()), va rot ve nhanh Xep() binh thuong neu thoGhi cu the
+// khong thoa man (an toan tuyet doi, khong panic — xem KhiDong).
+type ghiDongBoKhiBiDa interface {
+	XepVaCho(ctx context.Context, nv store.NhanVat) error
+}
+
 // BoXuLy giu trang thai cua MOT phien (mot ket noi). Xem Task 1: moi ket noi
-// mot BoXuLy rieng, nen cac truong duoi day khong bao gio bi hai phien tranh.
+// mot BoXuLy rieng, nen cac truong duoi day khong bao gio bi hai phien tranh
+// — NGOAI TRU session/biDa/daXongDon (Ke hoach 11 Task 7), xem chu thich rieng
+// cua tung truong do ve ly do CHUNG DUOC mot goroutine KHAC cham vao va vi
+// sao van AN TOAN (chi qua thao tac dong-kenh/Session.Dong(), khong bao gio
+// doc/ghi truc tiep cac truong con lai cua BoXuLy tu ben ngoai).
 type BoXuLy struct {
 	kho      Kho
 	taiKhoan *store.TaiKhoan // nil khi chua dang nhap
@@ -79,10 +111,96 @@ type BoXuLy struct {
 	daVaoKhuVuc   bool      // da gui suKienVao (chan -39 goi lap gay -5 trung)
 	khuVuc        *KhuVuc   // khu vuc nhan vat dang o (dung o KH4; nen mong cho KH5)
 	soKhuVuc      *SoKhuVuc // so khu vuc CHUNG (5 map), tra khu vuc theo mapId cua nhan vat
+
+	// thoGhi (Ke hoach 11 Task 5): noi KhiDong() Xep() anh chup nguoi choi vao
+	// khi phien mat ket noi (dac ta §4 diem B). nil la gia tri mac dinh HOP LE
+	// (chua goi DatThoGhi) — KhiDong tu bo qua buoc luu trong truong hop do,
+	// KHONG panic (xem KhiDong). Tach khoi tham so constructor (xem DatThoGhi
+	// ben duoi) THAY VI them tham so thu ba vao NewBoXuLy, vi rat nhieu noi
+	// trong repo dang goi NewBoXuLy(kho, soKhuVuc) voi DUNG 2 tham so
+	// (nhanvat_test.go, tichhop_test.go, khuvuc_tichhop_test.go...) khong lien
+	// quan gi toi luu tru — doi chu ky constructor se bat het cac noi do phai
+	// sua theo, khong can thiet cho task nay.
+	thoGhi GhiKhiRoi
+
+	// session (Ke hoach 11 Task 7, dac ta §7.2): luu lai *mynet.Session cua
+	// CHINH phien nay, gan MOT LAN trong xuLyDangNhap khi dang nhap thanh cong
+	// — TRUOC khi dang ky vao soDangNhap (xem xuLyDangNhap), de neu MOT dang
+	// nhap KHAC cung tai khoan xay ra gan nhu ngay sau do, SoDangNhap.DangKy
+	// (chay tren goroutine cua phien MOI do) da co the DONG duoc ket noi vat
+	// ly cua phien nay ngay. Day la truong DUY NHAT cua BoXuLy duoc DOC boi
+	// mot goroutine KHAC voi goroutine so huu phien — AN TOAN vi (1) chi GAN
+	// MOT LAN (khong bao gio doi lai sau do) va (2) Session.Dong() (net/
+	// session.go) tu no da AN TOAN goi dong thoi tu bat ky goroutine nao
+	// (sync.Once noi bo) — khong dua tranh gi voi cach chinh BoXuLy nay dung
+	// no (Gui() da tu khoa muGui rieng).
+	session *mynet.Session
+
+	// biDa la kenh TIN HIEU (Ke hoach 11 Task 7): dong boi SoDangNhap.DangKy
+	// (chay tren goroutine cua phien MOI) de bao PHIEN NAY vua bi DA boi mot
+	// dang nhap moi cung tai khoan. Luon khoi tao khac nil (NewBoXuLy) de an
+	// toan dong tu ben ngoai. Dong mot kenh la thao tac cross-goroutine AN
+	// TOAN theo dung dinh nghia cua Go (khong phai doc/ghi mot truong thuong)
+	// — day KHONG vi pham nguyen tac "moi truong BoXuLy chi mot phien cham
+	// toi" o tren, vi kenh CHINH LA co che danh cho muc dich nay. CHI duoc
+	// DOC (khong bao gio ghi) tu goroutine cua CHINH phien nay, trong
+	// daBiDa() (goi ben trong KhiDong()).
+	biDa chan struct{}
+
+	// biDaMotLan (soi toan nhanh KH11, fix-cuoi-report.md, Finding 1) la
+	// PHONG THU CHIEU SAU cho close(biDa): dam bao close(b.biDa) o
+	// SoDangNhap.DangKy (sodangnhap.go) chi thuc su chay MOT LAN cho DU
+	// DangKy vo tinh (hoac do mot loi khac trong tuong lai) goi den hai lan
+	// tren CUNG mot BoXuLy — close mot channel DA dong la panic khong
+	// recover duoc tren duong PhucVu (net/session.go khong co recover()),
+	// panic do se lam CHET CA TIEN TRINH may chu. Chot chinh (b.taiKhoan !=
+	// nil trong xuLyDangNhap) da chan duong gay ra tinh huong nay TU GOC —
+	// truong nay la LUOI AN TOAN THEM, khong phai thay the cho chot chinh.
+	biDaMotLan sync.Once
+
+	// daXongDon la kenh TIN HIEU nguoc lai voi biDa: dong boi CHINH goroutine
+	// cua phien nay, o CUOI KhiDong() (qua defer baoXongDon) — bao "KhiDong da
+	// chay xong HOAN TOAN" (ke ca buoc ghi DONG BO neu phien bi da) cho
+	// SoDangNhap.DangKy (dang cho tren goroutine cua phien MOI) biet luc nao
+	// AN TOAN de tiep tuc doc lai CSDL — day CHINH LA co che thuc hien dac ta
+	// §7.1 "cho no luu xong -> ROI MOI doc du lieu cho phien moi".
+	daXongDon chan struct{}
+
+	// soDangNhap (Ke hoach 11 Task 7): so phien CHUNG toan may chu — MOT nguon
+	// su that duy nhat "tai khoan X dang o phien nao" (xem sodangnhap.go). nil
+	// la gia tri mac dinh AN TOAN (khong dang ky/khong bao gio bi da) — cac
+	// test hien co (goi NewBoXuLy(kho, soKhuVuc) truc tiep, khong goi
+	// DatSoDangNhap) van bien dich va chay dung y het truoc Task 7.
+	soDangNhap *SoDangNhap
 }
 
 func NewBoXuLy(kho Kho, soKhuVuc *SoKhuVuc) *BoXuLy {
-	return &BoXuLy{kho: kho, soKhuVuc: soKhuVuc}
+	return &BoXuLy{
+		kho: kho, soKhuVuc: soKhuVuc,
+		// Ke hoach 11 Task 7: LUON khoi tao hai kenh nay khac nil, du phien
+		// nay co bao gio bi da hay khong — an toan de SoDangNhap dong biDa tu
+		// ben ngoai (dong kenh nil se panic), va daXongDon luon co the dong
+		// duoc trong KhiDong() (goi mot lan duy nhat, xem baoXongDon).
+		biDa:      make(chan struct{}),
+		daXongDon: make(chan struct{}),
+	}
+}
+
+// DatSoDangNhap gan so dang nhap CHUNG cho phien nay (Ke hoach 11 Task 7) —
+// goi TU main.go (qua MoLuuTru) SAU NewBoXuLy, dung khuon "thiet lap sau khoi
+// tao" giong het DatThoGhi o tren (xem chu thich truong thoGhi ve ly do tach
+// khoi constructor). AN TOAN KHONG goi ham nay (soDangNhap giu nguyen nil) —
+// phien se khong dang ky vao so va khong bao gio bi da.
+func (b *BoXuLy) DatSoDangNhap(s *SoDangNhap) {
+	b.soDangNhap = s
+}
+
+// DatThoGhi gan tho ghi cho phien nay (Ke hoach 11 Task 5) — goi TU main.go
+// SAU NewBoXuLy, dung khuon "thiet lap sau khoi tao" thay vi tham so
+// constructor thu ba (xem ly do o chu thich truong thoGhi phia tren). An toan
+// KHONG goi ham nay (thoGhi giu nguyen nil) — KhiDong() tu bo qua buoc luu.
+func (b *BoXuLy) DatThoGhi(t GhiKhiRoi) {
+	b.thoGhi = t
 }
 
 // KiemTraDangNhap chua toan bo luat dang nhap, tach khoi phan mang de kiem thu.
@@ -406,9 +524,107 @@ func (b *BoXuLy) xuLyHoiSinh() error {
 // bao actor go no ra (actor phat -6 cho nguoi con lai). An toan goi khi khuVuc nil.
 // Chi gui suKienRa neu da thuc su vao (daVaoKhuVuc) — chua vao thi khong can go,
 // du actor xu ly suKienRa cua id khong co van la no-op an toan.
+//
+// Ke hoach 11 Task 5 (dac ta §4 diem B): TRUOC khi bao actor go nguoi choi ra
+// (Gui(suKienRa)), xin "anh chup" trang thai nguoi choi (AnhChupNguoiChoi,
+// khuvuc.go) roi Xep() vao tho ghi de luu xuong dia. THU TU NAY BAT BUOC,
+// TUYET DOI KHONG DUOC DAO NGUOC:
+//
+//	DUNG:  AnhChupNguoiChoi(id) ──► Xep(ban)     ──► khuVuc.Gui(suKienRa)
+//	SAI :  khuVuc.Gui(suKienRa) ──► AnhChupNguoiChoi(id) tra VE RONG
+//
+// Ly do: case suKienRa (khuvuc.go) XOA nguoi choi khoi k.nguoiTrong NGAY khi
+// actor xu ly su kien do. Neu goi Gui(suKienRa) truoc, den luc
+// AnhChupNguoiChoi duoc goi thi actor rat co the (thuong la se) DA xu ly xong
+// suKienRa va xoa nguoi nay khoi map — AnhChupNguoiChoi(id) khong con tim
+// thay ai, tra ve slice RONG, nghia la MAT SACH tien do vua choi ngay truoc
+// luc ngat ket noi. Nguoi sua sau TUYET DOI giu dung thu tu nay.
+//
+// AnhChupNguoiChoi da tu co han gio rieng (100ms, khuvuc.go) va Xep khong bao
+// gio chan (thogi.go, Ke hoach 11 Task 3) nen ca hai buoc o day an toan de
+// goi tren luong phien luc dong ket noi — KHONG duoc them buoc cho nao khac
+// vao ham nay (dac ta §3: actor/luong phien khong bao gio duoc cho o dia).
+//
+// Ke hoach 11 Task 7 (dac ta §7.1 — chan dung bay "doc truoc, da sau" cua ban
+// Java cu): NEU phien nay VUA bi DA boi mot dang nhap moi cung tai khoan
+// (b.biDa da dong — xem daBiDa()), buoc luu o day PHAI la GHI DONG BO XAC
+// NHAN (XepVaCho, cho ket qua that su tu CSDL) THAY VI Xep() khong chan binh
+// thuong — vi SoDangNhap.DangKy (goroutine cua phien MOI) dang CHO tin hieu
+// b.daXongDon o day de biet luc nao AN TOAN doc lai du lieu. Neu chi Xep()
+// (dua vao hang doi trong bo nho roi bao "xong" ngay), phien MOI co the doc
+// CSDL TRUOC KHI ban ghi that su xuong dia — dung dung loi (1) cua ban Java
+// cu (NDVSqlFetcher.login(): doc CSDL TRUOC roi moi da phien cu) ma Task 7
+// phai chan.
+//
+// Voi phien dut ket noi TU NHIEN (KHONG bi da): giu NGUYEN hanh vi CU (Task
+// 5) — Xep() khong chan. Khong co ai dang cho tin hieu b.daXongDon de doc lai
+// CSDL ngay lap tuc trong truong hop nay, nen khong can tra gia dong bo; giu
+// dung tinh than "khong cho o dia lau hon muc can thiet" cho duong pho bien
+// nhat (nguoi choi thoat game binh thuong).
+//
+// baoXongDon() LUON chay (defer, ke ca khi som return vi chua vao khu vuc) —
+// SoDangNhap.DangKy phai luon nhan duoc tin hieu "xong", bat ke phien bi da
+// co gi de luu hay khong, neu khong no se cho toi het han gio moi thoi.
+//
+// XoaNeuDung o dau ham (truoc ca kiem tra khuVuc/nhanVat/daVaoKhuVuc): mot
+// phien dang ky vao so NGAY khi dang nhap thanh cong (xuLyDangNhap, TRUOC ca
+// khi co nhan vat) — mot phien dut ket noi TRUOC khi vao the gioi (vd dang o
+// man chon nhan vat) van phai duoc go khoi so, khong thi so giu "rac" mai.
 func (b *BoXuLy) KhiDong() {
-	if b.khuVuc != nil && b.nhanVat != nil && b.daVaoKhuVuc {
-		b.khuVuc.Gui(suKienRa{idNhanVat: b.nhanVat.ID})
+	defer b.baoXongDon()
+
+	if b.taiKhoan != nil && b.soDangNhap != nil {
+		b.soDangNhap.XoaNeuDung(b.taiKhoan.ID, b)
+	}
+
+	if b.khuVuc == nil || b.nhanVat == nil || !b.daVaoKhuVuc {
+		return // chua vao khu vuc -> khong co gi de luu, khong can bao actor
+	}
+
+	if b.thoGhi != nil {
+		if ban := b.khuVuc.AnhChupNguoiChoi(b.nhanVat.ID); len(ban) > 0 {
+			if b.daBiDa() {
+				if gdb, ok := b.thoGhi.(ghiDongBoKhiBiDa); ok {
+					ctx, huy := context.WithTimeout(context.Background(), hanGioGhi)
+					if err := gdb.XepVaCho(ctx, ban[0]); err != nil {
+						slog.Error("ghi dong bo phien BI DA that bai — co the mat vai thay doi GAN NHAT cua phien bi da",
+							"idNhanVat", ban[0].ID, "loi", err)
+					}
+					huy()
+				} else {
+					// Khong nen xay ra o may chu that (thoGhi that luon la
+					// *ThoGhi, thoa man ghiDongBoKhiBiDa) — chi cham toi khi
+					// mot test tu gan mot fake CHI co Xep(). Rot ve Xep() binh
+					// thuong thay vi bo qua hoan toan buoc luu.
+					b.thoGhi.Xep(ban[0])
+				}
+			} else {
+				b.thoGhi.Xep(ban[0])
+			}
+		}
+	}
+
+	b.khuVuc.Gui(suKienRa{idNhanVat: b.nhanVat.ID})
+}
+
+// daBiDa bao phien nay da bi da (b.biDa da dong) hay chua — AN TOAN goi tren
+// kenh nil (select+default khong bao gio chan tren kenh nil, chi khong bao
+// gio "san sang", nen luon roi vao default = false).
+func (b *BoXuLy) daBiDa() bool {
+	select {
+	case <-b.biDa:
+		return true
+	default:
+		return false
+	}
+}
+
+// baoXongDon dong b.daXongDon — tin hieu "KhiDong da chay xong hoan toan" cho
+// SoDangNhap.DangKy dang cho tren goroutine cua phien khac. An toan goi dung
+// MOT LAN (KhiDong chi chay dung mot lan qua defer trong mynet.PhucVu).
+func (b *BoXuLy) baoXongDon() {
+	if b.daXongDon != nil {
+		close(b.daXongDon)
 	}
 }
 
@@ -436,6 +652,27 @@ func (b *BoXuLy) xuLyDangNhap(s *mynet.Session, m *protocol.Message) error {
 		return fmt.Errorf("goi dang nhap thieu mat khau: %w", err)
 	}
 
+	// Soi toan nhanh KH11 (fix-cuoi-report.md, Finding 1 — CRITICAL): chot
+	// chan dang nhap CHONG tren CUNG mot ket noi. Bat bien "mot BoXuLy <->
+	// mot tai khoan" ma SoDangNhap.DangKy dua vao (sodangnhap.go) chi con
+	// dung neu MOI ket noi dang ky vao so DUNG MOT LAN. Neu khong chan:
+	// mot -29 THANH CONG lan hai tren CUNG ket noi se gan lai b.taiKhoan
+	// roi DangKy(tai_khoan_MOI, b) — b GIO NAM O HAI KHOA trong so cung
+	// luc (khoa CU van con tro ve chinh no). Khi sau nay co ai da tai
+	// khoan MOI, KhiDong() cua b chi XoaNeuDung duoc khoa MOI (so dang tro
+	// dung no) — khoa CU tro thanh "rac" vinh vien, va lan da TIEP THEO
+	// nham dung tai khoan CU se goi close() len CHINH b.biDa DA DONG TU
+	// TRUOC (o lan da cua tai khoan moi) -> double-close mot channel ->
+	// PANIC khong recover duoc (net/session.go khong co recover() tren
+	// duong PhucVu) -> CHET CA TIEN TRINH may chu (DoS tu xa, tai khoan tu
+	// dang ky duoc). Dang nhap SAI (KiemTraDangNhap tra ThanhCong=false)
+	// KHONG gan b.taiKhoan, nen nguoi choi go sai mat khau van thu lai
+	// binh thuong tren cung ket noi — nhanh nay CHI chan dang nhap THANH
+	// CONG lan thu hai tro di, khong chan thu lai sau khi go sai.
+	if b.taiKhoan != nil {
+		return nil
+	}
+
 	kq, err := b.KiemTraDangNhap(context.Background(), ten, matKhau)
 	if err != nil {
 		// Loi he thong: bao chung chung, khong lo chi tiet ky thuat ra ngoai.
@@ -450,6 +687,26 @@ func (b *BoXuLy) xuLyDangNhap(s *mynet.Session, m *protocol.Message) error {
 	slog.Info("dang nhap thanh cong",
 		"ip", s.DiaChiIP, "ten", kq.TaiKhoan.TenDangNhap, "id", kq.TaiKhoan.ID)
 	b.taiKhoan = kq.TaiKhoan // ghi nhan phien nay da dang nhap bang tai khoan nao
+
+	// Ke hoach 11 Task 7 (dac ta §7.1/§7.2): luu Session cua CHINH phien nay
+	// TRUOC khi dang ky vao so (de mot dang nhap thu ba, gan nhu ngay sau,
+	// van co the da duoc phien nay), ROI GOI DangKy — thu tu BAT BUOC:
+	//
+	//	DUNG: DangKy (da phien cu + CHO no luu xong) ──► LayNhanVatTheoTaiKhoan
+	//	SAI : LayNhanVatTheoTaiKhoan ──► DangKy (da phien cu)
+	//
+	// DangKy (neu co phien cu cung tai khoan) DA ket noi cu VA CHO no bao "da
+	// luu xong" (thong qua b.daXongDon cua phien cu) TRUOC KHI ham nay tra ve
+	// — dam bao dong nay CHAC CHAN doc duoc du lieu MOI NHAT tu CSDL, khong
+	// phai ban CU HON con nam lai tu truoc khi phien cu kip ghi. Day CHINH LA
+	// thu tu dao nguoc voi loi (1) cua ban Java cu (NDVSqlFetcher.login():
+	// doc CSDL TRUOC roi moi da phien cu o dong sau) — dao nguoc lai dong nay
+	// se lam TestDangNhapTrung_DaPhienCuChoLuuXongRoiDocViTriMoiNhat do (xem
+	// bao cao Task 7, muc dot bien).
+	b.session = s
+	if b.soDangNhap != nil {
+		b.soDangNhap.DangKy(kq.TaiKhoan.ID, b)
+	}
 
 	nv, err := b.kho.LayNhanVatTheoTaiKhoan(context.Background(), kq.TaiKhoan.ID)
 	if errors.Is(err, store.ErrKhongThayNhanVat) {

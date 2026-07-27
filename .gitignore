@@ -67,3 +67,11 @@ desktop.ini
 # --- 9. THU MUC ANH DO NGUOI DUNG GUI VE ---
 # Anh se nam tren Cloudflare R2 theo thiet ke, khong dua vao git.
 my thuat/
+
+# --- 5. ANH MY THUAT (~50 MB) ---
+# Anh goc AI ve + 4 muc zoom sinh ra tu chung. Cung ly do voi muc 2: anh se
+# nam tren Cloudflare R2, khong nam trong git. Chi CONG CU + TAI LIEU +
+# vai anh THAM CHIEU nho (anh-tham-chieu/) la duoc theo doi.
+docs/my-thuat/anh-nguon/
+docs/my-thuat/anh-game/
+docs/my-thuat/*.zip

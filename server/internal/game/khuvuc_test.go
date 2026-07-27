@@ -724,3 +724,176 @@ func khangDinhIdTrongGoi(t *testing.T, m *protocol.Message, idMongDoi int64) {
 		t.Fatalf("id trong goi -5 = %d, mong doi %d", id, idMongDoi)
 	}
 }
+
+// ---------------------------------------------------------------------------
+// Ke hoach 11 Task 2 — AnhChupNguoiChoi: su kien "chup anh" trang thai nguoi
+// choi qua hop thu actor, dac ta 2026-07-27-luu-trang-thai-song.md §5. CUNG
+// KHUON voi suKienXinDanhSachQuai/DanhSachQuaiSnapshot (quai_test.go): kenh
+// traLoi dem 1, han gio cho 100ms, actor chua BatDau() -> tra nil NGAY. Khac
+// mot diem CO CHU DICH: tra VE GIA TRI ([]store.NhanVat), khong phai con tro
+// ([]*Quai nhu ban quai) — vi nguoiTrongKhuVuc.nv la con tro DUNG CHUNG voi
+// luong phien (dac ta §2.1), khong duoc lo ra ngoai duoi bat ky dang con tro
+// nao (khac Quai — khong ai giu con tro toi no ngoai actor).
+// ---------------------------------------------------------------------------
+
+// khuVucAnhChupGia dung MOT khu vuc actor THAT (BatDau(), co goroutine
+// vongLap song song that su — CAN THIET vi AnhChupNguoiChoi tu no di qua
+// k.Gui() + doc kenh traLoi, khong hoat dong neu khong ai rut hop thu) voi
+// hai nguoi choi da vao san, dung chung cho cac test AnhChupNguoiChoi ben
+// duoi. Vi tri hai nguoi dat THAT XA moi quai mac dinh cua map (quai spawn o
+// SpawnX±60 = 40/160, xem taoQuaiMacDinh; tam AI xa nhat la tamTraThu=300,
+// quai.go) de dam bao nhipTim (chay THAT, 100ms/lan, vi day la actor that)
+// KHONG BAO GIO chon trung hai nguoi nay lam muc tieu roi tu y doi HpHienTai
+// giua luc test dang chay — giu test tat dinh (deterministic) du dung actor
+// that thay vi goi k.xuLy truc tiep (khac phan lon test khac trong file nay).
+func khuVucAnhChupGia(t *testing.T) (k *KhuVuc, nvA, nvB *store.NhanVat) {
+	t.Helper()
+	k = MoKhuVuc(TimBanDo(1))
+	k.BatDau()
+	t.Cleanup(k.Dung)
+
+	nvA = &store.NhanVat{ID: 1, Ten: "A", HpToiDa: 100, HpHienTai: 80, ChakraToiDa: 50, ChakraHienTai: 40, ViTriX: 30000, ViTriY: 30000}
+	nvB = &store.NhanVat{ID: 2, Ten: "B", HpToiDa: 120, HpHienTai: 120, ChakraToiDa: 60, ChakraHienTai: 60, ViTriX: -30000, ViTriY: -30000}
+	k.Gui(suKienVao{nv: nvA, phien: &phienGiaKhuVuc{}})
+	k.Gui(suKienVao{nv: nvB, phien: &phienGiaKhuVuc{}})
+	return k, nvA, nvB
+}
+
+// TestAnhChupNguoiChoiTatCaHaiNguoi la brief Task 2 buoc 1 y (1): hai nguoi
+// trong khu vuc, xin anh chup TAT CA (idNhanVat=0) phai duoc DUNG 2 ban.
+func TestAnhChupNguoiChoiTatCaHaiNguoi(t *testing.T) {
+	k, nvA, nvB := khuVucAnhChupGia(t)
+
+	ban := k.AnhChupNguoiChoi(0)
+	if len(ban) != 2 {
+		t.Fatalf("AnhChupNguoiChoi(0) tra %d ban, mong doi 2", len(ban))
+	}
+	coId := map[int64]bool{}
+	for _, nv := range ban {
+		coId[nv.ID] = true
+	}
+	if !coId[nvA.ID] || !coId[nvB.ID] {
+		t.Fatalf("AnhChupNguoiChoi(0) thieu nguoi: %+v (mong doi ca id %d va %d)", ban, nvA.ID, nvB.ID)
+	}
+}
+
+// TestAnhChupNguoiChoiTheoIdDungMotNguoi la brief Task 2 buoc 1 y (2): xin
+// anh chup theo id cu the phai duoc DUNG 1 ban, DUNG nguoi do — khong lan
+// sang nguoi con lai trong khu vuc.
+func TestAnhChupNguoiChoiTheoIdDungMotNguoi(t *testing.T) {
+	k, _, nvB := khuVucAnhChupGia(t)
+
+	ban := k.AnhChupNguoiChoi(nvB.ID)
+	if len(ban) != 1 {
+		t.Fatalf("AnhChupNguoiChoi(%d) tra %d ban, mong doi 1", nvB.ID, len(ban))
+	}
+	if ban[0].ID != nvB.ID {
+		t.Fatalf("AnhChupNguoiChoi(%d) tra nham nguoi: ID=%d", nvB.ID, ban[0].ID)
+	}
+	if ban[0].Ten != "B" || ban[0].HpHienTai != 120 {
+		t.Fatalf("du lieu ban chup sai: %+v, mong doi Ten=B HpHienTai=120", ban[0])
+	}
+}
+
+// TestAnhChupNguoiChoiLaBanSaoGiaTriKhongDoiTrangThaiActor la test QUAN
+// TRONG NHAT cua Task 2 (brief buoc 1, "quan trong nhat"): sua truong tren
+// BAN CHUP tra ve TUYET DOI KHONG duoc lam doi trang thai THAT trong actor —
+// day la bang chung actor tra BAN SAO GIA TRI (dac ta §5 diem 1), khong phai
+// con tro dung chung voi nguoiTrongKhuVuc.nv (dac ta §2.1: con tro do dung
+// CHUNG voi luong phien, lo ra ngoai la tranh chap du lieu that).
+//
+// Kiem trang thai actor qua CHINH duong cong khai AnhChupNguoiChoi, goi LAN
+// HAI (KHONG doc thang k.nguoiTrong dau vao) — tranh kieu test "gian lan" so
+// sanh voi con tro nvA ma chinh test dang giu (con tro do CHINH LA con tro
+// actor dang dung, so kieu do se luon dung ke ca khi code sai). Neu than
+// AnhChupNguoiChoi vo tinh tra ve con tro/vung nho dung chung, lan goi thu
+// hai se doc lai dung gia tri DA BI SUA o duoi, lam test do.
+func TestAnhChupNguoiChoiLaBanSaoGiaTriKhongDoiTrangThaiActor(t *testing.T) {
+	k, nvA, _ := khuVucAnhChupGia(t)
+
+	banTruoc := k.AnhChupNguoiChoi(nvA.ID)
+	if len(banTruoc) != 1 {
+		t.Fatalf("AnhChupNguoiChoi(%d) tra %d ban, mong doi 1", nvA.ID, len(banTruoc))
+	}
+	hpGoc := banTruoc[0].HpHienTai
+	if hpGoc != 80 {
+		t.Fatalf("HpHienTai ban dau = %d, mong doi 80 (kiem tra lai thiet lap test)", hpGoc)
+	}
+
+	// "Pha hoai" ban chup vua nhan duoc. Neu day la BAN SAO GIA TRI THAT, ba
+	// dong duoi KHONG THE anh huong gi toi trang thai actor.
+	banTruoc[0].HpHienTai = -999
+	banTruoc[0].Ten = "DA_BI_SUA"
+	banTruoc[0].ViTriX = -1
+
+	// Xin lai anh chup MOI qua CHINH duong cong khai — bang chung actor van
+	// con nguyen trang thai that, khong bi ban vua sua o tren lam bien dang.
+	banSau := k.AnhChupNguoiChoi(nvA.ID)
+	if len(banSau) != 1 {
+		t.Fatalf("AnhChupNguoiChoi(%d) lan hai tra %d ban, mong doi 1", nvA.ID, len(banSau))
+	}
+	if banSau[0].HpHienTai != hpGoc {
+		t.Fatalf("sua ban chup lam DOI trang thai actor: HpHienTai sau = %d, mong doi van la %d (ban chup phai la BAN SAO GIA TRI, khong phai con tro dung chung)", banSau[0].HpHienTai, hpGoc)
+	}
+	if banSau[0].Ten != "A" {
+		t.Fatalf("sua ban chup lam doi Ten trong actor: %q, mong doi van la \"A\"", banSau[0].Ten)
+	}
+	if banSau[0].ViTriX != 30000 {
+		t.Fatalf("sua ban chup lam doi ViTriX trong actor: %d, mong doi van la 30000", banSau[0].ViTriX)
+	}
+}
+
+// TestAnhChupNguoiChoiActorChuaBatDauTraNilNgay: dung tinh than voi
+// TestDanhSachQuaiSnapshotActorChuaBatDauTraNilNgay (quai_test.go) — actor
+// chua BatDau() thi chua co hop thu (k.hopThu == nil), AnhChupNguoiChoi PHAI
+// tra ve nil NGAY, khong duoc cho het 100ms timeout (ben goi — bo dinh ky
+// luu, xu ly ngat ket noi — khong bi treo vo ich cho mot actor khong ton tai).
+func TestAnhChupNguoiChoiActorChuaBatDauTraNilNgay(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1)) // KHONG goi BatDau()
+
+	batDau := time.Now()
+	ban := k.AnhChupNguoiChoi(0)
+	trongVongMs := time.Since(batDau)
+
+	if ban != nil {
+		t.Fatalf("actor chua BatDau(), anh chup phai nil, duoc %v", ban)
+	}
+	if trongVongMs > 20*time.Millisecond {
+		t.Fatalf("AnhChupNguoiChoi mat %v de tra ve khi actor chua BatDau — phai tra NGAY (khong hop thu de gui), khong duoc cho het 100ms timeout", trongVongMs)
+	}
+}
+
+// TestGuiHopThuDayDemVaLog kham nghiem rang buoc RIENG cua Task 2 (dac ta §5
+// canh bao, brief buoc 3): Gui() ROI mot su kien khi hop thu day PHAI duoc
+// DEM — truoc Task 2, nhanh nay chi ghi slog.Debug roi thoi (muc Debug thuong
+// TAT trong production => roi ma khong ai biet). Hau qua neu khong dem: bo
+// dinh ky luu (§4 diem A) gui suKienXinAnhChup cho tung khu vuc, dung luc hop
+// thu day thi bi roi im lang -> ca khu vuc bi bo qua mot luot luu ma khong ai
+// hay.
+//
+// Dung hop thu NHO (capacity 2) va KHONG goi BatDau() (khong co vongLap rut
+// bot) de chinh test chu dong lam day hop thu bang tay — lap lai dung tinh
+// huong that (hang doi day trong luc co su kien khac dang don ve), khong can
+// gia lap actor cham/treo that su.
+func TestGuiHopThuDayDemVaLog(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	k.hopThu = make(chan suKienKhuVuc, 2) // KHONG BatDau(): khong ai rut, tu tay lam day
+
+	k.Gui(suKienRa{idNhanVat: 1}) // 1/2 — con cho
+	k.Gui(suKienRa{idNhanVat: 2}) // 2/2 — vua day
+	if got := k.soLanGuiRoi.Load(); got != 0 {
+		t.Fatalf("hop thu chua day (2/2) ma soLanGuiRoi da = %d, mong doi 0", got)
+	}
+
+	k.Gui(suKienRa{idNhanVat: 3}) // hop thu DAY -> phai ROI + dem
+	if got := k.soLanGuiRoi.Load(); got != 1 {
+		t.Fatalf("soLanGuiRoi = %d sau 1 lan Gui() vao hop thu day, mong doi 1", got)
+	}
+	k.Gui(suKienRa{idNhanVat: 4}) // roi lan 2
+	if got := k.soLanGuiRoi.Load(); got != 2 {
+		t.Fatalf("soLanGuiRoi = %d sau 2 lan Gui() vao hop thu day, mong doi 2", got)
+	}
+	if len(k.hopThu) != 2 {
+		t.Fatalf("hop thu co %d phan tu, mong doi van la 2 (day, khong nhan them su kien bi roi)", len(k.hopThu))
+	}
+}

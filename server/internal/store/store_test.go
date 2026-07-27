@@ -317,3 +317,151 @@ func TestMotTaiKhoanChiMotNhanVat(t *testing.T) {
 		t.Errorf("mong doi ErrDaCoNhanVat, nhan %v", err)
 	}
 }
+
+// TestCapNhatNhanVatGhiDungTungTruong la Test 1 cua Task 1 (KH11): tao nhan
+// vat, doi TAT CA cac truong co the doi (khong chi vi tri + mau nhu KH6 dang
+// dung — co tinh doi luon Cap/KinhNghiem/SucManh/Vang/Ngoc/MapID... de ghim
+// dung yeu cau "ghi moi truong co the doi" cua dac ta §6.1), goi
+// CapNhatNhanVat, doc lai bang LayNhanVatTheoTaiKhoan, roi khang dinh TUNG
+// truong dung gia tri MOI (ghim cung).
+//
+// Test nay cung la bang chung cho rang buoc "KHONG ghi ID/TaiKhoanID/Ten":
+// co tinh dua vao CapNhatNhanVat mot ban NhanVat voi TaiKhoanID va Ten KHAC
+// gia tri that (tro sang mot tai khoan thu hai, ten khac), roi kiem tra sau
+// khi cap nhat, doc lai theo TaiKhoanID GOC van thay dung nhan vat voi Ten
+// GOC — chung minh ham khong ghi de hai truong bat bien do du input co gia
+// tri khac.
+func TestCapNhatNhanVatGhiDungTungTruong(t *testing.T) {
+	s := moKetNoiThu(t)
+	ctx := context.Background()
+
+	taiKhoanID := taoTaiKhoanThu(t, s, "chunin"+hauToNganNgau(t))
+	nv, err := s.TaoNhanVat(ctx, NhanVatMoi{
+		TaiKhoanID: taiKhoanID, Ten: "Naruto" + hauToNganNgau(t),
+		Lang: 0, KieuToc: 5, MapID: 1, ViTriX: 100, ViTriY: 384,
+		HpToiDa: 150, ChakraToiDa: 150, Vang: 1000,
+	})
+	if err != nil {
+		t.Fatalf("tao nhan vat loi: %v", err)
+	}
+
+	// Tai khoan thu hai: chi de "nhu vao" truong TaiKhoanID trong input duoi
+	// day. Neu CapNhatNhanVat vo tinh ghi ca cot tai_khoan_id, buoc doc lai
+	// theo taiKhoanID GOC se khong con thay nhan vat nay nua.
+	taiKhoanKhacID := taoTaiKhoanThu(t, s, "khac"+hauToNganNgau(t))
+
+	moi := *nv
+	moi.TaiKhoanID = taiKhoanKhacID     // BAT BIEN - dua gia tri khac, cho de bay
+	moi.Ten = "Khac" + hauToNganNgau(t) // BAT BIEN - dua gia tri khac, cho de bay
+	moi.Lang = 1
+	moi.KieuToc = 7
+	moi.MapID = 3
+	moi.ViTriX = 250
+	moi.ViTriY = 90
+	moi.Cap = 12
+	moi.KinhNghiem = 4500
+	moi.SucManh = 9999
+	moi.HpToiDa = 300
+	moi.HpHienTai = 77
+	moi.ChakraToiDa = 300
+	moi.ChakraHienTai = 210
+	moi.Vang = 5000
+	moi.Ngoc = 250
+
+	if err := s.CapNhatNhanVat(ctx, moi); err != nil {
+		t.Fatalf("CapNhatNhanVat loi: %v", err)
+	}
+
+	lay, err := s.LayNhanVatTheoTaiKhoan(ctx, taiKhoanID)
+	if err != nil {
+		t.Fatalf("doc lai sau khi cap nhat loi: %v", err)
+	}
+
+	// Ba truong bat bien phai GIU NGUYEN gia tri goc, du input da dua gia tri
+	// khac - day la bang chung CapNhatNhanVat khong ghi ID/TaiKhoanID/Ten.
+	if lay.ID != nv.ID {
+		t.Errorf("ID = %d, mong doi giu nguyen %d (bat bien)", lay.ID, nv.ID)
+	}
+	if lay.TaiKhoanID != taiKhoanID {
+		t.Errorf("TaiKhoanID = %d, mong doi giu nguyen %d (bat bien - KHONG duoc doi chu so huu)", lay.TaiKhoanID, taiKhoanID)
+	}
+	if lay.Ten != nv.Ten {
+		t.Errorf("Ten = %q, mong doi giu nguyen %q (bat bien - KHONG duoc doi ten)", lay.Ten, nv.Ten)
+	}
+
+	// Cac truong con lai phai dung gia tri MOI - ghim cung TUNG truong rieng
+	// (khong gop lai bang || de khi sai con biet chinh xac truong nao).
+	if lay.Lang != 1 {
+		t.Errorf("Lang = %d, mong doi 1", lay.Lang)
+	}
+	if lay.KieuToc != 7 {
+		t.Errorf("KieuToc = %d, mong doi 7", lay.KieuToc)
+	}
+	if lay.MapID != 3 {
+		t.Errorf("MapID = %d, mong doi 3", lay.MapID)
+	}
+	if lay.ViTriX != 250 {
+		t.Errorf("ViTriX = %d, mong doi 250", lay.ViTriX)
+	}
+	if lay.ViTriY != 90 {
+		t.Errorf("ViTriY = %d, mong doi 90", lay.ViTriY)
+	}
+	if lay.Cap != 12 {
+		t.Errorf("Cap = %d, mong doi 12", lay.Cap)
+	}
+	if lay.KinhNghiem != 4500 {
+		t.Errorf("KinhNghiem = %d, mong doi 4500", lay.KinhNghiem)
+	}
+	if lay.SucManh != 9999 {
+		t.Errorf("SucManh = %d, mong doi 9999", lay.SucManh)
+	}
+	if lay.HpToiDa != 300 {
+		t.Errorf("HpToiDa = %d, mong doi 300", lay.HpToiDa)
+	}
+	if lay.HpHienTai != 77 {
+		t.Errorf("HpHienTai = %d, mong doi 77", lay.HpHienTai)
+	}
+	if lay.ChakraToiDa != 300 {
+		t.Errorf("ChakraToiDa = %d, mong doi 300", lay.ChakraToiDa)
+	}
+	if lay.ChakraHienTai != 210 {
+		t.Errorf("ChakraHienTai = %d, mong doi 210", lay.ChakraHienTai)
+	}
+	if lay.Vang != 5000 {
+		t.Errorf("Vang = %d, mong doi 5000", lay.Vang)
+	}
+	if lay.Ngoc != 250 {
+		t.Errorf("Ngoc = %d, mong doi 250", lay.Ngoc)
+	}
+}
+
+// TestCapNhatNhanVatKhongTonTai la Test 2 cua Task 1 (KH11): cap nhat mot
+// nhan vat KHONG con ton tai phai tra ErrKhongThayNhanVat, khong duoc im
+// lang coi nhu xong (bai hoc dat nhat tu ban Java cu, xem dac ta §6.3).
+//
+// Dung mot ID TUNG THAT (tao roi xoa ngay) thay vi doan mot so lon tuy tien:
+// vua giong tinh huong thuc te nhat (nhan vat bi xoa, hoac tang tren giu
+// mot ID cu da khong con), vua khong phu thuoc gia dinh ve pham vi ID con
+// trong CSDL kiem thu dung chung.
+func TestCapNhatNhanVatKhongTonTai(t *testing.T) {
+	s := moKetNoiThu(t)
+	ctx := context.Background()
+	taiKhoanID := taoTaiKhoanThu(t, s, "xoaroi"+hauToNganNgau(t))
+
+	nv, err := s.TaoNhanVat(ctx, NhanVatMoi{
+		TaiKhoanID: taiKhoanID, Ten: "Xoaroi" + hauToNganNgau(t),
+		Lang: 0, KieuToc: 5, MapID: 1, ViTriX: 100, ViTriY: 384,
+		HpToiDa: 150, ChakraToiDa: 150, Vang: 1000,
+	})
+	if err != nil {
+		t.Fatalf("tao nhan vat thu loi: %v", err)
+	}
+	if _, err := s.pool.Exec(ctx, `DELETE FROM nhan_vat WHERE id = $1`, nv.ID); err != nil {
+		t.Fatalf("xoa nhan vat thu loi: %v", err)
+	}
+
+	err = s.CapNhatNhanVat(ctx, *nv)
+	if !errors.Is(err, ErrKhongThayNhanVat) {
+		t.Fatalf("mong doi ErrKhongThayNhanVat, nhan %v", err)
+	}
+}

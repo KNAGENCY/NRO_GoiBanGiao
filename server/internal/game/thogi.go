@@ -174,6 +174,33 @@ func (t *ThoGhi) vongLap() {
 	}
 }
 
+// XepVaCho ghi MOT store.NhanVat XUONG CSDL NGAY, DONG BO — khac han Xep()
+// (KHONG BAO GIO CHAN, chi cham hang doi trong bo nho). Dung DUY NHAT cho
+// kich ban "phien bi da boi mot dang nhap moi cung tai khoan" (Ke hoach 11
+// Task 7, dac ta §7.1): SoDangNhap.DangKy (goroutine cua phien MOI) dang CHO
+// tin hieu "da luu xong" truoc khi doc lai du lieu, nen o day BAT BUOC xac
+// nhan that su ghi xong (khong chi "da xep vao hang doi") — Xep() KHONG DU
+// MANH cho yeu cau nay: no chi dam bao du lieu nam trong hangDoi, KHONG dam
+// bao da ghi xuong dia tai thoi diem no tra ve (viec ghi that su la cua
+// goroutine vongLap, hoan toan tach roi ve thoi gian).
+//
+// ctx cua nguoi goi duoc BOC THEM han gio hanGioGhi (dung CUNG han voi
+// ghiMotBan — §6.2, "de xuat 5 giay") — dam bao du nguoi goi truyen ctx
+// khong han gio (context.Background()), lan ghi nay VAN khong the treo vo
+// han neu CSDL treo that su.
+//
+// AN TOAN goi tu goroutine CUA PHIEN (KhiDong(), chay tren goroutine cua
+// CHINH ket noi vua bi da) — KHONG PHAI goroutine actor cua KhuVuc — nen
+// block o day KHONG vi pham LUAT SO MOT (dac ta §3: "actor khong bao gio cho
+// o dia"); luat do chi ap dung cho KhuVuc.vongLap, khong ap dung cho luong
+// phien dang tu dong (dut ket noi la thao tac CO CHU DICH cho, khong phai
+// nhip tim cua the gioi dang song).
+func (t *ThoGhi) XepVaCho(ctx context.Context, nv store.NhanVat) error {
+	ctx, huy := context.WithTimeout(ctx, hanGioGhi)
+	defer huy()
+	return t.kho.CapNhatNhanVat(ctx, nv)
+}
+
 // ghiHetHangDoi lay TOAN BO noi dung hangDoi hien tai (khoa mutex mot lan de
 // "doat" con tro map roi thay bang map RONG moi — nen Xep() goi trong luc
 // dang ghi se roi vao map MOI, khong dung cham voi ban dang xu ly), roi ghi

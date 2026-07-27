@@ -17,6 +17,14 @@ type KhoDayDu interface {
 // nhipLuuDinhKy — diem moc A), va mot ham taoXuLy tra ve MOT BoXuLy MOI da
 // duoc DatThoGhi (diem moc B) cho MOI ket noi.
 //
+// Ke hoach 11 Task 7 (dac ta §7.2 "mot tai khoan, mot phien"): taoXuLy CUNG
+// DatSoDangNhap mot *SoDangNhap CHUNG (tao MOI LAN goi MoLuuTru — dung MOT
+// so cho ca may chu, dung khuon voi thoGhi/boLuu o tren) cho MOI BoXuLy —
+// day la "MOT cho duy nhat biet tai khoan X dang o phien nao" ma dac ta doi
+// hoi. Dat trong ham nay (khong phai rieng trong main.go) vi TRUOC Task 6,
+// bai hoc da ro: bat cu manh ha tang nao khong duoc NOI DAY o day se nam do
+// khong ai goi toi — MoLuuTru la diem duy nhat lap rap moi BoXuLy san xuat.
+//
 // TRUOC Task 6, KHONG NOI NAO trong ca du an goi MoThoGhi / MoBoLuuDinhKy(...)
 // .BatDau() / DatThoGhi — nghia la toan bo ha tang Task 1-5 (ThoGhi,
 // LuuTatCa, BoLuuDinhKy, DatThoGhi) NAM DO KHONG AI GOI TOI, may chu THAT SU
@@ -35,9 +43,11 @@ func MoLuuTru(kho KhoDayDu, soKhuVuc *SoKhuVuc, soThoGhi int) (thoGhi *ThoGhi, b
 	thoGhi = MoThoGhi(kho, soThoGhi)
 	boLuu = MoBoLuuDinhKy(soKhuVuc, thoGhi)
 	boLuu.BatDau()
+	soDangNhap := MoSoDangNhap()
 	taoXuLy = func() *BoXuLy {
 		b := NewBoXuLy(kho, soKhuVuc)
 		b.DatThoGhi(thoGhi)
+		b.DatSoDangNhap(soDangNhap)
 		return b
 	}
 	return thoGhi, boLuu, taoXuLy

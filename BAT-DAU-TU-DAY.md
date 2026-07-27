@@ -8,7 +8,7 @@
 > một bản vá, một phát hiện lỗi) thì **phải cập nhật file này ngay** rồi mới commit.
 > Cách cập nhật xem mục [11. Quy ước cập nhật](#11-quy-ước-cập-nhật-file-này).
 
-**Cập nhật lần cuối:** 27/07/2026 (**KH6 xong, gộp `main`**) · **Nhánh chính:** `main` · **Commit HEAD:** `162bbe9`
+**Cập nhật lần cuối:** 27/07/2026 (**KH6 + KH11 xong, gộp `main`**) · **Nhánh chính:** `main` · **Commit HEAD:** `6ea467f`
 
 ---
 
@@ -117,6 +117,7 @@ Mỗi kế hoạch đều đi qua: thiết kế → kế hoạch → thi công t
 | 4 | Vào thế giới | Nhân vật hiện ra đứng trong làng (tileset + ME_INFO + MAP INFO) | `aef5f71` |
 | 5 | Di chuyển + mô hình actor | Nhiều người **thấy nhau**, đi lại, chống dịch chuyển tức thời | `e1ddc44` |
 | 6 | **Chiến đấu, chiêu thức, quái** | 20 chiêu Naruto (4/làng) + sát thương ngũ hành (×1,25/×1,00/×0,80); đánh quái, quái đánh lại + hồi sinh, **PvP**, chết & hồi sinh; nhiều người cùng khu vực **thấy toàn bộ diễn biến** | `162bbe9` |
+| 11 | **Lưu trạng thái sống** | Trước đó máy chủ **không lưu gì** sau lúc tạo nhân vật. Nay lưu **3 thời điểm**: định kỳ 60 giây · khi người chơi rời · khi tắt máy chủ. Kiến trúc: actor **chụp ảnh** → hàng đợi gộp → **thợ ghi riêng** chạm đĩa (actor không bao giờ chờ ổ đĩa). Kèm **một tài khoản một phiên** (đá phiên cũ → chờ lưu xong → mới đọc) | `6ea467f` |
 | W1 | Web nền tảng | Đăng ký, đăng nhập, phiên cookie, dùng chung CSDL với game | `af5a2e4` |
 | W2 | Web tính năng | Trang cá nhân, đổi mật khẩu, bảng xếp hạng, panel admin (chặn quyền 3 lớp) | trên `main` |
 
@@ -139,7 +140,7 @@ Xếp theo thứ tự nên làm:
 | Ưu tiên | Việc | Ghi chú |
 |---|---|---|
 | ✅ | ~~KH6 — Chiến đấu~~ | **Xong, gộp `162bbe9`.** Còn **Task 15 — nghiệm thu tay bằng client Unity** (chỉ chủ dự án làm). Hồi máu PvP (`goiHoiMauNguoiChoi`) cố ý hoãn — xem §8 |
-| 1 | **KH11 — Lưu trạng thái sống** (đề xuất mới, [chi tiết](docs/superpowers/plans/BO-SUNG-LO-TRINH.md) Khối 1) | 🔴🧱 **Nguy hiểm nhất, kiến trúc, làm ngay sau KH6.** Server hiện **không lưu gì** sau lúc tạo nhân vật (`store.go` không có UPDATE) → tắt server là mất sạch tiến độ. Phải thiết kế lưu bất đồng bộ TRƯỚC KH7 |
+| ✅ | ~~KH11 — Lưu trạng thái sống~~ | **Xong, gộp `6ea467f`.** Còn **Task 9 — nghiệm thu tay**: chơi vài phút → Ctrl+C tắt máy chủ → bật lại → đăng nhập xem có đúng chỗ, đúng máu không |
 | 1b | **KH6b — Boss** (hệ riêng, tách khỏi KH6) | Bản Java là 12 file, phức tạp hơn quái thường nhiều. Thiết kế sau khi KH6 gộp |
 | 1c | **KH6c — Stress test 20 client cùng khu vực** | Cùng xả chiêu, đo gói rơi hộp thư actor (trần 256, rơi im lặng) + trễ nhịp 100ms. Dựng trên `thuclient`/`clientGia` |
 | 2 | KH7 — Vật phẩm, hành trang, cửa hàng, giao dịch | 🧱 **Phải chốt căn cước vật phẩm + chống nhân bản trong đặc tả TRƯỚC khi viết code** ([BO-SUNG](docs/superpowers/plans/BO-SUNG-LO-TRINH.md) Khối 3). Tách rõ 4 thứ: cửa hàng NPC / giao dịch 2 người / ký gửi / kho |
@@ -298,6 +299,25 @@ Gom lại thành **Kế hoạch B**, sửa lẻ từng cái là vô nghĩa:
 - **KH6 — `iconId` sinh theo vị trí** (`chieuthuc.go:166` `int16(1+lang*4+slot)`): bug lớp
   "chỉ số = danh tính" (§2.3 thiết kế tổng) — chèn làng/đổi thứ tự chiêu làm lệch icon các
   chiêu sau. Chưa cắn (5 làng cố định). KH7/KH8 thay bằng bảng tra ID bền, thêm ID ở cuối.
+- **KH6 — hai test chập chờn dưới tải cao**: `TestTichHop_DanhQuaiVuotTam...` và
+  `TestTichHop_DanhQuaiThuCung...` (`khuvuc_tichhop_test.go`) thỉnh thoảng hết giờ khi
+  chạy `-count=5` trên máy đang bận — quái AI thời gian thực giết nhân vật thử nghiệm
+  trước khi nó kịp đánh trả. Đã xác minh **có từ trước KH11** (chạy trên commit gốc tái
+  hiện y hệt). Cách chữa: cho hai test đó dùng khu vực không quái mặc định.
+- **KH11 — khe hở lúc tắt máy chủ (~1 ms)**: client rớt mạng đúng lúc `DungTatCa()` đang
+  lặp dừng 5 khu vực, mà khu vực của họ **chưa tới lượt** → `KhiDong()` gọi `Xep()` sau khi
+  thợ ghi đã dừng → **mất bản ghi cuối của MỘT người** (không phải mất sạch). Vá đúng cần
+  hạ tầng "rút hết phiên đang mở trước khi dừng".
+- **KH11 — khe hở "rớt mạng tự nhiên trùng đăng nhập trùng"**: phiên cũ tự đứt đúng lúc có
+  đăng nhập trùng → `XoaNeuDung` giành khoá trước `DangKy` → phiên mới **không chờ ai**, có
+  thể đọc trước khi bản ghi trôi xuống đĩa. **Cùng bản chất** lỗi bản Java (đọc trước, đá
+  sau) nhưng khác hẳn mức độ: bản Java sai **100% mỗi lần** trùng phiên; khe hở này cần
+  **hai sự kiện độc lập trùng nhau trong vài mili-giây**.
+- **KH11 — actor bận > 100 ms thì cả khu vực bị bỏ qua một lượt lưu**: `AnhChupNguoiChoi`
+  chờ tối đa 100 ms rồi trả rỗng; `LuuTatCa` bỏ qua nguyên khu vực đó (có ghi `slog.Warn`,
+  không câm hẳn). Kết hợp với **§6.10b** (actor bị chặn tới 30 giây vì tự gửi gói mạng) thì
+  lúc tắt máy chủ, một khu vực đang dính lỗi đó sẽ mất tới 60 giây tiến độ. **Thêm một lý do
+  để Kế hoạch B ưu tiên tách gửi gói mạng khỏi actor.**
 - **KH6 Task 11**: chưa chặn tự đánh chính mình (`-60` với `idMucTieu==idNhanVat`) — vô hại
   ở KH6 (chưa có luật đội/PvP), hoãn tới KH9.
 
@@ -397,3 +417,4 @@ Commit riêng cho việc cập nhật tài liệu thì dùng tiền tố `docs:`
 | 27/07/2026 | **KH6 thiết kế gộp vào `main`** (`c812617`, sau soi lần hai: gói 87 đối chiếu client khớp, test 7/7 xanh). **Thi công KH6 trên nhánh `kh6-thi-cong`**: Task 1 (catalog 20 chiêu) → 2 (chọn chiêu qua actor) → 3 (chốt kiểm) → 4 (sát thương ngũ hành) → 5 (quái trong actor + `-24`, vá kỷ luật actor bằng snapshot qua hộp thư) → 6 (gói 54/-9/-12/-13) → 10 (gói `-60` hai dạng) → 7 (điều phối đánh quái + 2 test lưới an toàn) — **mỗi task đều qua review đối kháng + kiểm thử đột biến**. Chủ dự án **chốt hệ số khắc chế ×1,25/×1,00/×0,80**; thêm **KH6b (Boss)** và **KH6c (stress 20 client)** vào lộ trình |
 | 27/07/2026 | **KH6 tiếp tục**: Task 8 (quái hồi sinh 5s + hồi máu 30s trong nhịp actor, `e41678b`) → Task 9 (AI quái 2 tầng ưu tiên + gói `-11`/`-10`, `b22152c`) → Task 13 (chết & hồi sinh người chơi, gói `-17`/`-8`/`-16`/`-30/15`, `67e6650`). Task 13 chỉ cần thêm **một** trường `lucHoiSinh` chứ không phải Hp/HpToiDa như rủi ro đã lường (Task 9 đã dùng `nv.HpHienTai`) |
 | 27/07/2026 | **KH6 XONG — gộp `main` `162bbe9`.** Task 11 (PvP `-60` + gói `-30/9` + **vá gap bất tử quái** của Task 13) → Task 14 (**test đầu-cuối 2 người qua mạng + CSDL thật**, diễn trọn chuỗi chiến đấu). **Soi toàn nhánh bằng opus** → bắt được `goiHoiMauNguoiChoi` là mã chết (chiêu type=2 gây sát thương sai) → đợt sửa cuối chốt hoãn có kỷ luật. **2 canary** (thả bug thật): reviewer bắt được lỗi byte im lặng, test E2E bắt được lỗi tích hợp — pipeline review đáng tin. Phân tích **bổ sung lộ trình** (9 khối thiếu, [`BO-SUNG-LO-TRINH.md`](docs/superpowers/plans/BO-SUNG-LO-TRINH.md)) + **mapping ảnh** đã lưu. Còn **Task 15 nghiệm thu tay bằng Unity** (chủ dự án) |
+| 27/07/2026 | **KH11 XONG — gộp `main` `6ea467f`.** Máy chủ trước đó **không lưu gì** sau lúc tạo nhân vật; nay lưu 3 thời điểm (định kỳ 60 giây · khi rời · khi tắt máy) theo kiến trúc *actor chụp ảnh → hàng đợi gộp → thợ ghi riêng*, **actor không bao giờ chờ ổ đĩa**. Kèm **một tài khoản một phiên** (đá phiên cũ → chờ lưu xong → mới đọc; bản Java làm ngược và chưa bao giờ vá). 8 task, mỗi task TDD + đột biến + review đối kháng. **Soi toàn nhánh (opus) tìm ra 1 lỗi Nghiêm trọng thật**: client đăng nhập chồng trên cùng kết nối → mục rác trong sổ phiên → đóng channel hai lần → **panic chết cả tiến trình** (DoS từ xa) — đã vá, có test dựng lại trọn kịch bản 4 bước. Cũng vá bẫy §7.1 ở `XepVaCho`. Bốn khoản nợ mới ghi ở §8 |

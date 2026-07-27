@@ -165,6 +165,54 @@ func (s *Store) LayNhanVatTheoTaiKhoan(ctx context.Context, taiKhoanID int64) (*
 	return kq, nil
 }
 
+// CapNhatNhanVat ghi lai TOAN BO trang thai nhan vat hien tai xuong CSDL -
+// khong chi 4 truong dang doi hom nay (vi tri, mau, chakra o KH6) ma ca cac
+// truong KH7/KH8 sap noi day (Cap, KinhNghiem, SucManh, Vang, Ngoc, MapID...).
+// Ghi het struct tu dau thi sau nay them truong moi vao NhanVat khong phai
+// sua lai cau SQL nay.
+//
+// KHONG ghi ID, TaiKhoanID, Ten trong menh de SET: ba truong nay BAT BIEN sau
+// khi TaoNhanVat tao xong (dinh danh hang, chu so huu, ten hien thi voi rang
+// buoc duy nhat rieng) - cho phep ghi lai se mo duong cho loi doi ten/doi chu
+// nhan vat neu tang tren goi ham nay voi mot ban NhanVat bi lech du lieu. ID
+// chi dung o menh de WHERE, khong bao gio dung ben trai dau '=' cua SET.
+//
+// dang_nhap_cuoi duoc ghi bang now() cua CSDL (khong phai gio may Go, tranh
+// lech dong ho giua cac tien trinh) trong MOI lan goi ham nay - ke ca khi goi
+// tu vong lap luu dinh ky, khong chi luc dang nhap/dang xuat that su. Cot nay
+// co san tu 0002_nhan_vat.sql nhung chua ai dung toi.
+//
+// Nhan vat khong ton tai (id sai, hoac vua bi xoa) tra ErrKhongThayNhanVat
+// thay vi im lang coi nhu xong (bai hoc dat tu ban Java cu - loi ghi bi nuot,
+// xem dac ta §6.3) - phai kiem RowsAffected() vi UPDATE khop 0 dong khong tu
+// no la loi o tang pgx/PostgreSQL.
+//
+// Ham nay CHUA tu dat context.WithTimeout - dac ta §6.2 yeu cau moi lan GOI
+// phai kem han gio (de xuat 5 giay), nhung do la trach nhiem cua noi GOI (vd
+// vong lap luu dinh ky se lam o task sau), giong cach ba ham con lai trong
+// file nay deu chi nhan ctx roi dung thang, khong tu bao boc.
+func (s *Store) CapNhatNhanVat(ctx context.Context, nv NhanVat) error {
+	ct, err := s.pool.Exec(ctx,
+		`UPDATE nhan_vat
+		    SET lang = $1, kieu_toc = $2, map_id = $3, vi_tri_x = $4, vi_tri_y = $5,
+		        cap = $6, kinh_nghiem = $7, suc_manh = $8, hp_toi_da = $9,
+		        hp_hien_tai = $10, chakra_toi_da = $11, chakra_hien_tai = $12,
+		        vang = $13, ngoc = $14, dang_nhap_cuoi = now()
+		  WHERE id = $15`,
+		nv.Lang, nv.KieuToc, nv.MapID, nv.ViTriX, nv.ViTriY,
+		nv.Cap, nv.KinhNghiem, nv.SucManh, nv.HpToiDa,
+		nv.HpHienTai, nv.ChakraToiDa, nv.ChakraHienTai,
+		nv.Vang, nv.Ngoc, nv.ID,
+	)
+	if err != nil {
+		return fmt.Errorf("cap nhat nhan vat that bai: %w", err)
+	}
+	if ct.RowsAffected() == 0 {
+		return ErrKhongThayNhanVat
+	}
+	return nil
+}
+
 // TenNhanVatDaDung kiem nhanh mot ten da co ai dung chua (khong phan biet hoa
 // thuong). Dung de bao nguoi choi som; rang buoc duy nhat trong CSDL moi la
 // chot chan that su khi co dua tranh.

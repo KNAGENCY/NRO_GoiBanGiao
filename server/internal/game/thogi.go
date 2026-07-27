@@ -196,6 +196,21 @@ func (t *ThoGhi) vongLap() {
 // phien dang tu dong (dut ket noi la thao tac CO CHU DICH cho, khong phai
 // nhip tim cua the gioi dang song).
 func (t *ThoGhi) XepVaCho(ctx context.Context, nv store.NhanVat) error {
+	// Soi toan nhanh KH11 (fix-cuoi-report.md, Finding 2): XOA ban CU cua
+	// CUNG id nay KHOI hangDoi TRUOC KHI ghi — neu KHONG xoa, mot Xep(v_cu)
+	// vua xep ngay truoc do (vd nhip luu dinh ky 60 giay vua xep xong, chua
+	// kip vongLap xa) van con nam trong hangDoi luc ham nay chay; ban DONG
+	// BO (nv, MOI HON) o day ghi xong xuong dia, ROI vongLap (hoan toan
+	// tach roi ve thoi gian voi ham nay — xem chu thich ThoGhi dau file) se
+	// XA hangDoi o nhip ke tiep va GHI DE ban MOI vua ghi bang v_cu — dung
+	// bay dac ta §7.1 "ghi de ban moi bang ban cu". Xoa o day dam bao
+	// hangDoi khong con giu "ban cu hon" cho id nay sau khi ham nay tra ve
+	// thanh cong — cua so ho nay (§7.1 mo ta) co the giai tu duoi 1ms toi
+	// hang giay khi vongLap dang ban mot dot xa khac (hanGioGhi = 5s).
+	t.mu.Lock()
+	delete(t.hangDoi, nv.ID)
+	t.mu.Unlock()
+
 	ctx, huy := context.WithTimeout(ctx, hanGioGhi)
 	defer huy()
 	return t.kho.CapNhatNhanVat(ctx, nv)

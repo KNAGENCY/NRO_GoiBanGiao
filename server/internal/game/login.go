@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"regexp"
 	"strings"
+	"sync"
 
 	"nroserver/internal/auth"
 	mynet "nroserver/internal/net"
@@ -145,6 +146,17 @@ type BoXuLy struct {
 	// DOC (khong bao gio ghi) tu goroutine cua CHINH phien nay, trong
 	// daBiDa() (goi ben trong KhiDong()).
 	biDa chan struct{}
+
+	// biDaMotLan (soi toan nhanh KH11, fix-cuoi-report.md, Finding 1) la
+	// PHONG THU CHIEU SAU cho close(biDa): dam bao close(b.biDa) o
+	// SoDangNhap.DangKy (sodangnhap.go) chi thuc su chay MOT LAN cho DU
+	// DangKy vo tinh (hoac do mot loi khac trong tuong lai) goi den hai lan
+	// tren CUNG mot BoXuLy — close mot channel DA dong la panic khong
+	// recover duoc tren duong PhucVu (net/session.go khong co recover()),
+	// panic do se lam CHET CA TIEN TRINH may chu. Chot chinh (b.taiKhoan !=
+	// nil trong xuLyDangNhap) da chan duong gay ra tinh huong nay TU GOC —
+	// truong nay la LUOI AN TOAN THEM, khong phai thay the cho chot chinh.
+	biDaMotLan sync.Once
 
 	// daXongDon la kenh TIN HIEU nguoc lai voi biDa: dong boi CHINH goroutine
 	// cua phien nay, o CUOI KhiDong() (qua defer baoXongDon) — bao "KhiDong da
@@ -638,6 +650,27 @@ func (b *BoXuLy) xuLyDangNhap(s *mynet.Session, m *protocol.Message) error {
 	matKhau, err := r.UTF()
 	if err != nil {
 		return fmt.Errorf("goi dang nhap thieu mat khau: %w", err)
+	}
+
+	// Soi toan nhanh KH11 (fix-cuoi-report.md, Finding 1 — CRITICAL): chot
+	// chan dang nhap CHONG tren CUNG mot ket noi. Bat bien "mot BoXuLy <->
+	// mot tai khoan" ma SoDangNhap.DangKy dua vao (sodangnhap.go) chi con
+	// dung neu MOI ket noi dang ky vao so DUNG MOT LAN. Neu khong chan:
+	// mot -29 THANH CONG lan hai tren CUNG ket noi se gan lai b.taiKhoan
+	// roi DangKy(tai_khoan_MOI, b) — b GIO NAM O HAI KHOA trong so cung
+	// luc (khoa CU van con tro ve chinh no). Khi sau nay co ai da tai
+	// khoan MOI, KhiDong() cua b chi XoaNeuDung duoc khoa MOI (so dang tro
+	// dung no) — khoa CU tro thanh "rac" vinh vien, va lan da TIEP THEO
+	// nham dung tai khoan CU se goi close() len CHINH b.biDa DA DONG TU
+	// TRUOC (o lan da cua tai khoan moi) -> double-close mot channel ->
+	// PANIC khong recover duoc (net/session.go khong co recover() tren
+	// duong PhucVu) -> CHET CA TIEN TRINH may chu (DoS tu xa, tai khoan tu
+	// dang ky duoc). Dang nhap SAI (KiemTraDangNhap tra ThanhCong=false)
+	// KHONG gan b.taiKhoan, nen nguoi choi go sai mat khau van thu lai
+	// binh thuong tren cung ket noi — nhanh nay CHI chan dang nhap THANH
+	// CONG lan thu hai tro di, khong chan thu lai sau khi go sai.
+	if b.taiKhoan != nil {
+		return nil
 	}
 
 	kq, err := b.KiemTraDangNhap(context.Background(), ten, matKhau)

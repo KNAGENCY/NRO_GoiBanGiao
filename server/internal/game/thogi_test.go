@@ -203,6 +203,81 @@ func TestThoGhiThuLaiKhiKhoLoiVaDemLoi(t *testing.T) {
 	}
 }
 
+// TestThoGhiXepVaChoXoaBanCuTrongHangDoi la kiem chung Finding 2 cua soi
+// toan nhanh KH11 (fix-cuoi-report.md): XepVaCho PHAI xoa ban CU cua CUNG id
+// khoi hangDoi TRUOC khi ghi dong bo — neu khong, mot Xep(v_cu) vua xep ngay
+// truoc do (con nam trong hangDoi, chua kip vongLap xa) se bi vongLap GHI DE
+// LEN ban MOI (v_moi) ma XepVaCho vua ghi xong, dung bay dac ta §7.1 "ghi de
+// ban moi bang ban cu".
+//
+// De dung bay nay MOT CACH TAT DINH (khong phu thuoc may man ve lich
+// goroutine, tranh test flaky): dung mot "ban CHIEM CHO" (id 999, khong lien
+// quan) de giu vongLap BAN trong toan bo phan con lai cua test — vongLap goi
+// ghiHetHangDoi() MOT CACH DONG BO (khong phai goroutine rieng) va
+// ghiHetHangDoi cho.Wait() cho toi khi ban chiem cho ghi xong (kg.doTre =
+// 500ms). Trong luc do, ghiHetHangDoi() DA hoan doi t.hangDoi thanh map RONG
+// MOI (xem chu thich ghiHetHangDoi) — nen Xep(vCu) goi SAU do CHAC CHAN roi
+// vao map RONG MOI nay, khong the nao bi gop lan vao dot dang xu ly. Doi
+// 100ms (gap doi khoangCachThuLai=50ms) sau khi Xep ban chiem cho de chac
+// chan vongLap da kip nhan tin hieu va bat dau cho ghi (van con thua rat
+// nhieu trong 500ms doTre).
+func TestThoGhiXepVaChoXoaBanCuTrongHangDoi(t *testing.T) {
+	kg := &khoLuuGia{doTre: 500 * time.Millisecond}
+	tg := MoThoGhi(kg, 1)
+	defer func() {
+		// Luoi an toan don dep (dung tinh than dangnhaptrung_tichhop_test.go):
+		// dam bao goroutine nen luon duoc dung han du test that bai som.
+		ctx, huy := context.WithTimeout(context.Background(), 3*time.Second)
+		defer huy()
+		_ = tg.DongVaChoXong(ctx)
+	}()
+
+	// Ban chiem cho: giu vongLap ban (dang trong ghiHetHangDoi/cho.Wait())
+	// trong 500ms.
+	tg.Xep(store.NhanVat{ID: 999, ViTriX: 1})
+	time.Sleep(100 * time.Millisecond)
+
+	id := int64(77)
+	vCu := store.NhanVat{ID: id, ViTriX: 10, ViTriY: 10}
+	vMoi := store.NhanVat{ID: id, ViTriX: 99, ViTriY: 99}
+
+	// Mo phong "nhip luu dinh ky vua xep xong, chua kip xa" (§7.1): vCu nam
+	// trong hangDoi MOI (chac chan roi vao day, xem chu thich tren ham) trong
+	// luc vongLap van con dang ban voi ban chiem cho.
+	tg.Xep(vCu)
+
+	// Cung luc do, phien BI DA cua CUNG nhan vat nay ghi DONG BO ban MOI HON
+	// (vMoi) — day la duong XepVaCho that su, dung y het KhiDong goi khi
+	// phien bi da (login.go, ghiDongBoKhiBiDa).
+	if err := tg.XepVaCho(context.Background(), vMoi); err != nil {
+		t.Fatalf("XepVaCho loi: %v", err)
+	}
+
+	// Xa het moi thu con lai (ban chiem cho neu chua xong, va — NEU thieu
+	// fix — ban vCu con sot trong hangDoi) truoc khi kiem ket qua sau cung.
+	dongVaChoXongVoiHan(t, tg, 3*time.Second)
+
+	kg.mu.Lock()
+	defer kg.mu.Unlock()
+	var banCuoiCungChoId store.NhanVat
+	var coBanNaoChoId bool
+	for _, nv := range kg.goiGhi {
+		if nv.ID == id {
+			banCuoiCungChoId = nv
+			coBanNaoChoId = true
+		}
+	}
+	if !coBanNaoChoId {
+		t.Fatalf("khong co lan ghi nao cho id=%d ca — mong doi it nhat ban MOI (tu XepVaCho)", id)
+	}
+	if banCuoiCungChoId != vMoi {
+		t.Fatalf("ban CUOI CUNG duoc ghi xuong kho cho id=%d la %+v, mong doi VAN LA ban MOI %+v — "+
+			"neu day la ban CU %+v: vongLap da GHI DE ban MOI (vua XepVaCho dong bo) bang ban CU con sot lai "+
+			"trong hangDoi, dung bay dac ta §7.1 ma XepVaCho phai chan (xoa ban cu khoi hangDoi TRUOC khi ghi)",
+			id, banCuoiCungChoId, vMoi, vCu)
+	}
+}
+
 // TestThoGhiDongVaChoXongGhiHetHangDoi la test (d) cua brief Task 3: xep 3
 // nguoi KHAC NHAU (khac ID, khong ai gop voi ai) roi goi DongVaChoXong ngay —
 // ham nay phai ghi HET nhung gi con trong hang doi TRUOC KHI tra ve (dung

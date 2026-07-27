@@ -72,7 +72,15 @@ func (s *SoDangNhap) DangKy(taiKhoanID int64, moi *BoXuLy) {
 	slog.Info("dang nhap trung tai khoan, da phien cu va cho luu xong",
 		"taiKhoanID", taiKhoanID)
 
-	close(cu.biDa)
+	// Soi toan nhanh KH11 (fix-cuoi-report.md, Finding 1) — phong thu chieu
+	// sau: chot chinh (b.taiKhoan != nil trong xuLyDangNhap, login.go) da
+	// chan duong duy nhat hien biet co the lam MOT BoXuLy bi da HAI LAN
+	// (dang ky trung tren cung ket noi tao "rac" trong so). Van boc qua
+	// cu.biDaMotLan o day de close(cu.biDa) KHONG BAO GIO panic (double
+	// close mot channel) DU co duong nao khac trong tuong lai lai goi
+	// DangKy hai lan cho cung mot "cu" — mot lan da THUA (no-op) van an
+	// toan hon tuyet doi so voi mot lan chet ca tien trinh.
+	cu.biDaMotLan.Do(func() { close(cu.biDa) })
 	if cu.session != nil {
 		cu.session.Dong()
 	}

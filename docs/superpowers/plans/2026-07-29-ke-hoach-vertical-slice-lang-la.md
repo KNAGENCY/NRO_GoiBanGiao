@@ -93,13 +93,17 @@ song vì một bên chỉ sửa `server/internal/game`, bên kia sửa Unity/too
 kèm `logical_keys[]`/physical xN paths khi key đã tồn tại. `direct` và
 `slice_group` phải có call-site evidence/SHA nhưng được phép có
 `consumer_sites[]` rỗng; `overlay_required` phải có consumer site, consumer SHA
-làm precondition và `future_logical_key`.
+làm precondition. Khi `overlay_required` không có key hiện hữu,
+`logical_keys[]` được phép rỗng và phải dùng `future_logical_key` duy nhất.
+Call-site/consumer SHA là `sha256` của **toàn bộ file nguồn C# được tham
+chiếu**, không phải SHA của expression, patch hay artifact.
 
 - [ ] Viết self-test đỏ với fixture cố tình đổi một key/call-site SHA.
 - [ ] Quét source Game1 thật cho logo, avatar/dialog frame, ba nút, ô chọn và ô
-      vật phẩm; `direct`/`slice_group` phải có file+line/expression và SHA làm
-      call-site evidence, còn `overlay_required` phải có consumer site + SHA
-      precondition. Không ép consumer vẽ primitive/composite thành key 1:1 giả.
+      vật phẩm; `direct`/`slice_group` phải có file+line/expression và SHA của
+      file nguồn C# làm call-site evidence, còn `overlay_required` phải có
+      consumer site + SHA của file nguồn C# làm precondition. Không ép consumer
+      vẽ primitive/composite thành key 1:1 giả.
 - [ ] Test cấm placeholder, cấm suy key từ tên source art; `direct`/
       `slice_group` phải chứng minh key literal/load path, `overlay_required`
       phải có consumer site + future key duy nhất + consumer SHA/precondition.

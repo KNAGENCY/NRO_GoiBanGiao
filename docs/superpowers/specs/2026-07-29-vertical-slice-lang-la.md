@@ -220,16 +220,21 @@ consumer đều đã có một resource key 1:1. Mỗi binding có một mode:
 - `direct`: một hoặc nhiều logical key thật được call-site nạp trực tiếp;
 - `slice_group`: consumer ghép nhiều key/slice của một composite;
 - `overlay_required`: client hiện vẽ primitive/composite không có key thay thế;
-  overlay phải thêm `future_logical_key`, có `consumer_sites[]` không rỗng và
-  consumer SHA làm precondition.
+  khi không có key hiện hữu thì `logical_keys[]` được phép rỗng và overlay phải
+  dùng `future_logical_key` duy nhất; binding vẫn phải có `consumer_sites[]`
+  không rỗng và consumer SHA làm precondition.
+
+Call-site/consumer SHA ở mọi mode là `sha256` của **toàn bộ file nguồn C# được
+tham chiếu**; không được băm riêng expression, patch hay artifact.
 
 Task phân tích đầu tiên phải ghim đủ tám binding, `logical_keys[]`, loader và
 physical paths bằng test source/load. Binding `direct` và `slice_group` phải có
 call-site evidence/SHA, nhưng được phép có `consumer_sites[]` rỗng. Binding
-`overlay_required` phải có `consumer_sites[]` không rỗng, `future_logical_key`
-và consumer SHA precondition. Không được đổi tên file theo phỏng đoán hoặc bịa
-key không tồn tại. Golden từ splash tới gameplay không được còn logo/icon
-Dragon Ball trong các checkpoint của lát cắt.
+`overlay_required` phải có `consumer_sites[]` không rỗng; khi không có key hiện
+hữu thì `logical_keys[]` được phép rỗng và phải dùng `future_logical_key` duy
+nhất, cùng consumer SHA precondition. Không được đổi tên file theo phỏng đoán
+hoặc bịa key không tồn tại. Golden từ splash tới gameplay không được còn
+logo/icon Dragon Ball trong các checkpoint của lát cắt.
 
 Phase 1 chỉ chạy bằng cặp staging có lock khớp; runner/preflight từ chối khởi
 động nếu lock server/client khác nhau. Đây chưa phải cơ chế cập nhật client công cộng:

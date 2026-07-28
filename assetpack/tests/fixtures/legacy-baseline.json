@@ -29,8 +29,8 @@
     {
       "path": "assetpack/tests/fixtures/legacy/mob.bin",
       "kind": "legacy_mob",
-      "sha256": "d38c22c29d386dffb4ca6bc77a4f1168a611df527cc659692cb4bae6cafb5c6d",
-      "bytes": 11
+      "sha256": "b7602310dbb1d0c668b972d27713b24a1d74feea7a9bb1b8398673df8273e59c",
+      "bytes": 227
     },
     {
       "path": "assetpack/tests/fixtures/legacy/Small27040.png",

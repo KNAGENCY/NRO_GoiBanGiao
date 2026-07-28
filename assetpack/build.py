@@ -152,10 +152,12 @@ def _source_paths(manifest: dict[str, Any]) -> list[str]:
     for item in inputs.get("hud_sources", {}).values():
         paths.extend(item.values())
     mob = inputs.get("mob", {})
-    for key in ("bytes_path", "data_path"):
-        if mob.get(key):
-            paths.append(mob[key])
-    paths.extend(mob.get("img", {}).values())
+    if isinstance(mob, dict):
+        for key in ("bytes_path", "data_path"):
+            if mob.get(key):
+                paths.append(mob[key])
+        if isinstance(mob.get("img"), dict):
+            paths.extend(mob["img"].values())
     for sheet in inputs.get("animation_sheets", []):
         paths.extend(cell.get("path") for cell in sheet.get("cells", []))
     runtime_map = inputs.get("runtime_key_map")
@@ -184,7 +186,7 @@ def _runtime_key_map(manifest: dict[str, Any], base_dir: Path) -> tuple[dict[str
     _fail("ASSET-UI-007", "build_inputs.runtime_key_map là bắt buộc")
 
 
-def _validate_runtime_keys(manifest: dict[str, Any], base_dir: Path) -> tuple[str | None, str]:
+def _validate_runtime_keys(manifest: dict[str, Any], base_dir: Path) -> tuple[str | None, str, dict[str, Any]]:
     payload, relative_path, map_sha = _runtime_key_map(manifest, base_dir)
     entries = payload.get("entries") if isinstance(payload, dict) else None
     bindings = manifest.get("ui_bindings")
@@ -193,6 +195,17 @@ def _validate_runtime_keys(manifest: dict[str, Any], base_dir: Path) -> tuple[st
     by_asset = {entry.get("source_asset"): entry for entry in entries if isinstance(entry, dict)}
     if len(by_asset) != 8:
         _fail("ASSET-UI-007", "runtime key map trùng/thiếu source_asset")
+    binding_assets = [binding.get("source_asset") for binding in bindings if isinstance(binding, dict)]
+    if len(binding_assets) != 8 or len(set(binding_assets)) != 8 or set(binding_assets) != set(by_asset):
+        _fail("ASSET-UI-007", "manifest phải bind exact tám source_asset duy nhất")
+    entry_fingerprints = []
+    for entry in entries:
+        if not isinstance(entry, dict):
+            _fail("ASSET-UI-007", "runtime entry malformed")
+        entry_fingerprints.append(json.dumps({key: entry.get(key) for key in ("source_asset", "logical_keys", "future_logical_key", "physical_paths")}, sort_keys=True, separators=(",", ":")))
+    if len(set(entry_fingerprints)) != 8:
+        _fail("ASSET-UI-007", "runtime logical/source/physical binding bị duplicate")
+    binding_fingerprints = []
     for binding in bindings:
         if not isinstance(binding, dict) or not isinstance(binding.get("source_asset"), str):
             _fail("ASSET-UI-007", "binding thiếu source_asset")
@@ -231,7 +244,12 @@ def _validate_runtime_keys(manifest: dict[str, Any], base_dir: Path) -> tuple[st
                 normalized = path.replace("\\", "/") if isinstance(path, str) else ""
                 if not normalized.startswith(prefix) or ".." in Path(normalized).parts:
                     _fail("ASSET-UI-007", f"{binding['source_asset']} physical path không canonical")
-    return relative_path, map_sha
+        binding_fingerprints.append(json.dumps({key: binding.get(key) for key in ("source_asset", "logical_keys", "future_logical_key", "physical_paths")}, sort_keys=True, separators=(",", ":")))
+        if mode == "overlay_required" and any(binding["future_logical_key"] not in site["expression"] for site in consumer_sites):
+            _fail("ASSET-UI-007", f"{binding['source_asset']} consumer precondition thiếu future logical key")
+    if len(set(binding_fingerprints)) != 8:
+        _fail("ASSET-UI-007", "manifest logical/source/physical binding bị duplicate")
+    return relative_path, map_sha, payload
 
 
 def require_approved_review(review_path: Path, manifest: dict[str, Any], base_dir: Path) -> tuple[str, list[dict[str, str]]]:
@@ -306,6 +324,16 @@ def _schema(manifest: dict[str, Any]) -> None:
         _fail("ASSET-SCHEMA-001", "thiếu build_inputs legacy part/tileset")
     if not isinstance(inputs.get("tile_set_baseline"), dict):
         _fail("ASSET-TILESET-010", "thiếu tile-set baseline golden")
+    mob = inputs.get("mob")
+    if (
+        not isinstance(mob, dict)
+        or not isinstance(mob.get("bytes_path"), str)
+        or not isinstance(mob.get("data_path"), str)
+        or not isinstance(mob.get("img"), dict)
+        or set(mob["img"]) != set(ZOOMS)
+        or any(not isinstance(mob["img"][zoom], str) for zoom in ZOOMS)
+    ):
+        _fail("ASSET-MOB-003", "Mob binary/image path malformed")
     if not inputs.get("runtime_key_map"):
         _fail("ASSET-UI-007", "thiếu runtime key map contract")
     try:
@@ -485,10 +513,10 @@ def _build_into(manifest: dict[str, Any], base_dir: Path, root: Path) -> dict[st
         for zoom in ZOOMS:
             _copy(base_dir, sources[zoom], client / zoom / "mainImage" / f"{name}.png", png=True)
 
-    mob = inputs.get("mob", {})
-    mob_bytes_path = _path(base_dir, mob.get("bytes_path"), "ASSET-MOB-003") if isinstance(mob, dict) else None
-    mob_data_path = _path(base_dir, mob.get("data_path"), "ASSET-MOB-003") if isinstance(mob, dict) else None
-    if mob_bytes_path is None or mob_data_path is None or not mob_bytes_path.is_file() or not mob_data_path.is_file():
+    mob = inputs["mob"]
+    mob_bytes_path = _path(base_dir, mob["bytes_path"], "ASSET-MOB-003")
+    mob_data_path = _path(base_dir, mob["data_path"], "ASSET-MOB-003")
+    if not mob_bytes_path.is_file() or not mob_data_path.is_file():
         _fail("ASSET-MOB-003", "thiếu Mob bytes/data payload")
     try:
         validate_mob_golden(mob, mob_bytes_path.read_bytes(), mob_data_path.read_bytes())
@@ -546,7 +574,7 @@ def build(manifest: dict, out: Path, review_path: Path, *, base_dir: Path | None
     base_dir = Path(base_dir or Path.cwd()).resolve()
     review_sha, evidence = require_approved_review(review_path, manifest, base_dir)
     _schema(manifest)
-    runtime_key_map_path, runtime_key_map_sha = _validate_runtime_keys(manifest, base_dir)
+    runtime_key_map_path, runtime_key_map_sha, runtime_key_map = _validate_runtime_keys(manifest, base_dir)
     parent = out.parent
     parent.mkdir(parents=True, exist_ok=True)
     temporary = Path(tempfile.mkdtemp(prefix=f".{out.name}.", dir=parent))
@@ -561,6 +589,45 @@ def build(manifest: dict, out: Path, review_path: Path, *, base_dir: Path | None
             "mob_ids": sorted(mob["id"] for mob in manifest.get("mobs", [])),
             "map_ids": sorted(item["id"] for item in manifest.get("maps", [])),
             "frame_counts": {str(part["id"]): len(part["frames"]) for part in manifest["parts"]},
+            "animations": [
+                {"name": item["name"], "slot_count": item["slot_count"], "frames": [
+                    {"slot_index": frame["slot_index"], "client_cf": list(frame["client_cf"])}
+                    for frame in item["frames"]
+                ]}
+                for item in manifest["animations"]
+            ],
+            "animation_sheets": [
+                {
+                    "name": sheet["name"],
+                    "slot_count": sheet["slot_count"],
+                    "cell_size": list(sheet["cell_size"]),
+                    "cells": [
+                        {"slot_index": cell["slot_index"], "path": cell["path"], "bounds": [
+                            cell["slot_index"] * sheet["cell_size"][0], 0,
+                            (cell["slot_index"] + 1) * sheet["cell_size"][0], sheet["cell_size"][1],
+                        ]}
+                        for cell in sheet["cells"]
+                    ],
+                }
+                for sheet in manifest["build_inputs"]["animation_sheets"]
+            ],
+            "mob": {
+                "id": manifest["build_inputs"]["mob"]["id"],
+                "actions": {
+                    action: {"frame_count": len(frames), "frames": frames}
+                    for action, frames in manifest["build_inputs"]["mob"]["frames"].items()
+                },
+                "images": manifest["build_inputs"]["mob"]["images"],
+                "arr_frames": manifest["build_inputs"]["mob"]["arr_frames"],
+                "trailer": manifest["build_inputs"]["mob"]["trailer"],
+            },
+            "runtime_bindings": [
+                {
+                    key: entry.get(key)
+                    for key in ("source_asset", "mode", "logical_keys", "future_logical_key", "physical_paths", "call_sites", "consumer_sites")
+                }
+                for entry in runtime_key_map["entries"]
+            ],
         }
         dimensions = {
             record["path"]: [record["width"], record["height"]]
@@ -584,6 +651,8 @@ def build(manifest: dict, out: Path, review_path: Path, *, base_dir: Path | None
                 "frame_counts": closure["frame_counts"],
                 "review_evidence": sorted(evidence, key=lambda item: item["path"]),
                 "generated_evidence": generated_evidence,
+                "artifacts": outputs,
+                "evidence_provenance": sorted([*evidence, *generated_evidence], key=lambda item: item["path"]),
             },
             "server_client_pair_sha256": _pair_sha(temporary),
         }

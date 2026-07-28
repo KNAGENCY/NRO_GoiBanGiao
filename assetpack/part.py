@@ -6,6 +6,7 @@ import struct
 
 FRAME_COUNTS = {0: 3, 1: 17, 2: 14}
 PHASE_ONE_REPLACEMENTS = {30, 57, 58}
+PHASE_ONE_ADDITIONS = {2189, 2190, 2191}
 
 
 class PartError(ValueError):
@@ -142,7 +143,7 @@ def build_part(manifest: dict, legacy_part: bytes) -> bytes:
             additions[part_id] = part
     if set(replacements) != PHASE_ONE_REPLACEMENTS:
         _part_fail("Phase 1 phải thay đủ part 30/57/58")
-    if sorted(additions) != list(range(len(legacy), len(legacy) + len(additions))):
+    if set(additions) != PHASE_ONE_ADDITIONS:
         _part_fail("part nối mới phải liền sau legacy")
     for part_id, part in replacements.items():
         legacy[part_id] = part

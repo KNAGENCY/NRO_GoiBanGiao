@@ -81,6 +81,26 @@ class PartBinaryTest(unittest.TestCase):
         self.assertEqual(golden, actual)
         self.assertEqual("935c7a32b7b8e40d7d66234611931b5803b348310fcca60e4de324a023c8d354", hashlib.sha256(actual).hexdigest())
 
+    def test_rejects_manifest_missing_required_iruka_part_2191(self):
+        missing_2191 = json.loads(json.dumps(self.manifest))
+        missing_2191["parts"] = [
+            part for part in missing_2191["parts"] if part["id"] != 2191
+        ]
+
+        with self.assertRaisesRegex(PartError, "ASSET-PART-001"):
+            build_part(missing_2191, self.legacy)
+
+    def test_rejects_manifest_with_extra_iruka_part_2192(self):
+        extra_2192 = json.loads(json.dumps(self.manifest))
+        extra_part = json.loads(json.dumps(
+            next(part for part in extra_2192["parts"] if part["id"] == 2191)
+        ))
+        extra_part["id"] = 2192
+        extra_2192["parts"].append(extra_part)
+
+        with self.assertRaisesRegex(PartError, "ASSET-PART-001"):
+            build_part(extra_2192, self.legacy)
+
     def test_rejects_corrupt_endian_type_and_frame_layout_with_part_code(self):
         corruptions = (
             b"\x8d\x05" + self.legacy[2:],

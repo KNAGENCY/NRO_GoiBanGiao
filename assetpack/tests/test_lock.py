@@ -23,8 +23,8 @@ class LockAndBuildGateTests(unittest.TestCase):
         right = lock_bytes({"outputs": [{"sha256": "1", "path": "a"}, {"sha256": "2", "path": "b"}], "versions": {"data": 1}})
         self.assertEqual(left, right)
 
-    def test_approved_build_writes_catalog_and_lock_with_identical_tree_hashes(self):
-        from assetpack.build import build
+    def test_minimal_approved_document_is_still_rejected_by_build_schema(self):
+        from assetpack.build import BuildError, build
 
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -34,13 +34,6 @@ class LockAndBuildGateTests(unittest.TestCase):
             review_path = root / "review.json"; review_path.write_text(json.dumps(review), encoding="utf-8")
             manifest = {"slice": "lang-la", "versions": {"data": 1}, "catalog": {"maps": ["Làng Lá"], "npcs": ["Iruka"], "mobs": ["Sói"], "spawn": [1], "skill_poses": [3]}, "review_sources": [str(source)]}
             first, second = root / "one", root / "two"
-            build(manifest, first, review_path); build(manifest, second, review_path)
-            def tree_hash(directory):
-                digest = hashlib.sha256()
-                for path in sorted(directory.rglob("*")):
-                    if path.is_file(): digest.update(path.relative_to(directory).as_posix().encode()); digest.update(path.read_bytes())
-                return digest.hexdigest()
-            self.assertEqual(tree_hash(first), tree_hash(second))
-            lock = json.loads((first / "asset-lock.json").read_text(encoding="utf-8"))
-            self.assertTrue(lock["review_sha256"])
-            self.assertTrue((first / "catalog.json").is_file())
+            with self.assertRaisesRegex(BuildError, "ASSET-SCHEMA-001"):
+                build(manifest, first, review_path)
+            self.assertFalse(first.exists())

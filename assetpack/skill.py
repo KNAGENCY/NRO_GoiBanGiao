@@ -7,10 +7,14 @@ class SkillError(ValueError):
     pass
 
 
+def _is_int(value):
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
 def _check(record):
-    if (not isinstance(record.get("id"), int) or not isinstance(record.get("pose_slot"), int)
+    if (not _is_int(record.get("id")) or not _is_int(record.get("pose_slot"))
             or record.get("effect_id") == 80 or len(record.get("levels", [])) != 12
-            or any(not isinstance(level, int) or not 0 <= level <= 255 for level in record["levels"])
+            or any(not _is_int(level) or not 0 <= level <= 255 for level in record["levels"])
             or record.get("effect_id") not in range(-1, 80) or record.get("arrow_id") not in range(-1, 128)):
         raise SkillError("ASSET-SKILL-004: 12 level/pose/effect/arrow không hợp lệ")
 

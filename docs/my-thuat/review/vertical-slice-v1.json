@@ -1,7 +1,7 @@
 {
   "review_id": "vertical-slice-v1",
-  "reviewer": "Codex Task 6A round 2 deterministic QA",
-  "timestamp": "2026-07-28T22:57:35.507824Z",
+  "reviewer": "Codex Task 6A fix round 2",
+  "timestamp": "2026-07-28T23:21:30.272624Z",
   "source_root": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1",
   "assets": [
     {
@@ -194,7 +194,7 @@
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\hu_anthan_10f_crop.json",
-          "sha256": "ef408796190776f705e3039c42959e1c9538c72e910248f07d3f26ad2bbe07c0",
+          "sha256": "cafe30917c49d0e13d1ce81f0b58c9585168c3dacbf97e6c3639d8a662d79b58",
           "asset": "hu_anthan_10f_chroma.png",
           "kind": "crop_report"
         },
@@ -206,7 +206,7 @@
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\hu_anthan_10f_animation.gif",
-          "sha256": "42b7691725649a3ce5301863bf344d13acd4be31260dd78032293edbecd2e96e",
+          "sha256": "73a45d0d07e8dc02502ac4c00abbf7261d9ea7e9e8d01c415dbbca0aa9b942a2",
           "asset": "hu_anthan_10f_chroma.png",
           "kind": "animation_preview"
         }
@@ -330,7 +330,7 @@
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\hud_hp_chakra_4_crop.json",
-          "sha256": "adafd5618697eb88429870b6e0a49a65ecc2a21d256c319095b8588c207f803d",
+          "sha256": "a55b84f500a3a598af508c0fd0ff3a4ae8e8c8873a5e23a9feb426e574e22754",
           "asset": "hud_hp_chakra_4_chroma.png",
           "kind": "crop_report"
         },
@@ -342,7 +342,7 @@
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\hud_hp_chakra_4_animation.gif",
-          "sha256": "429e19d399d7880d52a10187bfc94dae7663ee802a97d87ad21d3fcd28462cec",
+          "sha256": "6cca2fe4bbd369cc47be680060823234de048f635502a54b22c717b585fc052c",
           "asset": "hud_hp_chakra_4_chroma.png",
           "kind": "animation_preview"
         }

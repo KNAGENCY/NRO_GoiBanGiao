@@ -206,7 +206,7 @@ def validate_animation(frames: list[Image.Image], durations_ms: list[int], loop:
         issues.append("invalid_frame_timing")
     duplicates: list[int] = []
     for index in range(1, len(frames)):
-        if ImageChops.difference(frames[index - 1], frames[index]).getbbox() is None:
+        if _images_match(frames[index - 1], frames[index]):
             duplicates.append(index)
     if duplicates:
         issues.append("duplicate_adjacent_frame")
@@ -269,19 +269,34 @@ def validate_alpha_output(image: Image.Image, columns: int) -> tuple[list[str], 
     }
 
 
-def render_animation_preview(frames: list[Image.Image], output: Path, durations_ms: list[int]) -> None:
+def _render_animation_frames(frames: list[Image.Image]) -> list[Image.Image]:
     rendered = []
     for frame in frames:
         canvas = Image.new("RGBA", frame.size, DARK)
         canvas.alpha_composite(frame)
         rendered.append(canvas.convert("P", palette=Image.Palette.ADAPTIVE))
+    return rendered
+
+
+def render_animation_preview(
+    frames: list[Image.Image],
+    output: Path,
+    durations_ms: list[int],
+    *,
+    loop: bool,
+) -> None:
+    rendered = _render_animation_frames(frames)
+    if not rendered or len(rendered) != len(durations_ms):
+        raise ValueError("animation preview requires one duration per frame")
     output.parent.mkdir(parents=True, exist_ok=True)
     rendered[0].save(
         output,
         save_all=True,
         append_images=rendered[1:],
         duration=durations_ms,
-        loop=0,
+        # Pillow biểu diễn loop=None bằng GIF không có NETSCAPE loop extension;
+        # loop=0 chỉ dành cho animation có semantic lặp vô hạn.
+        loop=0 if loop else None,
         disposal=2,
     )
 
@@ -296,6 +311,36 @@ def _asset_contact_sheet(name: str, alpha: Image.Image) -> Image.Image:
     sheet.alpha_composite(dark, (alpha.width, 0))
     ImageDraw.Draw(sheet).text((4, alpha.height + 4), name, fill=(255, 255, 255, 255))
     return sheet
+
+
+def _pipeline_for_source(source: Path) -> dict:
+    with Image.open(source) as raw:
+        raw.load()
+        source_issues, source_metrics = analyze_source_background(raw)
+        extracted = extract_alpha(raw)
+    columns = _expected_columns(source.name)
+    normalized, crop_report, crop_issues = normalize_cells(extracted, columns)
+    output_issues, alpha_metrics = validate_alpha_output(normalized, columns)
+    frames = split_frames(normalized, columns)
+    durations = [FRAME_DURATION_MS] * len(frames)
+    loop, sequence_semantics = _animation_policy(source.name)
+    animation_issues, animation_metrics = validate_animation(frames, durations, loop=loop)
+    animation_metrics["sequence_semantics"] = sequence_semantics
+    return {
+        "source_issues": source_issues,
+        "source_metrics": source_metrics,
+        "normalized": normalized,
+        "crop_report": crop_report,
+        "crop_issues": crop_issues,
+        "alpha_metrics": alpha_metrics,
+        "frames": frames,
+        "durations": durations,
+        "loop": loop,
+        "sequence_semantics": sequence_semantics,
+        "animation_metrics": animation_metrics,
+        "animation_issues": animation_issues,
+        "issues": crop_issues + output_issues + animation_issues,
+    }
 
 
 def _evidence(path: Path, asset: str, kind: str) -> dict:
@@ -318,18 +363,17 @@ def review(art_root: Path, review_path: Path, reviewer: str) -> dict:
 
     reviewed: list[dict] = []
     for source in sorted(art_root.glob("*.png")):
-        with Image.open(source) as raw:
-            raw.load()
-            source_issues, source_metrics = analyze_source_background(raw)
-            extracted = extract_alpha(raw)
-        columns = _expected_columns(source.name)
-        normalized, crop_report, crop_issues = normalize_cells(extracted, columns)
-        output_issues, alpha_metrics = validate_alpha_output(normalized, columns)
-        frames = split_frames(normalized, columns)
-        durations = [FRAME_DURATION_MS] * len(frames)
-        loop, sequence_semantics = _animation_policy(source.name)
-        animation_issues, animation_metrics = validate_animation(frames, durations, loop=loop)
-        animation_metrics["sequence_semantics"] = sequence_semantics
+        pipeline = _pipeline_for_source(source)
+        source_issues = pipeline["source_issues"]
+        source_metrics = pipeline["source_metrics"]
+        normalized = pipeline["normalized"]
+        crop_report = pipeline["crop_report"]
+        frames = pipeline["frames"]
+        durations = pipeline["durations"]
+        loop = pipeline["loop"]
+        sequence_semantics = pipeline["sequence_semantics"]
+        alpha_metrics = pipeline["alpha_metrics"]
+        animation_metrics = pipeline["animation_metrics"]
 
         stem = source.stem.replace("_chroma", "")
         alpha_path = alpha_root / f"{stem}_alpha.png"
@@ -342,10 +386,10 @@ def review(art_root: Path, review_path: Path, reviewer: str) -> dict:
             "crop": crop_report,
             "alpha": alpha_metrics,
             "animation": animation_metrics,
-            "issues": crop_issues + output_issues + animation_issues,
+            "issues": pipeline["issues"],
         }
         _asset_contact_sheet(source.name, normalized).save(contact_path)
-        render_animation_preview(frames, preview_path, durations)
+        render_animation_preview(frames, preview_path, durations, loop=loop)
         crop_document["evidence"] = {
             "alpha": sha256(alpha_path),
             "contact_sheet": sha256(contact_path),
@@ -355,7 +399,7 @@ def review(art_root: Path, review_path: Path, reviewer: str) -> dict:
 
         # Trạng thái bind thuộc output đã chuẩn hóa. Lỗi nền nguồn vẫn được giữ
         # riêng và không bao giờ bị biến thành lời khẳng định raw source PASS.
-        bind_issues = crop_issues + output_issues + animation_issues
+        bind_issues = pipeline["issues"]
         reviewed.append({
             "asset": source.name,
             "required": True,
@@ -433,7 +477,23 @@ def _evidence_filename(asset_name: str, kind: str) -> str:
     }[kind]
 
 
-def _verify_evidence_content(asset: dict, kind: str, path: Path, issues: list[str]) -> None:
+def _images_match(actual: Image.Image, expected: Image.Image, max_channel_delta: int = 0) -> bool:
+    actual_rgba = actual.convert("RGBA")
+    expected_rgba = expected.convert("RGBA")
+    if actual_rgba.size != expected_rgba.size:
+        return False
+    actual_pixels = np.asarray(actual_rgba, dtype=np.int16)
+    expected_pixels = np.asarray(expected_rgba, dtype=np.int16)
+    return bool(np.max(np.abs(actual_pixels - expected_pixels)) <= max_channel_delta)
+
+
+def _verify_evidence_content(
+    asset: dict,
+    kind: str,
+    path: Path,
+    pipeline: dict,
+    issues: list[str],
+) -> None:
     name = asset["asset"]
     checks = asset.get("checks", {})
     expected_name = _evidence_filename(name, kind)
@@ -451,25 +511,33 @@ def _verify_evidence_content(asset: dict, kind: str, path: Path, issues: list[st
                 alpha_issues, _ = validate_alpha_output(image, _expected_columns(name))
                 if alpha_issues:
                     issues.append(f"evidence_alpha_quality_invalid:{name}:{','.join(alpha_issues)}")
+                if not _images_match(image, pipeline["normalized"]):
+                    issues.append(f"evidence_canonical_mismatch:{name}:{kind}")
         elif kind == "crop_report":
             document = json.loads(path.read_text(encoding="utf-8"))
-            if document.get("asset") != name:
-                issues.append(f"evidence_content_asset_mismatch:{name}:{kind}")
-            for key in ("crop", "alpha", "animation", "evidence"):
-                if not isinstance(document.get(key), dict):
-                    issues.append(f"evidence_content_missing:{name}:{kind}:{key}")
-            if document.get("evidence", {}).get("alpha") != asset["evidence"]["alpha"]["sha256"]:
-                issues.append(f"evidence_cross_hash_mismatch:{name}:alpha")
-            if document.get("evidence", {}).get("contact_sheet") != asset["evidence"]["contact_sheet"]["sha256"]:
-                issues.append(f"evidence_cross_hash_mismatch:{name}:contact_sheet")
-            if document.get("evidence", {}).get("animation_preview") != asset["evidence"]["animation_preview"]["sha256"]:
-                issues.append(f"evidence_cross_hash_mismatch:{name}:animation_preview")
+            expected = {
+                "asset": name,
+                "crop": pipeline["crop_report"],
+                "alpha": pipeline["alpha_metrics"],
+                "animation": pipeline["animation_metrics"],
+                "issues": pipeline["issues"],
+                "evidence": {
+                    "alpha": asset["evidence"]["alpha"]["sha256"],
+                    "contact_sheet": asset["evidence"]["contact_sheet"]["sha256"],
+                    "animation_preview": asset["evidence"]["animation_preview"]["sha256"],
+                },
+            }
+            if document != expected:
+                issues.append(f"evidence_canonical_mismatch:{name}:{kind}")
         elif kind == "contact_sheet":
             with Image.open(path) as image:
                 image.load()
                 expected_size = checks.get("crop", {}).get("output_canvas_size")
                 if expected_size and list(image.size) != [expected_size[0] * 2, expected_size[1] + 24]:
                     issues.append(f"evidence_contact_dimensions_invalid:{name}")
+                expected = _asset_contact_sheet(name, pipeline["normalized"])
+                if not _images_match(image, expected):
+                    issues.append(f"evidence_canonical_mismatch:{name}:{kind}")
         else:
             with Image.open(path) as image:
                 image.seek(0)
@@ -484,18 +552,45 @@ def _verify_evidence_content(asset: dict, kind: str, path: Path, issues: list[st
                     durations.append(image.info.get("duration"))
                 if expected_durations and durations != expected_durations:
                     issues.append(f"evidence_animation_timing_invalid:{name}")
+                expected_loop = pipeline["loop"]
+                actual_loop = image.info.get("loop")
+                if (not expected_loop and actual_loop is not None) or (expected_loop and actual_loop != 0):
+                    issues.append(f"animation_loop_semantics_invalid:{name}")
+                if not expected_loop and actual_loop == 0:
+                    issues.append(f"animation_loop_semantics_invalid:{name}")
+                expected_frames = _render_animation_frames(pipeline["frames"])
+                if frame_count != len(expected_frames):
+                    issues.append(f"evidence_animation_frame_count_invalid:{name}")
+                else:
+                    for index, expected in enumerate(expected_frames):
+                        image.seek(index)
+                        if not _images_match(image, expected, max_channel_delta=2):
+                            issues.append(f"evidence_canonical_mismatch:{name}:{kind}:frame{index}")
+                            break
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
         issues.append(f"evidence_unreadable:{name}:{kind}:{error}")
 
 
-def verify_review_gate(review_path: Path) -> tuple[bool, list[str]]:
+def _verify_review_gate(review_path: Path) -> tuple[bool, list[str]]:
     try:
         document = json.loads(review_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as error:
         return False, [f"review_unreadable:{error}"]
+    if not isinstance(document, dict):
+        return False, ["review_record_invalid"]
     issues: list[str] = []
     if document.get("review_id") != "vertical-slice-v1":
         issues.append("review_id_invalid")
+    reviewer = document.get("reviewer")
+    if not isinstance(reviewer, str) or not reviewer.strip():
+        issues.append("reviewer_invalid")
+    timestamp = document.get("timestamp")
+    try:
+        parsed_timestamp = datetime.fromisoformat(timestamp.replace("Z", "+00:00")) if isinstance(timestamp, str) else None
+        if parsed_timestamp is None or parsed_timestamp.tzinfo is None:
+            raise ValueError("timestamp must include timezone")
+    except (TypeError, ValueError):
+        issues.append("timestamp_invalid")
     source_root_value = document.get("source_root")
     if not isinstance(source_root_value, str) or not source_root_value:
         return False, ["source_root_invalid"]
@@ -508,29 +603,67 @@ def verify_review_gate(review_path: Path) -> tuple[bool, list[str]]:
     assets = document.get("assets")
     if not isinstance(assets, list):
         return False, issues + ["required_assets_missing"]
-    names = [asset.get("asset") for asset in assets if isinstance(asset, dict)]
-    if len(assets) != len(names) or len(names) != len(set(names)) or tuple(sorted(names)) != tuple(sorted(REQUIRED_ASSET_NAMES)):
+    names = [asset.get("asset") if isinstance(asset, dict) and isinstance(asset.get("asset"), str) else None for asset in assets]
+    if len(assets) != len(names) or len(names) != len(set(names)) or tuple(sorted(name for name in names if name is not None)) != tuple(sorted(REQUIRED_ASSET_NAMES)):
         issues.append("exact_required_assets_mismatch")
     seen_evidence: set[Path] = set()
+    actual_raw_pass = 0
+    actual_raw_fail = 0
     for asset in assets:
         if not isinstance(asset, dict):
             issues.append("asset_record_invalid")
             continue
-        name = str(asset.get("asset", "<unknown>"))
+        name_value = asset.get("asset")
+        if not isinstance(name_value, str) or not name_value:
+            issues.append("asset_name_invalid")
+            continue
+        name = name_value
         if asset.get("required") is not True:
             issues.append(f"asset_not_required:{name}")
         if asset.get("status") != "PASS":
             issues.append(f"required_asset_not_pass:{name}")
-        if asset.get("source_status") != "PASS":
-            issues.append(f"source_status_not_pass:{name}")
-        if asset.get("issues") != []:
-            issues.append(f"issues_not_empty:{name}")
         source = source_root / name
         if not source.is_file():
             issues.append(f"source_file_missing:{name}")
-        elif asset.get("source_sha256") != sha256(source):
+            continue
+        if asset.get("source_sha256") != sha256(source):
             issues.append(f"source_sha256_mismatch:{name}")
-        evidence = asset.get("evidence", {})
+        try:
+            pipeline = _pipeline_for_source(source)
+        except (OSError, ValueError) as error:
+            issues.append(f"source_pipeline_unreadable:{name}:{error}")
+            continue
+        raw_status = asset.get("raw_source_status")
+        expected_raw_status = "PASS" if not pipeline["source_issues"] else "FAIL"
+        if raw_status not in ("PASS", "FAIL"):
+            issues.append(f"raw_source_status_invalid:{name}")
+        elif raw_status == "PASS":
+            actual_raw_pass += 1
+        else:
+            actual_raw_fail += 1
+        if raw_status != expected_raw_status:
+            issues.append(f"raw_source_status_mismatch:{name}")
+        if asset.get("source_issues") != pipeline["source_issues"]:
+            issues.append(f"raw_source_issues_mismatch:{name}")
+        if asset.get("checks", {}).get("source") != pipeline["source_metrics"]:
+            issues.append(f"source_metrics_mismatch:{name}")
+        expected_derived_status = "PASS" if not pipeline["issues"] else "FAIL"
+        if asset.get("source_status") != expected_derived_status:
+            issues.append(f"source_status_mismatch:{name}")
+        if asset.get("status") != expected_derived_status:
+            issues.append(f"derived_status_mismatch:{name}")
+        if asset.get("issues") != pipeline["issues"]:
+            issues.append(f"derived_issues_mismatch:{name}")
+        if asset.get("checks", {}).get("crop") != pipeline["crop_report"]:
+            issues.append(f"crop_metrics_mismatch:{name}")
+        if asset.get("checks", {}).get("alpha") != pipeline["alpha_metrics"]:
+            issues.append(f"alpha_metrics_mismatch:{name}")
+        if asset.get("checks", {}).get("animation") != pipeline["animation_metrics"]:
+            issues.append(f"animation_metrics_mismatch:{name}")
+        evidence = asset.get("evidence")
+        if not isinstance(evidence, dict):
+            issues.append(f"evidence_record_invalid:{name}")
+            continue
         if set(evidence) != set(REQUIRED_EVIDENCE):
             issues.append(f"evidence_kinds_invalid:{name}")
         for kind in REQUIRED_EVIDENCE:
@@ -552,15 +685,27 @@ def verify_review_gate(review_path: Path) -> tuple[bool, list[str]]:
             elif sha256(path) != item["sha256"]:
                 issues.append(f"sha256_mismatch:{name}:{kind}")
             elif _path_under(resolved, qa_root):
-                _verify_evidence_content(asset, kind, path, issues)
+                _verify_evidence_content(asset, kind, path, pipeline, issues)
     actual_pass = sum(asset.get("status") == "PASS" for asset in assets)
     actual_fail = len(assets) - actual_pass
     summary = document.get("summary", {})
+    if not isinstance(summary, dict):
+        issues.append("summary_invalid")
+        summary = {}
     if summary.get("total") != len(assets) or summary.get("pass") != actual_pass or summary.get("fail") != actual_fail:
         issues.append("summary_does_not_match_assets")
     if summary.get("accepted_source_pass") != len(assets) or summary.get("accepted_source_fail") != 0:
         issues.append("accepted_source_summary_does_not_match_assets")
+    if summary.get("raw_source_pass") != actual_raw_pass or summary.get("raw_source_fail") != actual_raw_fail:
+        issues.append("raw_source_summary_does_not_match_assets")
     return not issues, issues
+
+
+def verify_review_gate(review_path: Path) -> tuple[bool, list[str]]:
+    try:
+        return _verify_review_gate(review_path)
+    except Exception as error:  # malformed/null review data must fail closed as gate exit 2
+        return False, [f"review_malformed:{type(error).__name__}:{error}"]
 
 
 def require_review_gate(review_path: Path) -> dict:

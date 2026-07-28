@@ -111,10 +111,21 @@ class CropAndAnimationTests(unittest.TestCase):
         ]
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp) / "preview.gif"
-            render_animation_preview(frames, output, [80, 120])
+            render_animation_preview(frames, output, [80, 120], loop=True)
             with Image.open(output) as preview:
                 self.assertEqual(getattr(preview, "n_frames", 1), 2)
                 self.assertEqual(preview.info["duration"], 80)
+
+    def test_one_shot_animation_preview_has_no_infinite_loop_metadata(self):
+        frames = [
+            Image.new("RGBA", (4, 4), (255, 0, 0, 255)),
+            Image.new("RGBA", (4, 4), (0, 255, 0, 255)),
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "one-shot.gif"
+            render_animation_preview(frames, output, [80, 120], loop=False)
+            with Image.open(output) as preview:
+                self.assertNotEqual(preview.info.get("loop"), 0)
 
 
 class GateTests(unittest.TestCase):
@@ -244,6 +255,152 @@ class GateTests(unittest.TestCase):
         path.write_text(json.dumps(document), encoding="utf-8")
         return path
 
+    def _write_generated_review(self, root: Path) -> Path:
+        source_root = root / "vertical-slice-v1"
+        source_root.mkdir(parents=True)
+        for index, name in enumerate(REQUIRED_ASSET_NAMES):
+            match = re.search(r"_(\d+)(?:f|_chroma)", name)
+            columns = int(match.group(1)) if match else 1
+            image = Image.new("RGB", (columns * 100, 100), (220 + index % 20, 10, 225))
+            for frame_index in range(columns):
+                color = (30 + frame_index, 80, 140 + frame_index)
+                for y in range(10, 91):
+                    for x in range(10, 91):
+                        if not (40 <= x <= 59 and y >= 40):
+                            image.putpixel((frame_index * 100 + x, y), color)
+            image.save(source_root / name)
+        review_path = root / "review.json"
+        review(source_root, review_path, "test reviewer")
+        return review_path
+
+    def test_gate_requires_reviewer_and_timestamp(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            review_path = self._write_generated_review(Path(tmp))
+            data = json.loads(review_path.read_text(encoding="utf-8"))
+            data.pop("reviewer")
+            data["timestamp"] = None
+            review_path.write_text(json.dumps(data), encoding="utf-8")
+
+            ok, issues = verify_review_gate(review_path)
+
+            self.assertFalse(ok)
+            self.assertTrue(any("reviewer_invalid" in issue for issue in issues))
+            self.assertTrue(any("timestamp_invalid" in issue for issue in issues))
+
+    def test_gate_requires_raw_source_status_summary_and_issues_to_match_source(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            review_path = self._write_generated_review(Path(tmp))
+            data = json.loads(review_path.read_text(encoding="utf-8"))
+            first = data["assets"][0]
+            first["raw_source_status"] = "FAIL"
+            first["source_issues"] = ["forged_raw_issue"]
+            data["summary"]["raw_source_pass"] = 20
+            data["summary"]["raw_source_fail"] = 0
+            review_path.write_text(json.dumps(data), encoding="utf-8")
+
+            ok, issues = verify_review_gate(review_path)
+
+            self.assertFalse(ok)
+            self.assertTrue(any("raw_source_status_mismatch" in issue for issue in issues))
+            self.assertTrue(any("raw_source_issues_mismatch" in issue for issue in issues))
+            self.assertTrue(any("raw_source_summary" in issue for issue in issues))
+
+    def test_gate_recomputes_all_evidence_content_not_only_hashes(self):
+        evidence_kinds = ("alpha", "crop_report", "contact_sheet", "animation_preview")
+        for kind in evidence_kinds:
+            with self.subTest(kind=kind), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                review_path = self._write_generated_review(root)
+                data = json.loads(review_path.read_text(encoding="utf-8"))
+                asset = data["assets"][0]
+                item = asset["evidence"][kind]
+                path = Path(item["path"])
+                if kind == "alpha":
+                    with Image.open(path) as image:
+                        changed = image.convert("RGBA")
+                    changed.putpixel((0, 0), (1, 2, 3, 0))
+                    changed.save(path)
+                elif kind == "crop_report":
+                    document = json.loads(path.read_text(encoding="utf-8"))
+                    document["crop"]["output_cell_size"][0] += 1
+                    path.write_text(json.dumps(document), encoding="utf-8")
+                elif kind == "contact_sheet":
+                    with Image.open(path) as image:
+                        changed = image.convert("RGBA")
+                    changed.putpixel((0, 0), (1, 2, 3, 255))
+                    changed.save(path)
+                else:
+                    with Image.open(path) as image:
+                        frames = []
+                        for index in range(image.n_frames):
+                            image.seek(index)
+                            frame = image.convert("RGBA")
+                            frame.putpixel((0, 0), (1, 2, 3, 255))
+                            frames.append(frame)
+                        durations = [100] * len(frames)
+                    frames[0].save(path, save_all=True, append_images=frames[1:], duration=durations, loop=0)
+                item["sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+                if kind == "alpha":
+                    crop_path = Path(asset["evidence"]["crop_report"]["path"])
+                    crop_document = json.loads(crop_path.read_text(encoding="utf-8"))
+                    crop_document["evidence"]["alpha"] = item["sha256"]
+                    crop_path.write_text(json.dumps(crop_document), encoding="utf-8")
+                    asset["evidence"]["crop_report"]["sha256"] = hashlib.sha256(crop_path.read_bytes()).hexdigest()
+                review_path.write_text(json.dumps(data), encoding="utf-8")
+
+                ok, issues = verify_review_gate(review_path)
+
+                self.assertFalse(ok)
+                self.assertTrue(any("evidence_content" in issue or "evidence_canonical" in issue for issue in issues))
+
+    def test_gate_rejects_one_shot_gif_that_advertises_infinite_loop(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            review_path = self._write_generated_review(Path(tmp))
+            data = json.loads(review_path.read_text(encoding="utf-8"))
+            asset = next(item for item in data["assets"] if item["asset"] == "hu_anthan_10f_chroma.png")
+            preview_path = Path(asset["evidence"]["animation_preview"]["path"])
+            with Image.open(preview_path) as image:
+                frames = [image.seek(index) or image.convert("RGBA") for index in range(image.n_frames)]
+                frames = [frame.copy() for frame in frames]
+            frames[0].save(preview_path, save_all=True, append_images=frames[1:], duration=[100] * len(frames), loop=0)
+            asset["evidence"]["animation_preview"]["sha256"] = hashlib.sha256(preview_path.read_bytes()).hexdigest()
+            crop_path = Path(asset["evidence"]["crop_report"]["path"])
+            crop_document = json.loads(crop_path.read_text(encoding="utf-8"))
+            crop_document["evidence"]["animation_preview"] = asset["evidence"]["animation_preview"]["sha256"]
+            crop_path.write_text(json.dumps(crop_document), encoding="utf-8")
+            asset["evidence"]["crop_report"]["sha256"] = hashlib.sha256(crop_path.read_bytes()).hexdigest()
+            review_path.write_text(json.dumps(data), encoding="utf-8")
+
+            ok, issues = verify_review_gate(review_path)
+
+            self.assertFalse(ok)
+            self.assertTrue(any("animation_loop_semantics" in issue for issue in issues))
+
+    def test_gate_malformed_null_assets_and_evidence_fail_closed(self):
+        for malformed in ("asset", "evidence"):
+            with self.subTest(malformed=malformed), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                source_root = root / "source"
+                (source_root / "qa").mkdir(parents=True)
+                data = {
+                    "review_id": "vertical-slice-v1",
+                    "reviewer": "test",
+                    "timestamp": "2026-07-29T00:00:00Z",
+                    "source_root": str(source_root),
+                    "assets": [None] if malformed == "asset" else [{"asset": "a.png", "evidence": None}],
+                    "summary": {},
+                }
+                review_path = root / "review.json"
+                review_path.write_text(json.dumps(data), encoding="utf-8")
+                result = subprocess.run(
+                    [sys.executable, "-m", "tools.artqa.artqa", "gate", "--review", str(review_path)],
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertEqual(result.returncode, 2)
+                self.assertIn('"allowed": false', result.stdout)
+
     def test_gate_requires_exact_twenty_unique_asset_names(self):
         with tempfile.TemporaryDirectory() as tmp:
             review = self._write_strict_review(Path(tmp))
@@ -263,7 +420,7 @@ class GateTests(unittest.TestCase):
             review.write_text(json.dumps(data), encoding="utf-8")
             ok, issues = verify_review_gate(review)
             self.assertFalse(ok)
-            self.assertTrue(any("source_status_not_pass" in issue for issue in issues))
+            self.assertTrue(any("source_status_mismatch" in issue for issue in issues))
             self.assertTrue(any("source_sha256_mismatch" in issue for issue in issues))
 
     def test_gate_rejects_nonempty_issues_and_duplicate_evidence(self):
@@ -276,7 +433,7 @@ class GateTests(unittest.TestCase):
             review.write_text(json.dumps(data), encoding="utf-8")
             ok, issues = verify_review_gate(review)
             self.assertFalse(ok)
-            self.assertTrue(any("issues_not_empty" in issue for issue in issues))
+            self.assertTrue(any("derived_issues_mismatch" in issue for issue in issues))
             self.assertTrue(any("evidence_duplicate" in issue for issue in issues))
 
     def test_gate_rejects_evidence_outside_qa_root_or_wrong_kind(self):
@@ -316,7 +473,7 @@ class GateTests(unittest.TestCase):
 
     def test_bind_precondition_cli_allows_only_a_strict_review(self):
         with tempfile.TemporaryDirectory() as tmp:
-            review = self._write_strict_review(Path(tmp))
+            review = self._write_generated_review(Path(tmp))
             result = subprocess.run(
                 [sys.executable, "-m", "tools.artqa.artqa", "bind-precondition", "--review", str(review)],
                 capture_output=True,

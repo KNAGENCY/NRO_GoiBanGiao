@@ -8,6 +8,28 @@ class MapError(ValueError):
     pass
 
 
+def validate_tileset_baseline(data: bytes, baseline: dict) -> None:
+    """Kiểm baseline bằng bytes vàng và parse semantic tối thiểu độc lập."""
+    if not isinstance(data, bytes) or not data:
+        raise MapError("ASSET-TILESET-010: tile_set_info rỗng/malformed")
+    if not isinstance(baseline, dict):
+        raise MapError("ASSET-TILESET-010: thiếu tile-set baseline")
+    try:
+        expected_bytes = bytes.fromhex(baseline["bytes_hex"])
+        expected_sha = baseline["sha256"]
+        semantic = baseline["semantic"]
+    except (KeyError, TypeError, ValueError) as error:
+        raise MapError(f"ASSET-TILESET-010: baseline malformed: {error}") from error
+    if not isinstance(expected_sha, str) or len(expected_sha) != 64 or len(expected_bytes) == 0:
+        raise MapError("ASSET-TILESET-010: baseline golden không hợp lệ")
+    if len(data) != len(expected_bytes) or data != expected_bytes:
+        raise MapError("ASSET-TILESET-011: tile_set_info khác baseline golden")
+    if hashlib.sha256(data).hexdigest() != expected_sha:
+        raise MapError("ASSET-TILESET-011: SHA tile_set_info khác baseline golden")
+    if not isinstance(semantic, dict) or semantic.get("byte_length") != len(data) or semantic.get("tile_count") != data[0]:
+        raise MapError("ASSET-TILESET-011: semantic tile_set_info khác baseline")
+
+
 def encode_collision(width: int, height: int, indexes, *, spawn_index: int) -> bytes:
     indexes = list(indexes)
     if not 1 <= width <= 255 or not 1 <= height <= 255 or len(indexes) != width * height:

@@ -77,6 +77,7 @@ function Write-Utf8NoBom {
     )
 }
 
+$staging = $null
 try {
     $unityRoot = Get-NormalizedPath $UnityProject
     $snapshot = Get-NormalizedPath $SnapshotRoot
@@ -172,17 +173,20 @@ try {
         })
     }
 
-    [System.IO.Directory]::CreateDirectory($snapshot) | Out-Null
+    # Build outside the final path. If a copy or overlay operation fails, the
+    # final snapshot stays absent so a later clean apply is never blocked.
+    $staging = $snapshot + ".staging-" + [guid]::NewGuid().ToString("N")
+    [System.IO.Directory]::CreateDirectory($staging) | Out-Null
     foreach ($directory in @("Assets", "Packages", "ProjectSettings")) {
         Copy-Item -LiteralPath (Join-Path $unityRoot $directory) `
-            -Destination $snapshot -Recurse
+            -Destination $staging -Recurse
     }
 
     $resultFiles = [System.Collections.Generic.List[object]]::new()
 
     foreach ($patchPlan in $patchPlans) {
         $relativeTarget = ([string]$patchPlan.target).Replace("/", "\")
-        $targetFile = Join-Path $snapshot $relativeTarget
+        $targetFile = Join-Path $staging $relativeTarget
         Write-Utf8NoBom $targetFile $patchPlan.content
         $resultFiles.Add([pscustomobject]@{
             path = ([string]$patchPlan.target).Replace("\", "/")
@@ -194,7 +198,7 @@ try {
     foreach ($overlayFileValue in @($manifest.overlay_files)) {
         $relativeOverlay = ([string]$overlayFileValue).Replace("/", "\")
         $sourceOverlay = Join-Path $PSScriptRoot $relativeOverlay
-        $targetOverlay = Join-Path $snapshot $relativeOverlay
+        $targetOverlay = Join-Path $staging $relativeOverlay
         if (-not (Test-Path -LiteralPath $sourceOverlay -PathType Leaf)) {
             Stop-Overlay "OVERLAY-FILE-001" "Overlay file is missing: $overlayFileValue"
         }
@@ -218,11 +222,16 @@ try {
         unity_version = $expectedVersion
         files = @($resultFiles)
     }
-    Write-Utf8NoBom (Join-Path $snapshot ".nro-e2e-overlay.json") `
+    Write-Utf8NoBom (Join-Path $staging ".nro-e2e-overlay.json") `
         ($marker | ConvertTo-Json -Depth 8)
+    Move-Item -LiteralPath $staging -Destination $snapshot
+    $staging = $null
     Write-Host "OVERLAY-OK: $snapshot"
 }
 catch {
+    if ($staging -and (Test-Path -LiteralPath $staging)) {
+        Remove-Item -LiteralPath $staging -Recurse -Force -ErrorAction SilentlyContinue
+    }
     Write-Error $_.Exception.Message
     exit 1
 }

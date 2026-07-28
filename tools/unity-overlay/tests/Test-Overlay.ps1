@@ -82,6 +82,7 @@ $snapshotRoot = Join-Path $fixtureRoot "unity-snapshot"
 $badSnapshotRoot = Join-Path $fixtureRoot "unity-bad-sha"
 $badPatchSnapshotRoot = Join-Path $fixtureRoot "unity-bad-patch"
 $copyFailureSnapshotRoot = Join-Path $fixtureRoot "unity-copy-failure"
+$existingEmptySnapshotRoot = Join-Path $fixtureRoot "unity-existing-empty"
 $defaultSnapshotRoot = Join-Path $fixtureRoot "unity-default-manifest"
 $patchRoot = Join-Path $fixtureRoot "patches"
 $fixtureManifest = Join-Path $fixtureRoot "overlay-manifest.json"
@@ -356,6 +357,19 @@ public class Panel {
         ((Split-Path -Leaf $copyFailureSnapshotRoot) + ".staging-*"))
     Assert-True ($stagingLeftovers.Count -eq 0) `
         "A failed copy must roll back its staging directory."
+
+    # The final path is a publish target, never a container for a staging tree.
+    # Even an empty pre-existing directory would make Move-Item nest staging under
+    # it, so it must be rejected before any snapshot is built.
+    [System.IO.Directory]::CreateDirectory($existingEmptySnapshotRoot) | Out-Null
+    $existingEmpty = Invoke-Overlay $applyScript @(
+        "-UnityProject", $sourceRoot,
+        "-SnapshotRoot", $existingEmptySnapshotRoot,
+        "-ManifestPath", $fixtureManifest
+    )
+    Assert-FailureCode $existingEmpty "OVERLAY-TARGET-EXISTS"
+    Assert-True (@(Get-ChildItem -LiteralPath $existingEmptySnapshotRoot -Force).Count -eq 0) `
+        "An existing empty publish target must stay empty, not receive nested staging."
 
     $defaultToolRoot = Join-Path $fixtureRoot "default-tool"
     [System.IO.Directory]::CreateDirectory((Join-Path $defaultToolRoot "patches")) | Out-Null

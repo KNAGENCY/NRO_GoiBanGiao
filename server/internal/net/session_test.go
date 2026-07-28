@@ -1,9 +1,12 @@
 package net
 
 import (
+	"bytes"
 	"errors"
 	"io"
 	"net"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -180,5 +183,283 @@ func TestGuiCoHanGioGhiKhongTreoVinhVien(t *testing.T) {
 		}
 	case <-time.After(2 * time.Second):
 		t.Fatal("Gui() TREO VINH VIEN khi client khong doc gi — thieu han gio ghi truoc moi lan ghi")
+	}
+}
+
+// connChanLanGhiDau mo phong socket cua mot client khong doc: lan Write dau
+// dung lai cho toi khi test mo khoa. Cac lan sau ghi vao bo nho de test doc
+// dung thu tu khung tin that, khong khang dinh tren mock call.
+type connChanLanGhiDau struct {
+	batDau       chan struct{}
+	mo           chan struct{}
+	daBaoBatDau  sync.Once
+	soLanGhi     atomic.Int32
+	dangGhi      atomic.Int32
+	soGhiDongLuc atomic.Int32
+	mu           sync.Mutex
+	duLieu       bytes.Buffer
+	dong         atomic.Int32
+}
+
+func newConnChanLanGhiDau() *connChanLanGhiDau {
+	return &connChanLanGhiDau{
+		batDau: make(chan struct{}),
+		mo:     make(chan struct{}),
+	}
+}
+
+func (c *connChanLanGhiDau) Read([]byte) (int, error) { return 0, io.EOF }
+func (c *connChanLanGhiDau) Write(p []byte) (int, error) {
+	if c.dangGhi.Add(1) != 1 {
+		c.soGhiDongLuc.Add(1)
+	}
+	defer c.dangGhi.Add(-1)
+
+	if c.soLanGhi.Add(1) == 1 {
+		c.daBaoBatDau.Do(func() { close(c.batDau) })
+		<-c.mo
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return c.duLieu.Write(p)
+}
+func (c *connChanLanGhiDau) Close() error {
+	c.dong.Add(1)
+	return nil
+}
+func (c *connChanLanGhiDau) LocalAddr() net.Addr              { return diaChiGia("local") }
+func (c *connChanLanGhiDau) RemoteAddr() net.Addr             { return diaChiGia("remote") }
+func (c *connChanLanGhiDau) SetDeadline(time.Time) error      { return nil }
+func (c *connChanLanGhiDau) SetReadDeadline(time.Time) error  { return nil }
+func (c *connChanLanGhiDau) SetWriteDeadline(time.Time) error { return nil }
+
+type diaChiGia string
+
+func (d diaChiGia) Network() string { return "test" }
+func (d diaChiGia) String() string  { return string(d) }
+
+// TestXepGuiKhongChanFIFO256ImmutableMotWriter bat bon loi san xuat:
+// XepGui ghi socket truc tiep (SERVER-ACTOR-005), hang sai nguong 256, giu
+// con tro Data de ben goi sua duoc goi da xep, hoac tao nhieu writer ghi chen.
+func TestXepGuiKhongChanFIFO256ImmutableMotWriter(t *testing.T) {
+	conn := newConnChanLanGhiDau()
+	s := &Session{conn: conn, framer: protocol.NewFramer(conn, conn)}
+	t.Cleanup(s.Dong)
+
+	dau := &protocol.Message{Command: 7, Data: []byte{1}}
+	if err := s.XepGui(dau); err != nil {
+		t.Fatalf("xep goi dau that bai: %v", err)
+	}
+	select {
+	case <-conn.batDau:
+	case <-time.After(time.Second):
+		t.Fatal("writer khong nhan goi dau")
+	}
+	dau.Data[0] = 99 // message da enqueue phai bat bien.
+
+	// Writer dang ket o goi dau, vi vay 256 goi sau nam tron trong queue.
+	for i := 0; i < 256; i++ {
+		if err := s.XepGui(&protocol.Message{Command: 7, Data: []byte{byte(i + 2)}}); err != nil {
+			t.Fatalf("queue chua du 256 nhung goi %d bi tu choi: %v", i, err)
+		}
+	}
+	batDau := time.Now()
+	err := s.XepGui(&protocol.Message{Command: 7, Data: []byte{0}})
+	if !errors.Is(err, ErrHangGuiDay) {
+		t.Fatalf("goi thu 257 trong queue = %v, mong ErrHangGuiDay", err)
+	}
+	if mat := time.Since(batDau); mat >= 10*time.Millisecond {
+		t.Fatalf("XepGui khi queue day mat %s, phai tra duoi 10ms", mat)
+	}
+
+	close(conn.mo)
+	han := time.After(2 * time.Second)
+	for conn.soLanGhi.Load() < 257 {
+		select {
+		case <-han:
+			t.Fatalf("writer moi ghi %d/257 goi", conn.soLanGhi.Load())
+		default:
+			time.Sleep(time.Millisecond)
+		}
+	}
+	if got := conn.soGhiDongLuc.Load(); got != 0 {
+		t.Fatalf("co %d lan Write chay dong thoi, mong dung mot writer", got)
+	}
+
+	conn.mu.Lock()
+	raw := append([]byte(nil), conn.duLieu.Bytes()...)
+	conn.mu.Unlock()
+	for i := 0; i < 257; i++ {
+		if len(raw) < 4 {
+			t.Fatalf("goi %d bi thieu khung, con %d byte", i, len(raw))
+		}
+		if int8(raw[0]) != 7 || raw[1] != 0 || raw[2] != 1 {
+			t.Fatalf("goi %d co header %v, mong [7 0 1]", i, raw[:3])
+		}
+		want := byte(i + 1)
+		if raw[3] != want {
+			t.Fatalf("goi %d co data=%d, mong %d (FIFO/immutable bi vo)", i, raw[3], want)
+		}
+		raw = raw[4:]
+	}
+	if len(raw) != 0 {
+		t.Fatalf("con %d byte rac sau 257 goi", len(raw))
+	}
+}
+
+type connLoiGhi struct {
+	*connChanLanGhiDau
+	loi error
+}
+
+func (c *connLoiGhi) Write([]byte) (int, error) {
+	if c.soLanGhi.Add(1) == 1 {
+		c.daBaoBatDau.Do(func() { close(c.batDau) })
+		<-c.mo
+	}
+	return 0, c.loi
+}
+
+// TestWriterLoiDongChamBoQueueVaThoat bat dot bien bo DongCham sau Write error:
+// socket chi dong mot lan, queue khong duoc ghi tiep va writer phai thoat.
+func TestWriterLoiDongChamBoQueueVaThoat(t *testing.T) {
+	loiGhi := errors.New("mat ket noi")
+	goc := newConnChanLanGhiDau()
+	conn := &connLoiGhi{connChanLanGhiDau: goc, loi: loiGhi}
+	s := &Session{conn: conn, framer: protocol.NewFramer(conn, conn)}
+
+	if err := s.XepGui(&protocol.Message{Command: 1}); err != nil {
+		t.Fatalf("xep goi dau: %v", err)
+	}
+	<-conn.batDau
+	for i := 0; i < 10; i++ {
+		if err := s.XepGui(&protocol.Message{Command: int8(i + 2)}); err != nil {
+			t.Fatalf("xep goi cho %d: %v", i, err)
+		}
+	}
+	close(conn.mo)
+
+	select {
+	case <-s.writerXong:
+	case <-time.After(time.Second):
+		t.Fatal("writer khong thoat sau Write error")
+	}
+	if got := conn.soLanGhi.Load(); got != 1 {
+		t.Fatalf("writer van ghi %d lan sau loi dau, queue chua bi bo", got)
+	}
+	if got := conn.dong.Load(); got != 1 {
+		t.Fatalf("Close duoc goi %d lan, mong dung 1", got)
+	}
+	s.DongCham()
+	s.DongCham()
+	if got := conn.dong.Load(); got != 1 {
+		t.Fatalf("DongCham khong idempotent: Close duoc goi %d lan", got)
+	}
+	if err := s.XepGui(&protocol.Message{Command: 99}); !errors.Is(err, ErrPhienDaDong) {
+		t.Fatalf("XepGui sau write error = %v, mong ErrPhienDaDong", err)
+	}
+}
+
+type connLoiTuLanGhiThuHai struct {
+	net.Conn
+	soLanGhi  atomic.Int32
+	soLanDong atomic.Int32
+	loi       error
+}
+
+func (c *connLoiTuLanGhiThuHai) Write(p []byte) (int, error) {
+	if c.soLanGhi.Add(1) == 2 {
+		return 0, c.loi
+	}
+	return c.Conn.Write(p)
+}
+
+func (c *connLoiTuLanGhiThuHai) Close() error {
+	c.soLanDong.Add(1)
+	return c.Conn.Close()
+}
+
+type xuLyXepRoiDemKhiDong struct {
+	xepXong   chan error
+	soKhiDong atomic.Int32
+}
+
+func (x *xuLyXepRoiDemKhiDong) XuLy(s *Session, _ *protocol.Message) error {
+	x.xepXong <- s.XepGui(&protocol.Message{Command: 8, Data: []byte{1}})
+	return nil
+}
+
+func (x *xuLyXepRoiDemKhiDong) KhiDong() { x.soKhiDong.Add(1) }
+
+// batTayClientTest tra Framer da co khoa, dung dung byte-order cua client that.
+func batTayClientTest(t *testing.T, conn net.Conn) *protocol.Framer {
+	t.Helper()
+	f := protocol.NewFramer(conn, conn)
+	if err := f.WriteMessage(&protocol.Message{Command: -27}); err != nil {
+		t.Fatalf("gui bat tay: %v", err)
+	}
+	var header [3]byte
+	if _, err := io.ReadFull(conn, header[:]); err != nil {
+		t.Fatalf("doc header bat tay: %v", err)
+	}
+	if int8(header[0]) != -27 {
+		t.Fatalf("lenh bat tay = %d", int8(header[0]))
+	}
+	n := int(header[1])<<8 | int(header[2])
+	than := make([]byte, n)
+	if _, err := io.ReadFull(conn, than); err != nil {
+		t.Fatalf("doc than bat tay: %v", err)
+	}
+	r := protocol.NewReader(than)
+	doDai, err := r.Byte()
+	if err != nil {
+		t.Fatalf("doc do dai khoa: %v", err)
+	}
+	khoa := make([]byte, doDai)
+	for i := range khoa {
+		khoa[i], err = r.Byte()
+		if err != nil {
+			t.Fatalf("doc khoa byte %d: %v", i, err)
+		}
+	}
+	f.SetKey(protocol.DeriveKey(khoa))
+	return f
+}
+
+// TestWriteErrorLamPhucVuCleanupDungMotLan chung minh write error cua writer
+// dong socket de vong Read thoat va moc KhiDong chay dung mot lan.
+func TestWriteErrorLamPhucVuCleanupDungMotLan(t *testing.T) {
+	client, serverGoc := net.Pipe()
+	defer client.Close()
+	conn := &connLoiTuLanGhiThuHai{Conn: serverGoc, loi: errors.New("reset")}
+	xuLy := &xuLyXepRoiDemKhiDong{xepXong: make(chan error, 1)}
+	phucVuXong := make(chan struct{})
+	go func() {
+		PhucVu(conn, func() XuLyGoiTin { return xuLy })
+		close(phucVuXong)
+	}()
+
+	f := batTayClientTest(t, client)
+	if err := f.WriteMessage(&protocol.Message{Command: 1}); err != nil {
+		t.Fatalf("gui gameplay kich writer: %v", err)
+	}
+	select {
+	case err := <-xuLy.xepXong:
+		if err != nil {
+			t.Fatalf("XepGui trong handler: %v", err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("handler khong xep goi gameplay")
+	}
+	select {
+	case <-phucVuXong:
+	case <-time.After(time.Second):
+		t.Fatal("PhucVu khong thoat sau write error")
+	}
+	if got := xuLy.soKhiDong.Load(); got != 1 {
+		t.Fatalf("KhiDong chay %d lan, mong dung 1", got)
+	}
+	if got := conn.soLanDong.Load(); got != 1 {
+		t.Fatalf("server conn Close %d lan, mong dung 1", got)
 	}
 }

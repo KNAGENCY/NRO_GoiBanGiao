@@ -83,9 +83,9 @@ class BuildContractTests(unittest.TestCase):
         source_dir = root / "inputs"
         source_dir.mkdir()
 
-        def png(name):
+        def png(name, size=(1, 1)):
             path = source_dir / name
-            Image.new("RGBA", (1, 1), (12, 34, 56, 255)).save(path, format="PNG")
+            Image.new("RGBA", size, (12, 34, 56, 255)).save(path, format="PNG")
             return f"inputs/{name}"
 
         def binary(name, data):
@@ -107,21 +107,72 @@ class BuildContractTests(unittest.TestCase):
         backgrounds = {f"b{index:02d}": {zoom: png(f"bg-{index}-{zoom}.png") for zoom in ("x1", "x2", "x3", "x4")} for index in range(4)}
         hud = {name: {zoom: png(f"{name}-{zoom}.png") for zoom in ("x1", "x2", "x3", "x4")} for name in ("naruto-hp-bg", "naruto-hp-fill", "naruto-chakra-bg", "naruto-chakra-fill")}
         ui = []
+        runtime_key_entries = []
         for index in range(8):
+            mode = "direct" if index == 0 else "slice_group" if index < 3 else "overlay_required"
+            if mode == "direct":
+                logical_keys = [f"/naruto/ui/{index}.png"]
+                future_key = None
+                site_role = "call"
+                expression = f"loadImage('{logical_keys[0]}');"
+            elif mode == "slice_group":
+                logical_keys = [f"/naruto/ui/{index}-{part}.png" for part in ("left", "mid", "right")]
+                future_key = None
+                site_role = "call"
+                expression = " ".join(f"loadImage('{key}');" for key in logical_keys)
+            else:
+                logical_keys = []
+                future_key = f"/naruto/ui/future-{index}.png"
+                site_role = "consumer"
+                expression = f"consumeOverlay('{future_key}');"
+            site_file_name = f"{site_role}-site-{index}.cs"
+            call_site = root / "inputs" / site_file_name
+            call_site.write_text(expression, encoding="utf-8")
+            call_sha = hashlib.sha256(call_site.read_bytes()).hexdigest()
+            physical_paths = {zoom: [f"Assets/Resources/res/{zoom}/naruto/ui/{index}.png"] for zoom in ("x1", "x2", "x3", "x4")}
             ui.append({
                 "source_asset": f"ui-{index}",
                 "source_path": png(f"ui-{index}.png"),
-                "mode": "direct",
-                "logical_keys": [f"/naruto/ui/{index}.png"],
-                "future_logical_key": None,
-                "physical_paths": {zoom: [f"Assets/Resources/res/{zoom}/naruto/ui/{index}.png"] for zoom in ("x1", "x2", "x3", "x4")},
+                "mode": mode,
+                "logical_keys": logical_keys,
+                "future_logical_key": future_key,
+                "physical_paths": physical_paths,
             })
+            runtime_key_entries.append({
+                "source_asset": f"ui-{index}",
+                "mode": mode,
+                "logical_keys": logical_keys,
+                "future_logical_key": future_key,
+                "call_sites": [{
+                    "file": f"inputs/{site_file_name}",
+                    "line": 1,
+                    "expression": expression,
+                    "file_sha256": call_sha,
+                }] if site_role == "call" else [],
+                "consumer_sites": [{
+                    "file": f"inputs/{site_file_name}",
+                    "line": 1,
+                    "expression": expression,
+                    "file_sha256": call_sha,
+                }] if site_role == "consumer" else [],
+                "physical_paths": physical_paths,
+            })
+        runtime_key_map = root / "inputs" / "runtime-key-map.json"
+        runtime_key_map.write_text(json.dumps({
+            "schema_version": 1,
+            "unity_source_scope": "fixture",
+            "entries": runtime_key_entries,
+        }), encoding="utf-8")
 
-        mob_payload = json.dumps([0, {"idle": [0, 1], "run": [2, 3, 4, 5], "pounce": [6, 7], "hit": [8], "death": [9]}], separators=(",", ":")).encode()
+        mob_frames = {"idle": [0, 1], "run": [2, 3, 4, 5], "pounce": [6, 7], "hit": [8], "death": [9]}
+        mob_payload = json.dumps([0, mob_frames], separators=(",", ":")).encode()
         mob_bytes = binary("mob.bytes", mob_payload)
         mob_data = binary("mob.data", mob_payload)
-        mob = {"id": 0, "bytes_path": mob_bytes, "data_path": mob_data, "bytes_sha256": hashlib.sha256(mob_payload).hexdigest(), "data_sha256": hashlib.sha256(mob_payload).hexdigest(), "frames": {"idle": [0, 1], "run": [2, 3, 4, 5], "pounce": [6, 7], "hit": [8], "death": [9]}, "img": {zoom: png(f"mob-{zoom}.png") for zoom in ("x1", "x2", "x3", "x4")}}
-        animation_cells = [{"slot_index": index, "path": png(f"animation-{index}.png")} for index in range(3)]
+        mob = {"id": 0, "bytes_path": mob_bytes, "data_path": mob_data, "bytes_sha256": hashlib.sha256(mob_payload).hexdigest(), "data_sha256": hashlib.sha256(mob_payload).hexdigest(), "frames": mob_frames, "img": {zoom: png(f"mob-{zoom}.png") for zoom in ("x1", "x2", "x3", "x4")}}
+        animation_specs = (("hoc-vien-head", 3, (128, 128)), ("hoc-vien-body", 17, (128, 160)), ("hoc-vien-leg", 14, (128, 128)), ("quai-soi-rung", 10, (96, 96)))
+        animation_sheets = []
+        for name, count, cell_size in animation_specs:
+            animation_sheets.append({"name": name, "slot_count": count, "cell_size": list(cell_size), "cells": [{"slot_index": index, "path": png(f"{name}-{index}.png", size=cell_size)} for index in range(count)]})
 
         for sprite in sprites:
             sprite["source_sha256"] = hashlib.sha256((root / sprite["source_path"]).read_bytes()).hexdigest()
@@ -132,7 +183,7 @@ class BuildContractTests(unittest.TestCase):
             "phase": {"name": "lang-la"},
             "sprites": sprites,
             "parts": mapping["parts"],
-            "animations": [{"name": "idle", "slot_count": 3, "frames": [{"slot_index": 0, "client_cf": [0]}, {"slot_index": 1, "client_cf": [1]}, {"slot_index": 2, "client_cf": [2]}]}],
+            "animations": [{"name": name, "slot_count": count, "frames": [{"slot_index": index, "client_cf": [index]} for index in range(count)]} for name, count, _ in animation_specs],
             "maps": [{"id": 1, "tile_id": 1, "background_id": 0}],
             "tiles": [{"id": 0, "semantic": "ground", "solid": False}],
             "backgrounds": [{"id": 0, "layers": 4}],
@@ -148,9 +199,14 @@ class BuildContractTests(unittest.TestCase):
                 "hud_sources": hud,
                 "mob": mob,
                 "map": {"width": 5, "height": 17, "indexes": [0] * 85, "spawn": [100, 384], "tile_size": [24, 24], "client_solid": [False] * 85},
-                "animation_sheets": [{"name": "idle", "slot_count": 3, "cell_size": [1, 1], "cells": animation_cells}],
+                "animation_sheets": animation_sheets,
+                "runtime_key_map": "inputs/runtime-key-map.json",
+                "tile_set_baseline": {"sha256": hashlib.sha256((root / "inputs/tileset.bin").read_bytes()).hexdigest(), "bytes_hex": (root / "inputs/tileset.bin").read_bytes().hex(), "semantic": {"byte_length": len((root / "inputs/tileset.bin").read_bytes()), "tile_count": (root / "inputs/tileset.bin").read_bytes()[0]}},
             },
         }
+        for binding, entry in zip(manifest["ui_bindings"], runtime_key_entries):
+            binding["call_sites"] = entry["call_sites"]
+            binding["consumer_sites"] = entry["consumer_sites"]
         return manifest
 
     def _write_complete_review(self, root: Path, manifest):
@@ -178,13 +234,106 @@ class BuildContractTests(unittest.TestCase):
             second = build(manifest, root / "out-second", review, base_dir=root)
             self.assertEqual(lock["server_client_pair_sha256"], second["server_client_pair_sha256"])
             self.assertEqual((out / "asset-lock.json").read_bytes(), (root / "out-second" / "asset-lock.json").read_bytes())
-            required = ("server/part.bin", "server/tile_set_info.bin", "server/map-1-collision.bin", "server/skill.bin", "server/catalog.json", "client/mymap/1.bytes", "client/x1/t/1/t_01.png", "client/x2/t/1$1.png", "client/x4/bg/b03.png", "client/Mob/0.bytes", "client/x3/Mob/0/img.png", "client/x1/mainImage/naruto-hp-fill.png", "client/x4/naruto/ui/0.png", "client/evidence/tile-contact-x1.png", "client/evidence/full-map-x4.png", "client/evidence/animation/idle.png", "asset-lock.json")
+            required = ("server/part.bin", "server/tile_set_info.bin", "server/map-1-collision.bin", "server/skill.bin", "server/catalog.json", "client/mymap/1.bytes", "client/x1/t/1/t_01.png", "client/x2/t/1$1.png", "client/x4/bg/b03.png", "client/Mob/0.bytes", "client/x3/Mob/0/img.png", "client/x1/mainImage/naruto-hp-fill.png", "client/x4/naruto/ui/0.png", "client/evidence/tile-contact-x1.png", "client/evidence/full-map-x4.png", "client/evidence/animation/hoc-vien-body.png", "asset-lock.json")
             for relative in required:
                 self.assertTrue((out / relative).is_file(), relative)
             self.assertEqual(lock["server_client_pair_sha256"], lock["server_client_pair_sha256"])
             stored = json.loads((out / "asset-lock.json").read_text(encoding="utf-8"))
             self.assertTrue(stored["outputs"])
             self.assertTrue(stored["evidence"])
+            self.assertIn("provenance", stored)
+            self.assertIn("runtime_key_map", stored["provenance"])
+            self.assertTrue(stored["provenance"]["generated_evidence"])
+
+    def test_mob_payload_mutation_is_rejected_even_when_manifest_sha_is_updated(self):
+        from assetpack.build import BuildError, build
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = self._complete_manifest(root)
+            changed = json.dumps([0, {"idle": [0, 1], "run": [2, 3, 4, 99], "pounce": [6, 7], "hit": [8], "death": [9]}], separators=(",", ":")).encode()
+            mob_path = root / manifest["build_inputs"]["mob"]["bytes_path"]
+            mob_path.write_bytes(changed)
+            manifest["build_inputs"]["mob"]["bytes_sha256"] = hashlib.sha256(changed).hexdigest()
+            review = self._write_complete_review(root, manifest)
+            with self.assertRaisesRegex(BuildError, "ASSET-MOB-003"):
+                build(manifest, root / "out", review, base_dir=root)
+
+    def test_animation_build_requires_all_canonical_sheets(self):
+        from assetpack.build import BuildError, build
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = self._complete_manifest(root)
+            manifest["build_inputs"]["animation_sheets"].pop()
+            review = self._write_complete_review(root, manifest)
+            with self.assertRaisesRegex(BuildError, "ASSET-ANIMATION-008"):
+                build(manifest, root / "out", review, base_dir=root)
+
+    def test_animation_cf_and_cell_bounds_are_part_of_required_closure(self):
+        from assetpack.build import BuildError, build
+
+        for mutation in ("cf", "cell"):
+            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                manifest = self._complete_manifest(root)
+                if mutation == "cf":
+                    manifest["animations"][0]["frames"][1]["client_cf"] = []
+                else:
+                    wrong = root / "inputs" / "hoc-vien-head-0.png"
+                    Image.new("RGBA", (129, 128), (1, 2, 3, 255)).save(wrong, format="PNG")
+                review = self._write_complete_review(root, manifest)
+                with self.assertRaisesRegex(BuildError, "ASSET-ANIMATION-008"):
+                    build(manifest, root / "out", review, base_dir=root)
+
+    def test_runtime_key_mutation_is_rejected_by_bound_contract(self):
+        from assetpack.build import BuildError, build
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = self._complete_manifest(root)
+            manifest["ui_bindings"][0]["logical_keys"] = ["/guessed/not-a-runtime-key.png"]
+            review = self._write_complete_review(root, manifest)
+            with self.assertRaisesRegex(BuildError, "ASSET-UI-007"):
+                build(manifest, root / "out", review, base_dir=root)
+
+    def test_tileset_payload_mutation_is_rejected_even_when_sha_is_updated(self):
+        from assetpack.build import BuildError, build
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = self._complete_manifest(root)
+            tileset_path = root / manifest["build_inputs"]["tile_set_info_path"]
+            changed = bytearray(tileset_path.read_bytes())
+            changed[-1] ^= 1
+            tileset_path.write_bytes(changed)
+            manifest["build_inputs"]["tile_set_info_path"] = manifest["build_inputs"]["tile_set_info_path"]
+            manifest["build_inputs"]["tile_set_baseline"]["sha256"] = hashlib.sha256(changed).hexdigest()
+            review = self._write_complete_review(root, manifest)
+            with self.assertRaisesRegex(BuildError, "ASSET-TILESET-011"):
+                build(manifest, root / "out", review, base_dir=root)
+
+    def test_malformed_tileset_returns_asset_error_not_runtime_exception(self):
+        from assetpack.build import BuildError, build
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = self._complete_manifest(root)
+            (root / manifest["build_inputs"]["tile_set_info_path"]).write_bytes(b"")
+            review = self._write_complete_review(root, manifest)
+            with self.assertRaisesRegex(BuildError, "ASSET-TILESET-010"):
+                build(manifest, root / "out", review, base_dir=root)
+
+    def test_zero_tile_size_returns_stable_build_error(self):
+        from assetpack.build import BuildError, build
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = self._complete_manifest(root)
+            manifest["build_inputs"]["map"]["tile_size"] = [0, 24]
+            review = self._write_complete_review(root, manifest)
+            with self.assertRaisesRegex(BuildError, "ASSET-MAP-004"):
+                build(manifest, root / "out", review, base_dir=root)
 
     def test_mutation_solid_tile_without_matching_collision_is_rejected(self):
         from assetpack.build import BuildError, build

@@ -16,10 +16,10 @@ from typing import Any
 
 from PIL import Image
 
-from .animation import compose_action_sheet
+from .animation import AnimationError, compose_action_sheet, validate_animation_closure
 from .catalog import encode_catalog, validate_catalog
 from .lock import lock_bytes
-from .map import MapError, encode_collision, validate_collision_semantics
+from .map import MapError, encode_collision, validate_collision_semantics, validate_tileset_baseline
 from .mob import validate_mob_golden
 from .part import build_part, parse_part
 from .skill import encode_skill
@@ -158,10 +158,80 @@ def _source_paths(manifest: dict[str, Any]) -> list[str]:
     paths.extend(mob.get("img", {}).values())
     for sheet in inputs.get("animation_sheets", []):
         paths.extend(cell.get("path") for cell in sheet.get("cells", []))
+    runtime_map = inputs.get("runtime_key_map")
+    if isinstance(runtime_map, str):
+        paths.append(runtime_map)
     for binding in manifest.get("ui_bindings", []):
         if binding.get("source_path"):
             paths.append(binding["source_path"])
     return sorted({path for path in paths if isinstance(path, str)})
+
+
+def _runtime_key_map(manifest: dict[str, Any], base_dir: Path) -> tuple[dict[str, Any], str | None, str]:
+    reference = manifest.get("build_inputs", {}).get("runtime_key_map")
+    if isinstance(reference, str):
+        path = _path(base_dir, reference, "ASSET-UI-007")
+        if not path.is_file():
+            _fail("ASSET-UI-007", f"thiếu unity runtime key map: {reference}")
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            _fail("ASSET-UI-007", f"runtime key map lỗi: {error}")
+        return payload, reference, _sha(path)
+    if isinstance(reference, dict):
+        canonical = json.dumps(reference, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        return reference, None, hashlib.sha256(canonical).hexdigest()
+    _fail("ASSET-UI-007", "build_inputs.runtime_key_map là bắt buộc")
+
+
+def _validate_runtime_keys(manifest: dict[str, Any], base_dir: Path) -> tuple[str | None, str]:
+    payload, relative_path, map_sha = _runtime_key_map(manifest, base_dir)
+    entries = payload.get("entries") if isinstance(payload, dict) else None
+    bindings = manifest.get("ui_bindings")
+    if not isinstance(entries, list) or len(entries) != 8 or not isinstance(bindings, list) or len(bindings) != 8:
+        _fail("ASSET-UI-007", "runtime key map và manifest phải có đúng tám binding")
+    by_asset = {entry.get("source_asset"): entry for entry in entries if isinstance(entry, dict)}
+    if len(by_asset) != 8:
+        _fail("ASSET-UI-007", "runtime key map trùng/thiếu source_asset")
+    for binding in bindings:
+        if not isinstance(binding, dict) or not isinstance(binding.get("source_asset"), str):
+            _fail("ASSET-UI-007", "binding thiếu source_asset")
+        entry = by_asset.get(binding["source_asset"])
+        if entry is None:
+            _fail("ASSET-UI-007", f"binding chưa được bind vào runtime map: {binding['source_asset']}")
+        for field in ("mode", "logical_keys", "future_logical_key", "physical_paths"):
+            if binding.get(field) != entry.get(field):
+                _fail("ASSET-UI-007", f"{binding['source_asset']} lệch runtime contract ở {field}")
+        mode = binding.get("mode")
+        call_sites = entry.get("call_sites")
+        consumer_sites = entry.get("consumer_sites")
+        if not isinstance(call_sites, list) or not isinstance(consumer_sites, list):
+            _fail("ASSET-UI-007", f"{binding['source_asset']} thiếu call-site/consumer-site")
+        required_sites = call_sites if mode in {"direct", "slice_group"} else consumer_sites
+        if not required_sites:
+            _fail("ASSET-UI-007", f"{binding['source_asset']} thiếu site precondition")
+        expressions = []
+        for site in [*call_sites, *consumer_sites]:
+            if not isinstance(site, dict) or not isinstance(site.get("file"), str) or not isinstance(site.get("expression"), str) or not isinstance(site.get("line"), int) or isinstance(site.get("line"), bool):
+                _fail("ASSET-UI-007", f"{binding['source_asset']} site malformed")
+            source = _path(base_dir, site["file"], "ASSET-UI-007")
+            if not source.is_file() or not isinstance(site.get("file_sha256"), str) or _sha(source) != site["file_sha256"]:
+                _fail("ASSET-UI-007", f"{binding['source_asset']} SHA site/precondition không khớp")
+            expressions.append(site["expression"])
+        if mode in {"direct", "slice_group"} and any(key not in "\n".join(expressions) for key in binding["logical_keys"]):
+            _fail("ASSET-UI-007", f"{binding['source_asset']} logical key không có call-site tham chiếu")
+        physical_paths = binding.get("physical_paths", {})
+        if set(physical_paths) != set(ZOOMS):
+            _fail("ASSET-UI-007", f"{binding['source_asset']} thiếu physical path x1..x4")
+        for zoom, paths in physical_paths.items():
+            if not isinstance(paths, list) or not paths:
+                _fail("ASSET-UI-007", f"{binding['source_asset']} thiếu output {zoom}")
+            prefix = f"Assets/Resources/res/{zoom}/"
+            for path in paths:
+                normalized = path.replace("\\", "/") if isinstance(path, str) else ""
+                if not normalized.startswith(prefix) or ".." in Path(normalized).parts:
+                    _fail("ASSET-UI-007", f"{binding['source_asset']} physical path không canonical")
+    return relative_path, map_sha
 
 
 def require_approved_review(review_path: Path, manifest: dict[str, Any], base_dir: Path) -> tuple[str, list[dict[str, str]]]:
@@ -234,6 +304,26 @@ def _schema(manifest: dict[str, Any]) -> None:
     inputs = manifest["build_inputs"]
     if not isinstance(inputs, dict) or not inputs.get("legacy_part_path") or not inputs.get("tile_set_info_path"):
         _fail("ASSET-SCHEMA-001", "thiếu build_inputs legacy part/tileset")
+    if not isinstance(inputs.get("tile_set_baseline"), dict):
+        _fail("ASSET-TILESET-010", "thiếu tile-set baseline golden")
+    if not inputs.get("runtime_key_map"):
+        _fail("ASSET-UI-007", "thiếu runtime key map contract")
+    try:
+        validate_animation_closure(inputs.get("animation_sheets"), manifest.get("animations"))
+    except AnimationError as error:
+        _fail("ASSET-ANIMATION-008", str(error))
+    map_config = inputs.get("map")
+    if not isinstance(map_config, dict):
+        _fail("ASSET-MAP-004", "thiếu map layout")
+    tile_size = map_config.get("tile_size")
+    if not isinstance(tile_size, list) or len(tile_size) != 2 or any(not isinstance(value, int) or isinstance(value, bool) or value <= 0 for value in tile_size):
+        _fail("ASSET-MAP-004", "tile_size phải là hai số nguyên dương")
+    width, height = map_config.get("width"), map_config.get("height")
+    if not isinstance(width, int) or isinstance(width, bool) or not 1 <= width <= 255 or not isinstance(height, int) or isinstance(height, bool) or not 1 <= height <= 255:
+        _fail("ASSET-MAP-004", "map width/height phải trong 1..255")
+    indexes = map_config.get("indexes")
+    if not isinstance(indexes, list) or len(indexes) != width * height or any(not isinstance(value, int) or isinstance(value, bool) or not 0 <= value <= 99 for value in indexes):
+        _fail("ASSET-MAP-004", "map indexes malformed")
     tile_art = inputs.get("tile_art")
     if not isinstance(tile_art, list) or any(not isinstance(item, dict) for item in tile_art) or {item.get("index") for item in tile_art} != set(range(100)):
         _fail("ASSET-MAP-004", "tile_art phải đủ index 0..99")
@@ -255,7 +345,12 @@ def _schema(manifest: dict[str, Any]) -> None:
     ui_bindings = manifest["ui_bindings"]
     if not isinstance(ui_bindings, list) or len(ui_bindings) != 8:
         _fail("ASSET-UI-007", "phải có đúng tám UI binding")
+    modes = [binding.get("mode") for binding in ui_bindings if isinstance(binding, dict)]
+    if modes.count("direct") != 1 or modes.count("slice_group") != 2 or modes.count("overlay_required") != 5:
+        _fail("ASSET-UI-007", "UI binding phải đúng tỷ lệ 1 direct/2 slice_group/5 overlay_required")
     for binding in ui_bindings:
+        if not isinstance(binding, dict):
+            _fail("ASSET-UI-007", "UI binding phải là object")
         mode = binding.get("mode")
         if mode not in {"direct", "slice_group", "overlay_required"}:
             _fail("ASSET-UI-007", "UI binding có mode không biết")
@@ -308,12 +403,31 @@ def _pair_sha(root: Path) -> str:
     return digest.hexdigest()
 
 
+def _manifest_sha(manifest: dict[str, Any]) -> str:
+    canonical = json.dumps(manifest, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
+
+
 def _build_into(manifest: dict[str, Any], base_dir: Path, root: Path) -> dict[str, Any]:
     inputs = manifest["build_inputs"]
     server = root / "server"
     client = root / "client"
     legacy = _path(base_dir, inputs["legacy_part_path"], "ASSET-BUILD-013").read_bytes()
     tileset = _path(base_dir, inputs["tile_set_info_path"], "ASSET-BUILD-013").read_bytes()
+    try:
+        validate_tileset_baseline(tileset, inputs["tile_set_baseline"])
+        validate_animation_closure(
+            inputs["animation_sheets"],
+            manifest["animations"],
+            check_paths=lambda relative: _path(base_dir, relative, "ASSET-ANIMATION-008"),
+            check_cell_size=lambda relative, expected: _load_png(base_dir, relative).size == expected,
+        )
+    except MapError as error:
+        message = str(error)
+        code = message.split(":", 1)[0] if message.startswith("ASSET-") else "ASSET-TILESET-011"
+        _fail(code, message)
+    except AnimationError as error:
+        _fail("ASSET-ANIMATION-008", str(error))
     try:
         part_data = build_part(manifest, legacy)
         parse_part(part_data)
@@ -372,8 +486,12 @@ def _build_into(manifest: dict[str, Any], base_dir: Path, root: Path) -> dict[st
             _copy(base_dir, sources[zoom], client / zoom / "mainImage" / f"{name}.png", png=True)
 
     mob = inputs.get("mob", {})
+    mob_bytes_path = _path(base_dir, mob.get("bytes_path"), "ASSET-MOB-003") if isinstance(mob, dict) else None
+    mob_data_path = _path(base_dir, mob.get("data_path"), "ASSET-MOB-003") if isinstance(mob, dict) else None
+    if mob_bytes_path is None or mob_data_path is None or not mob_bytes_path.is_file() or not mob_data_path.is_file():
+        _fail("ASSET-MOB-003", "thiếu Mob bytes/data payload")
     try:
-        validate_mob_golden(mob)
+        validate_mob_golden(mob, mob_bytes_path.read_bytes(), mob_data_path.read_bytes())
     except ValueError as error:
         _fail("ASSET-MOB-003", str(error))
     mob_id = _int(mob.get("id"), "ASSET-MOB-003", "mob.id")
@@ -428,12 +546,27 @@ def build(manifest: dict, out: Path, review_path: Path, *, base_dir: Path | None
     base_dir = Path(base_dir or Path.cwd()).resolve()
     review_sha, evidence = require_approved_review(review_path, manifest, base_dir)
     _schema(manifest)
+    runtime_key_map_path, runtime_key_map_sha = _validate_runtime_keys(manifest, base_dir)
     parent = out.parent
     parent.mkdir(parents=True, exist_ok=True)
     temporary = Path(tempfile.mkdtemp(prefix=f".{out.name}.", dir=parent))
     try:
         _build_into(manifest, base_dir, temporary)
         outputs = _all_output_files(temporary)
+        generated_evidence = [record for record in outputs if record["path"].startswith("client/evidence/")]
+        closure = {
+            "sprite_ids": sorted(sprite["id"] for sprite in manifest["sprites"]),
+            "part_ids": sorted(part["id"] for part in manifest["parts"]),
+            "skill_ids": sorted(skill["id"] for skill in manifest["skills"]),
+            "mob_ids": sorted(mob["id"] for mob in manifest.get("mobs", [])),
+            "map_ids": sorted(item["id"] for item in manifest.get("maps", [])),
+            "frame_counts": {str(part["id"]): len(part["frames"]) for part in manifest["parts"]},
+        }
+        dimensions = {
+            record["path"]: [record["width"], record["height"]]
+            for record in outputs
+            if "width" in record and "height" in record
+        }
         lock = {
             "schema_version": manifest["schema_version"],
             "slice": manifest["phase"]["name"],
@@ -442,10 +575,15 @@ def build(manifest: dict, out: Path, review_path: Path, *, base_dir: Path | None
             "inputs": [{"path": relative, "sha256": _sha(_path(base_dir, relative, "ASSET-BUILD-013"))} for relative in _source_paths(manifest)],
             "outputs": outputs,
             "evidence": sorted(evidence, key=lambda item: item["path"]),
-            "closure": {
-                "sprite_ids": sorted(sprite["id"] for sprite in manifest["sprites"]),
-                "part_ids": sorted(part["id"] for part in manifest["parts"]),
-                "frame_counts": {str(part["id"]): len(part["frames"]) for part in manifest["parts"]},
+            "closure": closure,
+            "provenance": {
+                "manifest": {"source": "canonical-json", "sha256": _manifest_sha(manifest)},
+                "runtime_key_map": {"path": runtime_key_map_path or "<inline>", "sha256": runtime_key_map_sha},
+                "dimensions": dimensions,
+                "ids": {key: closure[key] for key in ("sprite_ids", "part_ids", "skill_ids", "mob_ids", "map_ids")},
+                "frame_counts": closure["frame_counts"],
+                "review_evidence": sorted(evidence, key=lambda item: item["path"]),
+                "generated_evidence": generated_evidence,
             },
             "server_client_pair_sha256": _pair_sha(temporary),
         }

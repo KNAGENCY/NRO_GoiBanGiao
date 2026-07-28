@@ -8,7 +8,7 @@
 > một bản vá, một phát hiện lỗi) thì **phải cập nhật file này ngay** rồi mới commit.
 > Cách cập nhật xem mục [11. Quy ước cập nhật](#11-quy-ước-cập-nhật-file-này).
 
-**Cập nhật lần cuối:** 27/07/2026 (**KH6 + KH11 xong, gộp `main`**) · **Nhánh chính:** `main` · **Commit HEAD:** `6ea467f`
+**Cập nhật lần cuối:** 29/07/2026 (**vertical slice Làng Lá: Task 0 khóa runtime UI xong trên nhánh**) · **Nhánh chính:** `main` · **Commit HEAD:** `6ea467f`
 
 ---
 
@@ -118,6 +118,7 @@ Mỗi kế hoạch đều đi qua: thiết kế → kế hoạch → thi công t
 | 5 | Di chuyển + mô hình actor | Nhiều người **thấy nhau**, đi lại, chống dịch chuyển tức thời | `e1ddc44` |
 | 6 | **Chiến đấu, chiêu thức, quái** | 20 chiêu Naruto (4/làng) + sát thương ngũ hành (×1,25/×1,00/×0,80); đánh quái, quái đánh lại + hồi sinh, **PvP**, chết & hồi sinh; nhiều người cùng khu vực **thấy toàn bộ diễn biến** | `162bbe9` |
 | 11 | **Lưu trạng thái sống** | Trước đó máy chủ **không lưu gì** sau lúc tạo nhân vật. Nay lưu **3 thời điểm**: định kỳ 60 giây · khi người chơi rời · khi tắt máy chủ. Kiến trúc: actor **chụp ảnh** → hàng đợi gộp → **thợ ghi riêng** chạm đĩa (actor không bao giờ chờ ổ đĩa). Kèm **một tài khoản một phiên** (đá phiên cũ → chờ lưu xong → mới đọc) | `6ea467f` |
+| Ảnh-0 | **Khóa runtime UI Game1** | Quét source Unity thật, khóa 8 binding bằng file+dòng+expression+SHA; phân biệt 1 key trực tiếp, 2 nhóm nút ba mảnh và 5 chỗ bắt buộc overlay. Có discovery self-test + mutation bắt key đoán | `kh-assets` (chờ review/gộp) |
 | W1 | Web nền tảng | Đăng ký, đăng nhập, phiên cookie, dùng chung CSDL với game | `af5a2e4` |
 | W2 | Web tính năng | Trang cá nhân, đổi mật khẩu, bảng xếp hạng, panel admin (chặn quyền 3 lớp) | trên `main` |
 
@@ -141,6 +142,7 @@ Xếp theo thứ tự nên làm:
 |---|---|---|
 | ✅ | ~~KH6 — Chiến đấu~~ | **Xong, gộp `162bbe9`.** Còn **Task 15 — nghiệm thu tay bằng client Unity** (chỉ chủ dự án làm). Hồi máu PvP (`goiHoiMauNguoiChoi`) cố ý hoãn — xem §8 |
 | ✅ | ~~KH11 — Lưu trạng thái sống~~ | **Xong, gộp `6ea467f`.** Còn **Task 9 — nghiệm thu tay**: chơi vài phút → Ctrl+C tắt máy chủ → bật lại → đăng nhập xem có đúng chỗ, đúng máu không |
+| 1a | **Vertical slice Làng Lá — Task 1–3 assetpack** | Task 0 đã khóa runtime UI trên `kh-assets`, **chưa gộp**. Chỉ làm Task 1–3 sau review độc lập; Task 5 phải vá và test đủ 5 binding `overlay_required` |
 | 1b | **KH6b — Boss** (hệ riêng, tách khỏi KH6) | Bản Java là 12 file, phức tạp hơn quái thường nhiều. Thiết kế sau khi KH6 gộp |
 | 1c | **KH6c — Stress test 20 client cùng khu vực** | Cùng xả chiêu, đo gói rơi hộp thư actor (trần 256, rơi im lặng) + trễ nhịp 100ms. Dựng trên `thuclient`/`clientGia` |
 | 2 | KH7 — Vật phẩm, hành trang, cửa hàng, giao dịch | 🧱 **Phải chốt căn cước vật phẩm + chống nhân bản trong đặc tả TRƯỚC khi viết code** ([BO-SUNG](docs/superpowers/plans/BO-SUNG-LO-TRINH.md) Khối 3). Tách rõ 4 thứ: cửa hàng NPC / giao dịch 2 người / ký gửi / kho |
@@ -258,6 +260,12 @@ Xếp theo thứ tự nên làm:
     Triệu chứng vì thế **im lặng**: gói không làm gì, hoặc hiện số vô lý — không treo,
     không log. **Chạy thử bằng mắt sẽ không phát hiện được; phải test byte-chính-xác.**
     (Thứ làm hỏng cả dòng byte là sai **số byte của trường độ dài** — đó là §6.2, khác hẳn.)
+19. **Tên ảnh mỹ thuật không phải runtime key Unity.** Quét Game1 ngày 29/07 cho thấy chỉ
+    logo ánh xạ trực tiếp; nút thường/nhấn được ghép từ ba file trái–giữa–phải, còn khung
+    hội thoại/avatar, nút khóa và hai ô vật phẩm đang vẽ ghép hoặc vẽ bằng code. Nếu đổi
+    tên file theo phỏng đoán thì ảnh không bao giờ được đọc nhưng pipeline vẫn có thể
+    “xanh”. **Phải khóa call-site/consumer bằng file+dòng+expression+SHA; chỗ chưa có key
+    phải ghi `overlay_required`, tuyệt đối không bịa key 1–1.**
 
 ---
 
@@ -448,3 +456,4 @@ Commit riêng cho việc cập nhật tài liệu thì dùng tiền tố `docs:`
 | 27/07/2026 | **KH6 XONG — gộp `main` `162bbe9`.** Task 11 (PvP `-60` + gói `-30/9` + **vá gap bất tử quái** của Task 13) → Task 14 (**test đầu-cuối 2 người qua mạng + CSDL thật**, diễn trọn chuỗi chiến đấu). **Soi toàn nhánh bằng opus** → bắt được `goiHoiMauNguoiChoi` là mã chết (chiêu type=2 gây sát thương sai) → đợt sửa cuối chốt hoãn có kỷ luật. **2 canary** (thả bug thật): reviewer bắt được lỗi byte im lặng, test E2E bắt được lỗi tích hợp — pipeline review đáng tin. Phân tích **bổ sung lộ trình** (9 khối thiếu, [`BO-SUNG-LO-TRINH.md`](docs/superpowers/plans/BO-SUNG-LO-TRINH.md)) + **mapping ảnh** đã lưu. Còn **Task 15 nghiệm thu tay bằng Unity** (chủ dự án) |
 | 27/07/2026 | **KH11 XONG — gộp `main` `6ea467f`.** Máy chủ trước đó **không lưu gì** sau lúc tạo nhân vật; nay lưu 3 thời điểm (định kỳ 60 giây · khi rời · khi tắt máy) theo kiến trúc *actor chụp ảnh → hàng đợi gộp → thợ ghi riêng*, **actor không bao giờ chờ ổ đĩa**. Kèm **một tài khoản một phiên** (đá phiên cũ → chờ lưu xong → mới đọc; bản Java làm ngược và chưa bao giờ vá). 8 task, mỗi task TDD + đột biến + review đối kháng. **Soi toàn nhánh (opus) tìm ra 1 lỗi Nghiêm trọng thật**: client đăng nhập chồng trên cùng kết nối → mục rác trong sổ phiên → đóng channel hai lần → **panic chết cả tiến trình** (DoS từ xa) — đã vá, có test dựng lại trọn kịch bản 4 bước. Cũng vá bẫy §7.1 ở `XepVaCho`. Bốn khoản nợ mới ghi ở §8 |
 | 28/07/2026 | **Nghiệm thu tay Unity — client VÀO ĐƯỢC GAME.** Chủ dự án bấm Play, tự động login `naruto/1`, vào bản đồ. Nhưng vấp 4 chỗ, mỗi chỗ đều là lỗi thật cần nhớ: (1) client Unity chỉ có file `mymap/{0,39,40,41}.bytes`, server gửi mapID=1-5 → **kẹt vô hình** — vá tạm bằng `cp 0.bytes {1..5}.bytes`; (2) client không gửi `-74` tự động khi mở, nhưng `ServerListScreen.switchToMe` chỉ set `loadScreen=true` khi RMS `ResVersion > 0` — thiếu, client kẹt màn "Xin chờ"; (3) client cần user click 2 lần (chọn server + đăng nhập), auto-login mặc định tắt → **sửa `SplashScr.cs`** thêm `waitToLogin = true` sau `GameCanvas.connect()` để bỏ qua cả 2 click; (4) RMS cache Java cũ (`NRdataVersion=20`) khớp `vsData=20` server → client tự đọc cache Java thay vì xin mới → parse fail âm thầm — xoá 16 file `NR*` cache. Thêm handler stub `-74` ở server (`login.go`), rebuild. **Server 100% đúng — testfull đi trọn từ bắt tay → clientOk → tileset+ME+MAP**. Còn 3 vấn đề mỹ thuật vẫn chưa map: sprite nhân vật (`part.bin` = Dragon Ball placeholder), tile map (1.bytes rỗng), atlas ảnh (`Big*.png` = Dragon Ball) — xem §8 mới thêm |
+| 29/07/2026 | **Vertical slice Làng Lá — Task 0 khóa 8 runtime UI trên nhánh `kh-assets`.** Không sửa `D:\NRO_Project`: chỉ đọc Game1 và ghi bằng chứng file+dòng+expression+SHA vào `unity-runtime-key-map.json`. Phát hiện contract 1 source→1 key là sai thực tế, nên chốt 8 binding `direct|slice_group|overlay_required`; self-test cấm placeholder/key đoán/trùng key/lệch SHA/thiếu zoom/file runtime. Mutation đổi logo thành `/Logo/naruto-emblem.png` đỏ đúng vì call-site không tham chiếu. **Chờ review độc lập trước Task 1–3.** |

@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "unity_version": "2022.3.62f2",
+  "protected_source_roots": [
+    "D:\\NRO_Project"
+  ],
+  "patches": [
+    {
+      "target": "Assets/Scripts/Game1/Rms.cs",
+      "source_sha256": "cf6b658da1ec6fd6dc73c03d076d95482f1a3b26c0b3abe63603c65860f762e8",
+      "patch": "patches/rms-profile-root.patch"
+    },
+    {
+      "target": "Assets/Scripts/Game2/Rms.cs",
+      "source_sha256": "7a39979e20a7781c4fd765e7a282fca24de56ddf653a813479bae3e25b92fa51",
+      "patch": "patches/rms-profile-root.patch"
+    },
+    {
+      "target": "Assets/Scripts/Game1/GameScr.cs",
+      "source_sha256": "ca9ebcf3be9b715e88d00e88d68a42930527b979ede491350b0a09e2a6f8b0a8",
+      "patch": "patches/skill-no-effect-80.patch"
+    },
+    {
+      "target": "Assets/Scripts/Game2/GameScr.cs",
+      "source_sha256": "375b1f959f1f7367a97cdab6e2e7d4d42e8a857caabad3b6701ec56d168fe280",
+      "patch": "patches/skill-no-effect-80.patch"
+    },
+    {
+      "target": "Assets/Scripts/Game1/Char.cs",
+      "source_sha256": "b098bc360ce5496192ea697914a227a921c6399dd81dd43cc66e342e7875708f",
+      "patch": "patches/skill-no-effect-render.patch"
+    },
+    {
+      "target": "Assets/Scripts/Game2/Char.cs",
+      "source_sha256": "ab4bbe9492aa68431c686be88f1ece703bdb97585c5632f8227d442dd82ac22a",
+      "patch": "patches/skill-no-effect-render.patch"
+    },
+    {
+      "target": "Assets/Scripts/Game1/ChatPopup.cs",
+      "source_sha256": "e0127190f772666bed7ccb23255a3611cd404c88e8a5692ee39c8fca08a41826",
+      "patch": "patches/ui-chat-popup.patch",
+      "provides_future_keys": [
+        "/naruto/ui/avatar-frame.png",
+        "/naruto/ui/dialog-frame.png"
+      ]
+    },
+    {
+      "target": "Assets/Scripts/Game1/Command.cs",
+      "source_sha256": "b053ac650526d45d026bbd2b74ee6b89a69f7e9e57fcefa234086bde91f5e2d5",
+      "patch": "patches/ui-command-disabled.patch",
+      "provides_future_keys": [
+        "/naruto/ui/button-disabled.png"
+      ]
+    },
+    {
+      "target": "Assets/Scripts/Game1/Panel.cs",
+      "source_sha256": "cc352009ebdeaea3f1386bfce9b69d9238e749dacd41ccc2f046d48259087033",
+      "patch": "patches/ui-panel-slots.patch",
+      "provides_future_keys": [
+        "/naruto/ui/item-slot.png",
+        "/naruto/ui/item-slot-selected.png"
+      ]
+    }
+  ],
+  "overlay_files": [
+    "Assets/Scripts/NroE2E/NroE2EConfig.cs",
+    "Assets/Scripts/NroE2E/NroUiOverlay.cs",
+    "Assets/Editor/NroResourceImportSettings.cs",
+    "Assets/Tests/EditMode/NroResourcePreflightTests.cs"
+  ]
+}

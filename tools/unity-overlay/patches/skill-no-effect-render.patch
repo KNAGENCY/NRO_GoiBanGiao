@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "replacements": [
+    {
+      "before": "if (effPaints[i] == null)",
+      "after": "if (effPaints[i] == null || effPaints[i].effCharPaint == null)",
+      "expected_count": 2
+    },
+    {
+      "before": "effPaints[i].effCharPaint = GameScr.efs[skillPaint.effectHappenOnMob - 1];",
+      "after": "effPaints[i].effCharPaint = (skillPaint.effectHappenOnMob > 0) ? GameScr.efs[skillPaint.effectHappenOnMob - 1] : null;"
+    },
+    {
+      "before": "effPaints[j + myVector.size()].effCharPaint = GameScr.efs[skillPaint.effectHappenOnMob - 1];",
+      "after": "effPaints[j + myVector.size()].effCharPaint = (skillPaint.effectHappenOnMob > 0) ? GameScr.efs[skillPaint.effectHappenOnMob - 1] : null;"
+    },
+    {
+      "before": "effPaints[k].effCharPaint = GameScr.efs[skillPaint2.effectHappenOnMob - 1];",
+      "after": "effPaints[k].effCharPaint = (skillPaint2.effectHappenOnMob > 0) ? GameScr.efs[skillPaint2.effectHappenOnMob - 1] : null;"
+    },
+    {
+      "before": "effPaints[l].effCharPaint = GameScr.efs[skillPaint2.effectHappenOnMob - 1];",
+      "after": "effPaints[l].effCharPaint = (skillPaint2.effectHappenOnMob > 0) ? GameScr.efs[skillPaint2.effectHappenOnMob - 1] : null;"
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import json
 
 def lock_bytes(lock: dict) -> bytes:
     canonical = dict(lock)
-    if "outputs" in canonical:
-        canonical["outputs"] = sorted(canonical["outputs"], key=lambda output: output["path"])
+    for key in ("inputs", "outputs", "evidence"):
+        if key in canonical:
+            canonical[key] = sorted(canonical[key], key=lambda item: item["path"])
     return (json.dumps(canonical, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8")

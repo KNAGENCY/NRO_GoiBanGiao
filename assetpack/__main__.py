@@ -59,7 +59,7 @@ def main(argv=None):
             manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
             if manifest.get("phase", {}).get("name", manifest.get("slice")) != args.slice:
                 raise BuildError("ASSET-BUILD-011: slice không khớp manifest")
-            build(manifest, args.out, args.review)
+            build(manifest, args.out, args.review, base_dir=args.manifest.parent)
         except (BuildError, OSError, json.JSONDecodeError) as error:
             print(error, file=sys.stderr)
             return 1

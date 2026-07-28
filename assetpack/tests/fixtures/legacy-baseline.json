@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "repository_root": ".",
+  "inputs": [
+    {
+      "path": "server/internal/game/part.bin",
+      "kind": "part.bin",
+      "sha256": "09349f28a95b46469b691abf87d6b341f3395f53ca8d6d704b48ab706992826b",
+      "bytes": 87707
+    }
+  ],
+  "expected": {
+    "part_records": 2189,
+    "occupied_ids": [0, 1, 32704]
+  }
+}

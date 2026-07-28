@@ -1,0 +1,232 @@
+{
+  "review_id": "vertical-slice-v1",
+  "reviewer": "Codex Task 6A deterministic Pillow QA",
+  "timestamp": "2026-07-28T22:30:20.203356Z",
+  "source_root": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1",
+  "evidence": [
+    {
+      "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheet-light.png",
+      "sha256": "617a52b104e7efd36f86812f4d6d0e4c423a827eb15c05e1e1281670117b9600"
+    },
+    {
+      "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheet-dark.png",
+      "sha256": "2ea271c78ff3b30e069f42f3e8e4b20aa81095c057cfc7229125323d8196d913"
+    }
+  ],
+  "assets": [
+    {
+      "asset": "hu_anthan_10f_chroma.png",
+      "status": "FAIL",
+      "source_sha256": "ba1280259b8818d99ce53648e3b5fe3583ccbd10abc4ed3cf94f48bbfc55ecba",
+      "evidence_path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\reports\\hu_anthan_10f_chroma.json",
+      "evidence_sha256": "5e593964c639d9a529af1a6d07565e74e53ad90bdd18fcbddb16a495526c3337",
+      "issues": [
+        "canvas_width_not_divisible_by_columns",
+        "background_gradient_exceeds_static_matte_tolerance"
+      ]
+    },
+    {
+      "asset": "hud_hp_chakra_4_chroma.png",
+      "status": "FAIL",
+      "source_sha256": "bea34c6838b76e2e34bdcc2cc726cb644f298532567d7784b2d06a209ff6cd48",
+      "evidence_path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\reports\\hud_hp_chakra_4_chroma.json",
+      "evidence_sha256": "e9500e5d35025496f6d57f2bc761783bb49385c644e8b6c939a980ef7f9bacf8",
+      "issues": [
+        "canvas_width_not_divisible_by_columns",
+        "border_chroma_not_detected"
+      ]
+    },
+    {
+      "asset": "iruka_portrait_chroma.png",
+      "status": "FAIL",
+      "source_sha256": "f6b84bde6409bd3e8de1a82f25a3329d135453bafdba00a4297cd5877b897251",
+      "evidence_path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\reports\\iruka_portrait_chroma.json",
+      "evidence_sha256": "5825c0363f2aa10481808d5f654879984e85659e1844918210fb08e500875019",
+      "issues": [
+        "background_gradient_exceeds_static_matte_tolerance"
+      ]
+    },
+    {
+      "asset": "master_hoc_vien_x4_chroma.png",
+      "status": "FAIL",
+      "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "evidence_path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\reports\\master_hoc_vien_x4_chroma.json",
+      "evidence_sha256": "55140186b32f7c682e3ff92ee7861877985e8e28759d0836931a5219c1462008",
+      "issues": [
+        "background_gradient_exceeds_static_matte_tolerance"
+      ]
+    },
+    {
+      "asset": "master_iruka_x4_chroma.png",
+      "status": "FAIL",
+      "source_sha256": "a53d149ca17557f365dd3d2b8f9f1b9d4fcb6c14dbfb130876157e7e27533622",
+      "evidence_path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\reports\\master_iruka_x4_chroma.json",
+      "evidence_sha256": "3094401090964a4404b4490a58eb60e18d036c7ea25760fbd2a1c281ac5556c1",
+      "issues": [
+        "background_gradient_exceeds_static_matte_tolerance"
+      ]
+    },
+    {
+      "asset": "master_soi_rung_x4_chroma.png",
+      "status": "FAIL",
+      "source_sha256": "c8002663b8c1cd2ccbe42ba0ea4d2fbc1ed54dd4ec1c001c5f22f6c341d64827",
+      "evidence_path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\reports\\master_soi_rung_x4_chroma.json",
+      "evidence_sha256": "c62577a0aff70ff836eefa08854436c6e83467902b901422cf3d9f2abebfab0a",
+      "issues": [
+        "background_gradient_exceeds_static_matte_tolerance"
+      ]
+    },
+    {
+      "asset": "player_cast_3f_chroma.png",
+      "status": "FAIL",
+      "source_sha256": "8798d45014e7a0a709b2a4d4f1876729664573393b4f119f60fc9adb4cfe6d30",
+      "evidence_path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\reports\\player_cast_3f_chroma.json",
+      "evidence_sha256": "2f558c0342bf8689561fd2dc15c7163ef981ced565b1a81c0e67100e1620a16b",
+      "issues": [
+        "background_gradient_exceeds_static_matte_tolerance"
+      ]
+    },
+    {
+      "asset": "player_hit_death_getup_3f_chroma.png",
+      "status": "FAIL",
+      "source_sha256": "9a4017a70a49c35d46146963943b00df4c61709e7a0f2bf441da945eeaf9808f",
+      "evidence_path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\reports\\player_hit_death_getup_3f_chroma.json",
+      "evidence_sha256": "7095c14491012667619e568b543c6ffe79957b12c5f47fc66a10dd80772abdac",
+      "issues": [
+        "background_gradient_exceeds_static_matte_tolerance",
+        "loop_boundary_anchor_mismatch"
+      ]
+    },
+    {
+      "asset": "player_idle_3f_chroma.png",
+      "status": "FAIL",
+      "source_sha256": "2c60b2bca5d0a68df9da341127971ccfc70d5c94a895ce01b0c6a59910465550",
+      "evidence_path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\reports\\player_idle_3f_chroma.json",
+      "evidence_sha256": "96da744bc0c63037f0a2669e9cad10c27243f4a0b02ae6d3055389cefa88892c",
+      "issues": [
+        "background_gradient_exceeds_static_matte_tolerance"
+      ]
+    },
+    {
+      "asset": "player_melee_4f_chroma.png",
+      "status": "FAIL",
+      "source_sha256": "2d87f30c095a858ffbbdb5a918af7b296a3766ab0595383b91d55bf4cbaf2dc5",
+      "evidence_path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\reports\\player_melee_4f_chroma.json",
+      "evidence_sha256": "6baa642b795867a25a918b5043bcf3b2e12d4c37cb32eee61c7c2ac5a31246ea",
+      "issues": [
+        "background_gradient_exceeds_static_matte_tolerance"
+      ]
+    },
+    {
+      "asset": "player_run_4f_chroma.png",
+      "status": "FAIL",
+      "source_sha256": "10ef5d8c32d541a9428308acdffcf46adc0c6084c5198b82a28ceb68759514da",
+      "evidence_path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\reports\\player_run_4f_chroma.json",
+      "evidence_sha256": "232ee0fbabcd178448e589d375ef258d18d401cd4a130ee13a3994c435cf897d",
+      "issues": [
+        "background_gradient_exceeds_static_matte_tolerance",
+        "anchor_bottom_drift"
+      ]
+    },
+    {
+      "asset": "skill_icons_cloud_4_chroma.png",
+      "status": "FAIL",
+      "source_sha256": "f987f3ab7bcd62cb5541065c1fcba17ae515d473ce2ce1f01a156c4096161916",
+      "evidence_path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\reports\\skill_icons_cloud_4_chroma.json",
+      "evidence_sha256": "c3b1d49503e5150b0d3decbd4d73b68e43461a0b12a588d7eff0491dbc0d7166",
+      "issues": [
+        "canvas_width_not_divisible_by_columns",
+        "background_gradient_exceeds_static_matte_tolerance"
+      ]
+    },
+    {
+      "asset": "skill_icons_leaf_4_chroma.png",
+      "status": "FAIL",
+      "source_sha256": "da6a4e3ba27830fa3ba29c8d9dd813ea6d9d2d089967623d50c90b7370a52fed",
+      "evidence_path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\reports\\skill_icons_leaf_4_chroma.json",
+      "evidence_sha256": "b41344f582c8e9a8040aba1a7fed658f0df6f013065e2639adac5969b64caeac",
+      "issues": [
+        "canvas_width_not_divisible_by_columns",
+        "background_gradient_exceeds_static_matte_tolerance"
+      ]
+    },
+    {
+      "asset": "skill_icons_mist_4_chroma.png",
+      "status": "FAIL",
+      "source_sha256": "c149c2b2e0499e7363a307155bfc6ea2f70589ed424f41a25732dee220849b3d",
+      "evidence_path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\reports\\skill_icons_mist_4_chroma.json",
+      "evidence_sha256": "c8d74650eeb2956c2e98bc31556af107e82aa1ac75a82381464ed992b3559035",
+      "issues": [
+        "canvas_width_not_divisible_by_columns",
+        "background_gradient_exceeds_static_matte_tolerance"
+      ]
+    },
+    {
+      "asset": "skill_icons_sand_4_chroma.png",
+      "status": "FAIL",
+      "source_sha256": "0373a3fa13094d5b260a3bfa6492901343c2cf015eafde4da4b5d85a1af09605",
+      "evidence_path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\reports\\skill_icons_sand_4_chroma.json",
+      "evidence_sha256": "63e4e73cdefa9e0b6b5d75a0d1542e8879a710d509c99c8b270ef159ed33324e",
+      "issues": [
+        "canvas_width_not_divisible_by_columns",
+        "background_gradient_exceeds_static_matte_tolerance"
+      ]
+    },
+    {
+      "asset": "skill_icons_stone_4_chroma.png",
+      "status": "FAIL",
+      "source_sha256": "fa02805c811423d45e5bbe21606c70c27d1d0f7cb92adc7366e54970fb9adc85",
+      "evidence_path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\reports\\skill_icons_stone_4_chroma.json",
+      "evidence_sha256": "21bb4923e6337bae17d7802491c441f520c5bf37ca56b3374d44a78f96340385",
+      "issues": [
+        "canvas_width_not_divisible_by_columns",
+        "background_gradient_exceeds_static_matte_tolerance"
+      ]
+    },
+    {
+      "asset": "wolf_hit_death_2f_chroma.png",
+      "status": "FAIL",
+      "source_sha256": "8fe6a75f61a1b3d588a78c1bf38caf8cd364dfe81e844a027262c9f41896760c",
+      "evidence_path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\reports\\wolf_hit_death_2f_chroma.json",
+      "evidence_sha256": "d0d05fbc935d1f9acc0a39863332e6afc08f879ed733dd41122bdd89cb5b776e",
+      "issues": [
+        "background_gradient_exceeds_static_matte_tolerance"
+      ]
+    },
+    {
+      "asset": "wolf_idle_2f_chroma.png",
+      "status": "FAIL",
+      "source_sha256": "c6bf95fd9faaa0748af1c33af87dc51bb126203a5e5fbd0217106fec16dd5b3c",
+      "evidence_path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\reports\\wolf_idle_2f_chroma.json",
+      "evidence_sha256": "bab3dd7f89d8fdd6776895ed57fda0481d2e77d7e93d2ca01f6d1184f437a5b9",
+      "issues": [
+        "background_gradient_exceeds_static_matte_tolerance"
+      ]
+    },
+    {
+      "asset": "wolf_pounce_2f_chroma.png",
+      "status": "FAIL",
+      "source_sha256": "42a30b0d5bcfe150c455c043bdef2d92cdf446de72b55d1deadb826b5c2b9fcb",
+      "evidence_path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\reports\\wolf_pounce_2f_chroma.json",
+      "evidence_sha256": "8a39f91f2a9e17bf63c16a8ce5090fea04e9f680773dcfe8709c9c0ea2194f91",
+      "issues": [
+        "background_gradient_exceeds_static_matte_tolerance"
+      ]
+    },
+    {
+      "asset": "wolf_run_4f_chroma.png",
+      "status": "FAIL",
+      "source_sha256": "2b15ce5e1dcda4a10b9b8196944f64806a2bde7b6fd3b5532bc73472ef214d52",
+      "evidence_path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\reports\\wolf_run_4f_chroma.json",
+      "evidence_sha256": "04e7845e3b785421cbbebc1471997505882116dfea74f781c875f5703606212a",
+      "issues": [
+        "background_gradient_exceeds_static_matte_tolerance"
+      ]
+    }
+  ],
+  "summary": {
+    "total": 20,
+    "pass": 0,
+    "fail": 20
+  }
+}

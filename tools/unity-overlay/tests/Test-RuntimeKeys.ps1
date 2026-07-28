@@ -239,6 +239,33 @@ try {
     $validStagingResult = Invoke-Discovery -Root $tempRoot -Map $validMap -RequireFutureOutputs
     Assert-True ($validStagingResult.ExitCode -eq 0) "staging đủ future output phải qua. Output: $($validStagingResult.Output)"
 
+    # Contract: direct/slice use call-sites; only overlay has a consumer precondition.
+    $directWithConsumer = Copy-JsonObject $mapping
+    $directWithConsumer.entries[0].consumer_sites = @($mapping.entries[3].consumer_sites[0])
+    $directWithConsumerPath = Join-Path $tempRoot "direct-with-consumer.json"
+    [System.IO.File]::WriteAllText($directWithConsumerPath, ($directWithConsumer | ConvertTo-Json -Depth 20))
+    $directWithConsumerResult = Invoke-Discovery -Root $tempRoot -Map $directWithConsumerPath
+    Assert-True ($directWithConsumerResult.ExitCode -ne 0) "direct must not carry an overlay consumer precondition"
+    Assert-True ($directWithConsumerResult.Output -match "RUNTIME-BINDING-001") "direct consumer error must state the contract distinction"
+
+    # Mutation: removing an overlay consumer site removes Task 1's required precondition.
+    $overlayWithoutConsumer = Copy-JsonObject $mapping
+    $overlayWithoutConsumer.entries[3].consumer_sites = @()
+    $overlayWithoutConsumerPath = Join-Path $tempRoot "overlay-without-consumer.json"
+    [System.IO.File]::WriteAllText($overlayWithoutConsumerPath, ($overlayWithoutConsumer | ConvertTo-Json -Depth 20))
+    $overlayWithoutConsumerResult = Invoke-Discovery -Root $tempRoot -Map $overlayWithoutConsumerPath
+    Assert-True ($overlayWithoutConsumerResult.ExitCode -ne 0) "overlay without a consumer site must fail"
+    Assert-True ($overlayWithoutConsumerResult.Output -match "RUNTIME-OVERLAY-001") "overlay consumer failure must name the precondition"
+
+    # Mutation: an overlay consumer without SHA is not a valid precondition.
+    $overlayWithoutSha = Copy-JsonObject $mapping
+    $overlayWithoutSha.entries[3].consumer_sites[0].PSObject.Properties.Remove("file_sha256")
+    $overlayWithoutShaPath = Join-Path $tempRoot "overlay-without-consumer-sha.json"
+    [System.IO.File]::WriteAllText($overlayWithoutShaPath, ($overlayWithoutSha | ConvertTo-Json -Depth 20))
+    $overlayWithoutShaResult = Invoke-Discovery -Root $tempRoot -Map $overlayWithoutShaPath
+    Assert-True ($overlayWithoutShaResult.ExitCode -ne 0) "overlay without consumer SHA must fail"
+    Assert-True ($overlayWithoutShaResult.Output -match "RUNTIME-EVIDENCE-002") "overlay SHA failure must name the consumer precondition"
+
     # Break được bảo vệ: một source đổi mode làm sai tỷ lệ 1 direct / 2 slice / 5 overlay.
     $wrongPressedMode = Copy-JsonObject $mapping
     $wrongPressedMode.entries[2].mode = "overlay_required"

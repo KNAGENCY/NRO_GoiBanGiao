@@ -123,7 +123,7 @@ function Test-EvidenceSite {
     $expectedSha = ([string]$Site.file_sha256).ToLowerInvariant()
     $actualSha = Get-NormalizedSha256 $file
     if ($expectedSha -notmatch "^[0-9a-f]{64}$") {
-        Add-ValidationError "$Kind '$($Site.file)' có SHA không hợp lệ."
+        Add-ValidationError "RUNTIME-EVIDENCE-002: $Kind '$($Site.file)' có SHA không hợp lệ."
     }
     elseif ($actualSha -ne $expectedSha) {
         Add-ValidationError "$Kind '$($Site.file)' lệch SHA: map=$expectedSha source=$actualSha."
@@ -287,12 +287,15 @@ try {
                 Add-ValidationError "'$source' overlay_required không được có call-site giả."
             }
             if (@($entry.consumer_sites).Count -lt 1) {
-                Add-ValidationError "'$source' overlay_required phải có consumer site + SHA precondition."
+                Add-ValidationError "RUNTIME-OVERLAY-001: '$source' overlay_required phải có consumer site + SHA precondition."
             }
         }
         else {
             if (-not [string]::IsNullOrWhiteSpace($futureKey)) {
                 Add-ValidationError "'$source' mode $mode không được có future_logical_key."
+            }
+            if (@($entry.consumer_sites).Count -ne 0) {
+                Add-ValidationError "RUNTIME-BINDING-001: '$source' mode $mode không được có consumer precondition; dùng call-site + SHA."
             }
             if ($mode -eq "direct" -and $logicalKeys.Count -ne 1) {
                 Add-ValidationError "'$source' direct phải có đúng một logical key."

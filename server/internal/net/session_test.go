@@ -245,10 +245,19 @@ func TestXepGuiKhongChanFIFO256ImmutableMotWriter(t *testing.T) {
 	conn := newConnChanLanGhiDau()
 	s := &Session{conn: conn, framer: protocol.NewFramer(conn, conn)}
 	t.Cleanup(s.Dong)
+	var moMotLan sync.Once
+	t.Cleanup(func() { moMotLan.Do(func() { close(conn.mo) }) })
 
 	dau := &protocol.Message{Command: 7, Data: []byte{1}}
-	if err := s.XepGui(dau); err != nil {
-		t.Fatalf("xep goi dau that bai: %v", err)
+	xepXong := make(chan error, 1)
+	go func() { xepXong <- s.XepGui(dau) }()
+	select {
+	case err := <-xepXong:
+		if err != nil {
+			t.Fatalf("xep goi dau that bai: %v", err)
+		}
+	case <-time.After(100 * time.Millisecond):
+		t.Fatal("XepGui bi chan boi socket; SERVER-ACTOR-005 cam ghi truc tiep")
 	}
 	select {
 	case <-conn.batDau:
@@ -272,7 +281,7 @@ func TestXepGuiKhongChanFIFO256ImmutableMotWriter(t *testing.T) {
 		t.Fatalf("XepGui khi queue day mat %s, phai tra duoi 10ms", mat)
 	}
 
-	close(conn.mo)
+	moMotLan.Do(func() { close(conn.mo) })
 	han := time.After(2 * time.Second)
 	for conn.soLanGhi.Load() < 257 {
 		select {

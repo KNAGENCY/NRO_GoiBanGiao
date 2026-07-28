@@ -1090,7 +1090,7 @@ func TestKhiDongLuuViTriMoiNhatKhiDaVaoKhuVuc(t *testing.T) {
 	k := MoKhuVuc(TimBanDo(1))
 	k.quai = nil // tat AI quai (dung tinh than moSoKhuVucKhongQuaiMacDinh, khuvuc_tichhop_test.go): test nay chi kiem VI TRI, khong de quai xen vao gay nhieu ngoai y muon
 	k.BatDau()
-	t.Cleanup(k.Dung)
+	t.Cleanup(func() { _ = k.Dung() })
 
 	viTriLucVaoX, viTriLucVaoY := int32(100), int32(100)
 	viTriGhimCungX, viTriGhimCungY := int16(300), int16(300) // cach (100,100) ~283 don vi < NguongBuoc=500 (dichuyen.go) -> hop le
@@ -1147,7 +1147,7 @@ func TestKhiDongSnapshotVaLeaveKhongRoiKhiGameplayDay(t *testing.T) {
 		k.hopThu <- suKienRa{idNhanVat: 999}
 	}
 	go k.vongLap()
-	t.Cleanup(k.Dung)
+	t.Cleanup(func() { _ = k.Dung() })
 
 	ghiGia := &ghiKhiRoiGia{}
 	b := &BoXuLy{khuVuc: k, nhanVat: nv, daVaoKhuVuc: true, thoGhi: ghiGia}

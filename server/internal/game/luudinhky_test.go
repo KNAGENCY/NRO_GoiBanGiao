@@ -57,10 +57,10 @@ func soKhuVucLuuDinhKyGia(t *testing.T) (s *SoKhuVuc, nvA, nvB *store.NhanVat) {
 	t.Helper()
 	k1 := MoKhuVuc(TimBanDo(1))
 	k1.BatDau()
-	t.Cleanup(k1.Dung)
+	t.Cleanup(func() { _ = k1.Dung() })
 	k2 := MoKhuVuc(TimBanDo(2))
 	k2.BatDau()
-	t.Cleanup(k2.Dung)
+	t.Cleanup(func() { _ = k2.Dung() })
 	s = &SoKhuVuc{theoMap: map[int32]*KhuVuc{1: k1, 2: k2}}
 
 	nvA = &store.NhanVat{ID: 101, Ten: "A", HpToiDa: 100, HpHienTai: 77, ViTriX: 30000, ViTriY: 30000}

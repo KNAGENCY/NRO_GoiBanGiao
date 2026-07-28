@@ -1,7 +1,50 @@
 {
   "schema_version": 1,
-  "versions": {"runtime_slice": 1},
-  "sprites": [{"id": 27041, "zooms": {"x1": "x1", "x2": "x2", "x3": "x3", "x4": "runtime-source.bin"}, "source_path": "runtime-source.bin", "source_sha256": "132d0dc2e995bb6f6ace1b8225f44b005e712bdf176e4a5d579b98d6ff55f2af"}],
-  "parts": [{"id": 30, "frames": [{"sprite_id": 27041, "dx": 0, "dy": 0}]}],
-  "animations": [{"name": "idle", "frames": [{"slot_index": 0, "client_cf": [0]}]}]
+  "versions": {
+    "runtime_slice": 1
+  },
+  "sprites": [
+    {
+      "id": 27041,
+      "zooms": {
+        "x1": "x1",
+        "x2": "x2",
+        "x3": "x3",
+        "x4": "runtime-source.bin"
+      },
+      "source_path": "runtime-source.bin",
+      "source_sha256": "132d0dc2e995bb6f6ace1b8225f44b005e712bdf176e4a5d579b98d6ff55f2af",
+      "x4_sha256": "132d0dc2e995bb6f6ace1b8225f44b005e712bdf176e4a5d579b98d6ff55f2af",
+      "source_dimensions": [
+        1,
+        1
+      ],
+      "source_alpha": false
+    }
+  ],
+  "parts": [
+    {
+      "id": 30,
+      "frames": [
+        {
+          "sprite_id": 27041,
+          "dx": 0,
+          "dy": 0
+        }
+      ]
+    }
+  ],
+  "animations": [
+    {
+      "name": "idle",
+      "frames": [
+        {
+          "slot_index": 0,
+          "client_cf": [
+            0
+          ]
+        }
+      ]
+    }
+  ]
 }

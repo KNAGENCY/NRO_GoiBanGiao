@@ -13,6 +13,7 @@ def main(argv=None):
     validate.add_argument("--manifest", type=Path, required=True)
     validate.add_argument("--legacy-ledger", type=Path)
     validate.add_argument("--version-ledger", type=Path)
+    validate.add_argument("--art-root", type=Path)
     legacy = commands.add_parser("verify-legacy-inputs")
     legacy.add_argument("--ledger", type=Path, required=True)
     args = parser.parse_args(argv)
@@ -34,7 +35,7 @@ def main(argv=None):
                 previous_runtime_version = version_data.get("runtime_slice_version")
             validate_manifest(
                 json.loads(args.manifest.read_text(encoding="utf-8")),
-                base_dir=args.manifest.parent,
+                base_dir=args.art_root or args.manifest.parent,
                 occupied_ids=occupied_ids,
                 previous_runtime_version=previous_runtime_version,
             )

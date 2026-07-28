@@ -1,13 +1,33 @@
 import json
 import hashlib
 import subprocess
+import struct
 import sys
 import tempfile
 import unittest
+import zlib
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def rgba_png(width=1, height=1):
+    def chunk(kind, payload):
+        return (
+            struct.pack(">I", len(payload))
+            + kind
+            + payload
+            + struct.pack(">I", zlib.crc32(kind + payload))
+        )
+
+    rows = b"".join(b"\0" + b"\0\0\0\0" * width for _ in range(height))
+    return (
+        b"\x89PNG\r\n\x1a\n"
+        + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0))
+        + chunk(b"IDAT", zlib.compress(rows))
+        + chunk(b"IEND", b"")
+    )
 
 
 class ManifestValidationTests(unittest.TestCase):
@@ -22,13 +42,18 @@ class ManifestValidationTests(unittest.TestCase):
                     "zooms": {"x1": "a", "x2": "b", "x3": "c", "x4": "x4.png"},
                     "source_path": "source.png",
                     "source_sha256": digest,
+                    "x4_sha256": digest,
+                    "source_dimensions": [1, 1],
+                    "source_alpha": False,
                 }
             ],
             "parts": [{"id": 30, "frames": [{"sprite_id": 27041, "dx": 0, "dy": 0}]}],
             "animations": [{"name": "idle", "frames": [{"slot_index": 0, "client_cf": [0]}]}],
         }
 
-    def validate(self, manifest, *, legacy_ledger=None, version_ledger=None, files=None):
+    def validate(
+        self, manifest, *, legacy_ledger=None, version_ledger=None, files=None, art_root=None
+    ):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "manifest.json"
             if files is None:
@@ -47,6 +72,8 @@ class ManifestValidationTests(unittest.TestCase):
                 version_path = Path(directory) / "versions.json"
                 version_path.write_text(json.dumps(version_ledger), encoding="utf-8")
                 command.extend(["--version-ledger", str(version_path)])
+            if art_root is not None:
+                command.extend(["--art-root", str(art_root)])
             return subprocess.run(
                 command,
                 cwd=ROOT,
@@ -63,6 +90,9 @@ class ManifestValidationTests(unittest.TestCase):
         manifest["sprites"][0].update(
             source_path="source.png",
             source_sha256=digest,
+            x4_sha256=digest,
+            source_dimensions=[1, 1],
+            source_alpha=False,
         )
         manifest["sprites"][0]["zooms"]["x4"] = "x4.png"
         return manifest
@@ -203,6 +233,7 @@ class ManifestValidationTests(unittest.TestCase):
 
         manifest["sprites"][0]["id"] = 32768
         overflow = self.validate(manifest)
+        self.assertNotEqual(0, overflow.returncode)
         self.assertIn("ASSET-ID-001", overflow.stderr)
 
     def test_rejects_poc_sprite_identity_from_official_manifest(self):
@@ -341,6 +372,93 @@ class ManifestValidationTests(unittest.TestCase):
                 result = self.validate(manifest, files=self.runtime_files())
                 self.assertNotEqual(0, result.returncode)
                 self.assertIn("ASSET-ANIMATION-008", result.stderr)
+
+    def test_rejects_common_runtime_placeholder_for_all_sprites(self):
+        # Mutation caught: replacing every real source with one tiny sentinel.
+        manifest = self.pin_runtime_source(self.minimal_manifest())
+        duplicate = json.loads(json.dumps(manifest["sprites"][0]))
+        duplicate["id"] = 27042
+        manifest["sprites"].append(duplicate)
+        manifest["parts"] = []
+
+        result = self.validate(manifest)
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("ASSET-SPRITE-002", result.stderr)
+
+    def test_verifies_source_and_x4_with_independent_paths_and_hashes(self):
+        # Mutation caught: checking only source_path, or reusing source SHA for x4.
+        manifest = self.pin_runtime_source(self.minimal_manifest())
+        manifest["sprites"][0]["zooms"]["x4"] = "rendered-x4.png"
+        manifest["sprites"][0]["x4_sha256"] = hashlib.sha256(b"rendered-x4").hexdigest()
+        files = {"source.png": b"runtime-source", "rendered-x4.png": b"rendered-x4"}
+        accepted = self.validate(manifest, files=files)
+        self.assertEqual(0, accepted.returncode, accepted.stderr)
+
+        for field, value in (
+            ("source_sha256", "f" * 64),
+            ("x4_sha256", "f" * 64),
+        ):
+            with self.subTest(field=field):
+                changed = json.loads(json.dumps(manifest))
+                changed["sprites"][0][field] = value
+                result = self.validate(changed, files=files)
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn("ASSET-SPRITE-002", result.stderr)
+
+    def test_rejects_bool_in_typed_integer_fields(self):
+        # Mutation caught: Python bool is an int subclass and must not enter binary fields.
+        mutations = (
+            ("source_rect", lambda manifest: manifest["sprites"][0].update(
+                crop={"subject": "iruka", "source_rect": [False, 0, 1, 1],
+                      "overlap": [0, 0], "layer": 0}
+            ), "ASSET-CROP-007"),
+            ("overlap", lambda manifest: manifest["sprites"][0].update(
+                crop={"subject": "iruka", "source_rect": [0, 0, 1, 1],
+                      "overlap": [False, 0], "layer": 0}
+            ), "ASSET-CROP-007"),
+            ("layer", lambda manifest: manifest["sprites"][0].update(
+                crop={"subject": "iruka", "source_rect": [0, 0, 1, 1],
+                      "overlap": [0, 0], "layer": False}
+            ), "ASSET-CROP-007"),
+            ("slot_index", lambda manifest: manifest["animations"][0]["frames"][0].update(
+                slot_index=False
+            ), "ASSET-ANIMATION-008"),
+            ("client_cf", lambda manifest: manifest["animations"][0]["frames"][0].update(
+                client_cf=[False]
+            ), "ASSET-ANIMATION-008"),
+        )
+        for field, mutate, error_code in mutations:
+            with self.subTest(field=field):
+                manifest = self.pin_runtime_source(self.minimal_manifest())
+                mutate(manifest)
+                result = self.validate(manifest)
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn(error_code, result.stderr)
+
+    def test_verifies_declared_source_dimensions_and_alpha(self):
+        # Mutation caught: a regenerated source with a changed canvas/alpha contract.
+        manifest = self.minimal_manifest()
+        png = rgba_png(2, 3)
+        digest = hashlib.sha256(png).hexdigest()
+        manifest["sprites"][0].update(
+            source_path="source.png",
+            source_sha256=digest,
+            x4_sha256=digest,
+            source_dimensions=[2, 3],
+            source_alpha=True,
+        )
+        manifest["sprites"][0]["zooms"]["x4"] = "source.png"
+        accepted = self.validate(manifest, files={"source.png": png})
+        self.assertEqual(0, accepted.returncode, accepted.stderr)
+
+        for field, value in (("source_dimensions", [3, 2]), ("source_alpha", False)):
+            with self.subTest(field=field):
+                changed = json.loads(json.dumps(manifest))
+                changed["sprites"][0][field] = value
+                result = self.validate(changed, files={"source.png": png})
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn("ASSET-SPRITE-002", result.stderr)
 
 
 if __name__ == "__main__":

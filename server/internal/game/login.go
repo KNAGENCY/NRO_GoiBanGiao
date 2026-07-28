@@ -41,6 +41,7 @@ const (
 	lenhDangNhapThatBai int8 = -102
 	lenhTaoNhanVat      int8 = 2
 	lenhVaoKhuVuc       int8 = -39 // client bao da tai xong map
+	lenhXinTaiNguyen    int8 = -74 // client xin resource o man ServerListScreen — Service.getResource
 )
 
 // reTenDangNhapHopLe khop dung quy tac ma CSDL da ap dung bang rang buoc CHECK
@@ -241,6 +242,8 @@ func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 		return b.xuLyKhongTrenBanDo(s, m)
 	case lenhDuLieu: // -87 — client xin data
 		return b.xuLyXinData(s)
+	case lenhXinTaiNguyen: // -74 — client xin resource tu server (§ScrList)
+		return b.xuLyXinTaiNguyen(s, m)
 	case lenhVaoKhuVuc: // -39 — client bao da tai xong map
 		return b.xuLyVaoKhuVuc(s)
 	case lenhDiChuyen: // -7 — client xin di chuyen
@@ -306,6 +309,50 @@ func (b *BoXuLy) xuLyXinData(s *mynet.Session) error {
 		return nil
 	}
 	return s.Gui(goiCatalogData())
+}
+
+// xuLyXinTaiNguyen tra goi -74 stub khi client o ServerListScreen goi
+// Service.getResource(1, null) — client kiem "phien ban resource" cua may
+// chu roi so voi RMS "ResVersion". Neu khop -> di tiep sang LoginScr; neu
+// khac -> hien dialog xin download. Vi may chu Go MOI khong host bo
+// resource cu (do la trach nhiem cua bo cai client, khong cua game server),
+// tra ResVersion = 0 CO DINH, VA yeu cau ban Unity o may nay cung ghi RMS
+// "ResVersion" = "0" -> khop, client di tiep binh thuong.
+//
+// Format client gui (Service.cs:1936): 40 byte token (HMAC-SHA256 anti-bot)
+// + 1 byte action (1/2/3, xem Controller.cs:1133 case -74). Ta CHI can
+// dieu action, khong xet token (khong phai muc dich chong bot cua ke hoach
+// nay). action=1: xin danh sach resource (tra -74/0/int0). action=2/3: bo
+// qua im lang — client khong cho tra loi cho hai action nay.
+//
+// Ban KHONG CAN doi trang thai phien (b.nhanVat = nil hay khac): -74 chay
+// TRUOC login, khi phien chua co nhan vat. Kiem tra o day chi phi vi
+// duong voi (client mo ket noi la vao ServerListScreen -> gui -74 luon).
+func (b *BoXuLy) xuLyXinTaiNguyen(s *mynet.Session, m *protocol.Message) error {
+	// Body toi thieu = 40 byte token + 1 byte action = 41 byte. Ngan hon
+	// la client hong hoac lenh bi trang phong, bo qua im lang (khong log,
+	// cung ly do chong ngap nhu nhanh "lenh chua ho tro" o XuLy).
+	if len(m.Data) < 41 {
+		return nil
+	}
+	action := m.Data[40] // byte action ngay sau 40 byte token
+	if action != 1 {
+		// action=2 (xin resource cu the) va action=3 (bao xong): may chu
+		// khong host resource -> khong tra gi, client tu xu ly khong cho
+		// (khong treo, xem Controller.cs case -74 khong co else nhanh
+		// hong cho action nay).
+		return nil
+	}
+	w := protocol.NewWriter()
+	w.Byte(0) // b42 = 0 (danh sach phien ban resource)
+	w.Int(1)  // ResVersion = 1 — PHAI khop RMS "ResVersion" da tao thu cong tren
+	// may client (writeUTF "1"). Neu tra ve gia tri khac, client so lech ->
+	// vao nhanh show2() (hop thoai xin download) thay vi di tiep binh thuong.
+	// Vi sao 1 chu khong phai 0: switchToMe cua ServerListScreen (line 660)
+	// chi set loadScreen=true khi int.Parse(RMS "ResVersion") > 0. Voi "0"
+	// loadScreen mai false, client ket o gif logo, khong bao gio hien 4 nut
+	// (Dang nhap/Doi tk/Server/Option) de nguoi choi bam.
+	return s.Gui(protocol.NewMessage(lenhXinTaiNguyen, w))
 }
 
 // phucVuCatalog gui mot goi catalog khi client xin, chi khi da vao the gioi.

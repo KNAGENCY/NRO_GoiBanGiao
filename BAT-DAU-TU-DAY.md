@@ -320,6 +320,35 @@ Gom lại thành **Kế hoạch B**, sửa lẻ từng cái là vô nghĩa:
   để Kế hoạch B ưu tiên tách gửi gói mạng khỏi actor.**
 - **KH6 Task 11**: chưa chặn tự đánh chính mình (`-60` với `idMucTieu==idNhanVat`) — vô hại
   ở KH6 (chưa có luật đội/PvP), hoãn tới KH9.
+- **Nghiệm thu Unity 28/07 — client Unity đã bị tinker tay, KHÔNG REPRODUCE ĐƯỢC trên máy khác.**
+  Nếu bạn (hoặc agent khác) mở dự án Unity `D:\NRO_Project` trên máy sạch, sẽ vấp lại toàn
+  bộ chuỗi 4 lỗi kể trong §12 dòng 28/07. Ba việc phải làm để "chính thức hoá" nghiệm thu:
+  (a) tạo **5 file tile map** cho làng 1-5 vào `Assets/Resources/res/mymap/{1..5}.bytes` —
+  hiện đang là bản sao của `0.bytes` (map trống 52×24, hiển thị cột thang lạ giữa màn);
+  (b) tạo **`part.bin` Naruto** thay placeholder Dragon Ball ở `server/internal/game/part.bin`
+  — hiện client render nhân vật bằng sprite Dragon Ball nên narruto không hiển thị đúng
+  (`dongbo.go:15` ghi rõ "PLACEHOLDER cua ban Dragon Ball cu"); (c) **đóng atlas `Big0..4.png`
+  Naruto + `NR_image`** để client render npc/boss/quái/hu/vk bằng ảnh mới. Cả ba đều đòi
+  **1 KH riêng có subagent + TDD** (như KH6/KH11) — bộ 343 ảnh Naruto ở `docs/my-thuat/anh-game/x1..x4/`
+  đã có sẵn nhưng thiếu (i) mapping ID số → tên file, (ii) script deploy, (iii) format
+  binary chưa reverse-engineer đủ chi tiết. Xem thêm ghi chú "Khối 10" ở
+  [`BO-SUNG-LO-TRINH.md`](docs/superpowers/plans/BO-SUNG-LO-TRINH.md) khi được viết.
+- **Client Unity đã có 3 sửa đổi tay ở `D:\NRO_Project` — GHI VÀO ĐÂY vì repo Unity không
+  thuộc gói `NRO_GoiBanGiao`**, phiên sau tra `git log` không thấy:
+  (1) `Assets/Scripts/Game1/SplashScr.cs` — thêm `ServerListScreen.waitToLogin = true;` sau
+  `GameCanvas.connect()` ở cả hai nhánh của `loadIP()` (line 109-110, 124-125) để bỏ qua
+  click "Đăng nhập" tay. Cần rollback trước khi build APK phát hành nếu muốn user gõ tài
+  khoản tay;
+  (2) `Assets/Resources/res/mymap/{1,2,3,4,5}.bytes` — bản sao của `0.bytes` (map trống);
+  (3) RMS `C:\Users\Admin\AppData\LocalLow\Kame\Ngoc Rong Kame\` đã được reset: xoá 16 file
+  cache `NR*` (NRdataVersion, NRmap, NRitem*, NR_arrow, NR_dart, NR_effect, NR_image, NR_part,
+  NR_skill) + tạo `acc="naruto"`, `pass="1"`, `ResVersion="1"`, `svselect=0`. Nếu chạy trên
+  máy khác cần **repeat toàn bộ 3 bước trên** hoặc mở KH mapping ảnh sửa gốc.
+- **Server `-74` handler là stub tối thiểu** (`login.go xuLyXinTaiNguyen`): trả `[b42=0][ResVersion=1]`
+  bỏ qua token 40 byte client gửi (HMAC-SHA256 anti-bot). Client thật sự **KHÔNG gửi -74 trong
+  luồng đăng nhập bình thường** (chỉ gửi khi user bấm nút "Download resource" ở màn chọn
+  server — mà luồng auto-login bỏ qua) → handler này thực tế **chưa bao giờ được gọi trong
+  runtime hiện tại**. Giữ lại như bảo hiểm, không vá thêm cho tới khi có KH resource sync.
 
 ---
 
@@ -418,3 +447,4 @@ Commit riêng cho việc cập nhật tài liệu thì dùng tiền tố `docs:`
 | 27/07/2026 | **KH6 tiếp tục**: Task 8 (quái hồi sinh 5s + hồi máu 30s trong nhịp actor, `e41678b`) → Task 9 (AI quái 2 tầng ưu tiên + gói `-11`/`-10`, `b22152c`) → Task 13 (chết & hồi sinh người chơi, gói `-17`/`-8`/`-16`/`-30/15`, `67e6650`). Task 13 chỉ cần thêm **một** trường `lucHoiSinh` chứ không phải Hp/HpToiDa như rủi ro đã lường (Task 9 đã dùng `nv.HpHienTai`) |
 | 27/07/2026 | **KH6 XONG — gộp `main` `162bbe9`.** Task 11 (PvP `-60` + gói `-30/9` + **vá gap bất tử quái** của Task 13) → Task 14 (**test đầu-cuối 2 người qua mạng + CSDL thật**, diễn trọn chuỗi chiến đấu). **Soi toàn nhánh bằng opus** → bắt được `goiHoiMauNguoiChoi` là mã chết (chiêu type=2 gây sát thương sai) → đợt sửa cuối chốt hoãn có kỷ luật. **2 canary** (thả bug thật): reviewer bắt được lỗi byte im lặng, test E2E bắt được lỗi tích hợp — pipeline review đáng tin. Phân tích **bổ sung lộ trình** (9 khối thiếu, [`BO-SUNG-LO-TRINH.md`](docs/superpowers/plans/BO-SUNG-LO-TRINH.md)) + **mapping ảnh** đã lưu. Còn **Task 15 nghiệm thu tay bằng Unity** (chủ dự án) |
 | 27/07/2026 | **KH11 XONG — gộp `main` `6ea467f`.** Máy chủ trước đó **không lưu gì** sau lúc tạo nhân vật; nay lưu 3 thời điểm (định kỳ 60 giây · khi rời · khi tắt máy) theo kiến trúc *actor chụp ảnh → hàng đợi gộp → thợ ghi riêng*, **actor không bao giờ chờ ổ đĩa**. Kèm **một tài khoản một phiên** (đá phiên cũ → chờ lưu xong → mới đọc; bản Java làm ngược và chưa bao giờ vá). 8 task, mỗi task TDD + đột biến + review đối kháng. **Soi toàn nhánh (opus) tìm ra 1 lỗi Nghiêm trọng thật**: client đăng nhập chồng trên cùng kết nối → mục rác trong sổ phiên → đóng channel hai lần → **panic chết cả tiến trình** (DoS từ xa) — đã vá, có test dựng lại trọn kịch bản 4 bước. Cũng vá bẫy §7.1 ở `XepVaCho`. Bốn khoản nợ mới ghi ở §8 |
+| 28/07/2026 | **Nghiệm thu tay Unity — client VÀO ĐƯỢC GAME.** Chủ dự án bấm Play, tự động login `naruto/1`, vào bản đồ. Nhưng vấp 4 chỗ, mỗi chỗ đều là lỗi thật cần nhớ: (1) client Unity chỉ có file `mymap/{0,39,40,41}.bytes`, server gửi mapID=1-5 → **kẹt vô hình** — vá tạm bằng `cp 0.bytes {1..5}.bytes`; (2) client không gửi `-74` tự động khi mở, nhưng `ServerListScreen.switchToMe` chỉ set `loadScreen=true` khi RMS `ResVersion > 0` — thiếu, client kẹt màn "Xin chờ"; (3) client cần user click 2 lần (chọn server + đăng nhập), auto-login mặc định tắt → **sửa `SplashScr.cs`** thêm `waitToLogin = true` sau `GameCanvas.connect()` để bỏ qua cả 2 click; (4) RMS cache Java cũ (`NRdataVersion=20`) khớp `vsData=20` server → client tự đọc cache Java thay vì xin mới → parse fail âm thầm — xoá 16 file `NR*` cache. Thêm handler stub `-74` ở server (`login.go`), rebuild. **Server 100% đúng — testfull đi trọn từ bắt tay → clientOk → tileset+ME+MAP**. Còn 3 vấn đề mỹ thuật vẫn chưa map: sprite nhân vật (`part.bin` = Dragon Ball placeholder), tile map (1.bytes rỗng), atlas ảnh (`Big*.png` = Dragon Ball) — xem §8 mới thêm |

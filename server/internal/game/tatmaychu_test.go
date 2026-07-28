@@ -21,7 +21,7 @@ import (
 func TestTatMayChuLuuTruocKhiDungKhuVuc(t *testing.T) {
 	k := MoKhuVuc(TimBanDo(1))
 	k.BatDau()
-	t.Cleanup(k.Dung) // phong ho: neu mot assert Fatal giua chung, actor van duoc dung sach
+	t.Cleanup(func() { _ = k.Dung() }) // phong ho: neu mot assert Fatal giua chung, actor van duoc dung sach
 
 	nv := &store.NhanVat{
 		ID: 777, Ten: "Obito", MapID: 1,
@@ -78,7 +78,7 @@ func TestTatMayChuLuuTruocKhiDungKhuVuc(t *testing.T) {
 func TestTatMayChuVanDungKhuVucKhiHetGioLuu(t *testing.T) {
 	k := MoKhuVuc(TimBanDo(1))
 	k.BatDau()
-	t.Cleanup(k.Dung)
+	t.Cleanup(func() { _ = k.Dung() })
 	s := &SoKhuVuc{theoMap: map[int32]*KhuVuc{1: k}}
 
 	kg := &khoLuuGia{doTre: 2 * time.Second} // kho gia CHAM hon nhieu so voi han gio ctx duoi day

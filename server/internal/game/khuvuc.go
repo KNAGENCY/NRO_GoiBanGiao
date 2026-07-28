@@ -63,6 +63,7 @@ type KhuVuc struct {
 	hopThuDieuKhien chan suKienDieuKhien
 	xong            chan struct{}
 	dungMotLan      sync.Once
+	loiDung         error
 
 	// soLanGuiRoi dem gameplay event best-effort bi bo khi hop thu day. Snapshot,
 	// leave va stop nay di qua hopThuDieuKhien reliable nen khong con nam trong
@@ -430,6 +431,8 @@ func (k *KhuVuc) RoiKhuVuc(idNhanVat int64) error {
 		return nil
 	case <-k.xong:
 		return ErrActorDaDung
+	case <-time.After(thoiGianChoControl):
+		return ErrControlQuaHan
 	}
 }
 
@@ -447,6 +450,8 @@ func (k *KhuVuc) guiDieuKhien(sk suKienDieuKhien) error {
 		return nil
 	case <-k.xong:
 		return ErrActorDaDung
+	case <-time.After(thoiGianChoControl):
+		return ErrControlQuaHan
 	}
 }
 
@@ -1362,16 +1367,20 @@ func (k *KhuVuc) Gui(sk suKienKhuVuc) {
 	}
 }
 
-// Dung dong actor mot cach sach: dong kenh dung (mot lan, an toan khi goi
-// nhieu lan) roi cho vongLap thoat han truoc khi tra ve — dam bao khong ro
-// goroutine.
-func (k *KhuVuc) Dung() {
+// Dung dong actor mot cach sach va tra loi ro neu control khong the den actor
+// trong han. KhiDong va don dep luc tat may chu khong duoc ket vinh vien chi
+// vi actor da ket logic hay mailbox control bi day.
+func (k *KhuVuc) Dung() error {
 	k.dungMotLan.Do(func() {
-		if k.hopThuDieuKhien != nil {
-			_ = k.guiDieuKhien(dieuKhienDung{})
+		if err := k.guiDieuKhien(dieuKhienDung{}); err != nil {
+			k.loiDung = err
+			return
+		}
+		select {
+		case <-k.xong:
+		case <-time.After(thoiGianChoControl):
+			k.loiDung = ErrControlQuaHan
 		}
 	})
-	if k.xong != nil {
-		<-k.xong
-	}
+	return k.loiDung
 }

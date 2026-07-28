@@ -170,7 +170,7 @@ func TestKhuVucXuLySuKien(t *testing.T) {
 func TestActorLoaiClientChamKhongChanClientKhoe_SERVER_ACTOR_005(t *testing.T) {
 	k := MoKhuVuc(TimBanDo(1))
 	k.BatDau()
-	t.Cleanup(k.Dung)
+	t.Cleanup(func() { _ = k.Dung() })
 
 	nvCham := &store.NhanVat{ID: 101, Ten: "Cham", HpToiDa: 100, ViTriX: 100, ViTriY: 384}
 	nvKhoe := &store.NhanVat{ID: 102, Ten: "Khoe", HpToiDa: 100, ViTriX: 100, ViTriY: 384}
@@ -251,7 +251,7 @@ func TestControlSnapshotVaLeaveKhongRoiKhiMailboxGameplayDay(t *testing.T) {
 		k.hopThu <- suKienRa{idNhanVat: 999}
 	}
 	go k.vongLap()
-	t.Cleanup(k.Dung)
+	t.Cleanup(func() { _ = k.Dung() })
 
 	ban, err := k.AnhChupNguoiChoiCoLoi(nv.ID)
 	if err != nil {
@@ -305,6 +305,58 @@ func TestControlSnapshotQuaHanTraLoiRoKhongTreo(t *testing.T) {
 		}
 	case <-time.After(200 * time.Millisecond):
 		t.Fatal("snapshot control treo qua 200ms, thieu timeout cleanup")
+	}
+}
+
+// TestControlLeaveVaDungQuaHanTraLoiRoKhongTreo bat hoi quy control co the
+// ket khi actor khong con tieu thu: ca leave va stop phai tra loi ro trong
+// han, de KhiDong/don dep may chu khong treo vinh vien.
+func TestControlLeaveVaDungQuaHanTraLoiRoKhongTreo(t *testing.T) {
+	for _, tc := range []struct {
+		ten string
+		goi func(*KhuVuc) error
+	}{
+		{
+			ten: "leave doi actor xac nhan",
+			goi: func(k *KhuVuc) error {
+				return k.RoiKhuVuc(1)
+			},
+		},
+		{
+			ten: "stop doi actor thoat",
+			goi: func(k *KhuVuc) error {
+				dung, co := any(k).(interface{ Dung() error })
+				if !co {
+					return ErrActorChuaBatDau
+				}
+				return dung.Dung()
+			},
+		},
+		{
+			ten: "leave khi mailbox control day",
+			goi: func(k *KhuVuc) error {
+				k.hopThuDieuKhien <- dieuKhienDung{}
+				return k.RoiKhuVuc(1)
+			},
+		},
+	} {
+		t.Run(tc.ten, func(t *testing.T) {
+			k := MoKhuVuc(TimBanDo(1))
+			k.hopThu = make(chan suKienKhuVuc, 1)
+			k.hopThuDieuKhien = make(chan suKienDieuKhien, 1)
+			k.xong = make(chan struct{})
+
+			ketQua := make(chan error, 1)
+			go func() { ketQua <- tc.goi(k) }()
+			select {
+			case err := <-ketQua:
+				if !errors.Is(err, ErrControlQuaHan) {
+					t.Fatalf("control ket = %v, mong ErrControlQuaHan", err)
+				}
+			case <-time.After(200 * time.Millisecond):
+				t.Fatal("control treo qua 200ms, KhiDong/don dep co the ket vinh vien")
+			}
+		})
 	}
 }
 
@@ -918,7 +970,7 @@ func khuVucAnhChupGia(t *testing.T) (k *KhuVuc, nvA, nvB *store.NhanVat) {
 	t.Helper()
 	k = MoKhuVuc(TimBanDo(1))
 	k.BatDau()
-	t.Cleanup(k.Dung)
+	t.Cleanup(func() { _ = k.Dung() })
 
 	nvA = &store.NhanVat{ID: 1, Ten: "A", HpToiDa: 100, HpHienTai: 80, ChakraToiDa: 50, ChakraHienTai: 40, ViTriX: 30000, ViTriY: 30000}
 	nvB = &store.NhanVat{ID: 2, Ten: "B", HpToiDa: 120, HpHienTai: 120, ChakraToiDa: 60, ChakraHienTai: 60, ViTriX: -30000, ViTriY: -30000}

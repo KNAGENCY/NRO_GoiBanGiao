@@ -117,9 +117,9 @@ try {
         if (Test-Path -LiteralPath (Join-Path $snapshot ".nro-e2e-overlay.json")) {
             Stop-Overlay "OVERLAY-ALREADY-APPLIED" "Snapshot already has an overlay"
         }
-        if (@(Get-ChildItem -LiteralPath $snapshot -Force).Count -gt 0) {
-            Stop-Overlay "OVERLAY-TARGET-NOT-EMPTY" "Snapshot target must be empty"
-        }
+        # Move-Item treats an existing directory as a container and would nest
+        # staging below it. The final publish path must therefore be absent.
+        Stop-Overlay "OVERLAY-TARGET-EXISTS" "Snapshot publish target must not already exist"
     }
 
     # Validate every patch against the source before creating the snapshot. A failed

@@ -214,10 +214,22 @@ còn lại chưa được tuyên bố hoàn thành; bước mở rộng năm là
 part thay hard-code client.
 
 Tám UI đã duyệt (`ui_logo_game`, khung avatar/hội thoại, ba nút, ô chọn và ô vật
-phẩm) được manifest ánh xạ tới **runtime resource key thật** mà Game1 đang đọc.
-Task phân tích đầu tiên phải ghim bảng source→key bằng test load resource; không
-được chỉ đổi tên file theo phỏng đoán. Golden từ splash tới gameplay không được
-còn logo/icon Dragon Ball trong các checkpoint của lát cắt.
+phẩm) được manifest ánh xạ tới **consumer thật** của Game1, không giả định mọi
+consumer đều đã có một resource key 1:1. Mỗi binding có một mode:
+
+- `direct`: một hoặc nhiều logical key thật được call-site nạp trực tiếp;
+- `slice_group`: consumer ghép nhiều key/slice của một composite;
+- `overlay_required`: client hiện vẽ primitive/composite không có key thay thế;
+  overlay phải thêm `future_logical_key`, có `consumer_sites[]` không rỗng và
+  consumer SHA làm precondition.
+
+Task phân tích đầu tiên phải ghim đủ tám binding, `logical_keys[]`, loader và
+physical paths bằng test source/load. Binding `direct` và `slice_group` phải có
+call-site evidence/SHA, nhưng được phép có `consumer_sites[]` rỗng. Binding
+`overlay_required` phải có `consumer_sites[]` không rỗng, `future_logical_key`
+và consumer SHA precondition. Không được đổi tên file theo phỏng đoán hoặc bịa
+key không tồn tại. Golden từ splash tới gameplay không được còn logo/icon
+Dragon Ball trong các checkpoint của lát cắt.
 
 Phase 1 chỉ chạy bằng cặp staging có lock khớp; runner/preflight từ chối khởi
 động nếu lock server/client khác nhau. Đây chưa phải cơ chế cập nhật client công cộng:

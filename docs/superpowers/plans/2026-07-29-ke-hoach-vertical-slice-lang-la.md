@@ -88,17 +88,25 @@ song vì một bên chỉ sửa `server/internal/game`, bên kia sửa Unity/too
 - Create `tools/unity-overlay/discover-runtime-keys.ps1`
 - Create `tools/unity-overlay/tests/Test-RuntimeKeys.ps1`
 
-**Produces:** bảng tám dòng
-`source_asset → Game1 call-site → logical resource key → physical xN path`,
-kèm SHA của file C# chứa call-site.
+**Produces:** đúng tám binding
+`source_asset → mode(direct|slice_group|overlay_required) → consumer_sites[]`,
+kèm `logical_keys[]`/physical xN paths khi key đã tồn tại. `direct` và
+`slice_group` phải có call-site evidence/SHA nhưng được phép có
+`consumer_sites[]` rỗng; `overlay_required` phải có consumer site, consumer SHA
+làm precondition và `future_logical_key`.
 
 - [ ] Viết self-test đỏ với fixture cố tình đổi một key/call-site SHA.
 - [ ] Quét source Game1 thật cho logo, avatar/dialog frame, ba nút, ô chọn và ô
-      vật phẩm; mỗi key phải có file+line/call expression làm bằng chứng.
-- [ ] Test cấm placeholder và cấm suy key từ tên source art.
-- [ ] Test map đủ đúng tám entry, không trùng logical key và có quy tắc x1..x4.
-- [ ] Mutation: đổi một key sang tên “đoán”; test phải đỏ vì call-site không
-      tham chiếu key đó.
+      vật phẩm; `direct`/`slice_group` phải có file+line/expression và SHA làm
+      call-site evidence, còn `overlay_required` phải có consumer site + SHA
+      precondition. Không ép consumer vẽ primitive/composite thành key 1:1 giả.
+- [ ] Test cấm placeholder, cấm suy key từ tên source art; `direct`/
+      `slice_group` phải chứng minh key literal/load path, `overlay_required`
+      phải có consumer site + future key duy nhất + consumer SHA/precondition.
+- [ ] Test map đủ đúng tám binding, logical/future key không đụng nhau và có
+      quy tắc x1..x4/loader rõ.
+- [ ] Mutation: đổi direct key sang tên “đoán” và xóa precondition của một
+      overlay binding; test phải đỏ đúng lý do.
 - [ ] Commit: `docs(asset): khoa 8 runtime resource key Unity`
 
 ---
@@ -222,8 +230,10 @@ python -m assetpack verify-legacy-inputs --ledger docs/my-thuat/legacy-input-led
       levelId, pose slot, endian/count, effect/arrow đều `-1`; mutation đổi
       count/endian hoặc ép effect 80 phải đỏ.
 - [ ] Test `catalog.json` có 6 map name, Iruka, Sói, spawn và bốn pose skill.
-- [ ] Dùng `unity-runtime-key-map.json` từ Task 0 để sinh đúng tám UI output;
-      test mỗi key có bằng chứng call-site SHA và cấm placeholder/tên phỏng đoán.
+- [ ] Dùng `unity-runtime-key-map.json` từ Task 0 để sinh đúng tám UI binding;
+      direct/slice group đi đúng logical keys, overlay-required đi đúng future
+      key; test direct/slice group có call-site evidence/SHA, overlay-required
+      có consumer site + consumer SHA precondition, và cấm placeholder.
 - [ ] Test lock chứa mọi input/output SHA, dimension, ID/version và build hai
       lần khác thư mục cho cùng SHA.
 - [ ] Build phải từ chối nếu review JSON thiếu PASS, source SHA/evidence SHA
@@ -300,10 +310,14 @@ python -m assetpack verify-legacy-inputs --ledger docs/my-thuat/legacy-input-led
       `D:\NRO_Project`.
 - [ ] EditMode test đỏ khi thiếu bất kỳ tile x1–x4, sai dimension, Small ID
       thiếu, bg thiếu hoặc HUD key không load.
-- [ ] EditMode test đọc `unity-runtime-key-map.json` của Task 0 và
-      `Resources.Load` đủ tám key; không chấp nhận danh sách key viết lại trong
-      C# test. Ở Task 5 chạy bằng fixture tối thiểu; lượt preflight artifact
-      thật bắt buộc nằm ở Task 7 sau deploy.
+- [ ] EditMode test đọc `unity-runtime-key-map.json` của Task 0: load đủ key của
+      direct/slice group; với `overlay_required`, áp patch đúng consumer SHA,
+      load future key và chứng minh consumer site thật dùng nó. Direct/slice
+      group chỉ cần call-site evidence/SHA, không bắt buộc `consumer_sites[]`;
+      overlay-required bắt buộc có consumer site + consumer SHA precondition.
+      Không chấp nhận danh sách key viết lại trong C# test. Task 5 chạy bằng
+      fixture tối thiểu; lượt preflight artifact thật bắt buộc nằm ở Task 7 sau
+      deploy.
 - [ ] Test profile A/B sentinel không đọc chéo; production không có `NRO_E2E`
       giữ nguyên `persistentDataPath`.
 - [ ] Patch skill Naruto giữ `-1=no effect`; test cấm load effect 80.

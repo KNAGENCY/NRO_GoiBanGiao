@@ -1133,6 +1133,39 @@ func TestKhiDongLuuViTriMoiNhatKhiDaVaoKhuVuc(t *testing.T) {
 	}
 }
 
+// TestKhiDongSnapshotVaLeaveKhongRoiKhiGameplayDay bat hoi quy dua hai control
+// event nay ve k.Gui best-effort: mailbox day se lam mat ban luu va ghost.
+func TestKhiDongSnapshotVaLeaveKhongRoiKhiGameplayDay(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	nv := &store.NhanVat{ID: 56, Ten: "MailboxDay", MapID: 1, ViTriX: 123, ViTriY: 384}
+	k.xuLy(suKienVao{nv: nv, phien: &phienGiaKhuVuc{}})
+
+	k.hopThu = make(chan suKienKhuVuc, 256)
+	k.hopThuDieuKhien = make(chan suKienDieuKhien, 16)
+	k.xong = make(chan struct{})
+	for i := 0; i < cap(k.hopThu); i++ {
+		k.hopThu <- suKienRa{idNhanVat: 999}
+	}
+	go k.vongLap()
+	t.Cleanup(k.Dung)
+
+	ghiGia := &ghiKhiRoiGia{}
+	b := &BoXuLy{khuVuc: k, nhanVat: nv, daVaoKhuVuc: true, thoGhi: ghiGia}
+	b.KhiDong()
+
+	nhan := ghiGia.banDaNhan()
+	if len(nhan) != 1 || nhan[0].ID != nv.ID || nhan[0].ViTriX != 123 {
+		t.Fatalf("snapshot khi gameplay day = %+v, mong dung ban moi nhat cua %d", nhan, nv.ID)
+	}
+	banSau, err := k.AnhChupNguoiChoiCoLoi(nv.ID)
+	if err != nil {
+		t.Fatalf("probe actor sau KhiDong: %v", err)
+	}
+	if len(banSau) != 0 {
+		t.Fatalf("con ghost sau KhiDong: %+v", banSau)
+	}
+}
+
 // TestKhiDongChuaVaoKhuVucKhongLuuKhongPanic la Task 5 buoc 1 kich ban 2: mot
 // phien CHUA thuc su vao khu vuc (b.daVaoKhuVuc == false) — du dang o buoc
 // nao (chua dang nhap, moi co nhan vat nhung chua chon khu vuc, hay da chon

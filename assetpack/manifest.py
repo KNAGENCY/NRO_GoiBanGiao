@@ -104,6 +104,19 @@ def _is_int(value: Any) -> bool:
     return isinstance(value, int) and not isinstance(value, bool)
 
 
+def _is_sbyte(value: Any) -> bool:
+    return _is_int(value) and -128 <= value <= 127
+
+
+def _rects_overlap(left: list[int], right: list[int]) -> bool:
+    return (
+        left[0] < right[0] + right[2]
+        and right[0] < left[0] + left[2]
+        and left[1] < right[1] + right[3]
+        and right[1] < left[1] + left[3]
+    )
+
+
 def _png_contract(content: bytes) -> tuple[list[int], bool] | None:
     if not content.startswith(b"\x89PNG\r\n\x1a\n") or len(content) < 26:
         return None
@@ -119,7 +132,7 @@ def validate_manifest(
     previous_runtime_version=None,
 ) -> None:
     seen_ids = set()
-    runtime_inputs = set()
+    runtime_inputs: dict[tuple[str, str, str, str], list[tuple[int, dict[str, Any] | None]]] = {}
     legacy_ids = set(occupied_ids)
     phase_range = manifest.get("phase", {}).get("sprite_id_range", [27041, 27082])
     if phase_range != [27041, 27082]:
@@ -165,10 +178,11 @@ def validate_manifest(
             or sprite.get("source_alpha") is not png_contract[1]
         ):
             _fail("ASSET-SPRITE-002", f"sprite {sprite_id} dimensions/alpha nguồn không khớp")
-        runtime_inputs.add((source_path, sprite["zooms"]["x4"], source_hash, x4_hash))
+        runtime_key = (source_path, sprite["zooms"]["x4"], source_hash, x4_hash)
         crop = sprite.get("crop")
-        if crop and crop.get("subject") == "iruka":
-            rect, overlap, layer = crop.get("source_rect"), crop.get("overlap"), crop.get("layer")
+        if crop is not None:
+            rect = crop.get("source_rect")
+            dimensions = sprite.get("source_dimensions")
             valid_rect = (
                 isinstance(rect, list)
                 and len(rect) == 4
@@ -177,13 +191,23 @@ def validate_manifest(
                 and rect[1] >= 0
                 and rect[2] > 0
                 and rect[3] > 0
+                and isinstance(dimensions, list)
+                and len(dimensions) == 2
+                and rect[0] + rect[2] <= dimensions[0]
+                and rect[1] + rect[3] <= dimensions[1]
+                and crop.get("asset_id") == sprite_id
             )
+            if not valid_rect:
+                _fail("ASSET-CROP-007", f"sprite {sprite_id} crop sai biên hoặc identity")
+        runtime_inputs.setdefault(runtime_key, []).append((sprite_id, crop))
+        if crop and crop.get("subject") == "iruka":
+            rect, overlap, layer = crop.get("source_rect"), crop.get("overlap"), crop.get("layer")
             valid_overlap = (
                 isinstance(overlap, list)
                 and len(overlap) == 2
                 and all(_is_int(value) and -127 <= value <= 127 for value in overlap)
             )
-            if not valid_rect or not valid_overlap or not _is_int(layer) or layer < 0:
+            if not valid_overlap or not _is_int(layer) or layer < 0:
                 _fail("ASSET-CROP-007", "crop Iruka sai kiểu hoặc ngoài phạm vi")
             iruka_layers.append(layer)
         seen_ids.add(sprite_id)
@@ -193,8 +217,19 @@ def validate_manifest(
     ):
         _fail("ASSET-CROP-007", "layer Iruka phải duy nhất và tăng dần")
 
-    if len(seen_ids) > 1 and len(runtime_inputs) == 1:
-        _fail("ASSET-SPRITE-002", "mọi sprite đang dùng chung một source/x4 placeholder")
+    for shared_sprites in runtime_inputs.values():
+        if len(shared_sprites) < 2:
+            continue
+        for sprite_id, crop in shared_sprites:
+            if crop is None:
+                _fail("ASSET-CROP-007", f"sprite {sprite_id} dùng shared-sheet nhưng thiếu crop")
+        for index, (sprite_id, crop) in enumerate(shared_sprites):
+            for other_id, other_crop in shared_sprites[index + 1 :]:
+                if _rects_overlap(crop["source_rect"], other_crop["source_rect"]):
+                    _fail(
+                        "ASSET-CROP-007",
+                        f"crop shared-sheet chồng nhau: sprite {sprite_id} và {other_id}",
+                    )
 
     previous = previous_runtime_version
     if previous is None:
@@ -210,7 +245,7 @@ def validate_manifest(
         for frame in part.get("frames", []):
             if frame.get("sprite_id") not in seen_ids:
                 _fail("ASSET-PART-004", f"part {part['id']} trỏ sprite không tồn tại")
-            if not -128 <= frame.get("dx", 0) <= 127 or not -128 <= frame.get("dy", 0) <= 127:
+            if not _is_sbyte(frame.get("dx", 0)) or not _is_sbyte(frame.get("dy", 0)):
                 _fail("ASSET-PART-005", f"part {part['id']} có dx/dy ngoài sbyte")
 
     for animation in manifest.get("animations", []):

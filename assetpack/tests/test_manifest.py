@@ -145,6 +145,18 @@ class ManifestValidationTests(unittest.TestCase):
         self.assertNotEqual(0, result.returncode)
         self.assertIn("ASSET-PART-005", result.stderr)
 
+    def test_rejects_bool_part_offsets(self):
+        # Mutation caught: Python bool is an int subclass but is not a binary offset.
+        for field in ("dx", "dy"):
+            with self.subTest(field=field):
+                manifest = self.minimal_manifest()
+                manifest["parts"][0]["frames"][0][field] = False
+
+                result = self.validate(manifest)
+
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn("ASSET-PART-005", result.stderr)
+
     def test_rejects_invalid_source_hash(self):
         # Mutation caught: accepting an unpinned source input.
         manifest = self.minimal_manifest()
@@ -384,7 +396,85 @@ class ManifestValidationTests(unittest.TestCase):
         result = self.validate(manifest)
 
         self.assertNotEqual(0, result.returncode)
-        self.assertIn("ASSET-SPRITE-002", result.stderr)
+        self.assertIn("ASSET-CROP-007", result.stderr)
+
+    def test_shared_sheet_requires_bounded_non_overlapping_asset_identity_crops(self):
+        # Mutation caught: changing one asset to another asset's crop must not preserve validity.
+        manifest = self.minimal_manifest()
+        png = rgba_png(4, 2)
+        digest = hashlib.sha256(png).hexdigest()
+        base = manifest["sprites"][0]
+        base.update(
+            source_path="sheet.png",
+            source_sha256=digest,
+            x4_sha256=digest,
+            source_dimensions=[4, 2],
+            source_alpha=True,
+            crop={"asset_id": 27041, "source_rect": [0, 0, 2, 2]},
+        )
+        base["zooms"]["x4"] = "sheet.png"
+        second = json.loads(json.dumps(base))
+        second.update(id=27042, crop={"asset_id": 27042, "source_rect": [2, 0, 2, 2]})
+        manifest["sprites"].append(second)
+        manifest["parts"] = []
+
+        accepted = self.validate(manifest, files={"sheet.png": png})
+        self.assertEqual(0, accepted.returncode, accepted.stderr)
+
+        mutations = {
+            "another_asset_crop": {"asset_id": 27041, "source_rect": [0, 0, 2, 2]},
+            "overlap": {"asset_id": 27042, "source_rect": [1, 0, 2, 2]},
+            "out_of_bounds": {"asset_id": 27042, "source_rect": [3, 0, 2, 2]},
+        }
+        for mutation, crop in mutations.items():
+            with self.subTest(mutation=mutation):
+                changed = json.loads(json.dumps(manifest))
+                changed["sprites"][1]["crop"] = crop
+                result = self.validate(changed, files={"sheet.png": png})
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn("ASSET-CROP-007", result.stderr)
+
+        swapped = json.loads(json.dumps(manifest))
+        swapped["sprites"][0]["crop"], swapped["sprites"][1]["crop"] = (
+            swapped["sprites"][1]["crop"],
+            swapped["sprites"][0]["crop"],
+        )
+        result = self.validate(swapped, files={"sheet.png": png})
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("ASSET-CROP-007", result.stderr)
+
+    def test_rejects_changing_one_asset_to_another_assets_source_path(self):
+        # Mutation caught: a valid path/hash tuple cannot replace another asset's identity.
+        manifest = self.minimal_manifest()
+        second = json.loads(json.dumps(manifest["sprites"][0]))
+        second["id"] = 27042
+        second["source_path"] = "source-b.png"
+        second["zooms"]["x4"] = "x4-b.png"
+        second_digest = hashlib.sha256(b"runtime-b").hexdigest()
+        second["source_sha256"] = second_digest
+        second["x4_sha256"] = second_digest
+        manifest["sprites"].append(second)
+        manifest["parts"] = []
+        files = {
+            "source.png": b"runtime-source",
+            "x4.png": b"runtime-source",
+            "source-b.png": b"runtime-b",
+            "x4-b.png": b"runtime-b",
+        }
+        accepted = self.validate(manifest, files=files)
+        self.assertEqual(0, accepted.returncode, accepted.stderr)
+
+        changed = json.loads(json.dumps(manifest))
+        changed["sprites"][1].update(
+            source_path="source.png",
+            source_sha256=manifest["sprites"][0]["source_sha256"],
+            x4_sha256=manifest["sprites"][0]["x4_sha256"],
+        )
+        changed["sprites"][1]["zooms"]["x4"] = "x4.png"
+        result = self.validate(changed, files=files)
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("ASSET-CROP-007", result.stderr)
 
     def test_verifies_source_and_x4_with_independent_paths_and_hashes(self):
         # Mutation caught: checking only source_path, or reusing source SHA for x4.

@@ -81,6 +81,7 @@ $sourceRoot = Join-Path $fixtureRoot "unity-source"
 $snapshotRoot = Join-Path $fixtureRoot "unity-snapshot"
 $badSnapshotRoot = Join-Path $fixtureRoot "unity-bad-sha"
 $badPatchSnapshotRoot = Join-Path $fixtureRoot "unity-bad-patch"
+$copyFailureSnapshotRoot = Join-Path $fixtureRoot "unity-copy-failure"
 $defaultSnapshotRoot = Join-Path $fixtureRoot "unity-default-manifest"
 $patchRoot = Join-Path $fixtureRoot "patches"
 $fixtureManifest = Join-Path $fixtureRoot "overlay-manifest.json"
@@ -325,6 +326,36 @@ public class Panel {
     Assert-FailureCode $badPatch "OVERLAY-PATCH-001"
     Assert-True (-not (Test-Path -LiteralPath $badPatchSnapshotRoot)) `
         "A rejected patch precondition must not create an unmarked snapshot."
+
+    # Hold a real source file exclusively so the child process fails during its
+    # recursive Copy-Item. A failed copy must not strand a partial final snapshot.
+    $copyFailureSource = Join-Path $sourceRoot "Assets\copy-blocked.txt"
+    Write-Utf8NoBom $copyFailureSource "copy must fail while this handle is held"
+    $copyLock = [System.IO.File]::Open(
+        $copyFailureSource,
+        [System.IO.FileMode]::Open,
+        [System.IO.FileAccess]::Read,
+        [System.IO.FileShare]::None
+    )
+    try {
+        $copyFailure = Invoke-Overlay $applyScript @(
+            "-UnityProject", $sourceRoot,
+            "-SnapshotRoot", $copyFailureSnapshotRoot,
+            "-ManifestPath", $fixtureManifest
+        )
+    }
+    finally {
+        $copyLock.Dispose()
+    }
+    Assert-True ($copyFailure.ExitCode -ne 0) "An exclusively locked source file must make copy fail."
+    Assert-True (-not (Test-Path -LiteralPath $copyFailureSnapshotRoot)) `
+        "A failed copy must leave no partial final snapshot."
+    Assert-True (-not (Test-Path -LiteralPath (Join-Path $copyFailureSnapshotRoot ".nro-e2e-overlay.json"))) `
+        "A failed copy must not leave a false overlay marker."
+    $stagingLeftovers = @(Get-ChildItem -LiteralPath $fixtureRoot -Directory -Force -Filter `
+        ((Split-Path -Leaf $copyFailureSnapshotRoot) + ".staging-*"))
+    Assert-True ($stagingLeftovers.Count -eq 0) `
+        "A failed copy must roll back its staging directory."
 
     $defaultToolRoot = Join-Path $fixtureRoot "default-tool"
     [System.IO.Directory]::CreateDirectory((Join-Path $defaultToolRoot "patches")) | Out-Null

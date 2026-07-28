@@ -36,7 +36,7 @@ type khoDayDuGia struct {
 func TestMoLuuTruNoiDuBaDiem(t *testing.T) {
 	kho := &khoDayDuGia{}
 	soKhuVuc := MoSoKhuVuc()
-	t.Cleanup(soKhuVuc.DungTatCa)
+	t.Cleanup(func() { _ = soKhuVuc.DungTatCa() })
 
 	thoGhi, boLuu, taoXuLy := MoLuuTru(kho, soKhuVuc, 4)
 	if boLuu != nil {

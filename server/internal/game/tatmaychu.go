@@ -1,6 +1,9 @@
 package game
 
-import "context"
+import (
+	"context"
+	"errors"
+)
 
 // TatMayChu thuc hien DUNG THU TU BAT BUOC cua dac ta
 // 2026-07-27-luu-trang-thai-song.md §4 diem C (tat may chu) va
@@ -25,15 +28,14 @@ import "context"
 // deu la ham that da co san — chi can GOI DUNG THU TU la du, khong phai viet
 // lai logic luu.
 //
-// Loi tra ve la loi cua DongVaChoXong (thuong la ctx.Err() khi vuot han gio
-// — vd CSDL treo that su dung luc tat may chu). Ham nay VAN GOI DungTatCa()
-// DU DongVaChoXong co loi hay khong: mot lan tat "danh hong" (mat vai thay
-// doi GAN NHAT chua kip ghi) con hon treo ca tien trinh may chu khong bao
-// gio thoat duoc — dung tinh than context.WithTimeout da giai thich o
-// hanGioGhi (thogi.go).
+// Loi tra ve gop ca loi cua DongVaChoXong (thuong la ctx.Err() khi vuot han
+// gio — vd CSDL treo that su dung luc tat may chu) VA loi dung actor. Ham nay
+// VAN GOI DungTatCa() du DongVaChoXong co loi hay khong: mot lan tat "danh
+// hong" (mat vai thay doi GAN NHAT chua kip ghi) con hon treo ca tien trinh
+// may chu khong bao gio thoat duoc — dung tinh than context.WithTimeout da
+// giai thich o hanGioGhi (thogi.go).
 func TatMayChu(ctx context.Context, soKhuVuc *SoKhuVuc, thoGhi *ThoGhi) error {
 	soKhuVuc.LuuTatCa(thoGhi)
 	err := thoGhi.DongVaChoXong(ctx)
-	soKhuVuc.DungTatCa()
-	return err
+	return errors.Join(err, soKhuVuc.DungTatCa())
 }

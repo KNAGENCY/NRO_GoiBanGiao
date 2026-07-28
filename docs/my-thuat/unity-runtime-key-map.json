@@ -120,14 +120,7 @@
           "file_sha256": "c25a9df30a6bd05755966890f10b7085619515e35669b5987c51c0a6ac82c08d"
         }
       ],
-      "consumer_sites": [
-        {
-          "file": "Assets/Scripts/Game1/Command.cs",
-          "line": 187,
-          "expression": "paintOngMau(btn0left, btn0mid, btn0right, x, y, 160, g);",
-          "file_sha256": "b053ac650526d45d026bbd2b74ee6b89a69f7e9e57fcefa234086bde91f5e2d5"
-        }
-      ],
+      "consumer_sites": [],
       "physical_paths": {
         "x1": [
           "Assets/Resources/res/x1/mainimage/btn0left.png",
@@ -180,14 +173,7 @@
           "file_sha256": "c25a9df30a6bd05755966890f10b7085619515e35669b5987c51c0a6ac82c08d"
         }
       ],
-      "consumer_sites": [
-        {
-          "file": "Assets/Scripts/Game1/Command.cs",
-          "line": 191,
-          "expression": "paintOngMau(btn1left, btn1mid, btn1right, x, y, 160, g);",
-          "file_sha256": "b053ac650526d45d026bbd2b74ee6b89a69f7e9e57fcefa234086bde91f5e2d5"
-        }
-      ],
+      "consumer_sites": [],
       "physical_paths": {
         "x1": [
           "Assets/Resources/res/x1/mainimage/btn1left.png",

@@ -3,12 +3,24 @@ param(
     [string]$UnityRoot,
 
     [Parameter(Mandatory = $true)]
-    [string]$MappingPath
+    [string]$MappingPath,
+
+    [switch]$RequireFutureOutputs
 )
 
 $ErrorActionPreference = "Stop"
 $errors = New-Object System.Collections.Generic.List[string]
 $allowedModes = @("direct", "slice_group", "overlay_required")
+$expectedModes = @{
+    "ui_logo_game_x4.png" = "direct"
+    "ui_nut_thuong_x4.png" = "slice_group"
+    "ui_nut_nhan_x4.png" = "slice_group"
+    "ui_khung_avatar_x4.png" = "overlay_required"
+    "ui_khung_hoithoai_x4.png" = "overlay_required"
+    "ui_nut_khoa_x4.png" = "overlay_required"
+    "ui_o_dangchon_x4.png" = "overlay_required"
+    "ui_o_vatpham_x4.png" = "overlay_required"
+}
 $requiredSources = @(
     "ui_logo_game_x4.png",
     "ui_khung_avatar_x4.png",
@@ -141,6 +153,7 @@ function Test-PhysicalPaths {
         [string]$Root
     )
 
+    $rootFull = [System.IO.Path]::GetFullPath($Root).TrimEnd("\", "/")
     foreach ($zoom in 1..4) {
         $propertyName = "x$zoom"
         $property = $Entry.physical_paths.PSObject.Properties[$propertyName]
@@ -155,44 +168,63 @@ function Test-PhysicalPaths {
         }
         for ($index = 0; $index -lt $paths.Count; $index++) {
             $path = ([string]$paths[$index]).Replace("\", "/")
-            if ($path -notmatch "^Assets/Resources/res/x[1-4]/") {
-                Add-ValidationError "Physical path '$path' không nằm dưới Assets/Resources/res/xN/."
+            if ([System.IO.Path]::IsPathRooted($path)) {
+                Add-ValidationError "Physical path '$path' phải là đường dẫn tương đối trong Unity root."
                 continue
             }
+            if (($path -split "/") -contains "..") {
+                Add-ValidationError "Physical path '$path' không được chứa '..'."
+                continue
+            }
+
+            $usesResizeLoader = (
+                $Entry.mode -eq "direct" -and
+                [string]$Entry.call_sites[0].expression -match "loadImageResize"
+            )
+            $physicalZoom = $(if ($usesResizeLoader) { 4 } else { $zoom })
+            $expectedRelativeRoot = "Assets/Resources/res/x$physicalZoom"
+            $expectedFullRoot = [System.IO.Path]::GetFullPath(
+                (Join-Path $rootFull $expectedRelativeRoot)
+            ).TrimEnd("\", "/")
+            $physicalFile = [System.IO.Path]::GetFullPath((Join-Path $rootFull $path))
+            if (-not $physicalFile.StartsWith(
+                $expectedFullRoot + [System.IO.Path]::DirectorySeparatorChar,
+                [StringComparison]::OrdinalIgnoreCase
+            )) {
+                Add-ValidationError "Physical path '$path' sau canonicalize nằm ngoài '$expectedRelativeRoot'."
+                continue
+            }
+
             $keySuffix = $EffectiveKeys[$index].TrimStart("/").Replace("mainImage/", "mainimage/")
             if (-not $path.EndsWith("/" + $keySuffix, [StringComparison]::OrdinalIgnoreCase)) {
                 Add-ValidationError "Physical path '$path' không khớp key '$($EffectiveKeys[$index])'."
             }
-            if ($Entry.mode -eq "overlay_required") {
-                if ($path -notmatch "^Assets/Resources/res/x$zoom/") {
-                    Add-ValidationError "Future overlay zoom $zoom phải có file riêng trong res/x${zoom}: '$path'."
-                }
-            }
-            elseif ($Entry.mode -eq "direct" -and $Entry.call_sites[0].expression -match "loadImageResize") {
-                if ($path -notmatch "^Assets/Resources/res/x4/") {
-                    Add-ValidationError "loadImageResize phải resolve '$($EffectiveKeys[$index])' từ x4, kể cả khi zoom=$zoom."
-                }
-            }
-            elseif (
-                $path -notmatch "^Assets/Resources/res/x$zoom/"
-            ) {
-                Add-ValidationError "Physical output zoom $zoom phải nằm trong res/x${zoom}: '$path'."
-            }
+
             if ($Entry.mode -ne "overlay_required") {
-                $physicalFile = Join-Path $Root $path
                 if (-not (Test-Path -LiteralPath $physicalFile -PathType Leaf)) {
                     $callExpressions = (@($Entry.call_sites) | ForEach-Object { [string]$_.expression }) -join "`n"
-                    $fallbackPath = $path -replace "^Assets/Resources/res/x[1-3]/", "Assets/Resources/res/x4/"
-                    $fallbackFile = Join-Path $Root $fallbackPath
+                    $fallbackPath = "Assets/Resources/res/x4/$keySuffix"
+                    $fallbackRoot = [System.IO.Path]::GetFullPath(
+                        (Join-Path $rootFull "Assets/Resources/res/x4")
+                    ).TrimEnd("\", "/")
+                    $fallbackFile = [System.IO.Path]::GetFullPath((Join-Path $rootFull $fallbackPath))
+                    $fallbackIsContained = $fallbackFile.StartsWith(
+                        $fallbackRoot + [System.IO.Path]::DirectorySeparatorChar,
+                        [StringComparison]::OrdinalIgnoreCase
+                    )
                     $usesLoadImageFallback = (
                         $zoom -lt 4 -and
                         $callExpressions -match "\bloadImage\(" -and
+                        $fallbackIsContained -and
                         (Test-Path -LiteralPath $fallbackFile -PathType Leaf)
                     )
                     if (-not $usesLoadImageFallback) {
                         Add-ValidationError "Không tìm thấy physical file '$path' hoặc fallback x4 cho '$($Entry.source_asset)'."
                     }
                 }
+            }
+            elseif ($RequireFutureOutputs -and -not (Test-Path -LiteralPath $physicalFile -PathType Leaf)) {
+                Add-ValidationError "Không tìm thấy future physical file '$path' trong staging."
             }
         }
     }
@@ -210,8 +242,8 @@ try {
     if ($mapping.schema_version -ne 1) {
         Add-ValidationError "schema_version phải bằng 1."
     }
-    if ([string]::IsNullOrWhiteSpace([string]$mapping.unity_source_scope)) {
-        Add-ValidationError "Thiếu unity_source_scope."
+    if ([string]$mapping.unity_source_scope -cne "Assets/Scripts/Game1") {
+        Add-ValidationError "unity_source_scope phải chính xác là 'Assets/Scripts/Game1'."
     }
 
     $entries = @($mapping.entries)
@@ -234,6 +266,9 @@ try {
         }
 
         $mode = [string]$entry.mode
+        if ($expectedModes.ContainsKey($source) -and $mode -ne $expectedModes[$source]) {
+            Add-ValidationError "'$source' phải có mode '$($expectedModes[$source])', không phải '$mode'."
+        }
         if ($allowedModes -notcontains $mode) {
             Add-ValidationError "'$source' có mode không hợp lệ '$mode'."
             continue
@@ -262,8 +297,14 @@ try {
             if ($mode -eq "direct" -and $logicalKeys.Count -ne 1) {
                 Add-ValidationError "'$source' direct phải có đúng một logical key."
             }
-            if ($mode -eq "slice_group" -and $logicalKeys.Count -lt 2) {
-                Add-ValidationError "'$source' slice_group phải có ít nhất hai logical key."
+            if ($mode -eq "direct" -and @($entry.call_sites).Count -ne 1) {
+                Add-ValidationError "'$source' direct phải có đúng một call-site."
+            }
+            if ($mode -eq "slice_group" -and $logicalKeys.Count -ne 3) {
+                Add-ValidationError "'$source' slice_group phải có đúng ba logical key trái-giữa-phải."
+            }
+            if ($mode -eq "slice_group" -and @($entry.call_sites).Count -ne 3) {
+                Add-ValidationError "'$source' slice_group phải có đúng ba call-site trái-giữa-phải."
             }
             if (@($entry.call_sites).Count -lt 1) {
                 Add-ValidationError "'$source' mode $mode phải có call-site thật."
@@ -312,6 +353,13 @@ try {
         if (-not $sourceNames.ContainsKey($requiredSource.ToLowerInvariant())) {
             Add-ValidationError "Thiếu source asset đã duyệt '$requiredSource'."
         }
+    }
+
+    $directCount = @($entries | Where-Object { $_.mode -eq "direct" }).Count
+    $sliceCount = @($entries | Where-Object { $_.mode -eq "slice_group" }).Count
+    $overlayCount = @($entries | Where-Object { $_.mode -eq "overlay_required" }).Count
+    if ($directCount -ne 1 -or $sliceCount -ne 2 -or $overlayCount -ne 5) {
+        Add-ValidationError "Tỷ lệ mode phải là direct=1, slice_group=2, overlay_required=5; hiện là $directCount/$sliceCount/$overlayCount."
     }
 
     if ($errors.Count -gt 0) {

@@ -27,6 +27,7 @@
     {
       "id": 27041,
       "name": "hoc-vien-head-0",
+      "crop": {"asset_id": 27041, "source_rect": [0, 0, 209, 209]},
       "zooms": {
         "x1": "planned/27041/x1.png",
         "x2": "planned/27041/x2.png",
@@ -45,6 +46,7 @@
     {
       "id": 27042,
       "name": "hoc-vien-head-1",
+      "crop": {"asset_id": 27042, "source_rect": [209, 0, 209, 209]},
       "zooms": {
         "x1": "planned/27042/x1.png",
         "x2": "planned/27042/x2.png",
@@ -63,6 +65,7 @@
     {
       "id": 27043,
       "name": "hoc-vien-head-2",
+      "crop": {"asset_id": 27043, "source_rect": [418, 0, 209, 209]},
       "zooms": {
         "x1": "planned/27043/x1.png",
         "x2": "planned/27043/x2.png",
@@ -81,6 +84,7 @@
     {
       "id": 27044,
       "name": "hoc-vien-body-0",
+      "crop": {"asset_id": 27044, "source_rect": [627, 0, 209, 209]},
       "zooms": {
         "x1": "planned/27044/x1.png",
         "x2": "planned/27044/x2.png",
@@ -99,6 +103,7 @@
     {
       "id": 27045,
       "name": "hoc-vien-body-1",
+      "crop": {"asset_id": 27045, "source_rect": [836, 0, 209, 209]},
       "zooms": {
         "x1": "planned/27045/x1.png",
         "x2": "planned/27045/x2.png",
@@ -117,6 +122,7 @@
     {
       "id": 27046,
       "name": "hoc-vien-body-2",
+      "crop": {"asset_id": 27046, "source_rect": [1045, 0, 209, 209]},
       "zooms": {
         "x1": "planned/27046/x1.png",
         "x2": "planned/27046/x2.png",
@@ -135,6 +141,7 @@
     {
       "id": 27047,
       "name": "hoc-vien-body-3",
+      "crop": {"asset_id": 27047, "source_rect": [0, 209, 209, 209]},
       "zooms": {
         "x1": "planned/27047/x1.png",
         "x2": "planned/27047/x2.png",
@@ -153,6 +160,7 @@
     {
       "id": 27048,
       "name": "hoc-vien-body-4",
+      "crop": {"asset_id": 27048, "source_rect": [209, 209, 209, 209]},
       "zooms": {
         "x1": "planned/27048/x1.png",
         "x2": "planned/27048/x2.png",
@@ -171,6 +179,7 @@
     {
       "id": 27049,
       "name": "hoc-vien-body-5",
+      "crop": {"asset_id": 27049, "source_rect": [418, 209, 209, 209]},
       "zooms": {
         "x1": "planned/27049/x1.png",
         "x2": "planned/27049/x2.png",
@@ -189,6 +198,7 @@
     {
       "id": 27050,
       "name": "hoc-vien-body-6",
+      "crop": {"asset_id": 27050, "source_rect": [627, 209, 209, 209]},
       "zooms": {
         "x1": "planned/27050/x1.png",
         "x2": "planned/27050/x2.png",
@@ -207,6 +217,7 @@
     {
       "id": 27051,
       "name": "hoc-vien-body-7",
+      "crop": {"asset_id": 27051, "source_rect": [836, 209, 209, 209]},
       "zooms": {
         "x1": "planned/27051/x1.png",
         "x2": "planned/27051/x2.png",
@@ -225,6 +236,7 @@
     {
       "id": 27052,
       "name": "hoc-vien-body-8",
+      "crop": {"asset_id": 27052, "source_rect": [1045, 209, 209, 209]},
       "zooms": {
         "x1": "planned/27052/x1.png",
         "x2": "planned/27052/x2.png",
@@ -243,6 +255,7 @@
     {
       "id": 27053,
       "name": "hoc-vien-body-9",
+      "crop": {"asset_id": 27053, "source_rect": [0, 418, 209, 209]},
       "zooms": {
         "x1": "planned/27053/x1.png",
         "x2": "planned/27053/x2.png",
@@ -261,6 +274,7 @@
     {
       "id": 27054,
       "name": "hoc-vien-body-10",
+      "crop": {"asset_id": 27054, "source_rect": [209, 418, 209, 209]},
       "zooms": {
         "x1": "planned/27054/x1.png",
         "x2": "planned/27054/x2.png",
@@ -279,6 +293,7 @@
     {
       "id": 27055,
       "name": "hoc-vien-body-11",
+      "crop": {"asset_id": 27055, "source_rect": [418, 418, 209, 209]},
       "zooms": {
         "x1": "planned/27055/x1.png",
         "x2": "planned/27055/x2.png",
@@ -297,6 +312,7 @@
     {
       "id": 27056,
       "name": "hoc-vien-body-12",
+      "crop": {"asset_id": 27056, "source_rect": [627, 418, 209, 209]},
       "zooms": {
         "x1": "planned/27056/x1.png",
         "x2": "planned/27056/x2.png",
@@ -315,6 +331,7 @@
     {
       "id": 27057,
       "name": "hoc-vien-body-13",
+      "crop": {"asset_id": 27057, "source_rect": [836, 418, 209, 209]},
       "zooms": {
         "x1": "planned/27057/x1.png",
         "x2": "planned/27057/x2.png",
@@ -333,6 +350,7 @@
     {
       "id": 27058,
       "name": "hoc-vien-body-14",
+      "crop": {"asset_id": 27058, "source_rect": [1045, 418, 209, 209]},
       "zooms": {
         "x1": "planned/27058/x1.png",
         "x2": "planned/27058/x2.png",
@@ -351,6 +369,7 @@
     {
       "id": 27059,
       "name": "hoc-vien-body-15",
+      "crop": {"asset_id": 27059, "source_rect": [0, 627, 209, 209]},
       "zooms": {
         "x1": "planned/27059/x1.png",
         "x2": "planned/27059/x2.png",
@@ -369,6 +388,7 @@
     {
       "id": 27060,
       "name": "hoc-vien-body-16",
+      "crop": {"asset_id": 27060, "source_rect": [209, 627, 209, 209]},
       "zooms": {
         "x1": "planned/27060/x1.png",
         "x2": "planned/27060/x2.png",
@@ -387,6 +407,7 @@
     {
       "id": 27061,
       "name": "hoc-vien-leg-0",
+      "crop": {"asset_id": 27061, "source_rect": [418, 627, 209, 209]},
       "zooms": {
         "x1": "planned/27061/x1.png",
         "x2": "planned/27061/x2.png",
@@ -405,6 +426,7 @@
     {
       "id": 27062,
       "name": "hoc-vien-leg-1",
+      "crop": {"asset_id": 27062, "source_rect": [627, 627, 209, 209]},
       "zooms": {
         "x1": "planned/27062/x1.png",
         "x2": "planned/27062/x2.png",
@@ -423,6 +445,7 @@
     {
       "id": 27063,
       "name": "hoc-vien-leg-2",
+      "crop": {"asset_id": 27063, "source_rect": [836, 627, 209, 209]},
       "zooms": {
         "x1": "planned/27063/x1.png",
         "x2": "planned/27063/x2.png",
@@ -441,6 +464,7 @@
     {
       "id": 27064,
       "name": "hoc-vien-leg-3",
+      "crop": {"asset_id": 27064, "source_rect": [1045, 627, 209, 209]},
       "zooms": {
         "x1": "planned/27064/x1.png",
         "x2": "planned/27064/x2.png",
@@ -459,6 +483,7 @@
     {
       "id": 27065,
       "name": "hoc-vien-leg-4",
+      "crop": {"asset_id": 27065, "source_rect": [0, 836, 209, 209]},
       "zooms": {
         "x1": "planned/27065/x1.png",
         "x2": "planned/27065/x2.png",
@@ -477,6 +502,7 @@
     {
       "id": 27066,
       "name": "hoc-vien-leg-5",
+      "crop": {"asset_id": 27066, "source_rect": [209, 836, 209, 209]},
       "zooms": {
         "x1": "planned/27066/x1.png",
         "x2": "planned/27066/x2.png",
@@ -495,6 +521,7 @@
     {
       "id": 27067,
       "name": "hoc-vien-leg-6",
+      "crop": {"asset_id": 27067, "source_rect": [418, 836, 209, 209]},
       "zooms": {
         "x1": "planned/27067/x1.png",
         "x2": "planned/27067/x2.png",
@@ -513,6 +540,7 @@
     {
       "id": 27068,
       "name": "hoc-vien-leg-7",
+      "crop": {"asset_id": 27068, "source_rect": [627, 836, 209, 209]},
       "zooms": {
         "x1": "planned/27068/x1.png",
         "x2": "planned/27068/x2.png",
@@ -531,6 +559,7 @@
     {
       "id": 27069,
       "name": "hoc-vien-leg-8",
+      "crop": {"asset_id": 27069, "source_rect": [836, 836, 209, 209]},
       "zooms": {
         "x1": "planned/27069/x1.png",
         "x2": "planned/27069/x2.png",
@@ -549,6 +578,7 @@
     {
       "id": 27070,
       "name": "hoc-vien-leg-9",
+      "crop": {"asset_id": 27070, "source_rect": [1045, 836, 209, 209]},
       "zooms": {
         "x1": "planned/27070/x1.png",
         "x2": "planned/27070/x2.png",
@@ -567,6 +597,7 @@
     {
       "id": 27071,
       "name": "hoc-vien-leg-10",
+      "crop": {"asset_id": 27071, "source_rect": [0, 1045, 209, 209]},
       "zooms": {
         "x1": "planned/27071/x1.png",
         "x2": "planned/27071/x2.png",
@@ -585,6 +616,7 @@
     {
       "id": 27072,
       "name": "hoc-vien-leg-11",
+      "crop": {"asset_id": 27072, "source_rect": [209, 1045, 209, 209]},
       "zooms": {
         "x1": "planned/27072/x1.png",
         "x2": "planned/27072/x2.png",
@@ -603,6 +635,7 @@
     {
       "id": 27073,
       "name": "hoc-vien-leg-12",
+      "crop": {"asset_id": 27073, "source_rect": [418, 1045, 209, 209]},
       "zooms": {
         "x1": "planned/27073/x1.png",
         "x2": "planned/27073/x2.png",
@@ -621,6 +654,7 @@
     {
       "id": 27074,
       "name": "hoc-vien-leg-13",
+      "crop": {"asset_id": 27074, "source_rect": [627, 1045, 209, 209]},
       "zooms": {
         "x1": "planned/27074/x1.png",
         "x2": "planned/27074/x2.png",
@@ -649,11 +683,12 @@
       "source_sha256": "a53d149ca17557f365dd3d2b8f9f1b9d4fcb6c14dbfb130876157e7e27533622",
       "crop": {
         "subject": "iruka",
+        "asset_id": 27075,
         "source_rect": [
           0,
           0,
           1254,
-          419
+          418
         ],
         "overlap": [
           0,
@@ -681,11 +716,12 @@
       "source_sha256": "a53d149ca17557f365dd3d2b8f9f1b9d4fcb6c14dbfb130876157e7e27533622",
       "crop": {
         "subject": "iruka",
+        "asset_id": 27076,
         "source_rect": [
           0,
           418,
           1254,
-          419
+          418
         ],
         "overlap": [
           1,
@@ -713,6 +749,7 @@
       "source_sha256": "a53d149ca17557f365dd3d2b8f9f1b9d4fcb6c14dbfb130876157e7e27533622",
       "crop": {
         "subject": "iruka",
+        "asset_id": 27077,
         "source_rect": [
           0,
           836,
@@ -753,6 +790,7 @@
     {
       "id": 27079,
       "name": "lang-la-skill-1",
+      "crop": {"asset_id": 27079, "source_rect": [0, 0, 496, 793]},
       "zooms": {
         "x1": "planned/27079/x1.png",
         "x2": "planned/27079/x2.png",
@@ -771,6 +809,7 @@
     {
       "id": 27080,
       "name": "lang-la-skill-2",
+      "crop": {"asset_id": 27080, "source_rect": [496, 0, 495, 793]},
       "zooms": {
         "x1": "planned/27080/x1.png",
         "x2": "planned/27080/x2.png",
@@ -789,6 +828,7 @@
     {
       "id": 27081,
       "name": "lang-la-skill-3",
+      "crop": {"asset_id": 27081, "source_rect": [991, 0, 496, 793]},
       "zooms": {
         "x1": "planned/27081/x1.png",
         "x2": "planned/27081/x2.png",
@@ -807,6 +847,7 @@
     {
       "id": 27082,
       "name": "lang-la-skill-4",
+      "crop": {"asset_id": 27082, "source_rect": [1487, 0, 496, 793]},
       "zooms": {
         "x1": "planned/27082/x1.png",
         "x2": "planned/27082/x2.png",

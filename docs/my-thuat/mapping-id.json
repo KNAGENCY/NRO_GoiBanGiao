@@ -890,22 +890,95 @@
       "id": 57,
       "type": 1,
       "frames": [
-        {
-          "sprite_id": 27044,
-          "dx": 0,
-          "dy": 0
-        }
+        {"sprite_id": 27044, "dx": 0, "dy": 0},
+        {"sprite_id": 27044, "dx": 0, "dy": 0},
+        {"sprite_id": 27044, "dx": 0, "dy": 0},
+        {"sprite_id": 27044, "dx": 0, "dy": 0},
+        {"sprite_id": 27044, "dx": 0, "dy": 0},
+        {"sprite_id": 27044, "dx": 0, "dy": 0},
+        {"sprite_id": 27044, "dx": 0, "dy": 0},
+        {"sprite_id": 27044, "dx": 0, "dy": 0},
+        {"sprite_id": 27044, "dx": 0, "dy": 0},
+        {"sprite_id": 27044, "dx": 0, "dy": 0},
+        {"sprite_id": 27044, "dx": 0, "dy": 0},
+        {"sprite_id": 27044, "dx": 0, "dy": 0},
+        {"sprite_id": 27044, "dx": 0, "dy": 0},
+        {"sprite_id": 27044, "dx": 0, "dy": 0},
+        {"sprite_id": 27044, "dx": 0, "dy": 0},
+        {"sprite_id": 27044, "dx": 0, "dy": 0},
+        {"sprite_id": 27044, "dx": 0, "dy": 0}
       ]
     },
     {
       "id": 58,
       "type": 2,
       "frames": [
-        {
-          "sprite_id": 27061,
-          "dx": 0,
-          "dy": 0
-        }
+        {"sprite_id": 27061, "dx": 0, "dy": 0},
+        {"sprite_id": 27061, "dx": 0, "dy": 0},
+        {"sprite_id": 27061, "dx": 0, "dy": 0},
+        {"sprite_id": 27061, "dx": 0, "dy": 0},
+        {"sprite_id": 27061, "dx": 0, "dy": 0},
+        {"sprite_id": 27061, "dx": 0, "dy": 0},
+        {"sprite_id": 27061, "dx": 0, "dy": 0},
+        {"sprite_id": 27061, "dx": 0, "dy": 0},
+        {"sprite_id": 27061, "dx": 0, "dy": 0},
+        {"sprite_id": 27061, "dx": 0, "dy": 0},
+        {"sprite_id": 27061, "dx": 0, "dy": 0},
+        {"sprite_id": 27061, "dx": 0, "dy": 0},
+        {"sprite_id": 27061, "dx": 0, "dy": 0},
+        {"sprite_id": 27061, "dx": 0, "dy": 0}
+      ]
+    },
+    {
+      "id": 2189,
+      "type": 0,
+      "frames": [
+        {"sprite_id": 27075, "dx": 0, "dy": 0},
+        {"sprite_id": 27075, "dx": 0, "dy": 0},
+        {"sprite_id": 27075, "dx": 0, "dy": 0}
+      ]
+    },
+    {
+      "id": 2190,
+      "type": 1,
+      "frames": [
+        {"sprite_id": 27076, "dx": 0, "dy": 0},
+        {"sprite_id": 27076, "dx": 0, "dy": 0},
+        {"sprite_id": 27076, "dx": 0, "dy": 0},
+        {"sprite_id": 27076, "dx": 0, "dy": 0},
+        {"sprite_id": 27076, "dx": 0, "dy": 0},
+        {"sprite_id": 27076, "dx": 0, "dy": 0},
+        {"sprite_id": 27076, "dx": 0, "dy": 0},
+        {"sprite_id": 27076, "dx": 0, "dy": 0},
+        {"sprite_id": 27076, "dx": 0, "dy": 0},
+        {"sprite_id": 27076, "dx": 0, "dy": 0},
+        {"sprite_id": 27076, "dx": 0, "dy": 0},
+        {"sprite_id": 27076, "dx": 0, "dy": 0},
+        {"sprite_id": 27076, "dx": 0, "dy": 0},
+        {"sprite_id": 27076, "dx": 0, "dy": 0},
+        {"sprite_id": 27076, "dx": 0, "dy": 0},
+        {"sprite_id": 27076, "dx": 0, "dy": 0},
+        {"sprite_id": 27076, "dx": 0, "dy": 0}
+      ]
+    },
+    {
+      "id": 2191,
+      "type": 2,
+      "frames": [
+        {"sprite_id": 27077, "dx": 0, "dy": 0},
+        {"sprite_id": 27077, "dx": 0, "dy": 0},
+        {"sprite_id": 27077, "dx": 0, "dy": 0},
+        {"sprite_id": 27077, "dx": 0, "dy": 0},
+        {"sprite_id": 27077, "dx": 0, "dy": 0},
+        {"sprite_id": 27077, "dx": 0, "dy": 0},
+        {"sprite_id": 27077, "dx": 0, "dy": 0},
+        {"sprite_id": 27077, "dx": 0, "dy": 0},
+        {"sprite_id": 27077, "dx": 0, "dy": 0},
+        {"sprite_id": 27077, "dx": 0, "dy": 0},
+        {"sprite_id": 27077, "dx": 0, "dy": 0},
+        {"sprite_id": 27077, "dx": 0, "dy": 0},
+        {"sprite_id": 27077, "dx": 0, "dy": 0},
+        {"sprite_id": 27077, "dx": 0, "dy": 0}
       ]
     }
   ],

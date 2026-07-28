@@ -1,5 +1,7 @@
 package game
 
+import "errors"
+
 // SoKhuVuc giu 5 khu vuc actor co dinh (mapId 1-5) — tao san luc khoi dong may
 // chu, song suot doi tien trinh. Don gian hon tao/huy dong; 5 goroutine ngu la
 // chi phi khong dang ke. Tao/huy dong de danh khi co map tam (to doi/su kien).
@@ -23,9 +25,13 @@ func (s *SoKhuVuc) Tra(mapId int32) *KhuVuc {
 	return s.theoMap[mapId]
 }
 
-// DungTatCa dung sach moi khu vuc (goi luc tat may chu).
-func (s *SoKhuVuc) DungTatCa() {
+// DungTatCa dung sach moi khu vuc (goi luc tat may chu) va tra loi neu bat
+// ky actor nao khong thoat. Van thu dung HET khu vuc de mot actor ket khong
+// lam bo qua viec don dep cac actor con lai.
+func (s *SoKhuVuc) DungTatCa() error {
+	var loi error
 	for _, k := range s.theoMap {
-		k.Dung()
+		loi = errors.Join(loi, k.Dung())
 	}
+	return loi
 }

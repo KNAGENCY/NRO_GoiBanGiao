@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "replacements": [
+    {
+      "before": "Item item = arrItemBox[i];\n                g.setColor(11771523);\n                g.fillRect(x, y, w, h, 4);\n                if (item != null)",
+      "after": "Item item = arrItemBox[i];\n                if (!NroE2E.NroUiOverlay.PaintItemSlot(g, x, y, w, h))\n                {\n                    g.setColor(11771523);\n                    g.fillRect(x, y, w, h, 4);\n                }\n                if (item != null)"
+    },
+    {
+      "before": "if (i == selected)",
+      "after": "if (i == selected && !NroE2E.NroUiOverlay.PaintSelectedItemSlot(g, x - 2, y - 2, w + 3, h + 3))"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "replacements": [
+    {
+      "before": "if (sks[levelId].effectHappenOnMob <= 0)",
+      "after": "if (NroE2E.NroE2EConfig.ShouldUseLegacyEffect(sks[levelId].effectHappenOnMob))"
+    }
+  ]
+}

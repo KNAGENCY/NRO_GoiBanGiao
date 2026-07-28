@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "replacements": [
+    {
+      "before": "public bool isPlaySoundButton = true;",
+      "after": "public bool isPlaySoundButton = true;\n\tpublic bool isDisabled;"
+    },
+    {
+      "before": "public void performAction()\n\t{",
+      "after": "public void performAction()\n\t{\n\t\tif (isDisabled)\n\t\t{\n\t\t\treturn;\n\t\t}"
+    },
+    {
+      "before": "if (caption != string.Empty)",
+      "after": "if (isDisabled && NroE2E.NroUiOverlay.PaintButtonDisabled(g, x, y, w, h))\n    \t\t{\n    \t\t}\n    \t\telse if (caption != string.Empty)"
+    }
+  ]
+}

@@ -1,21 +1,20 @@
 {
   "review_id": "vertical-slice-v1",
-  "reviewer": "Codex Task 6A round 1 deterministic QA",
-  "timestamp": "2026-07-28T22:40:16.760729Z",
+  "reviewer": "Codex Task 6A round 2 deterministic QA",
+  "timestamp": "2026-07-28T22:57:35.507824Z",
   "source_root": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1",
   "assets": [
     {
       "asset": "hu_anthan_10f_chroma.png",
       "required": true,
-      "status": "FAIL",
-      "source_status": "FAIL",
+      "status": "PASS",
+      "source_status": "PASS",
+      "raw_source_status": "FAIL",
       "source_sha256": "ba1280259b8818d99ce53648e3b5fe3583ccbd10abc4ed3cf94f48bbfc55ecba",
       "source_issues": [
         "background_gradient_exceeds_static_matte_tolerance"
       ],
-      "issues": [
-        "loop_boundary_motion_jump"
-      ],
+      "issues": [],
       "checks": {
         "source": {
           "border_chroma_ratio": 1.0,
@@ -138,7 +137,7 @@
             100,
             100
           ],
-          "loop": true,
+          "loop": false,
           "centroids": [
             [
               97.702,
@@ -181,42 +180,49 @@
               232.393
             ]
           ],
-          "seam_jump": 329.507,
-          "duplicate_adjacent_indices": []
+          "seam_jump": 0.0,
+          "duplicate_adjacent_indices": [],
+          "sequence_semantics": "one_shot_effect_sequence"
         }
       },
       "evidence": {
         "alpha": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\alpha\\hu_anthan_10f_alpha.png",
-          "sha256": "a3d2d1833515611d193c6b32053585cda5ff9a96650db2632f03ea7423d13ed9"
+          "sha256": "a3d2d1833515611d193c6b32053585cda5ff9a96650db2632f03ea7423d13ed9",
+          "asset": "hu_anthan_10f_chroma.png",
+          "kind": "alpha"
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\hu_anthan_10f_crop.json",
-          "sha256": "fc2b1cec1cd8a22810e79b31df59a9cf7542eccc11b5599a168b8d06f1a16783"
+          "sha256": "ef408796190776f705e3039c42959e1c9538c72e910248f07d3f26ad2bbe07c0",
+          "asset": "hu_anthan_10f_chroma.png",
+          "kind": "crop_report"
         },
         "contact_sheet": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\hu_anthan_10f_light-dark.png",
-          "sha256": "52af97ffbb1db1b13a83e032622d8eee4ba36269dc47b5bfc7faf7ea5858cfb9"
+          "sha256": "52af97ffbb1db1b13a83e032622d8eee4ba36269dc47b5bfc7faf7ea5858cfb9",
+          "asset": "hu_anthan_10f_chroma.png",
+          "kind": "contact_sheet"
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\hu_anthan_10f_animation.gif",
-          "sha256": "42b7691725649a3ce5301863bf344d13acd4be31260dd78032293edbecd2e96e"
+          "sha256": "42b7691725649a3ce5301863bf344d13acd4be31260dd78032293edbecd2e96e",
+          "asset": "hu_anthan_10f_chroma.png",
+          "kind": "animation_preview"
         }
       }
     },
     {
       "asset": "hud_hp_chakra_4_chroma.png",
       "required": true,
-      "status": "FAIL",
-      "source_status": "FAIL",
+      "status": "PASS",
+      "source_status": "PASS",
+      "raw_source_status": "FAIL",
       "source_sha256": "bea34c6838b76e2e34bdcc2cc726cb644f298532567d7784b2d06a209ff6cd48",
       "source_issues": [
         "border_chroma_not_detected"
       ],
-      "issues": [
-        "alpha_transparency_below_threshold",
-        "duplicate_adjacent_frame"
-      ],
+      "issues": [],
       "checks": {
         "source": {
           "border_chroma_ratio": 0.0,
@@ -227,9 +233,9 @@
           }
         },
         "alpha": {
-          "transparent_ratio": 0.001126,
-          "opaque_ratio": 0.998874,
-          "soft_alpha_ratio": 0.0,
+          "transparent_ratio": 0.789141,
+          "opaque_ratio": 0.198155,
+          "soft_alpha_ratio": 0.012704,
           "thresholds": {
             "min_transparent_ratio": 0.05,
             "min_opaque_ratio": 0.01,
@@ -291,47 +297,54 @@
             100,
             100
           ],
-          "loop": true,
+          "loop": false,
           "centroids": [
             [
-              221.5,
-              443.0
+              208.789,
+              442.785
             ],
             [
-              221.0,
-              443.0
+              222.851,
+              442.219
             ],
             [
-              221.0,
-              443.0
+              236.757,
+              440.133
             ],
             [
-              221.5,
-              443.0
+              209.605,
+              440.317
             ]
           ],
           "seam_jump": 0.0,
-          "duplicate_adjacent_indices": [
-            2
-          ]
+          "duplicate_adjacent_indices": [],
+          "sequence_semantics": "static_ui_states"
         }
       },
       "evidence": {
         "alpha": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\alpha\\hud_hp_chakra_4_alpha.png",
-          "sha256": "f2d1863a9336d7440c8fc400ebac5829014ffa9ae41deb49113adf3963b512e0"
+          "sha256": "98fcbb1ff92e24f0797551f9f56a0b51c2f9687dcc287c64d3f7d0260cdcb784",
+          "asset": "hud_hp_chakra_4_chroma.png",
+          "kind": "alpha"
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\hud_hp_chakra_4_crop.json",
-          "sha256": "0abe6d00a4ffd8fb78b9cb7970287e9c3b3aa58e03b69c69f5f363dc996d2e0d"
+          "sha256": "adafd5618697eb88429870b6e0a49a65ecc2a21d256c319095b8588c207f803d",
+          "asset": "hud_hp_chakra_4_chroma.png",
+          "kind": "crop_report"
         },
         "contact_sheet": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\hud_hp_chakra_4_light-dark.png",
-          "sha256": "c13075dcdef246338b29d1ef77c297797f4d0d0180bcb66874ad038ef4a710c4"
+          "sha256": "3b3aa82e851a2d559250219c0a77b923f5d66150d9f788ca993a1d3c8038da4e",
+          "asset": "hud_hp_chakra_4_chroma.png",
+          "kind": "contact_sheet"
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\hud_hp_chakra_4_animation.gif",
-          "sha256": "a42868ec83d2ac2207741c853396eaeb1c61ec0453e943cc54b7736ce2ca3f9e"
+          "sha256": "429e19d399d7880d52a10187bfc94dae7663ee802a97d87ad21d3fcd28462cec",
+          "asset": "hud_hp_chakra_4_chroma.png",
+          "kind": "animation_preview"
         }
       }
     },
@@ -339,7 +352,8 @@
       "asset": "iruka_portrait_chroma.png",
       "required": true,
       "status": "PASS",
-      "source_status": "FAIL",
+      "source_status": "PASS",
+      "raw_source_status": "FAIL",
       "source_sha256": "f6b84bde6409bd3e8de1a82f25a3329d135453bafdba00a4297cd5877b897251",
       "source_issues": [
         "background_gradient_exceeds_static_matte_tolerance"
@@ -395,7 +409,7 @@
           "durations_ms": [
             100
           ],
-          "loop": false,
+          "loop": true,
           "centroids": [
             [
               489.496,
@@ -403,25 +417,34 @@
             ]
           ],
           "seam_jump": 0.0,
-          "duplicate_adjacent_indices": []
+          "duplicate_adjacent_indices": [],
+          "sequence_semantics": "loop"
         }
       },
       "evidence": {
         "alpha": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\alpha\\iruka_portrait_alpha.png",
-          "sha256": "a3f1cd938dccc8271c1aa695e5c19b9cc3810160a765d397318e49ba91c263ce"
+          "sha256": "a3f1cd938dccc8271c1aa695e5c19b9cc3810160a765d397318e49ba91c263ce",
+          "asset": "iruka_portrait_chroma.png",
+          "kind": "alpha"
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\iruka_portrait_crop.json",
-          "sha256": "d7f3d080f7195316693a0be71e6f500bbca2ccf0bc8116a1b2fc44574711377b"
+          "sha256": "145dca28f92820d2d4457e3835ef8461fd53d5aa9b4bfa93765f49a0c8bb1921",
+          "asset": "iruka_portrait_chroma.png",
+          "kind": "crop_report"
         },
         "contact_sheet": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\iruka_portrait_light-dark.png",
-          "sha256": "cf77c4d529c2bc93d39a413a1e9d53da2499935fe65767e909052dd2ef04b069"
+          "sha256": "cf77c4d529c2bc93d39a413a1e9d53da2499935fe65767e909052dd2ef04b069",
+          "asset": "iruka_portrait_chroma.png",
+          "kind": "contact_sheet"
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\iruka_portrait_animation.gif",
-          "sha256": "519b2f258633c45c7c00499aa6dfc28af03cc95fa39f3c5666e1f6d8be4eebc9"
+          "sha256": "519b2f258633c45c7c00499aa6dfc28af03cc95fa39f3c5666e1f6d8be4eebc9",
+          "asset": "iruka_portrait_chroma.png",
+          "kind": "animation_preview"
         }
       }
     },
@@ -429,7 +452,8 @@
       "asset": "master_hoc_vien_x4_chroma.png",
       "required": true,
       "status": "PASS",
-      "source_status": "FAIL",
+      "source_status": "PASS",
+      "raw_source_status": "FAIL",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
       "source_issues": [
         "background_gradient_exceeds_static_matte_tolerance"
@@ -485,7 +509,7 @@
           "durations_ms": [
             100
           ],
-          "loop": false,
+          "loop": true,
           "centroids": [
             [
               288.004,
@@ -493,25 +517,34 @@
             ]
           ],
           "seam_jump": 0.0,
-          "duplicate_adjacent_indices": []
+          "duplicate_adjacent_indices": [],
+          "sequence_semantics": "loop"
         }
       },
       "evidence": {
         "alpha": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\alpha\\master_hoc_vien_x4_alpha.png",
-          "sha256": "25f5aa58e0786a4a224b7d7f20925af53ab3f240f6df99db377c0aff1016b6d1"
+          "sha256": "25f5aa58e0786a4a224b7d7f20925af53ab3f240f6df99db377c0aff1016b6d1",
+          "asset": "master_hoc_vien_x4_chroma.png",
+          "kind": "alpha"
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\master_hoc_vien_x4_crop.json",
-          "sha256": "ea53892a1cf804197bcf03f85ce8231bd40313fb41283abe5b23e27a09cf10d5"
+          "sha256": "6829fddd3caabd9000dc08ee00e91da3ebd137a9acedeb8b0b9fc7b4490894a5",
+          "asset": "master_hoc_vien_x4_chroma.png",
+          "kind": "crop_report"
         },
         "contact_sheet": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\master_hoc_vien_x4_light-dark.png",
-          "sha256": "bf54e26dff1449f242abaa2e3e43dd779d132104670ce13a8c43d90f340ffc89"
+          "sha256": "bf54e26dff1449f242abaa2e3e43dd779d132104670ce13a8c43d90f340ffc89",
+          "asset": "master_hoc_vien_x4_chroma.png",
+          "kind": "contact_sheet"
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\master_hoc_vien_x4_animation.gif",
-          "sha256": "b44ab3862588535f9ab0149c1dce1d5f33066cf8c695e70e56ba39534c81b803"
+          "sha256": "b44ab3862588535f9ab0149c1dce1d5f33066cf8c695e70e56ba39534c81b803",
+          "asset": "master_hoc_vien_x4_chroma.png",
+          "kind": "animation_preview"
         }
       }
     },
@@ -519,7 +552,8 @@
       "asset": "master_iruka_x4_chroma.png",
       "required": true,
       "status": "PASS",
-      "source_status": "FAIL",
+      "source_status": "PASS",
+      "raw_source_status": "FAIL",
       "source_sha256": "a53d149ca17557f365dd3d2b8f9f1b9d4fcb6c14dbfb130876157e7e27533622",
       "source_issues": [
         "background_gradient_exceeds_static_matte_tolerance"
@@ -575,7 +609,7 @@
           "durations_ms": [
             100
           ],
-          "loop": false,
+          "loop": true,
           "centroids": [
             [
               259.505,
@@ -583,25 +617,34 @@
             ]
           ],
           "seam_jump": 0.0,
-          "duplicate_adjacent_indices": []
+          "duplicate_adjacent_indices": [],
+          "sequence_semantics": "loop"
         }
       },
       "evidence": {
         "alpha": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\alpha\\master_iruka_x4_alpha.png",
-          "sha256": "88c6ac7c9e880c33a773f45c66e3ab105b74cfae88817d0841603b5f45d0042e"
+          "sha256": "88c6ac7c9e880c33a773f45c66e3ab105b74cfae88817d0841603b5f45d0042e",
+          "asset": "master_iruka_x4_chroma.png",
+          "kind": "alpha"
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\master_iruka_x4_crop.json",
-          "sha256": "511e1221c4a66786233faaa820a3b1815670f868eae34c9c624ac96aaa3d1cd4"
+          "sha256": "1289926c14cad956b553c84b9b5d4659d886df6ea63a46925a4ec98105978bd1",
+          "asset": "master_iruka_x4_chroma.png",
+          "kind": "crop_report"
         },
         "contact_sheet": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\master_iruka_x4_light-dark.png",
-          "sha256": "315543311c5db401ced488ac39913820ff0d50aff54ed328282a576372da8882"
+          "sha256": "315543311c5db401ced488ac39913820ff0d50aff54ed328282a576372da8882",
+          "asset": "master_iruka_x4_chroma.png",
+          "kind": "contact_sheet"
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\master_iruka_x4_animation.gif",
-          "sha256": "2a4b6d7cb61a7d95c692a9233499a5b44e79be07d9ec67ea5a936eb320fb3ddb"
+          "sha256": "2a4b6d7cb61a7d95c692a9233499a5b44e79be07d9ec67ea5a936eb320fb3ddb",
+          "asset": "master_iruka_x4_chroma.png",
+          "kind": "animation_preview"
         }
       }
     },
@@ -609,7 +652,8 @@
       "asset": "master_soi_rung_x4_chroma.png",
       "required": true,
       "status": "PASS",
-      "source_status": "FAIL",
+      "source_status": "PASS",
+      "raw_source_status": "FAIL",
       "source_sha256": "c8002663b8c1cd2ccbe42ba0ea4d2fbc1ed54dd4ec1c001c5f22f6c341d64827",
       "source_issues": [
         "background_gradient_exceeds_static_matte_tolerance"
@@ -665,7 +709,7 @@
           "durations_ms": [
             100
           ],
-          "loop": false,
+          "loop": true,
           "centroids": [
             [
               655.016,
@@ -673,25 +717,34 @@
             ]
           ],
           "seam_jump": 0.0,
-          "duplicate_adjacent_indices": []
+          "duplicate_adjacent_indices": [],
+          "sequence_semantics": "loop"
         }
       },
       "evidence": {
         "alpha": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\alpha\\master_soi_rung_x4_alpha.png",
-          "sha256": "a0f4d6334cf8c958fd8cced3161d1c9f5f818ce372f74e9e4b886af1d5ef74ee"
+          "sha256": "a0f4d6334cf8c958fd8cced3161d1c9f5f818ce372f74e9e4b886af1d5ef74ee",
+          "asset": "master_soi_rung_x4_chroma.png",
+          "kind": "alpha"
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\master_soi_rung_x4_crop.json",
-          "sha256": "f3da142b223f190d98c09b708c7cf63d75382c036e5e520a6a8dd7386b614b4e"
+          "sha256": "54ba630a389f550dbf735ed62fa682dfd7d3e9fe55e71ce7921e81398b561a40",
+          "asset": "master_soi_rung_x4_chroma.png",
+          "kind": "crop_report"
         },
         "contact_sheet": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\master_soi_rung_x4_light-dark.png",
-          "sha256": "3e7f8e64343625730734cd5df1a0f532162a75dbfb155e3d2f0e387567dd3f5c"
+          "sha256": "3e7f8e64343625730734cd5df1a0f532162a75dbfb155e3d2f0e387567dd3f5c",
+          "asset": "master_soi_rung_x4_chroma.png",
+          "kind": "contact_sheet"
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\master_soi_rung_x4_animation.gif",
-          "sha256": "944ff3f59a45cd8ef98f4c0e40325b8911c945fb69805d3de494a970e7a6c41e"
+          "sha256": "944ff3f59a45cd8ef98f4c0e40325b8911c945fb69805d3de494a970e7a6c41e",
+          "asset": "master_soi_rung_x4_chroma.png",
+          "kind": "animation_preview"
         }
       }
     },
@@ -699,7 +752,8 @@
       "asset": "player_cast_3f_chroma.png",
       "required": true,
       "status": "PASS",
-      "source_status": "FAIL",
+      "source_status": "PASS",
+      "raw_source_status": "FAIL",
       "source_sha256": "8798d45014e7a0a709b2a4d4f1876729664573393b4f119f60fc9adb4cfe6d30",
       "source_issues": [
         "background_gradient_exceeds_static_matte_tolerance"
@@ -787,25 +841,34 @@
             ]
           ],
           "seam_jump": 57.186,
-          "duplicate_adjacent_indices": []
+          "duplicate_adjacent_indices": [],
+          "sequence_semantics": "loop"
         }
       },
       "evidence": {
         "alpha": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\alpha\\player_cast_3f_alpha.png",
-          "sha256": "ae08bd1851ac70f8332195a54fd5957a505a535ca7bc1ab2ed8dc598d5c57d8f"
+          "sha256": "ae08bd1851ac70f8332195a54fd5957a505a535ca7bc1ab2ed8dc598d5c57d8f",
+          "asset": "player_cast_3f_chroma.png",
+          "kind": "alpha"
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\player_cast_3f_crop.json",
-          "sha256": "59dd9770016732fc07f657f184efd0fb6f3374b472fbc776ee9d9b96faa27a14"
+          "sha256": "354e3f6debc6a3859c77d1dc35a33466e920d358bcdc21b53272f7121ec7857e",
+          "asset": "player_cast_3f_chroma.png",
+          "kind": "crop_report"
         },
         "contact_sheet": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\player_cast_3f_light-dark.png",
-          "sha256": "2e711c3bb4bbb895837d62f962e72a1fbb5dfd0b9e4b58af8ded3df8f0668af2"
+          "sha256": "2e711c3bb4bbb895837d62f962e72a1fbb5dfd0b9e4b58af8ded3df8f0668af2",
+          "asset": "player_cast_3f_chroma.png",
+          "kind": "contact_sheet"
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\player_cast_3f_animation.gif",
-          "sha256": "9d249583256da193f113ca8f19c3c907fd89dfb39b3640b05fe4033b73ddc9bd"
+          "sha256": "9d249583256da193f113ca8f19c3c907fd89dfb39b3640b05fe4033b73ddc9bd",
+          "asset": "player_cast_3f_chroma.png",
+          "kind": "animation_preview"
         }
       }
     },
@@ -813,7 +876,8 @@
       "asset": "player_hit_death_getup_3f_chroma.png",
       "required": true,
       "status": "PASS",
-      "source_status": "FAIL",
+      "source_status": "PASS",
+      "raw_source_status": "FAIL",
       "source_sha256": "9a4017a70a49c35d46146963943b00df4c61709e7a0f2bf441da945eeaf9808f",
       "source_issues": [
         "background_gradient_exceeds_static_matte_tolerance"
@@ -901,25 +965,34 @@
             ]
           ],
           "seam_jump": 85.654,
-          "duplicate_adjacent_indices": []
+          "duplicate_adjacent_indices": [],
+          "sequence_semantics": "loop"
         }
       },
       "evidence": {
         "alpha": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\alpha\\player_hit_death_getup_3f_alpha.png",
-          "sha256": "8e66e7bd53f955d6d8dfa8749754ad8d16d4739bdf3933c48f0ca0e138b98161"
+          "sha256": "8e66e7bd53f955d6d8dfa8749754ad8d16d4739bdf3933c48f0ca0e138b98161",
+          "asset": "player_hit_death_getup_3f_chroma.png",
+          "kind": "alpha"
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\player_hit_death_getup_3f_crop.json",
-          "sha256": "9610136d4cfe1e8e85ae55616219527d7e80fb661e97e6703b9e12b3cf204da2"
+          "sha256": "29638a0c44f991b8afdd8b911b538018f7b5d1d19ec4138757c817f6fe63e18f",
+          "asset": "player_hit_death_getup_3f_chroma.png",
+          "kind": "crop_report"
         },
         "contact_sheet": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\player_hit_death_getup_3f_light-dark.png",
-          "sha256": "728b1a9718e4467c30d33e91da25873af495aed6999608bee5052590fb91ad5a"
+          "sha256": "728b1a9718e4467c30d33e91da25873af495aed6999608bee5052590fb91ad5a",
+          "asset": "player_hit_death_getup_3f_chroma.png",
+          "kind": "contact_sheet"
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\player_hit_death_getup_3f_animation.gif",
-          "sha256": "e2fb745362c9e121089daa31f18fa005e4930d543445e586d10a1b25bd4fcbdb"
+          "sha256": "e2fb745362c9e121089daa31f18fa005e4930d543445e586d10a1b25bd4fcbdb",
+          "asset": "player_hit_death_getup_3f_chroma.png",
+          "kind": "animation_preview"
         }
       }
     },
@@ -927,7 +1000,8 @@
       "asset": "player_idle_3f_chroma.png",
       "required": true,
       "status": "PASS",
-      "source_status": "FAIL",
+      "source_status": "PASS",
+      "raw_source_status": "FAIL",
       "source_sha256": "2c60b2bca5d0a68df9da341127971ccfc70d5c94a895ce01b0c6a59910465550",
       "source_issues": [
         "background_gradient_exceeds_static_matte_tolerance"
@@ -1015,25 +1089,34 @@
             ]
           ],
           "seam_jump": 1.952,
-          "duplicate_adjacent_indices": []
+          "duplicate_adjacent_indices": [],
+          "sequence_semantics": "loop"
         }
       },
       "evidence": {
         "alpha": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\alpha\\player_idle_3f_alpha.png",
-          "sha256": "138daffe4a5b20e022031f343ec79192233ee3fe07d097c43c035a654b7ec4d3"
+          "sha256": "138daffe4a5b20e022031f343ec79192233ee3fe07d097c43c035a654b7ec4d3",
+          "asset": "player_idle_3f_chroma.png",
+          "kind": "alpha"
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\player_idle_3f_crop.json",
-          "sha256": "6ebaaad6837a6c9182b5b6c2aae40b01d2b22739254204e1e91093abb1dc0b34"
+          "sha256": "acdf58ea4671e02e5453678fadf14e93487c6f33cb0b7cc9287c1f31b2646be4",
+          "asset": "player_idle_3f_chroma.png",
+          "kind": "crop_report"
         },
         "contact_sheet": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\player_idle_3f_light-dark.png",
-          "sha256": "6c92a54b3d8f5b07efb3a22f1afa4ecb2bc333ec03807af55b0848b2e7ec6c19"
+          "sha256": "6c92a54b3d8f5b07efb3a22f1afa4ecb2bc333ec03807af55b0848b2e7ec6c19",
+          "asset": "player_idle_3f_chroma.png",
+          "kind": "contact_sheet"
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\player_idle_3f_animation.gif",
-          "sha256": "016bcdc1bce5f5bd2856561cc2f959ade68c1b7dbab6527674784a201a061117"
+          "sha256": "016bcdc1bce5f5bd2856561cc2f959ade68c1b7dbab6527674784a201a061117",
+          "asset": "player_idle_3f_chroma.png",
+          "kind": "animation_preview"
         }
       }
     },
@@ -1041,7 +1124,8 @@
       "asset": "player_melee_4f_chroma.png",
       "required": true,
       "status": "PASS",
-      "source_status": "FAIL",
+      "source_status": "PASS",
+      "raw_source_status": "FAIL",
       "source_sha256": "2d87f30c095a858ffbbdb5a918af7b296a3766ab0595383b91d55bf4cbaf2dc5",
       "source_issues": [
         "background_gradient_exceeds_static_matte_tolerance"
@@ -1141,25 +1225,34 @@
             ]
           ],
           "seam_jump": 41.46,
-          "duplicate_adjacent_indices": []
+          "duplicate_adjacent_indices": [],
+          "sequence_semantics": "loop"
         }
       },
       "evidence": {
         "alpha": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\alpha\\player_melee_4f_alpha.png",
-          "sha256": "e8e29e685d1eef62bbfe13e964fc4fc302b016f18b00549a469e28e95a806159"
+          "sha256": "e8e29e685d1eef62bbfe13e964fc4fc302b016f18b00549a469e28e95a806159",
+          "asset": "player_melee_4f_chroma.png",
+          "kind": "alpha"
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\player_melee_4f_crop.json",
-          "sha256": "356bf49f6fa9b8ab992ec321062de0d126831fa550c0013ea17d7d3cf7eadb4a"
+          "sha256": "3618985bac1369bf97d32aa2d31b23dda07229d0e2bf203162b6dcdd6f53ba94",
+          "asset": "player_melee_4f_chroma.png",
+          "kind": "crop_report"
         },
         "contact_sheet": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\player_melee_4f_light-dark.png",
-          "sha256": "26e7bee0e9f351c77b9945d95c63e150bc444d1c8391243914987b9627a010d0"
+          "sha256": "26e7bee0e9f351c77b9945d95c63e150bc444d1c8391243914987b9627a010d0",
+          "asset": "player_melee_4f_chroma.png",
+          "kind": "contact_sheet"
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\player_melee_4f_animation.gif",
-          "sha256": "a0b557482ad26e7570a7e202d6347d7efd1039104d29c630e5f2f4c84695ba82"
+          "sha256": "a0b557482ad26e7570a7e202d6347d7efd1039104d29c630e5f2f4c84695ba82",
+          "asset": "player_melee_4f_chroma.png",
+          "kind": "animation_preview"
         }
       }
     },
@@ -1167,7 +1260,8 @@
       "asset": "player_run_4f_chroma.png",
       "required": true,
       "status": "PASS",
-      "source_status": "FAIL",
+      "source_status": "PASS",
+      "raw_source_status": "FAIL",
       "source_sha256": "10ef5d8c32d541a9428308acdffcf46adc0c6084c5198b82a28ceb68759514da",
       "source_issues": [
         "background_gradient_exceeds_static_matte_tolerance"
@@ -1267,25 +1361,34 @@
             ]
           ],
           "seam_jump": 10.119,
-          "duplicate_adjacent_indices": []
+          "duplicate_adjacent_indices": [],
+          "sequence_semantics": "loop"
         }
       },
       "evidence": {
         "alpha": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\alpha\\player_run_4f_alpha.png",
-          "sha256": "6b57c2cdfb9da7988d20579228673a7dbe2e6cefea0df70fa477f0fc55f0758c"
+          "sha256": "6b57c2cdfb9da7988d20579228673a7dbe2e6cefea0df70fa477f0fc55f0758c",
+          "asset": "player_run_4f_chroma.png",
+          "kind": "alpha"
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\player_run_4f_crop.json",
-          "sha256": "274b84b85c06a4dc751134b0d689185349cec1b04e962728c8abaa373fad3999"
+          "sha256": "0412b0fab2cac39e92d74635c326a4ad1fc0dd351bfbfba4cbb92e9be4a00b93",
+          "asset": "player_run_4f_chroma.png",
+          "kind": "crop_report"
         },
         "contact_sheet": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\player_run_4f_light-dark.png",
-          "sha256": "77c1aeb762be1b7d2e0b55d3be95dfc79866d81ce965e18ba9d4868f346475d1"
+          "sha256": "77c1aeb762be1b7d2e0b55d3be95dfc79866d81ce965e18ba9d4868f346475d1",
+          "asset": "player_run_4f_chroma.png",
+          "kind": "contact_sheet"
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\player_run_4f_animation.gif",
-          "sha256": "6788c183677f043de8c6ba9c1cc174050d572b754f9014ab55e234b92bd16ef1"
+          "sha256": "6788c183677f043de8c6ba9c1cc174050d572b754f9014ab55e234b92bd16ef1",
+          "asset": "player_run_4f_chroma.png",
+          "kind": "animation_preview"
         }
       }
     },
@@ -1293,7 +1396,8 @@
       "asset": "skill_icons_cloud_4_chroma.png",
       "required": true,
       "status": "PASS",
-      "source_status": "FAIL",
+      "source_status": "PASS",
+      "raw_source_status": "FAIL",
       "source_sha256": "f987f3ab7bcd62cb5541065c1fcba17ae515d473ce2ce1f01a156c4096161916",
       "source_issues": [
         "background_gradient_exceeds_static_matte_tolerance"
@@ -1393,25 +1497,34 @@
             ]
           ],
           "seam_jump": 29.486,
-          "duplicate_adjacent_indices": []
+          "duplicate_adjacent_indices": [],
+          "sequence_semantics": "loop"
         }
       },
       "evidence": {
         "alpha": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\alpha\\skill_icons_cloud_4_alpha.png",
-          "sha256": "aba4aad937d28d1b2fe2f3836749323177923ae8c64e360dd109249b245b8777"
+          "sha256": "aba4aad937d28d1b2fe2f3836749323177923ae8c64e360dd109249b245b8777",
+          "asset": "skill_icons_cloud_4_chroma.png",
+          "kind": "alpha"
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\skill_icons_cloud_4_crop.json",
-          "sha256": "162d28c9457474298eb80c37406b58ac097a529b94de1d2bcbc567d7b7a62fd8"
+          "sha256": "cd01bf3a794c7fdbdae242228680c1efc2f1e5d83449537742265986ea1fbb09",
+          "asset": "skill_icons_cloud_4_chroma.png",
+          "kind": "crop_report"
         },
         "contact_sheet": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\skill_icons_cloud_4_light-dark.png",
-          "sha256": "c49e65db33c5dcb6c334faa511a31407b25392bf64b830f23bfe84b4af48e315"
+          "sha256": "c49e65db33c5dcb6c334faa511a31407b25392bf64b830f23bfe84b4af48e315",
+          "asset": "skill_icons_cloud_4_chroma.png",
+          "kind": "contact_sheet"
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\skill_icons_cloud_4_animation.gif",
-          "sha256": "a788e5e7a36b97be95f8ee439e75aafbc5da379154a7b64abbd02959609401f4"
+          "sha256": "a788e5e7a36b97be95f8ee439e75aafbc5da379154a7b64abbd02959609401f4",
+          "asset": "skill_icons_cloud_4_chroma.png",
+          "kind": "animation_preview"
         }
       }
     },
@@ -1419,7 +1532,8 @@
       "asset": "skill_icons_leaf_4_chroma.png",
       "required": true,
       "status": "PASS",
-      "source_status": "FAIL",
+      "source_status": "PASS",
+      "raw_source_status": "FAIL",
       "source_sha256": "da6a4e3ba27830fa3ba29c8d9dd813ea6d9d2d089967623d50c90b7370a52fed",
       "source_issues": [
         "background_gradient_exceeds_static_matte_tolerance"
@@ -1519,25 +1633,34 @@
             ]
           ],
           "seam_jump": 10.654,
-          "duplicate_adjacent_indices": []
+          "duplicate_adjacent_indices": [],
+          "sequence_semantics": "loop"
         }
       },
       "evidence": {
         "alpha": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\alpha\\skill_icons_leaf_4_alpha.png",
-          "sha256": "9ed23c8cfd1478ffc43b803fb38174792a5acdc46a41ddeb72bed3f75f6e96f3"
+          "sha256": "9ed23c8cfd1478ffc43b803fb38174792a5acdc46a41ddeb72bed3f75f6e96f3",
+          "asset": "skill_icons_leaf_4_chroma.png",
+          "kind": "alpha"
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\skill_icons_leaf_4_crop.json",
-          "sha256": "cb0a84acabdb1255089ab5f4d57f35ce2d4ca82abbc6c896c8816b5835b4a820"
+          "sha256": "9e41a346baf6a1e126fe442caaff0ca463f19edaa2aad08f713d2a8774ebcb2a",
+          "asset": "skill_icons_leaf_4_chroma.png",
+          "kind": "crop_report"
         },
         "contact_sheet": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\skill_icons_leaf_4_light-dark.png",
-          "sha256": "3344ffad92fb0444df105c595024d5038784c2634c19c15de973dfc204be1a30"
+          "sha256": "3344ffad92fb0444df105c595024d5038784c2634c19c15de973dfc204be1a30",
+          "asset": "skill_icons_leaf_4_chroma.png",
+          "kind": "contact_sheet"
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\skill_icons_leaf_4_animation.gif",
-          "sha256": "1869d011e00f2b1fd1a794ebde762e7c55141b7027de4ad56575758bae64666f"
+          "sha256": "1869d011e00f2b1fd1a794ebde762e7c55141b7027de4ad56575758bae64666f",
+          "asset": "skill_icons_leaf_4_chroma.png",
+          "kind": "animation_preview"
         }
       }
     },
@@ -1545,7 +1668,8 @@
       "asset": "skill_icons_mist_4_chroma.png",
       "required": true,
       "status": "PASS",
-      "source_status": "FAIL",
+      "source_status": "PASS",
+      "raw_source_status": "FAIL",
       "source_sha256": "c149c2b2e0499e7363a307155bfc6ea2f70589ed424f41a25732dee220849b3d",
       "source_issues": [
         "background_gradient_exceeds_static_matte_tolerance"
@@ -1645,25 +1769,34 @@
             ]
           ],
           "seam_jump": 20.693,
-          "duplicate_adjacent_indices": []
+          "duplicate_adjacent_indices": [],
+          "sequence_semantics": "loop"
         }
       },
       "evidence": {
         "alpha": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\alpha\\skill_icons_mist_4_alpha.png",
-          "sha256": "c297b5a8ba4604bb1c8e6a8613002b4d64c49d0515cafe93724a019d7b29180f"
+          "sha256": "c297b5a8ba4604bb1c8e6a8613002b4d64c49d0515cafe93724a019d7b29180f",
+          "asset": "skill_icons_mist_4_chroma.png",
+          "kind": "alpha"
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\skill_icons_mist_4_crop.json",
-          "sha256": "e3708adfb0f8fe3223d24dd59aadfdf73217215676e7e7c7c1203d075154267d"
+          "sha256": "78b1a7891ce6831b25211170a41ec4b6e17b38b562512f82898357e94892456e",
+          "asset": "skill_icons_mist_4_chroma.png",
+          "kind": "crop_report"
         },
         "contact_sheet": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\skill_icons_mist_4_light-dark.png",
-          "sha256": "c44bb6710de7da40df7ac34e036e1a34e7a4380c377c6d51f3fba2f7779620a4"
+          "sha256": "c44bb6710de7da40df7ac34e036e1a34e7a4380c377c6d51f3fba2f7779620a4",
+          "asset": "skill_icons_mist_4_chroma.png",
+          "kind": "contact_sheet"
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\skill_icons_mist_4_animation.gif",
-          "sha256": "17d1823c27778fbb608f82aaa80af96bdced338827255a4a0e69699b52e6d704"
+          "sha256": "17d1823c27778fbb608f82aaa80af96bdced338827255a4a0e69699b52e6d704",
+          "asset": "skill_icons_mist_4_chroma.png",
+          "kind": "animation_preview"
         }
       }
     },
@@ -1671,7 +1804,8 @@
       "asset": "skill_icons_sand_4_chroma.png",
       "required": true,
       "status": "PASS",
-      "source_status": "FAIL",
+      "source_status": "PASS",
+      "raw_source_status": "FAIL",
       "source_sha256": "0373a3fa13094d5b260a3bfa6492901343c2cf015eafde4da4b5d85a1af09605",
       "source_issues": [
         "background_gradient_exceeds_static_matte_tolerance"
@@ -1771,25 +1905,34 @@
             ]
           ],
           "seam_jump": 15.733,
-          "duplicate_adjacent_indices": []
+          "duplicate_adjacent_indices": [],
+          "sequence_semantics": "loop"
         }
       },
       "evidence": {
         "alpha": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\alpha\\skill_icons_sand_4_alpha.png",
-          "sha256": "c0e8d28ab114180ea72f91dd030f2a653cc74a9f0dd06f0b313b6f3c1c7defc8"
+          "sha256": "c0e8d28ab114180ea72f91dd030f2a653cc74a9f0dd06f0b313b6f3c1c7defc8",
+          "asset": "skill_icons_sand_4_chroma.png",
+          "kind": "alpha"
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\skill_icons_sand_4_crop.json",
-          "sha256": "f5bb2460702720ab19162921ac9e3bf12127985735827d0885401d6f16c1a91f"
+          "sha256": "569f1ed5ef5b9b705197377429764c2c4dcfd899a65a5ac9d18cd9b0d6405829",
+          "asset": "skill_icons_sand_4_chroma.png",
+          "kind": "crop_report"
         },
         "contact_sheet": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\skill_icons_sand_4_light-dark.png",
-          "sha256": "2fe6368a2bc9fd1f1d6ff4bb7ad7840dff8fa2878052618be237dea179dd8a70"
+          "sha256": "2fe6368a2bc9fd1f1d6ff4bb7ad7840dff8fa2878052618be237dea179dd8a70",
+          "asset": "skill_icons_sand_4_chroma.png",
+          "kind": "contact_sheet"
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\skill_icons_sand_4_animation.gif",
-          "sha256": "2e6cc23a87b2ee7056f9d8f674eb6ca7e86ef2accaab345b82b9861f11fd5acc"
+          "sha256": "2e6cc23a87b2ee7056f9d8f674eb6ca7e86ef2accaab345b82b9861f11fd5acc",
+          "asset": "skill_icons_sand_4_chroma.png",
+          "kind": "animation_preview"
         }
       }
     },
@@ -1797,7 +1940,8 @@
       "asset": "skill_icons_stone_4_chroma.png",
       "required": true,
       "status": "PASS",
-      "source_status": "FAIL",
+      "source_status": "PASS",
+      "raw_source_status": "FAIL",
       "source_sha256": "fa02805c811423d45e5bbe21606c70c27d1d0f7cb92adc7366e54970fb9adc85",
       "source_issues": [
         "background_gradient_exceeds_static_matte_tolerance"
@@ -1897,25 +2041,34 @@
             ]
           ],
           "seam_jump": 14.22,
-          "duplicate_adjacent_indices": []
+          "duplicate_adjacent_indices": [],
+          "sequence_semantics": "loop"
         }
       },
       "evidence": {
         "alpha": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\alpha\\skill_icons_stone_4_alpha.png",
-          "sha256": "1576869127890456e2c9192be105896aff7650a078a1e808571694a89274db90"
+          "sha256": "1576869127890456e2c9192be105896aff7650a078a1e808571694a89274db90",
+          "asset": "skill_icons_stone_4_chroma.png",
+          "kind": "alpha"
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\skill_icons_stone_4_crop.json",
-          "sha256": "d57c2290737db131f1a22cce2c8899b4f14e28da601380c2dcece34ed441febc"
+          "sha256": "8f41acd51970fd2d7de79f0e5900d0555dadcee95aab240020f035bcd0ba094a",
+          "asset": "skill_icons_stone_4_chroma.png",
+          "kind": "crop_report"
         },
         "contact_sheet": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\skill_icons_stone_4_light-dark.png",
-          "sha256": "73be41e711989c95955587990fd91c57313efab9e314e72f19ab83e4ffcbb64d"
+          "sha256": "73be41e711989c95955587990fd91c57313efab9e314e72f19ab83e4ffcbb64d",
+          "asset": "skill_icons_stone_4_chroma.png",
+          "kind": "contact_sheet"
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\skill_icons_stone_4_animation.gif",
-          "sha256": "172d0c599afa91ee5a57bbc4ac402537d0d13f7a6628d53456864f9f61e04989"
+          "sha256": "172d0c599afa91ee5a57bbc4ac402537d0d13f7a6628d53456864f9f61e04989",
+          "asset": "skill_icons_stone_4_chroma.png",
+          "kind": "animation_preview"
         }
       }
     },
@@ -1923,7 +2076,8 @@
       "asset": "wolf_hit_death_2f_chroma.png",
       "required": true,
       "status": "PASS",
-      "source_status": "FAIL",
+      "source_status": "PASS",
+      "raw_source_status": "FAIL",
       "source_sha256": "8fe6a75f61a1b3d588a78c1bf38caf8cd364dfe81e844a027262c9f41896760c",
       "source_issues": [
         "background_gradient_exceeds_static_matte_tolerance"
@@ -1999,25 +2153,34 @@
             ]
           ],
           "seam_jump": 0.0,
-          "duplicate_adjacent_indices": []
+          "duplicate_adjacent_indices": [],
+          "sequence_semantics": "loop"
         }
       },
       "evidence": {
         "alpha": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\alpha\\wolf_hit_death_2f_alpha.png",
-          "sha256": "f6e7c0420a3cb2100898634bd52a65c0de3c0f66dd8e932263cb553337f7a13a"
+          "sha256": "f6e7c0420a3cb2100898634bd52a65c0de3c0f66dd8e932263cb553337f7a13a",
+          "asset": "wolf_hit_death_2f_chroma.png",
+          "kind": "alpha"
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\wolf_hit_death_2f_crop.json",
-          "sha256": "911651fde9f7b80433d7d54002df47813f049432855164fc69e812ac630ac9de"
+          "sha256": "962c5b2a1f08b316a839f53d95fcefda0178c9ee32c01b928b8647949ade9e9d",
+          "asset": "wolf_hit_death_2f_chroma.png",
+          "kind": "crop_report"
         },
         "contact_sheet": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\wolf_hit_death_2f_light-dark.png",
-          "sha256": "5e07c4782cc9cb98bf316b77115fb13427fc6b2fabc682afd205deedcf1eedf3"
+          "sha256": "5e07c4782cc9cb98bf316b77115fb13427fc6b2fabc682afd205deedcf1eedf3",
+          "asset": "wolf_hit_death_2f_chroma.png",
+          "kind": "contact_sheet"
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\wolf_hit_death_2f_animation.gif",
-          "sha256": "bb3fa43ad6001a02ffbbe6986bf39ff3afff9ebf77bfb46bbe9f19d2d3a9dba5"
+          "sha256": "bb3fa43ad6001a02ffbbe6986bf39ff3afff9ebf77bfb46bbe9f19d2d3a9dba5",
+          "asset": "wolf_hit_death_2f_chroma.png",
+          "kind": "animation_preview"
         }
       }
     },
@@ -2025,7 +2188,8 @@
       "asset": "wolf_idle_2f_chroma.png",
       "required": true,
       "status": "PASS",
-      "source_status": "FAIL",
+      "source_status": "PASS",
+      "raw_source_status": "FAIL",
       "source_sha256": "c6bf95fd9faaa0748af1c33af87dc51bb126203a5e5fbd0217106fec16dd5b3c",
       "source_issues": [
         "background_gradient_exceeds_static_matte_tolerance"
@@ -2101,25 +2265,34 @@
             ]
           ],
           "seam_jump": 0.0,
-          "duplicate_adjacent_indices": []
+          "duplicate_adjacent_indices": [],
+          "sequence_semantics": "loop"
         }
       },
       "evidence": {
         "alpha": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\alpha\\wolf_idle_2f_alpha.png",
-          "sha256": "5f0e9d2c13f98ee76826a3b6e99d2218f0023f9f863bb8f930dd79088ae0d023"
+          "sha256": "5f0e9d2c13f98ee76826a3b6e99d2218f0023f9f863bb8f930dd79088ae0d023",
+          "asset": "wolf_idle_2f_chroma.png",
+          "kind": "alpha"
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\wolf_idle_2f_crop.json",
-          "sha256": "29e1d9939b9b9ac57fb0b04f172f8f23b93e79e77e77c7602667220e287cb579"
+          "sha256": "12c74aec81cac96c9abe790ff76f2e0173ec14341122eaad398b246b2304fa27",
+          "asset": "wolf_idle_2f_chroma.png",
+          "kind": "crop_report"
         },
         "contact_sheet": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\wolf_idle_2f_light-dark.png",
-          "sha256": "8cb998c9c68617fdb5b555e3fd55ff6de1effce04a719984463917f8fce3bab1"
+          "sha256": "8cb998c9c68617fdb5b555e3fd55ff6de1effce04a719984463917f8fce3bab1",
+          "asset": "wolf_idle_2f_chroma.png",
+          "kind": "contact_sheet"
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\wolf_idle_2f_animation.gif",
-          "sha256": "507b9b33358ffbe4ef0a4377c87feb83dfdd2831145bac0fc4da7bba9737e9a7"
+          "sha256": "507b9b33358ffbe4ef0a4377c87feb83dfdd2831145bac0fc4da7bba9737e9a7",
+          "asset": "wolf_idle_2f_chroma.png",
+          "kind": "animation_preview"
         }
       }
     },
@@ -2127,7 +2300,8 @@
       "asset": "wolf_pounce_2f_chroma.png",
       "required": true,
       "status": "PASS",
-      "source_status": "FAIL",
+      "source_status": "PASS",
+      "raw_source_status": "FAIL",
       "source_sha256": "42a30b0d5bcfe150c455c043bdef2d92cdf446de72b55d1deadb826b5c2b9fcb",
       "source_issues": [
         "background_gradient_exceeds_static_matte_tolerance"
@@ -2203,25 +2377,34 @@
             ]
           ],
           "seam_jump": 0.0,
-          "duplicate_adjacent_indices": []
+          "duplicate_adjacent_indices": [],
+          "sequence_semantics": "loop"
         }
       },
       "evidence": {
         "alpha": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\alpha\\wolf_pounce_2f_alpha.png",
-          "sha256": "d87c75544c92c991e31343950f49ef807ba91a6447397a1ca6dd7a52107ec519"
+          "sha256": "d87c75544c92c991e31343950f49ef807ba91a6447397a1ca6dd7a52107ec519",
+          "asset": "wolf_pounce_2f_chroma.png",
+          "kind": "alpha"
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\wolf_pounce_2f_crop.json",
-          "sha256": "118fca040d6921d99001d398435df8ed2ef452220688f7628a46e52f79c46e5b"
+          "sha256": "ca835ed3ad88da41b2b6cfc46137343e9b2b3fbdf1888b9edd1f3ed2493115f9",
+          "asset": "wolf_pounce_2f_chroma.png",
+          "kind": "crop_report"
         },
         "contact_sheet": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\wolf_pounce_2f_light-dark.png",
-          "sha256": "5c53b40eff38d5da9b226afb2fbb5b8950c58f25713097ec6091d97ffa20aa15"
+          "sha256": "5c53b40eff38d5da9b226afb2fbb5b8950c58f25713097ec6091d97ffa20aa15",
+          "asset": "wolf_pounce_2f_chroma.png",
+          "kind": "contact_sheet"
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\wolf_pounce_2f_animation.gif",
-          "sha256": "62f2f171ba0758f1757dd48867aca27497f1712f003bca634c00a1d1f5307972"
+          "sha256": "62f2f171ba0758f1757dd48867aca27497f1712f003bca634c00a1d1f5307972",
+          "asset": "wolf_pounce_2f_chroma.png",
+          "kind": "animation_preview"
         }
       }
     },
@@ -2229,7 +2412,8 @@
       "asset": "wolf_run_4f_chroma.png",
       "required": true,
       "status": "PASS",
-      "source_status": "FAIL",
+      "source_status": "PASS",
+      "raw_source_status": "FAIL",
       "source_sha256": "2b15ce5e1dcda4a10b9b8196944f64806a2bde7b6fd3b5532bc73472ef214d52",
       "source_issues": [
         "background_gradient_exceeds_static_matte_tolerance"
@@ -2329,34 +2513,45 @@
             ]
           ],
           "seam_jump": 25.193,
-          "duplicate_adjacent_indices": []
+          "duplicate_adjacent_indices": [],
+          "sequence_semantics": "loop"
         }
       },
       "evidence": {
         "alpha": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\alpha\\wolf_run_4f_alpha.png",
-          "sha256": "349b30cc15ec13cd0fb0498a0ead3d7b09d9e07cb7620a3406dcf642da8030da"
+          "sha256": "349b30cc15ec13cd0fb0498a0ead3d7b09d9e07cb7620a3406dcf642da8030da",
+          "asset": "wolf_run_4f_chroma.png",
+          "kind": "alpha"
         },
         "crop_report": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\crop-reports\\wolf_run_4f_crop.json",
-          "sha256": "8f9f220f27d9f45900d6957bd9701a9b931f6c224b153ac1cd84009da29b910b"
+          "sha256": "f8583b8ef512ba3269f97bb6fc10d244d65c1c579dc05624417920f799359767",
+          "asset": "wolf_run_4f_chroma.png",
+          "kind": "crop_report"
         },
         "contact_sheet": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\wolf_run_4f_light-dark.png",
-          "sha256": "cf145b9aeecd36805e4209a85351c3b27ee3cce78026b90b08db13ff96db6ac2"
+          "sha256": "cf145b9aeecd36805e4209a85351c3b27ee3cce78026b90b08db13ff96db6ac2",
+          "asset": "wolf_run_4f_chroma.png",
+          "kind": "contact_sheet"
         },
         "animation_preview": {
           "path": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\previews\\wolf_run_4f_animation.gif",
-          "sha256": "6fd349a9c45fb603154cd92165c75f55ae08501e355b3f6e4aa71f757de06869"
+          "sha256": "6fd349a9c45fb603154cd92165c75f55ae08501e355b3f6e4aa71f757de06869",
+          "asset": "wolf_run_4f_chroma.png",
+          "kind": "animation_preview"
         }
       }
     }
   ],
   "summary": {
     "total": 20,
-    "pass": 18,
-    "fail": 2,
+    "pass": 20,
+    "fail": 0,
     "raw_source_pass": 0,
-    "raw_source_fail": 20
+    "raw_source_fail": 20,
+    "accepted_source_pass": 20,
+    "accepted_source_fail": 0
   }
 }

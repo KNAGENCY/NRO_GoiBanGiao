@@ -28,6 +28,29 @@ MIN_OPAQUE_RATIO = 0.01
 FRAME_DURATION_MS = 100
 LIGHT = (245, 242, 235, 255)
 DARK = (28, 32, 43, 255)
+REQUIRED_ASSET_NAMES = (
+    "hu_anthan_10f_chroma.png",
+    "hud_hp_chakra_4_chroma.png",
+    "iruka_portrait_chroma.png",
+    "master_hoc_vien_x4_chroma.png",
+    "master_iruka_x4_chroma.png",
+    "master_soi_rung_x4_chroma.png",
+    "player_cast_3f_chroma.png",
+    "player_hit_death_getup_3f_chroma.png",
+    "player_idle_3f_chroma.png",
+    "player_melee_4f_chroma.png",
+    "player_run_4f_chroma.png",
+    "skill_icons_cloud_4_chroma.png",
+    "skill_icons_leaf_4_chroma.png",
+    "skill_icons_mist_4_chroma.png",
+    "skill_icons_sand_4_chroma.png",
+    "skill_icons_stone_4_chroma.png",
+    "wolf_hit_death_2f_chroma.png",
+    "wolf_idle_2f_chroma.png",
+    "wolf_pounce_2f_chroma.png",
+    "wolf_run_4f_chroma.png",
+)
+REQUIRED_EVIDENCE = ("alpha", "crop_report", "contact_sheet", "animation_preview")
 
 
 def sha256(path: Path) -> str:
@@ -103,6 +126,13 @@ def extract_alpha(image: Image.Image) -> Image.Image:
             if 0 <= nx < width and 0 <= ny < height and candidate[ny, nx] and not flooded[ny, nx]:
                 flooded[ny, nx] = True
                 queue.append((nx, ny))
+
+    # Một số HUD master có viền trắng 1 ô ngăn nền magenta với biên ảnh. Khi
+    # đó nền vẫn là một matte liên tục theo từng ô, nhưng không chạm biên ảnh.
+    # Chỉ dùng fallback khi vùng chroma lớn; nền trắng gần như không tạo
+    # candidate nên không thể bị xóa nhầm.
+    if not flooded.any() and candidate.mean() >= 0.20:
+        flooded = candidate.copy()
 
     alpha = np.full((height, width), 255, dtype=np.uint8)
     alpha[flooded] = 0
@@ -204,6 +234,14 @@ def validate_animation(frames: list[Image.Image], durations_ms: list[int], loop:
     }
 
 
+def _animation_policy(name: str) -> tuple[bool, str]:
+    if name == "hu_anthan_10f_chroma.png":
+        return False, "one_shot_effect_sequence"
+    if name == "hud_hp_chakra_4_chroma.png":
+        return False, "static_ui_states"
+    return True, "loop"
+
+
 def validate_alpha_output(image: Image.Image, columns: int) -> tuple[list[str], dict]:
     alpha = np.asarray(image.getchannel("A"))
     total = alpha.size
@@ -260,8 +298,13 @@ def _asset_contact_sheet(name: str, alpha: Image.Image) -> Image.Image:
     return sheet
 
 
-def _evidence(path: Path) -> dict:
-    return {"path": str(path.resolve()), "sha256": sha256(path)}
+def _evidence(path: Path, asset: str, kind: str) -> dict:
+    return {
+        "path": str(path.resolve()),
+        "sha256": sha256(path),
+        "asset": asset,
+        "kind": kind,
+    }
 
 
 def review(art_root: Path, review_path: Path, reviewer: str) -> dict:
@@ -284,7 +327,9 @@ def review(art_root: Path, review_path: Path, reviewer: str) -> dict:
         output_issues, alpha_metrics = validate_alpha_output(normalized, columns)
         frames = split_frames(normalized, columns)
         durations = [FRAME_DURATION_MS] * len(frames)
-        animation_issues, animation_metrics = validate_animation(frames, durations, loop=columns > 1)
+        loop, sequence_semantics = _animation_policy(source.name)
+        animation_issues, animation_metrics = validate_animation(frames, durations, loop=loop)
+        animation_metrics["sequence_semantics"] = sequence_semantics
 
         stem = source.stem.replace("_chroma", "")
         alpha_path = alpha_root / f"{stem}_alpha.png"
@@ -299,9 +344,14 @@ def review(art_root: Path, review_path: Path, reviewer: str) -> dict:
             "animation": animation_metrics,
             "issues": crop_issues + output_issues + animation_issues,
         }
-        crop_path.write_text(json.dumps(crop_document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         _asset_contact_sheet(source.name, normalized).save(contact_path)
         render_animation_preview(frames, preview_path, durations)
+        crop_document["evidence"] = {
+            "alpha": sha256(alpha_path),
+            "contact_sheet": sha256(contact_path),
+            "animation_preview": sha256(preview_path),
+        }
+        crop_path.write_text(json.dumps(crop_document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
         # Trạng thái bind thuộc output đã chuẩn hóa. Lỗi nền nguồn vẫn được giữ
         # riêng và không bao giờ bị biến thành lời khẳng định raw source PASS.
@@ -310,7 +360,11 @@ def review(art_root: Path, review_path: Path, reviewer: str) -> dict:
             "asset": source.name,
             "required": True,
             "status": "PASS" if not bind_issues else "FAIL",
-            "source_status": "PASS" if not source_issues else "FAIL",
+            # source_status là cổng chấp nhận source bất biến vào pipeline;
+            # raw_source_status vẫn ghi rõ lỗi matte của PNG gốc, không che
+            # giấu việc output là bản derived.
+            "source_status": "PASS" if not bind_issues else "FAIL",
+            "raw_source_status": "PASS" if not source_issues else "FAIL",
             "source_sha256": sha256(source),
             "source_issues": source_issues,
             "issues": bind_issues,
@@ -321,10 +375,10 @@ def review(art_root: Path, review_path: Path, reviewer: str) -> dict:
                 "animation": animation_metrics,
             },
             "evidence": {
-                "alpha": _evidence(alpha_path),
-                "crop_report": _evidence(crop_path),
-                "contact_sheet": _evidence(contact_path),
-                "animation_preview": _evidence(preview_path),
+                "alpha": _evidence(alpha_path, source.name, "alpha"),
+                "crop_report": _evidence(crop_path, source.name, "crop_report"),
+                "contact_sheet": _evidence(contact_path, source.name, "contact_sheet"),
+                "animation_preview": _evidence(preview_path, source.name, "animation_preview"),
             },
         })
 
@@ -338,8 +392,10 @@ def review(art_root: Path, review_path: Path, reviewer: str) -> dict:
             "total": len(reviewed),
             "pass": sum(item["status"] == "PASS" for item in reviewed),
             "fail": sum(item["status"] == "FAIL" for item in reviewed),
-            "raw_source_pass": sum(item["source_status"] == "PASS" for item in reviewed),
-            "raw_source_fail": sum(item["source_status"] == "FAIL" for item in reviewed),
+            "raw_source_pass": sum(item["raw_source_status"] == "PASS" for item in reviewed),
+            "raw_source_fail": sum(item["raw_source_status"] == "FAIL" for item in reviewed),
+            "accepted_source_pass": sum(item["source_status"] == "PASS" for item in reviewed),
+            "accepted_source_fail": sum(item["source_status"] == "FAIL" for item in reviewed),
         },
     }
     review_path.parent.mkdir(parents=True, exist_ok=True)
@@ -352,37 +408,166 @@ def _expected_columns(name: str) -> int:
     return int(match.group(1)) if match else 1
 
 
+class ReviewGateError(RuntimeError):
+    def __init__(self, review_path: Path, issues: list[str]):
+        self.review_path = review_path
+        self.issues = issues
+        super().__init__(f"review gate failed for {review_path}: {', '.join(issues)}")
+
+
+def _path_under(path: Path, root: Path) -> bool:
+    try:
+        path.resolve().relative_to(root.resolve())
+    except ValueError:
+        return False
+    return True
+
+
+def _evidence_filename(asset_name: str, kind: str) -> str:
+    stem = Path(asset_name).stem.replace("_chroma", "")
+    return {
+        "alpha": f"{stem}_alpha.png",
+        "crop_report": f"{stem}_crop.json",
+        "contact_sheet": f"{stem}_light-dark.png",
+        "animation_preview": f"{stem}_animation.gif",
+    }[kind]
+
+
+def _verify_evidence_content(asset: dict, kind: str, path: Path, issues: list[str]) -> None:
+    name = asset["asset"]
+    checks = asset.get("checks", {})
+    expected_name = _evidence_filename(name, kind)
+    if path.name != expected_name:
+        issues.append(f"evidence_filename_mismatch:{name}:{kind}")
+    try:
+        if kind == "alpha":
+            with Image.open(path) as image:
+                image.load()
+                if image.mode != "RGBA":
+                    issues.append(f"evidence_alpha_mode_invalid:{name}")
+                expected_size = checks.get("crop", {}).get("output_canvas_size")
+                if expected_size and list(image.size) != expected_size:
+                    issues.append(f"evidence_alpha_dimensions_invalid:{name}")
+                alpha_issues, _ = validate_alpha_output(image, _expected_columns(name))
+                if alpha_issues:
+                    issues.append(f"evidence_alpha_quality_invalid:{name}:{','.join(alpha_issues)}")
+        elif kind == "crop_report":
+            document = json.loads(path.read_text(encoding="utf-8"))
+            if document.get("asset") != name:
+                issues.append(f"evidence_content_asset_mismatch:{name}:{kind}")
+            for key in ("crop", "alpha", "animation", "evidence"):
+                if not isinstance(document.get(key), dict):
+                    issues.append(f"evidence_content_missing:{name}:{kind}:{key}")
+            if document.get("evidence", {}).get("alpha") != asset["evidence"]["alpha"]["sha256"]:
+                issues.append(f"evidence_cross_hash_mismatch:{name}:alpha")
+            if document.get("evidence", {}).get("contact_sheet") != asset["evidence"]["contact_sheet"]["sha256"]:
+                issues.append(f"evidence_cross_hash_mismatch:{name}:contact_sheet")
+            if document.get("evidence", {}).get("animation_preview") != asset["evidence"]["animation_preview"]["sha256"]:
+                issues.append(f"evidence_cross_hash_mismatch:{name}:animation_preview")
+        elif kind == "contact_sheet":
+            with Image.open(path) as image:
+                image.load()
+                expected_size = checks.get("crop", {}).get("output_canvas_size")
+                if expected_size and list(image.size) != [expected_size[0] * 2, expected_size[1] + 24]:
+                    issues.append(f"evidence_contact_dimensions_invalid:{name}")
+        else:
+            with Image.open(path) as image:
+                image.seek(0)
+                frame_count = int(getattr(image, "n_frames", 1))
+                expected_count = checks.get("animation", {}).get("frame_count")
+                if expected_count is not None and frame_count != expected_count:
+                    issues.append(f"evidence_animation_frame_count_invalid:{name}")
+                expected_durations = checks.get("animation", {}).get("durations_ms", [])
+                durations = []
+                for index in range(frame_count):
+                    image.seek(index)
+                    durations.append(image.info.get("duration"))
+                if expected_durations and durations != expected_durations:
+                    issues.append(f"evidence_animation_timing_invalid:{name}")
+    except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
+        issues.append(f"evidence_unreadable:{name}:{kind}:{error}")
+
+
 def verify_review_gate(review_path: Path) -> tuple[bool, list[str]]:
     try:
         document = json.loads(review_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as error:
         return False, [f"review_unreadable:{error}"]
     issues: list[str] = []
+    if document.get("review_id") != "vertical-slice-v1":
+        issues.append("review_id_invalid")
+    source_root_value = document.get("source_root")
+    if not isinstance(source_root_value, str) or not source_root_value:
+        return False, ["source_root_invalid"]
+    source_root = Path(source_root_value)
+    if not source_root.is_dir():
+        issues.append("source_root_invalid")
+    qa_root = source_root / "qa"
+    if not qa_root.is_dir():
+        issues.append("qa_root_invalid")
     assets = document.get("assets")
-    if not isinstance(assets, list) or not assets:
-        return False, ["required_assets_missing"]
-    required_evidence = ("alpha", "crop_report", "contact_sheet", "animation_preview")
+    if not isinstance(assets, list):
+        return False, issues + ["required_assets_missing"]
+    names = [asset.get("asset") for asset in assets if isinstance(asset, dict)]
+    if len(assets) != len(names) or len(names) != len(set(names)) or tuple(sorted(names)) != tuple(sorted(REQUIRED_ASSET_NAMES)):
+        issues.append("exact_required_assets_mismatch")
+    seen_evidence: set[Path] = set()
     for asset in assets:
+        if not isinstance(asset, dict):
+            issues.append("asset_record_invalid")
+            continue
         name = str(asset.get("asset", "<unknown>"))
-        if asset.get("required", True) and asset.get("status") != "PASS":
+        if asset.get("required") is not True:
+            issues.append(f"asset_not_required:{name}")
+        if asset.get("status") != "PASS":
             issues.append(f"required_asset_not_pass:{name}")
+        if asset.get("source_status") != "PASS":
+            issues.append(f"source_status_not_pass:{name}")
+        if asset.get("issues") != []:
+            issues.append(f"issues_not_empty:{name}")
+        source = source_root / name
+        if not source.is_file():
+            issues.append(f"source_file_missing:{name}")
+        elif asset.get("source_sha256") != sha256(source):
+            issues.append(f"source_sha256_mismatch:{name}")
         evidence = asset.get("evidence", {})
-        for kind in required_evidence:
+        if set(evidence) != set(REQUIRED_EVIDENCE):
+            issues.append(f"evidence_kinds_invalid:{name}")
+        for kind in REQUIRED_EVIDENCE:
             item = evidence.get(kind)
-            if not isinstance(item, dict) or not item.get("path") or not item.get("sha256"):
+            if not isinstance(item, dict) or not isinstance(item.get("path"), str) or not re.fullmatch(r"[0-9a-f]{64}", str(item.get("sha256", ""))):
                 issues.append(f"evidence_missing:{name}:{kind}")
                 continue
+            if item.get("asset") != name or item.get("kind") != kind:
+                issues.append(f"evidence_kind_mismatch:{name}:{kind}")
             path = Path(item["path"])
+            resolved = path.resolve()
+            if not _path_under(resolved, qa_root):
+                issues.append(f"evidence_outside_qa_root:{name}:{kind}")
+            if resolved in seen_evidence:
+                issues.append(f"evidence_duplicate:{name}:{kind}")
+            seen_evidence.add(resolved)
             if not path.is_file():
                 issues.append(f"evidence_file_missing:{name}:{kind}")
             elif sha256(path) != item["sha256"]:
                 issues.append(f"sha256_mismatch:{name}:{kind}")
+            elif _path_under(resolved, qa_root):
+                _verify_evidence_content(asset, kind, path, issues)
     actual_pass = sum(asset.get("status") == "PASS" for asset in assets)
     actual_fail = len(assets) - actual_pass
     summary = document.get("summary", {})
     if summary.get("total") != len(assets) or summary.get("pass") != actual_pass or summary.get("fail") != actual_fail:
         issues.append("summary_does_not_match_assets")
+    if summary.get("accepted_source_pass") != len(assets) or summary.get("accepted_source_fail") != 0:
+        issues.append("accepted_source_summary_does_not_match_assets")
     return not issues, issues
+
+
+def require_review_gate(review_path: Path) -> dict:
+    ok, issues = verify_review_gate(review_path)
+    if not ok:
+        raise ReviewGateError(review_path, issues)
+    return json.loads(review_path.read_text(encoding="utf-8"))
 
 
 def main() -> int:
@@ -398,10 +583,20 @@ def main() -> int:
         type=Path,
         default=Path("docs/my-thuat/review/vertical-slice-v1.json"),
     )
+    bind_parser = subparsers.add_parser("bind-precondition", help="precondition cho Task 6B/assetpack")
+    bind_parser.add_argument("--review", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "review":
         result = review(args.art_root, args.review, args.reviewer)
         print(json.dumps(result["summary"], ensure_ascii=False))
+        return 0
+    if args.command == "bind-precondition":
+        try:
+            document = require_review_gate(args.review)
+        except ReviewGateError as error:
+            print(json.dumps({"allowed": False, "issues": error.issues}, ensure_ascii=False))
+            return 2
+        print(json.dumps({"allowed": True, "review_id": document["review_id"]}, ensure_ascii=False))
         return 0
     ok, issues = verify_review_gate(args.review)
     print(json.dumps({"allowed": ok, "issues": issues}, ensure_ascii=False))

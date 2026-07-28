@@ -12,31 +12,60 @@ ROOT = Path(__file__).resolve().parents[2]
 
 class ManifestValidationTests(unittest.TestCase):
     def minimal_manifest(self):
+        digest = hashlib.sha256(b"runtime-source").hexdigest()
         return {
             "schema_version": 1,
             "versions": {"runtime_slice": 2},
             "sprites": [
                 {
                     "id": 27041,
-                    "zooms": {"x1": "a", "x2": "b", "x3": "c", "x4": "d"},
-                    "source_sha256": "a" * 64,
+                    "zooms": {"x1": "a", "x2": "b", "x3": "c", "x4": "x4.png"},
+                    "source_path": "source.png",
+                    "source_sha256": digest,
                 }
             ],
             "parts": [{"id": 30, "frames": [{"sprite_id": 27041, "dx": 0, "dy": 0}]}],
             "animations": [{"name": "idle", "frames": [{"slot_index": 0, "client_cf": [0]}]}],
         }
 
-    def validate(self, manifest):
+    def validate(self, manifest, *, legacy_ledger=None, version_ledger=None, files=None):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "manifest.json"
+            if files is None:
+                files = self.runtime_files()
+            for relative, content in files.items():
+                target = Path(directory) / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(content)
             path.write_text(json.dumps(manifest), encoding="utf-8")
+            command = [sys.executable, "-m", "assetpack", "validate", "--manifest", str(path)]
+            if legacy_ledger is not None:
+                ledger_path = Path(directory) / "legacy.json"
+                ledger_path.write_text(json.dumps(legacy_ledger), encoding="utf-8")
+                command.extend(["--legacy-ledger", str(ledger_path)])
+            if version_ledger is not None:
+                version_path = Path(directory) / "versions.json"
+                version_path.write_text(json.dumps(version_ledger), encoding="utf-8")
+                command.extend(["--version-ledger", str(version_path)])
             return subprocess.run(
-                [sys.executable, "-m", "assetpack", "validate", "--manifest", str(path)],
+                command,
                 cwd=ROOT,
                 text=True,
                 capture_output=True,
                 check=False,
             )
+
+    def runtime_files(self):
+        return {"source.png": b"runtime-source", "x4.png": b"runtime-source"}
+
+    def pin_runtime_source(self, manifest):
+        digest = hashlib.sha256(b"runtime-source").hexdigest()
+        manifest["sprites"][0].update(
+            source_path="source.png",
+            source_sha256=digest,
+        )
+        manifest["sprites"][0]["zooms"]["x4"] = "x4.png"
+        return manifest
 
     def verify_legacy(self, ledger):
         return subprocess.run(
@@ -165,9 +194,11 @@ class ManifestValidationTests(unittest.TestCase):
         manifest = self.minimal_manifest()
         manifest["sprites"][0]["id"] = 27042
         manifest["parts"][0]["frames"][0]["sprite_id"] = 27042
-        manifest["legacy_occupied_ids"] = [27042]
-
-        collision = self.validate(manifest)
+        collision = self.validate(
+            manifest,
+            legacy_ledger={"inputs": [], "expected": {"occupied_ids": [27042]}},
+        )
+        self.assertNotEqual(0, collision.returncode)
         self.assertIn("ASSET-ID-001", collision.stderr)
 
         manifest["sprites"][0]["id"] = 32768
@@ -185,6 +216,131 @@ class ManifestValidationTests(unittest.TestCase):
 
         self.assertNotEqual(0, result.returncode)
         self.assertIn("ASSET-ID-001", result.stderr)
+
+    def test_legacy_ledger_requires_every_input_closure_and_relative_paths(self):
+        required = {
+            "part.bin",
+            "NR_part",
+            "NR_image",
+            "legacy_skill",
+            "legacy_mob",
+            "small_local",
+            "client_hardcoded_ids",
+        }
+        ledger = json.loads(
+            (ROOT / "assetpack/tests/fixtures/legacy-baseline.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(required, {entry["kind"] for entry in ledger["inputs"]})
+        self.assertTrue(all(not Path(entry["path"]).is_absolute() for entry in ledger["inputs"]))
+
+    def test_verify_legacy_fails_when_each_required_input_is_missing_or_changed(self):
+        fixture = ROOT / "assetpack/tests/fixtures/legacy-baseline.json"
+        ledger = json.loads(fixture.read_text(encoding="utf-8"))
+        for entry in ledger["inputs"]:
+            with self.subTest(kind=entry["kind"]):
+                changed = json.loads(json.dumps(ledger))
+                target = next(item for item in changed["inputs"] if item["kind"] == entry["kind"])
+                target["sha256"] = "f" * 64
+                with tempfile.TemporaryDirectory() as directory:
+                    path = Path(directory) / "ledger.json"
+                    path.write_text(json.dumps(changed), encoding="utf-8")
+                    result = self.verify_legacy(path)
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn("ASSET-LEGACY-009", result.stderr)
+
+    def test_verify_legacy_rejects_incomplete_required_closure(self):
+        fixture = ROOT / "assetpack/tests/fixtures/legacy-baseline.json"
+        ledger = json.loads(fixture.read_text(encoding="utf-8"))
+        ledger["inputs"].pop()
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "ledger.json"
+            path.write_text(json.dumps(ledger), encoding="utf-8")
+            result = self.verify_legacy(path)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("ASSET-LEGACY-009", result.stderr)
+
+    def test_rejects_collision_from_independent_legacy_ledger(self):
+        manifest = self.pin_runtime_source(self.minimal_manifest())
+        ledger = {"inputs": [], "expected": {"occupied_ids": [27041]}}
+        result = self.validate(manifest, legacy_ledger=ledger, files=self.runtime_files())
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("ASSET-ID-001", result.stderr)
+
+    def test_rejects_sprite_outside_phase_one_allocation(self):
+        manifest = self.pin_runtime_source(self.minimal_manifest())
+        manifest["sprites"][0]["id"] = 9000
+        manifest["parts"][0]["frames"][0]["sprite_id"] = 9000
+        result = self.validate(manifest, files=self.runtime_files())
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("ASSET-ID-001", result.stderr)
+
+    def test_rejects_missing_placeholder_and_mismatched_runtime_source(self):
+        for mutation in ("missing_path", "zero_hash", "source_mismatch", "x4_mismatch"):
+            with self.subTest(mutation=mutation):
+                manifest = self.pin_runtime_source(self.minimal_manifest())
+                files = self.runtime_files()
+                if mutation == "missing_path":
+                    del manifest["sprites"][0]["source_path"]
+                elif mutation == "zero_hash":
+                    manifest["sprites"][0]["source_sha256"] = "0" * 64
+                elif mutation == "source_mismatch":
+                    files["source.png"] = b"changed"
+                else:
+                    files["x4.png"] = b"different"
+                result = self.validate(manifest, files=files)
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn("ASSET-SPRITE-002", result.stderr)
+
+    def test_rejects_runtime_version_not_above_independent_ledger(self):
+        manifest = self.pin_runtime_source(self.minimal_manifest())
+        result = self.validate(
+            manifest,
+            version_ledger={"runtime_slice_version": 2},
+            files=self.runtime_files(),
+        )
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("ASSET-VERSION-006", result.stderr)
+
+    def test_rejects_invalid_iruka_layer_contract(self):
+        invalid_crops = [
+            [
+                {"subject": "iruka", "source_rect": [0, 0, 1, 1], "overlap": [0, 0], "layer": 0},
+                {"subject": "iruka", "source_rect": [0, 0, 1, 1], "overlap": [0, 0], "layer": 0},
+            ],
+            [{"subject": "iruka", "source_rect": [0, 0, 0, 1], "overlap": [0, 0], "layer": 0}],
+            [{"subject": "iruka", "source_rect": [0, 0, 1, 1], "overlap": [128, 0], "layer": "0"}],
+        ]
+        for crops in invalid_crops:
+            with self.subTest(crops=crops):
+                manifest = self.pin_runtime_source(self.minimal_manifest())
+                base = manifest["sprites"][0]
+                manifest["sprites"] = []
+                for offset, crop in enumerate(crops):
+                    sprite = json.loads(json.dumps(base))
+                    sprite["id"] = 27041 + offset
+                    sprite["crop"] = crop
+                    manifest["sprites"].append(sprite)
+                manifest["parts"] = []
+                result = self.validate(manifest, files=self.runtime_files())
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn("ASSET-CROP-007", result.stderr)
+
+    def test_rejects_animation_slot_range_and_client_cf_integrity(self):
+        invalid_frames = [
+            [{"slot_index": -1, "client_cf": [0]}],
+            [{"slot_index": 1, "client_cf": [0]}],
+            [{"slot_index": 0, "client_cf": [0, 0]}],
+            [{"slot_index": 0, "client_cf": [128]}],
+            [{"slot_index": "0", "client_cf": [0]}],
+        ]
+        for frames in invalid_frames:
+            with self.subTest(frames=frames):
+                manifest = self.pin_runtime_source(self.minimal_manifest())
+                manifest["animations"][0]["slot_count"] = 1
+                manifest["animations"][0]["frames"] = frames
+                result = self.validate(manifest, files=self.runtime_files())
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn("ASSET-ANIMATION-008", result.stderr)
 
 
 if __name__ == "__main__":

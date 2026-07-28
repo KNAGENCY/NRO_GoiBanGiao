@@ -164,11 +164,12 @@ class BuildContractTests(unittest.TestCase):
             "entries": runtime_key_entries,
         }), encoding="utf-8")
 
-        mob_frames = {"idle": [0, 1], "run": [2, 3, 4, 5], "pounce": [6, 7], "hit": [8], "death": [9]}
-        mob_payload = json.dumps([0, mob_frames], separators=(",", ":")).encode()
+        from assetpack.tests.test_mob import GOLDEN_FRAMES, GOLDEN_IMAGES, GOLDEN_TRAILER
+        mob_payload = (Path("assetpack/tests/fixtures/legacy/mob.bin")).read_bytes()
+        mob_frames = {"idle": GOLDEN_FRAMES[:2], "run": GOLDEN_FRAMES[2:6], "pounce": GOLDEN_FRAMES[6:8], "hit": GOLDEN_FRAMES[8:9], "death": GOLDEN_FRAMES[9:]}
         mob_bytes = binary("mob.bytes", mob_payload)
         mob_data = binary("mob.data", mob_payload)
-        mob = {"id": 0, "bytes_path": mob_bytes, "data_path": mob_data, "bytes_sha256": hashlib.sha256(mob_payload).hexdigest(), "data_sha256": hashlib.sha256(mob_payload).hexdigest(), "frames": mob_frames, "img": {zoom: png(f"mob-{zoom}.png") for zoom in ("x1", "x2", "x3", "x4")}}
+        mob = {"id": 0, "bytes_path": mob_bytes, "data_path": mob_data, "bytes_sha256": hashlib.sha256(mob_payload).hexdigest(), "data_sha256": hashlib.sha256(mob_payload).hexdigest(), "images": GOLDEN_IMAGES, "arr_frames": [], "trailer": GOLDEN_TRAILER, "frames": mob_frames, "img": {zoom: png(f"mob-{zoom}.png") for zoom in ("x1", "x2", "x3", "x4")}}
         animation_specs = (("hoc-vien-head", 3, (128, 128)), ("hoc-vien-body", 17, (128, 160)), ("hoc-vien-leg", 14, (128, 128)), ("quai-soi-rung", 10, (96, 96)))
         animation_sheets = []
         for name, count, cell_size in animation_specs:
@@ -176,6 +177,12 @@ class BuildContractTests(unittest.TestCase):
 
         for sprite in sprites:
             sprite["source_sha256"] = hashlib.sha256((root / sprite["source_path"]).read_bytes()).hexdigest()
+        cf = {
+            "hoc-vien-head": [[0, 1, 7, 8, 11, 12, 17, 18, 19, 20, 21, 22, 23, 24, 30, 31, 32], [2, 3, 4, 5, 6, 9, 10, 13, 14, 15, 16, 26, 27, 28, 29], [25]],
+            "hoc-vien-body": [[0, 1], [2, 15, 28], [3], [4], [5], [6], [7, 8, 17], [9, 10], [11, 21, 32], [12, 18, 22], [13, 26], [14, 27], [16, 29], [19, 30], [20, 31], [23, 24], [25]],
+            "hoc-vien-leg": [[0, 1, 22], [2], [3], [4], [5], [6], [7, 23], [8], [9], [10], [11], [12], [13, 14, 15, 16, 17, 18, 19, 20, 21, 24], [25]],
+            "quai-soi-rung": [[index] for index in range(10)],
+        }
         manifest = {
             "schema_version": 1,
             "source_catalog_version": 25,
@@ -183,7 +190,7 @@ class BuildContractTests(unittest.TestCase):
             "phase": {"name": "lang-la"},
             "sprites": sprites,
             "parts": mapping["parts"],
-            "animations": [{"name": name, "slot_count": count, "frames": [{"slot_index": index, "client_cf": [index]} for index in range(count)]} for name, count, _ in animation_specs],
+            "animations": [{"name": name, "slot_count": count, "frames": [{"slot_index": index, "client_cf": cf[name][index]} for index in range(count)]} for name, count, _ in animation_specs],
             "maps": [{"id": 1, "tile_id": 1, "background_id": 0}],
             "tiles": [{"id": 0, "semantic": "ground", "solid": False}],
             "backgrounds": [{"id": 0, "layers": 4}],
@@ -251,13 +258,16 @@ class BuildContractTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             manifest = self._complete_manifest(root)
-            changed = json.dumps([0, {"idle": [0, 1], "run": [2, 3, 4, 99], "pounce": [6, 7], "hit": [8], "death": [9]}], separators=(",", ":")).encode()
             mob_path = root / manifest["build_inputs"]["mob"]["bytes_path"]
+            changed = bytearray(mob_path.read_bytes())
+            changed[40] ^= 1
+            changed = bytes(changed)
             mob_path.write_bytes(changed)
             manifest["build_inputs"]["mob"]["bytes_sha256"] = hashlib.sha256(changed).hexdigest()
             review = self._write_complete_review(root, manifest)
             with self.assertRaisesRegex(BuildError, "ASSET-MOB-003"):
                 build(manifest, root / "out", review, base_dir=root)
+            self.assertFalse((root / "out").exists())
 
     def test_animation_build_requires_all_canonical_sheets(self):
         from assetpack.build import BuildError, build
@@ -285,6 +295,7 @@ class BuildContractTests(unittest.TestCase):
                 review = self._write_complete_review(root, manifest)
                 with self.assertRaisesRegex(BuildError, "ASSET-ANIMATION-008"):
                     build(manifest, root / "out", review, base_dir=root)
+                self.assertFalse((root / "out").exists())
 
     def test_runtime_key_mutation_is_rejected_by_bound_contract(self):
         from assetpack.build import BuildError, build
@@ -296,6 +307,19 @@ class BuildContractTests(unittest.TestCase):
             review = self._write_complete_review(root, manifest)
             with self.assertRaisesRegex(BuildError, "ASSET-UI-007"):
                 build(manifest, root / "out", review, base_dir=root)
+            self.assertFalse((root / "out").exists())
+
+    def test_runtime_binding_duplicate_cannot_hide_a_missing_logical_binding(self):
+        from assetpack.build import BuildError, build
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = self._complete_manifest(root)
+            manifest["ui_bindings"][-1]["source_asset"] = manifest["ui_bindings"][0]["source_asset"]
+            review = self._write_complete_review(root, manifest)
+            with self.assertRaisesRegex(BuildError, "ASSET-UI-007"):
+                build(manifest, root / "out", review, base_dir=root)
+            self.assertFalse((root / "out").exists())
 
     def test_tileset_payload_mutation_is_rejected_even_when_sha_is_updated(self):
         from assetpack.build import BuildError, build

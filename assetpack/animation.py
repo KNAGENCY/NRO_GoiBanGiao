@@ -14,17 +14,39 @@ REQUIRED_ANIMATION_SHEETS = {
     "quai-soi-rung": {"slot_count": 10, "cell_size": (96, 96)},
 }
 
+REQUIRED_CLIENT_CF = {
+    "hoc-vien-head": (
+        (0, 1, 7, 8, 11, 12, 17, 18, 19, 20, 21, 22, 23, 24, 30, 31, 32),
+        (2, 3, 4, 5, 6, 9, 10, 13, 14, 15, 16, 26, 27, 28, 29),
+        (25,),
+    ),
+    "hoc-vien-body": (
+        (0, 1), (2, 15, 28), (3,), (4,), (5,), (6,), (7, 8, 17), (9, 10),
+        (11, 21, 32), (12, 18, 22), (13, 26), (14, 27), (16, 29), (19, 30),
+        (20, 31), (23, 24), (25,),
+    ),
+    "hoc-vien-leg": (
+        (0, 1, 22), (2,), (3,), (4,), (5,), (6,), (7, 23), (8,), (9,), (10,),
+        (11,), (12,), (13, 14, 15, 16, 17, 18, 19, 20, 21, 24), (25,),
+    ),
+    "quai-soi-rung": tuple((index,) for index in range(10)),
+}
+
 
 def validate_animation_closure(sheets, animations, *, check_paths=None, check_cell_size=None) -> None:
     """Khóa cả bốn strip runtime, kể cả metadata không thể suy từ PNG."""
-    if not isinstance(sheets, list) or {sheet.get("name") for sheet in sheets if isinstance(sheet, dict)} != set(REQUIRED_ANIMATION_SHEETS):
+    if not isinstance(sheets, list) or len(sheets) != len(REQUIRED_ANIMATION_SHEETS) or any(not isinstance(sheet, dict) for sheet in sheets):
         raise AnimationError("ASSET-ANIMATION-008: thiếu required animation_sheets closure")
-    if not isinstance(animations, list) or {item.get("name") for item in animations if isinstance(item, dict)} != set(REQUIRED_ANIMATION_SHEETS):
+    sheet_names = [sheet.get("name") for sheet in sheets]
+    if len(set(sheet_names)) != len(sheet_names) or set(sheet_names) != set(REQUIRED_ANIMATION_SHEETS):
+        raise AnimationError("ASSET-ANIMATION-008: sheet name phải exact và duy nhất")
+    if not isinstance(animations, list) or len(animations) != len(REQUIRED_ANIMATION_SHEETS) or any(not isinstance(item, dict) for item in animations):
         raise AnimationError("ASSET-ANIMATION-008: thiếu animation contract tương ứng")
+    animation_names = [item.get("name") for item in animations]
+    if len(set(animation_names)) != len(animation_names) or set(animation_names) != set(REQUIRED_ANIMATION_SHEETS):
+        raise AnimationError("ASSET-ANIMATION-008: animation name phải exact và duy nhất")
     by_animation = {item["name"]: item for item in animations}
     for sheet in sheets:
-        if not isinstance(sheet, dict) or sheet.get("name") not in REQUIRED_ANIMATION_SHEETS:
-            raise AnimationError("ASSET-ANIMATION-008: tên sheet không thuộc closure")
         name = sheet["name"]
         expected = REQUIRED_ANIMATION_SHEETS[name]
         if sheet.get("slot_count") != expected["slot_count"] or tuple(sheet.get("cell_size", ())) != expected["cell_size"]:
@@ -42,7 +64,9 @@ def validate_animation_closure(sheets, animations, *, check_paths=None, check_ce
             raise AnimationError(f"ASSET-ANIMATION-008: {name} contract slot sai")
         for frame in frames:
             client_cf = frame.get("client_cf") if isinstance(frame, dict) else None
-            if not isinstance(client_cf, list) or not client_cf or len(client_cf) != len(set(client_cf)) or any(not isinstance(value, int) or isinstance(value, bool) or not -128 <= value <= 127 for value in client_cf):
+            slot = frame.get("slot_index") if isinstance(frame, dict) else None
+            expected_cf = REQUIRED_CLIENT_CF[name][slot] if isinstance(slot, int) and not isinstance(slot, bool) and 0 <= slot < expected["slot_count"] else None
+            if not isinstance(client_cf, list) or tuple(client_cf) != expected_cf:
                 raise AnimationError(f"ASSET-ANIMATION-008: {name} client_cf malformed")
         for cell in cells:
             path = cell.get("path") if isinstance(cell, dict) else None

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import hashlib
 import json
 from pathlib import Path
+import struct
 from typing import Any
 
 
@@ -99,6 +100,17 @@ def _fail(code: str, detail: str) -> None:
     raise ManifestError(f"{code}: {detail}")
 
 
+def _is_int(value: Any) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def _png_contract(content: bytes) -> tuple[list[int], bool] | None:
+    if not content.startswith(b"\x89PNG\r\n\x1a\n") or len(content) < 26:
+        return None
+    width, height, _depth, color_type = struct.unpack(">IIBB", content[16:26])
+    return [width, height], color_type in {4, 6}
+
+
 def validate_manifest(
     manifest: dict[str, Any],
     *,
@@ -107,6 +119,7 @@ def validate_manifest(
     previous_runtime_version=None,
 ) -> None:
     seen_ids = set()
+    runtime_inputs = set()
     legacy_ids = set(occupied_ids)
     phase_range = manifest.get("phase", {}).get("sprite_id_range", [27041, 27082])
     if phase_range != [27041, 27082]:
@@ -125,29 +138,41 @@ def validate_manifest(
             _fail("ASSET-ZOOM-003", f"sprite {sprite_id} phải có đủ x1..x4")
 
         source_hash = sprite.get("source_sha256", "")
+        x4_hash = sprite.get("x4_sha256", "")
         source_path = sprite.get("source_path")
         if (
             not source_path
             or source_hash == "0" * 64
             or len(source_hash) != 64
             or any(char not in "0123456789abcdef" for char in source_hash)
+            or x4_hash == "0" * 64
+            or len(x4_hash) != 64
+            or any(char not in "0123456789abcdef" for char in x4_hash)
         ):
             _fail("ASSET-SPRITE-002", f"sprite {sprite_id} có source path/SHA không hợp lệ")
         try:
-            source_digest = hashlib.sha256((base_dir / source_path).read_bytes()).hexdigest()
+            source_content = (base_dir / source_path).read_bytes()
+            source_digest = hashlib.sha256(source_content).hexdigest()
             x4_digest = hashlib.sha256((base_dir / sprite["zooms"]["x4"]).read_bytes()).hexdigest()
         except (OSError, KeyError) as error:
             _fail("ASSET-SPRITE-002", f"sprite {sprite_id} thiếu source/x4: {error}")
-        if source_digest != source_hash or x4_digest != source_hash:
+        if source_digest != source_hash or x4_digest != x4_hash:
             _fail("ASSET-SPRITE-002", f"sprite {sprite_id} source/x4 SHA không khớp")
 
+        png_contract = _png_contract(source_content)
+        if png_contract is not None and (
+            sprite.get("source_dimensions") != png_contract[0]
+            or sprite.get("source_alpha") is not png_contract[1]
+        ):
+            _fail("ASSET-SPRITE-002", f"sprite {sprite_id} dimensions/alpha nguồn không khớp")
+        runtime_inputs.add((source_path, sprite["zooms"]["x4"], source_hash, x4_hash))
         crop = sprite.get("crop")
         if crop and crop.get("subject") == "iruka":
             rect, overlap, layer = crop.get("source_rect"), crop.get("overlap"), crop.get("layer")
             valid_rect = (
                 isinstance(rect, list)
                 and len(rect) == 4
-                and all(isinstance(value, int) for value in rect)
+                and all(_is_int(value) for value in rect)
                 and rect[0] >= 0
                 and rect[1] >= 0
                 and rect[2] > 0
@@ -156,9 +181,9 @@ def validate_manifest(
             valid_overlap = (
                 isinstance(overlap, list)
                 and len(overlap) == 2
-                and all(isinstance(value, int) and -127 <= value <= 127 for value in overlap)
+                and all(_is_int(value) and -127 <= value <= 127 for value in overlap)
             )
-            if not valid_rect or not valid_overlap or not isinstance(layer, int) or layer < 0:
+            if not valid_rect or not valid_overlap or not _is_int(layer) or layer < 0:
                 _fail("ASSET-CROP-007", "crop Iruka sai kiểu hoặc ngoài phạm vi")
             iruka_layers.append(layer)
         seen_ids.add(sprite_id)
@@ -167,6 +192,9 @@ def validate_manifest(
         len(iruka_layers) != len(set(iruka_layers)) or iruka_layers != sorted(iruka_layers)
     ):
         _fail("ASSET-CROP-007", "layer Iruka phải duy nhất và tăng dần")
+
+    if len(seen_ids) > 1 and len(runtime_inputs) == 1:
+        _fail("ASSET-SPRITE-002", "mọi sprite đang dùng chung một source/x4 placeholder")
 
     previous = previous_runtime_version
     if previous is None:
@@ -193,13 +221,13 @@ def validate_manifest(
             slot = frame.get("slot_index")
             client_cf = frame.get("client_cf")
             if (
-                not isinstance(slot, int)
+                not _is_int(slot)
                 or not 0 <= slot < slot_count
                 or slot in seen_slots
                 or not isinstance(client_cf, list)
                 or not client_cf
                 or len(client_cf) != len(set(client_cf))
-                or any(not isinstance(value, int) or not -128 <= value <= 127 for value in client_cf)
+                or any(not _is_int(value) or not -128 <= value <= 127 for value in client_cf)
             ):
                 _fail("ASSET-ANIMATION-008", f"animation {animation.get('name', '?')} có slot/cf sai")
             seen_slots.add(slot)

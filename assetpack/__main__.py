@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 from .manifest import ManifestError, validate_manifest, verify_legacy_inputs
+from .build import BuildError, build
 
 
 def main(argv=None):
@@ -16,6 +17,11 @@ def main(argv=None):
     validate.add_argument("--art-root", type=Path)
     legacy = commands.add_parser("verify-legacy-inputs")
     legacy.add_argument("--ledger", type=Path, required=True)
+    build_command = commands.add_parser("build")
+    build_command.add_argument("--manifest", type=Path, required=True)
+    build_command.add_argument("--slice", required=True)
+    build_command.add_argument("--out", type=Path, required=True)
+    build_command.add_argument("--review", type=Path, required=True)
     args = parser.parse_args(argv)
     if args.command == "validate":
         try:
@@ -46,6 +52,15 @@ def main(argv=None):
         try:
             verify_legacy_inputs(args.ledger, Path.cwd())
         except (ManifestError, OSError, json.JSONDecodeError) as error:
+            print(error, file=sys.stderr)
+            return 1
+    if args.command == "build":
+        try:
+            manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
+            if manifest.get("phase", {}).get("name", manifest.get("slice")) != args.slice:
+                raise BuildError("ASSET-BUILD-011: slice không khớp manifest")
+            build(manifest, args.out, args.review)
+        except (BuildError, OSError, json.JSONDecodeError) as error:
             print(error, file=sys.stderr)
             return 1
     return 0

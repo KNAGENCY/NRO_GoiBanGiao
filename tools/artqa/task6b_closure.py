@@ -21,13 +21,17 @@ from PIL import Image
 
 from assetpack.animation import REQUIRED_ANIMATION_SHEETS, REQUIRED_CLIENT_CF
 from assetpack.build import _source_paths
+from assetpack.visual import (
+    render_hud_golden,
+    render_iruka_composite_contact_sheet,
+)
 from tools.artqa.artqa import _adaptive_chroma_mask, extract_alpha
 from tools.artqa.generate_tile_sheet import generate_tile_sheet
 
 
 ZOOMS = ("x1", "x2", "x3", "x4")
 ART_PREFIX = Path("docs/my-thuat/anh-nguon/vertical-slice-v1")
-CLOSURE_RELATIVE = ART_PREFIX / "generated/production-closure-v9"
+CLOSURE_RELATIVE = ART_PREFIX / "generated/production-closure-v11"
 APPROVED_UI_RELATIVE = Path(
     "my thuat/dot1-nhom1-duyet/dot1-nhom1-duyet/01-giao-dien"
 )
@@ -382,6 +386,107 @@ def _single_frame_spec(
     }
 
 
+def _generate_iruka_components(
+    *,
+    record: dict[str, Any],
+    art_root: Path,
+    alpha_cache: dict[str, Image.Image],
+    temporary: Path,
+) -> list[dict[str, Any]]:
+    """Giữ ba part trong cùng hệ tọa độ để runtime ghép lại đúng một Iruka."""
+
+    source_name = "master_iruka_x4_chroma.png"
+    source = art_root / source_name
+    alpha = _load_reviewed_alpha(
+        art_root, {source_name: record}, source_name, alpha_cache
+    )
+    frame_x, frame_y, frame_width, frame_height = _frame_rect(record, 0)
+    frame = alpha.crop(
+        (
+            frame_x,
+            frame_y,
+            frame_x + frame_width,
+            frame_y + frame_height,
+        )
+    )
+    canvas_size = (128, 160)
+    content_limit = (120, 152)
+    scale = min(
+        content_limit[0] / frame_width,
+        content_limit[1] / frame_height,
+    )
+    resized_size = (
+        max(1, round(frame_width * scale)),
+        max(1, round(frame_height * scale)),
+    )
+    offset = (
+        (canvas_size[0] - resized_size[0]) // 2,
+        canvas_size[1] - 4 - resized_size[1],
+    )
+    result = []
+    for offset_id, component in enumerate(("head", "body", "leg")):
+        component_x, component_y, component_width, component_height = (
+            _component_rect(record, 0, component)
+        )
+        layer = Image.new("RGBA", frame.size)
+        local_box = (
+            component_x - frame_x,
+            component_y - frame_y,
+            component_x - frame_x + component_width,
+            component_y - frame_y + component_height,
+        )
+        layer.alpha_composite(frame.crop(local_box), local_box[:2])
+        resized = layer.resize(resized_size, Image.Resampling.NEAREST)
+        canvas = Image.new("RGBA", canvas_size)
+        canvas.alpha_composite(resized, offset)
+        sprite_id = 27075 + offset_id
+        zooms, zoom_hashes = _save_zooms(
+            canvas, temporary, Path("sprites") / str(sprite_id)
+        )
+        result.append(
+            {
+                "id": sprite_id,
+                "name": f"iruka-{component}",
+                "crop": {
+                    "asset_id": sprite_id,
+                    "source_rect": [
+                        component_x,
+                        component_y,
+                        component_width,
+                        component_height,
+                    ],
+                },
+                "zooms": zooms,
+                "source_path": (ART_PREFIX / source_name).as_posix(),
+                "source_sha256": _sha(source),
+                "x4_sha256": zoom_hashes["x4"],
+                "source_dimensions": list(alpha.size),
+                "source_alpha": False,
+                "target_x4": list(canvas_size),
+                "zoom_sha256": zoom_hashes,
+                "anchor": "bottom-center",
+                "layer": {"head": 2, "body": 1, "leg": 0}[component],
+                "overlap_ratio": {"head_body": 0.14, "body_leg": 0.10},
+                "component": component,
+                "slot_index": 0,
+                "action": "idle",
+                "action_slot": 0,
+                "provenance_role": "approved_iruka_master_component",
+                "shared_transform": {
+                    "source_frame": [
+                        frame_x,
+                        frame_y,
+                        frame_width,
+                        frame_height,
+                    ],
+                    "resized_size": list(resized_size),
+                    "canvas_offset": list(offset),
+                },
+            }
+        )
+    return result
+
+
 def _generate_sprites(
     review: dict[str, Any], art_root: Path, temporary: Path
 ) -> list[dict[str, Any]]:
@@ -401,33 +506,14 @@ def _generate_sprites(
             )
         )
 
-    iruka_record = records["master_iruka_x4_chroma.png"]
-    for offset, component in enumerate(("head", "body", "leg")):
-        spec = {
-            "id": 27075 + offset,
-            "name": f"iruka-{component}",
-            "component": component,
-            "slot_index": 0,
-            "action": "idle",
-            "action_slot": 0,
-            "source_path": "master_iruka_x4_chroma.png",
-            "source_sha256": iruka_record["source_sha256"],
-            "source_rect": _component_rect(iruka_record, 0, component),
-            "anchor": "bottom-center",
-            "layer": {"head": 2, "body": 1, "leg": 0}[component],
-            "overlap_ratio": {"head_body": 0.14, "body_leg": 0.10},
-            "provenance_role": "approved_iruka_master_component",
-        }
-        sprites.append(
-            _sprite_record(
-                spec,
-                art_root=art_root,
-                records=records,
-                alpha_cache=cache,
-                temporary=temporary,
-                target_size=targets[component],
-            )
+    sprites.extend(
+        _generate_iruka_components(
+            record=records["master_iruka_x4_chroma.png"],
+            art_root=art_root,
+            alpha_cache=cache,
+            temporary=temporary,
         )
+    )
 
     portrait = _single_frame_spec(
         records,
@@ -720,6 +806,49 @@ def _copy_file(source: Path, temporary: Path, relative: Path) -> str:
     return (CLOSURE_RELATIVE / relative).as_posix()
 
 
+def _generate_production_evidence(
+    temporary: Path,
+    hud_sources: dict[str, dict[str, str]],
+    sprites: list[dict[str, Any]],
+) -> dict[str, dict[str, str]]:
+    """Render đúng artifact production cần reviewer nhìn, ngay trong closure."""
+
+    def load(relative: str) -> Image.Image:
+        local = temporary / Path(relative).relative_to(CLOSURE_RELATIVE)
+        with Image.open(local) as image:
+            image.load()
+            return image.convert("RGBA")
+
+    hud = {name: load(sources["x4"]) for name, sources in hud_sources.items()}
+    hud_path = temporary / "evidence/hud-golden-25-50-100-x4.png"
+    render_hud_golden(hud, hud_path)
+
+    by_id = {sprite["id"]: sprite for sprite in sprites}
+    iruka_layers = {
+        "head": load(by_id[27075]["zooms"]["x4"]),
+        "body": load(by_id[27076]["zooms"]["x4"]),
+        "leg": load(by_id[27077]["zooms"]["x4"]),
+    }
+    iruka_path = temporary / "evidence/iruka-composite-light-dark-x4.png"
+    render_iruka_composite_contact_sheet(iruka_layers, iruka_path)
+
+    return {
+        "hud_golden": {
+            "path": (
+                CLOSURE_RELATIVE / "evidence/hud-golden-25-50-100-x4.png"
+            ).as_posix(),
+            "sha256": _sha(hud_path),
+        },
+        "iruka_composite": {
+            "path": (
+                CLOSURE_RELATIVE
+                / "evidence/iruka-composite-light-dark-x4.png"
+            ).as_posix(),
+            "sha256": _sha(iruka_path),
+        },
+    }
+
+
 def _copy_runtime_inputs(
     project_root: Path, shared_root: Path, temporary: Path
 ) -> tuple[str, str, str, dict[str, str]]:
@@ -935,6 +1064,9 @@ def generate_production_closure(
             ).as_posix()
 
         hud_sources = _generate_hud(art_root, review, temporary)
+        artifact_evidence = _generate_production_evidence(
+            temporary, hud_sources, sprites
+        )
         ui_sources = _generate_ui(shared_root, temporary)
         tile_art, tile_hashes = _tile_art(art_root, temporary)
         part_path, tileset_path, runtime_map, snapshots = _copy_runtime_inputs(
@@ -1018,6 +1150,7 @@ def generate_production_closure(
                 "tile_art_sha256": tile_hashes,
                 "background_sources": _background_sources(shared_root),
                 "hud_sources": hud_sources,
+                "artifact_evidence": artifact_evidence,
                 "mob": {
                     "id": 0,
                     "payload_mode": "generated",

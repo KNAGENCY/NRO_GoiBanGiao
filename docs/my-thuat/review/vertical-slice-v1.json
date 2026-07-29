@@ -2553,5 +2553,23 @@
     "raw_source_fail": 20,
     "accepted_source_pass": 20,
     "accepted_source_fail": 0
+  },
+  "production_artifact_review": {
+    "status": "PASS",
+    "reviewer": "/root/task6b_visual_review6",
+    "timestamp": "2026-07-29T19:40:38+07:00",
+    "production_closure_digest_sha256": "c3f51d3c023191a44a19f6f103634400e2aec85d36149da4c3438639eefec649",
+    "evidence": {
+      "hud_golden": {
+        "path": "docs/my-thuat/anh-nguon/vertical-slice-v1/generated/production-closure-v11/evidence/hud-golden-25-50-100-x4.png",
+        "sha256": "4a459fd81d044b21ee8c629ced4defe2c37e5c048c68ae1d47a33396932e2652",
+        "status": "PASS"
+      },
+      "iruka_composite": {
+        "path": "docs/my-thuat/anh-nguon/vertical-slice-v1/generated/production-closure-v11/evidence/iruka-composite-light-dark-x4.png",
+        "sha256": "86fcea3153f0eec4c0989488b6e853952c332c5777873ac18f682306afaee8fc",
+        "status": "PASS"
+      }
+    }
   }
 }

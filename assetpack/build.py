@@ -9,6 +9,7 @@ from __future__ import annotations
 from io import BytesIO
 import hashlib
 import json
+from datetime import datetime
 from pathlib import Path
 import shutil
 import tempfile
@@ -25,7 +26,12 @@ from .map import MapError, encode_collision, validate_collision_semantics, valid
 from .mob import MobError, encode_mob, validate_mob_golden
 from .part import build_part, parse_part
 from .skill import encode_skill
-from .visual import render_full_map, render_tile_contact_sheet
+from .visual import (
+    render_full_map,
+    render_hud_golden,
+    render_iruka_composite_contact_sheet,
+    render_tile_contact_sheet,
+)
 
 
 class BuildError(ValueError):
@@ -39,6 +45,8 @@ REQUIRED_TOP_LEVEL = {
 }
 ZOOMS = ("x1", "x2", "x3", "x4")
 POC_IDS = {9000, 9001, 9002}
+PRODUCTION_REVIEWED_SOURCE_COUNT = 20
+PRODUCTION_REVIEWED_SOURCE_ROLE = "reviewed_vertical_slice_source"
 
 
 def _fail(code: str, detail: str) -> None:
@@ -223,6 +231,257 @@ def review_digest(review_path: Path) -> str:
     return digest.hexdigest()
 
 
+def _is_sha256(value: Any) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(character in "0123456789abcdef" for character in value)
+    )
+
+
+def _validate_production_review_provenance(
+    review_path: Path,
+    entries: list[dict[str, Any]],
+    manifest: dict[str, Any],
+    base_dir: Path,
+) -> dict[str, dict[str, Any]]:
+    """Buộc manifest khai đúng tuyệt đối 20 nguồn PASS của review canonical."""
+
+    documents = _review_documents(review_path)
+    if len(documents) != 1:
+        _fail(
+            "ASSET-PROVENANCE-014",
+            "production review phải là đúng một JSON canonical",
+        )
+    _, payload = documents[0]
+    source_root_value = payload.get("source_root") if isinstance(payload, dict) else None
+    if not isinstance(source_root_value, str) or not source_root_value:
+        _fail("ASSET-PROVENANCE-014", "production review thiếu source_root")
+    source_root = Path(source_root_value).resolve()
+    canonical_base = base_dir.resolve()
+    try:
+        source_root.relative_to(canonical_base)
+    except ValueError:
+        _fail(
+            "ASSET-PROVENANCE-014",
+            "production review source_root vượt ngoài source_base",
+        )
+    if (
+        len(entries) != PRODUCTION_REVIEWED_SOURCE_COUNT
+        or any(entry.get("status") != "PASS" for entry in entries)
+    ):
+        _fail(
+            "ASSET-PROVENANCE-014",
+            "production review phải có đúng 20 asset PASS",
+        )
+
+    expected: set[tuple[str, str]] = set()
+    reviewed_assets: set[str] = set()
+    for entry in entries:
+        asset = entry.get("asset")
+        digest = entry.get("source_sha256")
+        if (
+            not isinstance(asset, str)
+            or not asset
+            or Path(asset).name != asset
+            or not _is_sha256(digest)
+            or asset in reviewed_assets
+        ):
+            _fail(
+                "ASSET-PROVENANCE-014",
+                "production review có asset duplicate/malformed",
+            )
+        reviewed_assets.add(asset)
+        source = (source_root / asset).resolve()
+        if source.parent != source_root or not source.is_file() or _sha(source) != digest:
+            _fail(
+                "ASSET-PROVENANCE-014",
+                f"production review source/SHA lệch: {asset}",
+            )
+        relative = source.relative_to(canonical_base).as_posix()
+        expected.add((relative, digest))
+
+    provenance = manifest.get("build_inputs", {}).get("source_provenance")
+    if not isinstance(provenance, list) or len(provenance) != len(expected):
+        _fail(
+            "ASSET-PROVENANCE-014",
+            "source_provenance phải có đúng 20 record duy nhất",
+        )
+    observed: set[tuple[str, str]] = set()
+    provenance_by_path: dict[str, dict[str, Any]] = {}
+    for record in provenance:
+        if (
+            not isinstance(record, dict)
+            or set(record)
+            != {"source_path", "source_sha256", "role"}
+            or not isinstance(record.get("source_path"), str)
+            or not record["source_path"]
+            or Path(record["source_path"]).is_absolute()
+            or not _is_sha256(record.get("source_sha256"))
+            or record.get("role") != PRODUCTION_REVIEWED_SOURCE_ROLE
+            or record["source_path"] in provenance_by_path
+        ):
+            _fail(
+                "ASSET-PROVENANCE-014",
+                "source_provenance duplicate/malformed",
+            )
+        pair = (record["source_path"], record["source_sha256"])
+        if pair in observed:
+            _fail("ASSET-PROVENANCE-014", "source_provenance duplicate")
+        observed.add(pair)
+        provenance_by_path[record["source_path"]] = record
+    if observed != expected:
+        _fail(
+            "ASSET-PROVENANCE-014",
+            "source_provenance thiếu/thừa hoặc SHA lệch review PASS",
+        )
+    return provenance_by_path
+
+
+def _require_production_artifact_review(review_path: Path) -> dict[str, Any]:
+    documents = _review_documents(review_path)
+    if len(documents) != 1:
+        _fail(
+            "ASSET-ARTIFACT-REVIEW-016",
+            "artifact review phải nằm trong đúng một JSON canonical",
+        )
+    _, payload = documents[0]
+    artifact_review = (
+        payload.get("production_artifact_review")
+        if isinstance(payload, dict)
+        else None
+    )
+    if not isinstance(artifact_review, dict):
+        _fail(
+            "ASSET-ARTIFACT-REVIEW-016",
+            "thiếu production_artifact_review",
+        )
+    return artifact_review
+
+
+def production_closure_digest(manifest: dict[str, Any]) -> str:
+    closure = manifest.get("build_inputs", {}).get(
+        "production_closure_sha256"
+    )
+    if not isinstance(closure, dict):
+        _fail(
+            "ASSET-ARTIFACT-REVIEW-016",
+            "thiếu production closure để bind artifact review",
+        )
+    canonical = json.dumps(
+        closure,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
+
+
+def validate_production_artifact_review(
+    review_path: Path,
+    manifest: dict[str, Any],
+    base_dir: Path,
+) -> dict[str, dict[str, str]]:
+    """Khóa evidence production và chữ ký reviewer trước khi tạo output."""
+
+    artifact_review = _require_production_artifact_review(review_path)
+    documents = _review_documents(review_path)
+    _, payload = documents[0]
+    source_reviewer = payload.get("reviewer") if isinstance(payload, dict) else None
+    if set(artifact_review) != {
+        "status",
+        "reviewer",
+        "timestamp",
+        "production_closure_digest_sha256",
+        "evidence",
+    }:
+        _fail(
+            "ASSET-ARTIFACT-REVIEW-016",
+            "production_artifact_review malformed",
+        )
+    reviewer = artifact_review.get("reviewer")
+    if (
+        artifact_review.get("status") != "PASS"
+        or not isinstance(reviewer, str)
+        or not reviewer.strip()
+        or reviewer == source_reviewer
+    ):
+        _fail(
+            "ASSET-ARTIFACT-REVIEW-016",
+            "artifact chưa có PASS của reviewer độc lập",
+        )
+    timestamp = artifact_review.get("timestamp")
+    try:
+        reviewed_at = datetime.fromisoformat(
+            timestamp.replace("Z", "+00:00")
+        )
+    except (AttributeError, TypeError, ValueError):
+        _fail("ASSET-ARTIFACT-REVIEW-016", "artifact review timestamp malformed")
+    if reviewed_at.tzinfo is None or reviewed_at.utcoffset() is None:
+        _fail(
+            "ASSET-ARTIFACT-REVIEW-016",
+            "artifact review timestamp phải có múi giờ",
+        )
+    if (
+        artifact_review.get("production_closure_digest_sha256")
+        != production_closure_digest(manifest)
+    ):
+        _fail(
+            "ASSET-ARTIFACT-REVIEW-016",
+            "artifact review không bind đúng production closure",
+        )
+
+    expected_kinds = {"hud_golden", "iruka_composite"}
+    declared = manifest.get("build_inputs", {}).get("artifact_evidence")
+    reviewed = artifact_review.get("evidence")
+    if (
+        not isinstance(declared, dict)
+        or set(declared) != expected_kinds
+        or not isinstance(reviewed, dict)
+        or set(reviewed) != expected_kinds
+    ):
+        _fail(
+            "ASSET-ARTIFACT-REVIEW-016",
+            "artifact evidence phải đủ HUD golden và Iruka composite",
+        )
+    closure = manifest["build_inputs"].get("production_closure_sha256")
+    validated: dict[str, dict[str, str]] = {}
+    for kind in sorted(expected_kinds):
+        record = declared[kind]
+        verdict = reviewed[kind]
+        if (
+            not isinstance(record, dict)
+            or set(record) != {"path", "sha256"}
+            or not isinstance(verdict, dict)
+            or set(verdict) != {"path", "sha256", "status"}
+            or verdict.get("status") != "PASS"
+            or verdict.get("path") != record.get("path")
+            or verdict.get("sha256") != record.get("sha256")
+            or not isinstance(record.get("path"), str)
+            or not _is_sha256(record.get("sha256"))
+            or not isinstance(closure, dict)
+            or closure.get(record["path"]) != record["sha256"]
+        ):
+            _fail(
+                "ASSET-ARTIFACT-REVIEW-016",
+                f"artifact evidence {kind} thiếu/sai/không PASS",
+            )
+        path = _path(
+            base_dir,
+            record["path"],
+            "ASSET-ARTIFACT-REVIEW-016",
+        )
+        if not path.is_file() or _sha(path) != record["sha256"]:
+            _fail(
+                "ASSET-ARTIFACT-REVIEW-016",
+                f"artifact evidence file/SHA lệch: {kind}",
+            )
+        validated[kind] = {
+            "path": str(path),
+            "sha256": record["sha256"],
+        }
+    return validated
+
+
 def _source_paths(manifest: dict[str, Any]) -> list[str]:
     paths: list[str] = []
     for sprite in manifest.get("sprites", []):
@@ -238,6 +497,9 @@ def _source_paths(manifest: dict[str, Any]) -> list[str]:
         paths.extend(item.values())
     for item in inputs.get("hud_sources", {}).values():
         paths.extend(item.values())
+    for item in inputs.get("artifact_evidence", {}).values():
+        if isinstance(item, dict) and isinstance(item.get("path"), str):
+            paths.append(item["path"])
     mob = inputs.get("mob", {})
     if isinstance(mob, dict):
         for key in ("bytes_path", "data_path"):
@@ -466,12 +728,24 @@ def require_approved_review(review_path: Path, manifest: dict[str, Any], base_di
     source_provenance = manifest.get("build_inputs", {}).get(
         "source_provenance", []
     )
-    provenance_by_path = {
-        record.get("source_path"): record
-        for record in source_provenance
-        if isinstance(record, dict)
-        and isinstance(record.get("source_path"), str)
-    }
+    provenance_by_path = (
+        _validate_production_review_provenance(
+            review_path, entries, manifest, base_dir
+        )
+        if production
+        else {
+            record.get("source_path"): record
+            for record in source_provenance
+            if isinstance(record, dict)
+            and isinstance(record.get("source_path"), str)
+        }
+    )
+    if production:
+        evidence.extend(
+            validate_production_artifact_review(
+                review_path, manifest, base_dir
+            ).values()
+        )
     reviewed_source_paths.update(provenance_by_path)
     for relative in _source_paths(manifest):
         source = _path(base_dir, relative, "ASSET-REVIEW-010")
@@ -829,6 +1103,40 @@ def _build_into(manifest: dict[str, Any], base_dir: Path, root: Path) -> dict[st
         path = evidence_root / "animation" / f"{sheet['name']}.png"
         path.parent.mkdir(parents=True, exist_ok=True)
         rendered.save(path, format="PNG")
+    hud_evidence = evidence_root / "hud-golden-25-50-100-x4.png"
+    render_hud_golden(
+        {
+            name: _load_png(base_dir, sources["x4"])
+            for name, sources in inputs["hud_sources"].items()
+        },
+        hud_evidence,
+    )
+    sprites_by_id = {sprite["id"]: sprite for sprite in manifest["sprites"]}
+    iruka_evidence = evidence_root / "iruka-composite-light-dark-x4.png"
+    render_iruka_composite_contact_sheet(
+        {
+            "head": _load_png(base_dir, sprites_by_id[27075]["zooms"]["x4"]),
+            "body": _load_png(base_dir, sprites_by_id[27076]["zooms"]["x4"]),
+            "leg": _load_png(base_dir, sprites_by_id[27077]["zooms"]["x4"]),
+        },
+        iruka_evidence,
+    )
+    declared_evidence = inputs.get("artifact_evidence")
+    if isinstance(declared_evidence, dict):
+        generated = {
+            "hud_golden": hud_evidence,
+            "iruka_composite": iruka_evidence,
+        }
+        for kind, path in generated.items():
+            record = declared_evidence.get(kind)
+            if (
+                not isinstance(record, dict)
+                or record.get("sha256") != _sha(path)
+            ):
+                _fail(
+                    "ASSET-ARTIFACT-REVIEW-016",
+                    f"generated evidence lệch artifact đã review: {kind}",
+                )
 
     catalog_data = encode_catalog(manifest["catalog"])
     (server / "catalog.json").write_bytes(catalog_data)

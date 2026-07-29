@@ -255,7 +255,7 @@ class BuildContractTests(unittest.TestCase):
             second = build(manifest, root / "out-second", review, base_dir=root)
             self.assertEqual(lock["server_client_pair_sha256"], second["server_client_pair_sha256"])
             self.assertEqual((out / "asset-lock.json").read_bytes(), (root / "out-second" / "asset-lock.json").read_bytes())
-            required = ("server/part.bin", "server/tile_set_info.bin", "server/map-1-collision.bin", "server/skill.bin", "server/catalog.json", "client/mymap/1.bytes", "client/x1/t/1/t_01.png", "client/x2/t/1$1.png", "client/x4/bg/b03.png", "client/Mob/0.bytes", "client/x3/Mob/0/img.png", "client/x1/mainImage/naruto-hp-fill.png", "client/x4/naruto/ui/0.png", "client/evidence/tile-contact-x1.png", "client/evidence/full-map-x4.png", "client/evidence/animation/hoc-vien-body.png", "asset-lock.json")
+            required = ("server/part.bin", "server/tile_set_info.bin", "server/map-1-collision.bin", "server/skill.bin", "server/catalog.json", "client/mymap/1.bytes", "client/x1/t/1/t_01.png", "client/x2/t/1$1.png", "client/x4/bg/b03.png", "client/Mob/0.bytes", "client/x3/Mob/0/img.png", "client/x1/mainImage/naruto-hp-fill.png", "client/x4/naruto/ui/0.png", "client/evidence/tile-contact-x1.png", "client/evidence/full-map-x4.png", "client/evidence/animation/hoc-vien-body.png", "client/evidence/hud-golden-25-50-100-x4.png", "client/evidence/iruka-composite-light-dark-x4.png", "asset-lock.json")
             for relative in required:
                 self.assertTrue((out / relative).is_file(), relative)
             self.assertEqual(lock["server_client_pair_sha256"], lock["server_client_pair_sha256"])

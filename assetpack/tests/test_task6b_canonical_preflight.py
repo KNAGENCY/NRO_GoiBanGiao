@@ -1,10 +1,15 @@
+import hashlib
 import json
+import tempfile
 import unittest
+from copy import deepcopy
 from pathlib import Path
 
 
 ROOT = Path(__file__).parents[2]
 MAPPING = ROOT / "docs/my-thuat/mapping-id.json"
+REVIEW = ROOT / "docs/my-thuat/review/vertical-slice-v1.json"
+SHARED_ROOT = ROOT.parents[1]
 
 
 class CanonicalTask6BPreflightTests(unittest.TestCase):
@@ -50,6 +55,94 @@ class CanonicalTask6BPreflightTests(unittest.TestCase):
         self.assertEqual(len(inputs["legacy_part_sha256"]), 64)
         self.assertEqual(len(inputs["runtime_key_map_sha256"]), 64)
         self.assertEqual(len(inputs["tile_art_sha256"]), 100)
+
+    def test_build_rejects_19_of_20_reviewed_source_provenance_records(self):
+        from assetpack.build import (
+            BuildError,
+            _review_records,
+            _validate_production_review_provenance,
+            build,
+        )
+
+        manifest = deepcopy(json.loads(MAPPING.read_text(encoding="utf-8")))
+        removed = manifest["build_inputs"]["source_provenance"].pop(0)
+        del manifest["build_inputs"]["production_closure_sha256"][
+            removed["source_path"]
+        ]
+        entries, _ = _review_records(REVIEW)
+        with self.assertRaisesRegex(BuildError, "ASSET-PROVENANCE-014"):
+            _validate_production_review_provenance(
+                REVIEW, entries, manifest, SHARED_ROOT
+            )
+
+        with tempfile.TemporaryDirectory() as temporary:
+            out = Path(temporary) / "out"
+            with self.assertRaisesRegex(BuildError, "ASSET-PROVENANCE-014"):
+                build(manifest, out, REVIEW, base_dir=SHARED_ROOT)
+            self.assertFalse(out.exists())
+
+    def test_build_rejects_duplicate_extra_malformed_or_wrong_sha_provenance(self):
+        from assetpack.build import BuildError, build
+
+        def duplicate(manifest):
+            manifest["build_inputs"]["source_provenance"].append(
+                deepcopy(manifest["build_inputs"]["source_provenance"][0])
+            )
+
+        def extra(manifest):
+            relative = (
+                "docs/my-thuat/anh-nguon/vertical-slice-v1/qa/alpha/"
+                "hud_hp_chakra_4_alpha.png"
+            )
+            digest = hashlib.sha256((SHARED_ROOT / relative).read_bytes()).hexdigest()
+            manifest["build_inputs"]["source_provenance"].append(
+                {
+                    "source_path": relative,
+                    "source_sha256": digest,
+                    "role": "reviewed_vertical_slice_source",
+                }
+            )
+            manifest["build_inputs"]["production_closure_sha256"][relative] = digest
+
+        def malformed(manifest):
+            del manifest["build_inputs"]["source_provenance"][0]["source_sha256"]
+
+        def wrong_sha(manifest):
+            manifest["build_inputs"]["source_provenance"][0][
+                "source_sha256"
+            ] = "0" * 64
+
+        for name, mutation in (
+            ("duplicate", duplicate),
+            ("extra", extra),
+            ("malformed", malformed),
+            ("wrong_sha", wrong_sha),
+        ):
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as temporary:
+                manifest = deepcopy(json.loads(MAPPING.read_text(encoding="utf-8")))
+                mutation(manifest)
+                out = Path(temporary) / "out"
+                with self.assertRaisesRegex(BuildError, "ASSET-PROVENANCE-014"):
+                    build(manifest, out, REVIEW, base_dir=SHARED_ROOT)
+                self.assertFalse(out.exists())
+
+    def test_build_rejects_missing_production_artifact_review_before_output(self):
+        from assetpack.build import BuildError, build
+
+        manifest = json.loads(MAPPING.read_text(encoding="utf-8"))
+        review_payload = json.loads(REVIEW.read_text(encoding="utf-8"))
+        review_payload.pop("production_artifact_review", None)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            review = root / "review.json"
+            review.write_text(
+                json.dumps(review_payload, ensure_ascii=False),
+                encoding="utf-8",
+            )
+            out = root / "out"
+            with self.assertRaisesRegex(BuildError, "ASSET-ARTIFACT-REVIEW-016"):
+                build(manifest, out, review, base_dir=SHARED_ROOT)
+            self.assertFalse(out.exists())
 
 
 if __name__ == "__main__":

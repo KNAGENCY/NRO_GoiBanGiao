@@ -41,7 +41,7 @@ class Task6BArtifactEvidenceTests(unittest.TestCase):
             "reviewer": "Source Reviewer Fixture",
             "production_artifact_review": {
                 "status": "PASS",
-                "reviewer": "Independent Visual Reviewer Fixture",
+                "reviewer": "/root/task6b_visual_review6",
                 "timestamp": "2026-07-29T19:35:12+07:00",
                 "production_closure_digest_sha256": production_closure_digest(
                     manifest
@@ -204,8 +204,16 @@ class Task6BArtifactEvidenceTests(unittest.TestCase):
         def missing_reviewer(root, manifest, review):
             del review["production_artifact_review"]["reviewer"]
 
+        def empty_reviewer(root, manifest, review):
+            review["production_artifact_review"]["reviewer"] = ""
+
         def source_reviewer_reused(root, manifest, review):
             review["production_artifact_review"]["reviewer"] = review["reviewer"]
+
+        def self_signed_alias(root, manifest, review):
+            review["production_artifact_review"][
+                "reviewer"
+            ] = "Task6B closure generator self-signed alias"
 
         def wrong_closure(root, manifest, review):
             review["production_artifact_review"][
@@ -218,7 +226,9 @@ class Task6BArtifactEvidenceTests(unittest.TestCase):
             ("wrong_sha", wrong_sha),
             ("nonpass", nonpass),
             ("missing_reviewer", missing_reviewer),
+            ("empty_reviewer", empty_reviewer),
             ("source_reviewer_reused", source_reviewer_reused),
+            ("self_signed_alias", self_signed_alias),
             ("wrong_closure", wrong_closure),
         ):
             with self.subTest(name=name), tempfile.TemporaryDirectory() as temporary:

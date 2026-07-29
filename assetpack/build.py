@@ -47,6 +47,7 @@ ZOOMS = ("x1", "x2", "x3", "x4")
 POC_IDS = {9000, 9001, 9002}
 PRODUCTION_REVIEWED_SOURCE_COUNT = 20
 PRODUCTION_REVIEWED_SOURCE_ROLE = "reviewed_vertical_slice_source"
+TRUSTED_PRODUCTION_ARTIFACT_REVIEWER = "/root/task6b_visual_review6"
 
 
 def _fail(code: str, detail: str) -> None:
@@ -384,9 +385,6 @@ def validate_production_artifact_review(
     """Khóa evidence production và chữ ký reviewer trước khi tạo output."""
 
     artifact_review = _require_production_artifact_review(review_path)
-    documents = _review_documents(review_path)
-    _, payload = documents[0]
-    source_reviewer = payload.get("reviewer") if isinstance(payload, dict) else None
     if set(artifact_review) != {
         "status",
         "reviewer",
@@ -403,7 +401,7 @@ def validate_production_artifact_review(
         artifact_review.get("status") != "PASS"
         or not isinstance(reviewer, str)
         or not reviewer.strip()
-        or reviewer == source_reviewer
+        or reviewer != TRUSTED_PRODUCTION_ARTIFACT_REVIEWER
     ):
         _fail(
             "ASSET-ARTIFACT-REVIEW-016",

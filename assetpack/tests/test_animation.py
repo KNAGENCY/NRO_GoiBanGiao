@@ -53,3 +53,15 @@ class AnimationContractTests(unittest.TestCase):
         animations[-1]["name"] = animations[0]["name"]
         with self.assertRaisesRegex(AnimationError, "ASSET-ANIMATION-008"):
             validate_animation_closure(sheets, animations)
+
+    def test_malformed_sheet_or_animation_name_types_return_animation_error(self):
+        from assetpack.animation import AnimationError, validate_animation_closure
+
+        for collection in ("sheets", "animations"):
+            for bad_name in ([], {}, None, 7):
+                with self.subTest(collection=collection, bad_name=bad_name):
+                    sheets, animations = _closure()
+                    target = sheets if collection == "sheets" else animations
+                    target[0]["name"] = bad_name
+                    with self.assertRaisesRegex(AnimationError, "ASSET-ANIMATION-008"):
+                        validate_animation_closure(sheets, animations)

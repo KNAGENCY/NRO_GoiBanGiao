@@ -8,7 +8,7 @@
 > một bản vá, một phát hiện lỗi) thì **phải cập nhật file này ngay** rồi mới commit.
 > Cách cập nhật xem mục [11. Quy ước cập nhật](#11-quy-ước-cập-nhật-file-này).
 
-**Cập nhật lần cuối:** 29/07/2026 (**vertical slice Làng Lá: Task 3 assetpack build contract đã vá trên nhánh `kh-assets`**) · **Nhánh chính:** `main` · **Commit HEAD:** `6ea467f`
+**Cập nhật lần cuối:** 29/07/2026 (**vertical slice Làng Lá: Task 3 fix4 đóng runtime collision và animation error contract trên nhánh `kh-assets`**) · **Nhánh chính:** `main` · **Commit HEAD:** `6ea467f`
 
 ---
 
@@ -119,6 +119,7 @@ Mỗi kế hoạch đều đi qua: thiết kế → kế hoạch → thi công t
 | 6 | **Chiến đấu, chiêu thức, quái** | 20 chiêu Naruto (4/làng) + sát thương ngũ hành (×1,25/×1,00/×0,80); đánh quái, quái đánh lại + hồi sinh, **PvP**, chết & hồi sinh; nhiều người cùng khu vực **thấy toàn bộ diễn biến** | `162bbe9` |
 | 11 | **Lưu trạng thái sống** | Trước đó máy chủ **không lưu gì** sau lúc tạo nhân vật. Nay lưu **3 thời điểm**: định kỳ 60 giây · khi người chơi rời · khi tắt máy chủ. Kiến trúc: actor **chụp ảnh** → hàng đợi gộp → **thợ ghi riêng** chạm đĩa (actor không bao giờ chờ ổ đĩa). Kèm **một tài khoản một phiên** (đá phiên cũ → chờ lưu xong → mới đọc) | `6ea467f` |
 | Ảnh-0 | **Khóa runtime UI Game1** | Quét source Unity thật, khóa 8 binding bằng file+dòng+expression+SHA; validator ghim đúng tỷ lệ 1 direct/2 nhóm nút ba mảnh/5 overlay, canonical path trong `res/xN` và preflight tồn tại output staging. Có self-test + mutation bắt key/mode/path sai | `kh-assets` (chờ re-review/gộp) |
+| Ảnh-0-fix4 | **Đóng hai lỗi reviewer Task 3** | Fingerprint runtime không dùng `source_asset`, bắt đủ logical/future/physical/call-site/consumer; animation malformed name/slot trả mã `ASSET-ANIMATION-008` ổn định | `kh-assets` / `fix(asset): close runtime collision error contract` |
 | W1 | Web nền tảng | Đăng ký, đăng nhập, phiên cookie, dùng chung CSDL với game | `af5a2e4` |
 | W2 | Web tính năng | Trang cá nhân, đổi mật khẩu, bảng xếp hạng, panel admin (chặn quyền 3 lớp) | trên `main` |
 
@@ -459,3 +460,4 @@ Commit riêng cho việc cập nhật tài liệu thì dùng tiền tố `docs:`
 | 29/07/2026 | **Vertical slice Làng Lá — Task 0 khóa 8 runtime UI trên nhánh `kh-assets`.** Không sửa `D:\NRO_Project`: chỉ đọc Game1 và ghi bằng chứng file+dòng+expression+SHA vào `unity-runtime-key-map.json`. Phát hiện contract 1 source→1 key là sai thực tế, nên chốt 8 binding `direct|slice_group|overlay_required`; self-test cấm placeholder/key đoán/trùng key/lệch SHA/thiếu zoom/file runtime. Mutation đổi logo thành `/Logo/naruto-emblem.png` đỏ đúng vì call-site không tham chiếu. **Chờ review độc lập trước Task 1–3.** |
 | 29/07/2026 | **Sửa review Task 0 runtime UI.** Fixture nay đúng hẳn contract thật: logo direct; cả nút thường/nhấn đều đủ ba key trái–giữa–phải; năm overlay. Validator khóa mode theo từng source, tỷ lệ 1/2/5, scope chính xác `Assets/Scripts/Game1`; mọi physical path được `GetFullPath`, cấm `..`, bắt containment đúng `res/xN`. Thêm `-RequireFutureOutputs` để Task 5/preflight staging bắt thiếu file overlay tương lai. Mutation nút nhấn→overlay và path traversal đều đỏ đúng nguyên nhân. **Vẫn chờ re-review CLEAN, chưa làm Task 1–3.** |
 | 29/07/2026 | **Task 3 assetpack sửa theo review NEEDS WORK.** Build giờ bind part/tile-set/map-collision/skill/catalog và Small/tile/bg/Mob/HUD/UI/evidence; review đối chiếu source SHA thật + evidence SHA, manifest canonical chặn minimal/bool/ID lạ, lock có provenance và output không ghi đè. 56 test xanh; mutation collision/b03/schema/skill ID bắt đúng mã. **Known blocker:** toàn bộ 20 review ảnh hiện FAIL và mapping production chưa có build_inputs closure thật, nên build production dừng trước output. |
+| 29/07/2026 | **Task 3 fix4 trên `kh-assets`:** thêm hai reproduction reviewer; runtime collision fingerprint bỏ `source_asset` và gồm logical/future/physical/call-site/consumer; animation kiểm kiểu name/slot trước set/hash. **70/70 test xanh ×3, 2 reproduction xanh, compileall + diff check sạch; mutation thật bắt cả hai lỗi.** |

@@ -2,6 +2,7 @@ import hashlib
 import json
 import tempfile
 import unittest
+from copy import deepcopy
 from pathlib import Path
 
 from PIL import Image
@@ -317,6 +318,26 @@ class BuildContractTests(unittest.TestCase):
             manifest = self._complete_manifest(root)
             manifest["ui_bindings"][-1]["source_asset"] = manifest["ui_bindings"][0]["source_asset"]
             review = self._write_complete_review(root, manifest)
+            with self.assertRaisesRegex(BuildError, "ASSET-UI-007"):
+                build(manifest, root / "out", review, base_dir=root)
+            self.assertFalse((root / "out").exists())
+
+    def test_runtime_entry_3_copy_into_entry_4_is_a_collision_even_with_distinct_source_assets(self):
+        from assetpack.build import BuildError, build
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = self._complete_manifest(root)
+            runtime_map_path = root / manifest["build_inputs"]["runtime_key_map"]
+            runtime_map = json.loads(runtime_map_path.read_text(encoding="utf-8"))
+            source = runtime_map["entries"][3]
+            target = runtime_map["entries"][4]
+            for field in ("mode", "logical_keys", "future_logical_key", "physical_paths", "call_sites", "consumer_sites"):
+                target[field] = deepcopy(source[field])
+                manifest["ui_bindings"][4][field] = deepcopy(source[field])
+            runtime_map_path.write_text(json.dumps(runtime_map), encoding="utf-8")
+            review = self._write_complete_review(root, manifest)
+
             with self.assertRaisesRegex(BuildError, "ASSET-UI-007"):
                 build(manifest, root / "out", review, base_dir=root)
             self.assertFalse((root / "out").exists())

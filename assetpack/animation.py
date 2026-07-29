@@ -38,29 +38,36 @@ def validate_animation_closure(sheets, animations, *, check_paths=None, check_ce
     if not isinstance(sheets, list) or len(sheets) != len(REQUIRED_ANIMATION_SHEETS) or any(not isinstance(sheet, dict) for sheet in sheets):
         raise AnimationError("ASSET-ANIMATION-008: thiếu required animation_sheets closure")
     sheet_names = [sheet.get("name") for sheet in sheets]
+    if any(not isinstance(name, str) for name in sheet_names):
+        raise AnimationError("ASSET-ANIMATION-008: sheet name phải là chuỗi exact")
     if len(set(sheet_names)) != len(sheet_names) or set(sheet_names) != set(REQUIRED_ANIMATION_SHEETS):
         raise AnimationError("ASSET-ANIMATION-008: sheet name phải exact và duy nhất")
     if not isinstance(animations, list) or len(animations) != len(REQUIRED_ANIMATION_SHEETS) or any(not isinstance(item, dict) for item in animations):
         raise AnimationError("ASSET-ANIMATION-008: thiếu animation contract tương ứng")
     animation_names = [item.get("name") for item in animations]
+    if any(not isinstance(name, str) for name in animation_names):
+        raise AnimationError("ASSET-ANIMATION-008: animation name phải là chuỗi exact")
     if len(set(animation_names)) != len(animation_names) or set(animation_names) != set(REQUIRED_ANIMATION_SHEETS):
         raise AnimationError("ASSET-ANIMATION-008: animation name phải exact và duy nhất")
     by_animation = {item["name"]: item for item in animations}
     for sheet in sheets:
         name = sheet["name"]
         expected = REQUIRED_ANIMATION_SHEETS[name]
-        if sheet.get("slot_count") != expected["slot_count"] or tuple(sheet.get("cell_size", ())) != expected["cell_size"]:
+        cell_size = sheet.get("cell_size")
+        if not isinstance(cell_size, (list, tuple)) or tuple(cell_size) != expected["cell_size"]:
             raise AnimationError(f"ASSET-ANIMATION-008: {name} sai slot count/cell size")
         cells = sheet.get("cells")
         if not isinstance(cells, list) or len(cells) != expected["slot_count"]:
             raise AnimationError(f"ASSET-ANIMATION-008: {name} thiếu frame closure")
-        if {cell.get("slot_index") for cell in cells if isinstance(cell, dict)} != set(range(expected["slot_count"])):
+        cell_slots = [cell.get("slot_index") if isinstance(cell, dict) else None for cell in cells]
+        if any(not isinstance(slot, int) or isinstance(slot, bool) for slot in cell_slots) or set(cell_slots) != set(range(expected["slot_count"])):
             raise AnimationError(f"ASSET-ANIMATION-008: {name} slot không đủ/duy nhất")
         contract = by_animation[name]
         frames = contract.get("frames")
         if contract.get("slot_count", expected["slot_count"]) != expected["slot_count"] or not isinstance(frames, list) or len(frames) != expected["slot_count"]:
             raise AnimationError(f"ASSET-ANIMATION-008: {name} frame count contract sai")
-        if {frame.get("slot_index") for frame in frames if isinstance(frame, dict)} != set(range(expected["slot_count"])):
+        frame_slots = [frame.get("slot_index") if isinstance(frame, dict) else None for frame in frames]
+        if any(not isinstance(slot, int) or isinstance(slot, bool) for slot in frame_slots) or set(frame_slots) != set(range(expected["slot_count"])):
             raise AnimationError(f"ASSET-ANIMATION-008: {name} contract slot sai")
         for frame in frames:
             client_cf = frame.get("client_cf") if isinstance(frame, dict) else None

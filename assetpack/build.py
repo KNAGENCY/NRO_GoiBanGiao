@@ -186,25 +186,48 @@ def _runtime_key_map(manifest: dict[str, Any], base_dir: Path) -> tuple[dict[str
     _fail("ASSET-UI-007", "build_inputs.runtime_key_map là bắt buộc")
 
 
+_RUNTIME_BINDING_FINGERPRINT_FIELDS = (
+    "logical_keys",
+    "future_logical_key",
+    "physical_paths",
+    "call_sites",
+    "consumer_sites",
+)
+
+
+def _runtime_binding_fingerprint(binding: dict[str, Any]) -> str:
+    """Nhận diện contract runtime, không nhận diện theo tên file nguồn.
+
+    `source_asset` chỉ là nhãn provenance. Nếu đưa nó vào khóa duy nhất thì hai
+    binding cùng trỏ một runtime output có thể đổi nhãn để lọt qua collision gate.
+    """
+    return json.dumps(
+        {key: binding.get(key) for key in _RUNTIME_BINDING_FINGERPRINT_FIELDS},
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+
 def _validate_runtime_keys(manifest: dict[str, Any], base_dir: Path) -> tuple[str | None, str, dict[str, Any]]:
     payload, relative_path, map_sha = _runtime_key_map(manifest, base_dir)
     entries = payload.get("entries") if isinstance(payload, dict) else None
     bindings = manifest.get("ui_bindings")
     if not isinstance(entries, list) or len(entries) != 8 or not isinstance(bindings, list) or len(bindings) != 8:
         _fail("ASSET-UI-007", "runtime key map và manifest phải có đúng tám binding")
-    by_asset = {entry.get("source_asset"): entry for entry in entries if isinstance(entry, dict)}
+    for entry in entries:
+        if not isinstance(entry, dict) or not isinstance(entry.get("source_asset"), str) or not entry["source_asset"]:
+            _fail("ASSET-UI-007", "runtime entry thiếu source_asset hợp lệ")
+    by_asset = {entry["source_asset"]: entry for entry in entries}
     if len(by_asset) != 8:
         _fail("ASSET-UI-007", "runtime key map trùng/thiếu source_asset")
     binding_assets = [binding.get("source_asset") for binding in bindings if isinstance(binding, dict)]
+    if any(not isinstance(asset, str) or not asset for asset in binding_assets):
+        _fail("ASSET-UI-007", "manifest binding thiếu source_asset hợp lệ")
     if len(binding_assets) != 8 or len(set(binding_assets)) != 8 or set(binding_assets) != set(by_asset):
         _fail("ASSET-UI-007", "manifest phải bind exact tám source_asset duy nhất")
-    entry_fingerprints = []
-    for entry in entries:
-        if not isinstance(entry, dict):
-            _fail("ASSET-UI-007", "runtime entry malformed")
-        entry_fingerprints.append(json.dumps({key: entry.get(key) for key in ("source_asset", "logical_keys", "future_logical_key", "physical_paths")}, sort_keys=True, separators=(",", ":")))
+    entry_fingerprints = [_runtime_binding_fingerprint(entry) for entry in entries]
     if len(set(entry_fingerprints)) != 8:
-        _fail("ASSET-UI-007", "runtime logical/source/physical binding bị duplicate")
+        _fail("ASSET-UI-007", "runtime logical/source/physical/consumer binding bị duplicate")
     binding_fingerprints = []
     for binding in bindings:
         if not isinstance(binding, dict) or not isinstance(binding.get("source_asset"), str):
@@ -214,6 +237,9 @@ def _validate_runtime_keys(manifest: dict[str, Any], base_dir: Path) -> tuple[st
             _fail("ASSET-UI-007", f"binding chưa được bind vào runtime map: {binding['source_asset']}")
         for field in ("mode", "logical_keys", "future_logical_key", "physical_paths"):
             if binding.get(field) != entry.get(field):
+                _fail("ASSET-UI-007", f"{binding['source_asset']} lệch runtime contract ở {field}")
+        for field in ("call_sites", "consumer_sites"):
+            if field in binding and binding[field] != entry.get(field):
                 _fail("ASSET-UI-007", f"{binding['source_asset']} lệch runtime contract ở {field}")
         mode = binding.get("mode")
         call_sites = entry.get("call_sites")
@@ -244,11 +270,14 @@ def _validate_runtime_keys(manifest: dict[str, Any], base_dir: Path) -> tuple[st
                 normalized = path.replace("\\", "/") if isinstance(path, str) else ""
                 if not normalized.startswith(prefix) or ".." in Path(normalized).parts:
                     _fail("ASSET-UI-007", f"{binding['source_asset']} physical path không canonical")
-        binding_fingerprints.append(json.dumps({key: binding.get(key) for key in ("source_asset", "logical_keys", "future_logical_key", "physical_paths")}, sort_keys=True, separators=(",", ":")))
+        binding_contract = dict(binding)
+        binding_contract.setdefault("call_sites", call_sites)
+        binding_contract.setdefault("consumer_sites", consumer_sites)
+        binding_fingerprints.append(_runtime_binding_fingerprint(binding_contract))
         if mode == "overlay_required" and any(binding["future_logical_key"] not in site["expression"] for site in consumer_sites):
             _fail("ASSET-UI-007", f"{binding['source_asset']} consumer precondition thiếu future logical key")
     if len(set(binding_fingerprints)) != 8:
-        _fail("ASSET-UI-007", "manifest logical/source/physical binding bị duplicate")
+        _fail("ASSET-UI-007", "manifest logical/source/physical/consumer binding bị duplicate")
     return relative_path, map_sha, payload
 
 

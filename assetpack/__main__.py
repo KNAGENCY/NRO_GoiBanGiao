@@ -20,6 +20,7 @@ def main(argv=None):
     build_command = commands.add_parser("build")
     build_command.add_argument("--manifest", type=Path, required=True)
     build_command.add_argument("--slice", required=True)
+    build_command.add_argument("--base-dir", type=Path)
     build_command.add_argument("--out", type=Path, required=True)
     build_command.add_argument("--review", type=Path, required=True)
     args = parser.parse_args(argv)
@@ -59,7 +60,7 @@ def main(argv=None):
             manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
             if manifest.get("phase", {}).get("name", manifest.get("slice")) != args.slice:
                 raise BuildError("ASSET-BUILD-011: slice không khớp manifest")
-            build(manifest, args.out, args.review, base_dir=args.manifest.parent)
+            build(manifest, args.out, args.review, base_dir=args.base_dir or args.manifest.parent)
         except (BuildError, OSError, json.JSONDecodeError) as error:
             print(error, file=sys.stderr)
             return 1

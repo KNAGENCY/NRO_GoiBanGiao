@@ -137,13 +137,19 @@ def _validate_runtime_map(runtime_map: dict[str, Any]) -> None:
         _fail("ASSET-UI-007", "runtime key map source_asset phai exact 8 va duy nhat")
 
 
-def validate_reviewed_sources(manifest: dict[str, Any], review_document: dict[str, Any]) -> None:
+def validate_reviewed_sources(
+    manifest: dict[str, Any],
+    review_document: dict[str, Any],
+    *,
+    base_dir: Path | None = None,
+) -> None:
     """Reject a new manifest source unless its exact basename is reviewed."""
-    reviewed = {
-        Path(item.get("asset", "")).name
+    reviewed_by_name = {
+        Path(item.get("asset", "")).name: item
         for item in review_document.get("assets", [])
         if isinstance(item, dict) and isinstance(item.get("asset"), str)
     }
+    reviewed = set(reviewed_by_name)
     sources = {
         Path(sprite.get("source_path", "")).name
         for sprite in manifest.get("sprites", [])
@@ -151,6 +157,24 @@ def validate_reviewed_sources(manifest: dict[str, Any], review_document: dict[st
     }
     if not sources or not sources.issubset(reviewed):
         _fail("ASSET-REVIEW-010", f"manifest source chua co trong exact reviewed set: {sorted(sources - reviewed)}")
+    if base_dir is None:
+        return
+    base_dir = Path(base_dir).resolve()
+    for sprite in manifest.get("sprites", []):
+        relative = sprite.get("source_path")
+        if not isinstance(relative, str) or not relative or Path(relative).is_absolute():
+            _fail("ASSET-REVIEW-010", f"source path không canonical: {relative!r}")
+        source = (base_dir / relative).resolve()
+        try:
+            source.relative_to(base_dir)
+        except ValueError:
+            _fail("ASSET-REVIEW-010", f"source path vượt build base: {relative}")
+        if not source.is_file():
+            _fail("ASSET-REVIEW-010", f"thiếu source đã review: {relative}")
+        digest = hashlib.sha256(source.read_bytes()).hexdigest()
+        reviewed_item = reviewed_by_name.get(source.name)
+        if reviewed_item is None or digest != sprite.get("source_sha256") or digest != reviewed_item.get("source_sha256"):
+            _fail("ASSET-REVIEW-010", f"source SHA không khớp review: {relative}")
 
 
 def validate_bind_records(
@@ -315,7 +339,7 @@ def bind_manifest(
         _fail("ASSET-REVIEW-GATE-001", str(error))
     manifest = _read_json(Path(mapping))
     runtime = _read_json(Path(runtime_map))
-    validate_reviewed_sources(manifest, review_document)
+    validate_reviewed_sources(manifest, review_document, base_dir=art_root)
     records = _review_records(review_document)
     validate_bind_records(records, review_document=review_document, runtime_map=runtime)
     manifest.setdefault("build_inputs", {})

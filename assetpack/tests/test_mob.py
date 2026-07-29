@@ -32,6 +32,47 @@ GOLDEN_TRAILER = [0, 0]
 
 
 class MobContractTests(unittest.TestCase):
+    def test_encoder_builds_deterministic_round_trip_from_naruto_manifest(self):
+        from assetpack.mob import encode_mob, parse_mob
+
+        images = [
+            {"id": index, "x": index * 24, "y": 0, "w": 24, "h": 24}
+            for index in range(10)
+        ]
+        flat_frames = [[[-12, -24, index]] for index in range(10)]
+        mob = {
+            "id": 0,
+            "payload_mode": "generated",
+            "images": images,
+            "frames": {
+                "idle": flat_frames[:2],
+                "run": flat_frames[2:6],
+                "pounce": flat_frames[6:8],
+                "hit": flat_frames[8:9],
+                "death": flat_frames[9:],
+            },
+            "arr_frames": [],
+            "trailer": [0, 0],
+        }
+
+        first = encode_mob(mob)
+        second = encode_mob(mob)
+
+        self.assertEqual(first, second)
+        self.assertEqual(
+            parse_mob(first),
+            {
+                "images": images,
+                "frames": flat_frames,
+                "arr_frames": [],
+                "trailer": [0, 0],
+            },
+        )
+        self.assertNotEqual(
+            hashlib.sha256(first).hexdigest(),
+            hashlib.sha256(FIXTURE.read_bytes()).hexdigest(),
+        )
+
     def test_real_effectdata_fixture_matches_legacy_read_data_contract(self):
         from assetpack.mob import parse_mob
 

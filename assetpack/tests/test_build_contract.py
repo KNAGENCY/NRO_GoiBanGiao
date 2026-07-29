@@ -283,6 +283,71 @@ class BuildContractTests(unittest.TestCase):
                 build(manifest, root / "out", review, base_dir=root)
             self.assertFalse((root / "out").exists())
 
+    def test_build_generates_production_mob_payload_without_legacy_fixture(self):
+        from assetpack.build import build
+        from assetpack.mob import parse_mob
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = self._complete_manifest(root)
+            mob = manifest["build_inputs"]["mob"]
+            mob["payload_mode"] = "generated"
+            for key in ("bytes_path", "data_path", "bytes_sha256", "data_sha256"):
+                del mob[key]
+            review = self._write_complete_review(root, manifest)
+
+            out = root / "out"
+            build(manifest, out, review, base_dir=root)
+
+            generated_bytes = (out / "client/Mob/0.bytes").read_bytes()
+            generated_data = (out / "client/Mob/0/data.bytes").read_bytes()
+            self.assertEqual(generated_bytes, generated_data)
+            parsed = parse_mob(generated_bytes)
+            self.assertEqual(
+                parsed["frames"],
+                [frame for action in ("idle", "run", "pounce", "hit", "death") for frame in mob["frames"][action]],
+            )
+
+    def test_ui_binding_uses_zoom_specific_sources(self):
+        from assetpack.build import build
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = self._complete_manifest(root)
+            expected = {}
+            for binding_index, binding in enumerate(manifest["ui_bindings"]):
+                sources = {}
+                for zoom_index, zoom in enumerate(("x1", "x2", "x3", "x4"), start=1):
+                    path = root / "inputs" / f"ui-{binding_index}-{zoom}.png"
+                    Image.new("RGBA", (zoom_index, zoom_index), (12, 34, 56, 255)).save(path)
+                    sources[zoom] = f"inputs/{path.name}"
+                binding["sources"] = sources
+                expected[binding["source_asset"]] = sources
+            review = self._write_complete_review(root, manifest)
+
+            out = root / "out"
+            build(manifest, out, review, base_dir=root)
+
+            first = manifest["ui_bindings"][0]
+            for zoom_index, zoom in enumerate(("x1", "x2", "x3", "x4"), start=1):
+                physical = first["physical_paths"][zoom][0].replace("\\", "/")
+                marker = f"Assets/Resources/res/{zoom}/"
+                relative = physical.split(marker, 1)[1]
+                with Image.open(out / "client" / zoom / relative) as image:
+                    self.assertEqual(image.size, (zoom_index, zoom_index))
+
+    def test_production_source_base_requires_complete_input_sha_closure(self):
+        from assetpack.build import BuildError, build
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = self._complete_manifest(root)
+            manifest["build_inputs"]["source_base"] = "."
+            review = self._write_complete_review(root, manifest)
+
+            with self.assertRaisesRegex(BuildError, "ASSET-PROVENANCE-014"):
+                build(manifest, root / "out", review, base_dir=root)
+
     def test_animation_build_requires_all_canonical_sheets(self):
         from assetpack.build import BuildError, build
 

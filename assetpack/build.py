@@ -22,7 +22,7 @@ from .animation import AnimationError, compose_action_sheet, validate_animation_
 from .catalog import encode_catalog, validate_catalog
 from .lock import lock_bytes
 from .map import MapError, encode_collision, validate_collision_semantics, validate_tileset_baseline
-from .mob import validate_mob_golden
+from .mob import MobError, encode_mob, validate_mob_golden
 from .part import build_part, parse_part
 from .skill import encode_skill
 from .visual import render_full_map, render_tile_contact_sheet
@@ -253,7 +253,34 @@ def _source_paths(manifest: dict[str, Any]) -> list[str]:
     for binding in manifest.get("ui_bindings", []):
         if binding.get("source_path"):
             paths.append(binding["source_path"])
+        if isinstance(binding.get("sources"), dict):
+            paths.extend(binding["sources"].values())
+    snapshots = inputs.get("runtime_source_snapshots")
+    if isinstance(snapshots, dict):
+        paths.extend(snapshots.values())
     return sorted({path for path in paths if isinstance(path, str)})
+
+
+def _validate_production_closure(manifest: dict[str, Any], base_dir: Path) -> None:
+    """Khóa byte của mọi input production; review mỹ thuật chỉ khóa raw source."""
+    inputs = manifest.get("build_inputs")
+    closure = inputs.get("production_closure_sha256") if isinstance(inputs, dict) else None
+    expected_paths = set(_source_paths(manifest))
+    if (
+        not isinstance(closure, dict)
+        or set(closure) != expected_paths
+        or any(
+            not isinstance(digest, str)
+            or len(digest) != 64
+            or any(char not in "0123456789abcdef" for char in digest)
+            for digest in closure.values()
+        )
+    ):
+        _fail("ASSET-PROVENANCE-014", "production_closure_sha256 thiếu/thừa input")
+    for relative, expected_sha in closure.items():
+        source = _path(base_dir, relative, "ASSET-PROVENANCE-014")
+        if not source.is_file() or _sha(source) != expected_sha:
+            _fail("ASSET-PROVENANCE-014", f"SHA production input lệch: {relative}")
 
 
 def _runtime_key_map(manifest: dict[str, Any], base_dir: Path) -> tuple[dict[str, Any], str | None, str]:
@@ -382,7 +409,9 @@ def _validate_runtime_keys(manifest: dict[str, Any], base_dir: Path) -> tuple[st
         for site in [*call_sites, *consumer_sites]:
             if not isinstance(site, dict) or not isinstance(site.get("file"), str) or not isinstance(site.get("expression"), str) or not isinstance(site.get("line"), int) or isinstance(site.get("line"), bool):
                 _fail("ASSET-UI-007", f"{binding['source_asset']} site malformed")
-            source = _path(base_dir, site["file"], "ASSET-UI-007")
+            snapshots = manifest.get("build_inputs", {}).get("runtime_source_snapshots", {})
+            snapshot = snapshots.get(site["file"]) if isinstance(snapshots, dict) else None
+            source = _path(base_dir, snapshot or site["file"], "ASSET-UI-007")
             if not source.is_file() or not isinstance(site.get("file_sha256"), str) or _sha(source) != site["file_sha256"]:
                 _fail("ASSET-UI-007", f"{binding['source_asset']} SHA site/precondition không khớp")
             expressions.append(site["expression"])
@@ -420,11 +449,17 @@ def require_approved_review(review_path: Path, manifest: dict[str, Any], base_di
         for relative in sprite.get("zooms", {}).values()
         if isinstance(relative, str)
     }
+    production = isinstance(manifest.get("build_inputs"), dict) and "source_base" in manifest["build_inputs"]
+    reviewed_source_paths = {
+        sprite.get("source_path")
+        for sprite in manifest.get("sprites", [])
+        if isinstance(sprite, dict) and isinstance(sprite.get("source_path"), str)
+    }
     for relative in _source_paths(manifest):
         source = _path(base_dir, relative, "ASSET-REVIEW-010")
         if not source.is_file():
             _fail("ASSET-REVIEW-010", f"thiếu source đã review: {relative}")
-        if relative in derived_sprite_paths:
+        if relative in derived_sprite_paths or (production and relative not in reviewed_source_paths):
             continue
         entry = by_name.get(source.name)
         if entry is None or entry["source_sha256"] != _sha(source):
@@ -492,10 +527,16 @@ def _schema(manifest: dict[str, Any]) -> None:
     if not isinstance(inputs.get("tile_set_baseline"), dict):
         _fail("ASSET-TILESET-010", "thiếu tile-set baseline golden")
     mob = inputs.get("mob")
+    generated_mob = isinstance(mob, dict) and mob.get("payload_mode") == "generated"
     if (
         not isinstance(mob, dict)
-        or not isinstance(mob.get("bytes_path"), str)
-        or not isinstance(mob.get("data_path"), str)
+        or (
+            not generated_mob
+            and (
+                not isinstance(mob.get("bytes_path"), str)
+                or not isinstance(mob.get("data_path"), str)
+            )
+        )
         or not isinstance(mob.get("img"), dict)
         or set(mob["img"]) != set(ZOOMS)
         or any(not isinstance(mob["img"][zoom], str) for zoom in ZOOMS)
@@ -560,6 +601,13 @@ def _schema(manifest: dict[str, Any]) -> None:
             _fail("ASSET-UI-007", "direct/slice_group phải dùng logical key thật")
         if set(binding.get("physical_paths", {})) != set(ZOOMS):
             _fail("ASSET-UI-007", "UI binding thiếu physical path x1..x4")
+        sources = binding.get("sources")
+        if sources is not None and (
+            not isinstance(sources, dict)
+            or set(sources) != set(ZOOMS)
+            or any(not isinstance(sources[zoom], str) for zoom in ZOOMS)
+        ):
+            _fail("ASSET-UI-007", "UI binding sources thiếu x1..x4")
     try:
         validate_catalog(manifest["catalog"])
     except ValueError as error:
@@ -681,19 +729,31 @@ def _build_into(manifest: dict[str, Any], base_dir: Path, root: Path) -> dict[st
             _copy(base_dir, sources[zoom], client / zoom / "mainImage" / f"{name}.png", png=True)
 
     mob = inputs["mob"]
-    mob_bytes_path = _path(base_dir, mob["bytes_path"], "ASSET-MOB-003")
-    mob_data_path = _path(base_dir, mob["data_path"], "ASSET-MOB-003")
-    if not mob_bytes_path.is_file() or not mob_data_path.is_file():
-        _fail("ASSET-MOB-003", "thiếu Mob bytes/data payload")
-    try:
-        validate_mob_golden(mob, mob_bytes_path.read_bytes(), mob_data_path.read_bytes())
-    except ValueError as error:
-        _fail("ASSET-MOB-003", str(error))
     mob_id = _int(mob.get("id"), "ASSET-MOB-003", "mob.id")
-    mob_bytes = _copy(base_dir, mob["bytes_path"], client / "Mob" / f"{mob_id}.bytes")
-    mob_data = _copy(base_dir, mob["data_path"], client / "Mob" / f"{mob_id}" / "data.bytes")
-    if mob_bytes["sha256"] != mob["bytes_sha256"] or mob_data["sha256"] != mob["data_sha256"]:
-        _fail("ASSET-MOB-003", "Mob golden SHA không khớp artifact")
+    if mob.get("payload_mode") == "generated":
+        try:
+            mob_payload = encode_mob(mob)
+        except MobError as error:
+            _fail("ASSET-MOB-003", str(error))
+        mob_bytes_target = client / "Mob" / f"{mob_id}.bytes"
+        mob_data_target = client / "Mob" / f"{mob_id}" / "data.bytes"
+        mob_bytes_target.parent.mkdir(parents=True, exist_ok=True)
+        mob_data_target.parent.mkdir(parents=True, exist_ok=True)
+        mob_bytes_target.write_bytes(mob_payload)
+        mob_data_target.write_bytes(mob_payload)
+    else:
+        mob_bytes_path = _path(base_dir, mob["bytes_path"], "ASSET-MOB-003")
+        mob_data_path = _path(base_dir, mob["data_path"], "ASSET-MOB-003")
+        if not mob_bytes_path.is_file() or not mob_data_path.is_file():
+            _fail("ASSET-MOB-003", "thiếu Mob bytes/data payload")
+        try:
+            validate_mob_golden(mob, mob_bytes_path.read_bytes(), mob_data_path.read_bytes())
+        except ValueError as error:
+            _fail("ASSET-MOB-003", str(error))
+        mob_bytes = _copy(base_dir, mob["bytes_path"], client / "Mob" / f"{mob_id}.bytes")
+        mob_data = _copy(base_dir, mob["data_path"], client / "Mob" / f"{mob_id}" / "data.bytes")
+        if mob_bytes["sha256"] != mob["bytes_sha256"] or mob_data["sha256"] != mob["data_sha256"]:
+            _fail("ASSET-MOB-003", "Mob golden SHA không khớp artifact")
     for zoom in ZOOMS:
         _copy(base_dir, mob["img"][zoom], client / zoom / "Mob" / str(mob_id) / "img.png", png=True)
 
@@ -702,6 +762,10 @@ def _build_into(manifest: dict[str, Any], base_dir: Path, root: Path) -> dict[st
         if not isinstance(source_path, str):
             _fail("ASSET-UI-007", "UI binding thiếu source_path")
         for zoom in ZOOMS:
+            zoom_sources = binding.get("sources")
+            zoom_source = zoom_sources.get(zoom) if isinstance(zoom_sources, dict) else source_path
+            if not isinstance(zoom_source, str):
+                _fail("ASSET-UI-007", f"UI binding thiếu source {zoom}")
             paths = binding.get("physical_paths", {}).get(zoom, [])
             if not paths:
                 _fail("ASSET-UI-007", f"UI binding thiếu physical path {zoom}")
@@ -710,7 +774,7 @@ def _build_into(manifest: dict[str, Any], base_dir: Path, root: Path) -> dict[st
                 marker = f"res/{zoom}/"
                 if marker in normalized:
                     normalized = normalized.split(marker, 1)[1]
-                _copy(base_dir, source_path, client / zoom / normalized, png=True)
+                _copy(base_dir, zoom_source, client / zoom / normalized, png=True)
 
     mymap = bytes([width, height, *indexes])
     (client / "mymap" / "1.bytes").parent.mkdir(parents=True, exist_ok=True)
@@ -754,6 +818,7 @@ def build(manifest: dict, out: Path, review_path: Path, *, base_dir: Path | None
     base_dir = Path(base_dir or Path.cwd()).resolve()
     if isinstance(manifest.get("build_inputs"), dict) and "source_base" in manifest["build_inputs"]:
         base_dir = resolve_manifest_base(Path("<manifest>"), manifest, base_dir=base_dir)
+        _validate_production_closure(manifest, base_dir)
     review_sha, evidence = require_approved_review(review_path, manifest, base_dir)
     _schema(manifest)
     runtime_key_map_path, runtime_key_map_sha, runtime_key_map = _validate_runtime_keys(manifest, base_dir)

@@ -1,5 +1,7 @@
 """Parser strict cho binary ``EffectData.readData`` của client Unity legacy."""
 
+import struct
+
 
 class MobError(ValueError):
     pass
@@ -117,6 +119,84 @@ def _expected_frames(mob: dict) -> list[list[list[int]]]:
                     raise MobError("ASSET-MOB-003: golden frame payload malformed")
         flattened.extend(value)
     return flattened
+
+
+def encode_mob(mob: dict) -> bytes:
+    """Sinh payload EffectData trực tiếp từ golden Sói Rừng trong manifest."""
+    if not isinstance(mob, dict) or mob.get("payload_mode") != "generated":
+        raise MobError("ASSET-MOB-003: production Mob phải khai payload_mode generated")
+    images = mob.get("images")
+    if not isinstance(images, list) or not 1 <= len(images) <= 127:
+        raise MobError("ASSET-MOB-003: image golden malformed")
+    output = bytearray(struct.pack("b", len(images)))
+    image_ids = set()
+    for image in images:
+        if not isinstance(image, dict):
+            raise MobError("ASSET-MOB-003: image golden malformed")
+        values = [image.get(key) for key in ("id", "x", "y", "w", "h")]
+        image_id, x, y, width, height = values
+        if (
+            any(not isinstance(value, int) or isinstance(value, bool) for value in values)
+            or not 0 <= image_id <= 127
+            or image_id in image_ids
+            or not 0 <= x <= 255
+            or not 0 <= y <= 255
+            or not 1 <= width <= 255
+            or not 1 <= height <= 255
+        ):
+            raise MobError("ASSET-MOB-003: image golden malformed")
+        image_ids.add(image_id)
+        output.extend(struct.pack(">bBBBB", image_id, x, y, width, height))
+
+    frames = _expected_frames(mob)
+    if not 1 <= len(frames) <= 32767:
+        raise MobError("ASSET-MOB-003: frame golden malformed")
+    output.extend(struct.pack(">h", len(frames)))
+    for frame in frames:
+        if not 1 <= len(frame) <= 127:
+            raise MobError("ASSET-MOB-003: frame golden malformed")
+        output.extend(struct.pack("b", len(frame)))
+        for dx, dy, image_id in frame:
+            if image_id not in image_ids:
+                raise MobError("ASSET-MOB-003: frame image reference malformed")
+            output.extend(struct.pack(">hhb", dx, dy, image_id))
+
+    arr_frames = mob.get("arr_frames")
+    trailer = mob.get("trailer")
+    if (
+        not isinstance(arr_frames, list)
+        or len(arr_frames) > 32767
+        or any(
+            not isinstance(value, int)
+            or isinstance(value, bool)
+            or not -32768 <= value <= 32767
+            for value in arr_frames
+        )
+        or not isinstance(trailer, list)
+        or len(trailer) != 2
+        or any(
+            not isinstance(value, int)
+            or isinstance(value, bool)
+            or not 0 <= value <= 255
+            for value in trailer
+        )
+    ):
+        raise MobError("ASSET-MOB-003: arrFrame/trailer golden malformed")
+    output.extend(struct.pack(">h", len(arr_frames)))
+    for value in arr_frames:
+        output.extend(struct.pack(">h", value))
+    output.extend(bytes(trailer))
+    payload = bytes(output)
+    parsed = parse_mob(payload)
+    expected = {
+        "images": images,
+        "frames": frames,
+        "arr_frames": arr_frames,
+        "trailer": trailer,
+    }
+    if parsed != expected:
+        raise MobError("ASSET-MOB-003: encoder không round-trip golden")
+    return payload
 
 
 def validate_mob_golden(mob: dict, bytes_payload: bytes | None = None, data_payload: bytes | None = None) -> None:

@@ -96,21 +96,85 @@ def _reviewed_assets(review: dict[str, Any], source_root: Path) -> dict[str, dic
     return records
 
 
-def _crop_rect(sprite: dict[str, Any], review: dict[str, Any]) -> list[int]:
+def _crop_rect(sprite: dict[str, Any], source_size: list[int]) -> list[int]:
     crop = sprite.get("crop")
-    if isinstance(crop, dict) and isinstance(crop.get("source_rect"), list):
-        rect = crop["source_rect"]
-    else:
-        boxes = review.get("checks", {}).get("crop", {}).get("content_boxes", [])
-        if not boxes:
-            _fail("ASSET-ART-001", f"thiếu crop: {sprite.get('id')}")
-        left, top, right, bottom = boxes[0]
-        rect = [left, top, right - left, bottom - top]
+    if not isinstance(crop, dict) or not isinstance(crop.get("source_rect"), list):
+        _fail("ASSET-ART-004", f"sprite {sprite.get('id')} thiếu explicit crop")
+    rect = crop["source_rect"]
     if len(rect) != 4 or any(not isinstance(value, int) or isinstance(value, bool) for value in rect):
-        _fail("ASSET-ART-001", f"crop malformed: {sprite.get('id')}")
+        _fail("ASSET-ART-004", f"sprite {sprite.get('id')} crop malformed")
+    if rect[0] < 0 or rect[1] < 0:
+        _fail("ASSET-ART-004", f"sprite {sprite.get('id')} negative crop")
     if rect[2] <= 0 or rect[3] <= 0:
-        _fail("ASSET-ART-001", f"crop rỗng: {sprite.get('id')}")
+        _fail("ASSET-ART-004", f"sprite {sprite.get('id')} empty crop")
+    if (
+        len(source_size) != 2
+        or rect[0] + rect[2] > source_size[0]
+        or rect[1] + rect[3] > source_size[1]
+    ):
+        _fail("ASSET-ART-004", f"sprite {sprite.get('id')} crop outside source canvas")
     return rect
+
+
+def _alpha_rect(
+    sprite: dict[str, Any],
+    rect: list[int],
+    crop_report: dict[str, Any],
+    alpha_size: tuple[int, int],
+) -> list[int]:
+    """Convert a source-sheet rect into the reviewed derived-alpha space."""
+    source_size = crop_report.get("source_size")
+    edges = crop_report.get("source_edges")
+    boxes = crop_report.get("content_boxes")
+    cell_size = crop_report.get("output_cell_size")
+    if (
+        not isinstance(source_size, list)
+        or not isinstance(edges, list)
+        or not isinstance(boxes, list)
+        or not isinstance(cell_size, list)
+        or len(source_size) != 2
+        or len(edges) < 2
+        or len(boxes) != len(edges) - 1
+        or len(cell_size) != 2
+    ):
+        _fail("ASSET-ART-004", f"sprite {sprite.get('id')} crop coordinate evidence malformed")
+
+    source_left, source_top, width, height = rect
+    source_right, source_bottom = source_left + width, source_top + height
+    frame_index = None
+    for index, (left, right) in enumerate(zip(edges, edges[1:])):
+        if source_left >= left and source_right <= right:
+            frame_index = index
+            break
+    if frame_index is None:
+        _fail("ASSET-ART-004", f"sprite {sprite.get('id')} crop crosses source frame boundary")
+
+    box = boxes[frame_index]
+    if (
+        not isinstance(box, list)
+        or len(box) != 4
+        or any(not isinstance(value, int) or isinstance(value, bool) for value in box)
+    ):
+        _fail("ASSET-ART-004", f"sprite {sprite.get('id')} alpha content box malformed")
+    box_left, box_top, box_right, box_bottom = box
+    alpha_rect = [
+        frame_index * cell_size[0] + source_left - edges[frame_index] - box_left,
+        source_top - box_top,
+        width,
+        height,
+    ]
+    if (
+        alpha_rect[0] < 0
+        or alpha_rect[1] < 0
+        or alpha_rect[2] <= 0
+        or alpha_rect[3] <= 0
+        or alpha_rect[0] + alpha_rect[2] > alpha_size[0]
+        or alpha_rect[1] + alpha_rect[3] > alpha_size[1]
+        or box_right <= box_left
+        or box_bottom <= box_top
+    ):
+        _fail("ASSET-ART-004", f"sprite {sprite.get('id')} crop outside alpha evidence")
+    return alpha_rect
 
 
 def _save_zoom(image: Image.Image, path: Path, root: Path, factor: float) -> dict[str, Any]:
@@ -219,22 +283,73 @@ def generate_vertical_slice(
     if not isinstance(sprites, list) or not sprites:
         _fail("ASSET-ART-002", "mapping thiếu sprites[]")
 
-    for sprite in sprites:
-        source_name = Path(sprite.get("source_path", "")).name
-        record = reviewed.get(source_name)
-        if record is None:
-            _fail("ASSET-ART-002", f"sprite chưa có source review: {source_name}")
-        alpha_path = _resolve_evidence_path(source_root, record["evidence"]["alpha"]["path"])
-        with Image.open(alpha_path) as alpha_image:
-            alpha_size = alpha_image.size
-        rect = _crop_rect(sprite, record)
-        if rect[0] + rect[2] > alpha_size[0] or rect[1] + rect[3] > alpha_size[1]:
-            _fail("ASSET-ART-004", f"mapping crop không nằm trong alpha evidence: sprite {sprite.get('id')}")
-    _fail("ASSET-ART-004", "mapping đã kiểm tra nhưng chưa có sprite binding provenance")
+    parent = output_root.parent
+    parent.mkdir(parents=True, exist_ok=True)
+    temporary = Path(tempfile.mkdtemp(prefix=f".{output_root.name}.", dir=parent))
+    try:
+        index: dict[str, Any] = {
+            "schema_version": 1,
+            "sprite_count": len(sprites),
+            "mapping_sha256": _sha(Path(mapping_path)),
+            "review_id": review.get("review_id"),
+            "sprites": {},
+        }
+        for sprite in sprites:
+            if not isinstance(sprite, dict) or not isinstance(sprite.get("id"), int):
+                _fail("ASSET-ART-004", "sprite record malformed")
+            source_path = sprite.get("source_path")
+            source_name = Path(source_path).name if isinstance(source_path, str) else ""
+            record = reviewed.get(source_name)
+            if record is None:
+                _fail("ASSET-ART-002", f"sprite chưa có source review: {source_name}")
+            crop_report = record["checks"]["crop"]
+            source_size = crop_report["source_size"]
+            if sprite.get("source_dimensions") not in (None, source_size):
+                _fail("ASSET-ART-004", f"sprite {sprite['id']} source canvas mismatch")
+            if sprite.get("source_sha256") != record.get("source_sha256"):
+                _fail("ASSET-ART-004", f"sprite {sprite['id']} source SHA mismatch")
+            rect = _crop_rect(sprite, source_size)
+            alpha_path = _resolve_evidence_path(source_root, record["evidence"]["alpha"]["path"])
+            with Image.open(alpha_path) as alpha_image:
+                alpha = alpha_image.convert("RGBA")
+            expected_alpha_size = crop_report.get("output_canvas_size")
+            if list(alpha.size) != expected_alpha_size:
+                _fail("ASSET-ART-004", f"sprite {sprite['id']} alpha canvas mismatch")
+            alpha_rect = _alpha_rect(sprite, rect, crop_report, alpha.size)
+            cropped = alpha.crop((
+                alpha_rect[0],
+                alpha_rect[1],
+                alpha_rect[0] + alpha_rect[2],
+                alpha_rect[1] + alpha_rect[3],
+            ))
+            stem = str(sprite["id"])
+            zooms = {}
+            for zoom in ZOOMS:
+                path = temporary / "sprites" / stem / zoom / "sprite.png"
+                zooms[zoom] = _save_zoom(cropped, path, temporary, ZOOM_FACTORS[zoom])
+            index["sprites"][str(sprite["id"])] = {
+                "source_path": source_path,
+                "source_sha256": record["source_sha256"],
+                "source_rect": rect,
+                "alpha_evidence_path": record["evidence"]["alpha"]["path"],
+                "alpha_evidence_sha256": record["evidence"]["alpha"]["sha256"],
+                "alpha_rect": alpha_rect,
+                "zooms": zooms,
+            }
+        (temporary / "generated-index.json").write_text(
+            json.dumps(index, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        temporary.replace(output_root)
+        return index
+    except Exception:
+        shutil.rmtree(temporary, ignore_errors=True)
+        raise
 
 
 def main() -> int:
     import argparse
+    import sys
 
     parser = argparse.ArgumentParser(description="Sinh PNG zoom deterministic cho vertical slice")
     parser.add_argument("--mapping", type=Path, required=True)
@@ -245,7 +360,7 @@ def main() -> int:
     try:
         result = generate_vertical_slice(args.mapping, args.review, args.source_root, args.output)
     except (GenerationError, OSError, json.JSONDecodeError) as error:
-        print(error)
+        print(error, file=sys.stderr)
         return 1
     print(json.dumps({"sprite_count": result["sprite_count"], "output": str(args.output)}))
     return 0

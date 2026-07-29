@@ -1,5 +1,8 @@
 import hashlib
 import json
+from copy import deepcopy
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -14,6 +17,16 @@ SOURCE_ROOT = Path(r"D:\NRO_GoiBanGiao\docs\my-thuat\anh-nguon\vertical-slice-v1
 
 
 class VerticalSliceGeneratorTests(unittest.TestCase):
+    def _single_sprite_mapping(self, sprite_id=27078):
+        mapping = json.loads(MAPPING.read_text(encoding="utf-8"))
+        sprite = next(item for item in mapping["sprites"] if item["id"] == sprite_id)
+        return {"sprites": [deepcopy(sprite)]}
+
+    def _write_mapping(self, root, mapping):
+        path = root / "mapping.json"
+        path.write_text(json.dumps(mapping), encoding="utf-8")
+        return path
+
     def test_generates_real_four_zoom_outputs_and_provenance_for_all_reviewed_assets(self):
         from tools.artqa.generate_vertical_slice import generate_reviewed_assets
 
@@ -84,8 +97,75 @@ class VerticalSliceGeneratorTests(unittest.TestCase):
         from tools.artqa.generate_vertical_slice import GenerationError, generate_vertical_slice
 
         with tempfile.TemporaryDirectory() as temporary:
-            with self.assertRaisesRegex(GenerationError, "ASSET-ART-004.*27043"):
+            with self.assertRaisesRegex(GenerationError, "ASSET-ART-004.*27041"):
                 generate_vertical_slice(MAPPING, REVIEW, SOURCE_ROOT, Path(temporary) / "generated")
+
+    def test_missing_sprite_crop_27078_is_not_replaced_by_a_content_box(self):
+        from tools.artqa.generate_vertical_slice import GenerationError, generate_vertical_slice
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            mapping = self._single_sprite_mapping()
+            mapping_path = self._write_mapping(root, mapping)
+            with self.assertRaisesRegex(GenerationError, "ASSET-ART-004.*27078.*explicit crop"):
+                generate_vertical_slice(mapping_path, REVIEW, SOURCE_ROOT, root / "generated")
+
+    def test_negative_source_crop_is_rejected_before_coordinate_conversion(self):
+        from tools.artqa.generate_vertical_slice import GenerationError, generate_vertical_slice
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            mapping = self._single_sprite_mapping()
+            mapping["sprites"][0]["crop"] = {"source_rect": [-1, 0, 2, 2]}
+            mapping_path = self._write_mapping(root, mapping)
+            with self.assertRaisesRegex(GenerationError, "ASSET-ART-004.*27078.*negative crop"):
+                generate_vertical_slice(mapping_path, REVIEW, SOURCE_ROOT, root / "generated")
+
+    def test_source_crop_outside_source_canvas_is_rejected_before_alpha_conversion(self):
+        from tools.artqa.generate_vertical_slice import GenerationError, generate_vertical_slice
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            mapping = self._single_sprite_mapping()
+            mapping["sprites"][0]["crop"] = {"source_rect": [1253, 0, 2, 2]}
+            mapping_path = self._write_mapping(root, mapping)
+            with self.assertRaisesRegex(GenerationError, "ASSET-ART-004.*27078.*source canvas"):
+                generate_vertical_slice(mapping_path, REVIEW, SOURCE_ROOT, root / "generated")
+
+    def test_source_crop_must_fit_derived_alpha_after_explicit_coordinate_conversion(self):
+        from tools.artqa.generate_vertical_slice import GenerationError, generate_vertical_slice
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            mapping = self._single_sprite_mapping()
+            mapping["sprites"][0]["crop"] = {"source_rect": [0, 0, 1, 1]}
+            mapping_path = self._write_mapping(root, mapping)
+            with self.assertRaisesRegex(GenerationError, "ASSET-ART-004.*27078.*alpha evidence"):
+                generate_vertical_slice(mapping_path, REVIEW, SOURCE_ROOT, root / "generated")
+
+    def test_cli_success_returns_sprite_count_for_a_proven_crop(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            mapping = self._single_sprite_mapping()
+            mapping["sprites"][0]["crop"] = {"source_rect": [105, 58, 940, 1165]}
+            mapping_path = self._write_mapping(root, mapping)
+            output = root / "generated"
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(ROOT / "tools/artqa/generate_vertical_slice.py"),
+                    "--mapping", str(mapping_path),
+                    "--review", str(REVIEW),
+                    "--source-root", str(SOURCE_ROOT),
+                    "--output", str(output),
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout)["sprite_count"], 1)
+            self.assertTrue((output / "generated-index.json").is_file())
 
 
 if __name__ == "__main__":

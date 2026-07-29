@@ -65,3 +65,22 @@ class AnimationContractTests(unittest.TestCase):
                     target[0]["name"] = bad_name
                     with self.assertRaisesRegex(AnimationError, "ASSET-ANIMATION-008"):
                         validate_animation_closure(sheets, animations)
+
+    def test_slot_count_must_be_present_integer_and_canonical_for_both_closures(self):
+        from assetpack.animation import AnimationError, validate_animation_closure
+
+        for collection in ("sheets", "animations"):
+            for mutation in ("missing", "bool", "float", "wrong"):
+                with self.subTest(collection=collection, mutation=mutation):
+                    sheets, animations = _closure()
+                    target = sheets[0] if collection == "sheets" else animations[0]
+                    if mutation == "missing":
+                        target.pop("slot_count")
+                    elif mutation == "bool":
+                        target["slot_count"] = True
+                    elif mutation == "float":
+                        target["slot_count"] = 3.0
+                    else:
+                        target["slot_count"] = 4
+                    with self.assertRaisesRegex(AnimationError, "ASSET-ANIMATION-008"):
+                        validate_animation_closure(sheets, animations)

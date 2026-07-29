@@ -7,6 +7,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).parents[2]
+SHARED_ROOT = Path(r"D:\NRO_GoiBanGiao")
 MAPPING = ROOT / "docs/my-thuat/mapping-id.json"
 REVIEW = ROOT / "docs/my-thuat/review/vertical-slice-v1.json"
 REVIEWED_NAMES = {
@@ -16,6 +17,33 @@ REVIEWED_NAMES = {
 
 
 class Task6BRound2ProductionTests(unittest.TestCase):
+    def test_canonical_source_base_resolves_repo_root_relative_artroot_paths(self):
+        from assetpack.build import resolve_manifest_base
+
+        manifest = {
+            "build_inputs": {"source_base": "."},
+            "sprites": [{
+                "source_path": "docs/my-thuat/anh-nguon/vertical-slice-v1/iruka_portrait_chroma.png",
+            }],
+        }
+
+        base_dir = resolve_manifest_base(ROOT / "docs/my-thuat/mapping-id.json", manifest, base_dir=SHARED_ROOT)
+
+        self.assertEqual(base_dir, SHARED_ROOT.resolve())
+        source = base_dir / manifest["sprites"][0]["source_path"]
+        self.assertTrue(source.is_file())
+
+    def test_canonical_source_base_rejects_mapping_relative_short_source(self):
+        from assetpack.build import BuildError, resolve_manifest_base
+
+        manifest = {
+            "build_inputs": {"source_base": "."},
+            "sprites": [{"source_path": "iruka_portrait_chroma.png"}],
+        }
+
+        with self.assertRaisesRegex(BuildError, "ASSET-REVIEW-010"):
+            resolve_manifest_base(ROOT / "docs/my-thuat/mapping-id.json", manifest, base_dir=SHARED_ROOT)
+
     def test_bind_source_path_must_resolve_from_the_declared_build_base(self):
         from assetpack.bind import BindError, validate_reviewed_sources
 

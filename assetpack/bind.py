@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from tools.artqa.artqa import ReviewGateError, require_review_gate
-from .build import BuildError, _schema
+from .build import BuildError, _schema, resolve_manifest_base
 
 
 class BindError(ValueError):
@@ -339,6 +339,8 @@ def bind_manifest(
         _fail("ASSET-REVIEW-GATE-001", str(error))
     manifest = _read_json(Path(mapping))
     runtime = _read_json(Path(runtime_map))
+    if isinstance(manifest.get("build_inputs"), dict) and "source_base" in manifest["build_inputs"]:
+        art_root = resolve_manifest_base(Path(mapping), manifest, base_dir=art_root)
     validate_reviewed_sources(manifest, review_document, base_dir=art_root)
     records = _review_records(review_document)
     validate_bind_records(records, review_document=review_document, runtime_map=runtime)

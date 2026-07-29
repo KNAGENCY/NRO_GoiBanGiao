@@ -62,6 +62,40 @@ def _path(base_dir: Path, value: str, code: str) -> Path:
     return result
 
 
+def resolve_manifest_base(
+    manifest_path: Path,
+    manifest: dict[str, Any],
+    *,
+    base_dir: Path | None = None,
+) -> Path:
+    """Resolve the canonical source base and prove repo-root-relative sources exist.
+
+    Production manifests use ``source_base`` explicitly.  Their source paths are
+    relative to the caller-provided repository root, never to the mapping file or
+    the shared ArtRoot directory.  The existence check happens before build output
+    staging so a short/nonexistent path cannot silently become an artifact.
+    """
+    inputs = manifest.get("build_inputs")
+    source_base = inputs.get("source_base") if isinstance(inputs, dict) else None
+    if not isinstance(source_base, str) or not source_base or Path(source_base).is_absolute():
+        _fail("ASSET-REVIEW-010", f"manifest thiếu source_base canonical: {source_base!r}")
+    root = Path(base_dir or Path.cwd()).resolve()
+    resolved = (root / source_base).resolve()
+    try:
+        resolved.relative_to(root)
+    except ValueError:
+        _fail("ASSET-REVIEW-010", f"source_base vượt ngoài build base: {source_base}")
+    if not resolved.is_dir():
+        _fail("ASSET-REVIEW-010", f"source_base không tồn tại: {source_base}")
+    for index, sprite in enumerate(manifest.get("sprites", [])):
+        if not isinstance(sprite, dict) or not isinstance(sprite.get("source_path"), str):
+            _fail("ASSET-REVIEW-010", f"sprite[{index}] thiếu source_path canonical")
+        source = _path(resolved, sprite["source_path"], "ASSET-REVIEW-010")
+        if not source.is_file():
+            _fail("ASSET-REVIEW-010", f"thiếu source production: {sprite['source_path']}")
+    return resolved
+
+
 def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -709,6 +743,8 @@ def build(manifest: dict, out: Path, review_path: Path, *, base_dir: Path | None
     if out.exists():
         _fail("ASSET-BUILD-012", f"output đã tồn tại: {out}")
     base_dir = Path(base_dir or Path.cwd()).resolve()
+    if isinstance(manifest.get("build_inputs"), dict) and "source_base" in manifest["build_inputs"]:
+        base_dir = resolve_manifest_base(Path("<manifest>"), manifest, base_dir=base_dir)
     review_sha, evidence = require_approved_review(review_path, manifest, base_dir)
     _schema(manifest)
     runtime_key_map_path, runtime_key_map_sha, runtime_key_map = _validate_runtime_keys(manifest, base_dir)

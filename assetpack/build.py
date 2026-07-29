@@ -413,10 +413,19 @@ def _validate_runtime_keys(manifest: dict[str, Any], base_dir: Path) -> tuple[st
 def require_approved_review(review_path: Path, manifest: dict[str, Any], base_dir: Path) -> tuple[str, list[dict[str, str]]]:
     entries, evidence = _review_records(review_path)
     by_name = {Path(entry.get("asset", entry.get("source_path", ""))).name: entry for entry in entries}
+    derived_sprite_paths = {
+        relative
+        for sprite in manifest.get("sprites", [])
+        if isinstance(sprite, dict)
+        for relative in sprite.get("zooms", {}).values()
+        if isinstance(relative, str)
+    }
     for relative in _source_paths(manifest):
         source = _path(base_dir, relative, "ASSET-REVIEW-010")
         if not source.is_file():
             _fail("ASSET-REVIEW-010", f"thiếu source đã review: {relative}")
+        if relative in derived_sprite_paths:
+            continue
         entry = by_name.get(source.name)
         if entry is None or entry["source_sha256"] != _sha(source):
             _fail("ASSET-REVIEW-010", f"source SHA không khớp review: {relative}")

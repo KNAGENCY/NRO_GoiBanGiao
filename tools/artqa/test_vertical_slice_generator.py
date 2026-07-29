@@ -81,6 +81,72 @@ class VerticalSliceGeneratorTests(unittest.TestCase):
         path.write_text(json.dumps(mapping), encoding="utf-8")
         return path
 
+    def _mapping_for_ids(self, ids):
+        mapping = json.loads(MAPPING.read_text(encoding="utf-8"))
+        wanted = set(ids)
+        mapping["sprites"] = [
+            deepcopy(sprite) for sprite in mapping["sprites"] if sprite["id"] in wanted
+        ]
+        return mapping
+
+    def test_raw_sheet_crop_precedes_alpha_for_all_hoc_vien_sprites(self):
+        from tools.artqa.generate_vertical_slice import generate_vertical_slice
+
+        ids = list(range(27041, 27075))
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            mapping = self._mapping_for_ids(ids)
+            mapping_path = self._write_mapping(root, mapping)
+            index = generate_vertical_slice(mapping_path, REVIEW, SOURCE_ROOT, root / "generated")
+
+            self.assertEqual(index["sprite_count"], len(ids))
+            self.assertEqual(set(index["sprites"]), {str(sprite_id) for sprite_id in ids})
+            for sprite in mapping["sprites"]:
+                record = index["sprites"][str(sprite["id"])]
+                self.assertEqual(record["source_rect"], sprite["crop"]["source_rect"])
+                raw_crop = root / "generated" / record["raw_crop"]["path"]
+                alpha = root / "generated" / record["alpha"]["path"]
+                self.assertTrue(raw_crop.is_file())
+                self.assertTrue(alpha.is_file())
+                with Image.open(raw_crop) as image:
+                    self.assertEqual(image.size, tuple(sprite["crop"]["source_rect"][2:]))
+                self.assertEqual(record["raw_crop"]["sha256"], hashlib.sha256(raw_crop.read_bytes()).hexdigest())
+                self.assertEqual(record["alpha"]["sha256"], hashlib.sha256(alpha.read_bytes()).hexdigest())
+                self.assertEqual(set(record["zooms"]), {"x1", "x2", "x3", "x4"})
+                self.assertEqual(set(record["evidence"]), {"alpha", "crop", "zooms"})
+                for zoom in record["zooms"].values():
+                    self.assertTrue((root / "generated" / zoom["path"]).is_file())
+
+    def test_shared_sheet_frame_uses_only_its_raw_crop_for_alpha_derivation(self):
+        from tools.artqa.artqa import extract_alpha, normalize_cells
+        from tools.artqa.generate_vertical_slice import generate_vertical_slice
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            mapping = self._mapping_for_ids([27041, 27042])
+            mapping_path = self._write_mapping(root, mapping)
+            index = generate_vertical_slice(mapping_path, REVIEW, SOURCE_ROOT, root / "generated")
+            source = SOURCE_ROOT / "master_hoc_vien_x4_chroma.png"
+            for sprite in mapping["sprites"]:
+                rect = sprite["crop"]["source_rect"]
+                with Image.open(source) as sheet:
+                    raw_crop = sheet.crop((rect[0], rect[1], rect[0] + rect[2], rect[1] + rect[3])).convert("RGBA")
+                expected, _, _ = normalize_cells(extract_alpha(raw_crop), 1)
+                x4_path = root / "generated" / index["sprites"][str(sprite["id"])] ["zooms"]["x4"]["path"]
+                with Image.open(x4_path) as actual:
+                    self.assertEqual(actual.convert("RGBA").tobytes(), expected.tobytes())
+
+    def test_missing_source_rect_fails_closed_for_sprite_27078(self):
+        from tools.artqa.generate_vertical_slice import GenerationError, generate_vertical_slice
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            mapping = self._mapping_for_ids([27078])
+            mapping["sprites"][0].pop("crop", None)
+            mapping_path = self._write_mapping(root, mapping)
+            with self.assertRaisesRegex(GenerationError, "ASSET-ART-004.*27078.*source_rect"):
+                generate_vertical_slice(mapping_path, REVIEW, SOURCE_ROOT, root / "generated")
+
     def test_generates_real_four_zoom_outputs_and_provenance_for_all_reviewed_assets(self):
         from tools.artqa.generate_vertical_slice import generate_reviewed_assets
 
@@ -147,12 +213,15 @@ class VerticalSliceGeneratorTests(unittest.TestCase):
             with self.assertRaisesRegex(GenerationError, "ASSET-ART-002"):
                 generate_vertical_slice(MAPPING, review_path, SOURCE_ROOT, Path(temporary) / "generated")
 
-    def test_mapping_cannot_be_generated_from_unproven_sheet_coordinates(self):
-        from tools.artqa.generate_vertical_slice import GenerationError, generate_vertical_slice
+    def test_mapping_sheet_coordinates_are_proven_by_raw_crop(self):
+        from tools.artqa.generate_vertical_slice import generate_vertical_slice
 
         with tempfile.TemporaryDirectory() as temporary:
-            with self.assertRaisesRegex(GenerationError, "ASSET-ART-004.*27041"):
-                generate_vertical_slice(MAPPING, REVIEW, SOURCE_ROOT, Path(temporary) / "generated")
+            root = Path(temporary)
+            mapping_path = self._write_mapping(root, self._mapping_for_ids([27041]))
+            index = generate_vertical_slice(mapping_path, REVIEW, SOURCE_ROOT, root / "generated")
+            self.assertEqual(index["sprite_count"], 1)
+            self.assertTrue((root / "generated" / index["sprites"]["27041"]["alpha"]["path"]).is_file())
 
     def test_missing_sprite_crop_27078_is_not_replaced_by_a_content_box(self):
         from tools.artqa.generate_vertical_slice import GenerationError, generate_vertical_slice
@@ -160,8 +229,9 @@ class VerticalSliceGeneratorTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             mapping = self._single_sprite_mapping()
+            mapping["sprites"][0].pop("crop", None)
             mapping_path = self._write_mapping(root, mapping)
-            with self.assertRaisesRegex(GenerationError, "ASSET-ART-004.*27078.*explicit crop"):
+            with self.assertRaisesRegex(GenerationError, "ASSET-ART-004.*27078.*source_rect"):
                 generate_vertical_slice(mapping_path, REVIEW, SOURCE_ROOT, root / "generated")
 
     def test_negative_source_crop_is_rejected_before_coordinate_conversion(self):
@@ -172,7 +242,7 @@ class VerticalSliceGeneratorTests(unittest.TestCase):
             mapping = self._single_sprite_mapping()
             mapping["sprites"][0]["crop"] = {"source_rect": [-1, 0, 2, 2]}
             mapping_path = self._write_mapping(root, mapping)
-            with self.assertRaisesRegex(GenerationError, "ASSET-ART-004.*27078.*negative crop"):
+            with self.assertRaisesRegex(GenerationError, "ASSET-ART-004.*27078.*source_rect negative"):
                 generate_vertical_slice(mapping_path, REVIEW, SOURCE_ROOT, root / "generated")
 
     def test_source_crop_outside_source_canvas_is_rejected_before_alpha_conversion(self):
@@ -183,19 +253,19 @@ class VerticalSliceGeneratorTests(unittest.TestCase):
             mapping = self._single_sprite_mapping()
             mapping["sprites"][0]["crop"] = {"source_rect": [1253, 0, 2, 2]}
             mapping_path = self._write_mapping(root, mapping)
-            with self.assertRaisesRegex(GenerationError, "ASSET-ART-004.*27078.*source canvas"):
+            with self.assertRaisesRegex(GenerationError, "ASSET-ART-004.*27078.*raw source"):
                 generate_vertical_slice(mapping_path, REVIEW, SOURCE_ROOT, root / "generated")
 
-    def test_source_crop_must_fit_derived_alpha_after_explicit_coordinate_conversion(self):
-        from tools.artqa.generate_vertical_slice import GenerationError, generate_vertical_slice
+    def test_valid_empty_raw_crop_is_derived_without_alpha_coordinate_fallback(self):
+        from tools.artqa.generate_vertical_slice import generate_vertical_slice
 
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             mapping = self._single_sprite_mapping()
             mapping["sprites"][0]["crop"] = {"source_rect": [0, 0, 1, 1]}
             mapping_path = self._write_mapping(root, mapping)
-            with self.assertRaisesRegex(GenerationError, "ASSET-ART-004.*27078.*alpha evidence"):
-                generate_vertical_slice(mapping_path, REVIEW, SOURCE_ROOT, root / "generated")
+            index = generate_vertical_slice(mapping_path, REVIEW, SOURCE_ROOT, root / "generated")
+            self.assertEqual(index["sprites"]["27078"]["source_rect"], [0, 0, 1, 1])
 
     def test_cli_success_returns_sprite_count_for_a_proven_crop(self):
         with tempfile.TemporaryDirectory() as temporary:

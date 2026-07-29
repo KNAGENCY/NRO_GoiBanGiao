@@ -27,657 +27,1133 @@
     {
       "id": 27041,
       "name": "hoc-vien-head-0",
-      "crop": {"asset_id": 27041, "source_rect": [0, 0, 209, 209]},
+      "crop": {
+        "asset_id": 27041,
+        "source_rect": [
+          0,
+          0,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27041/x1.png",
-        "x2": "planned/27041/x2.png",
-        "x3": "planned/27041/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27041/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27041/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27041/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27041/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x2": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x3": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x4": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317"
+      }
     },
     {
       "id": 27042,
       "name": "hoc-vien-head-1",
-      "crop": {"asset_id": 27042, "source_rect": [209, 0, 209, 209]},
+      "crop": {
+        "asset_id": 27042,
+        "source_rect": [
+          209,
+          0,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27042/x1.png",
-        "x2": "planned/27042/x2.png",
-        "x3": "planned/27042/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27042/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27042/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27042/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27042/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "9ac36811093619dba8b966ff43f9032c882fbba4c51e5b7a7a3a9fcb3f4cf850",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "93cb028e1ebba95d33d91649bde865d30238b9c25294c326be8e4199e614757d",
+        "x2": "a7af87e434a5671ea55940b2361175fbebbdd0c75faafd82ce874392f3ac83c5",
+        "x3": "ff0885f2c8ee97f4a18cf4c59c5164772eb2a343e4a46e108e13cd89de174955",
+        "x4": "9ac36811093619dba8b966ff43f9032c882fbba4c51e5b7a7a3a9fcb3f4cf850"
+      }
     },
     {
       "id": 27043,
       "name": "hoc-vien-head-2",
-      "crop": {"asset_id": 27043, "source_rect": [418, 0, 209, 209]},
+      "crop": {
+        "asset_id": 27043,
+        "source_rect": [
+          418,
+          0,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27043/x1.png",
-        "x2": "planned/27043/x2.png",
-        "x3": "planned/27043/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27043/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27043/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27043/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27043/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "9f316bbe22c1d056c6869ff9ab51767345c12a517dfa14bf04b04ecb7c1eccb5",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "45d38f4625ab5f20dd3cf0917082efaa1132a59dfbb1425f2274dff0996e8267",
+        "x2": "2bc4abca8803beab0228ce07b1a3dc96f175b1b0f8e7f8d8706accb664d72027",
+        "x3": "cd0dd5b7523236a8a84c2c19717ab039efc5480a1b59991c6346938e2b00670a",
+        "x4": "9f316bbe22c1d056c6869ff9ab51767345c12a517dfa14bf04b04ecb7c1eccb5"
+      }
     },
     {
       "id": 27044,
       "name": "hoc-vien-body-0",
-      "crop": {"asset_id": 27044, "source_rect": [627, 0, 209, 209]},
+      "crop": {
+        "asset_id": 27044,
+        "source_rect": [
+          627,
+          0,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27044/x1.png",
-        "x2": "planned/27044/x2.png",
-        "x3": "planned/27044/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27044/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27044/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27044/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27044/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "4176cb81a742e9a60b5cde1eabe3d24ee14acd718c5f6ef7de6e4e9929b5bcfd",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "6f1cfff298b3da890e59e0ca45c9dcd7803b5928c3dc2c2b7afde949301ecbb5",
+        "x2": "327c0538ff996f4374b929fa255c496be0348547a88a122caeee86dd5b22d1ae",
+        "x3": "442679de8e31c26195e52afa4543d1470a8af643a40132fb8eb66e3604749bee",
+        "x4": "4176cb81a742e9a60b5cde1eabe3d24ee14acd718c5f6ef7de6e4e9929b5bcfd"
+      }
     },
     {
       "id": 27045,
       "name": "hoc-vien-body-1",
-      "crop": {"asset_id": 27045, "source_rect": [836, 0, 209, 209]},
+      "crop": {
+        "asset_id": 27045,
+        "source_rect": [
+          836,
+          0,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27045/x1.png",
-        "x2": "planned/27045/x2.png",
-        "x3": "planned/27045/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27045/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27045/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27045/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27045/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "7a3693f593357bc997b226cbff5dd494ce27ba95fe958b2ad666dcae211ee106",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "80f1aa2d20400cb166c08c4a17028229d8fce08fdd34b9b20556d91353fd48d3",
+        "x2": "80f1aa2d20400cb166c08c4a17028229d8fce08fdd34b9b20556d91353fd48d3",
+        "x3": "7a3693f593357bc997b226cbff5dd494ce27ba95fe958b2ad666dcae211ee106",
+        "x4": "7a3693f593357bc997b226cbff5dd494ce27ba95fe958b2ad666dcae211ee106"
+      }
     },
     {
       "id": 27046,
       "name": "hoc-vien-body-2",
-      "crop": {"asset_id": 27046, "source_rect": [1045, 0, 209, 209]},
+      "crop": {
+        "asset_id": 27046,
+        "source_rect": [
+          1045,
+          0,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27046/x1.png",
-        "x2": "planned/27046/x2.png",
-        "x3": "planned/27046/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27046/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27046/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27046/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27046/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x2": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x3": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x4": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317"
+      }
     },
     {
       "id": 27047,
       "name": "hoc-vien-body-3",
-      "crop": {"asset_id": 27047, "source_rect": [0, 209, 209, 209]},
+      "crop": {
+        "asset_id": 27047,
+        "source_rect": [
+          0,
+          209,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27047/x1.png",
-        "x2": "planned/27047/x2.png",
-        "x3": "planned/27047/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27047/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27047/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27047/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27047/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x2": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x3": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x4": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317"
+      }
     },
     {
       "id": 27048,
       "name": "hoc-vien-body-4",
-      "crop": {"asset_id": 27048, "source_rect": [209, 209, 209, 209]},
+      "crop": {
+        "asset_id": 27048,
+        "source_rect": [
+          209,
+          209,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27048/x1.png",
-        "x2": "planned/27048/x2.png",
-        "x3": "planned/27048/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27048/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27048/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27048/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27048/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "0a2354b9fcd39c5a0e6d1e4a448b03d60e5aa8c2005f4bb4503d15629fd2e7f3",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "525981f2d4cc71bfd31d715c41b72443759373fe60908055d7558017ab0e107f",
+        "x2": "e1bfc1c36d9f8182df3733604f50a0d378fa23ed26fbd114815f3a3685666b03",
+        "x3": "e0c1992d441ffa3fff51618cf128e62133c14774307d16a69568fb6207d7ec77",
+        "x4": "0a2354b9fcd39c5a0e6d1e4a448b03d60e5aa8c2005f4bb4503d15629fd2e7f3"
+      }
     },
     {
       "id": 27049,
       "name": "hoc-vien-body-5",
-      "crop": {"asset_id": 27049, "source_rect": [418, 209, 209, 209]},
+      "crop": {
+        "asset_id": 27049,
+        "source_rect": [
+          418,
+          209,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27049/x1.png",
-        "x2": "planned/27049/x2.png",
-        "x3": "planned/27049/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27049/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27049/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27049/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27049/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "ec122bb2a7c98fc92b0b8f69072572a25fe98f436e9191821e569da10c3e1547",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "3604b50030d3fe86479ab7612b984fcfc210c7ada804f38692aa6009fc14316b",
+        "x2": "bb81ac74220269d24d2150a103685fddd57f185d3994a64d1a26c8db8eb9387f",
+        "x3": "befbc8b89c5f7be67c15b80ff384f998d1946d47a7b6c085a4f566fd4f0d751d",
+        "x4": "ec122bb2a7c98fc92b0b8f69072572a25fe98f436e9191821e569da10c3e1547"
+      }
     },
     {
       "id": 27050,
       "name": "hoc-vien-body-6",
-      "crop": {"asset_id": 27050, "source_rect": [627, 209, 209, 209]},
+      "crop": {
+        "asset_id": 27050,
+        "source_rect": [
+          627,
+          209,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27050/x1.png",
-        "x2": "planned/27050/x2.png",
-        "x3": "planned/27050/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27050/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27050/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27050/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27050/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "51aedddd5486e3c01824822c503286686650a3c7f8f87e757739c7ffe7019a8a",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "5f1420b6d56d9c3599decb1321921c5f5695ae8d5b4c8e4efaac0023f1232948",
+        "x2": "93cdb7545449d6b7403015377b0579ae63cd8d7cd869f4622866a001f6fd5b39",
+        "x3": "d40302b367be00694f83dfe0e3a16a9cee558789ae0c2ab187305d886fe2e100",
+        "x4": "51aedddd5486e3c01824822c503286686650a3c7f8f87e757739c7ffe7019a8a"
+      }
     },
     {
       "id": 27051,
       "name": "hoc-vien-body-7",
-      "crop": {"asset_id": 27051, "source_rect": [836, 209, 209, 209]},
+      "crop": {
+        "asset_id": 27051,
+        "source_rect": [
+          836,
+          209,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27051/x1.png",
-        "x2": "planned/27051/x2.png",
-        "x3": "planned/27051/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27051/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27051/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27051/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27051/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "bae34d26f7c128fc956ffee125b70551d79ec662625e8873112cd1d28a4504d2",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "5210c71fc78d6acaf5765603be59378cd34af8abd518dc5701d9fbf4f0fd73fb",
+        "x2": "a1a8198e38e5ed51e4385c3fa6d9604beda9878cf7b8835cc37bc644f2ff215b",
+        "x3": "0be292573dd9e946e5a9bce432f37dbb57caa7bdba157d6c4bdcc83479997c43",
+        "x4": "bae34d26f7c128fc956ffee125b70551d79ec662625e8873112cd1d28a4504d2"
+      }
     },
     {
       "id": 27052,
       "name": "hoc-vien-body-8",
-      "crop": {"asset_id": 27052, "source_rect": [1045, 209, 209, 209]},
+      "crop": {
+        "asset_id": 27052,
+        "source_rect": [
+          1045,
+          209,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27052/x1.png",
-        "x2": "planned/27052/x2.png",
-        "x3": "planned/27052/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27052/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27052/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27052/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27052/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x2": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x3": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x4": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317"
+      }
     },
     {
       "id": 27053,
       "name": "hoc-vien-body-9",
-      "crop": {"asset_id": 27053, "source_rect": [0, 418, 209, 209]},
+      "crop": {
+        "asset_id": 27053,
+        "source_rect": [
+          0,
+          418,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27053/x1.png",
-        "x2": "planned/27053/x2.png",
-        "x3": "planned/27053/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27053/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27053/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27053/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27053/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x2": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x3": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x4": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317"
+      }
     },
     {
       "id": 27054,
       "name": "hoc-vien-body-10",
-      "crop": {"asset_id": 27054, "source_rect": [209, 418, 209, 209]},
+      "crop": {
+        "asset_id": 27054,
+        "source_rect": [
+          209,
+          418,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27054/x1.png",
-        "x2": "planned/27054/x2.png",
-        "x3": "planned/27054/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27054/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27054/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27054/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27054/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "a94f125300d59df642ffad4714e1160d1a802c02153afaafcb197656b0eb4af4",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "4d90641d56a996bcdd75d770af47d33db6b5e8a2d33046fd46959a8c2b1fcb1a",
+        "x2": "520c4c8f0ace855bb02434024185bd467a49f0a9c4a34e33b19ae116a72ee862",
+        "x3": "007379b60799ddafdd3e6312f9ce9245d4351100384713d7adf8b5959f56f710",
+        "x4": "a94f125300d59df642ffad4714e1160d1a802c02153afaafcb197656b0eb4af4"
+      }
     },
     {
       "id": 27055,
       "name": "hoc-vien-body-11",
-      "crop": {"asset_id": 27055, "source_rect": [418, 418, 209, 209]},
+      "crop": {
+        "asset_id": 27055,
+        "source_rect": [
+          418,
+          418,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27055/x1.png",
-        "x2": "planned/27055/x2.png",
-        "x3": "planned/27055/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27055/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27055/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27055/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27055/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "fffa7e46a387b9752d55a3d6f995fedeb128caacde8ffb8e3d1db6aa6deabf78",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "ce64f21225a99557e3857b6192f5b1bcea0430508db5b6f79894c56815f94096",
+        "x2": "8334d0fe9e53cd5074c2582174b66fc821e43dd1c599e5c2920c680cfb984627",
+        "x3": "395b72eb8e927a40059ef978446a23663da6d9fc3dd4853d701d8ee8ecaf693d",
+        "x4": "fffa7e46a387b9752d55a3d6f995fedeb128caacde8ffb8e3d1db6aa6deabf78"
+      }
     },
     {
       "id": 27056,
       "name": "hoc-vien-body-12",
-      "crop": {"asset_id": 27056, "source_rect": [627, 418, 209, 209]},
+      "crop": {
+        "asset_id": 27056,
+        "source_rect": [
+          627,
+          418,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27056/x1.png",
-        "x2": "planned/27056/x2.png",
-        "x3": "planned/27056/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27056/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27056/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27056/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27056/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "0c7d75fb0886b2101aa8fff3c873726ce3244c82d0b2a5519c99adf8fa62b573",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "ae9a481988630c3d2edb60f4ab12382644d85fe6300e96e642b31f4123da2a42",
+        "x2": "eb89b8be9e31f728e784d4657d7b1486b24d249c23c062d7045cff9757c902c4",
+        "x3": "9c44f8b15d7fc6487e5be264d83dafeba01575075400cc22378c44c214c27dc3",
+        "x4": "0c7d75fb0886b2101aa8fff3c873726ce3244c82d0b2a5519c99adf8fa62b573"
+      }
     },
     {
       "id": 27057,
       "name": "hoc-vien-body-13",
-      "crop": {"asset_id": 27057, "source_rect": [836, 418, 209, 209]},
+      "crop": {
+        "asset_id": 27057,
+        "source_rect": [
+          836,
+          418,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27057/x1.png",
-        "x2": "planned/27057/x2.png",
-        "x3": "planned/27057/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27057/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27057/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27057/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27057/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x2": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x3": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x4": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317"
+      }
     },
     {
       "id": 27058,
       "name": "hoc-vien-body-14",
-      "crop": {"asset_id": 27058, "source_rect": [1045, 418, 209, 209]},
+      "crop": {
+        "asset_id": 27058,
+        "source_rect": [
+          1045,
+          418,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27058/x1.png",
-        "x2": "planned/27058/x2.png",
-        "x3": "planned/27058/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27058/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27058/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27058/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27058/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x2": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x3": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x4": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317"
+      }
     },
     {
       "id": 27059,
       "name": "hoc-vien-body-15",
-      "crop": {"asset_id": 27059, "source_rect": [0, 627, 209, 209]},
+      "crop": {
+        "asset_id": 27059,
+        "source_rect": [
+          0,
+          627,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27059/x1.png",
-        "x2": "planned/27059/x2.png",
-        "x3": "planned/27059/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27059/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27059/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27059/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27059/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x2": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x3": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x4": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317"
+      }
     },
     {
       "id": 27060,
       "name": "hoc-vien-body-16",
-      "crop": {"asset_id": 27060, "source_rect": [209, 627, 209, 209]},
+      "crop": {
+        "asset_id": 27060,
+        "source_rect": [
+          209,
+          627,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27060/x1.png",
-        "x2": "planned/27060/x2.png",
-        "x3": "planned/27060/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27060/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27060/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27060/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27060/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "cbd7740a13b14f980cfca725ddb8bfb1935946b34356f69023c37997ec947b79",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "1d56d034a04b4948990694a1840dd625e23c884e2bd7f95221e2f3a58bce8684",
+        "x2": "c033d89c4f75b20ca34e7b63c4b2293a2d244b893ef01f1ecceda7757c0a4b50",
+        "x3": "59bef12a4516261c495927ea06027466f5f90a8fc630cdb2185880dbd02565bd",
+        "x4": "cbd7740a13b14f980cfca725ddb8bfb1935946b34356f69023c37997ec947b79"
+      }
     },
     {
       "id": 27061,
       "name": "hoc-vien-leg-0",
-      "crop": {"asset_id": 27061, "source_rect": [418, 627, 209, 209]},
+      "crop": {
+        "asset_id": 27061,
+        "source_rect": [
+          418,
+          627,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27061/x1.png",
-        "x2": "planned/27061/x2.png",
-        "x3": "planned/27061/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27061/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27061/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27061/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27061/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "8c382d197144d34945c7744214098e85bf62a77b2785e9ae9ad29b3dcdd1000b",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "95f25fd280ec58d89bd0989639d17e7d2b33fc6392749b17a4f8d1b677cfa29d",
+        "x2": "d58032ef0af9e46477019bf39c513b090ddf11da29ad67e703a008a0e821b2db",
+        "x3": "635118b3bddee3e768734d9082897f63a5640f88bb8e6834e91717b5d38b5e6f",
+        "x4": "8c382d197144d34945c7744214098e85bf62a77b2785e9ae9ad29b3dcdd1000b"
+      }
     },
     {
       "id": 27062,
       "name": "hoc-vien-leg-1",
-      "crop": {"asset_id": 27062, "source_rect": [627, 627, 209, 209]},
+      "crop": {
+        "asset_id": 27062,
+        "source_rect": [
+          627,
+          627,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27062/x1.png",
-        "x2": "planned/27062/x2.png",
-        "x3": "planned/27062/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27062/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27062/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27062/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27062/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "bc8ef3849ba8fa91d93bdd783d72a0fa62d14491ea438fc587e916bc1ccc7c07",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "c97e45ae3fb0fc35b7963e4b40d36a287b2958ea7eb5a7c2ac0fdca7d2c3d27e",
+        "x2": "8390a2d6e1c3020e774fbabe38c1fc983b58100d125f3138a36acacaf663f68e",
+        "x3": "45c5f4f9f51fa2fb1a0d1922dfa96cade8f9c482658ed7ec1d8f0352eb99259f",
+        "x4": "bc8ef3849ba8fa91d93bdd783d72a0fa62d14491ea438fc587e916bc1ccc7c07"
+      }
     },
     {
       "id": 27063,
       "name": "hoc-vien-leg-2",
-      "crop": {"asset_id": 27063, "source_rect": [836, 627, 209, 209]},
+      "crop": {
+        "asset_id": 27063,
+        "source_rect": [
+          836,
+          627,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27063/x1.png",
-        "x2": "planned/27063/x2.png",
-        "x3": "planned/27063/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27063/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27063/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27063/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27063/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x2": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x3": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x4": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317"
+      }
     },
     {
       "id": 27064,
       "name": "hoc-vien-leg-3",
-      "crop": {"asset_id": 27064, "source_rect": [1045, 627, 209, 209]},
+      "crop": {
+        "asset_id": 27064,
+        "source_rect": [
+          1045,
+          627,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27064/x1.png",
-        "x2": "planned/27064/x2.png",
-        "x3": "planned/27064/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27064/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27064/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27064/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27064/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x2": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x3": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x4": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317"
+      }
     },
     {
       "id": 27065,
       "name": "hoc-vien-leg-4",
-      "crop": {"asset_id": 27065, "source_rect": [0, 836, 209, 209]},
+      "crop": {
+        "asset_id": 27065,
+        "source_rect": [
+          0,
+          836,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27065/x1.png",
-        "x2": "planned/27065/x2.png",
-        "x3": "planned/27065/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27065/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27065/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27065/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27065/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x2": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x3": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x4": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317"
+      }
     },
     {
       "id": 27066,
       "name": "hoc-vien-leg-5",
-      "crop": {"asset_id": 27066, "source_rect": [209, 836, 209, 209]},
+      "crop": {
+        "asset_id": 27066,
+        "source_rect": [
+          209,
+          836,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27066/x1.png",
-        "x2": "planned/27066/x2.png",
-        "x3": "planned/27066/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27066/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27066/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27066/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27066/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "702ec3e52abc2d0ce1de30dc9aa8e4db56f81add2ccc5e14633943b4748b5d26",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "4be677d0a448a995c3a3ecfde88fb8c178b714a13f575f496aafd1d2eff065c9",
+        "x2": "ac18ba2f5d814d07184cd322e05d6388adccbf4b28bc592ce35a3fc45e138d7b",
+        "x3": "5a1e2a7c5520add1efb5806534f80fdc0fc221486dcfa5a70340e84a8c347ddb",
+        "x4": "702ec3e52abc2d0ce1de30dc9aa8e4db56f81add2ccc5e14633943b4748b5d26"
+      }
     },
     {
       "id": 27067,
       "name": "hoc-vien-leg-6",
-      "crop": {"asset_id": 27067, "source_rect": [418, 836, 209, 209]},
+      "crop": {
+        "asset_id": 27067,
+        "source_rect": [
+          418,
+          836,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27067/x1.png",
-        "x2": "planned/27067/x2.png",
-        "x3": "planned/27067/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27067/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27067/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27067/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27067/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "75b382f0ece80a396aa5b5dc3c9a0a78d0a709d62ee2a18eca38c940db03e051",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "8dbc343efa7586b3ed6704098913b3d482ab4809e4d6c4506f2c5b0341e18e37",
+        "x2": "1a9b66e9aef36b107a478373dee3b995e40208d3ef67f2127c20b3901a5f8542",
+        "x3": "6c1cc68e4a07154114e90e154d1419bb315826c3da8330f4340f3f2a6688f159",
+        "x4": "75b382f0ece80a396aa5b5dc3c9a0a78d0a709d62ee2a18eca38c940db03e051"
+      }
     },
     {
       "id": 27068,
       "name": "hoc-vien-leg-7",
-      "crop": {"asset_id": 27068, "source_rect": [627, 836, 209, 209]},
+      "crop": {
+        "asset_id": 27068,
+        "source_rect": [
+          627,
+          836,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27068/x1.png",
-        "x2": "planned/27068/x2.png",
-        "x3": "planned/27068/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27068/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27068/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27068/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27068/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "fd29173a04dc3aab73598718e5239d04688fcc2f26d6f970c1b06f72f0966384",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "53afa206e16b523a89549c12b0b9dae2653641a8cf8c14e538100017f3cc0efc",
+        "x2": "5f675db2120773bf6be889130a17b52a23c1dfa0683decc67a1d534878904ccb",
+        "x3": "0b56cba03beefb73d31351b750735d386fec96c58fbc99ccb337523f15995eca",
+        "x4": "fd29173a04dc3aab73598718e5239d04688fcc2f26d6f970c1b06f72f0966384"
+      }
     },
     {
       "id": 27069,
       "name": "hoc-vien-leg-8",
-      "crop": {"asset_id": 27069, "source_rect": [836, 836, 209, 209]},
+      "crop": {
+        "asset_id": 27069,
+        "source_rect": [
+          836,
+          836,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27069/x1.png",
-        "x2": "planned/27069/x2.png",
-        "x3": "planned/27069/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27069/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27069/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27069/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27069/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x2": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x3": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x4": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317"
+      }
     },
     {
       "id": 27070,
       "name": "hoc-vien-leg-9",
-      "crop": {"asset_id": 27070, "source_rect": [1045, 836, 209, 209]},
+      "crop": {
+        "asset_id": 27070,
+        "source_rect": [
+          1045,
+          836,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27070/x1.png",
-        "x2": "planned/27070/x2.png",
-        "x3": "planned/27070/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27070/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27070/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27070/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27070/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x2": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x3": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x4": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317"
+      }
     },
     {
       "id": 27071,
       "name": "hoc-vien-leg-10",
-      "crop": {"asset_id": 27071, "source_rect": [0, 1045, 209, 209]},
+      "crop": {
+        "asset_id": 27071,
+        "source_rect": [
+          0,
+          1045,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27071/x1.png",
-        "x2": "planned/27071/x2.png",
-        "x3": "planned/27071/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27071/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27071/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27071/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27071/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x2": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x3": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x4": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317"
+      }
     },
     {
       "id": 27072,
       "name": "hoc-vien-leg-11",
-      "crop": {"asset_id": 27072, "source_rect": [209, 1045, 209, 209]},
+      "crop": {
+        "asset_id": 27072,
+        "source_rect": [
+          209,
+          1045,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27072/x1.png",
-        "x2": "planned/27072/x2.png",
-        "x3": "planned/27072/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27072/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27072/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27072/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27072/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x2": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x3": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317",
+        "x4": "f2bb5bbaca678ecad746b1fa5ecfa2c8a81dd18817be19f0187c036d25326317"
+      }
     },
     {
       "id": 27073,
       "name": "hoc-vien-leg-12",
-      "crop": {"asset_id": 27073, "source_rect": [418, 1045, 209, 209]},
+      "crop": {
+        "asset_id": 27073,
+        "source_rect": [
+          418,
+          1045,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27073/x1.png",
-        "x2": "planned/27073/x2.png",
-        "x3": "planned/27073/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27073/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27073/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27073/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27073/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "dca4db32a07ba9d99386da271f882829f25bbc9ea7898a60f6f6db7d3586ba55",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "2228107f0608adf33669df60e7fee0b61fd97a1229c9cea7487ab9c123dbc074",
+        "x2": "d4e615ac13a98b9561dd5b611e12f6a0db326e278be4d513aae6ac7e27886704",
+        "x3": "8f17355a61ebc5977e73f668cc69ba49268753b9debbe550b7d85ca2c21dc609",
+        "x4": "dca4db32a07ba9d99386da271f882829f25bbc9ea7898a60f6f6db7d3586ba55"
+      }
     },
     {
       "id": 27074,
       "name": "hoc-vien-leg-13",
-      "crop": {"asset_id": 27074, "source_rect": [627, 1045, 209, 209]},
+      "crop": {
+        "asset_id": 27074,
+        "source_rect": [
+          627,
+          1045,
+          209,
+          209
+        ]
+      },
       "zooms": {
-        "x1": "planned/27074/x1.png",
-        "x2": "planned/27074/x2.png",
-        "x3": "planned/27074/x3.png",
-        "x4": "master_hoc_vien_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27074/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27074/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27074/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27074/x4/sprite.png"
       },
       "source_path": "master_hoc_vien_x4_chroma.png",
       "source_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
-      "x4_sha256": "ea3e32732485861fe323e8c191543a42dc6cbab74ea56b0f9c851228368d47cd",
+      "x4_sha256": "2b0cf03baad0462940aeda3b12282f7f0ecd6e71afb7cf05fc8adc4720e1fafc",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "c80edb8d768392f7c6c5c49d3ca7f2445530e145b7fb54d05d0c9ee6a194fab0",
+        "x2": "557f08e596257a87cab74fb13efa1d867e8e81a417e83728d1a3d6d49d7beeb1",
+        "x3": "a2d76e7ab7376d5a41544a0fc3a1c4dafb58245c064a155ecf3e872793ffba33",
+        "x4": "2b0cf03baad0462940aeda3b12282f7f0ecd6e71afb7cf05fc8adc4720e1fafc"
+      }
     },
     {
       "id": 27075,
       "name": "iruka-head",
       "zooms": {
-        "x1": "planned/27075/x1.png",
-        "x2": "planned/27075/x2.png",
-        "x3": "planned/27075/x3.png",
-        "x4": "master_iruka_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27075/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27075/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27075/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27075/x4/sprite.png"
       },
       "source_path": "master_iruka_x4_chroma.png",
       "source_sha256": "a53d149ca17557f365dd3d2b8f9f1b9d4fcb6c14dbfb130876157e7e27533622",
@@ -696,21 +1172,27 @@
         ],
         "layer": 0
       },
-      "x4_sha256": "a53d149ca17557f365dd3d2b8f9f1b9d4fcb6c14dbfb130876157e7e27533622",
+      "x4_sha256": "213410cd9922310a5b4f61ce763f8f9ccfed488d61096a967eda041053f3a50d",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "d1ff625f407eecedb7bd06c8b2b08498afdf5944014ae72bda98ae65f03ce9a0",
+        "x2": "ca379f853dce80e3f828efb4ec6940976d112046246690da9e8eab2d3e9412ec",
+        "x3": "d32163eca325f6fa2d662358a64eebb49e623ac429376217ccf97e70ee10e093",
+        "x4": "213410cd9922310a5b4f61ce763f8f9ccfed488d61096a967eda041053f3a50d"
+      }
     },
     {
       "id": 27076,
       "name": "iruka-body",
       "zooms": {
-        "x1": "planned/27076/x1.png",
-        "x2": "planned/27076/x2.png",
-        "x3": "planned/27076/x3.png",
-        "x4": "master_iruka_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27076/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27076/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27076/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27076/x4/sprite.png"
       },
       "source_path": "master_iruka_x4_chroma.png",
       "source_sha256": "a53d149ca17557f365dd3d2b8f9f1b9d4fcb6c14dbfb130876157e7e27533622",
@@ -729,21 +1211,27 @@
         ],
         "layer": 1
       },
-      "x4_sha256": "a53d149ca17557f365dd3d2b8f9f1b9d4fcb6c14dbfb130876157e7e27533622",
+      "x4_sha256": "922a69abd75fae68fb19e0fd6f1f5bd533d46911d3a327ac29f5d3f22dee0839",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "51219ca17c1469e61cee3efe1320bf993604c06993bfc387a3024cef904509ae",
+        "x2": "0e90d1d54f22abeab66006e45eff62861c8e23cabf58dc49f2bd26ec4c10e3cf",
+        "x3": "b9cafe79200e582aaa5eee0cb84b336516bc9701eb9a4f40a58e52832536028c",
+        "x4": "922a69abd75fae68fb19e0fd6f1f5bd533d46911d3a327ac29f5d3f22dee0839"
+      }
     },
     {
       "id": 27077,
       "name": "iruka-leg",
       "zooms": {
-        "x1": "planned/27077/x1.png",
-        "x2": "planned/27077/x2.png",
-        "x3": "planned/27077/x3.png",
-        "x4": "master_iruka_x4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27077/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27077/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27077/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27077/x4/sprite.png"
       },
       "source_path": "master_iruka_x4_chroma.png",
       "source_sha256": "a53d149ca17557f365dd3d2b8f9f1b9d4fcb6c14dbfb130876157e7e27533622",
@@ -762,106 +1250,183 @@
         ],
         "layer": 2
       },
-      "x4_sha256": "a53d149ca17557f365dd3d2b8f9f1b9d4fcb6c14dbfb130876157e7e27533622",
+      "x4_sha256": "12fe0ee639e83a22065fb806f9f3fe71c9badff155b271eb9d4b5a2b7eb061c5",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "9eec48f10fd2c75c9a127df951b78f0576ede767bcb771257e0f8677410c5a00",
+        "x2": "5dcc3ea02674fc87f06eb17f401a3b98f7326cfdfb650f5ae770d1f52de6827e",
+        "x3": "9822cc31eb6eea68f92884f514816abda20f70d37c3b12f30e7476baf56b1dbd",
+        "x4": "12fe0ee639e83a22065fb806f9f3fe71c9badff155b271eb9d4b5a2b7eb061c5"
+      }
     },
     {
       "id": 27078,
       "name": "iruka-portrait",
+      "crop": {
+        "asset_id": 27078,
+        "source_rect": [
+          0,
+          0,
+          1254,
+          1254
+        ]
+      },
       "zooms": {
-        "x1": "planned/27078/x1.png",
-        "x2": "planned/27078/x2.png",
-        "x3": "planned/27078/x3.png",
-        "x4": "iruka_portrait_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27078/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27078/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27078/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27078/x4/sprite.png"
       },
       "source_path": "iruka_portrait_chroma.png",
       "source_sha256": "f6b84bde6409bd3e8de1a82f25a3329d135453bafdba00a4297cd5877b897251",
-      "x4_sha256": "f6b84bde6409bd3e8de1a82f25a3329d135453bafdba00a4297cd5877b897251",
+      "x4_sha256": "25c8eb9b1366a59cd6076207a1c2fd677327c50dfded7f1836dc447d6caf61e3",
       "source_dimensions": [
         1254,
         1254
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "dee6754b8e5f97183d4681a2231bb780b204df0c4d118e0ad6f232cea413a2ac",
+        "x2": "b08538eb876da26d4c5156bdf48d21ff58f63c60863dbcc8e297e4880e4c3d1f",
+        "x3": "c8e89bafd7ced91a36b50372c0439b461bdc4a804026aa06a5f99824e156b908",
+        "x4": "25c8eb9b1366a59cd6076207a1c2fd677327c50dfded7f1836dc447d6caf61e3"
+      }
     },
     {
       "id": 27079,
       "name": "lang-la-skill-1",
-      "crop": {"asset_id": 27079, "source_rect": [0, 0, 496, 793]},
+      "crop": {
+        "asset_id": 27079,
+        "source_rect": [
+          0,
+          0,
+          496,
+          793
+        ]
+      },
       "zooms": {
-        "x1": "planned/27079/x1.png",
-        "x2": "planned/27079/x2.png",
-        "x3": "planned/27079/x3.png",
-        "x4": "skill_icons_leaf_4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27079/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27079/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27079/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27079/x4/sprite.png"
       },
       "source_path": "skill_icons_leaf_4_chroma.png",
       "source_sha256": "da6a4e3ba27830fa3ba29c8d9dd813ea6d9d2d089967623d50c90b7370a52fed",
-      "x4_sha256": "da6a4e3ba27830fa3ba29c8d9dd813ea6d9d2d089967623d50c90b7370a52fed",
+      "x4_sha256": "39cba93bfe68d3f87d8fa0ff638bcebf8a12d22dcd9eec96551b8901d0227f85",
       "source_dimensions": [
         1983,
         793
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "8015b5c622c6aeacbfbfeb9a6e211a3b32cb12ac4849087e0b378f8f899274c6",
+        "x2": "cb2f9df3adc7ad64f831345b72bae1d0007a76259a5fbb9835747e0095ed2798",
+        "x3": "5b16c612fcb06b6ad927bc034db3f71e9baef8bd4d0ed930233495140e1c215d",
+        "x4": "39cba93bfe68d3f87d8fa0ff638bcebf8a12d22dcd9eec96551b8901d0227f85"
+      }
     },
     {
       "id": 27080,
       "name": "lang-la-skill-2",
-      "crop": {"asset_id": 27080, "source_rect": [496, 0, 495, 793]},
+      "crop": {
+        "asset_id": 27080,
+        "source_rect": [
+          496,
+          0,
+          495,
+          793
+        ]
+      },
       "zooms": {
-        "x1": "planned/27080/x1.png",
-        "x2": "planned/27080/x2.png",
-        "x3": "planned/27080/x3.png",
-        "x4": "skill_icons_leaf_4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27080/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27080/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27080/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27080/x4/sprite.png"
       },
       "source_path": "skill_icons_leaf_4_chroma.png",
       "source_sha256": "da6a4e3ba27830fa3ba29c8d9dd813ea6d9d2d089967623d50c90b7370a52fed",
-      "x4_sha256": "da6a4e3ba27830fa3ba29c8d9dd813ea6d9d2d089967623d50c90b7370a52fed",
+      "x4_sha256": "8904e810d5bec2fcf954afc556be502fcf6ecaaff5b156d85682a9ad3fff8a7a",
       "source_dimensions": [
         1983,
         793
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "e62dcd4915946c5002647eedba45a8b34f9cc86f38c019c3f61902b4cf86a4a7",
+        "x2": "1ea1c3dacee0b88168f1b6ceede500d6601f43a2deb7df62862f1a63126c1863",
+        "x3": "dcd4b4e534db92c08ccc5be4a04eff857121d8250e4dff0e73752e15de1aa53b",
+        "x4": "8904e810d5bec2fcf954afc556be502fcf6ecaaff5b156d85682a9ad3fff8a7a"
+      }
     },
     {
       "id": 27081,
       "name": "lang-la-skill-3",
-      "crop": {"asset_id": 27081, "source_rect": [991, 0, 496, 793]},
+      "crop": {
+        "asset_id": 27081,
+        "source_rect": [
+          991,
+          0,
+          496,
+          793
+        ]
+      },
       "zooms": {
-        "x1": "planned/27081/x1.png",
-        "x2": "planned/27081/x2.png",
-        "x3": "planned/27081/x3.png",
-        "x4": "skill_icons_leaf_4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27081/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27081/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27081/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27081/x4/sprite.png"
       },
       "source_path": "skill_icons_leaf_4_chroma.png",
       "source_sha256": "da6a4e3ba27830fa3ba29c8d9dd813ea6d9d2d089967623d50c90b7370a52fed",
-      "x4_sha256": "da6a4e3ba27830fa3ba29c8d9dd813ea6d9d2d089967623d50c90b7370a52fed",
+      "x4_sha256": "255d2f376dddf3a85a09859080d7b82889f9cb9170ea4a35959361a70d79c904",
       "source_dimensions": [
         1983,
         793
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "74250bc1a10ec8aba7a336800a9d0bdbcee6e1912133450f83bfbe237588d811",
+        "x2": "332288c63481fdeaa51c9cff06c21be4ed3d811f516a2d3fefdcb3d95747096b",
+        "x3": "15c68f87a4b50a6c650b183cdc928007d1a71f2a6cff5b631a4d9177bd315a33",
+        "x4": "255d2f376dddf3a85a09859080d7b82889f9cb9170ea4a35959361a70d79c904"
+      }
     },
     {
       "id": 27082,
       "name": "lang-la-skill-4",
-      "crop": {"asset_id": 27082, "source_rect": [1487, 0, 496, 793]},
+      "crop": {
+        "asset_id": 27082,
+        "source_rect": [
+          1487,
+          0,
+          496,
+          793
+        ]
+      },
       "zooms": {
-        "x1": "planned/27082/x1.png",
-        "x2": "planned/27082/x2.png",
-        "x3": "planned/27082/x3.png",
-        "x4": "skill_icons_leaf_4_chroma.png"
+        "x1": "generated/canonical-sprites-v1/sprites/27082/x1/sprite.png",
+        "x2": "generated/canonical-sprites-v1/sprites/27082/x2/sprite.png",
+        "x3": "generated/canonical-sprites-v1/sprites/27082/x3/sprite.png",
+        "x4": "generated/canonical-sprites-v1/sprites/27082/x4/sprite.png"
       },
       "source_path": "skill_icons_leaf_4_chroma.png",
       "source_sha256": "da6a4e3ba27830fa3ba29c8d9dd813ea6d9d2d089967623d50c90b7370a52fed",
-      "x4_sha256": "da6a4e3ba27830fa3ba29c8d9dd813ea6d9d2d089967623d50c90b7370a52fed",
+      "x4_sha256": "04cb047e1cdf07b5413519e997a5e4e80f9b77dfb99ea8364482a0170c8df91f",
       "source_dimensions": [
         1983,
         793
       ],
-      "source_alpha": false
+      "source_alpha": false,
+      "zoom_sha256": {
+        "x1": "7d612445ce54922923d746f60b51bc7128ef5a432f08e09030aa853736ad2e16",
+        "x2": "9d7aca7cd0c65fedf1f6e5f6492c1dcf56b1199d9da686e5b6845ee265905c3d",
+        "x3": "59fd2d9a381adcf9cdf47dabd2ab2f7e60b02d1fca275b4c6288df1c87fd084e",
+        "x4": "04cb047e1cdf07b5413519e997a5e4e80f9b77dfb99ea8364482a0170c8df91f"
+      }
     }
   ],
   "parts": [
@@ -890,95 +1455,355 @@
       "id": 57,
       "type": 1,
       "frames": [
-        {"sprite_id": 27044, "dx": 0, "dy": 0},
-        {"sprite_id": 27044, "dx": 0, "dy": 0},
-        {"sprite_id": 27044, "dx": 0, "dy": 0},
-        {"sprite_id": 27044, "dx": 0, "dy": 0},
-        {"sprite_id": 27044, "dx": 0, "dy": 0},
-        {"sprite_id": 27044, "dx": 0, "dy": 0},
-        {"sprite_id": 27044, "dx": 0, "dy": 0},
-        {"sprite_id": 27044, "dx": 0, "dy": 0},
-        {"sprite_id": 27044, "dx": 0, "dy": 0},
-        {"sprite_id": 27044, "dx": 0, "dy": 0},
-        {"sprite_id": 27044, "dx": 0, "dy": 0},
-        {"sprite_id": 27044, "dx": 0, "dy": 0},
-        {"sprite_id": 27044, "dx": 0, "dy": 0},
-        {"sprite_id": 27044, "dx": 0, "dy": 0},
-        {"sprite_id": 27044, "dx": 0, "dy": 0},
-        {"sprite_id": 27044, "dx": 0, "dy": 0},
-        {"sprite_id": 27044, "dx": 0, "dy": 0}
+        {
+          "sprite_id": 27044,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27044,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27044,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27044,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27044,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27044,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27044,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27044,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27044,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27044,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27044,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27044,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27044,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27044,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27044,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27044,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27044,
+          "dx": 0,
+          "dy": 0
+        }
       ]
     },
     {
       "id": 58,
       "type": 2,
       "frames": [
-        {"sprite_id": 27061, "dx": 0, "dy": 0},
-        {"sprite_id": 27061, "dx": 0, "dy": 0},
-        {"sprite_id": 27061, "dx": 0, "dy": 0},
-        {"sprite_id": 27061, "dx": 0, "dy": 0},
-        {"sprite_id": 27061, "dx": 0, "dy": 0},
-        {"sprite_id": 27061, "dx": 0, "dy": 0},
-        {"sprite_id": 27061, "dx": 0, "dy": 0},
-        {"sprite_id": 27061, "dx": 0, "dy": 0},
-        {"sprite_id": 27061, "dx": 0, "dy": 0},
-        {"sprite_id": 27061, "dx": 0, "dy": 0},
-        {"sprite_id": 27061, "dx": 0, "dy": 0},
-        {"sprite_id": 27061, "dx": 0, "dy": 0},
-        {"sprite_id": 27061, "dx": 0, "dy": 0},
-        {"sprite_id": 27061, "dx": 0, "dy": 0}
+        {
+          "sprite_id": 27061,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27061,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27061,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27061,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27061,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27061,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27061,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27061,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27061,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27061,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27061,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27061,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27061,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27061,
+          "dx": 0,
+          "dy": 0
+        }
       ]
     },
     {
       "id": 2189,
       "type": 0,
       "frames": [
-        {"sprite_id": 27075, "dx": 0, "dy": 0},
-        {"sprite_id": 27075, "dx": 0, "dy": 0},
-        {"sprite_id": 27075, "dx": 0, "dy": 0}
+        {
+          "sprite_id": 27075,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27075,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27075,
+          "dx": 0,
+          "dy": 0
+        }
       ]
     },
     {
       "id": 2190,
       "type": 1,
       "frames": [
-        {"sprite_id": 27076, "dx": 0, "dy": 0},
-        {"sprite_id": 27076, "dx": 0, "dy": 0},
-        {"sprite_id": 27076, "dx": 0, "dy": 0},
-        {"sprite_id": 27076, "dx": 0, "dy": 0},
-        {"sprite_id": 27076, "dx": 0, "dy": 0},
-        {"sprite_id": 27076, "dx": 0, "dy": 0},
-        {"sprite_id": 27076, "dx": 0, "dy": 0},
-        {"sprite_id": 27076, "dx": 0, "dy": 0},
-        {"sprite_id": 27076, "dx": 0, "dy": 0},
-        {"sprite_id": 27076, "dx": 0, "dy": 0},
-        {"sprite_id": 27076, "dx": 0, "dy": 0},
-        {"sprite_id": 27076, "dx": 0, "dy": 0},
-        {"sprite_id": 27076, "dx": 0, "dy": 0},
-        {"sprite_id": 27076, "dx": 0, "dy": 0},
-        {"sprite_id": 27076, "dx": 0, "dy": 0},
-        {"sprite_id": 27076, "dx": 0, "dy": 0},
-        {"sprite_id": 27076, "dx": 0, "dy": 0}
+        {
+          "sprite_id": 27076,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27076,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27076,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27076,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27076,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27076,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27076,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27076,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27076,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27076,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27076,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27076,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27076,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27076,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27076,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27076,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27076,
+          "dx": 0,
+          "dy": 0
+        }
       ]
     },
     {
       "id": 2191,
       "type": 2,
       "frames": [
-        {"sprite_id": 27077, "dx": 0, "dy": 0},
-        {"sprite_id": 27077, "dx": 0, "dy": 0},
-        {"sprite_id": 27077, "dx": 0, "dy": 0},
-        {"sprite_id": 27077, "dx": 0, "dy": 0},
-        {"sprite_id": 27077, "dx": 0, "dy": 0},
-        {"sprite_id": 27077, "dx": 0, "dy": 0},
-        {"sprite_id": 27077, "dx": 0, "dy": 0},
-        {"sprite_id": 27077, "dx": 0, "dy": 0},
-        {"sprite_id": 27077, "dx": 0, "dy": 0},
-        {"sprite_id": 27077, "dx": 0, "dy": 0},
-        {"sprite_id": 27077, "dx": 0, "dy": 0},
-        {"sprite_id": 27077, "dx": 0, "dy": 0},
-        {"sprite_id": 27077, "dx": 0, "dy": 0},
-        {"sprite_id": 27077, "dx": 0, "dy": 0}
+        {
+          "sprite_id": 27077,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27077,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27077,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27077,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27077,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27077,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27077,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27077,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27077,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27077,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27077,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27077,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27077,
+          "dx": 0,
+          "dy": 0
+        },
+        {
+          "sprite_id": 27077,
+          "dx": 0,
+          "dy": 0
+        }
       ]
     }
   ],
@@ -1028,5 +1853,8 @@
       "body": 57,
       "leg": 58
     }
+  },
+  "build_inputs": {
+    "source_base": "."
   }
 }

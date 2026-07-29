@@ -16,6 +16,13 @@ from typing import Any
 
 from PIL import Image
 
+try:
+    from .artqa import extract_alpha, normalize_cells, validate_alpha_output
+except ImportError:  # direct CLI execution
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from tools.artqa.artqa import extract_alpha, normalize_cells, validate_alpha_output
+
 
 class GenerationError(ValueError):
     """Lỗi có mã ổn định cho cổng art và mutation test."""
@@ -221,6 +228,124 @@ def _save_zoom(image: Image.Image, path: Path, root: Path, factor: float) -> dic
     }
 
 
+def _raw_source_rect(sprite: dict[str, Any], source_size: list[int]) -> list[int]:
+    rect = sprite.get("source_rect")
+    crop = sprite.get("crop")
+    nested = crop.get("source_rect") if isinstance(crop, dict) else None
+    if rect is None:
+        rect = nested
+    if not isinstance(rect, list):
+        _fail("ASSET-ART-004", f"sprite {sprite.get('id')} source_rect missing")
+    if nested is not None and nested != rect:
+        _fail("ASSET-ART-004", f"sprite {sprite.get('id')} source_rect mismatch")
+    if len(rect) != 4 or any(not isinstance(value, int) or isinstance(value, bool) for value in rect):
+        _fail("ASSET-ART-004", f"sprite {sprite.get('id')} source_rect malformed")
+    if rect[0] < 0 or rect[1] < 0:
+        _fail("ASSET-ART-004", f"sprite {sprite.get('id')} source_rect negative")
+    if rect[2] <= 0 or rect[3] <= 0:
+        _fail("ASSET-ART-004", f"sprite {sprite.get('id')} source_rect empty")
+    if len(source_size) != 2 or rect[0] + rect[2] > source_size[0] or rect[1] + rect[3] > source_size[1]:
+        _fail("ASSET-ART-004", f"sprite {sprite.get('id')} source_rect outside raw source")
+    return rect
+
+
+def _derive_raw_sprite(
+    sprite: dict[str, Any],
+    reviewed: dict[str, dict[str, Any]],
+    source_root: Path,
+    temporary: Path,
+) -> dict[str, Any]:
+    sprite_id = sprite["id"]
+    source_path = sprite.get("source_path")
+    if not isinstance(source_path, str) or not source_path or Path(source_path).is_absolute():
+        _fail("ASSET-ART-004", f"sprite {sprite_id} source_path invalid")
+    source_file = (source_root / source_path).resolve()
+    try:
+        source_file.relative_to(source_root)
+    except ValueError:
+        _fail("ASSET-ART-004", f"sprite {sprite_id} source_path outside ArtRoot")
+    if not source_file.is_file():
+        _fail("ASSET-ART-004", f"sprite {sprite_id} raw source missing")
+    record = reviewed.get(Path(source_path).name)
+    if record is None:
+        _fail("ASSET-ART-002", f"sprite source review missing: {source_path}")
+    source_sha = _sha(source_file)
+    if source_sha != record.get("source_sha256") or sprite.get("source_sha256") != source_sha:
+        _fail("ASSET-ART-004", f"sprite {sprite_id} source SHA mismatch")
+
+    with Image.open(source_file) as raw_image:
+        raw_image.load()
+        source_size = list(raw_image.size)
+        declared_size = sprite.get("source_dimensions")
+        if declared_size is not None and declared_size != source_size:
+            _fail("ASSET-ART-004", f"sprite {sprite_id} raw source dimensions mismatch")
+        rect = _raw_source_rect(sprite, source_size)
+        raw_crop = raw_image.crop((rect[0], rect[1], rect[0] + rect[2], rect[1] + rect[3])).convert("RGBA")
+
+    # Canonical order: crop raw source coordinates, then run the shared chroma/alpha
+    # extraction and single-cell normalization on that crop. No full-sheet alpha
+    # evidence coordinates are used here.
+    extracted = extract_alpha(raw_crop)
+    normalized, crop_report, crop_issues = normalize_cells(extracted, 1)
+    alpha_issues, alpha_metrics = validate_alpha_output(normalized, 1)
+    stem = str(sprite_id)
+    sprite_root = temporary / "sprites" / stem
+    raw_path = sprite_root / "raw-crop.png"
+    alpha_path = sprite_root / "alpha.png"
+    crop_path = sprite_root / "crop.json"
+    raw_path.parent.mkdir(parents=True, exist_ok=True)
+    raw_crop.save(raw_path, format="PNG", optimize=False, compress_level=9)
+    normalized.save(alpha_path, format="PNG", optimize=False, compress_level=9)
+    crop_document = {
+        "sprite_id": sprite_id,
+        "source_path": source_path,
+        "source_sha256": source_sha,
+        "source_dimensions": source_size,
+        "source_rect": rect,
+        "raw_crop_dimensions": list(raw_crop.size),
+        "alpha_dimensions": list(normalized.size),
+        "crop": crop_report,
+        "alpha": alpha_metrics,
+        "issues": crop_issues + alpha_issues,
+    }
+    crop_path.write_text(json.dumps(crop_document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    zooms = {}
+    for zoom in ZOOMS:
+        zooms[zoom] = _save_zoom(normalized, sprite_root / zoom / "sprite.png", temporary, ZOOM_FACTORS[zoom])
+    raw_crop_record = {
+        "path": raw_path.relative_to(temporary).as_posix(),
+        "sha256": _sha(raw_path),
+        "dimensions": list(raw_crop.size),
+    }
+    alpha_record = {
+        "path": alpha_path.relative_to(temporary).as_posix(),
+        "sha256": _sha(alpha_path),
+        "dimensions": list(normalized.size),
+    }
+    crop_record = {
+        "path": crop_path.relative_to(temporary).as_posix(),
+        "sha256": _sha(crop_path),
+        "source_rect": rect,
+        "raw_dimensions": list(raw_crop.size),
+        "alpha_dimensions": list(normalized.size),
+    }
+    return {
+        "source_path": source_path,
+        "source_sha256": source_sha,
+        "source_dimensions": source_size,
+        "source_rect": rect,
+        "raw_crop": raw_crop_record,
+        "alpha": alpha_record,
+        "crop": crop_record,
+        "zooms": zooms,
+        "evidence": {
+            "alpha": alpha_record,
+            "crop": crop_record,
+            "zooms": zooms,
+        },
+    }
+
+
 def generate_reviewed_assets(
     review_path: Path,
     source_root: Path,
@@ -325,6 +450,11 @@ def generate_vertical_slice(
             "sprites": {},
         }
         for sprite in sprites:
+            if isinstance(sprite, dict) and isinstance(sprite.get("id"), int):
+                index["sprites"][str(sprite["id"])] = _derive_raw_sprite(
+                    sprite, reviewed, source_root, temporary
+                )
+                continue
             if not isinstance(sprite, dict) or not isinstance(sprite.get("id"), int):
                 _fail("ASSET-ART-004", "sprite record malformed")
             source_path = sprite.get("source_path")

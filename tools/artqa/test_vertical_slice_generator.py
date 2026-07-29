@@ -17,6 +17,60 @@ SOURCE_ROOT = Path(r"D:\NRO_GoiBanGiao\docs\my-thuat\anh-nguon\vertical-slice-v1
 
 
 class VerticalSliceGeneratorTests(unittest.TestCase):
+    def test_alpha_rect_applies_normalize_center_and_bottom_offsets_for_player_idle_frame_1(self):
+        from tools.artqa.generate_vertical_slice import _alpha_rect
+
+        crop_report = {
+            "source_size": [2172, 724],
+            "source_edges": [0, 724, 1448, 2172],
+            "content_boxes": [
+                [180, 62, 520, 715],
+                [160, 68, 495, 713],
+                [124, 65, 461, 715],
+            ],
+            "output_cell_size": [340, 653],
+        }
+        rect = _alpha_rect(
+            {"id": "player_idle", "frame": 1},
+            [884, 68, 10, 10],
+            crop_report,
+            (1020, 653),
+        )
+
+        self.assertEqual(rect, [342, 8, 10, 10])
+
+    def test_alpha_rect_rejects_malformed_source_edges_as_generation_error(self):
+        from tools.artqa.generate_vertical_slice import GenerationError, _alpha_rect
+
+        base = {
+            "source_size": [2172, 724],
+            "source_edges": [0, 724, 1448, 2172],
+            "content_boxes": [[180, 62, 520, 715]] * 3,
+            "output_cell_size": [340, 653],
+        }
+        for edges in (["0", 724, 1448, 2172], [-1, 724, 1448, 2172], [0, 724, 1448, 2173]):
+            with self.subTest(edges=edges):
+                crop_report = deepcopy(base)
+                crop_report["source_edges"] = edges
+                with self.assertRaisesRegex(GenerationError, "ASSET-ART-004"):
+                    _alpha_rect({"id": "player_idle"}, [884, 68, 10, 10], crop_report, (1020, 653))
+
+    def test_alpha_rect_rejects_malformed_output_cell_size_as_generation_error(self):
+        from tools.artqa.generate_vertical_slice import GenerationError, _alpha_rect
+
+        base = {
+            "source_size": [2172, 724],
+            "source_edges": [0, 724, 1448, 2172],
+            "content_boxes": [[180, 62, 520, 715]] * 3,
+            "output_cell_size": [340, 653],
+        }
+        for cell_size in (["340", 653], [0, 653], [1021, 653]):
+            with self.subTest(cell_size=cell_size):
+                crop_report = deepcopy(base)
+                crop_report["output_cell_size"] = cell_size
+                with self.assertRaisesRegex(GenerationError, "ASSET-ART-004"):
+                    _alpha_rect({"id": "player_idle"}, [884, 68, 10, 10], crop_report, (1020, 653))
+
     def _single_sprite_mapping(self, sprite_id=27078):
         mapping = json.loads(MAPPING.read_text(encoding="utf-8"))
         sprite = next(item for item in mapping["sprites"] if item["id"] == sprite_id)

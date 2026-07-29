@@ -136,9 +136,24 @@ def _alpha_rect(
         or len(edges) < 2
         or len(boxes) != len(edges) - 1
         or len(cell_size) != 2
+        or any(not isinstance(value, int) or isinstance(value, bool) or value <= 0 for value in source_size)
+        or any(not isinstance(value, int) or isinstance(value, bool) for value in edges)
+        or edges[0] != 0
+        or edges[-1] != source_size[0]
+        or any(left >= right for left, right in zip(edges, edges[1:]))
+        or any(edge < 0 or edge > source_size[0] for edge in edges)
+        or any(not isinstance(value, int) or isinstance(value, bool) or value <= 0 for value in cell_size)
+        or cell_size[0] * (len(edges) - 1) != alpha_size[0]
+        or cell_size[1] != alpha_size[1]
     ):
         _fail("ASSET-ART-004", f"sprite {sprite.get('id')} crop coordinate evidence malformed")
 
+    if (
+        not isinstance(rect, list)
+        or len(rect) != 4
+        or any(not isinstance(value, int) or isinstance(value, bool) for value in rect)
+    ):
+        _fail("ASSET-ART-004", f"sprite {sprite.get('id')} crop coordinate malformed")
     source_left, source_top, width, height = rect
     source_right, source_bottom = source_left + width, source_top + height
     frame_index = None
@@ -150,16 +165,33 @@ def _alpha_rect(
         _fail("ASSET-ART-004", f"sprite {sprite.get('id')} crop crosses source frame boundary")
 
     box = boxes[frame_index]
-    if (
-        not isinstance(box, list)
-        or len(box) != 4
-        or any(not isinstance(value, int) or isinstance(value, bool) for value in box)
+    if not all(
+        isinstance(item, list)
+        and len(item) == 4
+        and all(isinstance(value, int) and not isinstance(value, bool) for value in item)
+        for item in boxes
     ):
         _fail("ASSET-ART-004", f"sprite {sprite.get('id')} alpha content box malformed")
     box_left, box_top, box_right, box_bottom = box
+    frame_width = box_right - box_left
+    frame_height = box_bottom - box_top
+    frame_source_width = edges[frame_index + 1] - edges[frame_index]
+    if (
+        box_left < 0
+        or box_top < 0
+        or box_right <= box_left
+        or box_bottom <= box_top
+        or box_right > frame_source_width
+        or box_bottom > source_size[1]
+        or frame_width > cell_size[0]
+        or frame_height > cell_size[1]
+    ):
+        _fail("ASSET-ART-004", f"sprite {sprite.get('id')} alpha content box outside source cell")
+    normalize_x = (cell_size[0] - frame_width) // 2
+    normalize_y = cell_size[1] - frame_height
     alpha_rect = [
-        frame_index * cell_size[0] + source_left - edges[frame_index] - box_left,
-        source_top - box_top,
+        frame_index * cell_size[0] + normalize_x + source_left - edges[frame_index] - box_left,
+        normalize_y + source_top - box_top,
         width,
         height,
     ]
@@ -170,8 +202,6 @@ def _alpha_rect(
         or alpha_rect[3] <= 0
         or alpha_rect[0] + alpha_rect[2] > alpha_size[0]
         or alpha_rect[1] + alpha_rect[3] > alpha_size[1]
-        or box_right <= box_left
-        or box_bottom <= box_top
     ):
         _fail("ASSET-ART-004", f"sprite {sprite.get('id')} crop outside alpha evidence")
     return alpha_rect

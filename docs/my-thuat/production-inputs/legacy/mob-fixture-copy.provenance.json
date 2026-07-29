@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "copied_path": "docs/my-thuat/production-inputs/legacy/mob-fixture-copy.bin",
+  "source_path": "assetpack/tests/fixtures/legacy/mob.bin",
+  "source_sha256": "b7602310dbb1d0c668b972d27713b24a1d74feea7a9bb1b8398673df8273e59c",
+  "source_bytes": 227,
+  "source_role": "committed_test_fixture",
+  "production_approved": false,
+  "independent_disk_match": {
+    "path": "D:/NRO_Project/Assets/Resources/res/x2/effectdata/106/data.bytes",
+    "sha256": "b7602310dbb1d0c668b972d27713b24a1d74feea7a9bb1b8398673df8273e59c",
+    "bytes": 227
+  },
+  "blocker": "No independently approved Naruto Mob binary/configuration input was found; this byte copy must not be called production input."
+}

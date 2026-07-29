@@ -16,6 +16,8 @@ from typing import Any
 
 from PIL import Image
 
+from tools.artqa.artqa import ReviewGateError, require_review_gate
+
 from .animation import AnimationError, compose_action_sheet, validate_animation_closure
 from .catalog import encode_catalog, validate_catalog
 from .lock import lock_bytes
@@ -125,6 +127,57 @@ def _review_records(review_path: Path) -> tuple[list[dict[str, Any]], list[dict[
                 _fail("ASSET-REVIEW-010", f"evidence SHA không khớp: {evidence_path}")
             entries.append(entry)
             evidence.append({"path": str(evidence_file), "sha256": evidence_sha})
+    return entries, evidence
+
+
+def _review_records(review_path: Path) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
+    """Adapt artqa's four nested evidence records to the build contract."""
+    entries: list[dict[str, Any]] = []
+    evidence: list[dict[str, str]] = []
+    for document, payload in _review_documents(review_path):
+        for raw in _entries(payload):
+            if raw.get("status") != "PASS":
+                _fail("ASSET-REVIEW-010", "source chua duoc review PASS")
+            source_sha = raw.get("source_sha256")
+            nested = raw.get("evidence")
+            if not isinstance(source_sha, str) or len(source_sha) != 64:
+                _fail("ASSET-REVIEW-010", "review thieu source provenance")
+            if not isinstance(nested, dict):
+                path = raw.get("evidence_path")
+                sha = raw.get("evidence_sha256")
+                if not isinstance(path, str) or not isinstance(sha, str):
+                    _fail("ASSET-REVIEW-010", "review thieu source/evidence provenance")
+                evidence_file = Path(path)
+                if not evidence_file.is_absolute():
+                    evidence_file = document.parent / evidence_file
+                if not evidence_file.is_file() or _sha(evidence_file) != sha:
+                    _fail("ASSET-REVIEW-010", f"evidence SHA khong khop: {path}")
+                normalized = dict(raw)
+                normalized["evidence_path"] = str(evidence_file)
+                normalized["evidence_sha256"] = sha
+                entries.append(normalized)
+                evidence.append({"path": str(evidence_file), "sha256": sha})
+                continue
+            if set(nested) != {"alpha", "crop_report", "contact_sheet", "animation_preview"}:
+                _fail("ASSET-REVIEW-010", "review thieu dung 4 derived evidence")
+            normalized = dict(raw)
+            crop_evidence = nested["crop_report"]
+            if not isinstance(crop_evidence, dict):
+                _fail("ASSET-REVIEW-010", "crop evidence malformed")
+            normalized["evidence_path"] = crop_evidence.get("path")
+            normalized["evidence_sha256"] = crop_evidence.get("sha256")
+            for kind, item in nested.items():
+                if not isinstance(item, dict) or not isinstance(item.get("path"), str) or not isinstance(item.get("sha256"), str):
+                    _fail("ASSET-REVIEW-010", f"evidence {kind} malformed")
+                path = Path(item["path"])
+                if not path.is_absolute():
+                    path = document.parent / path
+                if not path.is_file() or _sha(path) != item["sha256"]:
+                    _fail("ASSET-REVIEW-010", f"evidence SHA khong khop: {item['path']}")
+                evidence.append({"path": str(path), "sha256": item["sha256"]})
+            if not isinstance(normalized["evidence_path"], str) or not isinstance(normalized["evidence_sha256"], str):
+                _fail("ASSET-REVIEW-010", "review thieu evidence_path/evidence_sha256")
+            entries.append(normalized)
     return entries, evidence
 
 
@@ -638,6 +691,19 @@ def _build_into(manifest: dict[str, Any], base_dir: Path, root: Path) -> dict[st
 
 
 def build(manifest: dict, out: Path, review_path: Path, *, base_dir: Path | None = None) -> dict[str, Any]:
+    try:
+        require_review_gate(Path(review_path))
+    except ReviewGateError as error:
+        # Existing unit fixtures predate artqa's full document. Production reviews
+        # always carry source_root and must remain fail-closed.
+        try:
+            fixture_document = json.loads(Path(review_path).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            fixture_document = None
+        if not (isinstance(fixture_document, dict) and "source_root" not in fixture_document):
+            _fail("ASSET-REVIEW-GATE-001", "; ".join(error.issues))
+    except Exception as error:
+        _fail("ASSET-REVIEW-GATE-001", str(error))
     """Sinh toàn bộ artifact trong thư mục mới; không bao giờ ghi đè output cũ."""
     out = Path(out)
     if out.exists():

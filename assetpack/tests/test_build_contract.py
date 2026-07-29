@@ -4,6 +4,7 @@ import tempfile
 import unittest
 from copy import deepcopy
 from pathlib import Path
+from unittest.mock import patch
 
 from PIL import Image
 
@@ -34,6 +35,18 @@ class BuildContractTests(unittest.TestCase):
             review = self._review(root, source)
             with self.assertRaisesRegex(BuildError, "ASSET-SCHEMA-001"):
                 build({"slice": "lang-la"}, root / "out", review)
+            self.assertFalse((root / "out").exists())
+
+    def test_build_calls_art_gate_before_schema_or_output(self):
+        from assetpack.build import BuildError, build
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            review = root / "review.json"
+            review.write_text("{}", encoding="utf-8")
+            with patch("assetpack.build.require_review_gate", side_effect=RuntimeError("gate")):
+                with self.assertRaisesRegex(BuildError, "ASSET-REVIEW-GATE-001"):
+                    build({}, root / "out", review, base_dir=root)
             self.assertFalse((root / "out").exists())
 
     def test_review_source_sha_must_match_the_bytes_on_disk(self):

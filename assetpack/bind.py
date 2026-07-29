@@ -48,6 +48,10 @@ def _validate_evidence(record: dict[str, Any]) -> None:
             or not _sha(item.get("sha256"))
         ):
             _fail("ASSET-EVIDENCE-012", f"{record.get('asset', '?')} evidence {kind} malformed")
+    if record.get("evidence_path") != evidence["crop_report"].get("path"):
+        _fail("ASSET-EVIDENCE-012", f"{record.get('asset', '?')} evidence_path mismatch")
+    if record.get("evidence_sha256") != evidence["crop_report"].get("sha256"):
+        _fail("ASSET-EVIDENCE-012", f"{record.get('asset', '?')} evidence_sha256 mismatch")
 
 
 def _validate_geometry(record: dict[str, Any]) -> None:
@@ -79,6 +83,21 @@ def _validate_geometry(record: dict[str, Any]) -> None:
         )
     ):
         _fail("ASSET-ANCHOR-009", f"{record.get('asset', '?')} anchor invalid")
+    for field in ("overlap", "layer"):
+        value = record.get(field)
+        if field == "overlap" and (
+            not isinstance(value, list) or len(value) != 2
+            or any(not isinstance(item, int) or isinstance(item, bool) or item < 0 for item in value)
+        ):
+            _fail("ASSET-ANCHOR-009", f"{record.get('asset', '?')} overlap invalid")
+        if field == "layer" and (not isinstance(value, int) or isinstance(value, bool) or value < 0):
+            _fail("ASSET-ANCHOR-009", f"{record.get('asset', '?')} layer invalid")
+    frames = crop.get("frames")
+    if not isinstance(frames, list) or not frames:
+        _fail("ASSET-ANCHOR-009", f"{record.get('asset', '?')} crop frame geometry missing")
+    for frame in frames:
+        if not isinstance(frame, dict) or not isinstance(frame.get("anchor"), dict) or "overlap" not in frame or "layer" not in frame:
+            _fail("ASSET-ANCHOR-009", f"{record.get('asset', '?')} frame anchor geometry missing")
 
 
 def _validate_animation(record: dict[str, Any], occupied: set[tuple[str, int]]) -> None:
@@ -107,6 +126,31 @@ def _validate_runtime_map(runtime_map: dict[str, Any]) -> None:
     entries = runtime_map.get("entries") if isinstance(runtime_map, dict) else None
     if not isinstance(entries, list) or len(entries) != 8:
         _fail("ASSET-UI-007", "runtime key map phải có đúng 8 binding")
+
+
+def _validate_runtime_map(runtime_map: dict[str, Any]) -> None:
+    entries = runtime_map.get("entries") if isinstance(runtime_map, dict) else None
+    if not isinstance(entries, list) or len(entries) != 8:
+        _fail("ASSET-UI-007", "runtime key map phai co dung 8 binding")
+    owners = [entry.get("source_asset") for entry in entries if isinstance(entry, dict)]
+    if len(owners) != 8 or any(not isinstance(owner, str) or not owner for owner in owners) or len(set(owners)) != 8:
+        _fail("ASSET-UI-007", "runtime key map source_asset phai exact 8 va duy nhat")
+
+
+def validate_reviewed_sources(manifest: dict[str, Any], review_document: dict[str, Any]) -> None:
+    """Reject a new manifest source unless its exact basename is reviewed."""
+    reviewed = {
+        Path(item.get("asset", "")).name
+        for item in review_document.get("assets", [])
+        if isinstance(item, dict) and isinstance(item.get("asset"), str)
+    }
+    sources = {
+        Path(sprite.get("source_path", "")).name
+        for sprite in manifest.get("sprites", [])
+        if isinstance(sprite, dict) and isinstance(sprite.get("source_path"), str)
+    }
+    if not sources or not sources.issubset(reviewed):
+        _fail("ASSET-REVIEW-010", f"manifest source chua co trong exact reviewed set: {sorted(sources - reviewed)}")
 
 
 def validate_bind_records(
@@ -199,6 +243,61 @@ def _review_records(document: dict[str, Any]) -> list[dict[str, Any]]:
     return records
 
 
+def _review_records(document: dict[str, Any]) -> list[dict[str, Any]]:
+    records = []
+    for asset in document.get("assets", []):
+        if not isinstance(asset, dict):
+            continue
+        checks = asset.get("checks", {})
+        crop = checks.get("crop", {})
+        boxes = crop.get("content_boxes")
+        source_size = crop.get("source_size")
+        edges = crop.get("source_edges")
+        cell_size = crop.get("output_cell_size") or crop.get("output_canvas_size")
+        if not isinstance(boxes, list) or not boxes:
+            _fail("ASSET-CROP-007", f"{asset.get('asset', '?')} canonical crop report has no content box")
+        if not isinstance(source_size, list) or not isinstance(edges, list) or not isinstance(cell_size, list):
+            _fail("ASSET-CROP-007", f"{asset.get('asset', '?')} canonical crop report malformed")
+        frames = []
+        for index, box in enumerate(boxes):
+            if not isinstance(box, list) or len(box) != 4 or not all(isinstance(value, int) for value in box):
+                _fail("ASSET-CROP-007", f"{asset.get('asset', '?')} canonical content box malformed")
+            x0, y0, x1, y1 = box
+            if x1 <= x0 or y1 <= y0:
+                _fail("ASSET-CROP-007", f"{asset.get('asset', '?')} canonical content box empty")
+            frames.append({
+                "slot_index": index,
+                "source_rect": [x0, y0, x1 - x0, y1 - y0],
+                "anchor": {"x": (x0 + x1) // 2, "y": y1},
+                "overlap": [x0, max(0, cell_size[0] - x1)],
+                "layer": index,
+            })
+        evidence = asset.get("evidence", {})
+        if not isinstance(evidence, dict) or set(evidence) != set(EVIDENCE_KINDS):
+            _fail("ASSET-EVIDENCE-012", f"{asset.get('asset', '?')} derived evidence missing")
+        first = frames[0]
+        record = {
+            "asset": asset.get("asset"),
+            "review_source_sha256": asset.get("source_sha256"),
+            "source_sha256": asset.get("source_sha256"),
+            "source_dimensions": source_size,
+            "crop": {"source_rect": first["source_rect"], "output_dimensions": crop.get("output_canvas_size"), "frames": frames},
+            "anchor": first["anchor"],
+            "overlap": first["overlap"],
+            "layer": first["layer"],
+            "action_strip": Path(asset.get("asset", "")).stem,
+            "slot_index": 0,
+            "client_cf": [0],
+            "dimensions": crop.get("output_canvas_size"),
+            "animation": checks.get("animation", {}),
+            "evidence": evidence,
+            "evidence_path": evidence["crop_report"].get("path"),
+            "evidence_sha256": evidence["crop_report"].get("sha256"),
+        }
+        records.append(record)
+    return records
+
+
 def bind_manifest(
     mapping: Path,
     review: Path,
@@ -216,6 +315,7 @@ def bind_manifest(
         _fail("ASSET-REVIEW-GATE-001", str(error))
     manifest = _read_json(Path(mapping))
     runtime = _read_json(Path(runtime_map))
+    validate_reviewed_sources(manifest, review_document)
     records = _review_records(review_document)
     validate_bind_records(records, review_document=review_document, runtime_map=runtime)
     manifest.setdefault("build_inputs", {})
@@ -232,6 +332,10 @@ def bind_manifest(
     validate_canonical_manifest(manifest)
     if output is not None:
         output = Path(output)
+        if output.exists():
+            _fail("ASSET-BIND-002", f"output da ton tai: {output}")
         output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        temporary = output.with_name(f".{output.name}.tmp")
+        temporary.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        temporary.replace(output)
     return manifest

@@ -1,7 +1,7 @@
 # Task6B/Task7 canonical production closure — blocker
 
-Ngày: 29/07/2026  
-Worktree: `kh-vertical-slice`  
+Ngày: 29/07/2026
+Worktree: `kh-vertical-slice`
 Trạng thái: **BLOCKED, không tuyên bố production PASS**
 
 ## Đã kiểm tra

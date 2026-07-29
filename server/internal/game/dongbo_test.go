@@ -2,16 +2,64 @@ package game
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"testing"
 
 	"nroserver/internal/protocol"
 )
 
-func TestNhungPartDungKichThuoc(t *testing.T) {
-	// File part nhung phai la file goc 87707 byte. Sai kich thuoc = nhung nham
-	// hoac file hong -> nhan vat khong ve duoc o Ke hoach 4.
-	if len(duLieuPart) != 87707 {
-		t.Errorf("duLieuPart = %d byte, mong doi 87707 (file part goc)", len(duLieuPart))
+type khoaArtifactTest struct {
+	Versions map[string]byte `json:"versions"`
+	Outputs  []struct {
+		Path   string `json:"path"`
+		SHA256 string `json:"sha256"`
+		Bytes  int    `json:"bytes"`
+	} `json:"outputs"`
+}
+
+func TestRuntimeServerNhungDungByteVaSHATuLock(t *testing.T) {
+	var lock khoaArtifactTest
+	if err := json.Unmarshal(duLieuAssetLock, &lock); err != nil {
+		t.Fatalf("asset-lock.json nhúng không đọc được: %v", err)
+	}
+	runtime := map[string][]byte{
+		"server/part.bin":            duLieuPart,
+		"server/skill.bin":           duLieuSkill,
+		"server/tile_set_info.bin":   duLieuTileSet,
+		"server/map-1-collision.bin": duLieuCollision,
+		"server/catalog.json":        duLieuCatalog,
+	}
+	for path, data := range runtime {
+		var expectedSHA string
+		var expectedBytes int
+		for _, output := range lock.Outputs {
+			if output.Path == path {
+				expectedSHA = output.SHA256
+				expectedBytes = output.Bytes
+				break
+			}
+		}
+		if expectedSHA == "" {
+			t.Fatalf("asset lock thiếu %s", path)
+		}
+		sum := sha256.Sum256(data)
+		if got := hex.EncodeToString(sum[:]); got != expectedSHA {
+			t.Errorf("%s SHA = %s, lock = %s", path, got, expectedSHA)
+		}
+		if len(data) != expectedBytes {
+			t.Errorf("%s = %d byte, lock = %d", path, len(data), expectedBytes)
+		}
+	}
+	if vsData != lock.Versions["data"] ||
+		vsMap != lock.Versions["map"] ||
+		vsSkill != lock.Versions["resource"] {
+		t.Fatalf(
+			"version server data/map/skill = %d/%d/%d, lock = %d/%d/%d",
+			vsData, vsMap, vsSkill,
+			lock.Versions["data"], lock.Versions["map"], lock.Versions["resource"],
+		)
 	}
 }
 
@@ -32,7 +80,7 @@ func TestGoiVersionGameDungByte(t *testing.T) {
 		t.Fatalf("lenh = %d, mong doi -28", m.Command)
 	}
 	// than: [4][vsData][vsMap][vsSkill][vsItem][0][countCaption=0]
-	want := []byte{4, 20, 20, 20, 20, 0, 0}
+	want := []byte{4, 21, 21, 21, 20, 0, 0}
 	if !bytes.Equal(m.Data, want) {
 		t.Errorf("than versionGame = %v, mong doi %v", m.Data, want)
 	}
@@ -49,13 +97,13 @@ func TestGoiCatalogDataDungCauTruc(t *testing.T) {
 	}
 	// 6 blob theo thu tu dart/arrow/effect/image/part/skill.
 	// Blob rong (dart/arrow/effect/image/skill): do dai 2, noi dung [0x00, 0x00].
-	// Part: do dai 87707, noi dung la duLieuPart 87707 byte.
-	doKiemBlob := func(ten string, khongRong bool) int32 {
+	// Part và skill là đúng nguyên blob đã khóa; bốn blob còn lại rỗng.
+	doKiemBlob := func(ten string, want []byte) int32 {
 		n, err := r.Int()
 		if err != nil {
 			t.Fatalf("doc do dai %s loi: %v", ten, err)
 		}
-		if !khongRong {
+		if want == nil {
 			// Blob rong: do dai phai 2, noi dung [0x00, 0x00]
 			if n != 2 {
 				t.Errorf("%s do dai %d, mong doi 2 (blob rong)", ten, n)
@@ -66,24 +114,29 @@ func TestGoiCatalogDataDungCauTruc(t *testing.T) {
 				t.Errorf("%s noi dung khong dung, doc [%d, %d], mong doi [0, 0]", ten, b1, b2)
 			}
 		} else {
-			// Part: chi kiem do dai, bo qua noi dung 87707 byte
-			if n != 87707 {
-				t.Errorf("%s do dai %d, mong doi 87707", ten, n)
+			if n != int32(len(want)) {
+				t.Errorf("%s do dai %d, mong doi %d", ten, n, len(want))
 			}
+			got := make([]byte, n)
 			for i := int32(0); i < n; i++ {
-				if _, err := r.Byte(); err != nil {
+				value, err := r.Byte()
+				if err != nil {
 					t.Fatalf("doc noi dung %s loi: %v", ten, err)
 				}
+				got[i] = value
+			}
+			if !bytes.Equal(got, want) {
+				t.Errorf("%s không byte-identical artifact đã nhúng", ten)
 			}
 		}
 		return n
 	}
-	doKiemBlob("dart", false)
-	doKiemBlob("arrow", false)
-	doKiemBlob("effect", false)
-	doKiemBlob("image", false)
-	doKiemBlob("part", true)
-	doKiemBlob("skill", false)
+	doKiemBlob("dart", nil)
+	doKiemBlob("arrow", nil)
+	doKiemBlob("effect", nil)
+	doKiemBlob("image", nil)
+	doKiemBlob("part", duLieuPart)
+	doKiemBlob("skill", duLieuSkill)
 	// Toan goi phai < 100000 byte (moc mark(100000) client).
 	if len(m.Data) >= 100000 {
 		t.Errorf("goi -87 = %d byte, phai < 100000", len(m.Data))
@@ -231,7 +284,7 @@ func TestGoiCatalogMapRong(t *testing.T) {
 		t.Fatalf("lenh = %d, mong doi -28", m.Command)
 	}
 	// [6][vsMap][countMap=0][countNpc=0][countMob=0]
-	want := []byte{6, 20, 0, 0, 0}
+	want := []byte{6, 21, 0, 0, 0}
 	if !bytes.Equal(m.Data, want) {
 		t.Errorf("than catalog map = %v, mong doi %v", m.Data, want)
 	}

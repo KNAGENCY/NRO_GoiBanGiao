@@ -201,14 +201,14 @@ func kiemVersionGame(t *testing.T, m *protocol.Message) {
 	t.Helper()
 	want := []byte{lenhConVersionGame, vsData, vsMap, vsSkill, vsItem, 0, 0}
 	if !bytes.Equal(m.Data, want) {
-		t.Fatalf("than goi -28/4 (versionGame) = %v, mong doi %v (vsData/map/skill/item = 20)", m.Data, want)
+		t.Fatalf("than goi -28/4 (versionGame) = %v, mong doi %v (version phải theo asset lock)", m.Data, want)
 	}
 }
 
 // kiemDataCoPartVaDuoi100KB khang dinh goi -87: lenh dung, tong do dai duoi
-// 100000 byte (moc mark client), vsData dung, va DUNG 6 blob theo thu tu
-// dart/arrow/effect/image/part/skill trong do CHI part la khong rong (dung
-// bang do dai duLieuPart) — doi chieu voi TestGoiCatalogDataDungCauTruc trong
+// 100000 byte (mốc mark client), vsData đúng, và ĐÚNG 6 blob theo thứ tự
+// dart/arrow/effect/image/part/skill; part + skill phải byte-identical artifact —
+// đối chiếu với TestGoiCatalogDataDungCauTruc trong
 // dongbo_test.go.
 func kiemDataCoPartVaDuoi100KB(t *testing.T, m *protocol.Message) {
 	t.Helper()
@@ -224,36 +224,39 @@ func kiemDataCoPartVaDuoi100KB(t *testing.T, m *protocol.Message) {
 		t.Fatalf("byte dau goi -87 = %d (loi doc: %v), mong doi vsData = %d", b, err, vsData)
 	}
 
-	docBlob := func(ten string) int32 {
+	docBlob := func(ten string) []byte {
 		n, err := r.Int()
 		if err != nil {
 			t.Fatalf("doc do dai blob %s that bai: %v", ten, err)
 		}
+		data := make([]byte, n)
 		for i := int32(0); i < n; i++ {
-			if _, err := r.Byte(); err != nil {
+			value, err := r.Byte()
+			if err != nil {
 				t.Fatalf("doc noi dung blob %s (byte %d/%d) that bai: %v", ten, i, n, err)
 			}
+			data[i] = value
 		}
-		return n
+		return data
 	}
 
-	if n := docBlob("dart"); n != 2 {
-		t.Errorf("blob dart do dai %d, mong doi 2 (rong)", n)
+	if data := docBlob("dart"); !bytes.Equal(data, []byte{0, 0}) {
+		t.Errorf("blob dart = %v, mong doi [0 0] (rong)", data)
 	}
-	if n := docBlob("arrow"); n != 2 {
-		t.Errorf("blob arrow do dai %d, mong doi 2 (rong)", n)
+	if data := docBlob("arrow"); !bytes.Equal(data, []byte{0, 0}) {
+		t.Errorf("blob arrow = %v, mong doi [0 0] (rong)", data)
 	}
-	if n := docBlob("effect"); n != 2 {
-		t.Errorf("blob effect do dai %d, mong doi 2 (rong)", n)
+	if data := docBlob("effect"); !bytes.Equal(data, []byte{0, 0}) {
+		t.Errorf("blob effect = %v, mong doi [0 0] (rong)", data)
 	}
-	if n := docBlob("image"); n != 2 {
-		t.Errorf("blob image do dai %d, mong doi 2 (rong)", n)
+	if data := docBlob("image"); !bytes.Equal(data, []byte{0, 0}) {
+		t.Errorf("blob image = %v, mong doi [0 0] (rong)", data)
 	}
-	if n := docBlob("part"); n != int32(len(duLieuPart)) || n == 0 {
-		t.Errorf("blob part do dai %d, mong doi %d (file part goc, KHONG rong)", n, len(duLieuPart))
+	if data := docBlob("part"); !bytes.Equal(data, duLieuPart) {
+		t.Errorf("blob part không byte-identical artifact nhúng (nhận %d, muốn %d)", len(data), len(duLieuPart))
 	}
-	if n := docBlob("skill"); n != 2 {
-		t.Errorf("blob skill do dai %d, mong doi 2 (rong)", n)
+	if data := docBlob("skill"); !bytes.Equal(data, duLieuSkill) {
+		t.Errorf("blob skill không byte-identical artifact nhúng (nhận %d, muốn %d)", len(data), len(duLieuSkill))
 	}
 
 	if _, err := r.Byte(); err == nil {

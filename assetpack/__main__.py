@@ -5,6 +5,7 @@ from pathlib import Path
 
 from .manifest import ManifestError, validate_manifest, verify_legacy_inputs
 from .build import BuildError, build
+from .deploy import DeployError, deploy, unity_preflight
 
 
 def main(argv=None):
@@ -23,6 +24,16 @@ def main(argv=None):
     build_command.add_argument("--base-dir", type=Path)
     build_command.add_argument("--out", type=Path, required=True)
     build_command.add_argument("--review", type=Path, required=True)
+    deploy_command = commands.add_parser("deploy")
+    deploy_command.add_argument("--server-artifact", type=Path, required=True)
+    deploy_command.add_argument("--client-artifact", type=Path)
+    deploy_command.add_argument("--release-root", type=Path, required=True)
+    deploy_command.add_argument("--snapshot", type=Path, required=True)
+    deploy_command.add_argument("--version-ledger", type=Path, required=True)
+    deploy_command.add_argument("--previous-lock", type=Path)
+    deploy_command.add_argument("--runtime-key-map", type=Path, required=True)
+    deploy_command.add_argument("--unity-exe", type=Path, required=True)
+    deploy_command.add_argument("--protected-unity-root", type=Path)
     args = parser.parse_args(argv)
     if args.command == "validate":
         try:
@@ -62,6 +73,29 @@ def main(argv=None):
                 raise BuildError("ASSET-BUILD-011: slice không khớp manifest")
             build(manifest, args.out, args.review, base_dir=args.base_dir or args.manifest.parent)
         except (BuildError, OSError, json.JSONDecodeError) as error:
+            print(error, file=sys.stderr)
+            return 1
+    if args.command == "deploy":
+        try:
+            release = deploy(
+                args.server_artifact,
+                args.client_artifact or args.server_artifact,
+                args.release_root,
+                args.snapshot,
+                args.version_ledger,
+                args.runtime_key_map,
+                previous_lock_path=args.previous_lock,
+                protected_unity_root=args.protected_unity_root,
+                preflight=lambda snapshot, runtime_map, contract, log: unity_preflight(
+                    args.unity_exe,
+                    snapshot,
+                    runtime_map,
+                    contract,
+                    log,
+                ),
+            )
+            print(release)
+        except (DeployError, OSError, json.JSONDecodeError) as error:
             print(error, file=sys.stderr)
             return 1
     return 0

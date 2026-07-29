@@ -146,7 +146,7 @@ namespace Game1 {
 public class Command {
     public bool isPlaySoundButton = true;
     public void performAction()
-	{
+__DECOMPILER_INDENT__{
         GameCanvas.clearAllPointerEvent();
     }
     public void Paint() {
@@ -157,6 +157,7 @@ public class Command {
     }
 }}
 '@
+    $commandGame1 = $commandGame1.Replace("__DECOMPILER_INDENT__", "    `t")
     $panelGame1 = @'
 namespace Game1 {
 public class Panel {

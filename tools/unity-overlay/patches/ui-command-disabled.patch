@@ -6,8 +6,8 @@
       "after": "public bool isPlaySoundButton = true;\n\tpublic bool isDisabled;"
     },
     {
-      "before": "public void performAction()\n\t{",
-      "after": "public void performAction()\n\t{\n\t\tif (isDisabled)\n\t\t{\n\t\t\treturn;\n\t\t}"
+      "before": "public void performAction()\n    \t{",
+      "after": "public void performAction()\n    \t{\n    \t\tif (isDisabled)\n    \t\t{\n    \t\t\treturn;\n    \t\t}"
     },
     {
       "before": "if (caption != string.Empty)",

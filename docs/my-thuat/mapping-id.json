@@ -2,10 +2,10 @@
   "schema_version": 1,
   "source_catalog_version": 2,
   "versions": {
-    "runtime_slice": 1,
-    "data": 1,
-    "map": 1,
-    "resource": 1
+    "runtime_slice": 21,
+    "data": 21,
+    "map": 21,
+    "resource": 21
   },
   "phase": {
     "name": "lang-la",

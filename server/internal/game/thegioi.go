@@ -15,7 +15,7 @@ import (
 // -82, gui SAU -24, hoac map.tileId ngoai [1,numTileMap] -> client GameMidlet.exit()
 // (THOAT HAN app). Nhung bang go:embed nhu part.bin o Ke hoach 3.
 //
-//go:embed tileset.bin
+//go:embed assets/tile_set_info.bin
 var duLieuTileSet []byte
 
 // Lenh cac goi vao the gioi. Gia tri tu ban Java cu, DUNG DOI:

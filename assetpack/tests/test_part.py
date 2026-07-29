@@ -14,6 +14,7 @@ LEGACY_PART = ROOT / "server" / "internal" / "game" / "part.bin"
 MANIFEST = ROOT / "docs" / "my-thuat" / "mapping-id.json"
 FRAME_COUNTS = {0: 3, 1: 17, 2: 14}
 LEGACY_SHA256 = "09349f28a95b46469b691abf87d6b341f3395f53ca8d6d704b48ab706992826b"
+BUILT_SHA256 = "9f9c8ee290d8ff367ad7450584d7c1544adc41916924d9ec4a41a93229e6f327"
 
 
 def scan_legacy_records(data: bytes):
@@ -70,8 +71,20 @@ class PartBinaryTest(unittest.TestCase):
         expected[30] = b"\x00" + b"".join(
             struct.pack(">hbb", sprite_id, 0, 0) for sprite_id in (27041, 27042, 27043)
         )
-        expected[57] = record_bytes(1, 27044, 17)
-        expected[58] = record_bytes(2, 27061, 14)
+        expected[57] = b"\x01" + b"".join(
+            struct.pack(">hbb", sprite_id, 0, 0)
+            for sprite_id in (
+                27044, 27045, 27046, 27047, 27048, 27049, 27050, 27051, 27052,
+                27053, 27054, 27055, 27056, 27057, 27058, 27059, 27060,
+            )
+        )
+        expected[58] = b"\x02" + b"".join(
+            struct.pack(">hbb", sprite_id, 0, 0)
+            for sprite_id in (
+                27061, 27062, 27063, 27064, 27065, 27066, 27067,
+                27068, 27069, 27070, 27071, 27072, 27073, 27074,
+            )
+        )
         expected.extend((
             record_bytes(0, 27075, 3),
             record_bytes(1, 27076, 17),
@@ -79,7 +92,16 @@ class PartBinaryTest(unittest.TestCase):
         ))
         golden = struct.pack(">h", 2192) + b"".join(expected)
         self.assertEqual(golden, actual)
-        self.assertEqual("935c7a32b7b8e40d7d66234611931b5803b348310fcca60e4de324a023c8d354", hashlib.sha256(actual).hexdigest())
+        self.assertEqual(BUILT_SHA256, hashlib.sha256(actual).hexdigest())
+
+    def test_swapping_two_body_slots_breaks_the_independent_part_golden(self):
+        mutated = json.loads(json.dumps(self.manifest))
+        body = next(part for part in mutated["parts"] if part["id"] == 57)
+        body["frames"][0], body["frames"][1] = body["frames"][1], body["frames"][0]
+
+        changed = build_part(mutated, self.legacy)
+
+        self.assertNotEqual(BUILT_SHA256, hashlib.sha256(changed).hexdigest())
 
     def test_rejects_manifest_missing_required_iruka_part_2191(self):
         missing_2191 = json.loads(json.dumps(self.manifest))

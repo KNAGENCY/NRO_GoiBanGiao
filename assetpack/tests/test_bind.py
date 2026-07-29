@@ -46,16 +46,15 @@ class Task6BBindTests(unittest.TestCase):
                     bind_manifest(mapping, review, runtime, art_root=root, output=output)
             self.assertFalse(output.exists())
 
-    def test_baseline_mapping_is_rejected_as_noncanonical_build_manifest(self):
-        from assetpack.bind import BindError, validate_canonical_manifest
+    def test_production_mapping_is_now_a_canonical_bind_manifest(self):
+        from assetpack.bind import validate_canonical_manifest
 
         mapping = json.loads(
             (Path(__file__).parents[2] / "docs/my-thuat/mapping-id.json").read_text(
                 encoding="utf-8"
             )
         )
-        with self.assertRaisesRegex(BindError, "ASSET-SCHEMA-001"):
-            validate_canonical_manifest(mapping)
+        validate_canonical_manifest(mapping)
 
     def test_two_slots_cannot_share_one_action_slot(self):
         from assetpack.bind import BindError, validate_bind_records

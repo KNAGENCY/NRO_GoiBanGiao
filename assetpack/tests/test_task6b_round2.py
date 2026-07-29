@@ -117,10 +117,23 @@ class Task6BRound2ProductionTests(unittest.TestCase):
         self.assertEqual(set(manifest), REQUIRED_TOP_LEVEL)
         self.assertIn("source_base", manifest["build_inputs"])
 
-        base_dir = (MAPPING.parent / manifest["build_inputs"]["source_base"]).resolve()
-        sources = {Path(sprite["source_path"]).name for sprite in manifest["sprites"]}
+        base_dir = (SHARED_ROOT / manifest["build_inputs"]["source_base"]).resolve()
+        sprite_sources = {
+            Path(sprite["source_path"]).name for sprite in manifest["sprites"]
+        }
+        source_provenance = manifest["build_inputs"].get("source_provenance")
+        self.assertIsInstance(source_provenance, list)
+        sources = {
+            Path(record["source_path"]).name for record in source_provenance
+        }
         self.assertEqual(sources, REVIEWED_NAMES)
-        self.assertIn("iruka_portrait_chroma.png", sources)
+        self.assertTrue(sprite_sources <= sources)
+        self.assertIn("iruka_portrait_chroma.png", sprite_sources)
+        for record in source_provenance:
+            source_path = Path(record["source_path"])
+            self.assertFalse(source_path.is_absolute())
+            self.assertTrue((base_dir / source_path).is_file(), record["source_path"])
+            self.assertEqual(len(record["source_sha256"]), 64)
         for sprite in manifest["sprites"]:
             source_path = Path(sprite["source_path"])
             self.assertFalse(source_path.is_absolute())
@@ -133,7 +146,7 @@ class Task6BRound2ProductionTests(unittest.TestCase):
         self.assertIsInstance(build_inputs, dict)
         source_base = build_inputs.get("source_base")
         self.assertIsInstance(source_base, str)
-        base_dir = (MAPPING.parent / source_base).resolve()
+        base_dir = (SHARED_ROOT / source_base).resolve()
         with tempfile.TemporaryDirectory() as temporary:
             out = Path(temporary) / "asset-build"
             result = subprocess.run(

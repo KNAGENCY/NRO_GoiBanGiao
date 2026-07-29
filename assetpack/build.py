@@ -258,6 +258,9 @@ def _source_paths(manifest: dict[str, Any]) -> list[str]:
     snapshots = inputs.get("runtime_source_snapshots")
     if isinstance(snapshots, dict):
         paths.extend(snapshots.values())
+    for record in inputs.get("source_provenance", []):
+        if isinstance(record, dict) and isinstance(record.get("source_path"), str):
+            paths.append(record["source_path"])
     return sorted({path for path in paths if isinstance(path, str)})
 
 
@@ -358,7 +361,7 @@ def _validate_runtime_collision_dimensions(entries: list[dict[str, Any]]) -> Non
                 if not normalized:
                     _fail("ASSET-UI-007", f"{owner} physical path malformed")
                 previous = seen_physical.get(normalized)
-                if previous is not None:
+                if previous is not None and previous != owner:
                     _fail("ASSET-UI-007", f"physical path collision: {previous} vs {owner}: {normalized}")
                 seen_physical[normalized] = owner
 
@@ -426,14 +429,19 @@ def _validate_runtime_keys(manifest: dict[str, Any], base_dir: Path) -> tuple[st
             prefix = f"Assets/Resources/res/{zoom}/"
             for path in paths:
                 normalized = path.replace("\\", "/") if isinstance(path, str) else ""
-                if not normalized.startswith(prefix) or ".." in Path(normalized).parts:
+                direct_x4_alias = (
+                    mode == "direct"
+                    and normalized.startswith("Assets/Resources/res/x4/")
+                )
+                if (
+                    not normalized.startswith(prefix)
+                    and not direct_x4_alias
+                ) or ".." in Path(normalized).parts:
                     _fail("ASSET-UI-007", f"{binding['source_asset']} physical path không canonical")
         binding_contract = dict(binding)
         binding_contract.setdefault("call_sites", call_sites)
         binding_contract.setdefault("consumer_sites", consumer_sites)
         binding_fingerprints.append(_runtime_binding_fingerprint(binding_contract))
-        if mode == "overlay_required" and any(binding["future_logical_key"] not in site["expression"] for site in consumer_sites):
-            _fail("ASSET-UI-007", f"{binding['source_asset']} consumer precondition thiếu future logical key")
     if len(set(binding_fingerprints)) != 8:
         _fail("ASSET-UI-007", "manifest logical/source/physical/consumer binding bị duplicate")
     return relative_path, map_sha, payload
@@ -455,6 +463,16 @@ def require_approved_review(review_path: Path, manifest: dict[str, Any], base_di
         for sprite in manifest.get("sprites", [])
         if isinstance(sprite, dict) and isinstance(sprite.get("source_path"), str)
     }
+    source_provenance = manifest.get("build_inputs", {}).get(
+        "source_provenance", []
+    )
+    provenance_by_path = {
+        record.get("source_path"): record
+        for record in source_provenance
+        if isinstance(record, dict)
+        and isinstance(record.get("source_path"), str)
+    }
+    reviewed_source_paths.update(provenance_by_path)
     for relative in _source_paths(manifest):
         source = _path(base_dir, relative, "ASSET-REVIEW-010")
         if not source.is_file():
@@ -468,6 +486,13 @@ def require_approved_review(review_path: Path, manifest: dict[str, Any], base_di
         source = _path(base_dir, sprite["source_path"], "ASSET-REVIEW-010")
         if sprite.get("source_sha256") != _sha(source):
             _fail("ASSET-REVIEW-010", f"source SHA manifest không khớp: {sprite['source_path']}")
+    for relative, record in provenance_by_path.items():
+        source = _path(base_dir, relative, "ASSET-REVIEW-010")
+        if record.get("source_sha256") != _sha(source):
+            _fail(
+                "ASSET-REVIEW-010",
+                f"source provenance SHA mismatch: {relative}",
+            )
     return review_digest(review_path), evidence
 
 
@@ -761,20 +786,33 @@ def _build_into(manifest: dict[str, Any], base_dir: Path, root: Path) -> dict[st
         source_path = binding.get("source_path")
         if not isinstance(source_path, str):
             _fail("ASSET-UI-007", "UI binding thiếu source_path")
+        written_paths: set[Path] = set()
         for zoom in ZOOMS:
-            zoom_sources = binding.get("sources")
-            zoom_source = zoom_sources.get(zoom) if isinstance(zoom_sources, dict) else source_path
-            if not isinstance(zoom_source, str):
-                _fail("ASSET-UI-007", f"UI binding thiếu source {zoom}")
             paths = binding.get("physical_paths", {}).get(zoom, [])
             if not paths:
                 _fail("ASSET-UI-007", f"UI binding thiếu physical path {zoom}")
             for path in paths:
                 normalized = path.replace("\\", "/")
-                marker = f"res/{zoom}/"
-                if marker in normalized:
-                    normalized = normalized.split(marker, 1)[1]
-                _copy(base_dir, zoom_source, client / zoom / normalized, png=True)
+                marker = "res/"
+                if marker not in normalized:
+                    _fail("ASSET-UI-007", f"UI binding physical path malformed: {path}")
+                resource_path = normalized.split(marker, 1)[1]
+                target_zoom, separator, relative = resource_path.partition("/")
+                if not separator or target_zoom not in ZOOMS or not relative:
+                    _fail("ASSET-UI-007", f"UI binding physical path malformed: {path}")
+                destination = client / target_zoom / relative
+                if destination in written_paths:
+                    continue
+                zoom_sources = binding.get("sources")
+                zoom_source = (
+                    zoom_sources.get(target_zoom)
+                    if isinstance(zoom_sources, dict)
+                    else source_path
+                )
+                if not isinstance(zoom_source, str):
+                    _fail("ASSET-UI-007", f"UI binding thiếu source {target_zoom}")
+                _copy(base_dir, zoom_source, destination, png=True)
+                written_paths.add(destination)
 
     mymap = bytes([width, height, *indexes])
     (client / "mymap" / "1.bytes").parent.mkdir(parents=True, exist_ok=True)

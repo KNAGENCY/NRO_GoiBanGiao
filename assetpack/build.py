@@ -208,6 +208,47 @@ def _runtime_binding_fingerprint(binding: dict[str, Any]) -> str:
     )
 
 
+def _validate_runtime_collision_dimensions(entries: list[dict[str, Any]]) -> None:
+    """Reject duplicate runtime outputs independently of provenance or site metadata."""
+    seen_logical: dict[str, str] = {}
+    seen_future: dict[str, str] = {}
+    seen_physical: dict[str, str] = {}
+    for index, entry in enumerate(entries):
+        owner = entry.get("source_asset", f"entry[{index}]")
+        logical_keys = entry.get("logical_keys")
+        if not isinstance(logical_keys, list) or any(not isinstance(key, str) or not key for key in logical_keys):
+            _fail("ASSET-UI-007", f"{owner} logical_keys malformed")
+        for key in logical_keys:
+            previous = seen_logical.get(key)
+            if previous is not None:
+                _fail("ASSET-UI-007", f"logical key collision: {previous} vs {owner}: {key}")
+            seen_logical[key] = owner
+
+        future_key = entry.get("future_logical_key")
+        if future_key is not None and (not isinstance(future_key, str) or not future_key):
+            _fail("ASSET-UI-007", f"{owner} future_logical_key malformed")
+        if future_key is not None:
+            previous = seen_future.get(future_key)
+            if previous is not None:
+                _fail("ASSET-UI-007", f"future logical key collision: {previous} vs {owner}: {future_key}")
+            seen_future[future_key] = owner
+
+        physical_paths = entry.get("physical_paths")
+        if not isinstance(physical_paths, dict) or set(physical_paths) != set(ZOOMS):
+            _fail("ASSET-UI-007", f"{owner} physical_paths malformed")
+        for zoom, paths in physical_paths.items():
+            if not isinstance(paths, list) or not paths:
+                _fail("ASSET-UI-007", f"{owner} physical path {zoom} malformed")
+            for path in paths:
+                normalized = path.replace("\\", "/") if isinstance(path, str) else ""
+                if not normalized:
+                    _fail("ASSET-UI-007", f"{owner} physical path malformed")
+                previous = seen_physical.get(normalized)
+                if previous is not None:
+                    _fail("ASSET-UI-007", f"physical path collision: {previous} vs {owner}: {normalized}")
+                seen_physical[normalized] = owner
+
+
 def _validate_runtime_keys(manifest: dict[str, Any], base_dir: Path) -> tuple[str | None, str, dict[str, Any]]:
     payload, relative_path, map_sha = _runtime_key_map(manifest, base_dir)
     entries = payload.get("entries") if isinstance(payload, dict) else None
@@ -217,6 +258,7 @@ def _validate_runtime_keys(manifest: dict[str, Any], base_dir: Path) -> tuple[st
     for entry in entries:
         if not isinstance(entry, dict) or not isinstance(entry.get("source_asset"), str) or not entry["source_asset"]:
             _fail("ASSET-UI-007", "runtime entry thiếu source_asset hợp lệ")
+    _validate_runtime_collision_dimensions(entries)
     by_asset = {entry["source_asset"]: entry for entry in entries}
     if len(by_asset) != 8:
         _fail("ASSET-UI-007", "runtime key map trùng/thiếu source_asset")

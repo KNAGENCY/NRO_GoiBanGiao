@@ -19,6 +19,12 @@
 - `python -m compileall -q assetpack`: **PASS**.
 - Mutation thật fix4: thêm lại `source_asset` làm test collision đỏ; tắt guard `name` làm 4 case `TypeError`; đã khôi phục và suite xanh lại.
 
+## Task 3 fix5 — final animation and binding guards
+
+- Runtime UI collision gate now rejects each duplicate `logical_keys`, non-empty `future_logical_key`, and normalized `physical_paths` independently, so changing `source_asset`, `call_sites`, or `consumer_sites` cannot hide a collision; all failures remain `ASSET-UI-007`.
+- `validate_animation_closure` now requires `slot_count` on both sheet and animation contracts, accepts only canonical non-boolean integers, and reports malformed values as `ASSET-ANIMATION-008` without raw `KeyError`.
+- Added exactly two reproduction tests: one covers all three runtime collision dimensions and one covers missing/bool/float/wrong slot counts for both closures. Minimal reproduction tests pass; real mutations made both reproductions fail.
+
 ## Known blocker
 
 Build production vẫn dừng fail-closed ở closure manifest nếu Task 6B chưa bind đủ source/evidence/build inputs thật. Test build dùng fixture canonical đầy đủ để chứng minh pipeline không bỏ qua required closure; chưa tự ý sửa PNG hay manifest production.

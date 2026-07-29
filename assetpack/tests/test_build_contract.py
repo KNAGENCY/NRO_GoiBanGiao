@@ -342,6 +342,48 @@ class BuildContractTests(unittest.TestCase):
                 build(manifest, root / "out", review, base_dir=root)
             self.assertFalse((root / "out").exists())
 
+    def test_runtime_collision_cannot_be_hidden_by_source_or_site_metadata(self):
+        from assetpack.build import BuildError, build
+
+        mutations = ("logical_keys", "future_logical_key", "physical_paths")
+        for field in mutations:
+            with self.subTest(field=field), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                manifest = self._complete_manifest(root)
+                runtime_map_path = root / manifest["build_inputs"]["runtime_key_map"]
+                runtime_map = json.loads(runtime_map_path.read_text(encoding="utf-8"))
+
+                source_index, target_index = (1, 2) if field == "logical_keys" else (3, 4)
+                source = runtime_map["entries"][source_index]
+                target = runtime_map["entries"][target_index]
+                target[field] = deepcopy(source[field])
+                manifest["ui_bindings"][target_index][field] = deepcopy(source[field])
+
+                if field == "logical_keys":
+                    target_site = target["call_sites"][0]
+                    target_expression = (
+                        " ".join(f"loadImage('{key}');" for key in source["logical_keys"])
+                        + " loadImage('/naruto/ui/independent-target-marker.png');"
+                    )
+                    (root / target_site["file"]).write_text(target_expression, encoding="utf-8")
+                    target_site["expression"] = target_expression
+                    target_site["file_sha256"] = hashlib.sha256((root / target_site["file"]).read_bytes()).hexdigest()
+                    manifest["ui_bindings"][target_index]["call_sites"] = deepcopy(target["call_sites"])
+                elif field == "future_logical_key":
+                    target_site = target["consumer_sites"][0]
+                    target_expression = f"consumeOverlay('{source[field]}'); consumeOverlay('/naruto/ui/independent-target-marker.png');"
+                    (root / target_site["file"]).write_text(target_expression, encoding="utf-8")
+                    target_site["expression"] = target_expression
+                    target_site["file_sha256"] = hashlib.sha256((root / target_site["file"]).read_bytes()).hexdigest()
+                    manifest["ui_bindings"][target_index]["consumer_sites"] = deepcopy(target["consumer_sites"])
+
+                runtime_map_path.write_text(json.dumps(runtime_map), encoding="utf-8")
+                review = self._write_complete_review(root, manifest)
+
+                with self.assertRaisesRegex(BuildError, "ASSET-UI-007"):
+                    build(manifest, root / "out", review, base_dir=root)
+                self.assertFalse((root / "out").exists())
+
     def test_tileset_payload_mutation_is_rejected_even_when_sha_is_updated(self):
         from assetpack.build import BuildError, build
 

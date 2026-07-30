@@ -63,8 +63,14 @@ catalog `f24db071ce8708d4fb8e318f934a702cbed7090bb709fc76a42c752d4617a973`,
 collision `4fe176b20d67dd98bd7b96421ab741d07f0d045b9e61b7f15efcbbeaadfd043b`, lock
 `f72a20b2bd50408dab472f5baa2c9d7ed3edd523e5b38784e11f64c697dea29f`.
 
-Full `go test ./internal/game -count=1` đã chạy 31.3s nhưng đỏ tại actor test cũ
-`TestKhuVucXuLySuKien` (pB nhận 1 thay vì 2 message), không liên quan packet/catalog.
+Fix collision placement: canary solid dời từ cell `(0,0)` sang `(4,0)`, tránh
+đường actor test bắt đầu tại `(0,0)`. `TestTaiCollision...` mutation cập nhật cell
+index 4 (offset 8 sau header). Full `D:\Go\bin\go.exe test ./internal/game -count=1`
+đã xanh, 30.451s.
+
+Artifact sau khi dời canary: collision
+`39eee2c743a6a27c1b8afe3e640c9dc1f611685b3a7e0b81e32538234ad7cd5f`; lock
+`54a638f0e7c008586dedbf13eaf45aff42edcdf63f6708fd6138b5219c773d82`.
 
 ## Concern
 

@@ -46,11 +46,12 @@ func TestTaiCollisionKhoaHashVaCanarySolid(t *testing.T) {
 	if err != nil {
 		t.Fatalf("TaiCollision() loi: %v", err)
 	}
-	if !col.DiDuoc(100, 384) || !col.DiDuocDoan(100, 384, 110, 384) || col.DiDuoc(10, 10) || col.DiDuocDoan(10, 10, 100, 384) {
+	if !col.DiDuoc(100, 384) || !col.DiDuocDoan(100, 384, 110, 384) || col.DiDuoc(100, 10) || col.DiDuocDoan(10, 10, 100, 10) {
 		t.Fatal("artifact phai co spawn/segment walkable va o solid chan duong")
 	}
 	mutated := append([]byte(nil), duLieuCollision...)
-	mutated[4] = 0
+	// Ô cản production nằm ở cell index 4 (sau header 4 byte).
+	mutated[8] = 0
 	if _, err := TaiCollision(mutated, duLieuAssetLock); err == nil || !strings.Contains(err.Error(), "ASSET-COLLISION-006") {
 		t.Fatalf("canary dao solid phai do ASSET-COLLISION-006, got %v", err)
 	}

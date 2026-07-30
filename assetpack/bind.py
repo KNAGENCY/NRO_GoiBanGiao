@@ -125,12 +125,6 @@ def _validate_animation(record: dict[str, Any], occupied: set[tuple[str, int]]) 
 def _validate_runtime_map(runtime_map: dict[str, Any]) -> None:
     entries = runtime_map.get("entries") if isinstance(runtime_map, dict) else None
     if not isinstance(entries, list) or len(entries) != 8:
-        _fail("ASSET-UI-007", "runtime key map phải có đúng 8 binding")
-
-
-def _validate_runtime_map(runtime_map: dict[str, Any]) -> None:
-    entries = runtime_map.get("entries") if isinstance(runtime_map, dict) else None
-    if not isinstance(entries, list) or len(entries) != 8:
         _fail("ASSET-UI-007", "runtime key map phai co dung 8 binding")
     owners = [entry.get("source_asset") for entry in entries if isinstance(entry, dict)]
     if len(owners) != 8 or any(not isinstance(owner, str) or not owner for owner in owners) or len(set(owners)) != 8:
@@ -223,48 +217,6 @@ def _read_json(path: Path) -> dict[str, Any]:
     if not isinstance(value, dict):
         _fail("ASSET-BIND-001", f"JSON phải là object: {path}")
     return value
-
-
-def _review_records(document: dict[str, Any]) -> list[dict[str, Any]]:
-    records = []
-    for asset in document.get("assets", []):
-        if not isinstance(asset, dict):
-            continue
-        checks = asset.get("checks", {})
-        crop = checks.get("crop", {})
-        animation = checks.get("animation", {})
-        boxes = crop.get("content_boxes", [])
-        first_box = boxes[0] if boxes else [0, 0, 0, 0]
-        if isinstance(first_box, list) and len(first_box) == 4:
-            source_rect = [
-                first_box[0],
-                first_box[1],
-                first_box[2] - first_box[0],
-                first_box[3] - first_box[1],
-            ]
-        else:
-            source_rect = first_box
-        record = {
-                "asset": asset.get("asset"),
-                "review_source_sha256": asset.get("source_sha256"),
-                "source_sha256": asset.get("source_sha256"),
-                "source_dimensions": checks.get("source", {}).get("dimensions", checks.get("crop", {}).get("source_size")),
-                "crop": {
-                    "source_rect": source_rect,
-                    "output_dimensions": crop.get("output_canvas_size"),
-                },
-                "action_strip": Path(asset.get("asset", "")).stem,
-                "slot_index": 0,
-                "client_cf": [0],
-                "dimensions": crop.get("output_canvas_size"),
-                "animation": animation,
-                "evidence": asset.get("evidence", {}),
-            }
-        anchor = asset.get("anchor") or checks.get("anchor") or crop.get("anchor")
-        if anchor is not None:
-            record["anchor"] = anchor
-        records.append(record)
-    return records
 
 
 def _review_records(document: dict[str, Any]) -> list[dict[str, Any]]:

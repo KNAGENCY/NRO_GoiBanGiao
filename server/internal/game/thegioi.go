@@ -126,8 +126,8 @@ func goiMapInfo(nv *store.NhanVat, bd *BanDo, quai []*Quai) (*protocol.Message, 
 	w.Byte(0)                // waypointCount = 0
 	ghiDanhSachQuai(w, quai) // mobCount + tung con quai (§3.6, Ke hoach 6 Task 5)
 	w.Byte(0)                // (a) BYTE DU PHONG — giua mob va npc, DUNG QUEN
-	w.Byte(0)                // npcCount = 0
-	w.Byte(0)                // itemCount = 0
+	ghiNPCMap(w, bd)
+	w.Byte(0) // itemCount = 0
 
 	w.Short(0) // (b) bg-item: short 0 (map trong, khong bo trang)
 	w.Short(0) // effMapCount = 0

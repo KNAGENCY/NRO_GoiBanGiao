@@ -9,7 +9,7 @@ import (
 // TestKiemDiChuyen kiểm tra hàm kiemDiChuyenHopLe: di chuyển hợp lệ trong biên
 // và khoảng cách mỗi bước ≤ NguongBuoc (500). Khoảng cách = Euclid (so bình phương).
 func TestKiemDiChuyen(t *testing.T) {
-	bd := TimBanDo(1)
+	bd := TimBanDo(2) // map khong co artifact collision: giu test cu cho nguong chung.
 
 	// Bước ngắn, hợp lệ
 	if !kiemDiChuyenHopLe(bd, 100, 100, 300, 100) {

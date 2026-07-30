@@ -256,6 +256,8 @@ func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 		return b.xuLyDanhNguoiChoi(m)
 	case lenhHoiSinh: // -16 — client xin hoi sinh (dac ta §3.1, Ke hoach 6 Task 13)
 		return b.xuLyHoiSinh()
+	case lenhMoNPC: // 33 — client mo hoi thoai NPC
+		return b.xuLyMoNPC(s, m)
 	default:
 		// Lenh chua ho tro: bo qua, khong ngat ket noi — client gui vai goi
 		// phu ngay sau khi noi (vi du setClientType), day la chuyen BINH
@@ -448,6 +450,24 @@ func (b *BoXuLy) xuLyVaoKhuVuc(s *mynet.Session) error {
 	b.daVaoKhuVuc = true
 	b.khuVuc.Gui(suKienVao{nv: b.nhanVat, phien: s})
 	return nil
+}
+
+// xuLyMoNPC chi doc ID va tra dialog bat bien. Khong dong vao state KhuVuc;
+// actor van la chu duy nhat cua di chuyen va chien dau.
+func (b *BoXuLy) xuLyMoNPC(s *mynet.Session, m *protocol.Message) error {
+	if b.nhanVat == nil || b.nhanVat.MapID != 1 {
+		return nil
+	}
+	r := protocol.NewReader(m.Data)
+	id, err := r.Short()
+	if err != nil || id < 0 || id > 255 {
+		return nil
+	}
+	goi, err := goiMoNPC(byte(id))
+	if err != nil {
+		return nil
+	}
+	return s.Gui(goi)
 }
 
 // xuLyDiChuyen: client gui -7 (byte co bay + short toX + short toY). Ke hoach 5:

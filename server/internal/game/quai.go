@@ -183,13 +183,13 @@ func taoQuaiMacDinh(bd *BanDo) []*Quai {
 	}
 	return []*Quai{
 		{
-			Id: 0, MauId: 1, Cap: 1, CapTinhAnh: 1,
+			Id: 0, MauId: catalogLangLa.Mob.ID, Cap: 1, CapTinhAnh: 1,
 			Hp: 100, HpToiDa: 100,
 			X: bd.SpawnX + 60, Y: bd.SpawnY,
 			SatThuongCoBan: 5, // Task 9: gia tri CO DINH tam thoi, xem chu thich truong SatThuongCoBan
 		},
 		{
-			Id: 1, MauId: 1, Cap: 1, CapTinhAnh: 1,
+			Id: 1, MauId: catalogLangLa.Mob.ID, Cap: 1, CapTinhAnh: 1,
 			Hp: 100, HpToiDa: 100,
 			X: bd.SpawnX - 60, Y: bd.SpawnY,
 			SatThuongCoBan: 5,

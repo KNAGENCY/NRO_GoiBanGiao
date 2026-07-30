@@ -278,15 +278,64 @@ func boQuaMotMauChieu(r *protocol.Reader) error {
 	return nil
 }
 
-func TestGoiCatalogMapRong(t *testing.T) {
+func TestGoiCatalogMapLangLa(t *testing.T) {
 	m := goiCatalogMap()
 	if m.Command != -28 {
 		t.Fatalf("lenh = %d, mong doi -28", m.Command)
 	}
-	// [6][vsMap][countMap=0][countNpc=0][countMob=0]
-	want := []byte{6, 21, 0, 0, 0}
-	if !bytes.Equal(m.Data, want) {
-		t.Errorf("than catalog map = %v, mong doi %v", m.Data, want)
+	r := protocol.NewReader(m.Data)
+	if sub, _ := r.Byte(); sub != 6 {
+		t.Fatalf("sub = %d", sub)
+	}
+	if v, _ := r.Byte(); v != vsMap {
+		t.Fatalf("vsMap = %d", v)
+	}
+	n, _ := r.Byte()
+	if n != 6 {
+		t.Fatalf("countMap = %d", n)
+	}
+	wantMaps := []string{"Làng Lá", "Làng Cát", "Làng Sương Mù", "Làng Đá", "Làng Mây", "Khu rừng"}
+	for i, want := range wantMaps {
+		got, err := r.UTF()
+		if err != nil || got != want {
+			t.Fatalf("map %d = %q (%v), muon %q", i, got, err, want)
+		}
+	}
+	n, _ = r.Byte()
+	if n != 1 {
+		t.Fatalf("countNpc = %d", n)
+	}
+	if name, _ := r.UTF(); name != "Iruka" {
+		t.Fatalf("NPC = %q", name)
+	}
+	for i := 0; i < 3; i++ {
+		if _, err := r.Short(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := r.Byte(); err != nil {
+		t.Fatal(err)
+	}
+	n, _ = r.Byte()
+	if n != 1 {
+		t.Fatalf("countMob = %d", n)
+	}
+	if typ, _ := r.Byte(); typ != 0 {
+		t.Fatalf("mob type = %d", typ)
+	}
+	if name, _ := r.UTF(); name != "Sói Rừng" {
+		t.Fatalf("mob name = %q", name)
+	}
+	if hp, _ := r.Int(); hp != 100 {
+		t.Fatalf("mob hp = %d", hp)
+	}
+	for i := 0; i < 3; i++ {
+		if _, err := r.Byte(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := r.Byte(); err == nil {
+		t.Fatal("-28/6 co byte thua")
 	}
 }
 

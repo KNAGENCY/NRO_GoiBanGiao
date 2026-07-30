@@ -187,7 +187,12 @@ func TestGoiMapInfoVoiQuaiByteDung(t *testing.T) {
 	b("q2.isBigBoss", 0)
 
 	b("byte du phong", 0) // (a) — giua quai va npc, DUNG QUEN
-	b("npcCount", 0)
+	b("npcCount", 1)
+	b("npc.status", 0)
+	sh("npc.x", 172)
+	sh("npc.y", 384)
+	b("npc.template", 0)
+	sh("npc.portrait", 27078)
 	b("itemCount", 0)
 	sh("bgItem", 0)
 	sh("effMap", 0)

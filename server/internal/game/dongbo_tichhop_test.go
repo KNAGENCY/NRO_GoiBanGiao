@@ -264,13 +264,44 @@ func kiemDataCoPartVaDuoi100KB(t *testing.T, m *protocol.Message) {
 	}
 }
 
-// kiemCatalogMapRong khang dinh than goi -28/6: [6][vsMap][0][0][0] (rong,
-// doi chieu TestGoiCatalogMapRong trong dongbo_test.go).
+// kiemCatalogMapRong giu ten de test cu goi lai, nhung doc catalog Lang La that.
 func kiemCatalogMapRong(t *testing.T, m *protocol.Message) {
 	t.Helper()
-	want := []byte{lenhConCatalogMap, vsMap, 0, 0, 0}
-	if !bytes.Equal(m.Data, want) {
-		t.Fatalf("than goi -28/6 (catalog map) = %v, mong doi %v", m.Data, want)
+	r := protocol.NewReader(m.Data)
+	if sub, err := r.Byte(); err != nil || sub != lenhConCatalogMap {
+		t.Fatalf("sub=%d err=%v", sub, err)
+	}
+	if v, _ := r.Byte(); v != vsMap {
+		t.Fatalf("vsMap=%d", v)
+	}
+	n, _ := r.Byte()
+	if n != 6 {
+		t.Fatalf("map count=%d", n)
+	}
+	for _, want := range catalogLangLa.Maps {
+		got, err := r.UTF()
+		if err != nil || got != want {
+			t.Fatalf("map=%q err=%v", got, err)
+		}
+	}
+	n, _ = r.Byte()
+	if n != 1 {
+		t.Fatalf("npc count=%d", n)
+	}
+	if _, err := r.UTF(); err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 3; i++ {
+		if _, err := r.Short(); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := r.Byte(); err != nil {
+		t.Fatal(err)
+	}
+	n, _ = r.Byte()
+	if n != 1 {
+		t.Fatalf("mob count=%d", n)
 	}
 }
 
@@ -462,7 +493,22 @@ func kiemMapInfo(t *testing.T, m *protocol.Message, nv *store.NhanVat, bd *BanDo
 	must("waypointCount", 0)
 	must("mobCount", 0)
 	must("byte du phong", 0) // giua mob va npc
-	must("npcCount", 0)
+	if bd.MapID == 1 {
+		must("npcCount", 1)
+		must("npc.status", 0)
+		if _, err := r.Short(); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := r.Short(); err != nil {
+			t.Fatal(err)
+		}
+		must("npc.template", 0)
+		if _, err := r.Short(); err != nil {
+			t.Fatal(err)
+		}
+	} else {
+		must("npcCount", 0)
+	}
 	must("itemCount", 0)
 	if bg, err := r.Short(); err != nil || bg != 0 {
 		t.Fatalf("bgItem = %d (loi %v), mong doi short 0", bg, err)

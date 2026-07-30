@@ -30,6 +30,9 @@ func kiemDiChuyenHopLe(bd *BanDo, cuX, cuY, toX, toY int16) bool {
 	if toX < 0 || toX > BienRongToiDa || toY < 0 || toY > BienRongToiDa {
 		return false
 	}
+	if bd != nil && bd.MapID == 1 && !collisionLangLa.DiDuocDoan(cuX, cuY, toX, toY) {
+		return false
+	}
 
 	// Ép kiểu int để tránh tràn int16 khi bình phương
 	// Ví dụ: nếu giữ int16, (400)² = 160000 sẽ overflow

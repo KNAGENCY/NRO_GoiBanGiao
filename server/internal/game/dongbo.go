@@ -114,15 +114,28 @@ func goiCatalogSkill() (*protocol.Message, error) {
 	return protocol.NewMessage(lenhKhongTrenBanDo, w), nil
 }
 
-// goiCatalogMap dung goi -28/6 RONG: 0 map, 0 npc, 0 mob. Du de qua bat tay;
-// noi dung map/npc/mob that se them o cac ke hoach sau. Xem tai lieu §4.
 func goiCatalogMap() *protocol.Message {
 	w := protocol.NewWriter()
 	w.Byte(lenhConCatalogMap) // 6
 	w.Byte(vsMap)
-	w.Byte(0) // countMap
-	w.Byte(0) // countNpc
-	w.Byte(0) // countMob
+	c := catalogLangLa
+	w.Byte(byte(len(c.Maps)))
+	for _, ten := range c.Maps {
+		_ = w.UTF(ten)
+	}
+	w.Byte(1)
+	_ = w.UTF(c.NPC.Name)
+	w.Short(c.NPC.Head)
+	w.Short(c.NPC.Body)
+	w.Short(c.NPC.Leg)
+	w.Byte(0)
+	w.Byte(1)
+	w.Byte(0)
+	_ = w.UTF(c.Mob.Name)
+	w.Int(100)
+	w.Byte(0)
+	w.Byte(0)
+	w.Byte(0)
 	return protocol.NewMessage(lenhKhongTrenBanDo, w)
 }
 

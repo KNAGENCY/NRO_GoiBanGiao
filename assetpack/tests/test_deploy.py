@@ -91,11 +91,13 @@ class DeployArtifactTests(unittest.TestCase):
         for zoom in range(1, 5):
             prefix = f"client/x{zoom}"
             files[f"{prefix}/smallimage/Small27041.png"] = f"small-x{zoom}".encode()
+            files[f"{prefix}/smallimage/Small27043.png"] = f"skill-x{zoom}".encode()
             files[f"{prefix}/bg/b00.png"] = f"bg-x{zoom}".encode()
             files[f"{prefix}/mainImage/naruto-hp-bg.png"] = f"hud-x{zoom}".encode()
             files[f"{prefix}/Mob/0/img.png"] = f"mob-x{zoom}".encode()
             for index in range(8):
                 files[f"{prefix}/ui/{index}.png"] = f"ui-{index}-x{zoom}".encode()
+        files["client/x2/smallimage/Small27042.png"] = b"small-decoy-x2"
         files["client/x1/t/1/t_01.png"] = b"tile-x1"
         for path, data in files.items():
             destination = root / path
@@ -115,6 +117,11 @@ class DeployArtifactTests(unittest.TestCase):
             "versions": versions
             or {"runtime_slice": 1, "data": 1, "map": 1, "resource": 1},
             "outputs": outputs,
+            "closure": {
+                "sprite_ids": [27041],
+                "skill_ids": [27043],
+                "mob_ids": [0],
+            },
             "provenance": {
                 "runtime_key_map": {
                     "sha256": _sha(self.runtime_map.read_bytes()),
@@ -219,7 +226,7 @@ class DeployArtifactTests(unittest.TestCase):
             "background": "bg/b00.png",
             "mob": "Mob/0/img.png",
             "hud": "mainImage/naruto-hp-bg.png",
-            "skill": "smallimage/Small27041.png",
+            "skill": "smallimage/Small27043.png",
         }
         for kind, suffix in representatives.items():
             for zoom in (2, 3, 4):
@@ -251,6 +258,30 @@ class DeployArtifactTests(unittest.TestCase):
                             protected_unity_root=self.protected_root,
                             preflight=self._preflight_ok,
                         )
+
+    def test_small_phai_giu_dung_resource_canonical_o_moi_zoom(self):
+        artifact = self.root / "artifact-small-decoy"
+        self._make_artifact(
+            artifact,
+            versions={"runtime_slice": 2, "data": 2, "map": 2, "resource": 2},
+        )
+        self._remove_locked_output(
+            artifact,
+            "client/x2/smallimage/Small27041.png",
+        )
+
+        with self.assertRaisesRegex(DeployError, "ASSET-PREFLIGHT-022"):
+            deploy(
+                artifact,
+                artifact,
+                self.release_root / "small-decoy",
+                self.snapshot,
+                self.ledger,
+                self.runtime_map,
+                previous_lock_path=self.previous_lock,
+                protected_unity_root=self.protected_root,
+                preflight=self._preflight_ok,
+            )
 
     def test_metadata_dimension_thieu_hoac_sai_phai_do_preflight(self):
         for mutation in ("missing-width", "string-height", "zero-width"):

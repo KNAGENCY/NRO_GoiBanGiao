@@ -304,47 +304,68 @@ def _find_zoom_paths(
     return paths
 
 
+def _exact_zoom_paths(
+    outputs: dict[str, dict[str, Any]],
+    relative: str,
+) -> list[str]:
+    paths = []
+    for zoom in range(1, 5):
+        expected = f"client/x{zoom}/{relative}"
+        if expected not in outputs:
+            _fail("ASSET-PREFLIGHT-022", f"thieu resource canonical: {expected}")
+        paths.append(expected)
+    return paths
+
+
+def _canonical_closure_id(lock: dict[str, Any], key: str) -> int:
+    closure = lock.get("closure")
+    values = closure.get(key) if isinstance(closure, dict) else None
+    if (
+        not isinstance(values, list)
+        or not values
+        or any(not isinstance(value, int) or isinstance(value, bool) for value in values)
+    ):
+        _fail("ASSET-PREFLIGHT-022", f"closure thieu {key} canonical")
+    return min(values)
+
+
 def _resource_contract(
     lock: dict[str, Any],
     outputs: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
-    skill_ids = lock.get("closure", {}).get("skill_ids", [])
-    skill_id = skill_ids[0] if isinstance(skill_ids, list) and skill_ids else None
-    skill_predicate = (
-        (lambda path: path.endswith(f"/Small{skill_id}.png"))
-        if isinstance(skill_id, int)
-        else (lambda path: "/smallimage/" in path)
-    )
+    sprite_id = _canonical_closure_id(lock, "sprite_ids")
+    skill_id = _canonical_closure_id(lock, "skill_ids")
+    mob_id = _canonical_closure_id(lock, "mob_ids")
     resources = [
         _resource(
             outputs,
             "small",
-            "iruka-player-small",
-            _find_zoom_paths(outputs, lambda path: "/smallimage/" in path),
+            f"iruka-player-small-{sprite_id}",
+            _exact_zoom_paths(outputs, f"smallimage/Small{sprite_id}.png"),
         ),
         _resource(
             outputs,
             "background",
             "lang-la-background",
-            _find_zoom_paths(outputs, lambda path: "/bg/b00.png" in path),
+            _exact_zoom_paths(outputs, "bg/b00.png"),
         ),
         _resource(
             outputs,
             "mob",
-            "soi-rung",
-            _find_zoom_paths(outputs, lambda path: "/Mob/0/img.png" in path),
+            f"soi-rung-{mob_id}",
+            _exact_zoom_paths(outputs, f"Mob/{mob_id}/img.png"),
         ),
         _resource(
             outputs,
             "hud",
             "naruto-hud",
-            _find_zoom_paths(outputs, lambda path: "/mainImage/naruto-hp-bg.png" in path),
+            _exact_zoom_paths(outputs, "mainImage/naruto-hp-bg.png"),
         ),
         _resource(
             outputs,
             "skill",
-            f"skill-pose-{skill_id if skill_id is not None else 'fixture'}",
-            _find_zoom_paths(outputs, skill_predicate),
+            f"skill-pose-{skill_id}",
+            _exact_zoom_paths(outputs, f"smallimage/Small{skill_id}.png"),
         ),
     ]
     return {

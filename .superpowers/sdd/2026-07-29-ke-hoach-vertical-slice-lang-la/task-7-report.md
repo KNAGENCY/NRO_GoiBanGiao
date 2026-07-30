@@ -164,6 +164,36 @@
 - Caller deploy cu can bo sung ca `previous lock` va `protected Unity root`; day la
   thay doi co chu dich de staging khong the chay fail-open.
 
+## Fix round 2: canonical resource per zoom
+
+### Finding
+
+- `small` chi tim mot file bat ky trong `smallimage` o tung zoom. Vi vay khi x2
+  thieu `Small27041.png` nhung con `Small27042.png`, deploy van qua gate.
+
+### Thay doi
+
+- Contract preflight lay sprite, skill va mob canonical tu `closure` trong
+  `asset-lock.json`, roi yeu cau dung duong dan canonical o x1-x4.
+- Background va HUD cung dung exact path thay vi predicate/first match.
+- Fixture them `Small27042.png` o x2 lam decoy; test xoa `Small27041.png` va yeu
+  cau `ASSET-PREFLIGHT-022`.
+
+### RED/GREEN va mutation
+
+- RED truoc code: test decoy x2 FAIL vi `DeployError` khong duoc raise.
+- GREEN: `python -m unittest assetpack.tests.test_deploy -v` -> 14/14 PASS.
+- Mutation: doi rieng small ve generic first-match; test decoy do dung ly do
+  `DeployError not raised`. Da hoan nguyen exact path guard truoc khi test cuoi.
+
+### Full suite va concern
+
+- `python -m unittest discover -s assetpack/tests -v` -> 123/123 PASS trong
+  164.920s.
+- Contract nay gia dinh `closure.sprite_ids`, `closure.skill_ids`, va
+  `closure.mob_ids` la danh sach ID int khong rong; lock production do build tao
+  da co ba closure nay, lock thieu se fail closed `ASSET-PREFLIGHT-022`.
+
 ## Full verification
 
 - `go vet ./...`: PASS.

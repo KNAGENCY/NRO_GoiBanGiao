@@ -8,7 +8,7 @@
 > một bản vá, một phát hiện lỗi) thì **phải cập nhật file này ngay** rồi mới commit.
 > Cách cập nhật xem mục [11. Quy ước cập nhật](#11-quy-ước-cập-nhật-file-này).
 
-**Cập nhật lần cuối:** 30/07/2026 (Vertical slice Task 7 đã review sạch; sẵn sàng Task 8 trên nhánh `kh-vertical-slice`) · **Nhánh đang làm:** `kh-vertical-slice` · **Commit HEAD:** `56fa302` · **main:** `485b095`
+**Cập nhật lần cuối:** 30/07/2026 (Vertical slice Task 8 đã review sạch; sẵn sàng Task 9 trên nhánh `kh-vertical-slice`) · **Nhánh đang làm:** `kh-vertical-slice` · **Commit HEAD:** `f53a255` · **main:** `485b095`
 
 ---
 
@@ -123,6 +123,7 @@ Mỗi kế hoạch đều đi qua: thiết kế → kế hoạch → thi công t
 | VS-6A | QA ảnh nguồn vertical slice Lang La | Fix round 2: semantic one-shot GIF, raw provenance, canonical evidence và gate fail-closed; raw **0/20 PASS**, derived **20/20 PASS**, gate exit 0 | nhánh `kh-vertical-slice` |
 | VS-6B | Bind ảnh đã duyệt vào manifest Làng Lá | Exact **20/20 provenance** fail-closed; closure v11 có 42 sprite `27041..27082`, HUD 25/50/100 và Iruka sáng/tối được reviewer độc lập ký SHA; mutation/full test/build A/B đều xanh | `bf91ee8`, `545b9c6`, `0fd6fc5` |
 | VS-7 | **Build artifact + deploy staging theo lock** | Artifact server/client bất biến theo lock 21; bắt buộc previous lock + protected Unity root; canonical resource đủ x1–x4 cho small/skill/mob/background/HUD; Unity preflight thật marker `RESOURCE-PREFLIGHT-OK`; full Python **123/123**, Go toàn repo + vet xanh | `2a77a43`, `9627680`, `56fa302` |
+| VS-8 | **Catalog, NPC Iruka, Sói và collision Làng Lá** | Catalog explicit map/NPC/mob/dialog/menu; `-28/6`, `-24`, command 33→32; collision semantic `0/1`, header tile `24×24`, actor kiểm foot-point/segment; map/runtime version 22; full Python **124/124**, Go game **-count=1**, net **-count=5**, vet xanh; review độc lập APPROVE | `de1f0c6`, `d0a8901`, `f53a255` |
 
 **Tình trạng chất lượng hiện tại:** `go test ./...` — **toàn bộ 6 gói xanh, 0 đỏ**
 (gói `game` ~70s), chạy lặp `-count=5` không chập chờn. `gofmt` sạch (trừ nhiễu CRLF file
@@ -148,7 +149,7 @@ Xếp theo thứ tự nên làm:
 | ✅ | ~~Vertical slice Task 6A — fix round 2~~ | Derived output **20/20 PASS**; raw source vẫn **0/20 PASS** nhưng được ghi rõ và không bị tráo. Gate kiểm semantic loop, raw summary, reviewer/timestamp và nội dung evidence trước khi bind |
 | ✅ | ~~Vertical slice Task 6B — bind ảnh đã duyệt~~ | **Xong, review sạch.** 109/109 test; A/B 669 file không khác; exact-20 provenance và evidence HUD/Iruka có trust anchor reviewer |
 | ✅ | ~~Vertical slice Task 7 — build artifact + deploy staging theo lock~~ | **Xong trên nhánh `kh-vertical-slice`**, review độc lập sạch. Artifact lock 21, deploy fail-closed (previous lock + protected root + canonical x1–x4), Unity preflight thật, full Python 123/123; chưa gộp `main`. **Tiếp: Task 8** |
-| 1 | **Vertical slice Task 8 — catalog, NPC, Sói và collision server** | Phụ thuộc Task 7; phải viết test byte/semantic độc lập trước khi nối gameplay |
+| ✅ | ~~Vertical slice Task 8 — catalog, NPC, Sói và collision server~~ | **Xong trên nhánh `kh-vertical-slice`**, review độc lập sạch. Catalog explicit + collision semantic 0/1 + queue NPC; full Python 124/124, Go game -count=1, net -count=5, vet xanh. Chưa gộp `main`. **Tiếp: Task 9/telemetry theo lộ trình** |
 | 1b | **KH6b — Boss** (hệ riêng, tách khỏi KH6) | Bản Java là 12 file, phức tạp hơn quái thường nhiều. Thiết kế sau khi KH6 gộp |
 | 1c | **KH6c — Stress test 20 client cùng khu vực** | Cùng xả chiêu, đo gói rơi hộp thư actor (trần 256, rơi im lặng) + trễ nhịp 100ms. Dựng trên `thuclient`/`clientGia` |
 | 2 | KH7 — Vật phẩm, hành trang, cửa hàng, giao dịch | 🧱 **Phải chốt căn cước vật phẩm + chống nhân bản trong đặc tả TRƯỚC khi viết code** ([BO-SUNG](docs/superpowers/plans/BO-SUNG-LO-TRINH.md) Khối 3). Tách rõ 4 thứ: cửa hàng NPC / giao dịch 2 người / ký gửi / kho |
@@ -291,6 +292,11 @@ Xếp theo thứ tự nên làm:
     `Small27041.png` nhưng còn `Small27042.png` vẫn có đường lọt. Cách tránh: API/CLI bắt
     buộc hai tham số, lock phải có closure ID độc lập, và mỗi resource canonical phải tồn
     tại đúng x1–x4 trước khi publish; mutation decoy phải đỏ `ASSET-PREFLIGHT-022`.
+22. **Collision phải tách semantic, không dùng thẳng tile index.** Artifact phải ghim header
+    `width,height,tileWidth,tileHeight` và cell `0/1`; server phải dùng cùng tile 24x24 với assetpack,
+    có canary solid trên artifact thật, và test foot-point/segment trên chính artifact.
+23. **Gameplay sau khi vào actor không ghi socket trực tiếp.** Command NPC phải `XepGui` qua outbound
+    queue; test net.Pipe phải chứng minh handler không bị chặn khi client không đọc, và giữ FIFO.
 
 ---
 

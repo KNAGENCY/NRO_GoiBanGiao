@@ -488,14 +488,14 @@ class DeployArtifactTests(unittest.TestCase):
 
 
 class ProductionVersionContractTests(unittest.TestCase):
-    def test_manifest_ghim_moc_21_va_khong_trung_legacy(self):
+    def test_manifest_versions_bump_runtime_map_and_keep_legacy_distinct(self):
         manifest = json.loads(
             Path("docs/my-thuat/mapping-id.json").read_text(encoding="utf-8")
         )
         versions = manifest["versions"]
         self.assertEqual(
             versions,
-            {"runtime_slice": 21, "data": 21, "map": 21, "resource": 21},
+            {"runtime_slice": 22, "data": 21, "map": 22, "resource": 21},
         )
         self.assertNotEqual(versions["data"], 10)
         self.assertNotEqual(versions["map"], 2)

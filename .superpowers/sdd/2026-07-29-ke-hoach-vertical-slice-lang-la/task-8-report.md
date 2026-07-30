@@ -72,9 +72,7 @@ Artifact sau khi dời canary: collision
 `39eee2c743a6a27c1b8afe3e640c9dc1f611685b3a7e0b81e32538234ad7cd5f`; lock
 `54a638f0e7c008586dedbf13eaf45aff42edcdf63f6708fd6138b5219c773d82`.
 
-## Concern
-
-Artifact catalog hiện chỉ chứa tên/spawn; câu thoại/menu Iruka không nằm trong
-catalog/lock. Runtime phải giữ text/menu tối thiểu ở `npc.go`; artifact nên được
-mở rộng để đưa dialog vào nguồn dữ liệu nếu muốn áp dụng tuyệt đối quy tắc
-"không hard-code catalog" cho nội dung thoại.
+Python version gate sau khi bump: `ProductionVersionContractTests` xanh (1 test,
+0.002s), xác nhận `runtime_slice=22`, `map=22`, `data/resource=21`. Full
+`python -m unittest discover -s assetpack/tests -v` xanh **124/124** trong
+163.649s.

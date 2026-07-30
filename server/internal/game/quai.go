@@ -181,20 +181,12 @@ func taoQuaiMacDinh(bd *BanDo) []*Quai {
 	if bd == nil {
 		return nil
 	}
-	return []*Quai{
-		{
-			Id: 0, MauId: catalogLangLa.Mob.ID, Cap: 1, CapTinhAnh: 1,
-			Hp: 100, HpToiDa: 100,
-			X: bd.SpawnX + 60, Y: bd.SpawnY,
-			SatThuongCoBan: 5, // Task 9: gia tri CO DINH tam thoi, xem chu thich truong SatThuongCoBan
-		},
-		{
-			Id: 1, MauId: catalogLangLa.Mob.ID, Cap: 1, CapTinhAnh: 1,
-			Hp: 100, HpToiDa: 100,
-			X: bd.SpawnX - 60, Y: bd.SpawnY,
-			SatThuongCoBan: 5,
-		},
+	m := catalogLangLa.Mob
+	quai := make([]*Quai, 0, len(m.Spawns))
+	for _, spawn := range m.Spawns {
+		quai = append(quai, &Quai{Id: spawn.ID, MauId: m.ID, Cap: 1, CapTinhAnh: 1, Hp: m.HP, HpToiDa: m.HP, X: spawn.X, Y: spawn.Y, SatThuongCoBan: 5})
 	}
+	return quai
 }
 
 // ---------------------------------------------------------------------------

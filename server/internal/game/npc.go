@@ -14,12 +14,14 @@ func goiMoNPC(id byte) (*protocol.Message, error) {
 	}
 	w := protocol.NewWriter()
 	w.Short(int16(c.NPC.ID))
-	if err := w.UTF("Chào mừng em đến Làng Lá. Hãy vững tin trên con đường ninja của mình."); err != nil {
+	if err := w.UTF(c.NPC.Dialog); err != nil {
 		return nil, err
 	}
-	w.Byte(1)
-	if err := w.UTF("Đóng"); err != nil {
-		return nil, err
+	w.Byte(byte(len(c.NPC.Menu)))
+	for _, menu := range c.NPC.Menu {
+		if err := w.UTF(menu); err != nil {
+			return nil, err
+		}
 	}
 	w.Short(c.NPC.Portrait)
 	return protocol.NewMessage(32, w), nil
@@ -33,8 +35,8 @@ func ghiNPCMap(w *protocol.Writer, bd *BanDo) {
 	c := catalogLangLa.NPC
 	w.Byte(1)
 	w.Byte(0)
-	w.Short(172)
-	w.Short(384)
+	w.Short(c.X)
+	w.Short(c.Y)
 	w.Byte(c.ID)
 	w.Short(c.Portrait)
 }

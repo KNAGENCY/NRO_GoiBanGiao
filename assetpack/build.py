@@ -999,7 +999,7 @@ def _build_into(manifest: dict[str, Any], base_dir: Path, root: Path) -> dict[st
     tile_rows = [{"id": item["index"], "solid": item.get("solid", False)} for item in inputs["tile_art"]]
     try:
         validate_collision_semantics(tile_rows, indexes, client_solid)
-        collision = encode_collision(width, height, indexes, spawn_index=spawn_index)
+        collision = encode_collision(width, height, client_solid, spawn_index=spawn_index, tile_size=tile_size)
     except MapError as error:
         _fail("ASSET-COLLISION-006", str(error))
     (server / "map-1-collision.bin").write_bytes(collision)

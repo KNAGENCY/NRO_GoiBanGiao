@@ -278,9 +278,9 @@ func kiemCatalogMapRong(t *testing.T, m *protocol.Message) {
 	if n != 6 {
 		t.Fatalf("map count=%d", n)
 	}
-	for _, want := range catalogLangLa.Maps {
+	for _, mapCatalog := range catalogLangLa.Maps {
 		got, err := r.UTF()
-		if err != nil || got != want {
+		if err != nil || got != mapCatalog.Name {
 			t.Fatalf("map=%q err=%v", got, err)
 		}
 	}
@@ -288,12 +288,17 @@ func kiemCatalogMapRong(t *testing.T, m *protocol.Message) {
 	if n != 1 {
 		t.Fatalf("npc count=%d", n)
 	}
-	if _, err := r.UTF(); err != nil {
-		t.Fatal(err)
+	if name, err := r.UTF(); err != nil || name != "Iruka" {
+		t.Fatalf("npc name=%q err=%v", name, err)
 	}
-	for i := 0; i < 3; i++ {
-		if _, err := r.Short(); err != nil {
-			t.Fatal(err)
+	for _, field := range []struct {
+		label string
+		want  int16
+	}{{"head", 2189}, {"body", 2190}, {"leg", 2191}} {
+		label, want := field.label, field.want
+		got, err := r.Short()
+		if err != nil || got != want {
+			t.Fatalf("npc %s=%d err=%v", label, got, err)
 		}
 	}
 	if _, err := r.Byte(); err != nil {
@@ -302,6 +307,24 @@ func kiemCatalogMapRong(t *testing.T, m *protocol.Message) {
 	n, _ = r.Byte()
 	if n != 1 {
 		t.Fatalf("mob count=%d", n)
+	}
+	if typ, err := r.Byte(); err != nil || typ != 0 {
+		t.Fatalf("mob type=%d err=%v", typ, err)
+	}
+	if name, err := r.UTF(); err != nil || name != "Sói Rừng" {
+		t.Fatalf("mob name=%q err=%v", name, err)
+	}
+	if hp, err := r.Int(); err != nil || hp != 100 {
+		t.Fatalf("mob hp=%d err=%v", hp, err)
+	}
+	for _, want := range []byte{100, 0, 0} {
+		got, err := r.Byte()
+		if err != nil || got != want {
+			t.Fatalf("mob runtime=%d want=%d err=%v", got, want, err)
+		}
+	}
+	if _, err := r.Byte(); err == nil {
+		t.Fatal("catalog map co byte thua")
 	}
 }
 

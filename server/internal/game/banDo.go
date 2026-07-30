@@ -27,11 +27,11 @@ type BanDo struct {
 var danhSachBanDo = func() []BanDo {
 	maps := catalogLangLa.Maps
 	return []BanDo{
-		{MapID: 1, Ten: maps[0], PlanetID: 0, TileID: 1, BgID: 0, BgType: 0, Loai: 0, SpawnX: 100, SpawnY: 384},
-		{MapID: 2, Ten: maps[1], PlanetID: 0, TileID: 1, BgID: 0, BgType: 0, Loai: 0, SpawnX: 100, SpawnY: 384},
-		{MapID: 3, Ten: maps[2], PlanetID: 0, TileID: 2, BgID: 1, BgType: 0, Loai: 0, SpawnX: 100, SpawnY: 384},
-		{MapID: 4, Ten: maps[3], PlanetID: 0, TileID: 2, BgID: 1, BgType: 0, Loai: 0, SpawnX: 100, SpawnY: 384},
-		{MapID: 5, Ten: maps[4], PlanetID: 0, TileID: 3, BgID: 2, BgType: 0, Loai: 0, SpawnX: 100, SpawnY: 384},
+		{MapID: int32(maps[0].ID), Ten: maps[0].Name, PlanetID: 0, TileID: 1, BgID: 0, BgType: 0, Loai: 0, SpawnX: maps[0].SpawnX, SpawnY: maps[0].SpawnY},
+		{MapID: int32(maps[1].ID), Ten: maps[1].Name, PlanetID: 0, TileID: 1, BgID: 0, BgType: 0, Loai: 0, SpawnX: maps[1].SpawnX, SpawnY: maps[1].SpawnY},
+		{MapID: int32(maps[2].ID), Ten: maps[2].Name, PlanetID: 0, TileID: 2, BgID: 1, BgType: 0, Loai: 0, SpawnX: maps[2].SpawnX, SpawnY: maps[2].SpawnY},
+		{MapID: int32(maps[3].ID), Ten: maps[3].Name, PlanetID: 0, TileID: 2, BgID: 1, BgType: 0, Loai: 0, SpawnX: maps[3].SpawnX, SpawnY: maps[3].SpawnY},
+		{MapID: int32(maps[4].ID), Ten: maps[4].Name, PlanetID: 0, TileID: 3, BgID: 2, BgType: 0, Loai: 0, SpawnX: maps[4].SpawnX, SpawnY: maps[4].SpawnY},
 	}
 }()
 

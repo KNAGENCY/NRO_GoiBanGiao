@@ -34,7 +34,7 @@ var duLieuAssetLock []byte
 // chưa thuộc lát cắt artifact nên giữ mốc Naruto hiện hành của server.
 const (
 	vsData  byte = 21
-	vsMap   byte = 21
+	vsMap   byte = 22
 	vsSkill byte = 21
 	vsItem  byte = 20
 )
@@ -120,8 +120,8 @@ func goiCatalogMap() *protocol.Message {
 	w.Byte(vsMap)
 	c := catalogLangLa
 	w.Byte(byte(len(c.Maps)))
-	for _, ten := range c.Maps {
-		_ = w.UTF(ten)
+	for _, banDo := range c.Maps {
+		_ = w.UTF(banDo.Name)
 	}
 	w.Byte(1)
 	_ = w.UTF(c.NPC.Name)
@@ -132,10 +132,10 @@ func goiCatalogMap() *protocol.Message {
 	w.Byte(1)
 	w.Byte(0)
 	_ = w.UTF(c.Mob.Name)
-	w.Int(100)
-	w.Byte(0)
-	w.Byte(0)
-	w.Byte(0)
+	w.Int(c.Mob.HP)
+	w.Byte(c.Mob.Range)
+	w.Byte(c.Mob.Speed)
+	w.Byte(c.Mob.Dart)
 	return protocol.NewMessage(lenhKhongTrenBanDo, w)
 }
 

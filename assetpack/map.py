@@ -30,13 +30,18 @@ def validate_tileset_baseline(data: bytes, baseline: dict) -> None:
         raise MapError("ASSET-TILESET-011: semantic tile_set_info khác baseline")
 
 
-def encode_collision(width: int, height: int, indexes, *, spawn_index: int) -> bytes:
-    indexes = list(indexes)
-    if not 1 <= width <= 255 or not 1 <= height <= 255 or len(indexes) != width * height:
+def encode_collision(width: int, height: int, solid_cells, *, spawn_index: int, tile_size) -> bytes:
+    solid_cells = list(solid_cells)
+    if not 1 <= width <= 255 or not 1 <= height <= 255 or len(solid_cells) != width * height:
         raise MapError("ASSET-COLLISION-006: header hoặc số cell collision sai")
-    if not isinstance(spawn_index, int) or isinstance(spawn_index, bool) or not 0 <= spawn_index < len(indexes) or any(not isinstance(value, int) or isinstance(value, bool) or not 0 <= value <= 99 for value in indexes):
-        raise MapError("ASSET-COLLISION-006: index tile hoặc spawn không hợp lệ")
-    return struct.pack(">BB", width, height) + bytes(indexes)
+    if (not isinstance(tile_size, (list, tuple)) or len(tile_size) != 2
+            or any(not isinstance(value, int) or isinstance(value, bool) or not 1 <= value <= 255 for value in tile_size)):
+        raise MapError("ASSET-COLLISION-006: tile size collision sai")
+    if not isinstance(spawn_index, int) or isinstance(spawn_index, bool) or not 0 <= spawn_index < len(solid_cells) or any(not isinstance(value, bool) for value in solid_cells):
+        raise MapError("ASSET-COLLISION-006: semantic solid hoặc spawn không hợp lệ")
+    if solid_cells[spawn_index] or not any(solid_cells):
+        raise MapError("ASSET-COLLISION-006: spawn phải walkable và map phải có solid")
+    return struct.pack(">BBBB", width, height, tile_size[0], tile_size[1]) + bytes(1 if value else 0 for value in solid_cells)
 
 
 def semantic_hash(solid_values) -> str:

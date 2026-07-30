@@ -80,7 +80,7 @@ func TestGoiVersionGameDungByte(t *testing.T) {
 		t.Fatalf("lenh = %d, mong doi -28", m.Command)
 	}
 	// than: [4][vsData][vsMap][vsSkill][vsItem][0][countCaption=0]
-	want := []byte{4, 21, 21, 21, 20, 0, 0}
+	want := []byte{4, 21, 22, 21, 20, 0, 0}
 	if !bytes.Equal(m.Data, want) {
 		t.Errorf("than versionGame = %v, mong doi %v", m.Data, want)
 	}

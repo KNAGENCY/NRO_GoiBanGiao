@@ -116,7 +116,7 @@ class BuildContractTests(unittest.TestCase):
         tile_art = []
         for index in range(100):
             sources = {zoom: png(f"tile-{zoom}-{index}.png") for zoom in ("x1", "x2", "x3", "x4")}
-            tile_art.append({"index": index, "solid": False, "sources": sources})
+            tile_art.append({"index": index, "solid": index == 1, "sources": sources})
 
         backgrounds = {f"b{index:02d}": {zoom: png(f"bg-{index}-{zoom}.png") for zoom in ("x1", "x2", "x3", "x4")} for index in range(4)}
         hud = {name: {zoom: png(f"{name}-{zoom}.png") for zoom in ("x1", "x2", "x3", "x4")} for name in ("naruto-hp-bg", "naruto-hp-fill", "naruto-chakra-bg", "naruto-chakra-fill")}
@@ -210,7 +210,7 @@ class BuildContractTests(unittest.TestCase):
             "backgrounds": [{"id": 0, "layers": 4}],
             "mobs": [{"id": 0, "name": "soi-rung"}],
             "skills": [{"id": 27079 + index, "pose_slot": index, "levels": list(range(12)), "effect_id": -1, "arrow_id": -1} for index in range(4)],
-            "catalog": {"maps": ["Làng Lá", "Làng Cát", "Làng Sương Mù", "Làng Đá", "Làng Mây", "Khu rừng"], "npc_templates": ["Iruka"], "mob_templates": ["Sói Rừng"], "spawn": [[100, 384]], "skill_poses": [0, 1, 2, 3]},
+            "catalog": {"maps": [{"id": index + 1, "name": name, "spawn": {"x": 100, "y": 384}} for index, name in enumerate(["Làng Lá", "Làng Cát", "Làng Sương Mù", "Làng Đá", "Làng Mây", "Khu rừng"])], "npcs": [{"id": 0, "name": "Iruka", "head": 2189, "body": 2190, "leg": 2191, "portrait": 27078, "x": 172, "y": 384, "dialog": "Chào mừng em đến Làng Lá.", "menu": ["Đóng"]}], "mobs": [{"id": 0, "name": "Sói Rừng", "hp": 100, "range": 100, "speed": 0, "dart": 0, "spawns": [{"id": 0, "x": 160, "y": 384}, {"id": 1, "x": 40, "y": 384}]}], "skill_poses": [0, 1, 2, 3]},
             "ui_bindings": ui,
             "build_inputs": {
                 "legacy_part_path": binary("part.bin", (Path("server/internal/game/part.bin")).read_bytes()),
@@ -219,7 +219,7 @@ class BuildContractTests(unittest.TestCase):
                 "background_sources": backgrounds,
                 "hud_sources": hud,
                 "mob": mob,
-                "map": {"width": 5, "height": 17, "indexes": [0] * 85, "spawn": [100, 384], "tile_size": [24, 24], "client_solid": [False] * 85},
+                "map": {"width": 5, "height": 17, "indexes": [1] + [0] * 84, "spawn": [100, 384], "tile_size": [24, 24], "client_solid": [True] + [False] * 84},
                 "animation_sheets": animation_sheets,
                 "runtime_key_map": "inputs/runtime-key-map.json",
                 "tile_set_baseline": {"sha256": hashlib.sha256((root / "inputs/tileset.bin").read_bytes()).hexdigest(), "bytes_hex": (root / "inputs/tileset.bin").read_bytes().hex(), "semantic": {"byte_length": len((root / "inputs/tileset.bin").read_bytes()), "tile_count": (root / "inputs/tileset.bin").read_bytes()[0]}},
@@ -507,6 +507,18 @@ class BuildContractTests(unittest.TestCase):
             root = Path(temporary)
             manifest = self._complete_manifest(root)
             manifest["build_inputs"]["tile_art"][0]["solid"] = True
+            review = self._write_complete_review(root, manifest)
+            with self.assertRaisesRegex(BuildError, "ASSET-COLLISION-006"):
+                build(manifest, root / "out", review, base_dir=root)
+
+    def test_mutation_erasing_all_collision_is_rejected(self):
+        from assetpack.build import BuildError, build
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = self._complete_manifest(root)
+            manifest["build_inputs"]["map"]["indexes"] = [0] * 85
+            manifest["build_inputs"]["map"]["client_solid"] = [False] * 85
             review = self._write_complete_review(root, manifest)
             with self.assertRaisesRegex(BuildError, "ASSET-COLLISION-006"):
                 build(manifest, root / "out", review, base_dir=root)

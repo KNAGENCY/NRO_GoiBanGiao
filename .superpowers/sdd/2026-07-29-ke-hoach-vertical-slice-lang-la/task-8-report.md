@@ -43,6 +43,29 @@ Kết quả: `ok nroserver/internal/game 30.410s`.
 (exit 124, không có failure output), nên chưa thể khẳng định pass lặp 5/full/vet.
 Cần chạy lại tách từng package hoặc điều tra timeout trước khi merge.
 
+## Fix round 1 — catalog explicit và collision semantic
+
+RED: collision test mới gọi `tile_size` trên API cũ và nhận `TypeError`. Mutation
+handler NPC (`XepGui` đổi thành `Gui`) làm test client `net.Pipe` không đọc output
+đỏ sau 250ms.
+
+GREEN: collision artifact là `[width,height,tileWidth,tileHeight,0|1...]`, ghim
+24x24, spawn walkable và có solid; build từ `client_solid`, không serialize tile
+index. Catalog chứa map spawn, NPC (parts/portrait/toạ độ/dialog/menu) và mob
+(hp/range/speed/dart/spawns); Go kiểm từng ID với closure, không suy diễn index.
+Command 33 dùng `XepGui`, test chứng minh trả nhanh, FIFO và byte chính xác.
+`vsMap=22` khớp lock `map=22`, `runtime_slice=22`.
+
+Đã xanh: Python `test_map` + `test_build_contract`: 25 tests/26.602s; focused Go
+catalog/collision/NPC/queue/version `-count=5`: OK 0.180s; `go test ./internal/net
+-count=5`: OK 0.284s; `go vet ./...`: OK. Hai lần build production deterministic:
+catalog `f24db071ce8708d4fb8e318f934a702cbed7090bb709fc76a42c752d4617a973`,
+collision `4fe176b20d67dd98bd7b96421ab741d07f0d045b9e61b7f15efcbbeaadfd043b`, lock
+`f72a20b2bd50408dab472f5baa2c9d7ed3edd523e5b38784e11f64c697dea29f`.
+
+Full `go test ./internal/game -count=1` đã chạy 31.3s nhưng đỏ tại actor test cũ
+`TestKhuVucXuLySuKien` (pB nhận 1 thay vì 2 message), không liên quan packet/catalog.
+
 ## Concern
 
 Artifact catalog hiện chỉ chứa tên/spawn; câu thoại/menu Iruka không nằm trong

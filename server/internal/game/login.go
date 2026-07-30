@@ -467,7 +467,9 @@ func (b *BoXuLy) xuLyMoNPC(s *mynet.Session, m *protocol.Message) error {
 	if err != nil {
 		return nil
 	}
-	return s.Gui(goi)
+	// Hoi thoai NPC la gameplay sau khi vao map: vao hang gui FIFO nhu cac
+	// broadcast cua actor, khong ghi socket dong bo tren luong xu ly command.
+	return s.XepGui(goi)
 }
 
 // xuLyDiChuyen: client gui -7 (byte co bay + short toX + short toY). Ke hoach 5:

@@ -7,27 +7,71 @@ import (
 	"fmt"
 )
 
-// Catalog là bản đọc duy nhất của artifact build. Các ID hiển thị được rút từ
-// lock để server không thể tự chạy với một bộ asset khác client.
+// Catalog là dữ liệu runtime tường minh: không suy diễn ID từ thứ tự closure.
 type Catalog struct {
-	Maps []string
+	Maps []MapCatalog
 	NPC  NPCatalog
 	Mob  MobCatalog
+}
+type MapCatalog struct {
+	ID             byte
+	Name           string
+	SpawnX, SpawnY int16
 }
 type NPCatalog struct {
 	ID                        byte
 	Name                      string
 	Head, Body, Leg, Portrait int16
+	X, Y                      int16
+	Dialog                    string
+	Menu                      []string
+}
+type MobSpawnCatalog struct {
+	ID   byte
+	X, Y int16
 }
 type MobCatalog struct {
-	ID   byte
-	Name string
+	ID                 byte
+	Name               string
+	HP                 int32
+	Range, Speed, Dart byte
+	Spawns             []MobSpawnCatalog
 }
 
 type catalogArtifact struct {
-	Maps []string `json:"maps"`
-	Mobs []string `json:"mob_templates"`
-	NPCs []string `json:"npc_templates"`
+	Maps []struct {
+		ID    byte   `json:"id"`
+		Name  string `json:"name"`
+		Spawn struct {
+			X int16 `json:"x"`
+			Y int16 `json:"y"`
+		} `json:"spawn"`
+	} `json:"maps"`
+	NPCs []struct {
+		ID       byte     `json:"id"`
+		Name     string   `json:"name"`
+		Head     int16    `json:"head"`
+		Body     int16    `json:"body"`
+		Leg      int16    `json:"leg"`
+		Portrait int16    `json:"portrait"`
+		X        int16    `json:"x"`
+		Y        int16    `json:"y"`
+		Dialog   string   `json:"dialog"`
+		Menu     []string `json:"menu"`
+	} `json:"npcs"`
+	Mobs []struct {
+		ID     byte   `json:"id"`
+		Name   string `json:"name"`
+		HP     int32  `json:"hp"`
+		Range  byte   `json:"range"`
+		Speed  byte   `json:"speed"`
+		Dart   byte   `json:"dart"`
+		Spawns []struct {
+			ID byte  `json:"id"`
+			X  int16 `json:"x"`
+			Y  int16 `json:"y"`
+		} `json:"spawns"`
+	} `json:"mobs"`
 }
 type lockArtifact struct {
 	Closure struct {
@@ -49,9 +93,6 @@ func NapCatalog(data, lockData []byte) (*Catalog, error) {
 	if len(a.Maps) != 6 || len(a.NPCs) != 1 || len(a.Mobs) != 1 {
 		return nil, fmt.Errorf("catalog thieu map/npc/mob")
 	}
-	if a.NPCs[0] == "" || a.Mobs[0] == "" {
-		return nil, fmt.Errorf("catalog co template rong")
-	}
 	var l lockArtifact
 	if err := json.Unmarshal(lockData, &l); err != nil {
 		return nil, fmt.Errorf("asset lock malformed: %w", err)
@@ -59,26 +100,33 @@ func NapCatalog(data, lockData []byte) (*Catalog, error) {
 	if !lockHashKhop(data, l, "server/catalog.json") {
 		return nil, fmt.Errorf("catalog hash khong khop asset lock")
 	}
-	parts := l.Closure.PartIDs
-	sprites := l.Closure.SpriteIDs
-	if len(parts) != 6 || len(sprites) != 42 || len(l.Closure.MobIDs) != 1 || !tangDan(parts) || !tangDan(sprites) {
+	n, m := a.NPCs[0], a.Mobs[0]
+	if n.Name == "" || n.Dialog == "" || len(n.Menu) == 0 || m.Name == "" || m.HP <= 0 || len(m.Spawns) == 0 {
+		return nil, fmt.Errorf("catalog co template rong")
+	}
+	if !coID(l.Closure.PartIDs, int(n.Head)) || !coID(l.Closure.PartIDs, int(n.Body)) || !coID(l.Closure.PartIDs, int(n.Leg)) || !coID(l.Closure.SpriteIDs, int(n.Portrait)) || !coID(l.Closure.MobIDs, int(m.ID)) {
 		return nil, fmt.Errorf("asset lock thieu binding Iruka/mob")
 	}
-	// Ba part Iruka là ba ID lớn nhất trong nhóm part runtime; portrait là ID
-	// đứng ngay trước bốn icon skill ở cuối nhóm sprite closure.
-	c := &Catalog{Maps: append([]string(nil), a.Maps...), NPC: NPCatalog{ID: 0, Name: a.NPCs[0], Head: int16(parts[len(parts)-3]), Body: int16(parts[len(parts)-2]), Leg: int16(parts[len(parts)-1]), Portrait: int16(sprites[len(sprites)-5])}, Mob: MobCatalog{ID: byte(l.Closure.MobIDs[0]), Name: a.Mobs[0]}}
+	c := &Catalog{NPC: NPCatalog{ID: n.ID, Name: n.Name, Head: n.Head, Body: n.Body, Leg: n.Leg, Portrait: n.Portrait, X: n.X, Y: n.Y, Dialog: n.Dialog, Menu: append([]string(nil), n.Menu...)}, Mob: MobCatalog{ID: m.ID, Name: m.Name, HP: m.HP, Range: m.Range, Speed: m.Speed, Dart: m.Dart}}
+	for _, item := range a.Maps {
+		if item.Name == "" {
+			return nil, fmt.Errorf("catalog map rong")
+		}
+		c.Maps = append(c.Maps, MapCatalog{ID: item.ID, Name: item.Name, SpawnX: item.Spawn.X, SpawnY: item.Spawn.Y})
+	}
+	for _, item := range m.Spawns {
+		c.Mob.Spawns = append(c.Mob.Spawns, MobSpawnCatalog{ID: item.ID, X: item.X, Y: item.Y})
+	}
 	return c, nil
 }
-
-func tangDan(ids []int) bool {
-	for i := 1; i < len(ids); i++ {
-		if ids[i-1] >= ids[i] {
-			return false
+func coID(ids []int, want int) bool {
+	for _, id := range ids {
+		if id == want {
+			return true
 		}
 	}
-	return true
+	return false
 }
-
 func lockHashKhop(data []byte, l lockArtifact, path string) bool {
 	want := ""
 	for _, o := range l.Outputs {
@@ -95,8 +143,8 @@ func lockHashKhop(data []byte, l lockArtifact, path string) bool {
 }
 
 type Collision struct {
-	width, height int
-	cells         []byte
+	width, height, tileWidth, tileHeight int
+	cells                                []byte
 }
 
 func TaiCollision(data, lockData []byte) (*Collision, error) {
@@ -107,29 +155,30 @@ func TaiCollision(data, lockData []byte) (*Collision, error) {
 	if !lockHashKhop(data, l, "server/map-1-collision.bin") {
 		return nil, fmt.Errorf("ASSET-COLLISION-006: collision hash khong khop lock")
 	}
-	if len(data) < 3 {
+	if len(data) < 5 {
 		return nil, fmt.Errorf("ASSET-COLLISION-006: collision header sai")
 	}
-	w, h := int(data[0]), int(data[1])
-	if w == 0 || h == 0 || len(data) != 2+w*h {
+	w, h, tw, th := int(data[0]), int(data[1]), int(data[2]), int(data[3])
+	if w == 0 || h == 0 || tw != 24 || th != 24 || len(data) != 4+w*h {
 		return nil, fmt.Errorf("ASSET-COLLISION-006: collision cell sai")
 	}
-	for _, tile := range data[2:] {
-		if tile > 99 {
-			return nil, fmt.Errorf("ASSET-COLLISION-006: tile collision sai")
+	hasSolid := false
+	for _, cell := range data[4:] {
+		if cell > 1 {
+			return nil, fmt.Errorf("ASSET-COLLISION-006: semantic collision sai")
 		}
+		hasSolid = hasSolid || cell == 1
 	}
-	return &Collision{width: w, height: h, cells: append([]byte(nil), data[2:]...)}, nil
+	if !hasSolid {
+		return nil, fmt.Errorf("ASSET-COLLISION-006: collision khong co o chan")
+	}
+	return &Collision{width: w, height: h, tileWidth: tw, tileHeight: th, cells: append([]byte(nil), data[4:]...)}, nil
 }
 func (c *Collision) DiDuoc(x, y int16) bool {
 	if c == nil || x < 0 || y < 0 {
 		return false
 	}
-	// Toa do gameplay dung o 48 px, con tile art x1 la 24 px; map artifact
-	// 5x17 vi vay phu duoc spawn (100,384) va khu choi thuc, khong phai 120px.
-	col, row := int(x)/48, int(y)/48
-	// Artifact chi mang semantic cua phan map slice. Toa do nam ngoai luoi
-	// khong duoc tu y coi la tuong: bien map cu va NguongBuoc van xu ly no.
+	col, row := int(x)/c.tileWidth, int(y)/c.tileHeight
 	if col >= c.width || row >= c.height {
 		return true
 	}

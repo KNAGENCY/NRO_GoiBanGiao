@@ -21,6 +21,13 @@ func haiQuaiMau() []*Quai {
 	}
 }
 
+func TestTaoQuaiMacDinhDungCatalogKhongSuyDienSpawn(t *testing.T) {
+	quai := taoQuaiMacDinh(TimBanDo(1))
+	if len(quai) != 2 || quai[0].MauId != 0 || quai[0].Hp != 100 || quai[0].HpToiDa != 100 || quai[0].X != 160 || quai[0].Y != 384 || quai[1].X != 40 || quai[1].Y != 384 {
+		t.Fatalf("quai mac dinh phai theo catalog, got=%+v", quai)
+	}
+}
+
 // TestGhiDanhSachQuaiByteDung: so TOAN BO mang byte ma ghiDanhSachQuai ghi ra
 // cho 2 con quai voi gia tri ghim cung, dung dac ta §3.6.
 func TestGhiDanhSachQuaiByteDung(t *testing.T) {

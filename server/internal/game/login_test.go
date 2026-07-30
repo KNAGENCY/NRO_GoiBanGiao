@@ -988,6 +988,50 @@ func TestVaoKhuVucLanHaiKhongPhatGoiTrung(t *testing.T) {
 	}
 }
 
+func TestMoNPCXepGuiKhongChanDocLenhVaGiuFIFO(t *testing.T) {
+	b := NewBoXuLy(&khoGia{}, nil)
+	b.nhanVat = &store.NhanVat{ID: 7, MapID: 1}
+	fClient, dong := dungPhienThat(t, b)
+	defer dong()
+
+	w := protocol.NewWriter()
+	w.Short(0)
+	if err := fClient.WriteMessage(protocol.NewMessage(lenhMoNPC, w)); err != nil {
+		t.Fatalf("gui NPC lan 1: %v", err)
+	}
+	// net.Pipe khong buffer: writer session dang ket o output vi client chua doc.
+	// Lenh thu hai van phai duoc handler nhan va xep hang, khong cho socket output.
+	time.Sleep(20 * time.Millisecond)
+	xong := make(chan error, 1)
+	go func() { xong <- fClient.WriteMessage(protocol.NewMessage(lenhMoNPC, w)) }()
+	select {
+	case err := <-xong:
+		if err != nil {
+			t.Fatalf("gui NPC lan 2: %v", err)
+		}
+	case <-time.After(250 * time.Millisecond):
+		t.Fatal("handler NPC bi chan boi client khong doc; phai dung XepGui")
+	}
+	for i := 0; i < 2; i++ {
+		m := docMotGoi(t, fClient)
+		if m.Command != 32 {
+			t.Fatalf("goi NPC #%d command=%d", i, m.Command)
+		}
+		if !bytes.Equal(m.Data, mustNPCData(t)) {
+			t.Fatalf("goi NPC #%d khong dung FIFO/exact", i)
+		}
+	}
+}
+
+func mustNPCData(t *testing.T) []byte {
+	t.Helper()
+	m, err := goiMoNPC(0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return m.Data
+}
+
 // TestXuLyChonChieuGuiSuKienKhongGhiThang la kiem chung QUAN TRONG cho ky
 // luat actor (dac ta §3.2 + brief KH6 Task 2): xuLyChonChieu (luong phien) CHI
 // duoc gui su kien vao hop thu actor, TUYET DOI KHONG tu tra ChieuCuaLang/ghi

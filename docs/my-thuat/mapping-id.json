@@ -2,9 +2,9 @@
   "schema_version": 1,
   "source_catalog_version": 2,
   "versions": {
-    "runtime_slice": 21,
+    "runtime_slice": 22,
     "data": 21,
-    "map": 21,
+    "map": 22,
     "resource": 21
   },
   "phase": {
@@ -2929,8 +2929,8 @@
     },
     {
       "id": 1,
-      "semantic": "decorative",
-      "solid": false
+      "semantic": "solid",
+      "solid": true
     },
     {
       "id": 2,
@@ -3519,24 +3519,18 @@
   ],
   "catalog": {
     "maps": [
-      "Làng Lá",
-      "Làng Cát",
-      "Làng Sương Mù",
-      "Làng Đá",
-      "Làng Mây",
-      "Khu rừng"
+      {"id": 1, "name": "Làng Lá", "spawn": {"x": 100, "y": 384}},
+      {"id": 2, "name": "Làng Cát", "spawn": {"x": 100, "y": 384}},
+      {"id": 3, "name": "Làng Sương Mù", "spawn": {"x": 100, "y": 384}},
+      {"id": 4, "name": "Làng Đá", "spawn": {"x": 100, "y": 384}},
+      {"id": 5, "name": "Làng Mây", "spawn": {"x": 100, "y": 384}},
+      {"id": 6, "name": "Khu rừng", "spawn": {"x": 100, "y": 384}}
     ],
-    "npc_templates": [
-      "Iruka"
+    "npcs": [
+      {"id": 0, "name": "Iruka", "head": 2189, "body": 2190, "leg": 2191, "portrait": 27078, "x": 172, "y": 384, "dialog": "Chào mừng em đến Làng Lá. Hãy vững tin trên con đường ninja của mình.", "menu": ["Đóng"]}
     ],
-    "mob_templates": [
-      "Sói Rừng"
-    ],
-    "spawn": [
-      [
-        100,
-        384
-      ]
+    "mobs": [
+      {"id": 0, "name": "Sói Rừng", "hp": 100, "range": 100, "speed": 0, "dart": 0, "spawns": [{"id": 0, "x": 160, "y": 384}, {"id": 1, "x": 40, "y": 384}]}
     ],
     "skill_poses": [
       0,
@@ -4022,7 +4016,7 @@
       },
       {
         "index": 1,
-        "solid": false,
+        "solid": true,
         "sources": {
           "x1": "docs/my-thuat/anh-nguon/vertical-slice-v1/generated/production-closure-v11/tile-art/tiles/001/x1/tile.png",
           "x2": "docs/my-thuat/anh-nguon/vertical-slice-v1/generated/production-closure-v11/tile-art/tiles/001/x2/tile.png",
@@ -5948,7 +5942,7 @@
       "width": 5,
       "height": 17,
       "indexes": [
-        0,
+        1,
         0,
         0,
         0,
@@ -6043,7 +6037,7 @@
         24
       ],
       "client_solid": [
-        false,
+        true,
         false,
         false,
         false,

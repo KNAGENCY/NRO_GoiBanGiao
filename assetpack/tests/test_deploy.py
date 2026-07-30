@@ -5,6 +5,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+from assetpack.__main__ import main
 from assetpack.deploy import DeployError, deploy
 
 
@@ -70,6 +71,10 @@ class DeployArtifactTests(unittest.TestCase):
             },
         )
         self._make_artifact(self.artifact)
+        self.previous_lock = self.root / "previous-asset-lock.json"
+        self.previous_lock.write_bytes((self.artifact / "asset-lock.json").read_bytes())
+        self.protected_root = self.root / "unity-source"
+        self.protected_root.mkdir()
 
     def tearDown(self):
         self.temp.cleanup()
@@ -96,10 +101,14 @@ class DeployArtifactTests(unittest.TestCase):
             destination = root / path
             destination.parent.mkdir(parents=True, exist_ok=True)
             destination.write_bytes(data)
-        outputs = [
-            {"path": path, "sha256": _sha(data), "bytes": len(data)}
-            for path, data in sorted(files.items())
-        ]
+        outputs = []
+        for path, data in sorted(files.items()):
+            record = {"path": path, "sha256": _sha(data), "bytes": len(data)}
+            if path.endswith(".png"):
+                zoom = int(path.split("/")[1][1:])
+                size = 24 * zoom if "/t/" in path else 8 * zoom
+                record.update({"width": size, "height": size})
+            outputs.append(record)
         lock = {
             "schema_version": 1,
             "slice": "lang-la",
@@ -134,6 +143,147 @@ class DeployArtifactTests(unittest.TestCase):
         log_path.write_text("RESOURCE-PREFLIGHT-OK\n", encoding="utf-8")
         return 0
 
+    def _remove_locked_output(self, artifact: Path, relative: str) -> None:
+        (artifact / relative).unlink()
+        lock_path = artifact / "asset-lock.json"
+        lock = json.loads(lock_path.read_text(encoding="utf-8"))
+        lock["outputs"] = [
+            output for output in lock["outputs"] if output["path"] != relative
+        ]
+        lock["server_client_pair_sha256"] = _pair_sha(artifact)
+        _write_json(lock_path, lock)
+
+    def _cli_args(self) -> list[str]:
+        return [
+            "deploy",
+            "--server-artifact",
+            str(self.artifact),
+            "--release-root",
+            str(self.release_root),
+            "--snapshot",
+            str(self.snapshot),
+            "--version-ledger",
+            str(self.ledger),
+            "--runtime-key-map",
+            str(self.runtime_map),
+            "--unity-exe",
+            str(self.root / "Unity.exe"),
+        ]
+
+    def test_api_bat_buoc_previous_lock_va_protected_unity_root(self):
+        with self.assertRaises(TypeError):
+            deploy(
+                self.artifact,
+                self.artifact,
+                self.release_root,
+                self.snapshot,
+                self.ledger,
+                self.runtime_map,
+                protected_unity_root=self.protected_root,
+                preflight=self._preflight_ok,
+            )
+        with self.assertRaises(TypeError):
+            deploy(
+                self.artifact,
+                self.artifact,
+                self.release_root,
+                self.snapshot,
+                self.ledger,
+                self.runtime_map,
+                previous_lock_path=self.previous_lock,
+                preflight=self._preflight_ok,
+            )
+
+    @mock.patch("assetpack.__main__.deploy", return_value=Path("release"))
+    def test_cli_bat_buoc_previous_lock_va_protected_unity_root(self, deploy_mock):
+        base = self._cli_args()
+        for missing_flag, supplied in (
+            (
+                "--previous-lock",
+                ["--protected-unity-root", str(self.protected_root)],
+            ),
+            (
+                "--protected-unity-root",
+                ["--previous-lock", str(self.previous_lock)],
+            ),
+        ):
+            with self.subTest(missing=missing_flag):
+                with self.assertRaises(SystemExit) as caught:
+                    main([*base, *supplied])
+                self.assertEqual(caught.exception.code, 2)
+        deploy_mock.assert_not_called()
+
+    def test_thieu_exact_zoom_cua_tung_nhom_resource_phai_do_preflight(self):
+        representatives = {
+            "small": "smallimage/Small27041.png",
+            "background": "bg/b00.png",
+            "mob": "Mob/0/img.png",
+            "hud": "mainImage/naruto-hp-bg.png",
+            "skill": "smallimage/Small27041.png",
+        }
+        for kind, suffix in representatives.items():
+            for zoom in (2, 3, 4):
+                with self.subTest(kind=kind, zoom=zoom):
+                    artifact = self.root / f"artifact-{kind}-x{zoom}"
+                    self._make_artifact(
+                        artifact,
+                        versions={
+                            "runtime_slice": 2,
+                            "data": 2,
+                            "map": 2,
+                            "resource": 2,
+                        },
+                    )
+                    relative = f"client/x{zoom}/{suffix}"
+                    self._remove_locked_output(artifact, relative)
+                    with self.assertRaisesRegex(
+                        DeployError,
+                        "ASSET-PREFLIGHT-022",
+                    ):
+                        deploy(
+                            artifact,
+                            artifact,
+                            self.release_root / f"{kind}-x{zoom}",
+                            self.snapshot,
+                            self.ledger,
+                            self.runtime_map,
+                            previous_lock_path=self.previous_lock,
+                            protected_unity_root=self.protected_root,
+                            preflight=self._preflight_ok,
+                        )
+
+    def test_metadata_dimension_thieu_hoac_sai_phai_do_preflight(self):
+        for mutation in ("missing-width", "string-height", "zero-width"):
+            with self.subTest(mutation=mutation):
+                artifact = self.root / f"artifact-{mutation}"
+                self._make_artifact(artifact)
+                lock_path = artifact / "asset-lock.json"
+                lock = json.loads(lock_path.read_text(encoding="utf-8"))
+                output = next(
+                    item
+                    for item in lock["outputs"]
+                    if item["path"] == "client/x2/bg/b00.png"
+                )
+                if mutation == "missing-width":
+                    output.pop("width", None)
+                elif mutation == "string-height":
+                    output["height"] = "2"
+                else:
+                    output["width"] = 0
+                _write_json(lock_path, lock)
+                with self.assertRaisesRegex(DeployError, "ASSET-PREFLIGHT-022"):
+                    deploy(
+                        artifact,
+                        artifact,
+                        self.release_root / mutation,
+                        self.snapshot,
+                        self.ledger,
+                        self.runtime_map,
+                        previous_lock_path=self.previous_lock,
+                        protected_unity_root=self.protected_root,
+                        preflight=self._preflight_ok,
+                    )
+
     def test_tu_choi_server_client_khac_lock(self):
         client_artifact = self.root / "client-artifact"
         self._make_artifact(
@@ -149,6 +299,8 @@ class DeployArtifactTests(unittest.TestCase):
                 self.snapshot,
                 self.ledger,
                 self.runtime_map,
+                previous_lock_path=self.previous_lock,
+                protected_unity_root=self.protected_root,
                 preflight=self._preflight_ok,
             )
 
@@ -175,6 +327,7 @@ class DeployArtifactTests(unittest.TestCase):
                 self.ledger,
                 self.runtime_map,
                 previous_lock_path=previous_lock,
+                protected_unity_root=self.protected_root,
                 preflight=self._preflight_ok,
             )
 
@@ -190,6 +343,8 @@ class DeployArtifactTests(unittest.TestCase):
                 self.snapshot,
                 self.ledger,
                 self.runtime_map,
+                previous_lock_path=self.previous_lock,
+                protected_unity_root=self.protected_root,
                 preflight=self._preflight_ok,
             )
 
@@ -204,6 +359,8 @@ class DeployArtifactTests(unittest.TestCase):
                 self.snapshot,
                 self.ledger,
                 self.runtime_map,
+                previous_lock_path=self.previous_lock,
+                protected_unity_root=self.protected_root,
                 preflight=self._preflight_ok,
             )
 
@@ -218,21 +375,22 @@ class DeployArtifactTests(unittest.TestCase):
                 self.snapshot,
                 self.ledger,
                 self.runtime_map,
+                previous_lock_path=self.previous_lock,
+                protected_unity_root=self.protected_root,
                 preflight=self._preflight_ok,
             )
 
     def test_tu_choi_unity_goc_va_snapshot_thieu_overlay(self):
-        unity_source = self.root / "unity-source"
-        unity_source.mkdir()
         with self.assertRaisesRegex(DeployError, "ASSET-DEPLOY-SOURCE-020"):
             deploy(
                 self.artifact,
                 self.artifact,
                 self.release_root,
-                unity_source,
+                self.protected_root,
                 self.ledger,
                 self.runtime_map,
-                protected_unity_root=unity_source,
+                previous_lock_path=self.previous_lock,
+                protected_unity_root=self.protected_root,
                 preflight=self._preflight_ok,
             )
 
@@ -246,6 +404,8 @@ class DeployArtifactTests(unittest.TestCase):
                 bare,
                 self.ledger,
                 self.runtime_map,
+                previous_lock_path=self.previous_lock,
+                protected_unity_root=self.protected_root,
                 preflight=self._preflight_ok,
             )
 
@@ -257,6 +417,8 @@ class DeployArtifactTests(unittest.TestCase):
             self.snapshot,
             self.ledger,
             self.runtime_map,
+            previous_lock_path=self.previous_lock,
+            protected_unity_root=self.protected_root,
             preflight=self._preflight_ok,
         )
 
@@ -285,6 +447,8 @@ class DeployArtifactTests(unittest.TestCase):
                     self.snapshot,
                     self.ledger,
                     self.runtime_map,
+                    previous_lock_path=self.previous_lock,
+                    protected_unity_root=self.protected_root,
                     preflight=self._preflight_ok,
                 )
 

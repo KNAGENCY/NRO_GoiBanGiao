@@ -261,13 +261,21 @@ def _resource(
     zooms = []
     for zoom, relative in enumerate(paths, 1):
         record = outputs.get(relative)
-        if record is None or "width" not in record or "height" not in record:
-            # Unit fixtures use short fake PNG bytes; real build locks always carry
-            # PNG dimensions. Keeping a deterministic fallback lets tests exercise
-            # deploy mechanics without pretending the Unity run has happened.
-            width = height = 1
-        else:
-            width, height = record["width"], record["height"]
+        if (
+            record is None
+            or not relative.startswith(f"client/x{zoom}/")
+            or not isinstance(record.get("width"), int)
+            or isinstance(record.get("width"), bool)
+            or record["width"] <= 0
+            or not isinstance(record.get("height"), int)
+            or isinstance(record.get("height"), bool)
+            or record["height"] <= 0
+        ):
+            _fail(
+                "ASSET-PREFLIGHT-022",
+                f"metadata width/height hoac zoom sai: {relative}",
+            )
+        width, height = record["width"], record["height"]
         zooms.append(
             {
                 "zoom": zoom,
@@ -290,12 +298,6 @@ def _find_zoom_paths(
             for path in outputs
             if path.startswith(f"client/x{zoom}/") and predicate(path)
         )
-        if not matches:
-            matches = sorted(
-                path
-                for path in outputs
-                if path.startswith("client/x1/") and predicate(path)
-            )
         if not matches:
             _fail("ASSET-PREFLIGHT-022", f"thiếu resource {predicate!r} ở x{zoom}")
         paths.append(matches[0])
@@ -446,8 +448,8 @@ def deploy(
     version_ledger: Path,
     runtime_map: Path,
     *,
-    previous_lock_path: Path | None = None,
-    protected_unity_root: Path | None = None,
+    previous_lock_path: Path,
+    protected_unity_root: Path,
     preflight: Preflight,
 ) -> Path:
     """Kiểm trước, deploy cặp lock vào snapshot, rồi xuất release immutable."""
@@ -457,6 +459,12 @@ def deploy(
     release_root = Path(release_root).resolve()
     snapshot = Path(snapshot).resolve()
     runtime_map = Path(runtime_map).resolve()
+    if previous_lock_path is None:
+        _fail("ASSET-VERSION-015", "deploy phai co previous asset lock")
+    if protected_unity_root is None:
+        _fail("ASSET-DEPLOY-SOURCE-020", "deploy phai co Unity root can bao ve")
+    previous_lock_path = Path(previous_lock_path).resolve()
+    protected_unity_root = Path(protected_unity_root).resolve()
     server_lock, server_lock_raw = _read_artifact_lock(server_artifact)
     client_lock, client_lock_raw = _read_artifact_lock(client_artifact)
     if _sha_bytes(server_lock_raw) != _sha_bytes(client_lock_raw):
@@ -464,8 +472,9 @@ def deploy(
     outputs = _verify_outputs(server_lock, server_artifact, client_artifact)
     _validate_version_bump(server_lock, Path(version_ledger), previous_lock_path)
     _validate_runtime_map(runtime_map, outputs, server_lock)
+    resource_contract = _resource_contract(server_lock, outputs)
 
-    if protected_unity_root is not None and _inside(snapshot, Path(protected_unity_root)):
+    if _inside(snapshot, protected_unity_root):
         _fail("ASSET-DEPLOY-SOURCE-020", "không được deploy vào Unity gốc")
     if not (snapshot / ".nro-e2e-overlay.json").is_file():
         _fail("ASSET-DEPLOY-SNAPSHOT-021", "đích không phải snapshot đã phủ overlay")
@@ -499,7 +508,7 @@ def deploy(
         contract_path = temporary / "resource-contract.json"
         contract_path.write_text(
             json.dumps(
-                _resource_contract(server_lock, outputs),
+                resource_contract,
                 ensure_ascii=False,
                 sort_keys=True,
                 separators=(",", ":"),

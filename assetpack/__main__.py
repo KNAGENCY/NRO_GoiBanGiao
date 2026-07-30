@@ -30,10 +30,10 @@ def main(argv=None):
     deploy_command.add_argument("--release-root", type=Path, required=True)
     deploy_command.add_argument("--snapshot", type=Path, required=True)
     deploy_command.add_argument("--version-ledger", type=Path, required=True)
-    deploy_command.add_argument("--previous-lock", type=Path)
+    deploy_command.add_argument("--previous-lock", type=Path, required=True)
     deploy_command.add_argument("--runtime-key-map", type=Path, required=True)
     deploy_command.add_argument("--unity-exe", type=Path, required=True)
-    deploy_command.add_argument("--protected-unity-root", type=Path)
+    deploy_command.add_argument("--protected-unity-root", type=Path, required=True)
     args = parser.parse_args(argv)
     if args.command == "validate":
         try:

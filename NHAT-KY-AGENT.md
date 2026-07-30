@@ -1,16 +1,15 @@
 # Nhật ký agent — ai đã làm gì
 
-## ⏳ ĐANG CHỜ GÌ NGAY LÚC NÀY — cập nhật: 28/07/2026
+## ⏳ ĐANG CHỜ GÌ NGAY LÚC NÀY — cập nhật: 30/07/2026
 
 > Ai vào cũng đọc khối này trước. **Xong việc thì phải sửa lại khối này**, nếu không nó
 > thành thông tin cũ gây hại hơn là không có.
 
 - ✅ **Client Unity ĐÃ VÀO ĐƯỢC GAME** (28/07) — chủ dự án tự bấm Play, tự động login. Server 100% đúng. Chi tiết chuỗi 4 fix + 3 sửa đổi tay ở client Unity: **BAT-DAU §8 hai bullet cuối + §12 dòng 28/07** — ai chưa đọc ĐỪNG sửa gì thêm ở `D:\NRO_Project` hoặc RMS Unity.
-- 🚨 **Ba lỗi mỹ thuật còn**: (1) nhân vật narruto không hiển thị — `part.bin` là placeholder Dragon Ball; (2) map trống chỉ có 1 cột thang — `mymap/1-5.bytes` là bản sao `0.bytes`; (3) background parallax 4 lớp là Dragon Ball. **CẦN 1 KH RIÊNG** — bộ 343 ảnh Naruto ở `docs/my-thuat/anh-game/` đã có nhưng thiếu (a) reverse-engineer format `Big*.png`/`NR_image`/`part.bin`, (b) mapping ID → tên file, (c) script deploy vào Unity Resources.
+- ✅ **Vertical slice Task 0–7 đã qua review độc lập** trên worktree `kh-vertical-slice`: assetpack 123/123, Go toàn repo + vet xanh; artifact lock 21 và Unity staging/preflight thật đã có bằng chứng. Chưa gộp `main`.
 - ✅ **KH6 (chiến đấu) + KH11 (lưu trạng thái) XONG** — gộp `main` (`162bbe9`, `6ea467f`). `server/` rảnh, agent khác vào được. Luật số một: **actor không bao giờ chờ ổ đĩa**.
-- **Việc nên làm tiếp** (theo BAT-DAU §5): **KH mapping ảnh Naruto** (mới nhất, cần viết spec trước), **Kế hoạch B — bảo mật**, hoặc **KH7 vật phẩm** (⚠️ chốt căn cước + chống nhân bản TRƯỚC khi viết code). Còn **KH6b (Boss)**, **KH6c (stress 20 client)**.
-- **Hai việc nghiệm thu tay còn của chủ dự án** (chưa test hôm nay vì client chưa render đúng nhân vật): (1) KH6 — mở 2 client Unity, đánh quái/PvP/chết-hồi-sinh; (2) KH11 — chơi vài phút, Ctrl+C tắt máy chủ, bật lại, đăng nhập xem có đúng chỗ đúng máu không. Cả hai cần **KH mapping ảnh xong trước** mới nhìn thấy được.
-- Phân tích **bổ sung lộ trình** (9 khối) ở [`BO-SUNG-LO-TRINH.md`](docs/superpowers/plans/BO-SUNG-LO-TRINH.md) — chờ chủ dự án chốt.
+- 🟡 **Việc tiếp theo là Task 8**: nối catalog/NPC/Sói/collision vào server Go, sau đó mới làm telemetry/runner và E2E hai client. Task 8 chưa bắt đầu; không được coi preflight artifact là gameplay E2E.
+- ⚠️ **Thư mục chính vẫn giữ POC cũ bẩn** trên `kh-mapping-anh`; không reset/xoá/cherry-pick đè. Các worktree `kh-actor`, `kh-assets`, `kh-unity-e2e` là lịch sử/nhánh nguồn, không tự dọn.
 
 ---
 
@@ -53,4 +52,5 @@ lên nhau.
 | 29/07/2026 | Codex Task 6A closure | Gate exact 20/source SHA/evidence fail-closed, bind precondition, derived 20/20 PASS; report + mutation đã ghi | `kh-vertical-slice` / pending commit | Raw 0/20; gate exit 0; 13 unittest PASS; 6 mutation bị bắt |
 | 29/07/2026 | Codex (Task 6A fix round 2) | Sửa semantic one-shot GIF, raw-source status/summary/issues, canonical alpha/crop/contact/animation evidence, reviewer/timestamp và malformed fail-closed; review thật **20 PNG**, derived **20/20 PASS** | `kh-vertical-slice` / chờ commit `fix(art): harden review evidence semantics` | Raw **0/20 PASS** vẫn giữ nguyên; unittest **19/19**, mutation đều exit **2**, gate/bind exit **0** |
 | 29/07/2026 | Hermes (review codex cũ tasks 6B→commit cuối) | Review 10 commit: phát hiện **2 duplicate functions** trong `assetpack/bind.py` (merge lỗi). Đã xoá dead code `_validate_runtime_map` cũ (dòng 125-128) và `_review_records` cũ (dòng 228-267), giữ phiên bản validate chặt. Số function: 12, không còn duplicate | `kh-vertical-slice` / fix(asset): xoa ham trung bind sau re-review | — |
-| 29/07/2026 | Codex (Vertical slice Task 6B closure) | Fix HUD artboard, exact 20 provenance, evidence HUD/Iruka có reviewer trust anchor; mutation + full **109/109** + A/B **669 file diff 0**; scoped review sạch | `kh-vertical-slice` / `bf91ee8`, `545b9c6`, `0fd6fc5` | Task 6B xong; tiếp Task 7 build artifact + deploy Unity staging theo lock. Hai sửa duplicate của Hermes vẫn để riêng, chưa commit |
+| 29/07/2026 | Codex (Vertical slice Task 6B closure) | Fix HUD artboard, exact 20 provenance, evidence HUD/Iruka có reviewer trust anchor; mutation + full **109/109** + A/B **669 file diff 0**; scoped review sạch | `kh-vertical-slice` / `bf91ee8`, `545b9c6`, `0fd6fc5` | Task 6B xong; tiếp Task 7 build artifact + deploy Unity staging theo lock |
+| 30/07/2026 | Codex (tiếp quản vertical slice) | Hoàn tất Task 7 build/deploy với lock 21: bắt buộc previous lock + protected Unity root, canonical resource từng zoom, rollback fail-closed; re-review độc lập APPROVE; full assetpack **123/123**, Go toàn repo + vet xanh | `kh-vertical-slice` / `2a77a43`, `9627680`, `56fa302` | Task 8 catalog/NPC/Sói/collision chưa bắt đầu; chưa gộp `main` |

@@ -8,7 +8,7 @@
 > một bản vá, một phát hiện lỗi) thì **phải cập nhật file này ngay** rồi mới commit.
 > Cách cập nhật xem mục [11. Quy ước cập nhật](#11-quy-ước-cập-nhật-file-này).
 
-**Cập nhật lần cuối:** 29/07/2026 (Vertical slice Task 6B đã review sạch; sẵn sàng Task 7 trên nhánh `kh-vertical-slice`) · **Nhánh chính:** `main` · **Commit HEAD main:** `6ea467f` · **Task 6B code:** `0fd6fc5`
+**Cập nhật lần cuối:** 30/07/2026 (Vertical slice Task 7 đã review sạch; sẵn sàng Task 8 trên nhánh `kh-vertical-slice`) · **Nhánh đang làm:** `kh-vertical-slice` · **Commit HEAD:** `56fa302` · **main:** `485b095`
 
 ---
 
@@ -122,10 +122,12 @@ Mỗi kế hoạch đều đi qua: thiết kế → kế hoạch → thi công t
 | W2 | Web tính năng | Trang cá nhân, đổi mật khẩu, bảng xếp hạng, panel admin (chặn quyền 3 lớp) | trên `main` |
 | VS-6A | QA ảnh nguồn vertical slice Lang La | Fix round 2: semantic one-shot GIF, raw provenance, canonical evidence và gate fail-closed; raw **0/20 PASS**, derived **20/20 PASS**, gate exit 0 | nhánh `kh-vertical-slice` |
 | VS-6B | Bind ảnh đã duyệt vào manifest Làng Lá | Exact **20/20 provenance** fail-closed; closure v11 có 42 sprite `27041..27082`, HUD 25/50/100 và Iruka sáng/tối được reviewer độc lập ký SHA; mutation/full test/build A/B đều xanh | `bf91ee8`, `545b9c6`, `0fd6fc5` |
+| VS-7 | **Build artifact + deploy staging theo lock** | Artifact server/client bất biến theo lock 21; bắt buộc previous lock + protected Unity root; canonical resource đủ x1–x4 cho small/skill/mob/background/HUD; Unity preflight thật marker `RESOURCE-PREFLIGHT-OK`; full Python **123/123**, Go toàn repo + vet xanh | `2a77a43`, `9627680`, `56fa302` |
 
 **Tình trạng chất lượng hiện tại:** `go test ./...` — **toàn bộ 6 gói xanh, 0 đỏ**
 (gói `game` ~70s), chạy lặp `-count=5` không chập chờn. `gofmt` sạch (trừ nhiễu CRLF file
-cũ, §9), `go vet` sạch. KH6 còn được **soi toàn nhánh (opus)** + **2 canary** (thả bug thật
+cũ, §9), `go vet` sạch. Vertical slice Task 7 có full `python -m unittest discover -s assetpack/tests -v`
+**123/123 xanh** và preflight Unity staging thật. KH6 còn được **soi toàn nhánh (opus)** + **2 canary** (thả bug thật
 để kiểm: reviewer bắt được lỗi byte im lặng, test E2E bắt được lỗi tích hợp).
 
 **Người chơi hiện đã làm được gì:** đăng ký trên web → đăng nhập vào game → tạo nhân
@@ -145,7 +147,8 @@ Xếp theo thứ tự nên làm:
 | ✅ | ~~KH11 — Lưu trạng thái sống~~ | **Xong, gộp `6ea467f`.** Còn **Task 9 — nghiệm thu tay**: chơi vài phút → Ctrl+C tắt máy chủ → bật lại → đăng nhập xem có đúng chỗ, đúng máu không |
 | ✅ | ~~Vertical slice Task 6A — fix round 2~~ | Derived output **20/20 PASS**; raw source vẫn **0/20 PASS** nhưng được ghi rõ và không bị tráo. Gate kiểm semantic loop, raw summary, reviewer/timestamp và nội dung evidence trước khi bind |
 | ✅ | ~~Vertical slice Task 6B — bind ảnh đã duyệt~~ | **Xong, review sạch.** 109/109 test; A/B 669 file không khác; exact-20 provenance và evidence HUD/Iruka có trust anchor reviewer |
-| 1a | **Vertical slice Task 7 — build artifact + deploy staging theo lock** | Chỉ deploy vào Unity snapshot; phải embed đúng artifact server/client, chạy Unity batch preflight thật và mutation một byte runtime |
+| ✅ | ~~Vertical slice Task 7 — build artifact + deploy staging theo lock~~ | **Xong trên nhánh `kh-vertical-slice`**, review độc lập sạch. Artifact lock 21, deploy fail-closed (previous lock + protected root + canonical x1–x4), Unity preflight thật, full Python 123/123; chưa gộp `main`. **Tiếp: Task 8** |
+| 1 | **Vertical slice Task 8 — catalog, NPC, Sói và collision server** | Phụ thuộc Task 7; phải viết test byte/semantic độc lập trước khi nối gameplay |
 | 1b | **KH6b — Boss** (hệ riêng, tách khỏi KH6) | Bản Java là 12 file, phức tạp hơn quái thường nhiều. Thiết kế sau khi KH6 gộp |
 | 1c | **KH6c — Stress test 20 client cùng khu vực** | Cùng xả chiêu, đo gói rơi hộp thư actor (trần 256, rơi im lặng) + trễ nhịp 100ms. Dựng trên `thuclient`/`clientGia` |
 | 2 | KH7 — Vật phẩm, hành trang, cửa hàng, giao dịch | 🧱 **Phải chốt căn cước vật phẩm + chống nhân bản trong đặc tả TRƯỚC khi viết code** ([BO-SUNG](docs/superpowers/plans/BO-SUNG-LO-TRINH.md) Khối 3). Tách rõ 4 thứ: cửa hàng NPC / giao dịch 2 người / ký gửi / kho |
@@ -282,6 +285,12 @@ Xếp theo thứ tự nên làm:
     one-shot chạy vô hạn; alpha/contact sheet/crop report có thể bị thay bằng file màu khác
     rồi cập nhật SHA. Gate phải tái tạo pipeline, đối chiếu nội dung canonical và fail closed
     với JSON null/malformed; raw source FAIL và derived output PASS là hai trạng thái khác nhau.
+21. **Deploy có thể xanh giả nếu tham số bảo vệ là tuỳ chọn hoặc predicate quá rộng.** Vòng
+    đầu Task 7 cho phép caller bỏ `previous_lock`/`protected_unity_root`, và preflight chỉ
+    tìm một file bất kỳ trong nhóm `Small*`; vì vậy runtime đổi cùng version hoặc thiếu
+    `Small27041.png` nhưng còn `Small27042.png` vẫn có đường lọt. Cách tránh: API/CLI bắt
+    buộc hai tham số, lock phải có closure ID độc lập, và mỗi resource canonical phải tồn
+    tại đúng x1–x4 trước khi publish; mutation decoy phải đỏ `ASSET-PREFLIGHT-022`.
 
 ---
 
@@ -477,3 +486,4 @@ Commit riêng cho việc cập nhật tài liệu thì dùng tiền tố `docs:`
 | VS-6A-fix | Gate exact 20/source SHA/evidence fail-closed, precondition bind; derived output 20/20 PASS | `kh-vertical-slice` / pending commit | Raw 0/20; gate exit 0; report `docs/superpowers/reports/2026-07-29-task-6a-fix-report.md` |
 | 29/07/2026 | **Task 6A fix round 2 hoàn tất:** TDD RED **19 test (9 fail + 2 error)** → GREEN **19/19**; review thật **20 PNG**, raw **0/20 PASS**, derived **20/20 PASS**; gate và bind exit **0**. Mutation SHA/raw summary/reviewer/evidence kind + alpha/crop/contact/animation/null asset đều exit **2**. Không sửa PNG nguồn hay worktree khác. |
 | 29/07/2026 | **Vertical slice Task 6B hoàn tất, review sạch.** Closure canonical v11 khóa exact 20 nguồn review, 42 sprite `27041..27082`, part/animation/Mob/tile/bg/HUD/UI/runtime snapshot. Reviewer độc lập ký HUD golden 25/50/100 và composite Iruka sáng/tối; validator pin path/SHA/digest/identity, mutation 19/20 và alias tự ký đều đỏ. Full **109/109**, build A/B **669/669 file, DIFF_COUNT=0**. Commit `bf91ee8` → `545b9c6` → `0fd6fc5`; việc tiếp theo là Task 7 build/deploy staging theo lock. |
+| 30/07/2026 | **Vertical slice Task 7 hoàn tất, review độc lập sạch.** Build/deploy artifact Naruto lock 21; fix hai guard fail-open (previous lock, protected Unity root) và canonical resource exact x1–x4 sau khi reviewer bắt được decoy `Small27042`. Mutation đều đỏ đúng mã; full Python **123/123**, Go toàn repo + `go vet` xanh; Unity staging preflight thật có `RESOURCE-PREFLIGHT-OK`. Commit `2a77a43` → `9627680` → `56fa302`. Việc tiếp: Task 8 catalog/NPC/Sói/collision, chưa bắt đầu. |

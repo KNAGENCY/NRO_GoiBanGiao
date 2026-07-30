@@ -76,3 +76,73 @@ Python version gate sau khi bump: `ProductionVersionContractTests` xanh (1 test,
 0.002s), xác nhận `runtime_slice=22`, `map=22`, `data/resource=21`. Full
 `python -m unittest discover -s assetpack/tests -v` xanh **124/124** trong
 163.649s.
+
+## Independent audit fix — collision ngoài footprint fail-open
+
+Audit sau commit bàn giao `902b5a8` phát hiện `Collision.DiDuoc` trả `true` khi
+`col >= width || row >= height`. Artifact thật chỉ có 5×17 cell, tile 24×24,
+nên footprint hợp lệ là `x=0..119`, `y=0..407`; trong khi map 1 vẫn dùng biên
+fallback 4096. Từ spawn `(100,384)`, bước tới `(121,384)` vì vậy từng thoát
+artifact nhưng vẫn được nhận.
+
+### RED và mutation
+
+Thêm test trên artifact thật:
+
+- `(119,407)` dùng đúng cell cuối; `(120,384)`, `(121,384)`, `(100,408)` và
+  tọa độ âm đều bị chặn.
+- segment `(100,384) -> (121,384)` bị chặn.
+- `kiemDiChuyenHopLe` map 1 chặn bước `(100,384) -> (121,384)`.
+- catalog vẫn quảng bá 6 template, nhưng map 6 `Khu rừng` được ghim là chưa
+  playable: runtime chỉ tạo 5 map và `TimBanDo(6) == nil`.
+
+Raw RED:
+
+```text
+--- FAIL: TestCollisionFailClosedNgoaiFootprintArtifact
+    catalog_test.go: DiDuoc(120,384) = true, muốn false
+--- FAIL: TestKiemDiChuyenLangLaKhongThoatKhoiCollisionGrid
+    dichuyen_test.go: kiemDiChuyenHopLe((100,384) -> (121,384)) = true, muốn false
+FAIL
+```
+
+Mutation: tạm đổi nhánh ngoài grid về `return true`; đúng hai test collision và
+movement trên đỏ. Khôi phục `return false`; focused GREEN `-count=5`:
+
+```text
+ok  	nroserver/internal/game	0.191s
+```
+
+### Bản vá
+
+- `Collision.DiDuoc` fail-closed với mọi tọa độ âm hoặc cell ngoài grid.
+- Map 1 lấy footprint collision làm biên authoritative; `BienRongToiDa=4096`
+  chỉ còn là fallback cho map chưa gắn artifact.
+- Các fixture test cũ của map 1 được đưa về footprint thật, không nới production
+  boundary để chiều test.
+- Comment và test ghim chủ ý catalog có 6 template nhưng runtime chỉ có 5 map
+  playable; map 6 chưa có tile/render/collision contract.
+
+### Fresh verification sau fix
+
+```text
+python -m unittest discover -s assetpack/tests -v
+Ran 124 tests in 285.481s
+OK
+
+D:\Go\bin\go.exe test ./internal/game -count=1
+ok  	nroserver/internal/game	83.940s
+
+D:\Go\bin\go.exe test ./internal/game -run 'Test(NapCatalog|TaiCollision|Collision|KiemDiChuyenLangLa|CatalogMap6|GoiCatalogMapLangLa|GoiMoIruka|MoNPCXepGui|TaoQuaiMacDinh)' -count=5
+ok  	nroserver/internal/game	0.191s
+
+D:\Go\bin\go.exe test ./internal/net -count=5
+ok  	nroserver/internal/net	0.280s
+
+D:\Go\bin\go.exe vet ./...
+(exit 0, không có output)
+```
+
+Ba thư mục `.task8-build-2..4`, hai `__pycache__` và log kiểm thử tạm đã được
+kiểm tra là untracked output rồi dọn. Task 8 đang **chờ independent re-review**;
+không được mở Task 9 hoặc merge trước kết luận mới.

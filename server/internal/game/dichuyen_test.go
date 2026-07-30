@@ -47,6 +47,16 @@ func TestKiemDiChuyen(t *testing.T) {
 	}
 }
 
+func TestKiemDiChuyenLangLaKhongThoatKhoiCollisionGrid(t *testing.T) {
+	bd := TimBanDo(1)
+	if bd == nil {
+		t.Fatal("thiếu map 1 Làng Lá")
+	}
+	if kiemDiChuyenHopLe(bd, 100, 384, 121, 384) {
+		t.Fatal("map 1 không được cho bước từ spawn ra ngoài collision grid")
+	}
+}
+
 // TestGoiDiChuyen kiểm tra gói -7 phát di chuyển: writeInt(id), writeShort(x), writeShort(y)
 // Đọc lại bằng Reader, khẳng định hết buffer.
 func TestGoiDiChuyen(t *testing.T) {

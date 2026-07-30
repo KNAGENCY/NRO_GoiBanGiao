@@ -58,3 +58,19 @@ func TestTimBanDoTheoMapId(t *testing.T) {
 		t.Errorf("TimBanDo tra con tro vao slice goc: sua ban sao lam doi danh muc (tileId=%d)", lai.TileID)
 	}
 }
+
+func TestCatalogMap6ChiLaTemplateChuaPlayable(t *testing.T) {
+	if len(catalogLangLa.Maps) != 6 {
+		t.Fatalf("catalog phải quảng bá đủ 6 template map, được %d", len(catalogLangLa.Maps))
+	}
+	map6 := catalogLangLa.Maps[5]
+	if map6.ID != 6 || map6.Name != "Khu rừng" {
+		t.Fatalf("template thứ 6 sai: %+v", map6)
+	}
+	if bd := TimBanDo(int32(map6.ID)); bd != nil {
+		t.Fatalf("map 6 chưa có runtime tile/render contract nên chưa được playable: %+v", bd)
+	}
+	if got := len(DanhSachBanDo()); got != 5 {
+		t.Fatalf("runtime chỉ được mở 5 map làng đã có render contract, được %d", got)
+	}
+}

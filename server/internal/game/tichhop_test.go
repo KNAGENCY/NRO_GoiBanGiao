@@ -907,8 +907,8 @@ func TestTichHop_TatBatMayChu_LuuDungViTriVaMau(t *testing.T) {
 	// nhan -7 truoc khi lam gi tiep — day la diem DONG BO xac nhan actor DA
 	// xu ly xong buoc di chuyen (net.Pipe Gui() dong bo lam nhiem vu
 	// "happens-before" tu nhien, dung tinh than moi test khac trong file nay).
-	viTriGhimCungX := int16(nvA.ViTriX) + 50
-	viTriGhimCungY := int16(nvA.ViTriY) + 16
+	viTriGhimCungX := int16(nvA.ViTriX) - 10
+	viTriGhimCungY := int16(nvA.ViTriY) + 10
 	clA.guiDiChuyen(viTriGhimCungX, viTriGhimCungY)
 
 	goiDiChuyenChoB := clB.doiGoiLenh(t, lenhDiChuyen)
@@ -1099,8 +1099,8 @@ func TestTichHop_NgatKetNoiThuong_LuuQuaDuongNoiDayDayDu(t *testing.T) {
 	khangDinhIdTrongGoi(t, clA.doiGoiLenh(t, -5), nvB.ID)
 
 	// A di chuyen toi VI TRI GHIM CUNG — cung khuon voi Test 1 o tren.
-	viTriGhimCungX := int16(nvA.ViTriX) + 50
-	viTriGhimCungY := int16(nvA.ViTriY) + 16
+	viTriGhimCungX := int16(nvA.ViTriX) - 10
+	viTriGhimCungY := int16(nvA.ViTriY) + 10
 	clA.guiDiChuyen(viTriGhimCungX, viTriGhimCungY)
 
 	goiDiChuyenChoB := clB.doiGoiLenh(t, lenhDiChuyen)

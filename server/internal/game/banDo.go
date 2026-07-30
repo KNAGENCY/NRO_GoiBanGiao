@@ -18,7 +18,10 @@ type BanDo struct {
 	SpawnY   int16 // (nam tren nen dat cua map). Ke hoach 5 dung khi hoi sinh.
 }
 
-// danhSachBanDo: 5 map khoi dau, moi lang (gender 0-4) mot map. mapId/tileId/bgId/
+// Catalog quảng bá 6 template để giữ mảng client dày đặc, nhưng template thứ 6
+// "Khu rừng" chưa có runtime tile/render/collision contract nên cố ý chưa
+// playable: TimBanDo(6) phải trả nil. danhSachBanDo chỉ chứa 5 map khởi đầu,
+// mỗi làng (gender 0-4) một map. mapId/tileId/bgId/
 // planetId/bgType lay DUNG tu map_template map cu 1-5 (Doi hoa cuc/Thung lung tre/
 // Rung nam/Rung xuong/Dao Kame) de client ve dung do hoa co san. Ten map dat theo
 // lang Naruto cho nhap vai (chi la nhan UI trong MAP INFO — coordinator co the

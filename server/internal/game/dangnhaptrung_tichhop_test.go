@@ -191,8 +191,8 @@ func TestDangNhapTrung_DaPhienCuChoLuuXongRoiDocViTriMoiNhat(t *testing.T) {
 
 	// Di chuyen toi VI TRI GHIM CUNG (trong nguong buoc 500, xem dichuyen.go)
 	// — day la "du lieu MOI" ma phien cu phai luu duoc truoc khi bi da.
-	viTriMoiX := int16(nvBanDau.ViTriX) + 50
-	viTriMoiY := int16(nvBanDau.ViTriY) + 16
+	viTriMoiX := int16(nvBanDau.ViTriX) - 10
+	viTriMoiY := int16(nvBanDau.ViTriY) + 10
 	cl1.guiDiChuyen(viTriMoiX, viTriMoiY)
 
 	k := soKhuVuc.Tra(1)

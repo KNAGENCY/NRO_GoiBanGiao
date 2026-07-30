@@ -116,9 +116,9 @@ func TestKhuVucXuLySuKien(t *testing.T) {
 	}
 	khangDinhIdTrongGoi(t, pA.nhan[0], nvB.ID)
 
-	// Buoc 3: A di chuyen toi (250,300) — pB nhan them 1 goi -7 [idA][250][300];
+	// Buoc 3: A di chuyen toi (50,50) — pB nhan them 1 goi -7 [idA][50][50];
 	// pA KHONG nhan gi them (client tu ve chuyen dong cua chinh minh).
-	k.xuLy(suKienDiChuyen{idNhanVat: nvA.ID, x: 250, y: 300})
+	k.xuLy(suKienDiChuyen{idNhanVat: nvA.ID, x: 50, y: 50})
 	if len(pA.nhan) != 1 {
 		t.Fatalf("buoc 3: pA nhan %d goi, mong doi van la 1 (khong nhan lai chinh minh)", len(pA.nhan))
 	}
@@ -133,14 +133,14 @@ func TestKhuVucXuLySuKien(t *testing.T) {
 	if id, err := r.Int(); err != nil || id != int32(nvA.ID) {
 		t.Fatalf("buoc 3: id trong goi -7 = %d, err=%v, mong doi %d", id, err, nvA.ID)
 	}
-	if x, err := r.Short(); err != nil || x != 250 {
-		t.Fatalf("buoc 3: x trong goi -7 = %d, err=%v, mong doi 250", x, err)
+	if x, err := r.Short(); err != nil || x != 50 {
+		t.Fatalf("buoc 3: x trong goi -7 = %d, err=%v, mong doi 50", x, err)
 	}
-	if y, err := r.Short(); err != nil || y != 300 {
-		t.Fatalf("buoc 3: y trong goi -7 = %d, err=%v, mong doi 300", y, err)
+	if y, err := r.Short(); err != nil || y != 50 {
+		t.Fatalf("buoc 3: y trong goi -7 = %d, err=%v, mong doi 50", y, err)
 	}
-	if nvA.ViTriX != 250 || nvA.ViTriY != 300 {
-		t.Fatalf("buoc 3: nvA vi tri = (%d,%d), mong doi (250,300) — phai la authoritative", nvA.ViTriX, nvA.ViTriY)
+	if nvA.ViTriX != 50 || nvA.ViTriY != 50 {
+		t.Fatalf("buoc 3: nvA vi tri = (%d,%d), mong doi (50,50) — phai la authoritative", nvA.ViTriX, nvA.ViTriY)
 	}
 
 	// Buoc 4: A roi khu vuc — pB nhan them 1 goi -6 [idA]; nvA bi xoa khoi map.
@@ -189,7 +189,7 @@ func TestActorLoaiClientChamKhongChanClientKhoe_SERVER_ACTOR_005(t *testing.T) {
 	pCham.batDauLoiXep()
 
 	batDau := time.Now()
-	k.Gui(suKienDiChuyen{idNhanVat: nvKhoe.ID, x: 120, y: 384})
+	k.Gui(suKienDiChuyen{idNhanVat: nvKhoe.ID, x: 110, y: 384})
 	for pCham.soLanDong.Load() == 0 {
 		if time.Since(batDau) >= 100*time.Millisecond {
 			t.Fatal("actor khong loai client cham trong 100ms")

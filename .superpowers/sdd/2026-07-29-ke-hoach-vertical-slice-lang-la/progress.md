@@ -48,10 +48,14 @@ scoped re-review approved, no new Critical/Important.
 Task 7: complete (commits 2a77a43..56fa302, review clean). Task 8 remains
 locked until the coordinator explicitly starts the next task.
 
-Task 8: complete (commits de1f0c6..f53a255, review clean). Catalog/NPC/mob
-bindings are explicit; collision artifact is semantic 0/1 with 24x24 header;
-NPC command 33 uses XepGui FIFO. Full Python 124/124, Go game -count=1,
-net -count=5, and vet pass. Next is Task 9/telemetry; branch not merged to main.
+Task 8: reopened after independent audit at handoff commit 902b5a8 — Important
+collision finding: out-of-grid cells were fail-open while map 1 still admitted
+the 4096 fallback boundary. RED tests reproduce x=120/121, y=408, segment exit
+and actor movement from (100,384) to (121,384). Fix makes the artifact footprint
+authoritative for map 1 and pins map 6 as a catalog-only, non-playable template.
+Fresh Python 124/124, Go game -count=1, focused collision -count=5, net -count=5
+and vet all pass; mutation back to fail-open is caught. Fix is committed
+separately after 902b5a8 and awaits independent re-review. Task 9 remains locked.
 
 Resume: Task 8, after fresh verification of Task 7 and bookkeeping.
 Preflight: hai sửa đổi dở ngoài Task 7 được bảo toàn tại stash

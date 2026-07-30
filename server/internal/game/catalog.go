@@ -180,7 +180,7 @@ func (c *Collision) DiDuoc(x, y int16) bool {
 	}
 	col, row := int(x)/c.tileWidth, int(y)/c.tileHeight
 	if col >= c.width || row >= c.height {
-		return true
+		return false
 	}
 	return c.cells[row*c.width+col] == 0
 }

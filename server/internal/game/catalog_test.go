@@ -60,3 +60,32 @@ func TestTaiCollisionKhoaHashVaCanarySolid(t *testing.T) {
 		t.Fatal("foot point va segment crossing phai bi chan boi solid cell")
 	}
 }
+
+func TestCollisionFailClosedNgoaiFootprintArtifact(t *testing.T) {
+	col, err := TaiCollision(duLieuCollision, duLieuAssetLock)
+	if err != nil {
+		t.Fatalf("TaiCollision() loi: %v", err)
+	}
+
+	// Artifact 5x17, mỗi cell 24x24 nên miền hợp lệ chính xác là
+	// x=[0,119], y=[0,407]. Cell cuối (4,16) là nền đi được.
+	if !col.DiDuoc(119, 407) {
+		t.Fatal("mép trong cuối (119,407) phải theo cell (4,16) walkable")
+	}
+	for _, p := range []struct {
+		x, y int16
+	}{
+		{120, 384},
+		{121, 384},
+		{100, 408},
+		{-1, 384},
+		{100, -1},
+	} {
+		if col.DiDuoc(p.x, p.y) {
+			t.Fatalf("DiDuoc(%d,%d) = true, ngoài footprint/âm phải fail-closed", p.x, p.y)
+		}
+	}
+	if col.DiDuocDoan(100, 384, 121, 384) {
+		t.Fatal("đoạn từ trong grid đi ra ngoài phải fail-closed")
+	}
+}

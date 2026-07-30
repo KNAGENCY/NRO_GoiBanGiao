@@ -1137,7 +1137,7 @@ func TestKhiDongLuuViTriMoiNhatKhiDaVaoKhuVuc(t *testing.T) {
 	t.Cleanup(func() { _ = k.Dung() })
 
 	viTriLucVaoX, viTriLucVaoY := int32(100), int32(100)
-	viTriGhimCungX, viTriGhimCungY := int16(300), int16(300) // cach (100,100) ~283 don vi < NguongBuoc=500 (dichuyen.go) -> hop le
+	viTriGhimCungX, viTriGhimCungY := int16(110), int16(110) // nam trong footprint collision 120x408 cua map 1
 
 	nv := &store.NhanVat{ID: 55, Ten: "RoiKhuVuc", Lang: 0, MapID: 1, ViTriX: viTriLucVaoX, ViTriY: viTriLucVaoY}
 	k.Gui(suKienVao{nv: nv, phien: &phienGiaKhuVuc{}})

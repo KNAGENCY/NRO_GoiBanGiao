@@ -8,7 +8,7 @@
 > một bản vá, một phát hiện lỗi) thì **phải cập nhật file này ngay** rồi mới commit.
 > Cách cập nhật xem mục [11. Quy ước cập nhật](#11-quy-ước-cập-nhật-file-này).
 
-**Cập nhật lần cuối:** 31/07/2026 (đã truy provenance `E2E-ASSET-006`: server HEAD là artifact Task 8 lock/version 22, còn release bất biến duy nhất là Task 7 lock/version 21; full ArtRoot Task 8 đã bị dọn nên chưa có cặp canonical để chạy E2E) · **Nhánh đang làm:** `kh-vertical-slice` · **Mốc oracle đã audit:** `0eb4c60` · **main:** `485b095`
+**Cập nhật lần cuối:** 01/08/2026 (đã rebuild deterministic A/B và publish immutable ArtRoot Task 8 v22: lock `54a638...`, pair `afd03...`, version `22/21/22/21`; `RESOURCE-PREFLIGHT-OK`. Gameplay Task 10 vẫn chưa chạy) · **Nhánh đang làm:** `kh-vertical-slice` · **Mốc oracle đã audit:** `0eb4c60` · **main:** `485b095`
 
 ---
 
@@ -125,7 +125,7 @@ Mỗi kế hoạch đều đi qua: thiết kế → kế hoạch → thi công t
 | VS-7 | **Build artifact + deploy staging theo lock** | Artifact server/client bất biến theo lock 21; bắt buộc previous lock + protected Unity root; canonical resource đủ x1–x4 cho small/skill/mob/background/HUD; Unity preflight thật marker `RESOURCE-PREFLIGHT-OK`; full Python **123/123**, Go toàn repo + vet xanh | `2a77a43`, `9627680`, `56fa302` |
 | VS-8 | **Catalog, NPC Iruka, Sói và collision Làng Lá** | Đã vá audit Important: grid 5×17 tile 24×24 fail-closed; map 1 lấy footprint 120×408 làm biên authoritative, map 6 ghim là template chưa playable. Full Python **124/124**, Go game **-count=1**, focused collision/net **-count=5**, vet xanh; **independent audit APPROVE** | `de1f0c6`…`b82d950` |
 | VS-9 | **Telemetry Unity, server control và runner** | Telemetry JSONL loopback có token/command ID/sequence và main-thread dispatch; session cũ không thể lọt lệnh sang client mới. Server control chỉ mở bằng env rõ ràng, bind loopback và tắt qua đúng `donDepKhiTat`. Fixture chỉ dùng `nro_test`, đúng 2 account/run và cleanup fail-safe. Runner có preflight/timeout/evidence SHA. Unity contract thật **50 assertion**, Go toàn repo + vet, PowerShell self-test và control smoke DB thật đều xanh; **independent audit APPROVE** | `01af875` |
-| VS-10 | **Clean full E2E và warm-upgrade smoke** | Canonical A đã harden thủ công theo audit B, không cherry-pick: 24 case qua runner boundary; tách server/asset/applied lock, file zero-byte/SHA/array rỗng fail-closed, Sói `source_id=1`, HP `137/150`, clean+warm cùng PASS, sequence per-client. Bốn mutation đều bị bắt. Đã truy `E2E-ASSET-006`: server HEAD nhúng Task 8 lock `54a638...` version `22/21/22/21`, nhưng release còn lại chỉ là Task 7 lock `e5b093...` version 21; full ArtRoot Task 8 đã bị dọn. **Gameplay thật chưa chạy** | `e6582ce`, `0eb4c60` |
+| VS-10 | **Clean full E2E và warm-upgrade smoke** | Canonical A đã harden thủ công theo audit B, không cherry-pick: 24 case qua runner boundary; tách server/asset/applied lock, file zero-byte/SHA/array rỗng fail-closed, Sói `source_id=1`, HP `137/150`, clean+warm cùng PASS, sequence per-client. Bốn mutation đều bị bắt. Asset blocker đã được xử đúng provenance: build A/B **669/669 byte-identical**, publish release Task 8 lock `54a638...`, pair `afd03...`, version `22/21/22/21`, Unity resource preflight thật PASS. **Gameplay thật vẫn chưa chạy** | `e6582ce`, `0eb4c60`, `f56341f` |
 
 **Tình trạng chất lượng hiện tại:** `go test ./...` — **toàn bộ 6 gói xanh, 0 đỏ**
 (gói `game` ~70s), chạy lặp `-count=5` không chập chờn. `gofmt` sạch (trừ nhiễu CRLF file
@@ -153,7 +153,7 @@ Xếp theo thứ tự nên làm:
 | ✅ | ~~Vertical slice Task 7 — build artifact + deploy staging theo lock~~ | **Xong trên nhánh `kh-vertical-slice`**, review độc lập sạch. Artifact lock 21, deploy fail-closed (previous lock + protected root + canonical x1–x4), Unity preflight thật, full Python 123/123; chưa gộp `main`. **Tiếp: Task 8** |
 | ✅ | ~~Vertical slice Task 8 — bản vá audit collision~~ | Important fail-open ngoài footprint đã có RED/mutation và được sửa fail-closed; **independent audit APPROVE**. Chưa gộp `main`. |
 | ✅ | ~~Vertical slice Task 9 — telemetry/control/runner~~ | **Independent audit APPROVE.** Commit `01af875`; chưa gộp `main`. |
-| ⛔ | **Vertical slice Task 10 — clean full + warm smoke** | Canonical oracle đã harden **24 case**, 4 mutation; stale lock owner=0 đã đi qua. Provenance xác nhận Task 7 release `e5b093...` là canonical lịch sử nhưng server HEAD đã chuyển đúng sang Task 8 `54a638...`; full ArtRoot/release Task 8 không còn sau khi `.task8-build-2..4` được dọn. **BLOCKED cho tới khi phục hồi hoặc được duyệt build/publish lại artifact version 22**; clean full/warm gameplay vẫn NOT RUN. |
+| ⏳ | **Vertical slice Task 10 — clean full + warm smoke** | Canonical oracle đã harden **24 case**, 4 mutation; stale lock owner=0 đã đi qua. Full ArtRoot Task 8 v22 đã được rebuild và publish immutable đúng lock `54a638...`/pair `afd03...`; Unity resource preflight có `RESOURCE-PREFLIGHT-OK`. `E2E-ASSET-006` đã được gỡ ở tầng provenance. **Clean full/warm gameplay vẫn NOT RUN và cần phê duyệt bước riêng**; không tự mở Task 11. |
 | 1b | **KH6b — Boss** (hệ riêng, tách khỏi KH6) | Bản Java là 12 file, phức tạp hơn quái thường nhiều. Thiết kế sau khi KH6 gộp |
 | 1c | **KH6c — Stress test 20 client cùng khu vực** | Cùng xả chiêu, đo gói rơi hộp thư actor (trần 256, rơi im lặng) + trễ nhịp 100ms. Dựng trên `thuclient`/`clientGia` |
 | 2 | KH7 — Vật phẩm, hành trang, cửa hàng, giao dịch | 🧱 **Phải chốt căn cước vật phẩm + chống nhân bản trong đặc tả TRƯỚC khi viết code** ([BO-SUNG](docs/superpowers/plans/BO-SUNG-LO-TRINH.md) Khối 3). Tách rõ 4 thứ: cửa hàng NPC / giao dịch 2 người / ký gửi / kho |
@@ -342,7 +342,9 @@ Xếp theo thứ tự nên làm:
     publish release immutable tương ứng. Task 10 vì vậy chỉ còn client release version 21 và
     buộc dừng `E2E-ASSET-006`. Mỗi lần runtime/map bump phải giữ nguyên full
     `asset-lock.json + server/ + client/`, publish theo thư mục lock SHA và ghi mapping
-    lock→release path trong report trước khi dọn build tạm.
+    lock→release path trong report trước khi dọn build tạm. Lượt phục hồi 01/08 đã áp dụng
+    đúng cổng này: giữ cả A/B, publish release `task8-releases-22/54a638...` trước mọi cleanup,
+    rồi băm lại toàn bộ release và marker snapshot.
 
 ---
 
@@ -545,3 +547,4 @@ Commit riêng cho việc cập nhật tài liệu thì dùng tiền tố `docs:`
 | 31/07/2026 | **Task 10 lock diagnosis read-only:** hai lock file vẫn tồn tại nhưng **stale/không có owner**: không có Unity/Hub/AssetImportWorker, Restart Manager `0` owner, exclusive read-only open thành công; Editor.log cho thấy đúng `D:\NRO_Project` đã shutdown sạch. Full E2E vẫn chưa chạy vì preflight hiện chỉ `Test-Path`. Không xóa lock, không sửa Unity, không bắt đầu Task 11. |
 | 31/07/2026 | **Task 10 canonical hardening theo audit B, không cherry-pick B:** port thủ công guard vào schema A và runner boundary thật. Suite 24 case tách server/asset/applied lock, zero-byte/SHA/array rỗng, Sói source 1, HP 137/150, clean+warm cùng PASS và sequence per-client; 4 mutation đều đỏ đúng. Runner dùng Restart Manager read-only; preflight thật cho hai stale lock đi qua, ghi `scope=task10_full`, rồi dừng đúng `E2E-ASSET-006` vì ArtRoot/embedded lock lệch. Go full + vet xanh; gameplay chưa chạy. |
 | 31/07/2026 | **Task 10 — chẩn đoán asset provenance `E2E-ASSET-006`:** Task 7 A/B/release cùng lock `e5b093...` version 21; server HEAD đã chuyển có chủ ý ở Task 8 sang lock `54a638...`, pair `afd03...`, runtime/map 22. Các ArtRoot tạm Task 8 `.task8-build-2..4` đã bị dọn, không còn release/full client pair version 22; runner nhận build A từ tham số caller chứ không tự chọn. Dừng BLOCKED, không ghép tay, không build lại, không chạy gameplay/Task 11. |
+| 01/08/2026 | **Rebuild canonical ArtRoot Task 8 v22 theo phê duyệt:** preflight 684/684 input, hai Unity lock owner=0; build A/B đều 669 file và byte-identical; lock `54a638...`, pair `afd03...`, version `22/21/22/21`, 668 output đúng record. Tạo fresh snapshot bằng overlay chính thức, publish immutable release theo lock SHA và Unity batch có đúng một `RESOURCE-PREFLIGHT-OK`. Giữ nguyên A/B/release; không sửa `D:\NRO_Project`, không gameplay, không Task 11. |

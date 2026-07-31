@@ -61,3 +61,10 @@ Resume: Task 8, after fresh verification of Task 7 and bookkeeping.
 Preflight: hai sửa đổi dở ngoài Task 7 được bảo toàn tại stash
 `codex-pre-task7-stale-task6b`; cache Python tại stash
 `codex-pre-task7-python-cache`. Worktree sạch ở HEAD 05b84f2 trước baseline.
+
+Task 8 ArtRoot v22 recovery: complete 01/08/2026. Read-only closure preflight
+684/684; Restart Manager owner=0 cho hai Unity lock. Build A/B đều 669 file,
+path/bytes/SHA identical; 668 output, lock 54a638f0..., pair afd03df6...,
+versions 22/21/22/21. Fresh overlay snapshot verified, immutable release
+`task8-releases-22/54a638f0...` published; preflight.log line 6693 contains
+`RESOURCE-PREFLIGHT-OK`. Gameplay Task 10 and Task 11 were not run.

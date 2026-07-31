@@ -4,13 +4,19 @@
   "status": "pass",
   "executable_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "server_lock_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "asset_lock_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
   "events": {"path":"events.ndjson","sha256":"__EVENTS_SHA__"},
+  "evidence": [
+    {"kind":"events","path":"events.ndjson","sha256":"__EVENTS_SHA__"},
+    {"kind":"cache","path":"cache-after.json","sha256":"__CACHE_AFTER_SHA__"},
+    {"kind":"screenshot","path":"screenshots/checkpoint.png","sha256":"__SCREEN_SHA__"}
+  ],
   "cache_before": {"path":"cache-before.json","sha256":"__CACHE_BEFORE_SHA__"},
   "cache_after": {"path":"cache-after.json","sha256":"__CACHE_AFTER_SHA__"},
   "artifacts": [{"kind":"screenshot","path":"screenshots/checkpoint.png","sha256":"__SCREEN_SHA__"}],
   "resources": {
     "negotiation_detected": true,
-    "applied_lock_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "applied_lock_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
     "entered_map_id": 1,
     "dragon_ball_fallback": false
   }

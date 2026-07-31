@@ -68,7 +68,7 @@ function Test-E2EEvidenceContract {
     if ($events.Count -eq 0) {
         throw "E2E-EVIDENCE-002: events khong duoc rong"
     }
-    $previous = [long]0
+    $lastByClient = @{}
     foreach ($event in $events) {
         foreach ($field in @(
             "monotonic_ms", "utc", "client", "sequence", "type", "payload")) {
@@ -94,13 +94,20 @@ function Test-E2EEvidenceContract {
         if (-not [long]::TryParse([string]$event.sequence, [ref]$current)) {
             throw "E2E-EVENT-008: sequence khong phai so nguyen"
         }
+        $client = [string]$event.client
+        $previous = if ($lastByClient.ContainsKey($client)) {
+            [long]$lastByClient[$client]
+        }
+        else {
+            [long]0
+        }
         if ($current -le $previous) {
-            throw "E2E-SEQUENCE-003: sequence lui hoac trung ($previous -> $current)"
+            throw "E2E-SEQUENCE-003: sequence lui hoac trung cho $client ($previous -> $current)"
         }
         if ($current -ne ($previous + 1)) {
-            throw "E2E-SEQUENCE-004: sequence dut ($previous -> $current)"
+            throw "E2E-SEQUENCE-004: sequence dut cho $client ($previous -> $current)"
         }
-        $previous = $current
+        $lastByClient[$client] = $current
     }
     return $true
 }
@@ -158,6 +165,9 @@ function Assert-E2EArtifactSha {
     $path = Resolve-E2ERelativePath -Root $Root -Relative $relative -Code $Code
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
         throw "$Code`: evidence khong ton tai: $relative"
+    }
+    if ((Get-Item -LiteralPath $path).Length -le 0) {
+        throw "$Code`: evidence zero-byte: $relative"
     }
     $actual = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash
     if ($actual.ToLowerInvariant() -cne $expected.ToLowerInvariant()) {
@@ -236,7 +246,7 @@ function Assert-E2EResultArtifacts {
     )
     $artifacts = @($Result.artifacts)
     if ($artifacts.Count -eq 0) {
-        throw "E2E-EVIDENCE-SHA-016: khong co artifact"
+        throw "E2E-EVIDENCE-002: artifacts khong duoc rong"
     }
     $hasScreenshot = $false
     foreach ($artifact in $artifacts) {
@@ -251,6 +261,24 @@ function Assert-E2EResultArtifacts {
     }
 }
 
+function Assert-E2EResultEvidence {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)]$Result
+    )
+    $evidence = @($Result.evidence)
+    if ($evidence.Count -eq 0) {
+        throw "E2E-EVIDENCE-002: evidence khong duoc rong"
+    }
+    foreach ($record in $evidence) {
+        if ([string]::IsNullOrWhiteSpace([string]$record.kind)) {
+            throw "E2E-EVIDENCE-002: evidence thieu kind"
+        }
+        Assert-E2EArtifactSha -Root $Root -Record $record `
+            -Code "E2E-EVIDENCE-SHA-016" | Out-Null
+    }
+}
+
 function Test-E2ECleanOracle {
     param([Parameter(Mandatory = $true)][string]$Root)
     $result = Read-E2EJson -Path (Join-Path $Root "result.json") `
@@ -259,14 +287,16 @@ function Test-E2ECleanOracle {
         throw "E2E-SCOPE-014: clean phai co scope=full"
     }
     if ([string]$result.status -cne "pass") {
-        throw "E2E-SCOPE-014: clean full chua PASS"
+        throw "E2E-CLEAN-WARM-016: clean full chua PASS"
     }
-    foreach ($sha in @(
-        [string]$result.executable_sha256,
-        [string]$result.server_lock_sha256)) {
-        if ($sha -notmatch "^[0-9a-f]{64}$") {
-            throw "E2E-ASSET-013: clean thieu executable/server lock SHA"
-        }
+    if ([string]$result.executable_sha256 -notmatch "^[0-9a-f]{64}$") {
+        throw "E2E-EXECUTABLE-012: clean thieu executable SHA"
+    }
+    if ([string]$result.server_lock_sha256 -notmatch "^[0-9a-f]{64}$") {
+        throw "E2E-SERVER-LOCK-017: clean thieu server lock SHA"
+    }
+    if ([string]$result.asset_lock_sha256 -notmatch "^[0-9a-f]{64}$") {
+        throw "E2E-ASSET-013: clean thieu asset lock SHA"
     }
 
     $events = @(Read-E2ENdjson -Root $Root -Record $result.events)
@@ -289,6 +319,7 @@ function Test-E2ECleanOracle {
         }
     }
 
+    Assert-E2EResultEvidence -Root $Root -Result $result
     Assert-E2EResultArtifacts -Root $Root -Result $result
     Assert-E2EVisualReview -Result $result
 
@@ -309,7 +340,8 @@ function Test-E2ECleanOracle {
         if ([int]$payload.amount -ne $expectedDamage[$index] -or
             [int]$payload.hp_before -ne $before[$index] -or
             [int]$payload.hp_after -ne $after[$index] -or
-            [string]$payload.source_kind -cne $sourceExpected) {
+            [string]$payload.source_kind -cne $sourceExpected -or
+            ($index -eq 0 -and [int]$payload.source_id -ne 1)) {
             throw "E2E-COMBAT-010: damage[$index] khong khop oracle"
         }
     }
@@ -323,6 +355,12 @@ function Test-E2ECleanOracle {
         [int]$dbStates.after_relogin.hp -ne 137) {
         throw "E2E-HP-011: HP cuoi phai bang 137"
     }
+    if ([int]$result.persistence.hp_max -ne 150 -or
+        [int]$dbStates.before_shutdown.hp_max -ne 150 -or
+        [int]$dbStates.after_shutdown.hp_max -ne 150 -or
+        [int]$dbStates.after_relogin.hp_max -ne 150) {
+        throw "E2E-HP-011: HP toi da phai bang 150"
+    }
     return $result
 }
 
@@ -334,7 +372,16 @@ function Test-E2EWarmOracle {
         throw "E2E-SCOPE-014: warm phai co scope=warm_smoke"
     }
     if ([string]$result.status -cne "pass") {
-        throw "E2E-SCOPE-014: warm smoke chua PASS"
+        throw "E2E-CLEAN-WARM-016: warm smoke chua PASS"
+    }
+    if ([string]$result.executable_sha256 -notmatch "^[0-9a-f]{64}$") {
+        throw "E2E-EXECUTABLE-012: warm thieu executable SHA"
+    }
+    if ([string]$result.server_lock_sha256 -notmatch "^[0-9a-f]{64}$") {
+        throw "E2E-SERVER-LOCK-017: warm thieu server lock SHA"
+    }
+    if ([string]$result.asset_lock_sha256 -notmatch "^[0-9a-f]{64}$") {
+        throw "E2E-ASSET-013: warm thieu asset lock SHA"
     }
     [void](Read-E2ENdjson -Root $Root -Record $result.events)
     foreach ($name in @("cache_before", "cache_after")) {
@@ -345,12 +392,15 @@ function Test-E2EWarmOracle {
         Assert-E2EArtifactSha -Root $Root -Record $record.Value `
             -Code "E2E-EVIDENCE-SHA-016" | Out-Null
     }
+    Assert-E2EResultEvidence -Root $Root -Result $result
     Assert-E2EResultArtifacts -Root $Root -Result $result
+    if ([string]$result.resources.applied_lock_sha256 -cne
+        [string]$result.asset_lock_sha256) {
+        throw "E2E-ASSET-013: applied resource lock khac asset lock"
+    }
     if ($result.resources.negotiation_detected -ne $true -or
         [int]$result.resources.entered_map_id -ne 1 -or
-        $result.resources.dragon_ball_fallback -ne $false -or
-        [string]$result.resources.applied_lock_sha256 -cne
-            [string]$result.server_lock_sha256) {
+        $result.resources.dragon_ball_fallback -ne $false) {
         throw "E2E-WARM-017: warm upgrade negotiation/resource khong hop le"
     }
     return $result
@@ -367,7 +417,11 @@ function Test-E2ERunnerOracle {
     }
     if ([string]$clean.server_lock_sha256 -cne
         [string]$warm.server_lock_sha256) {
-        throw "E2E-ASSET-013: clean/warm khac server lock"
+        throw "E2E-SERVER-LOCK-017: clean/warm khac server lock"
+    }
+    if ([string]$clean.asset_lock_sha256 -cne
+        [string]$warm.asset_lock_sha256) {
+        throw "E2E-ASSET-013: clean/warm khac asset lock"
     }
     $aggregate = [ordered]@{
         schema_version = 1
@@ -375,6 +429,7 @@ function Test-E2ERunnerOracle {
         status = "pass"
         executable_sha256 = [string]$clean.executable_sha256
         server_lock_sha256 = [string]$clean.server_lock_sha256
+        asset_lock_sha256 = [string]$clean.asset_lock_sha256
         clean = @{ scope = "full"; status = "pass"; path = "clean/result.json" }
         warm = @{
             scope = "warm_smoke"
@@ -497,6 +552,33 @@ function Invoke-EvidenceSelfTest {
         Write-TestResult $manifest
         if (-not (Test-E2EEvidenceContract -Root $root)) {
             throw "SELFTEST-FAIL: valid evidence was rejected"
+        }
+
+        $manifest.events = @(
+            @{
+                monotonic_ms = 201; utc = "2026-07-31T01:03:01Z"
+                client = "A"; sequence = 1; type = "ready"
+                payload = @{ ready = $true }
+            },
+            @{
+                monotonic_ms = 202; utc = "2026-07-31T01:03:02Z"
+                client = "B"; sequence = 1; type = "ready"
+                payload = @{ ready = $true }
+            },
+            @{
+                monotonic_ms = 203; utc = "2026-07-31T01:03:03Z"
+                client = "A"; sequence = 2; type = "state"
+                payload = @{ hp = 137 }
+            },
+            @{
+                monotonic_ms = 204; utc = "2026-07-31T01:03:04Z"
+                client = "B"; sequence = 2; type = "state"
+                payload = @{ hp = 150 }
+            }
+        )
+        Write-TestResult $manifest
+        if (-not (Test-E2EEvidenceContract -Root $root)) {
+            throw "SELFTEST-FAIL: interleave A1/B1/A2/B2 was rejected"
         }
     }
     finally {

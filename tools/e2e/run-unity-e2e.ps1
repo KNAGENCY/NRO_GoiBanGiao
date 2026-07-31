@@ -113,13 +113,139 @@ function Assert-PortFree {
     }
 }
 
+function Get-UnityAssetLockOwners {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    if ($null -eq ("NroE2ERestartManager" -as [type])) {
+        $source = @'
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Text;
+
+public static class NroE2ERestartManager
+{
+    const int ErrorSuccess = 0;
+    const int ErrorMoreData = 234;
+
+    [StructLayout(LayoutKind.Sequential)]
+    struct UniqueProcess
+    {
+        public int ProcessId;
+        public System.Runtime.InteropServices.ComTypes.FILETIME StartTime;
+    }
+
+    enum AppType
+    {
+        Unknown = 0, MainWindow = 1, OtherWindow = 2, Service = 3,
+        Explorer = 4, Console = 5, Critical = 1000
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    struct ProcessInfo
+    {
+        public UniqueProcess Process;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 256)]
+        public string AppName;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
+        public string ServiceName;
+        public AppType ApplicationType;
+        public uint AppStatus;
+        public uint SessionId;
+        [MarshalAs(UnmanagedType.Bool)]
+        public bool Restartable;
+    }
+
+    [DllImport("rstrtmgr.dll", CharSet = CharSet.Unicode)]
+    static extern int RmStartSession(
+        out uint handle, int flags, StringBuilder sessionKey);
+    [DllImport("rstrtmgr.dll", CharSet = CharSet.Unicode)]
+    static extern int RmRegisterResources(
+        uint handle, uint fileCount, string[] files,
+        uint appCount, IntPtr apps, uint serviceCount, string[] services);
+    [DllImport("rstrtmgr.dll")]
+    static extern int RmGetList(
+        uint handle, out uint needed, ref uint count,
+        [In, Out] ProcessInfo[] info, ref uint reasons);
+    [DllImport("rstrtmgr.dll")]
+    static extern int RmEndSession(uint handle);
+
+    public static string[] Query(string path)
+    {
+        uint handle;
+        var key = new StringBuilder(33);
+        int result = RmStartSession(out handle, 0, key);
+        if (result != ErrorSuccess) throw new Win32Exception(result);
+        try
+        {
+            result = RmRegisterResources(
+                handle, 1, new[] { path }, 0, IntPtr.Zero, 0, null);
+            if (result != ErrorSuccess) throw new Win32Exception(result);
+            uint needed = 0, count = 0, reasons = 0;
+            result = RmGetList(handle, out needed, ref count, null, ref reasons);
+            if (result == ErrorSuccess) return new string[0];
+            if (result != ErrorMoreData) throw new Win32Exception(result);
+            var info = new ProcessInfo[needed];
+            count = needed;
+            result = RmGetList(
+                handle, out needed, ref count, info, ref reasons);
+            if (result != ErrorSuccess) throw new Win32Exception(result);
+            var owners = new List<string>();
+            for (int index = 0; index < count; index++)
+            {
+                int processId = info[index].Process.ProcessId;
+                string processName;
+                try
+                {
+                    processName = Process.GetProcessById(processId).ProcessName;
+                }
+                catch
+                {
+                    processName = "exited";
+                }
+                owners.Add(processId + ":" + processName);
+            }
+            return owners.ToArray();
+        }
+        finally
+        {
+            RmEndSession(handle);
+        }
+    }
+}
+'@
+        try {
+            Add-Type -TypeDefinition $source -Language CSharp -ErrorAction Stop
+        }
+        catch {
+            Stop-E2E "E2E-PREFLIGHT-LOCK-004" `
+                "khong nap duoc Restart Manager de xac minh asset lock"
+        }
+    }
+    try {
+        return @([NroE2ERestartManager]::Query(
+            [IO.Path]::GetFullPath($Path)))
+    }
+    catch {
+        Stop-E2E "E2E-PREFLIGHT-LOCK-004" `
+            "khong chung minh duoc asset lock owner=0"
+    }
+}
+
 function Assert-NoUnityAssetLock {
     param([string]$Root)
     foreach ($relative in @("Library\ArtifactDB-lock", "Library\SourceAssetDB-lock")) {
-        if (Test-Path -LiteralPath (Join-Path $Root $relative)) {
-            Stop-E2E "E2E-PREFLIGHT-LOCK-004" `
-                "Unity source dang co asset lock: $relative"
+        $path = Join-Path $Root $relative
+        if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+            continue
         }
+        $owners = @(Get-UnityAssetLockOwners -Path $path)
+        if ($owners.Count -ne 0) {
+            Stop-E2E "E2E-PREFLIGHT-LOCK-004" `
+                "Unity source dang co asset lock: $relative; owners=$([string]::Join(',', $owners))"
+        }
+        Write-Host "E2E-UNITY-LOCK-STALE owner_count=0 path=$relative"
     }
 }
 
@@ -545,7 +671,25 @@ function Get-E2EFailureScope {
     return "task10_full"
 }
 
+function Get-E2ERunScope {
+    param(
+        [bool]$IsControlSmoke,
+        [bool]$IsContract
+    )
+    return Get-E2EFailureScope `
+        -IsControlSmoke $IsControlSmoke `
+        -IsContract $IsContract
+}
+
 function Invoke-RunnerSelfTest {
+    if ((Get-E2ERunScope -IsControlSmoke $false -IsContract $false) -cne
+        "task10_full" -or
+        (Get-E2ERunScope -IsControlSmoke $true -IsContract $false) -cne
+        "task9_control_smoke" -or
+        (Get-E2ERunScope -IsControlSmoke $false -IsContract $true) -cne
+        "task9_contract") {
+        throw "SELFTEST-FAIL: top-level manifest scope Task 9/10 sai"
+    }
     if ((Get-E2EFailureScope -IsControlSmoke $false -IsContract $false) -cne
         "task10_full" -or
         (Get-E2EFailureScope -IsControlSmoke $true -IsContract $false) -cne
@@ -554,6 +698,50 @@ function Invoke-RunnerSelfTest {
         "task9_contract") {
         throw "SELFTEST-FAIL: failure scope Task 9/10 sai"
     }
+
+    $lockRoot = Join-Path ([IO.Path]::GetTempPath()) (
+        "nro-e2e-lock-selftest-" + [Guid]::NewGuid().ToString("N"))
+    $lockLibrary = Join-Path $lockRoot "Library"
+    New-Item -ItemType Directory -Path $lockLibrary -Force | Out-Null
+    $artifactLock = Join-Path $lockLibrary "ArtifactDB-lock"
+    $sourceLock = Join-Path $lockLibrary "SourceAssetDB-lock"
+    [IO.File]::WriteAllBytes($artifactLock, [byte[]](1, 2, 3))
+    [IO.File]::WriteAllBytes($sourceLock, [byte[]](4, 5, 6))
+    try {
+        Assert-NoUnityAssetLock $lockRoot
+
+        $held = [IO.File]::Open(
+            $sourceLock,
+            [IO.FileMode]::Open,
+            [IO.FileAccess]::Read,
+            [IO.FileShare]::None)
+        try {
+            try {
+                Assert-NoUnityAssetLock $lockRoot
+                throw "SELFTEST-FAIL: lock dang co owner da bi chap nhan"
+            }
+            catch {
+                if (-not $_.Exception.Message.Contains(
+                    "E2E-PREFLIGHT-LOCK-004")) {
+                    throw
+                }
+                Write-Host "RUNNER-LOCK-OWNER-REJECTED"
+            }
+        }
+        finally {
+            $held.Dispose()
+        }
+    }
+    finally {
+        $temp = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
+        $resolvedLockRoot = [IO.Path]::GetFullPath($lockRoot)
+        if ($resolvedLockRoot.StartsWith(
+            $temp, [StringComparison]::OrdinalIgnoreCase) -and
+            (Test-Path -LiteralPath $resolvedLockRoot)) {
+            Remove-Item -LiteralPath $resolvedLockRoot -Recurse -Force
+        }
+    }
+
     $steps = New-Object System.Collections.Generic.List[string]
     $fixture = @{ cleanup_completed = $false }
     Invoke-ControlSmokeLifecycle `
@@ -710,12 +898,9 @@ WHERE table_schema='public'
         $profileRoots = @($profileA, $profileB)
     }
 
-    $runScope = if ($ControlSmokeOnly) {
-        "task9_control_smoke"
-    }
-    else {
-        "task9_contract"
-    }
+    $runScope = Get-E2ERunScope `
+        -IsControlSmoke ([bool]$ControlSmokeOnly) `
+        -IsContract ([bool]$ContractOnly)
     $manifest = [ordered]@{
         schema_version = 1
         scope = $runScope

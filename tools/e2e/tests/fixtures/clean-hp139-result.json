@@ -4,7 +4,13 @@
   "status": "pass",
   "executable_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "server_lock_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "asset_lock_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
   "events": {"path": "events.ndjson", "sha256": "__EVENTS_SHA__"},
+  "evidence": [
+    {"kind":"events","path":"events.ndjson","sha256":"__EVENTS_SHA__"},
+    {"kind":"db","path":"db-before.json","sha256":"__DB_SHA__"},
+    {"kind":"screenshot","path":"screenshots/checkpoint.png","sha256":"__SCREEN_SHA__"}
+  ],
   "database": {
     "before_shutdown": {"path": "db-before.json", "sha256": "__DB_SHA__"},
     "after_shutdown": {"path": "db-after-shutdown.json", "sha256": "__DB_SHA__"},
@@ -19,7 +25,7 @@
     "expected_final_hp": 137,
     "actual_final_hp": 139
   },
-  "persistence": {"map_id": 1, "zone_id": 0, "x": 112, "y": 384, "hp": 139},
+  "persistence": {"map_id": 1, "zone_id": 0, "x": 112, "y": 384, "hp": 139, "hp_max": 150},
   "visual_review": {
     "reviewer": "oracle-fixture",
     "status": "pass",

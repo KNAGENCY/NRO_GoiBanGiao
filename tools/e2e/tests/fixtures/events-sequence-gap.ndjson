@@ -1,0 +1,5 @@
+{"monotonic_ms":100,"utc":"2026-07-31T01:00:00Z","client":"A","sequence":1,"type":"damage_received","payload":{"source_kind":"mob","source_id":1,"amount":5,"hp_before":150,"hp_after":145}}
+{"monotonic_ms":200,"utc":"2026-07-31T01:00:01Z","client":"A","sequence":2,"type":"damage_received","payload":{"source_kind":"player","source_id":202,"amount":2,"hp_before":145,"hp_after":143}}
+{"monotonic_ms":300,"utc":"2026-07-31T01:00:02Z","client":"A","sequence":4,"type":"damage_received","payload":{"source_kind":"player","source_id":202,"amount":2,"hp_before":143,"hp_after":141}}
+{"monotonic_ms":400,"utc":"2026-07-31T01:00:03Z","client":"A","sequence":5,"type":"damage_received","payload":{"source_kind":"player","source_id":202,"amount":2,"hp_before":141,"hp_after":139}}
+{"monotonic_ms":500,"utc":"2026-07-31T01:00:04Z","client":"A","sequence":6,"type":"damage_received","payload":{"source_kind":"player","source_id":202,"amount":2,"hp_before":139,"hp_after":137}}

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "aggregate": { "status": "PASS", "executable_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "server_lock_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "asset_lock_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" },
+  "clean": {
+    "status": "PASS", "scope": "full", "executable_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "server_lock_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "asset_lock_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "final_state": { "hp": 137, "hp_max": 150 }, "events_path": "events-extra-damage.ndjson",
+    "artifacts": [{ "role": "screenshot", "path": "evidence/clean-capture.txt", "sha256": "0d24c2e59e58dc1f75db9f7274ecb2366e1e733a9e87bff05dd931a124f77eae" }],
+    "evidence": [
+      { "role": "db_after_shutdown", "path": "evidence/db-after-shutdown.json", "sha256": "8b7d45c6ba491ad88e2ed89f8b3fc629aeba08e3e0f1d856d79f4c769a3bbc40" },
+      { "role": "db_after_relogin", "path": "evidence/db-after-relogin.json", "sha256": "8b7d45c6ba491ad88e2ed89f8b3fc629aeba08e3e0f1d856d79f4c769a3bbc40" },
+      { "role": "events", "path": "events-extra-damage.ndjson", "sha256": "b1c85279058f3728d7ff612a7b920835c873e8459ee9fb604d025eda5ae2304e" }
+    ]
+  },
+  "warm": {
+    "status": "PASS", "scope": "warm_smoke", "executable_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "server_lock_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "asset_lock_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "events_path": "events-warm.ndjson",
+    "artifacts": [{ "role": "screenshot", "path": "evidence/warm-capture.txt", "sha256": "ab53d8786d10b6083c12e1a7f578beef47363ab6a321963edfae33b261ba9278" }],
+    "evidence": [
+      { "role": "cache_after", "path": "evidence/cache-after.json", "sha256": "d89edd0d9c53aad2adb86cfd4682f9999a848595368b39406fd515d9a6710a99" },
+      { "role": "events", "path": "events-warm.ndjson", "sha256": "7b439ec2b423ab48a013c5338607e9bbfd9448f30049fc506a01b99084af847f" }
+    ]
+  }
+}

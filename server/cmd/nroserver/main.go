@@ -6,7 +6,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
@@ -61,6 +63,10 @@ func mucNhatKyTuChuoi(s string) (muc slog.Level, hopLe bool) {
 // thoa man interface nay tu nhien.
 type khoDong interface {
 	Close()
+}
+
+type mayChuCoTheTat interface {
+	Shutdown(context.Context) error
 }
 
 // donDepKhiTat gom TOAN BO trinh tu tat may chu an toan (Ke hoach 11 Task 6,
@@ -119,6 +125,52 @@ func donDepKhiTat(ctx context.Context, kho khoDong, soKhuVuc *game.SoKhuVuc, tho
 	return err
 }
 
+// tatMayChuChung la mot cua duy nhat cho moi nguon dung: signal, E2E,
+// listener game/control loi va control khong mo duoc. Ham nhan callback don
+// dep de test noi duoc control that toi donDepKhiTat that ma khong can chay
+// main/os.Exit.
+func tatMayChuChung(
+	control mayChuCoTheTat,
+	donDep func(context.Context) error,
+) error {
+	var loiControl error
+	if control != nil {
+		ctxControl, huyControl := context.WithTimeout(context.Background(), 2*time.Second)
+		loiControl = control.Shutdown(ctxControl)
+		huyControl()
+	}
+	ctxTat, huyTat := context.WithTimeout(context.Background(), hanGioTatMayChu)
+	loiDonDep := donDep(ctxTat)
+	huyTat()
+	return errors.Join(loiControl, loiDonDep)
+}
+
+func choVaTatMayChu(
+	sigCh <-chan os.Signal,
+	yeuCauTatE2E <-chan struct{},
+	loiMayChu <-chan error,
+	loiControl <-chan error,
+	control mayChuCoTheTat,
+	donDep func(context.Context) error,
+) (maThoat int, loiNguon error, loiDonDep error) {
+	select {
+	case sig := <-sigCh:
+		slog.Info("da nhan tin hieu dung, dang dong may chu...", "tin_hieu", sig.String())
+	case <-yeuCauTatE2E:
+		slog.Info("da nhan yeu cau shutdown E2E, dang dong may chu an toan")
+	case err := <-loiMayChu:
+		maThoat = 1
+		loiNguon = err
+	case err := <-loiControl:
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			maThoat = 1
+			loiNguon = err
+		}
+	}
+	loiDonDep = tatMayChuChung(control, donDep)
+	return maThoat, loiNguon, loiDonDep
+}
+
 func main() {
 	// MAC DINH LA INFO, TUYET DOI KHONG PHAI DEBUG.
 	//
@@ -139,6 +191,12 @@ func main() {
 	if !hopLe {
 		slog.Warn("NRO_MUC_NHAT_KY khong nhan dang duoc, dung muc mac dinh info",
 			"gia_tri_nhan_duoc", os.Getenv("NRO_MUC_NHAT_KY"))
+	}
+
+	cauHinhControl, err := docCauHinhE2EControl(os.Getenv)
+	if err != nil {
+		slog.Error("KHONG THE KHOI DONG E2E control.", "loi", err)
+		os.Exit(1)
 	}
 
 	dsn := os.Getenv("NRO_DSN")
@@ -163,7 +221,8 @@ func main() {
 	if err != nil {
 		slog.Error("KHONG THE KHOI DONG: khong noi duoc CSDL.", "loi", err)
 		slog.Error("Cach kiem tra: PostgreSQL da chay chua? Dung dia chi/cong/mat khau chua?")
-		slog.Error("Chuoi ket noi dang dung (kiem tra lai user/mat khau/host/cong/ten CSDL):", "NRO_DSN", dsn)
+		// Khong bao gio dua DSN vao log: no thuong chua mat khau ro.
+		slog.Error("Hay kiem tra lai user/mat khau/host/cong/ten CSDL trong NRO_DSN (gia tri duoc an).")
 		os.Exit(1)
 	}
 	slog.Info("da noi CSDL thanh cong.")
@@ -172,6 +231,7 @@ func main() {
 	// bao gio bo lot Ctrl+C dung luc dang khoi dong.
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+	defer signal.Stop(sigCh)
 
 	// Ke hoach 5: tao 5 khu vuc actor (mapId 1-5) MOT lan, dung chung cho moi phien.
 	soKhuVuc := game.MoSoKhuVuc()
@@ -195,33 +255,43 @@ func main() {
 		})
 	}()
 
-	slog.Info("may chu san sang. Nhan Ctrl+C de dung may chu an toan.")
-
-	select {
-	case sig := <-sigCh:
-		slog.Info("da nhan tin hieu dung, dang dong may chu...", "tin_hieu", sig.String())
-		ctxTat, huy := context.WithTimeout(context.Background(), hanGioTatMayChu)
-		if errTat := donDepKhiTat(ctxTat, kho, soKhuVuc, thoGhi, boLuu); errTat != nil {
-			slog.Error("don dep luc tat may chu gap loi (co the mat vai thay doi GAN NHAT chua kip ghi)",
-				"loi", errTat)
+	yeuCauTatE2E := make(chan struct{}, 1)
+	donDep := func(ctx context.Context) error {
+		return donDepKhiTat(ctx, kho, soKhuVuc, thoGhi, boLuu)
+	}
+	control, controlListener, err := moE2EControl(cauHinhControl, yeuCauTatE2E)
+	if err != nil {
+		if errTat := tatMayChuChung(nil, donDep); errTat != nil {
+			slog.Error("don dep sau loi mo E2E control gap loi", "loi", errTat)
 		}
-		huy()
-		slog.Info("da dong CSDL. Thoat may chu.")
-		os.Exit(0)
-
-	case err := <-loiMayChu:
-		// LangNghe() chi tra ve khi khong the mo cong nghe (loi khoi dong):
-		// than vong lap Accept cua no tu bat loi tung ket noi va khong bao
-		// gio tu thoat, nen err o day luon khac nil. Chua ai ket noi duoc
-		// (Accept chua bao gio chay) nen donDepKhiTat o day chu yeu la dong
-		// bo luu dinh ky + pool CSDL cho sach, khong mat du lieu nguoi choi
-		// nao (chua co ai de mat).
-		ctxTat, huy := context.WithTimeout(context.Background(), hanGioTatMayChu)
-		if errTat := donDepKhiTat(ctxTat, kho, soKhuVuc, thoGhi, boLuu); errTat != nil {
-			slog.Error("don dep luc tat may chu gap loi", "loi", errTat)
-		}
-		huy()
-		slog.Error("MAY CHU DUNG DO LOI: khong mo duoc cong de lang nghe ket noi.", "loi", err)
+		slog.Error("MAY CHU DUNG: khong mo duoc E2E control.", "loi", err)
 		os.Exit(1)
 	}
+	loiControl := make(chan error, 1)
+	if control != nil {
+		go func() {
+			loiControl <- control.Serve(controlListener)
+		}()
+		slog.Info("E2E control dang nghe tren loopback", "dia_chi", controlListener.Addr().String())
+	}
+
+	slog.Info("may chu san sang. Nhan Ctrl+C de dung may chu an toan.")
+
+	maThoat, loiKhoiDong, errTat := choVaTatMayChu(
+		sigCh,
+		yeuCauTatE2E,
+		loiMayChu,
+		loiControl,
+		control,
+		donDep,
+	)
+	if errTat != nil {
+		slog.Error("don dep luc tat may chu gap loi (co the mat vai thay doi GAN NHAT chua kip ghi)",
+			"loi", errTat)
+	}
+	if loiKhoiDong != nil {
+		slog.Error("MAY CHU DUNG DO LOI: listener da dung bat thuong.", "loi", loiKhoiDong)
+	}
+	slog.Info("da dong CSDL. Thoat may chu.", "ma_thoat", maThoat)
+	os.Exit(maThoat)
 }

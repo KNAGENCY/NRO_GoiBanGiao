@@ -1,14 +1,14 @@
 # Nhật ký agent — ai đã làm gì
 
-## ⏳ ĐANG CHỜ GÌ NGAY LÚC NÀY — cập nhật: 30/07/2026
+## ⏳ ĐANG CHỜ GÌ NGAY LÚC NÀY — cập nhật: 31/07/2026
 
 > Ai vào cũng đọc khối này trước. **Xong việc thì phải sửa lại khối này**, nếu không nó
 > thành thông tin cũ gây hại hơn là không có.
 
 - ✅ **Client Unity ĐÃ VÀO ĐƯỢC GAME** (28/07) — chủ dự án tự bấm Play, tự động login. Server 100% đúng. Chi tiết chuỗi 4 fix + 3 sửa đổi tay ở client Unity: **BAT-DAU §8 hai bullet cuối + §12 dòng 28/07** — ai chưa đọc ĐỪNG sửa gì thêm ở `D:\NRO_Project` hoặc RMS Unity.
-- 🔎 **Vertical slice Task 8 đã vá Important collision sau audit mốc `902b5a8`** trên worktree `kh-vertical-slice`: ngoài grid 5×17 nay fail-closed, map 1 dùng footprint 120×408 authoritative; assetpack 124/124, Go game/focused/net + vet xanh. **Đang chờ independent re-review, chưa gộp `main`.**
+- ✅ **Vertical slice Task 8 đã được independent audit APPROVE** trên worktree `kh-vertical-slice`: ngoài grid 5×17 fail-closed, map 1 dùng footprint 120×408 authoritative; chưa gộp `main`.
 - ✅ **KH6 (chiến đấu) + KH11 (lưu trạng thái) XONG** — gộp `main` (`162bbe9`, `6ea467f`). `server/` rảnh, agent khác vào được. Luật số một: **actor không bao giờ chờ ổ đĩa**.
-- ⛔ **Task 9/telemetry đang khóa** cho tới khi independent re-review xác nhận bản vá Task 8; vẫn chưa có gameplay E2E hai client. Không được coi preflight artifact là gameplay E2E.
+- ✅ **Task 9/telemetry-control-runner đã xong và review độc lập sạch** trên `kh-vertical-slice`: Unity contract 50 assertion, Go toàn repo + vet, PowerShell self-test, control smoke DB thật và cleanup fixture đều xanh. **Task 10 gameplay hai client chưa bắt đầu**; không được coi control smoke là gameplay E2E.
 - ⚠️ **Thư mục chính vẫn giữ POC cũ bẩn** trên `kh-mapping-anh`; không reset/xoá/cherry-pick đè. Các worktree `kh-actor`, `kh-assets`, `kh-unity-e2e` là lịch sử/nhánh nguồn, không tự dọn.
 
 ---
@@ -56,3 +56,4 @@ lên nhau.
 | 30/07/2026 | Codex (tiếp quản vertical slice) | Hoàn tất Task 7 build/deploy với lock 21: bắt buộc previous lock + protected Unity root, canonical resource từng zoom, rollback fail-closed; re-review độc lập APPROVE; full assetpack **123/123**, Go toàn repo + vet xanh | `kh-vertical-slice` / `2a77a43`, `9627680`, `56fa302` | Task 8 đã mở trên cùng worktree |
 | 30/07/2026 | Codex (Task 8, kết quả trước audit mới) | Catalog explicit map/NPC/mob/dialog/menu; `-28/6`, `-24`, command 33→32 qua `XepGui` FIFO; collision semantic 0/1, tile 24×24, canary solid tránh đường actor; full Python **124/124**, Go game -count=1, net -count=5, vet xanh | `kh-vertical-slice` / `de1f0c6`, `d0a8901`, `f53a255` | **Kết luận cũ đã bị independent audit sau `902b5a8` thay thế vì Important fail-open ngoài grid; xem dòng bản vá ngay dưới** |
 | 30/07/2026 | Codex (Task 8 audit fix) | Independent audit bắt fail-open ngoài collision grid 5×17. Viết RED cho x=120/121, y=408, segment, actor và tọa độ âm; mutation bắt được; sửa map 1 dùng footprint 120×408 authoritative; ghim map 6 là template chưa playable; dọn build/cache tạm. Full Python **124/124**, Go game -count=1, focused collision/net -count=5, vet xanh | `kh-vertical-slice` / bản vá riêng sau `902b5a8` | **Chờ independent re-review; không merge, không bắt đầu Task 9** |
+| 31/07/2026 | Codex (Vertical slice Task 9) | Sau khi Task 8 được independent audit APPROVE, hoàn tất telemetry Unity JSONL loopback có token/command ID/sequence/main-thread dispatch/screenshot SHA; server control env-gated đi chung `donDepKhiTat`; fixture đúng 2 account trong `nro_test`; runner có preflight/timeout/evidence. Hai vòng review vá common cleanup, evidence rỗng, PBKDF2 production, reconnect và stale-session generation. Unity batch thật **50 assertion**, Go focused `-count=5` + toàn repo + vet, PowerShell parser/self-test và control smoke DB thật xanh; cleanup còn **0 account** | `kh-vertical-slice` / commit `test(e2e): telemetry hai client va graceful control` | Task 9 xong, chưa gộp `main`. **Không bắt đầu Task 10**; full gameplay hai client là bước kế tiếp |

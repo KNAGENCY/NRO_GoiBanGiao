@@ -8,8 +8,10 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using Game1;
 using UnityEditor;
 using UnityEngine;
+using GameChar = Game1.Char;
 
 namespace NroE2E
 {
@@ -77,8 +79,12 @@ namespace NroE2E
                 TestScreenshotSha();
                 TestReconnectAfterRejectedSession();
                 TestQueuedCommandCannotCrossSession();
+                TestShutdownRequestsPlayerExit();
+                TestCombatTelemetryComesFromRuntimeState();
+                TestWarmNegotiationSurvivesPreLogin();
+                TestSkillReadyComesFromRuntimeCooldown();
                 TestSchema();
-                Debug.Log("NRO-E2E-CONTRACT-OK assertions=50");
+                Debug.Log("NRO-E2E-CONTRACT-OK assertions=63");
                 EditorApplication.Exit(0);
             }
             catch (ContractException error)
@@ -387,10 +393,16 @@ namespace NroE2E
                 InvokeBridgeUpdate(bridge);
 
                 Thread.Sleep(200);
-                Require(
-                    sessionB.Socket.Available == 0,
-                    "E2E-SESSION-011",
-                    "session B received response/event queued by session A");
+                while (sessionB.Socket.Available > 0)
+                {
+                    string sessionBLine = TryReadLine(sessionB.Reader);
+                    Require(
+                        sessionBLine == null ||
+                        (!sessionBLine.Contains("stale-shutdown") &&
+                         !sessionBLine.Contains("telemetry_shutdown")),
+                        "E2E-SESSION-011",
+                        "session B received response/event queued by session A");
+                }
                 bool stopping = (bool)typeof(NroE2EBridge)
                     .GetField(
                         "stopping",
@@ -493,6 +505,155 @@ namespace NroE2E
             return null;
         }
 
+        private static void TestShutdownRequestsPlayerExit()
+        {
+            const string token = "token-test-32-byte-khong-secret-0001";
+            TcpListener probe = new TcpListener(IPAddress.Loopback, 0);
+            probe.Start();
+            int port = ((IPEndPoint)probe.LocalEndpoint).Port;
+            probe.Stop();
+            GameObject host = new GameObject("NroE2EShutdownContract");
+            NroE2EBridge bridge = host.AddComponent<NroE2EBridge>();
+            AuthenticatedSession session = null;
+            try
+            {
+                bridge.StartListener(port, token, "shutdown-client");
+                session = OpenAuthenticatedSession(port, token);
+                Require(
+                    session != null,
+                    "E2E-SHUTDOWN-007",
+                    "shutdown session did not authenticate");
+                session.Writer.WriteLine(JsonUtility.ToJson(
+                    new NroE2ECommandRequest
+                    {
+                        command_id = "live-shutdown",
+                        command = "shutdown",
+                        payload = new NroE2ECommandPayload()
+                    }));
+                string shutdownEvent = WaitForEventLine(
+                    bridge,
+                    session,
+                    "\"type\":\"telemetry_shutdown\"",
+                    1000);
+                string response = WaitForEventLine(
+                    bridge,
+                    session,
+                    "\"command_id\":\"live-shutdown\"",
+                    1000);
+                Require(
+                    shutdownEvent != null && response != null &&
+                    response.Contains("\"ok\":true"),
+                    "E2E-SHUTDOWN-007",
+                    "shutdown did not flush event and command response");
+                FieldInfo requested = typeof(NroE2EBridge).GetField(
+                    "applicationQuitRequested",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+                Require(
+                    requested != null && (bool)requested.GetValue(bridge),
+                    "E2E-SHUTDOWN-007",
+                    "shutdown did not request player exit");
+            }
+            finally
+            {
+                if (session != null)
+                {
+                    session.Dispose();
+                }
+                bridge.StopBridge();
+                UnityEngine.Object.DestroyImmediate(host);
+            }
+        }
+
+        private static void TestWarmNegotiationSurvivesPreLogin()
+        {
+            NroE2ETelemetryProducer producer = new NroE2ETelemetryProducer();
+            List<string> types = new List<string>();
+            List<NroE2EEventPayload> payloads =
+                new List<NroE2EEventPayload>();
+            Action<string, NroE2EEventPayload> emit = (type, payload) =>
+            {
+                types.Add(type);
+                payloads.Add(payload);
+            };
+            producer.Observe(
+                new NroE2ERuntimeSample
+                {
+                    ready = false,
+                    negotiationActive = true,
+                    serverDataVersion = 21,
+                    clientDataVersion = 20
+                },
+                emit);
+            producer.Observe(
+                new NroE2ERuntimeSample
+                {
+                    ready = true,
+                    characterId = 7,
+                    mapId = 1,
+                    mapName = "Làng Lá",
+                    negotiationActive = false,
+                    appliedLockSha256 = new string('a', 64),
+                    pairSha256 = new string('b', 64)
+                },
+                emit);
+
+            int warmIndex = types.IndexOf("warm_negotiation");
+            int appliedIndex = types.IndexOf("resource_lock_applied");
+            Require(
+                warmIndex >= 0 && appliedIndex > warmIndex,
+                "E2E-WARM-017",
+                "pre-login negotiation was lost before map ready");
+            Require(
+                payloads[appliedIndex].applied_lock_sha256 == new string('a', 64) &&
+                payloads[appliedIndex].map_id == 1 &&
+                !payloads[appliedIndex].dragon_ball_fallback,
+                "E2E-WARM-017",
+                "applied warm resource state is incomplete");
+        }
+
+        private static void TestSkillReadyComesFromRuntimeCooldown()
+        {
+            NroE2ETelemetryProducer producer = new NroE2ETelemetryProducer();
+            List<string> types = new List<string>();
+            List<NroE2EEventPayload> payloads =
+                new List<NroE2EEventPayload>();
+            Action<string, NroE2EEventPayload> emit = (type, payload) =>
+            {
+                types.Add(type);
+                payloads.Add(payload);
+            };
+            NroE2ERuntimeSample sample = new NroE2ERuntimeSample
+            {
+                ready = true,
+                characterId = 9,
+                mapId = 1,
+                selectedSkill = 2,
+                selectedSkillLastUse = 10,
+                selectedSkillReadyAt = 110,
+                monotonicMs = 110
+            };
+            producer.Observe(sample, emit);
+            sample.selectedSkillLastUse = 200;
+            sample.selectedSkillReadyAt = 300;
+            sample.monotonicMs = 201;
+            producer.Observe(sample, emit);
+            sample.monotonicMs = 300;
+            producer.Observe(sample, emit);
+
+            int used = types.FindLastIndex(type => type == "skill_state");
+            int ready = types.FindLastIndex(type => type == "skill_ready");
+            Require(
+                used >= 0 && ready > used,
+                "E2E-DRIVER-COMMAND-021",
+                "runtime cooldown did not emit used then ready");
+            Require(
+                payloads[used].selected_skill == 2 &&
+                payloads[used].selected_skill_ready_at_ms == 300 &&
+                payloads[ready].selected_skill_ready_at_ms == 300,
+                "E2E-DRIVER-COMMAND-021",
+                "skill telemetry is not tied to runtime cooldown");
+        }
+
         private static string TryReadLine(StreamReader reader)
         {
             try
@@ -512,6 +673,115 @@ namespace NroE2E
                     "Update",
                     BindingFlags.Instance | BindingFlags.NonPublic)
                 .Invoke(bridge, null);
+        }
+
+        private static void TestCombatTelemetryComesFromRuntimeState()
+        {
+            const string token = "token-test-32-byte-khong-secret-0001";
+            TcpListener probe = new TcpListener(IPAddress.Loopback, 0);
+            probe.Start();
+            int port = ((IPEndPoint)probe.LocalEndpoint).Port;
+            probe.Stop();
+
+            GameObject host = new GameObject("NroE2ECombatTelemetryBridge");
+            NroE2EBridge bridge = host.AddComponent<NroE2EBridge>();
+            AuthenticatedSession session = null;
+            GameChar me = GameChar.myCharz();
+            double oldHp = me.cHP;
+            double oldHpFull = me.cHPFull;
+            int oldCharId = me.charID;
+            int oldMapId = TileMap.mapID;
+            int oldZoneId = TileMap.zoneID;
+            Mob wolf = new Mob
+            {
+                mobId = 1,
+                templateId = 0,
+                cFocus = me,
+                dame = 5,
+                isBusyAttackSomeOne = true
+            };
+            try
+            {
+                me.charID = 1001;
+                me.cHPFull = 150;
+                me.cHP = 150;
+                TileMap.mapID = 1;
+                TileMap.zoneID = 0;
+                GameScr.vMob.addElement(wolf);
+
+                bridge.StartListener(port, token, "A");
+                session = OpenAuthenticatedSession(port, token);
+                Require(
+                    session != null,
+                    "E2E-TELEMETRY-COMBAT-020",
+                    "combat telemetry session did not authenticate");
+
+                InvokeBridgeUpdate(bridge);
+                DrainAvailableLines(session);
+                me.cHP = 145;
+                InvokeBridgeUpdate(bridge);
+
+                string damage = WaitForEventLine(
+                    bridge,
+                    session,
+                    "\"type\":\"damage_received\"",
+                    1000);
+                Require(
+                    damage != null,
+                    "E2E-TELEMETRY-COMBAT-020",
+                    "HP transition did not emit damage_received");
+                Require(
+                    damage.Contains("\"amount\":5") &&
+                    damage.Contains("\"hp_before\":150") &&
+                    damage.Contains("\"hp_after\":145") &&
+                    damage.Contains("\"source_kind\":\"mob\"") &&
+                    damage.Contains("\"source_id\":1"),
+                    "E2E-TELEMETRY-COMBAT-020",
+                    "damage_received payload did not come from runtime state");
+            }
+            finally
+            {
+                GameScr.vMob.removeElement(wolf);
+                me.cHP = oldHp;
+                me.cHPFull = oldHpFull;
+                me.charID = oldCharId;
+                TileMap.mapID = oldMapId;
+                TileMap.zoneID = oldZoneId;
+                if (session != null)
+                {
+                    session.Dispose();
+                }
+                bridge.StopBridge();
+                UnityEngine.Object.DestroyImmediate(host);
+            }
+        }
+
+        private static void DrainAvailableLines(AuthenticatedSession session)
+        {
+            while (session.Socket.Available > 0)
+            {
+                TryReadLine(session.Reader);
+            }
+        }
+
+        private static string WaitForEventLine(
+            NroE2EBridge bridge,
+            AuthenticatedSession session,
+            string marker,
+            int timeoutMs)
+        {
+            DateTime deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
+            while (DateTime.UtcNow < deadline)
+            {
+                InvokeBridgeUpdate(bridge);
+                string line = TryReadLine(session.Reader);
+                if (line != null && line.Contains(marker))
+                {
+                    return line;
+                }
+                Thread.Sleep(10);
+            }
+            return null;
         }
 
         private static void TestSchema()

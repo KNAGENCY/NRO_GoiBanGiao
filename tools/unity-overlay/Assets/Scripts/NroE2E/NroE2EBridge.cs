@@ -21,6 +21,8 @@ namespace NroE2E
             new NroE2EMainThreadQueue();
         private readonly NroE2ECommandIds commandIds =
             new NroE2ECommandIds();
+        private readonly NroE2ETelemetryProducer telemetry =
+            new NroE2ETelemetryProducer();
         private readonly object sessionLock = new object();
 
         private TcpListener listener;
@@ -31,6 +33,7 @@ namespace NroE2E
         private long activeSessionGeneration;
         private Thread listenerThread;
         private volatile bool stopping;
+        private bool applicationQuitRequested;
         private string expectedToken;
         private string clientName;
         private long sequence;
@@ -67,6 +70,7 @@ namespace NroE2E
             }
             PlayerSettings.defaultScreenWidth = 1280;
             PlayerSettings.defaultScreenHeight = 720;
+            EmbedAssetProvenance();
             Directory.CreateDirectory(Path.GetDirectoryName(output));
             BuildReport report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {
@@ -84,6 +88,47 @@ namespace NroE2E
             Debug.Log(
                 "E2E-BUILD-OK bytes=" + report.summary.totalSize +
                 " duration=" + report.summary.totalTime);
+        }
+
+        private static void EmbedAssetProvenance()
+        {
+            string source = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                ".nro-asset-lock.json");
+            if (!File.Exists(source))
+            {
+                throw new InvalidOperationException(
+                    "E2E-ASSET-006: snapshot thieu .nro-asset-lock.json");
+            }
+            NroE2EAssetMarker marker;
+            try
+            {
+                marker = JsonUtility.FromJson<NroE2EAssetMarker>(
+                    File.ReadAllText(source, Encoding.UTF8));
+            }
+            catch (Exception error)
+            {
+                throw new InvalidOperationException(
+                    "E2E-ASSET-006: marker provenance khong doc duoc",
+                    error);
+            }
+            if (marker == null || marker.schema_version != 1 ||
+                string.IsNullOrWhiteSpace(marker.lock_sha256) ||
+                marker.lock_sha256.Length != 64 ||
+                string.IsNullOrWhiteSpace(marker.server_client_pair_sha256) ||
+                marker.server_client_pair_sha256.Length != 64 ||
+                marker.versions == null)
+            {
+                throw new InvalidOperationException(
+                    "E2E-ASSET-006: marker provenance sai schema");
+            }
+            string destination = Path.Combine(
+                Application.dataPath,
+                "StreamingAssets",
+                "nro-e2e-provenance.json");
+            Directory.CreateDirectory(Path.GetDirectoryName(destination));
+            File.Copy(source, destination, true);
+            AssetDatabase.Refresh();
         }
 #endif
 
@@ -347,6 +392,20 @@ namespace NroE2E
         private void Update()
         {
             mainThread.Drain();
+            long sessionGeneration;
+            lock (sessionLock)
+            {
+                sessionGeneration = activeSessionGeneration;
+            }
+            if (sessionGeneration != 0 && IsSessionActive(sessionGeneration))
+            {
+                telemetry.Observe(
+                    NroE2ERuntimeReader.Read(),
+                    (type, payload) => EmitEvent(
+                        sessionGeneration,
+                        type,
+                        payload));
+            }
         }
 
         private void ExecuteOnMainThread(
@@ -389,19 +448,25 @@ namespace NroE2E
                     EmitEvent(
                         sessionGeneration,
                         "telemetry_shutdown",
-                        "{}");
+                        new NroE2EEventPayload());
                     SendSuccess(
                         sessionGeneration,
                         request.command_id,
                         "{}");
+                    RequestApplicationQuit();
+#if UNITY_EDITOR
                     StopBridge();
+#endif
                     return;
 
                 default:
                     EmitEvent(
                         sessionGeneration,
                         "command_completed",
-                        "{\"command\":\"" + EscapeJson(request.command) + "\"}");
+                        new NroE2EEventPayload
+                        {
+                            command = request.command
+                        });
                     SendSuccess(
                         sessionGeneration,
                         request.command_id,
@@ -486,9 +551,12 @@ namespace NroE2E
                             yield break;
                         }
                         string sha = NroE2EEvidence.ComputeSha256(path);
-                        string eventPayload =
-                            "{\"path\":\"" + EscapeJson(path) +
-                            "\",\"sha256\":\"" + sha + "\"}";
+                        NroE2EEventPayload eventPayload =
+                            new NroE2EEventPayload
+                            {
+                                path = path,
+                                sha256 = sha
+                            };
                         EmitEvent(
                             sessionGeneration,
                             "capture_completed",
@@ -496,7 +564,7 @@ namespace NroE2E
                         SendSuccess(
                             sessionGeneration,
                             request.command_id,
-                            eventPayload);
+                            JsonUtility.ToJson(eventPayload));
                         yield break;
                     }
                 }
@@ -516,7 +584,7 @@ namespace NroE2E
         private void EmitEvent(
             long sessionGeneration,
             string type,
-            string payload)
+            NroE2EEventPayload payload)
         {
             if (!IsSessionActive(sessionGeneration))
             {
@@ -531,7 +599,7 @@ namespace NroE2E
                 client = clientName,
                 sequence = sequence,
                 type = type,
-                payload = payload
+                payload = payload ?? new NroE2EEventPayload()
             });
         }
 
@@ -660,6 +728,14 @@ namespace NroE2E
                     activeSessionGeneration = 0;
                 }
             }
+        }
+
+        private void RequestApplicationQuit()
+        {
+            applicationQuitRequested = true;
+#if !UNITY_EDITOR
+            Application.Quit();
+#endif
         }
 
         private void OnDestroy()

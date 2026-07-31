@@ -35,6 +35,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 $script:PhaseDurations = [ordered]@{}
+if ([string]::IsNullOrWhiteSpace($GameplayScript)) {
+    $GameplayScript = Join-Path $PSScriptRoot "Task10-GameplayDriver.ps1"
+}
 
 function Stop-E2E {
     param([string]$Code, [string]$Message)
@@ -1222,6 +1225,9 @@ WHERE table_schema='public'
                     "-RunRoot", $runRoot,
                     "-Executable", $executable,
                     "-Manifest", $manifestPath,
+                    "-ServerRoot", $server,
+                    "-PreviousLock", (Resolve-FullPath $PreviousLock),
+                    "-GoExe", (Resolve-GoExecutable $GoExe),
                     "-GamePort", $GamePort,
                     "-ControlPort", $ControlPort,
                     "-TelemetryPortA", $TelemetryPortA,
@@ -1240,6 +1246,26 @@ WHERE table_schema='public'
             "NRO_TEST_DSN",
             $previousTestDsn,
             [EnvironmentVariableTarget]::Process)
+    }
+
+    $cleanCapturePath = Join-Path $runRoot "clean\result.json"
+    $warmCapturePath = Join-Path $runRoot "warm-upgrade\result.json"
+    if ((Test-Path -LiteralPath $cleanCapturePath -PathType Leaf) -and
+        (Test-Path -LiteralPath $warmCapturePath -PathType Leaf)) {
+        $cleanCapture = Get-Content -LiteralPath $cleanCapturePath -Raw `
+            -Encoding UTF8 | ConvertFrom-Json
+        $warmCapture = Get-Content -LiteralPath $warmCapturePath -Raw `
+            -Encoding UTF8 | ConvertFrom-Json
+        if ([string]$cleanCapture.status -ceq "captured" -or
+            [string]$warmCapture.status -ceq "captured") {
+            $manifest.status = "evidence_captured"
+            $manifest.clean_result = $cleanCapturePath
+            $manifest.warm_result = $warmCapturePath
+            $manifest.durations_seconds = $script:PhaseDurations
+            Write-Utf8Json -Path $manifestPath -Value $manifest
+            Write-Output "E2E-TASK10-EVIDENCE-CAPTURED $runRoot"
+            exit 2
+        }
     }
 
     Invoke-Phase "clean_warm_oracle" {

@@ -44,7 +44,44 @@ namespace NroE2E
         public string client;
         public long sequence;
         public string type;
-        public string payload;
+        public NroE2EEventPayload payload = new NroE2EEventPayload();
+    }
+
+    [Serializable]
+    public sealed class NroE2EEventPayload
+    {
+        public string command;
+        public string path;
+        public string sha256;
+        public string account;
+        public string login_mode;
+        public string action;
+        public string source_kind;
+        public string map_name;
+        public string applied_lock_sha256;
+        public string pair_sha256;
+        public int character_id = -1;
+        public int map_id = -1;
+        public int zone_id = -1;
+        public int source_id = -1;
+        public int amount;
+        public int hp_before;
+        public int hp_after;
+        public int hp;
+        public int hp_max;
+        public int selected_skill = -1;
+        public long selected_skill_ready_at_ms;
+        public int server_data_version = -1;
+        public int server_map_version = -1;
+        public int server_skill_version = -1;
+        public int server_item_version = -1;
+        public int client_data_version = -1;
+        public int client_map_version = -1;
+        public int client_skill_version = -1;
+        public int client_item_version = -1;
+        public bool negotiation_detected;
+        public bool update_required;
+        public bool dragon_ball_fallback;
     }
 
     [Serializable]

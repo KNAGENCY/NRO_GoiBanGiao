@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$EvidenceRoot,
+    [string]$OracleRunRoot,
     [switch]$SelfTest
 )
 
@@ -102,6 +103,291 @@ function Test-E2EEvidenceContract {
         $previous = $current
     }
     return $true
+}
+
+function Read-E2EJson {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$Code
+    )
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        throw "$Code`: thieu file $([IO.Path]::GetFileName($Path))"
+    }
+    try {
+        return Get-Content -LiteralPath $Path -Raw -Encoding UTF8 |
+            ConvertFrom-Json
+    }
+    catch {
+        throw "$Code`: JSON khong doc duoc: $([IO.Path]::GetFileName($Path))"
+    }
+}
+
+function Resolve-E2ERelativePath {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][string]$Relative,
+        [Parameter(Mandatory = $true)][string]$Code
+    )
+    if ([string]::IsNullOrWhiteSpace($Relative) -or
+        [IO.Path]::IsPathRooted($Relative) -or
+        $Relative.Split([char[]]@("/", "\")) -contains "..") {
+        throw "$Code`: evidence path khong hop le"
+    }
+    $base = [IO.Path]::GetFullPath($Root).TrimEnd("\") + "\"
+    $path = [IO.Path]::GetFullPath((Join-Path $Root $Relative))
+    if (-not $path.StartsWith($base, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "$Code`: evidence path vuot khoi run root"
+    }
+    return $path
+}
+
+function Assert-E2EArtifactSha {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)]$Record,
+        [Parameter(Mandatory = $true)][string]$Code
+    )
+    if ($null -eq $Record) {
+        throw "$Code`: thieu evidence record"
+    }
+    $relative = [string]$Record.path
+    $expected = [string]$Record.sha256
+    if ($expected -notmatch "^[0-9a-fA-F]{64}$") {
+        throw "$Code`: thieu SHA-256 cho $relative"
+    }
+    $path = Resolve-E2ERelativePath -Root $Root -Relative $relative -Code $Code
+    if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+        throw "$Code`: evidence khong ton tai: $relative"
+    }
+    $actual = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash
+    if ($actual.ToLowerInvariant() -cne $expected.ToLowerInvariant()) {
+        throw "$Code`: evidence sai SHA-256: $relative"
+    }
+    return $path
+}
+
+function Read-E2ENdjson {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)]$Record
+    )
+    $path = Assert-E2EArtifactSha -Root $Root -Record $Record `
+        -Code "E2E-EVIDENCE-SHA-016"
+    $events = New-Object System.Collections.Generic.List[object]
+    $lastByClient = @{}
+    $lineNumber = 0
+    foreach ($line in Get-Content -LiteralPath $path -Encoding UTF8) {
+        $lineNumber++
+        if ([string]::IsNullOrWhiteSpace($line)) {
+            continue
+        }
+        try {
+            $event = $line | ConvertFrom-Json
+        }
+        catch {
+            throw "E2E-EVENT-008: NDJSON hong o dong $lineNumber"
+        }
+        $client = [string]$event.client
+        $current = [long]0
+        if ([string]::IsNullOrWhiteSpace($client) -or
+            -not [long]::TryParse([string]$event.sequence, [ref]$current)) {
+            throw "E2E-EVENT-008: client/sequence khong hop le o dong $lineNumber"
+        }
+        $previous = if ($lastByClient.ContainsKey($client)) {
+            [long]$lastByClient[$client]
+        }
+        else {
+            [long]0
+        }
+        if ($current -le $previous) {
+            throw "E2E-SEQUENCE-003: sequence lui hoac trung cho $client ($previous -> $current)"
+        }
+        if ($current -ne ($previous + 1)) {
+            throw "E2E-SEQUENCE-004: sequence dut cho $client ($previous -> $current)"
+        }
+        $lastByClient[$client] = $current
+        [void]$events.Add($event)
+    }
+    if ($events.Count -eq 0) {
+        throw "E2E-EVENT-008: NDJSON khong co event"
+    }
+    return $events.ToArray()
+}
+
+function Assert-E2EVisualReview {
+    param([Parameter(Mandatory = $true)]$Result)
+    if ([string]$Result.visual_review.status -cne "pass" -or
+        [string]::IsNullOrWhiteSpace([string]$Result.visual_review.reviewer)) {
+        throw "E2E-VISUAL-018: visual review chua PASS"
+    }
+    foreach ($name in @(
+        "blur", "seam", "edge_alignment", "anchor", "loop", "impact_timing")) {
+        $property = $Result.visual_review.checklist.PSObject.Properties[$name]
+        if ($null -eq $property -or [string]$property.Value -cne "pass") {
+            throw "E2E-VISUAL-018: checklist $name chua PASS"
+        }
+    }
+}
+
+function Assert-E2EResultArtifacts {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)]$Result
+    )
+    $artifacts = @($Result.artifacts)
+    if ($artifacts.Count -eq 0) {
+        throw "E2E-EVIDENCE-SHA-016: khong co artifact"
+    }
+    $hasScreenshot = $false
+    foreach ($artifact in $artifacts) {
+        Assert-E2EArtifactSha -Root $Root -Record $artifact `
+            -Code "E2E-EVIDENCE-SHA-016" | Out-Null
+        if ([string]$artifact.kind -ceq "screenshot") {
+            $hasScreenshot = $true
+        }
+    }
+    if (-not $hasScreenshot) {
+        throw "E2E-EVIDENCE-SHA-016: thieu screenshot evidence"
+    }
+}
+
+function Test-E2ECleanOracle {
+    param([Parameter(Mandatory = $true)][string]$Root)
+    $result = Read-E2EJson -Path (Join-Path $Root "result.json") `
+        -Code "E2E-SCOPE-014"
+    if ([string]$result.scope -cne "full") {
+        throw "E2E-SCOPE-014: clean phai co scope=full"
+    }
+    if ([string]$result.status -cne "pass") {
+        throw "E2E-SCOPE-014: clean full chua PASS"
+    }
+    foreach ($sha in @(
+        [string]$result.executable_sha256,
+        [string]$result.server_lock_sha256)) {
+        if ($sha -notmatch "^[0-9a-f]{64}$") {
+            throw "E2E-ASSET-013: clean thieu executable/server lock SHA"
+        }
+    }
+
+    $events = @(Read-E2ENdjson -Root $Root -Record $result.events)
+    $dbStates = @{}
+    foreach ($name in @("before_shutdown", "after_shutdown", "after_relogin")) {
+        $record = $result.database.PSObject.Properties[$name]
+        if ($null -eq $record) {
+            throw "E2E-DB-SHA-015: thieu DB snapshot $name"
+        }
+        $path = Assert-E2EArtifactSha -Root $Root -Record $record.Value `
+            -Code "E2E-DB-SHA-015"
+        $dbStates[$name] = Read-E2EJson -Path $path -Code "E2E-DB-SHA-015"
+    }
+    foreach ($field in @("map_id", "zone_id", "x", "y", "hp", "hp_max")) {
+        $expected = [string]$dbStates.before_shutdown.$field
+        foreach ($name in @("after_shutdown", "after_relogin")) {
+            if ([string]$dbStates[$name].$field -cne $expected) {
+                throw "E2E-PERSIST-004: DB $field sai sau $name"
+            }
+        }
+    }
+
+    Assert-E2EResultArtifacts -Root $Root -Result $result
+    Assert-E2EVisualReview -Result $result
+
+    $target = [string]$result.combat.target_client
+    $damage = @($events | Where-Object {
+        [string]$_.client -ceq $target -and
+        [string]$_.type -ceq "damage_received"
+    })
+    $expectedDamage = @(5, 2, 2, 2, 2)
+    $before = @(150, 145, 143, 141, 139)
+    $after = @(145, 143, 141, 139, 137)
+    if ($damage.Count -ne $expectedDamage.Count) {
+        throw "E2E-COMBAT-010: damage count actual=$($damage.Count), expected=5"
+    }
+    for ($index = 0; $index -lt $expectedDamage.Count; $index++) {
+        $payload = $damage[$index].payload
+        $sourceExpected = if ($index -eq 0) { "mob" } else { "player" }
+        if ([int]$payload.amount -ne $expectedDamage[$index] -or
+            [int]$payload.hp_before -ne $before[$index] -or
+            [int]$payload.hp_after -ne $after[$index] -or
+            [string]$payload.source_kind -cne $sourceExpected) {
+            throw "E2E-COMBAT-010: damage[$index] khong khop oracle"
+        }
+    }
+    if (@($result.combat.expected_damage) -join "," -cne "5,2,2,2,2") {
+        throw "E2E-COMBAT-010: result khong ghim expected damage"
+    }
+    if ([int]$result.combat.expected_final_hp -ne 137 -or
+        [int]$result.combat.actual_final_hp -ne 137 -or
+        [int]$damage[-1].payload.hp_after -ne 137 -or
+        [int]$result.persistence.hp -ne 137 -or
+        [int]$dbStates.after_relogin.hp -ne 137) {
+        throw "E2E-HP-011: HP cuoi phai bang 137"
+    }
+    return $result
+}
+
+function Test-E2EWarmOracle {
+    param([Parameter(Mandatory = $true)][string]$Root)
+    $result = Read-E2EJson -Path (Join-Path $Root "result.json") `
+        -Code "E2E-SCOPE-014"
+    if ([string]$result.scope -cne "warm_smoke") {
+        throw "E2E-SCOPE-014: warm phai co scope=warm_smoke"
+    }
+    if ([string]$result.status -cne "pass") {
+        throw "E2E-SCOPE-014: warm smoke chua PASS"
+    }
+    [void](Read-E2ENdjson -Root $Root -Record $result.events)
+    foreach ($name in @("cache_before", "cache_after")) {
+        $record = $result.PSObject.Properties[$name]
+        if ($null -eq $record) {
+            throw "E2E-EVIDENCE-SHA-016: thieu $name"
+        }
+        Assert-E2EArtifactSha -Root $Root -Record $record.Value `
+            -Code "E2E-EVIDENCE-SHA-016" | Out-Null
+    }
+    Assert-E2EResultArtifacts -Root $Root -Result $result
+    if ($result.resources.negotiation_detected -ne $true -or
+        [int]$result.resources.entered_map_id -ne 1 -or
+        $result.resources.dragon_ball_fallback -ne $false -or
+        [string]$result.resources.applied_lock_sha256 -cne
+            [string]$result.server_lock_sha256) {
+        throw "E2E-WARM-017: warm upgrade negotiation/resource khong hop le"
+    }
+    return $result
+}
+
+function Test-E2ERunnerOracle {
+    param([Parameter(Mandatory = $true)][string]$Root)
+    $resolved = [IO.Path]::GetFullPath($Root)
+    $clean = Test-E2ECleanOracle -Root (Join-Path $resolved "clean")
+    $warm = Test-E2EWarmOracle -Root (Join-Path $resolved "warm-upgrade")
+    if ([string]$clean.executable_sha256 -cne
+        [string]$warm.executable_sha256) {
+        throw "E2E-EXECUTABLE-012: clean/warm khac executable"
+    }
+    if ([string]$clean.server_lock_sha256 -cne
+        [string]$warm.server_lock_sha256) {
+        throw "E2E-ASSET-013: clean/warm khac server lock"
+    }
+    $aggregate = [ordered]@{
+        schema_version = 1
+        scope = "aggregate"
+        status = "pass"
+        executable_sha256 = [string]$clean.executable_sha256
+        server_lock_sha256 = [string]$clean.server_lock_sha256
+        clean = @{ scope = "full"; status = "pass"; path = "clean/result.json" }
+        warm = @{
+            scope = "warm_smoke"
+            status = "pass"
+            path = "warm-upgrade/result.json"
+        }
+    }
+    $json = $aggregate | ConvertTo-Json -Depth 8
+    [IO.File]::WriteAllText(
+        (Join-Path $resolved "aggregate-result.json"),
+        $json,
+        (New-Object Text.UTF8Encoding($false)))
+    return $aggregate
 }
 
 function Invoke-EvidenceSelfTest {
@@ -226,6 +512,14 @@ function Invoke-EvidenceSelfTest {
 if ($SelfTest) {
     Invoke-EvidenceSelfTest
     Write-Output "EVIDENCE-SELFTEST-PASS"
+    exit 0
+}
+
+if (-not [string]::IsNullOrWhiteSpace($OracleRunRoot)) {
+    $aggregate = Test-E2ERunnerOracle -Root $OracleRunRoot
+    Write-Output (
+        "E2E-RUNNER-ORACLE-PASS " +
+        (Join-Path ([IO.Path]::GetFullPath($OracleRunRoot)) "aggregate-result.json"))
     exit 0
 }
 

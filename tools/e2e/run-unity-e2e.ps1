@@ -28,6 +28,8 @@ param(
     [switch]$PreflightOnly,
     [switch]$ContractOnly,
     [switch]$ControlSmokeOnly,
+    [string]$OracleRunRoot,
+    [switch]$OracleOnly,
     [switch]$SelfTest
 )
 
@@ -529,7 +531,29 @@ function Wait-E2EServerExit {
     }
 }
 
+function Get-E2EFailureScope {
+    param(
+        [bool]$IsControlSmoke,
+        [bool]$IsContract
+    )
+    if ($IsControlSmoke) {
+        return "task9_control_smoke"
+    }
+    if ($IsContract) {
+        return "task9_contract"
+    }
+    return "task10_full"
+}
+
 function Invoke-RunnerSelfTest {
+    if ((Get-E2EFailureScope -IsControlSmoke $false -IsContract $false) -cne
+        "task10_full" -or
+        (Get-E2EFailureScope -IsControlSmoke $true -IsContract $false) -cne
+        "task9_control_smoke" -or
+        (Get-E2EFailureScope -IsControlSmoke $false -IsContract $true) -cne
+        "task9_contract") {
+        throw "SELFTEST-FAIL: failure scope Task 9/10 sai"
+    }
     $steps = New-Object System.Collections.Generic.List[string]
     $fixture = @{ cleanup_completed = $false }
     Invoke-ControlSmokeLifecycle `
@@ -590,6 +614,15 @@ if ($SelfTest) {
     Invoke-RunnerSelfTest
     Write-Output "RUNNER-SELFTEST-PASS"
     exit 0
+}
+
+if ($OracleOnly) {
+    if ([string]::IsNullOrWhiteSpace($OracleRunRoot)) {
+        Stop-E2E "E2E-EVIDENCE-001" "OracleOnly can -OracleRunRoot"
+    }
+    & (Join-Path $PSScriptRoot "Test-Evidence.ps1") `
+        -OracleRunRoot (Resolve-FullPath $OracleRunRoot)
+    exit $LASTEXITCODE
 }
 
 Assert-FiniteTimeouts
@@ -982,18 +1015,71 @@ WHERE table_schema='public'
     if ([string]::IsNullOrWhiteSpace($GameplayScript) -or
         -not (Test-Path -LiteralPath $GameplayScript -PathType Leaf)) {
         Stop-E2E "E2E-TASK10-NOT-RUN" `
-            "Task 9 khong gia gameplay PASS; full run can -GameplayScript cua Task 10"
+            "full run can -GameplayScript de tao raw clean/warm evidence"
     }
-    Stop-E2E "E2E-TASK10-NOT-RUN" `
-        "Gameplay orchestration duoc mo o Task 10, khong chay trong Task 9"
+
+    # Driver chi dieu khien Unity/server va ghi raw evidence. Quyet dinh PASS
+    # phai di qua Test-Evidence.ps1 da duoc pressure-test bang bad fixtures.
+    $previousTestDsn = [Environment]::GetEnvironmentVariable(
+        "NRO_TEST_DSN",
+        [EnvironmentVariableTarget]::Process)
+    [Environment]::SetEnvironmentVariable(
+        "NRO_TEST_DSN",
+        $Dsn,
+        [EnvironmentVariableTarget]::Process)
+    try {
+        Invoke-Phase "clean_warm_gameplay" {
+            Invoke-ExternalWithTimeout -Name "GAMEPLAY-DRIVER" `
+                -FilePath "powershell.exe" `
+                -Arguments @(
+                    "-NoProfile", "-ExecutionPolicy", "Bypass",
+                    "-File", (Resolve-FullPath $GameplayScript),
+                    "-RunRoot", $runRoot,
+                    "-Executable", $executable,
+                    "-Manifest", $manifestPath,
+                    "-GamePort", $GamePort,
+                    "-ControlPort", $ControlPort,
+                    "-TelemetryPortA", $TelemetryPortA,
+                    "-TelemetryPortB", $TelemetryPortB) `
+                -TimeoutSec (
+                    $LoginTimeoutSec +
+                    (20 * $CommandTimeoutSec) +
+                    (2 * $ServerStartTimeoutSec) +
+                    (2 * $ServerShutdownTimeoutSec)) `
+                -StdoutPath (Join-Path $runRoot "gameplay.stdout.log") `
+                -StderrPath (Join-Path $runRoot "gameplay.stderr.log")
+        } | Out-Null
+    }
+    finally {
+        [Environment]::SetEnvironmentVariable(
+            "NRO_TEST_DSN",
+            $previousTestDsn,
+            [EnvironmentVariableTarget]::Process)
+    }
+
+    Invoke-Phase "clean_warm_oracle" {
+        Invoke-ExternalWithTimeout -Name "RUNNER-ORACLE" `
+            -FilePath "powershell.exe" `
+            -Arguments @(
+                "-NoProfile", "-ExecutionPolicy", "Bypass",
+                "-File", (Join-Path $server "tools\e2e\Test-Evidence.ps1"),
+                "-OracleRunRoot", $runRoot) `
+            -TimeoutSec $EvidenceTimeoutSec `
+            -StdoutPath (Join-Path $runRoot "oracle.stdout.log") `
+            -StderrPath (Join-Path $runRoot "oracle.stderr.log")
+    } | Out-Null
+
+    $manifest.status = "full_pass"
+    $manifest.aggregate_result = Join-Path $runRoot "aggregate-result.json"
+    $manifest.durations_seconds = $script:PhaseDurations
+    Write-Utf8Json -Path $manifestPath -Value $manifest
+    Write-Output "E2E-FULL-PASS $($manifest.aggregate_result)"
+    exit 0
 }
 catch {
-    $failureScope = if ($ControlSmokeOnly) {
-        "task9_control_smoke"
-    }
-    else {
-        "task9_contract"
-    }
+    $failureScope = Get-E2EFailureScope `
+        -IsControlSmoke ([bool]$ControlSmokeOnly) `
+        -IsContract ([bool]$ContractOnly)
     $failure = [ordered]@{
         schema_version = 1
         scope = $failureScope

@@ -8,7 +8,7 @@
 > một bản vá, một phát hiện lỗi) thì **phải cập nhật file này ngay** rồi mới commit.
 > Cách cập nhật xem mục [11. Quy ước cập nhật](#11-quy-ước-cập-nhật-file-này).
 
-**Cập nhật lần cuối:** 31/07/2026 (Task 8 đã được independent audit APPROVE; Vertical slice Task 9 telemetry/control/runner đã hoàn tất và review độc lập sạch) · **Nhánh đang làm:** `kh-vertical-slice` · **Mốc trước Task 9:** `b82d950` · **main:** `485b095`
+**Cập nhật lần cuối:** 31/07/2026 (Task 9 đã được independent audit APPROVE; Task 10 đã có oracle/aggregate TDD nhưng clean full và warm thật đang BLOCKED vì Unity asset lock) · **Nhánh đang làm:** `kh-vertical-slice` · **Mốc trước Task 10:** `01af875` · **main:** `485b095`
 
 ---
 
@@ -124,7 +124,8 @@ Mỗi kế hoạch đều đi qua: thiết kế → kế hoạch → thi công t
 | VS-6B | Bind ảnh đã duyệt vào manifest Làng Lá | Exact **20/20 provenance** fail-closed; closure v11 có 42 sprite `27041..27082`, HUD 25/50/100 và Iruka sáng/tối được reviewer độc lập ký SHA; mutation/full test/build A/B đều xanh | `bf91ee8`, `545b9c6`, `0fd6fc5` |
 | VS-7 | **Build artifact + deploy staging theo lock** | Artifact server/client bất biến theo lock 21; bắt buộc previous lock + protected Unity root; canonical resource đủ x1–x4 cho small/skill/mob/background/HUD; Unity preflight thật marker `RESOURCE-PREFLIGHT-OK`; full Python **123/123**, Go toàn repo + vet xanh | `2a77a43`, `9627680`, `56fa302` |
 | VS-8 | **Catalog, NPC Iruka, Sói và collision Làng Lá** | Đã vá audit Important: grid 5×17 tile 24×24 fail-closed; map 1 lấy footprint 120×408 làm biên authoritative, map 6 ghim là template chưa playable. Full Python **124/124**, Go game **-count=1**, focused collision/net **-count=5**, vet xanh; **independent audit APPROVE** | `de1f0c6`…`b82d950` |
-| VS-9 | **Telemetry Unity, server control và runner** | Telemetry JSONL loopback có token/command ID/sequence và main-thread dispatch; session cũ không thể lọt lệnh sang client mới. Server control chỉ mở bằng env rõ ràng, bind loopback và tắt qua đúng `donDepKhiTat`. Fixture chỉ dùng `nro_test`, đúng 2 account/run và cleanup fail-safe. Runner có preflight/timeout/evidence SHA. Unity contract thật **50 assertion**, Go toàn repo + vet, PowerShell self-test và control smoke DB thật đều xanh; review độc lập sạch | commit Task 9 này |
+| VS-9 | **Telemetry Unity, server control và runner** | Telemetry JSONL loopback có token/command ID/sequence và main-thread dispatch; session cũ không thể lọt lệnh sang client mới. Server control chỉ mở bằng env rõ ràng, bind loopback và tắt qua đúng `donDepKhiTat`. Fixture chỉ dùng `nro_test`, đúng 2 account/run và cleanup fail-safe. Runner có preflight/timeout/evidence SHA. Unity contract thật **50 assertion**, Go toàn repo + vet, PowerShell self-test và control smoke DB thật đều xanh; **independent audit APPROVE** | `01af875` |
+| VS-10 | **Clean full E2E và warm-upgrade smoke** | Oracle/aggregate fail-closed đã có TDD cho damage `5,2,2,2,2`, HP `137`, executable/lock/scope, DB/evidence SHA và NDJSON sequence; 10 fixture xanh và ba mutation bắt đúng. Runner gọi chính oracle đã test. **Chưa có bằng chứng clean/warm thật:** `D:\NRO_Project` còn cả hai asset lock, nên cold snapshot/import/build và gameplay bị BLOCKED trung thực | commit Task 10 này |
 
 **Tình trạng chất lượng hiện tại:** `go test ./...` — **toàn bộ 6 gói xanh, 0 đỏ**
 (gói `game` ~70s), chạy lặp `-count=5` không chập chờn. `gofmt` sạch (trừ nhiễu CRLF file
@@ -151,8 +152,8 @@ Xếp theo thứ tự nên làm:
 | ✅ | ~~Vertical slice Task 6B — bind ảnh đã duyệt~~ | **Xong, review sạch.** 109/109 test; A/B 669 file không khác; exact-20 provenance và evidence HUD/Iruka có trust anchor reviewer |
 | ✅ | ~~Vertical slice Task 7 — build artifact + deploy staging theo lock~~ | **Xong trên nhánh `kh-vertical-slice`**, review độc lập sạch. Artifact lock 21, deploy fail-closed (previous lock + protected root + canonical x1–x4), Unity preflight thật, full Python 123/123; chưa gộp `main`. **Tiếp: Task 8** |
 | ✅ | ~~Vertical slice Task 8 — bản vá audit collision~~ | Important fail-open ngoài footprint đã có RED/mutation và được sửa fail-closed; **independent audit APPROVE**. Chưa gộp `main`. |
-| ✅ | ~~Vertical slice Task 9 — telemetry/control/runner~~ | **Xong trên `kh-vertical-slice`, review độc lập sạch.** Unity contract 50 assertion; Go toàn repo + vet; PowerShell parser/self-test; control smoke dùng DB `nro_test`, graceful shutdown và cleanup fixture đều xanh. Full gameplay hai client **chưa chạy** vì thuộc Task 10. |
-| 🔒 | **Vertical slice Task 10 — gameplay E2E hai client** | Việc tiếp theo theo kế hoạch; **chưa bắt đầu**. Runner Task 9 đã chuẩn bị cổng telemetry/control/fixture/evidence, nhưng không được coi control smoke là gameplay PASS. |
+| ✅ | ~~Vertical slice Task 9 — telemetry/control/runner~~ | **Independent audit APPROVE.** Commit `01af875`; chưa gộp `main`. |
+| ⛔ | **Vertical slice Task 10 — clean full + warm smoke** | Oracle/aggregate, bad fixtures và ba mutation đã hoàn tất; runner gọi đúng parser. **Clean full/warm thật BLOCKED** vì `D:\NRO_Project\Library\ArtifactDB-lock` và `SourceAssetDB-lock` vẫn tồn tại. Không xóa lock, không giả PASS. Khi người dùng đóng Unity/lock tự hết thì chạy lại full runner. |
 | 1b | **KH6b — Boss** (hệ riêng, tách khỏi KH6) | Bản Java là 12 file, phức tạp hơn quái thường nhiều. Thiết kế sau khi KH6 gộp |
 | 1c | **KH6c — Stress test 20 client cùng khu vực** | Cùng xả chiêu, đo gói rơi hộp thư actor (trần 256, rơi im lặng) + trễ nhịp 100ms. Dựng trên `thuclient`/`clientGia` |
 | 2 | KH7 — Vật phẩm, hành trang, cửa hàng, giao dịch | 🧱 **Phải chốt căn cước vật phẩm + chống nhân bản trong đặc tả TRƯỚC khi viết code** ([BO-SUNG](docs/superpowers/plans/BO-SUNG-LO-TRINH.md) Khối 3). Tách rõ 4 thứ: cửa hàng NPC / giao dịch 2 người / ký gửi / kho |
@@ -319,6 +320,12 @@ Xếp theo thứ tự nên làm:
     trỏ chính xác `nro_test`, sinh đúng hai account có prefix từ run ID, dùng cùng
     PBKDF2-SHA256 với server và chỉ nhận mật khẩu thô qua biến môi trường. Cleanup phải
     xóa đúng con trước cha trong `finally`, rồi truy vấn lại chứng minh còn 0 account.
+28. **Clean và warm không được tự chấm điểm ở hai nhánh runner khác nhau.** Nếu mỗi phase
+    tự viết assertion, một nhánh có thể bỏ kiểm damage thừa/HP 137 còn nhánh kia dùng
+    executable hoặc asset lock khác mà aggregate vẫn xanh. Cả runner thật và fixture test
+    phải gọi cùng một oracle fail-closed: parser tự đọc NDJSON, băm lại DB/screenshot,
+    kiểm scope `full|warm_smoke`, rồi chỉ ghi aggregate PASS khi executable và server lock
+    bằng tuyệt đối. Unity asset lock là blocker thật; không xóa lock để “làm test chạy”.
 
 ---
 
@@ -517,3 +524,4 @@ Commit riêng cho việc cập nhật tài liệu thì dùng tiền tố `docs:`
 | 30/07/2026 | **Vertical slice Task 7 hoàn tất, review độc lập sạch.** Build/deploy artifact Naruto lock 21; fix hai guard fail-open (previous lock, protected Unity root) và canonical resource exact x1–x4 sau khi reviewer bắt được decoy `Small27042`. Mutation đều đỏ đúng mã; full Python **123/123**, Go toàn repo + `go vet` xanh; Unity staging preflight thật có `RESOURCE-PREFLIGHT-OK`. Commit `2a77a43` → `9627680` → `56fa302`. Việc tiếp: Task 8 catalog/NPC/Sói/collision, chưa bắt đầu. |
 | 30/07/2026 | **Vertical slice Task 8 — vá Important collision sau audit mốc `902b5a8`.** `DiDuoc` ngoài grid 5×17 từng fail-open, khiến bước `(100,384)→(121,384)` thoát artifact. Đã viết RED/mutation, đổi map 1 sang footprint 120×408 authoritative, ghim map 6 là template chưa playable và sửa fixture cũ về vùng thật. Fresh Python **124/124**, Go game -count=1, focused collision/net -count=5, vet xanh. **Chờ independent re-review; Task 9 chưa bắt đầu.** |
 | 31/07/2026 | **Vertical slice Task 9 hoàn tất sau khi Task 8 được independent audit APPROVE.** TDD bao phủ token sai/thiếu, command ID thiếu/trùng, sequence lùi/đứt, main-thread dispatch, screenshot SHA, graceful shutdown/persistence và fixture prefix/cleanup. Hai vòng review đã vá evidence rỗng, fixture hash, common shutdown path, reconnect và stale-session generation. Fresh Unity batch thật **50 assertion**, Go focused `-count=5` + toàn repo + vet, PowerShell parser/self-test và control smoke DB thật đều xanh; fixture còn **0 account** sau cleanup. Full gameplay hai client chưa chạy vì thuộc Task 10. |
+| 31/07/2026 | **Task 9 được independent audit APPROVE; Task 10 hoàn tất phần không phụ thuộc Unity lock.** Viết 10 fixture/oracle TDD cho damage `5,2,2,2,2`, HP 137, clean/warm executable+lock+scope, DB/evidence SHA và NDJSON sequence. Ba mutation bỏ damage thừa/HP/lock đều làm suite đỏ đúng case, hoàn nguyên xanh 10/10. Runner thật gọi chính parser đã test và không truyền DSN qua command line. Clean full/warm Unity **BLOCKED** vì cả hai asset lock của người dùng vẫn tồn tại; không xóa lock, không chạy production account, không bắt đầu Task 11/12. |

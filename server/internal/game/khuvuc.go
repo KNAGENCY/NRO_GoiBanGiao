@@ -1,6 +1,7 @@
 package game
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"sync"
@@ -33,6 +34,10 @@ type KhuVuc struct {
 	nguoiChoi []*store.NhanVat
 
 	nguoiTrong map[int64]*nguoiTrongKhuVuc
+	// anhChupDaRoi giu tam ban cuoi cua session bi actor loai vi outbound
+	// error/queue day. KhiDong van xin duoc ban nay de xep luu, roi control
+	// leave don no; id khong nam trong nguoiTrong nen khong tao ghost.
+	anhChupDaRoi map[int64]store.NhanVat
 
 	// quai la danh sach quai dang song trong khu vuc nay (Ke hoach 6 Task 5).
 	// Tao MOT LAN trong MoKhuVuc; sau do CHI luong vongLap duoc doc/ghi (dac ta
@@ -54,21 +59,15 @@ type KhuVuc struct {
 	// truoc) de dieu khien "bay gio" theo y muon, khong sleep.
 	dongHo func() time.Time
 
-	hopThu     chan suKienKhuVuc
-	dung       chan struct{}
-	xong       chan struct{}
-	dungMotLan sync.Once
+	hopThu          chan suKienKhuVuc
+	hopThuDieuKhien chan suKienDieuKhien
+	xong            chan struct{}
+	dungMotLan      sync.Once
+	loiDung         error
 
-	// soLanGuiRoi dem so lan Gui() BO ROI mot su kien vi hop thu day (nhanh
-	// default cua Gui(), duoi day) — Ke hoach 11 Task 2 (dac ta
-	// 2026-07-27-luu-trang-thai-song.md §5, canh bao rieng cua task). TRUOC
-	// Task 2, nhanh do chi ghi slog.Debug roi thoi — muc Debug thuong TAT
-	// trong production nen day la ROI IM LANG THAT SU. Hau qua xau nhat: bo
-	// dinh ky luu (§4 diem A) gui suKienXinAnhChup cho MOI khu vuc de xin anh
-	// chup dem luu; mot khu vuc dang qua tai (hop thu day vi dang xu ly nhieu
-	// su kien chien dau) roi DUNG LUC bi roi -> khu vuc do IM LANG bi bo qua
-	// CA LUOT LUU ma khong ai biet, nguoi choi trong do mat tien do khi sap
-	// dien ra su co.
+	// soLanGuiRoi dem gameplay event best-effort bi bo khi hop thu day. Snapshot,
+	// leave va stop nay di qua hopThuDieuKhien reliable nen khong con nam trong
+	// nhom co the roi nay.
 	//
 	// atomic.Int64 (KHONG PHAI int64 thuong) vi Gui() duoc goi TU NHIEU
 	// goroutine cung luc: moi luong phien (mot goroutine/ket noi) + luong
@@ -82,7 +81,8 @@ type KhuVuc struct {
 // guiTin la phan toi thieu cua mot phien (session) ma actor can de gui goi tin
 // cho client. *mynet.Session thoa man interface nay; test dung phien gia.
 type guiTin interface {
-	Gui(*protocol.Message) error
+	XepGui(*protocol.Message) error
+	DongCham()
 }
 
 // nguoiTrongKhuVuc gan mot nhan vat voi phien mang cua no trong pham vi mot
@@ -241,14 +241,8 @@ func heNguyenToNguoiChoi(lang int16) byte {
 	return heNguyenToTheoLang[lang]
 }
 
-// suKienXinDanhSachQuai la su kien TRUY VAN (khac cac su kien "lam viec" o
-// tren): mot luong BEN NGOAI vongLap (vd luong phien khi dung goi -24 MAP
-// INFO o xuLyClientOk, TRUOC khi nhan vat duoc giao cho actor qua -39) can
-// biet quai hien co trong khu vuc, nhung KHONG duoc doc truc tiep k.quai (dac
-// ta §1.6). Luong do gui su kien nay qua Gui() roi cho tra loi tren traLoi;
-// vongLap la noi DUY NHAT xu ly no va tra ve BAN SAO GIA TRI (con tro moi,
-// KHONG PHAI con tro goc trong k.quai) de ben nhan khong the vo tinh sua
-// trang thai actor tu ben ngoai.
+// Hai su kien truy van duoi day chi con la fallback cho integration test cu
+// tu cap hopThu ma khong BatDau. Runtime dung control mailbox rieng.
 type suKienXinDanhSachQuai struct {
 	traLoi chan []*Quai
 }
@@ -282,16 +276,51 @@ type suKienXinAnhChup struct {
 	traLoi    chan []store.NhanVat
 }
 
+// Control co mailbox rieng, khong the bi gameplay day lam roi. Cac request
+// deu co kenh tra loi buffer 1 de actor khong bao gio cho nguoi goi.
+type suKienDieuKhien interface{ laDieuKhien() }
+
+type dieuKhienXinQuai struct{ traLoi chan []*Quai }
+
+func (dieuKhienXinQuai) laDieuKhien() {}
+
+type dieuKhienXinAnhChup struct {
+	idNhanVat int64
+	traLoi    chan []store.NhanVat
+}
+
+func (dieuKhienXinAnhChup) laDieuKhien() {}
+
+type dieuKhienRa struct {
+	idNhanVat int64
+	xong      chan struct{}
+}
+
+func (dieuKhienRa) laDieuKhien() {}
+
+type dieuKhienDung struct{}
+
+func (dieuKhienDung) laDieuKhien() {}
+
+var (
+	ErrActorChuaBatDau = errors.New("actor chua bat dau")
+	ErrActorDaDung     = errors.New("actor da dung")
+	ErrControlQuaHan   = errors.New("control actor qua han")
+)
+
+const thoiGianChoControl = 100 * time.Millisecond
+
 // MoKhuVuc tao mot khu vuc giu ban do da cho, chua co nguoi choi nao. Quai
 // (Ke hoach 6 Task 5) duoc sinh MOT LAN o day bang taoQuaiMacDinh — day la
 // diem duy nhat gan quai vao mot khu vuc, giu dung nguyen tac "quai thuoc
 // actor, sinh luc MoKhuVuc" cua brief Task 5.
 func MoKhuVuc(bd *BanDo) *KhuVuc {
 	k := &KhuVuc{
-		banDo:      bd,
-		nguoiTrong: make(map[int64]*nguoiTrongKhuVuc),
-		quai:       taoQuaiMacDinh(bd),
-		dongHo:     time.Now,
+		banDo:        bd,
+		nguoiTrong:   make(map[int64]*nguoiTrongKhuVuc),
+		anhChupDaRoi: make(map[int64]store.NhanVat),
+		quai:         taoQuaiMacDinh(bd),
+		dongHo:       time.Now,
 	}
 	// Ke hoach 6 Task 8: khoi tao LanHoiMauCuoi = thoi diem spawn cho MOI con
 	// quai — tranh zero value (nam 1) khien lan kiem hoi mau DAU TIEN cua
@@ -309,26 +338,40 @@ func MoKhuVuc(bd *BanDo) *KhuVuc {
 // BanDo tra ban do cua khu vuc (client can no de dung MAP INFO).
 func (k *KhuVuc) BanDo() *BanDo { return k.banDo }
 
-// DanhSachQuaiSnapshot tra BAN SAO danh sach quai hien co trong khu vuc, AN
-// TOAN goi tu BEN NGOAI vongLap (vd luong phien o xuLyClientOk khi dung goi
-// -24 MAP INFO). Di qua hop thu actor (suKienXinDanhSachQuai) thay vi doc
-// truc tiep k.quai — dung dac ta §1.6 "chi luong vongLap duoc cham trang
-// thai quai". Cho toi da 100ms; qua han (actor da Dung(), hop thu day bat
-// thuong, hoac k.hopThu chua duoc cap phat vi BatDau() chua chay) thi tra ve
-// nil — luong phien khong bi treo, chi gui MAP INFO voi 0 quai (giong hanh
-// vi KH4 cu, khong sap goi).
+// DanhSachQuaiSnapshot tra ban sao qua control mailbox. Ban CoLoi phan biet
+// actor chua bat dau/da dung; wrapper cu giu tuong thich bang cach tra nil.
 func (k *KhuVuc) DanhSachQuaiSnapshot() []*Quai {
+	ban, _ := k.DanhSachQuaiSnapshotCoLoi()
+	return ban
+}
+
+func (k *KhuVuc) DanhSachQuaiSnapshotCoLoi() ([]*Quai, error) {
 	if k.hopThu == nil {
-		return nil // actor chua BatDau() -> khong co hop thu de gui
+		return nil, ErrActorChuaBatDau
 	}
 	traLoi := make(chan []*Quai, 1)
-	k.Gui(suKienXinDanhSachQuai{traLoi: traLoi})
+	// Mot so integration test cu cap phat hopThu bang tay de bom tung event,
+	// khong chay actor. Giu fallback nay cho harness do; runtime BatDau luon
+	// co mailbox control rieng.
+	if k.hopThuDieuKhien == nil {
+		k.Gui(suKienXinDanhSachQuai{traLoi: traLoi})
+		select {
+		case ds := <-traLoi:
+			return ds, nil
+		case <-time.After(100 * time.Millisecond):
+			return nil, ErrActorChuaBatDau
+		}
+	}
+	if err := k.guiDieuKhien(dieuKhienXinQuai{traLoi: traLoi}); err != nil {
+		return nil, err
+	}
 	select {
 	case ds := <-traLoi:
-		return ds
-	case <-time.After(100 * time.Millisecond):
-		slog.Warn("xin danh sach quai qua hop thu actor het gio cho", "mapId", k.banDo.MapID)
-		return nil
+		return ds, nil
+	case <-k.xong:
+		return nil, ErrActorDaDung
+	case <-time.After(thoiGianChoControl):
+		return nil, ErrControlQuaHan
 	}
 }
 
@@ -342,24 +385,73 @@ func (k *KhuVuc) DanhSachQuaiSnapshot() []*Quai {
 // nguoi co ID do (khong tim thay -> nil, dung tinh than "khong tim thay ->
 // im lang" cua cac case suKien... khac trong file nay).
 //
-// Cho toi da 100ms; qua han (actor da Dung(), hop thu day bat thuong, hoac
-// k.hopThu chua duoc cap phat vi BatDau() chua chay) thi tra ve nil — dung
-// nguyen tac actor KHONG BAO GIO CHO O DIA (dac ta §3): ben goi (bo dinh ky
-// luu, xu ly ngat ket noi, nhanh tat may chu) khong duoc treo vo han cho mot
-// actor co the da chet.
+// Runtime di qua control mailbox reliable; ban CoLoi tra loi ro khi actor chua
+// bat dau/da dung. Wrapper cu giu tuong thich cho cac call site chi can slice.
 func (k *KhuVuc) AnhChupNguoiChoi(idNhanVat int64) []store.NhanVat {
+	ban, _ := k.AnhChupNguoiChoiCoLoi(idNhanVat)
+	return ban
+}
+
+func (k *KhuVuc) AnhChupNguoiChoiCoLoi(idNhanVat int64) ([]store.NhanVat, error) {
 	if k.hopThu == nil {
-		return nil // actor chua BatDau() -> khong co hop thu de gui
+		return nil, ErrActorChuaBatDau
 	}
 	traLoi := make(chan []store.NhanVat, 1)
-	k.Gui(suKienXinAnhChup{idNhanVat: idNhanVat, traLoi: traLoi})
+	if k.hopThuDieuKhien == nil {
+		k.Gui(suKienXinAnhChup{idNhanVat: idNhanVat, traLoi: traLoi})
+		select {
+		case ban := <-traLoi:
+			return ban, nil
+		case <-time.After(100 * time.Millisecond):
+			return nil, ErrActorChuaBatDau
+		}
+	}
+	if err := k.guiDieuKhien(dieuKhienXinAnhChup{idNhanVat: idNhanVat, traLoi: traLoi}); err != nil {
+		return nil, err
+	}
 	select {
 	case ban := <-traLoi:
-		return ban
-	case <-time.After(100 * time.Millisecond):
-		slog.Warn("xin anh chup nguoi choi qua hop thu actor het gio cho",
-			"mapId", k.banDo.MapID, "idNhanVat", idNhanVat)
+		return ban, nil
+	case <-k.xong:
+		return nil, ErrActorDaDung
+	case <-time.After(thoiGianChoControl):
+		return nil, ErrControlQuaHan
+	}
+}
+
+// RoiKhuVuc la control reliable cho disconnect: khong dung gameplay mailbox
+// best-effort, va chi tra ve sau khi actor da xoa nguoi khoi map.
+func (k *KhuVuc) RoiKhuVuc(idNhanVat int64) error {
+	xong := make(chan struct{})
+	if err := k.guiDieuKhien(dieuKhienRa{idNhanVat: idNhanVat, xong: xong}); err != nil {
+		return err
+	}
+	select {
+	case <-xong:
 		return nil
+	case <-k.xong:
+		return ErrActorDaDung
+	case <-time.After(thoiGianChoControl):
+		return ErrControlQuaHan
+	}
+}
+
+func (k *KhuVuc) guiDieuKhien(sk suKienDieuKhien) error {
+	if k.hopThuDieuKhien == nil || k.xong == nil {
+		return ErrActorChuaBatDau
+	}
+	select {
+	case <-k.xong:
+		return ErrActorDaDung
+	default:
+	}
+	select {
+	case k.hopThuDieuKhien <- sk:
+		return nil
+	case <-k.xong:
+		return ErrActorDaDung
+	case <-time.After(thoiGianChoControl):
+		return ErrControlQuaHan
 	}
 }
 
@@ -376,7 +468,7 @@ func (k *KhuVuc) SoNguoiChoi() int { return len(k.nguoiChoi) }
 // khien roi chay vongLap trong goroutine rieng. Goi mot lan truoc khi dung Gui.
 func (k *KhuVuc) BatDau() {
 	k.hopThu = make(chan suKienKhuVuc, 256)
-	k.dung = make(chan struct{})
+	k.hopThuDieuKhien = make(chan suKienDieuKhien, 16)
 	k.xong = make(chan struct{})
 	go k.vongLap()
 }
@@ -390,15 +482,88 @@ func (k *KhuVuc) vongLap() {
 	defer close(k.xong)
 
 	for {
+		// Drain control truoc gameplay. Vong default nay tranh mot mailbox
+		// gameplay luon day lam snapshot/leave/stop bi doi vo han.
 		select {
+		case sk := <-k.hopThuDieuKhien:
+			if k.xuLyDieuKhien(sk) {
+				return
+			}
+			continue
+		default:
+		}
+		select {
+		case sk := <-k.hopThuDieuKhien:
+			if k.xuLyDieuKhien(sk) {
+				return
+			}
 		case sk := <-k.hopThu:
 			k.xuLy(sk)
 		case <-ticker.C:
 			k.nhipTim()
-		case <-k.dung:
+		}
+	}
+}
+
+func (k *KhuVuc) xuLyDieuKhien(sk suKienDieuKhien) bool {
+	switch sk := sk.(type) {
+	case dieuKhienXinQuai:
+		k.xuLyGameplayDaXepTruoc()
+		sk.traLoi <- k.saoQuai()
+	case dieuKhienXinAnhChup:
+		k.xuLyGameplayDaXepTruoc()
+		sk.traLoi <- k.saoNguoiChoi(sk.idNhanVat)
+	case dieuKhienRa:
+		k.xuLyGameplayDaXepTruoc()
+		k.xuLy(suKienRa{idNhanVat: sk.idNhanVat})
+		delete(k.anhChupDaRoi, sk.idNhanVat)
+		close(sk.xong)
+	case dieuKhienDung:
+		return true
+	}
+	return false
+}
+
+// Control duoc uu tien lay khoi mailbox rieng, nhung snapshot/leave van phai
+// thay cac gameplay event da enqueue TRUOC request. Chot so luong tai thoi
+// diem bat dau de khong bi mot dong gameplay moi den lien tuc lam doi control
+// vo han.
+func (k *KhuVuc) xuLyGameplayDaXepTruoc() {
+	soLuong := len(k.hopThu)
+	for i := 0; i < soLuong; i++ {
+		select {
+		case sk := <-k.hopThu:
+			k.xuLy(sk)
+		default:
 			return
 		}
 	}
+}
+
+func (k *KhuVuc) saoQuai() []*Quai {
+	ban := make([]*Quai, len(k.quai))
+	for i, q := range k.quai {
+		cp := *q
+		ban[i] = &cp
+	}
+	return ban
+}
+
+func (k *KhuVuc) saoNguoiChoi(idNhanVat int64) []store.NhanVat {
+	if idNhanVat == 0 {
+		ban := make([]store.NhanVat, 0, len(k.nguoiTrong))
+		for _, nguoi := range k.nguoiTrong {
+			ban = append(ban, *nguoi.nv)
+		}
+		return ban
+	}
+	if nguoi, co := k.nguoiTrong[idNhanVat]; co {
+		return []store.NhanVat{*nguoi.nv}
+	}
+	if ban, co := k.anhChupDaRoi[idNhanVat]; co {
+		return []store.NhanVat{ban}
+	}
+	return nil
 }
 
 // xuLy xu ly mot su kien lay tu hop thu — day la NOI DUY NHAT doc/ghi trang
@@ -415,6 +580,7 @@ func (k *KhuVuc) vongLap() {
 func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 	switch sk := sk.(type) {
 	case suKienVao:
+		delete(k.anhChupDaRoi, sk.nv.ID)
 		// 1) Gui -5 cua TUNG nguoi CU cho nguoi MOI (de nguoi moi thay nguoi cu).
 		//    Lam TRUOC khi them nguoi moi vao map, de nguoi moi khong tu thay minh.
 		for _, cu := range k.nguoiTrong {
@@ -423,8 +589,10 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 				slog.Error("dung goi -5 nguoi cu that bai", "id", cu.nv.ID, "loi", err)
 				continue
 			}
-			if err := sk.phien.Gui(m); err != nil {
+			if err := sk.phien.XepGui(m); err != nil {
 				slog.Warn("gui -5 nguoi cu cho nguoi moi that bai", "loi", err)
+				sk.phien.DongCham()
+				return
 			}
 		}
 		// 2) Them nguoi moi vao khu vuc.
@@ -841,8 +1009,10 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 
 		// -16 RIENG chinh chu TRUOC, roi -30/15 CA KHU VUC — dung thu tu
 		// chuoi cua dac ta §6.4.
-		if err := nguoi.phien.Gui(goiHoiSinhChinhChu()); err != nil {
+		if err := nguoi.phien.XepGui(goiHoiSinhChinhChu()); err != nil {
 			slog.Warn("gui -16 (xac nhan hoi sinh) that bai", "id", sk.idNhanVat, "loi", err)
+			k.loaiNguoiLoiGui(sk.idNhanVat)
+			return
 		}
 		k.phatChoCaKhuVuc(goiAiDoHoiSinh(
 			int32(nguoi.nv.ID), nguoi.nv.HpHienTai, nguoi.nv.ChakraHienTai,
@@ -855,12 +1025,7 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 		// luong khac va co the giu con tro do lau hon nhip actor tiep theo
 		// (dac ta §1.6). traLoi co buffer 1 nen gui khong bao gio block du
 		// ben goi da het gio cho va bo di.
-		ban := make([]*Quai, len(k.quai))
-		for i, q := range k.quai {
-			cp := *q
-			ban[i] = &cp
-		}
-		sk.traLoi <- ban
+		sk.traLoi <- k.saoQuai()
 
 	case suKienXinAnhChup:
 		// Ke hoach 11 Task 2: SAO GIA TRI tung nguoi (*nguoi.nv, KHONG PHAI
@@ -876,30 +1041,23 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 		//
 		// traLoi co buffer 1 nen gui khong bao gio block du ben goi da het
 		// gio cho va bo di — dung tinh than voi suKienXinDanhSachQuai.
-		if sk.idNhanVat == 0 {
-			ban := make([]store.NhanVat, 0, len(k.nguoiTrong))
-			for _, nguoi := range k.nguoiTrong {
-				ban = append(ban, *nguoi.nv)
-			}
-			sk.traLoi <- ban
-		} else if nguoi, co := k.nguoiTrong[sk.idNhanVat]; co {
-			sk.traLoi <- []store.NhanVat{*nguoi.nv}
-		} else {
-			sk.traLoi <- nil // khong tim thay -> nil, dung tinh than "khong tim thay" cua cac case khac trong file nay
-		}
+		sk.traLoi <- k.saoNguoiChoi(sk.idNhanVat)
 	}
 }
 
 // phatChoNguoiKhac gui goi tin `m` cho MOI nguoi trong khu vuc TRU nguoi co id `truId`.
 func (k *KhuVuc) phatChoNguoiKhac(truId int64, m *protocol.Message) {
+	var loi []int64
 	for id, nguoi := range k.nguoiTrong {
 		if id == truId {
 			continue
 		}
-		if err := nguoi.phien.Gui(m); err != nil {
+		if err := nguoi.phien.XepGui(m); err != nil {
 			slog.Warn("phat goi tin that bai", "id", id, "loi", err)
+			loi = append(loi, id)
 		}
 	}
+	k.loaiNhieuNguoiLoiGui(loi)
 }
 
 // phatChoCaKhuVuc gui goi tin `m` cho TOAN BO nguoi dang trong khu vuc, KE CA
@@ -909,9 +1067,54 @@ func (k *KhuVuc) phatChoNguoiKhac(truId int64, m *protocol.Message) {
 // danh cua minh — khac han goi di chuyen (-7) noi client tu ve chuyen dong
 // cua chinh minh nen khong can nhan lai.
 func (k *KhuVuc) phatChoCaKhuVuc(m *protocol.Message) {
+	var loi []int64
 	for id, nguoi := range k.nguoiTrong {
-		if err := nguoi.phien.Gui(m); err != nil {
+		if err := nguoi.phien.XepGui(m); err != nil {
 			slog.Warn("phat goi tin (ca khu vuc) that bai", "id", id, "loi", err)
+			loi = append(loi, id)
+		}
+	}
+	k.loaiNhieuNguoiLoiGui(loi)
+}
+
+func (k *KhuVuc) loaiNguoiLoiGui(id int64) {
+	k.loaiNhieuNguoiLoiGui([]int64{id})
+}
+
+// loaiNhieuNguoiLoiGui chay trong actor: xoa state TRUOC, roi moi DongCham va
+// bao -6 cho nhung nguoi con lai. Neu mot nguoi con lai cung day queue trong
+// luc nhan -6, lap tiep cho toi khi khong con session hong; khong goroutine
+// phu, khong ghi socket.
+func (k *KhuVuc) loaiNhieuNguoiLoiGui(ids []int64) {
+	for len(ids) > 0 {
+		daLoai := make([]int64, 0, len(ids))
+		for _, id := range ids {
+			nguoi, co := k.nguoiTrong[id]
+			if !co {
+				continue
+			}
+			k.anhChupDaRoi[id] = *nguoi.nv
+			delete(k.nguoiTrong, id)
+			nguoi.phien.DongCham()
+			daLoai = append(daLoai, id)
+		}
+		if len(daLoai) == 0 {
+			return
+		}
+
+		tiep := make(map[int64]struct{})
+		for _, idDaLoai := range daLoai {
+			m := goiRoiKhuVuc(idDaLoai)
+			for idConLai, nguoi := range k.nguoiTrong {
+				if err := nguoi.phien.XepGui(m); err != nil {
+					slog.Warn("gui -6 xoa client cham that bai", "id", idConLai, "loi", err)
+					tiep[idConLai] = struct{}{}
+				}
+			}
+		}
+		ids = ids[:0]
+		for id := range tiep {
+			ids = append(ids, id)
 		}
 	}
 }
@@ -1088,8 +1291,10 @@ func (k *KhuVuc) aiQuai(q *Quai, nguoi []*nguoiTrongKhuVuc, bayGio time.Time) {
 	// mot loai tru nan nhan, mot gui thua cho nguoi khac). Gui THANG qua
 	// phien cua chinh nan nhan, giong cach case suKienVao gui -5 rieng cho
 	// tung nguoi cu (xem k.xuLy o tren).
-	if err := mucTieu.phien.Gui(goiQuaiDanhTrungMinh(q.Id, satThuong)); err != nil {
+	if err := mucTieu.phien.XepGui(goiQuaiDanhTrungMinh(q.Id, satThuong)); err != nil {
 		slog.Warn("gui -11 (quai danh trung minh) that bai", "idNanNhan", mucTieu.nv.ID, "loi", err)
+		k.loaiNguoiLoiGui(mucTieu.nv.ID)
+		return
 	}
 	// -10: NGUOI KHAC trong khu vuc, khong phai nan nhan (dac ta §3.3 cot
 	// "Gui cho": "Nguoi khac trong khu vuc"). phatChoNguoiKhac da co san (Ke
@@ -1125,8 +1330,10 @@ func (k *KhuVuc) xuLyNguoiChoiChet(nguoi *nguoiTrongKhuVuc) {
 	x := int16(nguoi.nv.ViTriX)
 	y := int16(nguoi.nv.ViTriY)
 
-	if err := nguoi.phien.Gui(goiNguoiChet(0, x, y)); err != nil {
+	if err := nguoi.phien.XepGui(goiNguoiChet(0, x, y)); err != nil {
 		slog.Warn("gui -17 (ban da chet) that bai", "id", nguoi.nv.ID, "loi", err)
+		k.loaiNguoiLoiGui(nguoi.nv.ID)
+		return
 	}
 	k.phatChoNguoiKhac(nguoi.nv.ID, goiAiDoChet(int32(nguoi.nv.ID), 0, x, y))
 }
@@ -1142,9 +1349,16 @@ func (k *KhuVuc) xuLyNguoiChoiChet(nguoi *nguoiTrongKhuVuc) {
 // khi doc log. Neu actor da Dung() thi cung bo goi an toan (khong panic, vi
 // hopThu khong bao gio bi close — chi kenh dung bi close).
 func (k *KhuVuc) Gui(sk suKienKhuVuc) {
+	if k.xong != nil {
+		select {
+		case <-k.xong:
+			return
+		default:
+		}
+	}
 	select {
 	case k.hopThu <- sk:
-	case <-k.dung:
+	case <-k.xong:
 		// actor da dung, bo su kien.
 	default:
 		tong := k.soLanGuiRoi.Add(1)
@@ -1153,12 +1367,20 @@ func (k *KhuVuc) Gui(sk suKienKhuVuc) {
 	}
 }
 
-// Dung dong actor mot cach sach: dong kenh dung (mot lan, an toan khi goi
-// nhieu lan) roi cho vongLap thoat han truoc khi tra ve — dam bao khong ro
-// goroutine.
-func (k *KhuVuc) Dung() {
+// Dung dong actor mot cach sach va tra loi ro neu control khong the den actor
+// trong han. KhiDong va don dep luc tat may chu khong duoc ket vinh vien chi
+// vi actor da ket logic hay mailbox control bi day.
+func (k *KhuVuc) Dung() error {
 	k.dungMotLan.Do(func() {
-		close(k.dung)
+		if err := k.guiDieuKhien(dieuKhienDung{}); err != nil {
+			k.loiDung = err
+			return
+		}
+		select {
+		case <-k.xong:
+		case <-time.After(thoiGianChoControl):
+			k.loiDung = ErrControlQuaHan
+		}
 	})
-	<-k.xong
+	return k.loiDung
 }

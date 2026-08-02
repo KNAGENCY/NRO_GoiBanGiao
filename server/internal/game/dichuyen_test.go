@@ -9,7 +9,7 @@ import (
 // TestKiemDiChuyen kiểm tra hàm kiemDiChuyenHopLe: di chuyển hợp lệ trong biên
 // và khoảng cách mỗi bước ≤ NguongBuoc (500). Khoảng cách = Euclid (so bình phương).
 func TestKiemDiChuyen(t *testing.T) {
-	bd := TimBanDo(1)
+	bd := TimBanDo(2) // map khong co artifact collision: giu test cu cho nguong chung.
 
 	// Bước ngắn, hợp lệ
 	if !kiemDiChuyenHopLe(bd, 100, 100, 300, 100) {
@@ -44,6 +44,16 @@ func TestKiemDiChuyen(t *testing.T) {
 	// Đứng yên (cuX==toX && cuY==toY), khoảng cách 0 ≤ 500, hợp lệ
 	if !kiemDiChuyenHopLe(bd, 100, 100, 100, 100) {
 		t.Error("dung yen phai true")
+	}
+}
+
+func TestKiemDiChuyenLangLaKhongThoatKhoiCollisionGrid(t *testing.T) {
+	bd := TimBanDo(1)
+	if bd == nil {
+		t.Fatal("thiếu map 1 Làng Lá")
+	}
+	if kiemDiChuyenHopLe(bd, 100, 384, 121, 384) {
+		t.Fatal("map 1 không được cho bước từ spawn ra ngoài collision grid")
 	}
 }
 

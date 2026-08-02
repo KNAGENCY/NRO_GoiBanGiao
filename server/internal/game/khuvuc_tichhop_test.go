@@ -10,7 +10,7 @@ package game
 // xong map) -> moi ben thay nguoi kia qua goi -5 -> A gui -7 (di chuyen trong
 // nguong) -> B nhan goi -7 chuyen tiep, A KHONG nhan lai goi cua chinh minh.
 //
-// Ca "vuot nguong bi chan" va "roi di phat -6" CO CHU DICH de danh cho Task 8
+// Ca "ngoai collision bi chan" va "roi di phat -6" CO CHU DICH de danh cho Task 8
 // (xem ghi chu cuoi task-7-brief-kh5.md) — khong lap lai o day.
 
 import (
@@ -320,8 +320,8 @@ func TestTichHop_HaiNguoiThayNhauVaDiChuyen(t *testing.T) {
 	// A di chuyen toi vi tri gan (trong nguong 500, xem NguongBuoc trong
 	// dichuyen.go) -> B phai nhan -7 [idA][toX][toY]; A KHONG duoc nhan lai
 	// goi cua chinh minh (client tu ve chuyen dong).
-	toX := int16(nvA.ViTriX) + 50
-	toY := int16(nvA.ViTriY) + 16
+	toX := int16(nvA.ViTriX) - 10
+	toY := int16(nvA.ViTriY) + 10
 	clA.guiDiChuyen(toX, toY)
 
 	goiDiChuyenChoB := clB.doiGoiLenh(t, -7)
@@ -341,15 +341,15 @@ func TestTichHop_HaiNguoiThayNhauVaDiChuyen(t *testing.T) {
 	}
 }
 
-// TestTichHop_DiChuyenVuotNguongBiChan la kich ban 1 cua Task 8: hai phien
+// TestTichHop_DiChuyenNgoaiCollisionBiChan la kich ban 1 cua Task 8: hai phien
 // THAT (giong het TestTichHop_HaiNguoiThayNhauVaDiChuyen) da thay nhau qua
-// -5, roi A gui -7 voi dich CACH vi tri hien tai > NguongBuoc (500, xem
-// dichuyen.go) — actor (kiemDiChuyenHopLe trong khuvuc.go, case
+// -5, roi A gui -7 voi dich nam ngoai collision artifact cua map 1. Actor
+// (kiemDiChuyenHopLe trong khuvuc.go, case
 // suKienDiChuyen) phai BO goi nay va KHONG phat cho ai, nen B khong duoc
 // nhan goi -7 nao trong han cho im lang. Sau do A gui tiep MOT -7 HOP LE
 // (dich gan, trong nguong) de chung minh ket noi VAN SONG BINH THUONG — chi
 // goi bat hop le bi bo, may chu khong ngat ket noi vi no.
-func TestTichHop_DiChuyenVuotNguongBiChan(t *testing.T) {
+func TestTichHop_DiChuyenNgoaiCollisionBiChan(t *testing.T) {
 	khoThat := moKhoThatChoTest(t)
 	ctx := context.Background()
 
@@ -397,12 +397,8 @@ func TestTichHop_DiChuyenVuotNguongBiChan(t *testing.T) {
 	goiChoA := clA.doiGoiLenh(t, -5)
 	khangDinhIdTrongGoi(t, goiChoA, nvB.ID)
 
-	// A gui -7 toi dich CACH vi tri hien tai RAT XA (>> NguongBuoc = 500) —
-	// van trong bien ban do [0, BienRongToiDa=4096] nen khong bi chan boi kiem
-	// bien, CHI bi chan boi kiem khoang cach. Dung toa do co dinh xa han (2000,
-	// 2000) thay vi cong tuong doi vao nvA.ViTriX/Y nhu test hop le o tren, de
-	// khoang cach chac chan >> 500 bat ke spawn cua lang 0 nam o dau trong
-	// bien 4096 (ViTriXKhoiDau=100 trong TestTaoRoiDangNhapLai_ThayNhanVat).
+	// A gui -7 toi (2000,2000), nam ngoai footprint collision 120x408 cua map
+	// 1. Collision artifact la nguon bien authoritative, nen actor phai bo goi.
 	toXQuaXa := int16(2000)
 	toYQuaXa := int16(2000)
 	clA.guiDiChuyen(toXQuaXa, toYQuaXa)
@@ -411,20 +407,20 @@ func TestTichHop_DiChuyenVuotNguongBiChan(t *testing.T) {
 	// bat hop le TRUOC khi phat (return som trong case suKienDiChuyen), nen
 	// khong ai — ke ca B — nhan duoc gi.
 	if !clB.khongConGoiGi(t) {
-		t.Fatal("A gui -7 vuot nguong buoc -> B KHONG duoc nhan goi -7 nao (may chu phai bo goi bat hop le)")
+		t.Fatal("A gui -7 ngoai collision -> B KHONG duoc nhan goi -7 nao (may chu phai bo goi bat hop le)")
 	}
 
 	// Chung minh ket noi CUA A VAN SONG BINH THUONG (khong bi ngat vi goi bat
 	// hop le): gui tiep MOT -7 HOP LE (dich gan, trong nguong) -> B phai nhan
 	// dung goi -7 chuyen tiep nhu kich ban duong hanh phuc.
-	toXHopLe := int16(nvA.ViTriX) + 40
+	toXHopLe := int16(nvA.ViTriX) - 10
 	toYHopLe := int16(nvA.ViTriY) + 10
 	clA.guiDiChuyen(toXHopLe, toYHopLe)
 
 	goiDiChuyenChoB := clB.doiGoiLenh(t, -7)
 	r := protocol.NewReader(goiDiChuyenChoB.Data)
 	if id, errID := r.Int(); errID != nil || id != int32(nvA.ID) {
-		t.Fatalf("id trong goi -7 (hop le, sau khi goi vuot nguong bi bo) = %d (loi %v), mong doi %d", id, errID, nvA.ID)
+		t.Fatalf("id trong goi -7 (hop le, sau khi goi ngoai collision bi bo) = %d (loi %v), mong doi %d", id, errID, nvA.ID)
 	}
 	if x, errX := r.Short(); errX != nil || x != toXHopLe {
 		t.Fatalf("toX trong goi -7 hop le = %d (loi %v), mong doi %d", x, errX, toXHopLe)
@@ -1068,10 +1064,10 @@ func TestTichHop_DanhQuaiVuotTamVanPhatGoiChiMangFalse(t *testing.T) {
 		t.Fatal("chon chieu (34) khong duoc phat goi tin nao NGOAI quai AI")
 	}
 
-	// A di chuyen tu (100,384) toi (300,384) — hop le (khoang cach 200 <=
-	// NguongBuoc 500). Quai Id=0 mac dinh o (160,384) -> khoang cach SAU khi
-	// di chuyen = |300-160| = 140 > tam can chien 100 -> vuot tam.
-	toXXa := int16(nvA.ViTriX) + 200
+	// A di chuyen tu (100,384) toi (0,384), van nam trong collision grid.
+	// Quai Id=0 mac dinh o (160,384) -> khoang cach SAU khi di chuyen
+	// la |0-160| = 160 > tam can chien 100 -> vuot tam.
+	toXXa := int16(0)
 	toYXa := int16(nvA.ViTriY)
 	clA.guiDiChuyen(toXXa, toYXa)
 	// -7 chi phat cho NGUOI KHAC (client tu ve chuyen dong cua chinh minh) —

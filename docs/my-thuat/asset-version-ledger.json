@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "runtime_slice_version": 0,
+  "data_version": 0,
+  "map_version": 0,
+  "resource_version": 0,
+  "note": "Mốc trước Task 1; manifest đầu tiên phải tăng runtime_slice_version."
+}

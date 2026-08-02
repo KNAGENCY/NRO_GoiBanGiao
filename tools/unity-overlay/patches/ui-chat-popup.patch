@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "replacements": [
+    {
+      "before": "PopUp.paintPopUp(g, num, num2, num3, num4, 16777215, isButton: false);",
+      "after": "if (!NroE2E.NroUiOverlay.PaintDialogFrame(g, num, num2, num3, num4))\n    \t\t{\n    \t\t\tPopUp.paintPopUp(g, num, num2, num3, num4, 16777215, isButton: false);\n    \t\t}"
+    },
+    {
+      "before": "SmallImage.drawSmallImage(g, c.avatar, cx + 14, cy + num5, 0, StaticObj.BOTTOM_LEFT);",
+      "after": "SmallImage.drawSmallImage(g, c.avatar, cx + 14, cy + num5, 0, StaticObj.BOTTOM_LEFT);\n    \t\t\tNroE2E.NroUiOverlay.PaintAvatarFrame(g, cx + 14, cy + num5);"
+    }
+  ]
+}

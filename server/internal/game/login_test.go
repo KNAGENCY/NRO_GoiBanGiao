@@ -988,6 +988,50 @@ func TestVaoKhuVucLanHaiKhongPhatGoiTrung(t *testing.T) {
 	}
 }
 
+func TestMoNPCXepGuiKhongChanDocLenhVaGiuFIFO(t *testing.T) {
+	b := NewBoXuLy(&khoGia{}, nil)
+	b.nhanVat = &store.NhanVat{ID: 7, MapID: 1}
+	fClient, dong := dungPhienThat(t, b)
+	defer dong()
+
+	w := protocol.NewWriter()
+	w.Short(0)
+	if err := fClient.WriteMessage(protocol.NewMessage(lenhMoNPC, w)); err != nil {
+		t.Fatalf("gui NPC lan 1: %v", err)
+	}
+	// net.Pipe khong buffer: writer session dang ket o output vi client chua doc.
+	// Lenh thu hai van phai duoc handler nhan va xep hang, khong cho socket output.
+	time.Sleep(20 * time.Millisecond)
+	xong := make(chan error, 1)
+	go func() { xong <- fClient.WriteMessage(protocol.NewMessage(lenhMoNPC, w)) }()
+	select {
+	case err := <-xong:
+		if err != nil {
+			t.Fatalf("gui NPC lan 2: %v", err)
+		}
+	case <-time.After(250 * time.Millisecond):
+		t.Fatal("handler NPC bi chan boi client khong doc; phai dung XepGui")
+	}
+	for i := 0; i < 2; i++ {
+		m := docMotGoi(t, fClient)
+		if m.Command != 32 {
+			t.Fatalf("goi NPC #%d command=%d", i, m.Command)
+		}
+		if !bytes.Equal(m.Data, mustNPCData(t)) {
+			t.Fatalf("goi NPC #%d khong dung FIFO/exact", i)
+		}
+	}
+}
+
+func mustNPCData(t *testing.T) []byte {
+	t.Helper()
+	m, err := goiMoNPC(0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return m.Data
+}
+
 // TestXuLyChonChieuGuiSuKienKhongGhiThang la kiem chung QUAN TRONG cho ky
 // luat actor (dac ta §3.2 + brief KH6 Task 2): xuLyChonChieu (luong phien) CHI
 // duoc gui su kien vao hop thu actor, TUYET DOI KHONG tu tra ChieuCuaLang/ghi
@@ -1090,10 +1134,10 @@ func TestKhiDongLuuViTriMoiNhatKhiDaVaoKhuVuc(t *testing.T) {
 	k := MoKhuVuc(TimBanDo(1))
 	k.quai = nil // tat AI quai (dung tinh than moSoKhuVucKhongQuaiMacDinh, khuvuc_tichhop_test.go): test nay chi kiem VI TRI, khong de quai xen vao gay nhieu ngoai y muon
 	k.BatDau()
-	t.Cleanup(k.Dung)
+	t.Cleanup(func() { _ = k.Dung() })
 
 	viTriLucVaoX, viTriLucVaoY := int32(100), int32(100)
-	viTriGhimCungX, viTriGhimCungY := int16(300), int16(300) // cach (100,100) ~283 don vi < NguongBuoc=500 (dichuyen.go) -> hop le
+	viTriGhimCungX, viTriGhimCungY := int16(110), int16(110) // nam trong footprint collision 120x408 cua map 1
 
 	nv := &store.NhanVat{ID: 55, Ten: "RoiKhuVuc", Lang: 0, MapID: 1, ViTriX: viTriLucVaoX, ViTriY: viTriLucVaoY}
 	k.Gui(suKienVao{nv: nv, phien: &phienGiaKhuVuc{}})
@@ -1130,6 +1174,39 @@ func TestKhiDongLuuViTriMoiNhatKhiDaVaoKhuVuc(t *testing.T) {
 	banSau := k.AnhChupNguoiChoi(nv.ID)
 	if len(banSau) != 0 {
 		t.Fatalf("sau KhiDong, AnhChupNguoiChoi(%d) van tra %d ban — actor le ra da xoa nguoi nay khoi k.nguoiTrong (case suKienRa, khuvuc.go)", nv.ID, len(banSau))
+	}
+}
+
+// TestKhiDongSnapshotVaLeaveKhongRoiKhiGameplayDay bat hoi quy dua hai control
+// event nay ve k.Gui best-effort: mailbox day se lam mat ban luu va ghost.
+func TestKhiDongSnapshotVaLeaveKhongRoiKhiGameplayDay(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	nv := &store.NhanVat{ID: 56, Ten: "MailboxDay", MapID: 1, ViTriX: 123, ViTriY: 384}
+	k.xuLy(suKienVao{nv: nv, phien: &phienGiaKhuVuc{}})
+
+	k.hopThu = make(chan suKienKhuVuc, 256)
+	k.hopThuDieuKhien = make(chan suKienDieuKhien, 16)
+	k.xong = make(chan struct{})
+	for i := 0; i < cap(k.hopThu); i++ {
+		k.hopThu <- suKienRa{idNhanVat: 999}
+	}
+	go k.vongLap()
+	t.Cleanup(func() { _ = k.Dung() })
+
+	ghiGia := &ghiKhiRoiGia{}
+	b := &BoXuLy{khuVuc: k, nhanVat: nv, daVaoKhuVuc: true, thoGhi: ghiGia}
+	b.KhiDong()
+
+	nhan := ghiGia.banDaNhan()
+	if len(nhan) != 1 || nhan[0].ID != nv.ID || nhan[0].ViTriX != 123 {
+		t.Fatalf("snapshot khi gameplay day = %+v, mong dung ban moi nhat cua %d", nhan, nv.ID)
+	}
+	banSau, err := k.AnhChupNguoiChoiCoLoi(nv.ID)
+	if err != nil {
+		t.Fatalf("probe actor sau KhiDong: %v", err)
+	}
+	if len(banSau) != 0 {
+		t.Fatalf("con ghost sau KhiDong: %+v", banSau)
 	}
 }
 

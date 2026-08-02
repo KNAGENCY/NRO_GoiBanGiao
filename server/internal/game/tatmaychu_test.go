@@ -2,11 +2,34 @@ package game
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
 	"nroserver/internal/store"
 )
+
+// TestTatMayChuTraLoiKhiActorKhongDungDuoc bao ve hop dong tat may chu: neu
+// actor khong con tieu thu control, TatMayChu khong duoc bao thanh cong trong
+// khi actor van song. Dot bien bo qua loi DungTatCa trong TatMayChu phai lam
+// test nay do.
+func TestTatMayChuTraLoiKhiActorKhongDungDuoc(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	// Mo phong actor ket logic: mailbox da duoc cap phat nhung khong co
+	// vongLap nao doc no, nen Dung phai het han va actor van chua dung.
+	k.hopThu = make(chan suKienKhuVuc, 1)
+	k.hopThuDieuKhien = make(chan suKienDieuKhien, 1)
+	k.xong = make(chan struct{})
+	s := &SoKhuVuc{theoMap: map[int32]*KhuVuc{1: k}}
+	tg := MoThoGhi(&khoLuuGia{}, 1)
+
+	ctx, huy := context.WithTimeout(context.Background(), time.Second)
+	defer huy()
+	err := TatMayChu(ctx, s, tg)
+	if !errors.Is(err, ErrControlQuaHan) {
+		t.Fatalf("TatMayChu khi actor ket = %v, mong ErrControlQuaHan", err)
+	}
+}
 
 // TestTatMayChuLuuTruocKhiDungKhuVuc la test CHINH cua Task 6 diem A (brief
 // Step 1): co nguoi trong khu vuc -> goi TatMayChu -> kho gia (thong qua
@@ -21,7 +44,7 @@ import (
 func TestTatMayChuLuuTruocKhiDungKhuVuc(t *testing.T) {
 	k := MoKhuVuc(TimBanDo(1))
 	k.BatDau()
-	t.Cleanup(k.Dung) // phong ho: neu mot assert Fatal giua chung, actor van duoc dung sach
+	t.Cleanup(func() { _ = k.Dung() }) // phong ho: neu mot assert Fatal giua chung, actor van duoc dung sach
 
 	nv := &store.NhanVat{
 		ID: 777, Ten: "Obito", MapID: 1,
@@ -78,7 +101,7 @@ func TestTatMayChuLuuTruocKhiDungKhuVuc(t *testing.T) {
 func TestTatMayChuVanDungKhuVucKhiHetGioLuu(t *testing.T) {
 	k := MoKhuVuc(TimBanDo(1))
 	k.BatDau()
-	t.Cleanup(k.Dung)
+	t.Cleanup(func() { _ = k.Dung() })
 	s := &SoKhuVuc{theoMap: map[int32]*KhuVuc{1: k}}
 
 	kg := &khoLuuGia{doTre: 2 * time.Second} // kho gia CHAM hon nhieu so voi han gio ctx duoi day

@@ -12,23 +12,30 @@ import (
 	"nroserver/internal/protocol"
 )
 
-// duLieuPart: du lieu sprite nhan vat (dau/than/chan). Day la PLACEHOLDER cua
-// ban Dragon Ball cu — nhan vat hien ra bang sprite cu; thay bang part Naruto
-// khi duong ong my thuat giao. Client ve nhan vat bang parts[head/body/leg]
-// KHONG kiem bien, nen part rong = sap khi ve (Ke hoach 4). File nhung phai phu
-// du chi so head/body/leg cua moi nhan vat -> forward nguyen file cu la an toan.
+// Năm runtime dưới đây được chép nguyên từ một build đã khóa SHA. Không dựng lại
+// trong Go vì chỉ cần lệch một byte là server/client dùng hai thế giới khác nhau.
 //
-//go:embed part.bin
+//go:embed assets/part.bin
 var duLieuPart []byte
 
-// Phien ban du lieu tinh cua ban Naruto. PHAI khac ban Dragon Ball cu
-// (vsData=10, vsMap=2, vsSkill=1, vsItem=4) de client khong dung cache cu — nhat
-// la vsSkill != 1 de khong dung cache 3 lop cu. 20 la gia tri tuy chon != cu va
-// != 0. Bump khi doi noi dung tuong ung o cac ke hoach sau.
+//go:embed assets/skill.bin
+var duLieuSkill []byte
+
+//go:embed assets/map-1-collision.bin
+var duLieuCollision []byte
+
+//go:embed assets/catalog.json
+var duLieuCatalog []byte
+
+//go:embed assets/asset-lock.json
+var duLieuAssetLock []byte
+
+// Ba version runtime phải bằng đúng asset-lock, không còn là số chọn tay. Item
+// chưa thuộc lát cắt artifact nên giữ mốc Naruto hiện hành của server.
 const (
-	vsData  byte = 20
-	vsMap   byte = 20
-	vsSkill byte = 20
+	vsData  byte = 21
+	vsMap   byte = 22
+	vsSkill byte = 21
 	vsItem  byte = 20
 )
 
@@ -59,10 +66,8 @@ func goiVersionGame() *protocol.Message {
 	return protocol.NewMessage(lenhKhongTrenBanDo, w)
 }
 
-// goiCatalogData dung goi -87: vsData roi 6 blob (dart/arrow/effect/image/part/
-// skill) theo dung thu tu. Chi part co noi dung (du lieu sprite nhan vat); 5 blob
-// kia rong (do dai 2 = mot short 0). Client chi LUU raw vao RMS, khong parse ngay
-// — loi part chi lo khi VE nhan vat (Ke hoach 4). Xem tai lieu giao thuc §3.
+// goiCatalogData dùng gói -87: vsData rồi 6 blob đúng thứ tự. Part và skill là
+// byte artifact thật; dart/arrow/effect/image chưa dùng nên là count=0 hợp lệ.
 func goiCatalogData() *protocol.Message {
 	w := protocol.NewWriter()
 	w.Byte(vsData)
@@ -77,7 +82,8 @@ func goiCatalogData() *protocol.Message {
 	blobRong()                    // image
 	w.Int(int32(len(duLieuPart))) // part: do dai that
 	w.ThemMang(duLieuPart)        // part: noi dung
-	blobRong()                    // skill
+	w.Int(int32(len(duLieuSkill)))
+	w.ThemMang(duLieuSkill)
 	return protocol.NewMessage(lenhDuLieu, w)
 }
 
@@ -108,15 +114,28 @@ func goiCatalogSkill() (*protocol.Message, error) {
 	return protocol.NewMessage(lenhKhongTrenBanDo, w), nil
 }
 
-// goiCatalogMap dung goi -28/6 RONG: 0 map, 0 npc, 0 mob. Du de qua bat tay;
-// noi dung map/npc/mob that se them o cac ke hoach sau. Xem tai lieu §4.
 func goiCatalogMap() *protocol.Message {
 	w := protocol.NewWriter()
 	w.Byte(lenhConCatalogMap) // 6
 	w.Byte(vsMap)
-	w.Byte(0) // countMap
-	w.Byte(0) // countNpc
-	w.Byte(0) // countMob
+	c := catalogLangLa
+	w.Byte(byte(len(c.Maps)))
+	for _, banDo := range c.Maps {
+		_ = w.UTF(banDo.Name)
+	}
+	w.Byte(1)
+	_ = w.UTF(c.NPC.Name)
+	w.Short(c.NPC.Head)
+	w.Short(c.NPC.Body)
+	w.Short(c.NPC.Leg)
+	w.Byte(0)
+	w.Byte(1)
+	w.Byte(0)
+	_ = w.UTF(c.Mob.Name)
+	w.Int(c.Mob.HP)
+	w.Byte(c.Mob.Range)
+	w.Byte(c.Mob.Speed)
+	w.Byte(c.Mob.Dart)
 	return protocol.NewMessage(lenhKhongTrenBanDo, w)
 }
 

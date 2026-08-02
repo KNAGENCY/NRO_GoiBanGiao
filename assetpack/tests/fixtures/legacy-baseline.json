@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "repository_root": ".",
+  "inputs": [
+    {
+      "path": "server/internal/game/part.bin",
+      "kind": "part.bin",
+      "sha256": "09349f28a95b46469b691abf87d6b341f3395f53ca8d6d704b48ab706992826b",
+      "bytes": 87707
+    },
+    {
+      "path": "assetpack/tests/fixtures/legacy/NR_part",
+      "kind": "NR_part",
+      "sha256": "05a612209e82bd816bc0145a31c71fa1a6e3f5548c521a61e57151d6e56c7780",
+      "bytes": 8
+    },
+    {
+      "path": "assetpack/tests/fixtures/legacy/NR_image",
+      "kind": "NR_image",
+      "sha256": "1df22d08430e51547c4caaba39d14ef8632fcbb77681968f4f0cced6351a4d5f",
+      "bytes": 9
+    },
+    {
+      "path": "assetpack/tests/fixtures/legacy/skill.bin",
+      "kind": "legacy_skill",
+      "sha256": "dc2b1a1d69df77809de02a749609775bf16200c06ac6ef147e10e968c36418ba",
+      "bytes": 13
+    },
+    {
+      "path": "assetpack/tests/fixtures/legacy/mob.bin",
+      "kind": "legacy_mob",
+      "sha256": "b7602310dbb1d0c668b972d27713b24a1d74feea7a9bb1b8398673df8273e59c",
+      "bytes": 227
+    },
+    {
+      "path": "assetpack/tests/fixtures/legacy/Small27040.png",
+      "kind": "small_local",
+      "sha256": "e85ef7a49464bcba4d969481b12d599b61c55beffc3988235e319760ef04e66f",
+      "bytes": 13
+    },
+    {
+      "path": "assetpack/tests/fixtures/legacy/HardCodedIds.cs",
+      "kind": "client_hardcoded_ids",
+      "sha256": "8c8efba79360f2189daf315e6066d49981648f7299c6c38d96f6c718fc72381a",
+      "bytes": 51
+    }
+  ],
+  "expected": {
+    "part_records": 2189,
+    "occupied_ids": [0, 1, 32704]
+  }
+}

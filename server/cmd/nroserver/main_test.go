@@ -40,3 +40,22 @@ func TestMucNhatKyTuChuoiMacDinhLaInfoKhongPhaiDebug(t *testing.T) {
 		}
 	}
 }
+
+// Main production khong dat NRO_E2E phai giu nguyen mat tan cong: khong tao
+// HTTP server, khong bind listener va khong co goroutine control ngam.
+func TestMainKhongMoE2EControlKhiCauHinhTat(t *testing.T) {
+	mayChu, langNghe, err := moE2EControl(
+		cauHinhE2EControl{},
+		make(chan struct{}, 1),
+	)
+	if err != nil {
+		t.Fatalf("control tat tra loi: %v", err)
+	}
+	if mayChu != nil || langNghe != nil {
+		t.Fatalf(
+			"E2E-CONTROL-001: production tao control ngoai y muon: server=%v listener=%v",
+			mayChu,
+			langNghe,
+		)
+	}
+}

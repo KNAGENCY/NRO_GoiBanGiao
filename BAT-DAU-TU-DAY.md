@@ -8,7 +8,7 @@
 > một bản vá, một phát hiện lỗi) thì **phải cập nhật file này ngay** rồi mới commit.
 > Cách cập nhật xem mục [11. Quy ước cập nhật](#11-quy-ước-cập-nhật-file-này).
 
-**Cập nhật lần cuối:** 27/07/2026 (**KH6 + KH11 xong, gộp `main`**) · **Nhánh chính:** `main` · **Commit HEAD:** `6ea467f`
+**Cập nhật lần cuối:** 01/08/2026 (đã rebuild deterministic A/B và publish immutable ArtRoot Task 8 v22: lock `54a638...`, pair `afd03...`, version `22/21/22/21`; `RESOURCE-PREFLIGHT-OK`. Gameplay Task 10 vẫn chưa chạy) · **Nhánh đang làm:** `kh-vertical-slice` · **Mốc oracle đã audit:** `0eb4c60` · **main:** `485b095`
 
 ---
 
@@ -120,10 +120,17 @@ Mỗi kế hoạch đều đi qua: thiết kế → kế hoạch → thi công t
 | 11 | **Lưu trạng thái sống** | Trước đó máy chủ **không lưu gì** sau lúc tạo nhân vật. Nay lưu **3 thời điểm**: định kỳ 60 giây · khi người chơi rời · khi tắt máy chủ. Kiến trúc: actor **chụp ảnh** → hàng đợi gộp → **thợ ghi riêng** chạm đĩa (actor không bao giờ chờ ổ đĩa). Kèm **một tài khoản một phiên** (đá phiên cũ → chờ lưu xong → mới đọc) | `6ea467f` |
 | W1 | Web nền tảng | Đăng ký, đăng nhập, phiên cookie, dùng chung CSDL với game | `af5a2e4` |
 | W2 | Web tính năng | Trang cá nhân, đổi mật khẩu, bảng xếp hạng, panel admin (chặn quyền 3 lớp) | trên `main` |
+| VS-6A | QA ảnh nguồn vertical slice Lang La | Fix round 2: semantic one-shot GIF, raw provenance, canonical evidence và gate fail-closed; raw **0/20 PASS**, derived **20/20 PASS**, gate exit 0 | nhánh `kh-vertical-slice` |
+| VS-6B | Bind ảnh đã duyệt vào manifest Làng Lá | Exact **20/20 provenance** fail-closed; closure v11 có 42 sprite `27041..27082`, HUD 25/50/100 và Iruka sáng/tối được reviewer độc lập ký SHA; mutation/full test/build A/B đều xanh | `bf91ee8`, `545b9c6`, `0fd6fc5` |
+| VS-7 | **Build artifact + deploy staging theo lock** | Artifact server/client bất biến theo lock 21; bắt buộc previous lock + protected Unity root; canonical resource đủ x1–x4 cho small/skill/mob/background/HUD; Unity preflight thật marker `RESOURCE-PREFLIGHT-OK`; full Python **123/123**, Go toàn repo + vet xanh | `2a77a43`, `9627680`, `56fa302` |
+| VS-8 | **Catalog, NPC Iruka, Sói và collision Làng Lá** | Đã vá audit Important: grid 5×17 tile 24×24 fail-closed; map 1 lấy footprint 120×408 làm biên authoritative, map 6 ghim là template chưa playable. Full Python **124/124**, Go game **-count=1**, focused collision/net **-count=5**, vet xanh; **independent audit APPROVE** | `de1f0c6`…`b82d950` |
+| VS-9 | **Telemetry Unity, server control và runner** | Telemetry JSONL loopback có token/command ID/sequence và main-thread dispatch; session cũ không thể lọt lệnh sang client mới. Server control chỉ mở bằng env rõ ràng, bind loopback và tắt qua đúng `donDepKhiTat`. Fixture chỉ dùng `nro_test`, đúng 2 account/run và cleanup fail-safe. Runner có preflight/timeout/evidence SHA. Unity contract thật **50 assertion**, Go toàn repo + vet, PowerShell self-test và control smoke DB thật đều xanh; **independent audit APPROVE** | `01af875` |
+| VS-10 | **Clean full E2E và warm-upgrade smoke** | Canonical A đã harden thủ công theo audit B, không cherry-pick: 24 case qua runner boundary; tách server/asset/applied lock, file zero-byte/SHA/array rỗng fail-closed, Sói `source_id=1`, HP `137/150`, clean+warm cùng PASS, sequence per-client. Bốn mutation đều bị bắt. Asset blocker đã được xử đúng provenance: build A/B **669/669 byte-identical**, publish release Task 8 lock `54a638...`, pair `afd03...`, version `22/21/22/21`, Unity resource preflight thật PASS. **Gameplay thật vẫn chưa chạy** | `e6582ce`, `0eb4c60`, `f56341f` |
 
 **Tình trạng chất lượng hiện tại:** `go test ./...` — **toàn bộ 6 gói xanh, 0 đỏ**
 (gói `game` ~70s), chạy lặp `-count=5` không chập chờn. `gofmt` sạch (trừ nhiễu CRLF file
-cũ, §9), `go vet` sạch. KH6 còn được **soi toàn nhánh (opus)** + **2 canary** (thả bug thật
+cũ, §9), `go vet` sạch. Vertical slice Task 7 có full `python -m unittest discover -s assetpack/tests -v`
+**123/123 xanh** và preflight Unity staging thật. KH6 còn được **soi toàn nhánh (opus)** + **2 canary** (thả bug thật
 để kiểm: reviewer bắt được lỗi byte im lặng, test E2E bắt được lỗi tích hợp).
 
 **Người chơi hiện đã làm được gì:** đăng ký trên web → đăng nhập vào game → tạo nhân
@@ -141,6 +148,12 @@ Xếp theo thứ tự nên làm:
 |---|---|---|
 | ✅ | ~~KH6 — Chiến đấu~~ | **Xong, gộp `162bbe9`.** Còn **Task 15 — nghiệm thu tay bằng client Unity** (chỉ chủ dự án làm). Hồi máu PvP (`goiHoiMauNguoiChoi`) cố ý hoãn — xem §8 |
 | ✅ | ~~KH11 — Lưu trạng thái sống~~ | **Xong, gộp `6ea467f`.** Còn **Task 9 — nghiệm thu tay**: chơi vài phút → Ctrl+C tắt máy chủ → bật lại → đăng nhập xem có đúng chỗ, đúng máu không |
+| ✅ | ~~Vertical slice Task 6A — fix round 2~~ | Derived output **20/20 PASS**; raw source vẫn **0/20 PASS** nhưng được ghi rõ và không bị tráo. Gate kiểm semantic loop, raw summary, reviewer/timestamp và nội dung evidence trước khi bind |
+| ✅ | ~~Vertical slice Task 6B — bind ảnh đã duyệt~~ | **Xong, review sạch.** 109/109 test; A/B 669 file không khác; exact-20 provenance và evidence HUD/Iruka có trust anchor reviewer |
+| ✅ | ~~Vertical slice Task 7 — build artifact + deploy staging theo lock~~ | **Xong trên nhánh `kh-vertical-slice`**, review độc lập sạch. Artifact lock 21, deploy fail-closed (previous lock + protected root + canonical x1–x4), Unity preflight thật, full Python 123/123; chưa gộp `main`. **Tiếp: Task 8** |
+| ✅ | ~~Vertical slice Task 8 — bản vá audit collision~~ | Important fail-open ngoài footprint đã có RED/mutation và được sửa fail-closed; **independent audit APPROVE**. Chưa gộp `main`. |
+| ✅ | ~~Vertical slice Task 9 — telemetry/control/runner~~ | **Independent audit APPROVE.** Commit `01af875`; chưa gộp `main`. |
+| ⏳ | **Vertical slice Task 10 — clean full + warm smoke** | Canonical oracle đã harden **24 case**, 4 mutation; stale lock owner=0 đã đi qua. Full ArtRoot Task 8 v22 đã được rebuild và publish immutable đúng lock `54a638...`/pair `afd03...`; Unity resource preflight có `RESOURCE-PREFLIGHT-OK`. `E2E-ASSET-006` đã được gỡ ở tầng provenance. **Clean full/warm gameplay vẫn NOT RUN và cần phê duyệt bước riêng**; không tự mở Task 11. |
 | 1b | **KH6b — Boss** (hệ riêng, tách khỏi KH6) | Bản Java là 12 file, phức tạp hơn quái thường nhiều. Thiết kế sau khi KH6 gộp |
 | 1c | **KH6c — Stress test 20 client cùng khu vực** | Cùng xả chiêu, đo gói rơi hộp thư actor (trần 256, rơi im lặng) + trễ nhịp 100ms. Dựng trên `thuclient`/`clientGia` |
 | 2 | KH7 — Vật phẩm, hành trang, cửa hàng, giao dịch | 🧱 **Phải chốt căn cước vật phẩm + chống nhân bản trong đặc tả TRƯỚC khi viết code** ([BO-SUNG](docs/superpowers/plans/BO-SUNG-LO-TRINH.md) Khối 3). Tách rõ 4 thứ: cửa hàng NPC / giao dịch 2 người / ký gửi / kho |
@@ -220,6 +233,13 @@ Xếp theo thứ tự nên làm:
     **Cách chữa duy nhất hiệu quả: kiểm thử đột biến** — cố tình phá code, test phải đỏ.
     Không đỏ nghĩa là test vô dụng, phải viết lại test chứ không phải mừng.
 12. **Test dùng giá trị ghim (hard-code), đừng lấy từ chính nguồn đang kiểm.**
+12b. **Hai tập tự khai có thể cùng sai mà vẫn “khớp”.** Task 6B từng cho phép xoá
+    cùng lúc 1 record `source_provenance` và SHA closure tương ứng; build vẫn xanh với
+    19/20 nguồn. Validator phải so với **tập độc lập tuyệt đối** trong review, không so
+    manifest với chính manifest.
+12c. **Tên reviewer nằm trong chính JSON review không phải trust anchor.** Chỉ kiểm
+    “khác reviewer nguồn” vẫn cho alias tự ký lọt. Artifact production phải pin identity
+    reviewer độc lập ở ngoài payload đang được kiểm, và có mutation alias tự ký.
 
 ### Về quy trình
 
@@ -235,6 +255,10 @@ Xếp theo thứ tự nên làm:
     sạch cả file**, và `git diff` phình ra như vừa viết lại toàn bộ. Đã vấp khi sửa
     `server/README.md`, phải `git checkout --` rồi làm lại. **File có dấu thì luôn dùng
     công cụ Edit/Write**, không dùng shell.
+15b. **Đừng import bytecode duy nhất trước khi phục hồi source cùng module.** Python sẽ
+    tự ghi đè `.pyc` khi thấy file `.py` mới. Task 6B từng mất bản bytecode generator đầy
+    đủ vì vấp đúng việc này; cuối cùng phải phục hồi nguyên source từ JSONL của phiên Codex.
+    Cách tránh: sao lưu bytecode ra path tạm trước, hoặc trích source lịch sử rồi mới import.
 
 ### Về giao thức nhị phân — bổ sung sau khi đọc CLIENT (26/07)
 
@@ -258,6 +282,69 @@ Xếp theo thứ tự nên làm:
     Triệu chứng vì thế **im lặng**: gói không làm gì, hoặc hiện số vô lý — không treo,
     không log. **Chạy thử bằng mắt sẽ không phát hiện được; phải test byte-chính-xác.**
     (Thứ làm hỏng cả dòng byte là sai **số byte của trường độ dài** — đó là §6.2, khác hẳn.)
+19. **Tên file `chroma` không chứng minh được alpha an toàn.** Nền magenta chuyển sắc có thể
+    nhìn giống chroma nhưng vượt sai số soft-matte tĩnh; HUD gần trắng lại không hề là chroma.
+    Vì vậy review phải FAIL theo evidence (không được tự suy PASS), và Task bind chỉ nhận source
+    có PASS + SHA khớp.
+20. **Hash/kích thước evidence chưa đủ để chứng minh nội dung.** GIF `loop=0` có thể làm
+    one-shot chạy vô hạn; alpha/contact sheet/crop report có thể bị thay bằng file màu khác
+    rồi cập nhật SHA. Gate phải tái tạo pipeline, đối chiếu nội dung canonical và fail closed
+    với JSON null/malformed; raw source FAIL và derived output PASS là hai trạng thái khác nhau.
+21. **Deploy có thể xanh giả nếu tham số bảo vệ là tuỳ chọn hoặc predicate quá rộng.** Vòng
+    đầu Task 7 cho phép caller bỏ `previous_lock`/`protected_unity_root`, và preflight chỉ
+    tìm một file bất kỳ trong nhóm `Small*`; vì vậy runtime đổi cùng version hoặc thiếu
+    `Small27041.png` nhưng còn `Small27042.png` vẫn có đường lọt. Cách tránh: API/CLI bắt
+    buộc hai tham số, lock phải có closure ID độc lập, và mỗi resource canonical phải tồn
+    tại đúng x1–x4 trước khi publish; mutation decoy phải đỏ `ASSET-PREFLIGHT-022`.
+22. **Collision phải tách semantic, không dùng thẳng tile index.** Artifact phải ghim header
+    `width,height,tileWidth,tileHeight` và cell `0/1`; server phải dùng cùng tile 24x24 với assetpack,
+    có canary solid trên artifact thật, và test foot-point/segment trên chính artifact.
+23. **Gameplay sau khi vào actor không ghi socket trực tiếp.** Command NPC phải `XepGui` qua outbound
+    queue; test net.Pipe phải chứng minh handler không bị chặn khi client không đọc, và giữ FIFO.
+24. **Collision artifact và biên movement không được là hai nguồn sự thật.** Grid 5×17,
+    tile 24×24 chỉ phủ 120×408; nếu ngoài grid trả walkable trong khi movement còn biên
+    4096 thì người chơi thoát artifact ngay từ spawn. Map có collision phải dùng chính
+    footprint đó làm biên authoritative và fail-closed ở mọi tọa độ ngoài grid; biên
+    fallback chỉ dành cho map chưa gắn artifact. Test phải có mép trong, mép ngoài,
+    segment crossing, tọa độ âm và đường actor thật.
+25. **Reconnect telemetry phải cô lập theo thế hệ phiên, không chỉ theo socket hiện tại.**
+    Sau khi client A rớt, action/capture đã xếp hàng của A vẫn có thể chạy trên main thread
+    rồi gửi kết quả nhầm sang client B mới kết nối. Mỗi phiên phải có generation riêng và
+    kiểm lại generation ở cả lúc dequeue lẫn lúc gửi response; test phải dựng đúng kịch bản
+    A enqueue → A rớt → B nối → main thread drain.
+26. **Evidence “đúng schema” vẫn có thể xanh rỗng.** Validator chỉ kiểm từng phần tử sẽ
+    vô tình chấp nhận `events=[]` hoặc `artifacts=[]`. Evidence E2E phải bắt buộc hai mảng
+    không rỗng, kiểm sequence/UTC/client/type/payload của mọi event và tự băm lại SHA của
+    mọi artifact; screenshot thiếu hoặc sai hash phải fail-closed.
+27. **Fixture E2E không được giả lập mật khẩu production bằng plaintext.** Chỉ nhận DSN
+    trỏ chính xác `nro_test`, sinh đúng hai account có prefix từ run ID, dùng cùng
+    PBKDF2-SHA256 với server và chỉ nhận mật khẩu thô qua biến môi trường. Cleanup phải
+    xóa đúng con trước cha trong `finally`, rồi truy vấn lại chứng minh còn 0 account.
+28. **Clean và warm không được tự chấm điểm ở hai nhánh runner khác nhau.** Nếu mỗi phase
+    tự viết assertion, một nhánh có thể bỏ kiểm damage thừa/HP 137 còn nhánh kia dùng
+    executable hoặc asset lock khác mà aggregate vẫn xanh. Cả runner thật và fixture test
+    phải gọi cùng một oracle fail-closed: parser tự đọc NDJSON, băm lại DB/screenshot,
+    kiểm scope `full|warm_smoke`, rồi chỉ ghi aggregate PASS khi executable và server lock
+    bằng tuyệt đối. Unity asset lock là blocker thật; không xóa lock để “làm test chạy”.
+29. **File lock tồn tại không đồng nghĩa Unity đang giữ lock.** Chẩn đoán Task 10 thấy cả
+    `ArtifactDB-lock` và `SourceAssetDB-lock` còn trên đĩa nhưng không có Unity/Hub/worker,
+    Windows Restart Manager báo 0 owner và mở read-only độc quyền đều thành công. Preflight
+    chỉ dùng `Test-Path` vì vậy chặn nhầm file stale. Khi sửa ở một task được phép, phải
+    phân biệt file hiện diện với handle đang hoạt động; tuyệt đối không chữa bằng xóa lock
+    hoặc kill Unity.
+30. **Server lock, asset lock và file evidence phải là ba cổng độc lập.** Một SHA 64 ký tự
+    vẫn có thể là SHA đúng của file rỗng, và dùng server lock thay cho asset lock làm warm
+    resource “khớp” sai nguồn. Oracle phải kiểm length dương trước khi băm, tách
+    `server_lock_sha256`/`asset_lock_sha256`, rồi so `applied_lock_sha256` với asset lock.
+    Fixture phải đi xuyên runner boundary; parser đứng riêng không chứng minh runner thật.
+31. **Build deterministic chưa đủ nếu artifact canonical bị dọn sau test.** Task 8 đã sinh
+    lock/server runtime version 22 đúng và commit lock, nhưng dọn `.task8-build-2..4` mà không
+    publish release immutable tương ứng. Task 10 vì vậy chỉ còn client release version 21 và
+    buộc dừng `E2E-ASSET-006`. Mỗi lần runtime/map bump phải giữ nguyên full
+    `asset-lock.json + server/ + client/`, publish theo thư mục lock SHA và ghi mapping
+    lock→release path trong report trước khi dọn build tạm. Lượt phục hồi 01/08 đã áp dụng
+    đúng cổng này: giữ cả A/B, publish release `task8-releases-22/54a638...` trước mọi cleanup,
+    rồi băm lại toàn bộ release và marker snapshot.
 
 ---
 
@@ -448,3 +535,16 @@ Commit riêng cho việc cập nhật tài liệu thì dùng tiền tố `docs:`
 | 27/07/2026 | **KH6 XONG — gộp `main` `162bbe9`.** Task 11 (PvP `-60` + gói `-30/9` + **vá gap bất tử quái** của Task 13) → Task 14 (**test đầu-cuối 2 người qua mạng + CSDL thật**, diễn trọn chuỗi chiến đấu). **Soi toàn nhánh bằng opus** → bắt được `goiHoiMauNguoiChoi` là mã chết (chiêu type=2 gây sát thương sai) → đợt sửa cuối chốt hoãn có kỷ luật. **2 canary** (thả bug thật): reviewer bắt được lỗi byte im lặng, test E2E bắt được lỗi tích hợp — pipeline review đáng tin. Phân tích **bổ sung lộ trình** (9 khối thiếu, [`BO-SUNG-LO-TRINH.md`](docs/superpowers/plans/BO-SUNG-LO-TRINH.md)) + **mapping ảnh** đã lưu. Còn **Task 15 nghiệm thu tay bằng Unity** (chủ dự án) |
 | 27/07/2026 | **KH11 XONG — gộp `main` `6ea467f`.** Máy chủ trước đó **không lưu gì** sau lúc tạo nhân vật; nay lưu 3 thời điểm (định kỳ 60 giây · khi rời · khi tắt máy) theo kiến trúc *actor chụp ảnh → hàng đợi gộp → thợ ghi riêng*, **actor không bao giờ chờ ổ đĩa**. Kèm **một tài khoản một phiên** (đá phiên cũ → chờ lưu xong → mới đọc; bản Java làm ngược và chưa bao giờ vá). 8 task, mỗi task TDD + đột biến + review đối kháng. **Soi toàn nhánh (opus) tìm ra 1 lỗi Nghiêm trọng thật**: client đăng nhập chồng trên cùng kết nối → mục rác trong sổ phiên → đóng channel hai lần → **panic chết cả tiến trình** (DoS từ xa) — đã vá, có test dựng lại trọn kịch bản 4 bước. Cũng vá bẫy §7.1 ở `XepVaCho`. Bốn khoản nợ mới ghi ở §8 |
 | 28/07/2026 | **Nghiệm thu tay Unity — client VÀO ĐƯỢC GAME.** Chủ dự án bấm Play, tự động login `naruto/1`, vào bản đồ. Nhưng vấp 4 chỗ, mỗi chỗ đều là lỗi thật cần nhớ: (1) client Unity chỉ có file `mymap/{0,39,40,41}.bytes`, server gửi mapID=1-5 → **kẹt vô hình** — vá tạm bằng `cp 0.bytes {1..5}.bytes`; (2) client không gửi `-74` tự động khi mở, nhưng `ServerListScreen.switchToMe` chỉ set `loadScreen=true` khi RMS `ResVersion > 0` — thiếu, client kẹt màn "Xin chờ"; (3) client cần user click 2 lần (chọn server + đăng nhập), auto-login mặc định tắt → **sửa `SplashScr.cs`** thêm `waitToLogin = true` sau `GameCanvas.connect()` để bỏ qua cả 2 click; (4) RMS cache Java cũ (`NRdataVersion=20`) khớp `vsData=20` server → client tự đọc cache Java thay vì xin mới → parse fail âm thầm — xoá 16 file `NR*` cache. Thêm handler stub `-74` ở server (`login.go`), rebuild. **Server 100% đúng — testfull đi trọn từ bắt tay → clientOk → tileset+ME+MAP**. Còn 3 vấn đề mỹ thuật vẫn chưa map: sprite nhân vật (`part.bin` = Dragon Ball placeholder), tile map (1.bytes rỗng), atlas ảnh (`Big*.png` = Dragon Ball) — xem §8 mới thêm |
+| 29/07/2026 | **Vertical slice Task 6A review nguồn ảnh:** helper QA Pillow đã qua TDD và hai mutation; review có SHA source/evidence, contact sheet sáng/tối và preview frame. **20/20 FAIL**: 19 nền magenta chuyển sắc vượt ngưỡng soft-matte tĩnh, HUD nền gần trắng không nhận diện chroma; Task 6B bị chặn đến khi có nguồn PASS. |
+| 29/07/2026 | **Task 6A fix round 1:** thêm crop/cell edge thật, kiểm loop/timing, GIF temporal, gate executable và SHA đủ bốn evidence/asset. Raw source vẫn 0/20 PASS; output thích nghi 18/20 PASS, còn `hu_anthan` và HUD FAIL nên Task 6B vẫn bị chặn trung thực. |
+| VS-6A-fix | Gate exact 20/source SHA/evidence fail-closed, precondition bind; derived output 20/20 PASS | `kh-vertical-slice` / pending commit | Raw 0/20; gate exit 0; report `docs/superpowers/reports/2026-07-29-task-6a-fix-report.md` |
+| 29/07/2026 | **Task 6A fix round 2 hoàn tất:** TDD RED **19 test (9 fail + 2 error)** → GREEN **19/19**; review thật **20 PNG**, raw **0/20 PASS**, derived **20/20 PASS**; gate và bind exit **0**. Mutation SHA/raw summary/reviewer/evidence kind + alpha/crop/contact/animation/null asset đều exit **2**. Không sửa PNG nguồn hay worktree khác. |
+| 29/07/2026 | **Vertical slice Task 6B hoàn tất, review sạch.** Closure canonical v11 khóa exact 20 nguồn review, 42 sprite `27041..27082`, part/animation/Mob/tile/bg/HUD/UI/runtime snapshot. Reviewer độc lập ký HUD golden 25/50/100 và composite Iruka sáng/tối; validator pin path/SHA/digest/identity, mutation 19/20 và alias tự ký đều đỏ. Full **109/109**, build A/B **669/669 file, DIFF_COUNT=0**. Commit `bf91ee8` → `545b9c6` → `0fd6fc5`; việc tiếp theo là Task 7 build/deploy staging theo lock. |
+| 30/07/2026 | **Vertical slice Task 7 hoàn tất, review độc lập sạch.** Build/deploy artifact Naruto lock 21; fix hai guard fail-open (previous lock, protected Unity root) và canonical resource exact x1–x4 sau khi reviewer bắt được decoy `Small27042`. Mutation đều đỏ đúng mã; full Python **123/123**, Go toàn repo + `go vet` xanh; Unity staging preflight thật có `RESOURCE-PREFLIGHT-OK`. Commit `2a77a43` → `9627680` → `56fa302`. Việc tiếp: Task 8 catalog/NPC/Sói/collision, chưa bắt đầu. |
+| 30/07/2026 | **Vertical slice Task 8 — vá Important collision sau audit mốc `902b5a8`.** `DiDuoc` ngoài grid 5×17 từng fail-open, khiến bước `(100,384)→(121,384)` thoát artifact. Đã viết RED/mutation, đổi map 1 sang footprint 120×408 authoritative, ghim map 6 là template chưa playable và sửa fixture cũ về vùng thật. Fresh Python **124/124**, Go game -count=1, focused collision/net -count=5, vet xanh. **Chờ independent re-review; Task 9 chưa bắt đầu.** |
+| 31/07/2026 | **Vertical slice Task 9 hoàn tất sau khi Task 8 được independent audit APPROVE.** TDD bao phủ token sai/thiếu, command ID thiếu/trùng, sequence lùi/đứt, main-thread dispatch, screenshot SHA, graceful shutdown/persistence và fixture prefix/cleanup. Hai vòng review đã vá evidence rỗng, fixture hash, common shutdown path, reconnect và stale-session generation. Fresh Unity batch thật **50 assertion**, Go focused `-count=5` + toàn repo + vet, PowerShell parser/self-test và control smoke DB thật đều xanh; fixture còn **0 account** sau cleanup. Full gameplay hai client chưa chạy vì thuộc Task 10. |
+| 31/07/2026 | **Task 9 được independent audit APPROVE; Task 10 hoàn tất phần không phụ thuộc Unity lock.** Viết 10 fixture/oracle TDD cho damage `5,2,2,2,2`, HP 137, clean/warm executable+lock+scope, DB/evidence SHA và NDJSON sequence. Ba mutation bỏ damage thừa/HP/lock đều làm suite đỏ đúng case, hoàn nguyên xanh 10/10. Runner thật gọi chính parser đã test và không truyền DSN qua command line. Clean full/warm Unity **BLOCKED** vì cả hai asset lock của người dùng vẫn tồn tại; không xóa lock, không chạy production account, không bắt đầu Task 11/12. |
+| 31/07/2026 | **Task 10 lock diagnosis read-only:** hai lock file vẫn tồn tại nhưng **stale/không có owner**: không có Unity/Hub/AssetImportWorker, Restart Manager `0` owner, exclusive read-only open thành công; Editor.log cho thấy đúng `D:\NRO_Project` đã shutdown sạch. Full E2E vẫn chưa chạy vì preflight hiện chỉ `Test-Path`. Không xóa lock, không sửa Unity, không bắt đầu Task 11. |
+| 31/07/2026 | **Task 10 canonical hardening theo audit B, không cherry-pick B:** port thủ công guard vào schema A và runner boundary thật. Suite 24 case tách server/asset/applied lock, zero-byte/SHA/array rỗng, Sói source 1, HP 137/150, clean+warm cùng PASS và sequence per-client; 4 mutation đều đỏ đúng. Runner dùng Restart Manager read-only; preflight thật cho hai stale lock đi qua, ghi `scope=task10_full`, rồi dừng đúng `E2E-ASSET-006` vì ArtRoot/embedded lock lệch. Go full + vet xanh; gameplay chưa chạy. |
+| 31/07/2026 | **Task 10 — chẩn đoán asset provenance `E2E-ASSET-006`:** Task 7 A/B/release cùng lock `e5b093...` version 21; server HEAD đã chuyển có chủ ý ở Task 8 sang lock `54a638...`, pair `afd03...`, runtime/map 22. Các ArtRoot tạm Task 8 `.task8-build-2..4` đã bị dọn, không còn release/full client pair version 22; runner nhận build A từ tham số caller chứ không tự chọn. Dừng BLOCKED, không ghép tay, không build lại, không chạy gameplay/Task 11. |
+| 01/08/2026 | **Rebuild canonical ArtRoot Task 8 v22 theo phê duyệt:** preflight 684/684 input, hai Unity lock owner=0; build A/B đều 669 file và byte-identical; lock `54a638...`, pair `afd03...`, version `22/21/22/21`, 668 output đúng record. Tạo fresh snapshot bằng overlay chính thức, publish immutable release theo lock SHA và Unity batch có đúng một `RESOURCE-PREFLIGHT-OK`. Giữ nguyên A/B/release; không sửa `D:\NRO_Project`, không gameplay, không Task 11. |

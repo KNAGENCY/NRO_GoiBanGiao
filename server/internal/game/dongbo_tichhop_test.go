@@ -201,14 +201,14 @@ func kiemVersionGame(t *testing.T, m *protocol.Message) {
 	t.Helper()
 	want := []byte{lenhConVersionGame, vsData, vsMap, vsSkill, vsItem, 0, 0}
 	if !bytes.Equal(m.Data, want) {
-		t.Fatalf("than goi -28/4 (versionGame) = %v, mong doi %v (vsData/map/skill/item = 20)", m.Data, want)
+		t.Fatalf("than goi -28/4 (versionGame) = %v, mong doi %v (version phải theo asset lock)", m.Data, want)
 	}
 }
 
 // kiemDataCoPartVaDuoi100KB khang dinh goi -87: lenh dung, tong do dai duoi
-// 100000 byte (moc mark client), vsData dung, va DUNG 6 blob theo thu tu
-// dart/arrow/effect/image/part/skill trong do CHI part la khong rong (dung
-// bang do dai duLieuPart) — doi chieu voi TestGoiCatalogDataDungCauTruc trong
+// 100000 byte (mốc mark client), vsData đúng, và ĐÚNG 6 blob theo thứ tự
+// dart/arrow/effect/image/part/skill; part + skill phải byte-identical artifact —
+// đối chiếu với TestGoiCatalogDataDungCauTruc trong
 // dongbo_test.go.
 func kiemDataCoPartVaDuoi100KB(t *testing.T, m *protocol.Message) {
 	t.Helper()
@@ -224,36 +224,39 @@ func kiemDataCoPartVaDuoi100KB(t *testing.T, m *protocol.Message) {
 		t.Fatalf("byte dau goi -87 = %d (loi doc: %v), mong doi vsData = %d", b, err, vsData)
 	}
 
-	docBlob := func(ten string) int32 {
+	docBlob := func(ten string) []byte {
 		n, err := r.Int()
 		if err != nil {
 			t.Fatalf("doc do dai blob %s that bai: %v", ten, err)
 		}
+		data := make([]byte, n)
 		for i := int32(0); i < n; i++ {
-			if _, err := r.Byte(); err != nil {
+			value, err := r.Byte()
+			if err != nil {
 				t.Fatalf("doc noi dung blob %s (byte %d/%d) that bai: %v", ten, i, n, err)
 			}
+			data[i] = value
 		}
-		return n
+		return data
 	}
 
-	if n := docBlob("dart"); n != 2 {
-		t.Errorf("blob dart do dai %d, mong doi 2 (rong)", n)
+	if data := docBlob("dart"); !bytes.Equal(data, []byte{0, 0}) {
+		t.Errorf("blob dart = %v, mong doi [0 0] (rong)", data)
 	}
-	if n := docBlob("arrow"); n != 2 {
-		t.Errorf("blob arrow do dai %d, mong doi 2 (rong)", n)
+	if data := docBlob("arrow"); !bytes.Equal(data, []byte{0, 0}) {
+		t.Errorf("blob arrow = %v, mong doi [0 0] (rong)", data)
 	}
-	if n := docBlob("effect"); n != 2 {
-		t.Errorf("blob effect do dai %d, mong doi 2 (rong)", n)
+	if data := docBlob("effect"); !bytes.Equal(data, []byte{0, 0}) {
+		t.Errorf("blob effect = %v, mong doi [0 0] (rong)", data)
 	}
-	if n := docBlob("image"); n != 2 {
-		t.Errorf("blob image do dai %d, mong doi 2 (rong)", n)
+	if data := docBlob("image"); !bytes.Equal(data, []byte{0, 0}) {
+		t.Errorf("blob image = %v, mong doi [0 0] (rong)", data)
 	}
-	if n := docBlob("part"); n != int32(len(duLieuPart)) || n == 0 {
-		t.Errorf("blob part do dai %d, mong doi %d (file part goc, KHONG rong)", n, len(duLieuPart))
+	if data := docBlob("part"); !bytes.Equal(data, duLieuPart) {
+		t.Errorf("blob part không byte-identical artifact nhúng (nhận %d, muốn %d)", len(data), len(duLieuPart))
 	}
-	if n := docBlob("skill"); n != 2 {
-		t.Errorf("blob skill do dai %d, mong doi 2 (rong)", n)
+	if data := docBlob("skill"); !bytes.Equal(data, duLieuSkill) {
+		t.Errorf("blob skill không byte-identical artifact nhúng (nhận %d, muốn %d)", len(data), len(duLieuSkill))
 	}
 
 	if _, err := r.Byte(); err == nil {
@@ -261,13 +264,67 @@ func kiemDataCoPartVaDuoi100KB(t *testing.T, m *protocol.Message) {
 	}
 }
 
-// kiemCatalogMapRong khang dinh than goi -28/6: [6][vsMap][0][0][0] (rong,
-// doi chieu TestGoiCatalogMapRong trong dongbo_test.go).
+// kiemCatalogMapRong giu ten de test cu goi lai, nhung doc catalog Lang La that.
 func kiemCatalogMapRong(t *testing.T, m *protocol.Message) {
 	t.Helper()
-	want := []byte{lenhConCatalogMap, vsMap, 0, 0, 0}
-	if !bytes.Equal(m.Data, want) {
-		t.Fatalf("than goi -28/6 (catalog map) = %v, mong doi %v", m.Data, want)
+	r := protocol.NewReader(m.Data)
+	if sub, err := r.Byte(); err != nil || sub != lenhConCatalogMap {
+		t.Fatalf("sub=%d err=%v", sub, err)
+	}
+	if v, _ := r.Byte(); v != vsMap {
+		t.Fatalf("vsMap=%d", v)
+	}
+	n, _ := r.Byte()
+	if n != 6 {
+		t.Fatalf("map count=%d", n)
+	}
+	for _, mapCatalog := range catalogLangLa.Maps {
+		got, err := r.UTF()
+		if err != nil || got != mapCatalog.Name {
+			t.Fatalf("map=%q err=%v", got, err)
+		}
+	}
+	n, _ = r.Byte()
+	if n != 1 {
+		t.Fatalf("npc count=%d", n)
+	}
+	if name, err := r.UTF(); err != nil || name != "Iruka" {
+		t.Fatalf("npc name=%q err=%v", name, err)
+	}
+	for _, field := range []struct {
+		label string
+		want  int16
+	}{{"head", 2189}, {"body", 2190}, {"leg", 2191}} {
+		label, want := field.label, field.want
+		got, err := r.Short()
+		if err != nil || got != want {
+			t.Fatalf("npc %s=%d err=%v", label, got, err)
+		}
+	}
+	if _, err := r.Byte(); err != nil {
+		t.Fatal(err)
+	}
+	n, _ = r.Byte()
+	if n != 1 {
+		t.Fatalf("mob count=%d", n)
+	}
+	if typ, err := r.Byte(); err != nil || typ != 0 {
+		t.Fatalf("mob type=%d err=%v", typ, err)
+	}
+	if name, err := r.UTF(); err != nil || name != "Sói Rừng" {
+		t.Fatalf("mob name=%q err=%v", name, err)
+	}
+	if hp, err := r.Int(); err != nil || hp != 100 {
+		t.Fatalf("mob hp=%d err=%v", hp, err)
+	}
+	for _, want := range []byte{100, 0, 0} {
+		got, err := r.Byte()
+		if err != nil || got != want {
+			t.Fatalf("mob runtime=%d want=%d err=%v", got, want, err)
+		}
+	}
+	if _, err := r.Byte(); err == nil {
+		t.Fatal("catalog map co byte thua")
 	}
 }
 
@@ -459,7 +516,22 @@ func kiemMapInfo(t *testing.T, m *protocol.Message, nv *store.NhanVat, bd *BanDo
 	must("waypointCount", 0)
 	must("mobCount", 0)
 	must("byte du phong", 0) // giua mob va npc
-	must("npcCount", 0)
+	if bd.MapID == 1 {
+		must("npcCount", 1)
+		must("npc.status", 0)
+		if _, err := r.Short(); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := r.Short(); err != nil {
+			t.Fatal(err)
+		}
+		must("npc.template", 0)
+		if _, err := r.Short(); err != nil {
+			t.Fatal(err)
+		}
+	} else {
+		must("npcCount", 0)
+	}
 	must("itemCount", 0)
 	if bg, err := r.Short(); err != nil || bg != 0 {
 		t.Fatalf("bgItem = %d (loi %v), mong doi short 0", bg, err)

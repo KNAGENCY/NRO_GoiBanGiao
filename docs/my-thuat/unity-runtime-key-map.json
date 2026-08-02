@@ -1,0 +1,288 @@
+{
+  "schema_version": 1,
+  "unity_source_scope": "Assets/Scripts/Game1",
+  "entries": [
+    {
+      "source_asset": "ui_logo_game_x4.png",
+      "mode": "direct",
+      "logical_keys": [
+        "/Logo/1.png"
+      ],
+      "future_logical_key": null,
+      "call_sites": [
+        {
+          "file": "Assets/Scripts/Game1/ModFunc.cs",
+          "line": 2618,
+          "expression": "imgLogoBig = GameCanvas.loadImageResize(\"/Logo/1.png\");",
+          "file_sha256": "4f9e7f581b0f4f1afba6b152fa71ee734ef0c27fbee4165f2eb3f0b65ca7da54"
+        }
+      ],
+      "consumer_sites": [],
+      "physical_paths": {
+        "x1": [
+          "Assets/Resources/res/x4/Logo/1.png"
+        ],
+        "x2": [
+          "Assets/Resources/res/x4/Logo/1.png"
+        ],
+        "x3": [
+          "Assets/Resources/res/x4/Logo/1.png"
+        ],
+        "x4": [
+          "Assets/Resources/res/x4/Logo/1.png"
+        ]
+      }
+    },
+    {
+      "source_asset": "ui_khung_avatar_x4.png",
+      "mode": "overlay_required",
+      "logical_keys": [],
+      "future_logical_key": "/naruto/ui/avatar-frame.png",
+      "call_sites": [],
+      "consumer_sites": [
+        {
+          "file": "Assets/Scripts/Game1/ChatPopup.cs",
+          "line": 316,
+          "expression": "SmallImage.drawSmallImage(g, c.avatar, cx + 14, cy + num5, 0, StaticObj.BOTTOM_LEFT);",
+          "file_sha256": "e0127190f772666bed7ccb23255a3611cd404c88e8a5692ee39c8fca08a41826"
+        }
+      ],
+      "physical_paths": {
+        "x1": [
+          "Assets/Resources/res/x1/naruto/ui/avatar-frame.png"
+        ],
+        "x2": [
+          "Assets/Resources/res/x2/naruto/ui/avatar-frame.png"
+        ],
+        "x3": [
+          "Assets/Resources/res/x3/naruto/ui/avatar-frame.png"
+        ],
+        "x4": [
+          "Assets/Resources/res/x4/naruto/ui/avatar-frame.png"
+        ]
+      }
+    },
+    {
+      "source_asset": "ui_khung_hoithoai_x4.png",
+      "mode": "overlay_required",
+      "logical_keys": [],
+      "future_logical_key": "/naruto/ui/dialog-frame.png",
+      "call_sites": [],
+      "consumer_sites": [
+        {
+          "file": "Assets/Scripts/Game1/ChatPopup.cs",
+          "line": 311,
+          "expression": "PopUp.paintPopUp(g, num, num2, num3, num4, 16777215, isButton: false);",
+          "file_sha256": "e0127190f772666bed7ccb23255a3611cd404c88e8a5692ee39c8fca08a41826"
+        }
+      ],
+      "physical_paths": {
+        "x1": [
+          "Assets/Resources/res/x1/naruto/ui/dialog-frame.png"
+        ],
+        "x2": [
+          "Assets/Resources/res/x2/naruto/ui/dialog-frame.png"
+        ],
+        "x3": [
+          "Assets/Resources/res/x3/naruto/ui/dialog-frame.png"
+        ],
+        "x4": [
+          "Assets/Resources/res/x4/naruto/ui/dialog-frame.png"
+        ]
+      }
+    },
+    {
+      "source_asset": "ui_nut_thuong_x4.png",
+      "mode": "slice_group",
+      "logical_keys": [
+        "/mainImage/btn0left.png",
+        "/mainImage/btn0mid.png",
+        "/mainImage/btn0right.png"
+      ],
+      "future_logical_key": null,
+      "call_sites": [
+        {
+          "file": "Assets/Scripts/Game1/GameCanvas.cs",
+          "line": 488,
+          "expression": "Command.btn0left = loadImage(\"/mainImage/btn0left.png\");",
+          "file_sha256": "c25a9df30a6bd05755966890f10b7085619515e35669b5987c51c0a6ac82c08d"
+        },
+        {
+          "file": "Assets/Scripts/Game1/GameCanvas.cs",
+          "line": 489,
+          "expression": "Command.btn0mid = loadImage(\"/mainImage/btn0mid.png\");",
+          "file_sha256": "c25a9df30a6bd05755966890f10b7085619515e35669b5987c51c0a6ac82c08d"
+        },
+        {
+          "file": "Assets/Scripts/Game1/GameCanvas.cs",
+          "line": 490,
+          "expression": "Command.btn0right = loadImage(\"/mainImage/btn0right.png\");",
+          "file_sha256": "c25a9df30a6bd05755966890f10b7085619515e35669b5987c51c0a6ac82c08d"
+        }
+      ],
+      "consumer_sites": [],
+      "physical_paths": {
+        "x1": [
+          "Assets/Resources/res/x1/mainimage/btn0left.png",
+          "Assets/Resources/res/x1/mainimage/btn0mid.png",
+          "Assets/Resources/res/x1/mainimage/btn0right.png"
+        ],
+        "x2": [
+          "Assets/Resources/res/x2/mainimage/btn0left.png",
+          "Assets/Resources/res/x2/mainimage/btn0mid.png",
+          "Assets/Resources/res/x2/mainimage/btn0right.png"
+        ],
+        "x3": [
+          "Assets/Resources/res/x3/mainimage/btn0left.png",
+          "Assets/Resources/res/x3/mainimage/btn0mid.png",
+          "Assets/Resources/res/x3/mainimage/btn0right.png"
+        ],
+        "x4": [
+          "Assets/Resources/res/x4/mainimage/btn0left.png",
+          "Assets/Resources/res/x4/mainimage/btn0mid.png",
+          "Assets/Resources/res/x4/mainimage/btn0right.png"
+        ]
+      }
+    },
+    {
+      "source_asset": "ui_nut_nhan_x4.png",
+      "mode": "slice_group",
+      "logical_keys": [
+        "/mainImage/btn1left.png",
+        "/mainImage/btn1mid.png",
+        "/mainImage/btn1right.png"
+      ],
+      "future_logical_key": null,
+      "call_sites": [
+        {
+          "file": "Assets/Scripts/Game1/GameCanvas.cs",
+          "line": 491,
+          "expression": "Command.btn1left = loadImage(\"/mainImage/btn1left.png\");",
+          "file_sha256": "c25a9df30a6bd05755966890f10b7085619515e35669b5987c51c0a6ac82c08d"
+        },
+        {
+          "file": "Assets/Scripts/Game1/GameCanvas.cs",
+          "line": 492,
+          "expression": "Command.btn1mid = loadImage(\"/mainImage/btn1mid.png\");",
+          "file_sha256": "c25a9df30a6bd05755966890f10b7085619515e35669b5987c51c0a6ac82c08d"
+        },
+        {
+          "file": "Assets/Scripts/Game1/GameCanvas.cs",
+          "line": 493,
+          "expression": "Command.btn1right = loadImage(\"/mainImage/btn1right.png\");",
+          "file_sha256": "c25a9df30a6bd05755966890f10b7085619515e35669b5987c51c0a6ac82c08d"
+        }
+      ],
+      "consumer_sites": [],
+      "physical_paths": {
+        "x1": [
+          "Assets/Resources/res/x1/mainimage/btn1left.png",
+          "Assets/Resources/res/x1/mainimage/btn1mid.png",
+          "Assets/Resources/res/x1/mainimage/btn1right.png"
+        ],
+        "x2": [
+          "Assets/Resources/res/x2/mainimage/btn1left.png",
+          "Assets/Resources/res/x2/mainimage/btn1mid.png",
+          "Assets/Resources/res/x2/mainimage/btn1right.png"
+        ],
+        "x3": [
+          "Assets/Resources/res/x3/mainimage/btn1left.png",
+          "Assets/Resources/res/x3/mainimage/btn1mid.png",
+          "Assets/Resources/res/x3/mainimage/btn1right.png"
+        ],
+        "x4": [
+          "Assets/Resources/res/x4/mainimage/btn1left.png",
+          "Assets/Resources/res/x4/mainimage/btn1mid.png",
+          "Assets/Resources/res/x4/mainimage/btn1right.png"
+        ]
+      }
+    },
+    {
+      "source_asset": "ui_nut_khoa_x4.png",
+      "mode": "overlay_required",
+      "logical_keys": [],
+      "future_logical_key": "/naruto/ui/button-disabled.png",
+      "call_sites": [],
+      "consumer_sites": [
+        {
+          "file": "Assets/Scripts/Game1/Command.cs",
+          "line": 181,
+          "expression": "if (caption != string.Empty)",
+          "file_sha256": "b053ac650526d45d026bbd2b74ee6b89a69f7e9e57fcefa234086bde91f5e2d5"
+        }
+      ],
+      "physical_paths": {
+        "x1": [
+          "Assets/Resources/res/x1/naruto/ui/button-disabled.png"
+        ],
+        "x2": [
+          "Assets/Resources/res/x2/naruto/ui/button-disabled.png"
+        ],
+        "x3": [
+          "Assets/Resources/res/x3/naruto/ui/button-disabled.png"
+        ],
+        "x4": [
+          "Assets/Resources/res/x4/naruto/ui/button-disabled.png"
+        ]
+      }
+    },
+    {
+      "source_asset": "ui_o_vatpham_x4.png",
+      "mode": "overlay_required",
+      "logical_keys": [],
+      "future_logical_key": "/naruto/ui/item-slot.png",
+      "call_sites": [],
+      "consumer_sites": [
+        {
+          "file": "Assets/Scripts/Game1/Panel.cs",
+          "line": 7888,
+          "expression": "g.fillRect(x, y, w, h, 4);",
+          "file_sha256": "cc352009ebdeaea3f1386bfce9b69d9238e749dacd41ccc2f046d48259087033"
+        }
+      ],
+      "physical_paths": {
+        "x1": [
+          "Assets/Resources/res/x1/naruto/ui/item-slot.png"
+        ],
+        "x2": [
+          "Assets/Resources/res/x2/naruto/ui/item-slot.png"
+        ],
+        "x3": [
+          "Assets/Resources/res/x3/naruto/ui/item-slot.png"
+        ],
+        "x4": [
+          "Assets/Resources/res/x4/naruto/ui/item-slot.png"
+        ]
+      }
+    },
+    {
+      "source_asset": "ui_o_dangchon_x4.png",
+      "mode": "overlay_required",
+      "logical_keys": [],
+      "future_logical_key": "/naruto/ui/item-slot-selected.png",
+      "call_sites": [],
+      "consumer_sites": [
+        {
+          "file": "Assets/Scripts/Game1/Panel.cs",
+          "line": 7925,
+          "expression": "if (i == selected)",
+          "file_sha256": "cc352009ebdeaea3f1386bfce9b69d9238e749dacd41ccc2f046d48259087033"
+        }
+      ],
+      "physical_paths": {
+        "x1": [
+          "Assets/Resources/res/x1/naruto/ui/item-slot-selected.png"
+        ],
+        "x2": [
+          "Assets/Resources/res/x2/naruto/ui/item-slot-selected.png"
+        ],
+        "x3": [
+          "Assets/Resources/res/x3/naruto/ui/item-slot-selected.png"
+        ],
+        "x4": [
+          "Assets/Resources/res/x4/naruto/ui/item-slot-selected.png"
+        ]
+      }
+    }
+  ]
+}

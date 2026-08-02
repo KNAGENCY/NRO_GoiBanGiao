@@ -2,9 +2,13 @@ package game
 
 import (
 	"bytes"
+	"errors"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
+	mynet "nroserver/internal/net"
 	"nroserver/internal/protocol"
 	"nroserver/internal/store"
 )
@@ -45,11 +49,31 @@ func TestKhuVucActorKhoiDongVaDungSach(t *testing.T) {
 // test xuLy cua KhuVuc: chi ghi lai moi goi tin nhan duoc vao slice, khong gui
 // di dau ca. Ten khac voi ham `phienGia` (nhanvat_test.go, phien mynet THAT
 // qua net.Pipe) de tranh dung ten trong cung package.
-type phienGiaKhuVuc struct{ nhan []*protocol.Message }
+type phienGiaKhuVuc struct {
+	mu        sync.Mutex
+	nhan      []*protocol.Message
+	loiXep    atomic.Bool
+	soLanDong atomic.Int32
+}
 
-func (p *phienGiaKhuVuc) Gui(m *protocol.Message) error {
+func (p *phienGiaKhuVuc) XepGui(m *protocol.Message) error {
+	if p.loiXep.Load() {
+		return mynet.ErrHangGuiDay
+	}
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	p.nhan = append(p.nhan, m)
 	return nil
+}
+
+func (p *phienGiaKhuVuc) DongCham() { p.soLanDong.Add(1) }
+
+func (p *phienGiaKhuVuc) batDauLoiXep() { p.loiXep.Store(true) }
+
+func (p *phienGiaKhuVuc) banTin() []*protocol.Message {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return append([]*protocol.Message(nil), p.nhan...)
 }
 
 // TestKhuVucXuLySuKien kiem tra logic xuLy cho ca 3 su kien theo dung THU TU
@@ -92,9 +116,9 @@ func TestKhuVucXuLySuKien(t *testing.T) {
 	}
 	khangDinhIdTrongGoi(t, pA.nhan[0], nvB.ID)
 
-	// Buoc 3: A di chuyen toi (250,300) — pB nhan them 1 goi -7 [idA][250][300];
+	// Buoc 3: A di chuyen toi (50,50) — pB nhan them 1 goi -7 [idA][50][50];
 	// pA KHONG nhan gi them (client tu ve chuyen dong cua chinh minh).
-	k.xuLy(suKienDiChuyen{idNhanVat: nvA.ID, x: 250, y: 300})
+	k.xuLy(suKienDiChuyen{idNhanVat: nvA.ID, x: 50, y: 50})
 	if len(pA.nhan) != 1 {
 		t.Fatalf("buoc 3: pA nhan %d goi, mong doi van la 1 (khong nhan lai chinh minh)", len(pA.nhan))
 	}
@@ -109,14 +133,14 @@ func TestKhuVucXuLySuKien(t *testing.T) {
 	if id, err := r.Int(); err != nil || id != int32(nvA.ID) {
 		t.Fatalf("buoc 3: id trong goi -7 = %d, err=%v, mong doi %d", id, err, nvA.ID)
 	}
-	if x, err := r.Short(); err != nil || x != 250 {
-		t.Fatalf("buoc 3: x trong goi -7 = %d, err=%v, mong doi 250", x, err)
+	if x, err := r.Short(); err != nil || x != 50 {
+		t.Fatalf("buoc 3: x trong goi -7 = %d, err=%v, mong doi 50", x, err)
 	}
-	if y, err := r.Short(); err != nil || y != 300 {
-		t.Fatalf("buoc 3: y trong goi -7 = %d, err=%v, mong doi 300", y, err)
+	if y, err := r.Short(); err != nil || y != 50 {
+		t.Fatalf("buoc 3: y trong goi -7 = %d, err=%v, mong doi 50", y, err)
 	}
-	if nvA.ViTriX != 250 || nvA.ViTriY != 300 {
-		t.Fatalf("buoc 3: nvA vi tri = (%d,%d), mong doi (250,300) — phai la authoritative", nvA.ViTriX, nvA.ViTriY)
+	if nvA.ViTriX != 50 || nvA.ViTriY != 50 {
+		t.Fatalf("buoc 3: nvA vi tri = (%d,%d), mong doi (50,50) — phai la authoritative", nvA.ViTriX, nvA.ViTriY)
 	}
 
 	// Buoc 4: A roi khu vuc — pB nhan them 1 goi -6 [idA]; nvA bi xoa khoi map.
@@ -137,6 +161,202 @@ func TestKhuVucXuLySuKien(t *testing.T) {
 	}
 	if _, co := k.nguoiTrong[nvA.ID]; co {
 		t.Fatal("buoc 4: nvA phai bi xoa khoi khu vuc sau khi ra")
+	}
+}
+
+// TestActorLoaiClientChamKhongChanClientKhoe_SERVER_ACTOR_005 bat ba hoi quy:
+// actor ghi socket truc tiep, queue day nhung khong loai client, hoac xoa
+// session ma quen xoa nguoi choi trong actor (ghost).
+func TestActorLoaiClientChamKhongChanClientKhoe_SERVER_ACTOR_005(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	k.BatDau()
+	t.Cleanup(func() { _ = k.Dung() })
+
+	nvCham := &store.NhanVat{ID: 101, Ten: "Cham", HpToiDa: 100, ViTriX: 100, ViTriY: 384}
+	nvKhoe := &store.NhanVat{ID: 102, Ten: "Khoe", HpToiDa: 100, ViTriX: 100, ViTriY: 384}
+	pCham := &phienGiaKhuVuc{}
+	pKhoe := &phienGiaKhuVuc{}
+	k.Gui(suKienVao{nv: nvCham, phien: pCham})
+	k.Gui(suKienVao{nv: nvKhoe, phien: pKhoe})
+
+	hanVao := time.Now().Add(time.Second)
+	for len(pKhoe.banTin()) == 0 {
+		if time.Now().After(hanVao) {
+			t.Fatal("actor chua xu ly xong hai suKienVao")
+		}
+		time.Sleep(time.Millisecond)
+	}
+	pCham.batDauLoiXep()
+
+	batDau := time.Now()
+	k.Gui(suKienDiChuyen{idNhanVat: nvKhoe.ID, x: 110, y: 384})
+	for pCham.soLanDong.Load() == 0 {
+		if time.Since(batDau) >= 100*time.Millisecond {
+			t.Fatal("actor khong loai client cham trong 100ms")
+		}
+		time.Sleep(time.Millisecond)
+	}
+	ban, err := k.AnhChupNguoiChoiCoLoi(0)
+	if err != nil {
+		t.Fatalf("probe actor sau client cham: %v", err)
+	}
+	if mat := time.Since(batDau); mat >= 100*time.Millisecond {
+		t.Fatalf("client cham chan actor %s, mong probe duoi 100ms", mat)
+	}
+	if len(ban) != 1 || ban[0].ID != nvKhoe.ID {
+		t.Fatalf("snapshot sau queue day = %+v, mong chi con client khoe %d", ban, nvKhoe.ID)
+	}
+	banCham, err := k.AnhChupNguoiChoiCoLoi(nvCham.ID)
+	if err != nil {
+		t.Fatalf("snapshot cuoi client cham: %v", err)
+	}
+	if len(banCham) != 1 || banCham[0].ID != nvCham.ID {
+		t.Fatalf("mat snapshot cuoi cua client cham: %+v", banCham)
+	}
+	if got := pCham.soLanDong.Load(); got != 1 {
+		t.Fatalf("DongCham client cham duoc goi %d lan, mong dung 1", got)
+	}
+	tinKhoe := pKhoe.banTin()
+	if len(tinKhoe) == 0 {
+		t.Fatal("client khoe khong nhan duoc event nao")
+	}
+	coRoi := false
+	for _, m := range tinKhoe {
+		if m.Command == -6 {
+			coRoi = true
+		}
+	}
+	if !coRoi {
+		t.Fatal("client khoe khong nhan goi -6 xoa ghost cua client cham")
+	}
+	if err := k.RoiKhuVuc(nvCham.ID); err != nil {
+		t.Fatalf("cleanup leave client cham: %v", err)
+	}
+	if con, err := k.AnhChupNguoiChoiCoLoi(nvCham.ID); err != nil || len(con) != 0 {
+		t.Fatalf("snapshot tach roi khong duoc don: ban=%+v err=%v", con, err)
+	}
+}
+
+// TestControlSnapshotVaLeaveKhongRoiKhiMailboxGameplayDay chung minh control
+// dung kenh rieng: mailbox gameplay da kin van chup va xoa dung nguoi.
+func TestControlSnapshotVaLeaveKhongRoiKhiMailboxGameplayDay(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	nv := &store.NhanVat{ID: 201, Ten: "Control", HpToiDa: 100}
+	k.xuLy(suKienVao{nv: nv, phien: &phienGiaKhuVuc{}})
+
+	k.hopThu = make(chan suKienKhuVuc, 256)
+	k.hopThuDieuKhien = make(chan suKienDieuKhien, 16)
+	k.xong = make(chan struct{})
+	for i := 0; i < cap(k.hopThu); i++ {
+		k.hopThu <- suKienRa{idNhanVat: 999}
+	}
+	go k.vongLap()
+	t.Cleanup(func() { _ = k.Dung() })
+
+	ban, err := k.AnhChupNguoiChoiCoLoi(nv.ID)
+	if err != nil {
+		t.Fatalf("snapshot control bi roi khi gameplay day: %v", err)
+	}
+	if len(ban) != 1 || ban[0].ID != nv.ID {
+		t.Fatalf("snapshot = %+v, mong dung nguoi %d", ban, nv.ID)
+	}
+	if err := k.RoiKhuVuc(nv.ID); err != nil {
+		t.Fatalf("leave control bi roi khi gameplay day: %v", err)
+	}
+	ban, err = k.AnhChupNguoiChoiCoLoi(0)
+	if err != nil {
+		t.Fatalf("snapshot sau leave: %v", err)
+	}
+	if len(ban) != 0 {
+		t.Fatalf("con ghost sau leave control: %+v", ban)
+	}
+}
+
+func TestControlTraLoiRoKhiActorDaDung(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	k.BatDau()
+	k.Dung()
+
+	if _, err := k.AnhChupNguoiChoiCoLoi(1); !errors.Is(err, ErrActorDaDung) {
+		t.Fatalf("snapshot sau dung = %v, mong ErrActorDaDung", err)
+	}
+	if err := k.RoiKhuVuc(1); !errors.Is(err, ErrActorDaDung) {
+		t.Fatalf("leave sau dung = %v, mong ErrActorDaDung", err)
+	}
+}
+
+func TestControlSnapshotQuaHanTraLoiRoKhongTreo(t *testing.T) {
+	k := MoKhuVuc(TimBanDo(1))
+	// Cap mailbox nhu actor da bat dau, nhung co y khong chay vongLap: mo
+	// phong actor mac loi/ket logic ma chua dong xong.
+	k.hopThu = make(chan suKienKhuVuc, 1)
+	k.hopThuDieuKhien = make(chan suKienDieuKhien, 1)
+	k.xong = make(chan struct{})
+
+	ketQua := make(chan error, 1)
+	go func() {
+		_, err := k.AnhChupNguoiChoiCoLoi(1)
+		ketQua <- err
+	}()
+	select {
+	case err := <-ketQua:
+		if !errors.Is(err, ErrControlQuaHan) {
+			t.Fatalf("snapshot actor ket = %v, mong ErrControlQuaHan", err)
+		}
+	case <-time.After(200 * time.Millisecond):
+		t.Fatal("snapshot control treo qua 200ms, thieu timeout cleanup")
+	}
+}
+
+// TestControlLeaveVaDungQuaHanTraLoiRoKhongTreo bat hoi quy control co the
+// ket khi actor khong con tieu thu: ca leave va stop phai tra loi ro trong
+// han, de KhiDong/don dep may chu khong treo vinh vien.
+func TestControlLeaveVaDungQuaHanTraLoiRoKhongTreo(t *testing.T) {
+	for _, tc := range []struct {
+		ten string
+		goi func(*KhuVuc) error
+	}{
+		{
+			ten: "leave doi actor xac nhan",
+			goi: func(k *KhuVuc) error {
+				return k.RoiKhuVuc(1)
+			},
+		},
+		{
+			ten: "stop doi actor thoat",
+			goi: func(k *KhuVuc) error {
+				dung, co := any(k).(interface{ Dung() error })
+				if !co {
+					return ErrActorChuaBatDau
+				}
+				return dung.Dung()
+			},
+		},
+		{
+			ten: "leave khi mailbox control day",
+			goi: func(k *KhuVuc) error {
+				k.hopThuDieuKhien <- dieuKhienDung{}
+				return k.RoiKhuVuc(1)
+			},
+		},
+	} {
+		t.Run(tc.ten, func(t *testing.T) {
+			k := MoKhuVuc(TimBanDo(1))
+			k.hopThu = make(chan suKienKhuVuc, 1)
+			k.hopThuDieuKhien = make(chan suKienDieuKhien, 1)
+			k.xong = make(chan struct{})
+
+			ketQua := make(chan error, 1)
+			go func() { ketQua <- tc.goi(k) }()
+			select {
+			case err := <-ketQua:
+				if !errors.Is(err, ErrControlQuaHan) {
+					t.Fatalf("control ket = %v, mong ErrControlQuaHan", err)
+				}
+			case <-time.After(200 * time.Millisecond):
+				t.Fatal("control treo qua 200ms, KhiDong/don dep co the ket vinh vien")
+			}
+		})
 	}
 }
 
@@ -750,7 +970,7 @@ func khuVucAnhChupGia(t *testing.T) (k *KhuVuc, nvA, nvB *store.NhanVat) {
 	t.Helper()
 	k = MoKhuVuc(TimBanDo(1))
 	k.BatDau()
-	t.Cleanup(k.Dung)
+	t.Cleanup(func() { _ = k.Dung() })
 
 	nvA = &store.NhanVat{ID: 1, Ten: "A", HpToiDa: 100, HpHienTai: 80, ChakraToiDa: 50, ChakraHienTai: 40, ViTriX: 30000, ViTriY: 30000}
 	nvB = &store.NhanVat{ID: 2, Ten: "B", HpToiDa: 120, HpHienTai: 120, ChakraToiDa: 60, ChakraHienTai: 60, ViTriX: -30000, ViTriY: -30000}

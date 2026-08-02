@@ -1,0 +1,3 @@
+{"monotonic_ms":100,"utc":"2026-07-31T08:00:00Z","client":"A","sequence":1,"type":"resource_negotiated","payload":{"old_version":20,"new_version":21}}
+{"monotonic_ms":200,"utc":"2026-07-31T08:00:01Z","client":"A","sequence":2,"type":"resource_lock_applied","payload":{"lock_sha256":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}}
+{"monotonic_ms":300,"utc":"2026-07-31T08:00:02Z","client":"A","sequence":3,"type":"map_ready","payload":{"map_id":1,"dragon_ball_fallback":false}}

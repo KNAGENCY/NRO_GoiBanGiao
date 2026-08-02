@@ -256,6 +256,8 @@ func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 		return b.xuLyDanhNguoiChoi(m)
 	case lenhHoiSinh: // -16 — client xin hoi sinh (dac ta §3.1, Ke hoach 6 Task 13)
 		return b.xuLyHoiSinh()
+	case lenhMoNPC: // 33 — client mo hoi thoai NPC
+		return b.xuLyMoNPC(s, m)
 	default:
 		// Lenh chua ho tro: bo qua, khong ngat ket noi — client gui vai goi
 		// phu ngay sau khi noi (vi du setClientType), day la chuyen BINH
@@ -450,6 +452,26 @@ func (b *BoXuLy) xuLyVaoKhuVuc(s *mynet.Session) error {
 	return nil
 }
 
+// xuLyMoNPC chi doc ID va tra dialog bat bien. Khong dong vao state KhuVuc;
+// actor van la chu duy nhat cua di chuyen va chien dau.
+func (b *BoXuLy) xuLyMoNPC(s *mynet.Session, m *protocol.Message) error {
+	if b.nhanVat == nil || b.nhanVat.MapID != 1 {
+		return nil
+	}
+	r := protocol.NewReader(m.Data)
+	id, err := r.Short()
+	if err != nil || id < 0 || id > 255 {
+		return nil
+	}
+	goi, err := goiMoNPC(byte(id))
+	if err != nil {
+		return nil
+	}
+	// Hoi thoai NPC la gameplay sau khi vao map: vao hang gui FIFO nhu cac
+	// broadcast cua actor, khong ghi socket dong bo tren luong xu ly command.
+	return s.XepGui(goi)
+}
+
 // xuLyDiChuyen: client gui -7 (byte co bay + short toX + short toY). Ke hoach 5:
 // KHONG kiem hop le o day (doc nv.ViTri se dua voi actor ghi) — chuyen tiep toX/toY
 // tho cho actor, actor kiem bang vi tri authoritative. Thieu toX/toY -> bo goi.
@@ -577,8 +599,8 @@ func (b *BoXuLy) xuLyHoiSinh() error {
 // khuvuc.go) roi Xep() vao tho ghi de luu xuong dia. THU TU NAY BAT BUOC,
 // TUYET DOI KHONG DUOC DAO NGUOC:
 //
-//	DUNG:  AnhChupNguoiChoi(id) ──► Xep(ban)     ──► khuVuc.Gui(suKienRa)
-//	SAI :  khuVuc.Gui(suKienRa) ──► AnhChupNguoiChoi(id) tra VE RONG
+//	DUNG:  AnhChupNguoiChoiCoLoi(id) ──► Xep(ban) ──► RoiKhuVuc(id)
+//	SAI :  RoiKhuVuc(id) ──► AnhChupNguoiChoiCoLoi(id) tra VE RONG
 //
 // Ly do: case suKienRa (khuvuc.go) XOA nguoi choi khoi k.nguoiTrong NGAY khi
 // actor xu ly su kien do. Neu goi Gui(suKienRa) truoc, den luc
@@ -629,7 +651,12 @@ func (b *BoXuLy) KhiDong() {
 	}
 
 	if b.thoGhi != nil {
-		if ban := b.khuVuc.AnhChupNguoiChoi(b.nhanVat.ID); len(ban) > 0 {
+		ban, err := b.khuVuc.AnhChupNguoiChoiCoLoi(b.nhanVat.ID)
+		if err != nil {
+			slog.Warn("khong chup duoc trang thai khi dong phien",
+				"idNhanVat", b.nhanVat.ID, "loi", err)
+		}
+		if len(ban) > 0 {
 			if b.daBiDa() {
 				if gdb, ok := b.thoGhi.(ghiDongBoKhiBiDa); ok {
 					ctx, huy := context.WithTimeout(context.Background(), hanGioGhi)
@@ -651,7 +678,10 @@ func (b *BoXuLy) KhiDong() {
 		}
 	}
 
-	b.khuVuc.Gui(suKienRa{idNhanVat: b.nhanVat.ID})
+	if err := b.khuVuc.RoiKhuVuc(b.nhanVat.ID); err != nil {
+		slog.Warn("khong the go nguoi choi khoi actor khi dong phien",
+			"idNhanVat", b.nhanVat.ID, "loi", err)
+	}
 }
 
 // daBiDa bao phien nay da bi da (b.biDa da dong) hay chua — AN TOAN goi tren

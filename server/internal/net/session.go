@@ -5,10 +5,12 @@
 package net
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"net"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"nroserver/internal/protocol"
@@ -41,6 +43,20 @@ const (
 	// CHU DONG thuc hien de tra loi, khong co ly do gi phai cho lau nhu doc
 	// (noi may chu bi dong THU DONG cho client goi tin lien tuc).
 	thoiGianChoGui = 30 * time.Second
+
+	// sucChuaHangGui la so goi gameplay toi da cho mot client. Actor khong
+	// duoc cho socket; vuot nguong nay thi loai client cham.
+	sucChuaHangGui = 256
+
+	// thoiGianChoWriter dung cho cleanup cua vong phuc vu. DongCham da dong
+	// socket truoc, nen writer binh thuong se thoat ngay; gioi han nay chan
+	// mot net.Conn loi khong ton trong production lam cleanup treo vo han.
+	thoiGianChoWriter = time.Second
+)
+
+var (
+	ErrHangGuiDay  = errors.New("hang gui da day")
+	ErrPhienDaDong = errors.New("phien da dong")
 )
 
 // XuLyGoiTin la thu tang tren cai dat de nhan goi tin da giai ma.
@@ -60,6 +76,14 @@ type Session struct {
 	muGui sync.Mutex
 
 	dongMotLan sync.Once
+
+	khoiTaoWriterMotLan sync.Once
+	batDauWriterMotLan  sync.Once
+	muHang              sync.RWMutex
+	hangGui             chan *protocol.Message
+	dungWriter          chan struct{}
+	writerXong          chan struct{}
+	writerDaBatDau      atomic.Bool
 }
 
 // Gui gui mot goi tin xuong client. An toan khi goi tu nhieu goroutine.
@@ -73,8 +97,93 @@ func (s *Session) Gui(m *protocol.Message) error {
 	return s.framer.WriteMessage(m)
 }
 
+// XepGui xep mot goi gameplay cho writer duy nhat cua Session. Ham chi sao
+// chep message va day vao queue, khong bao gio cham socket hay cho writer.
+func (s *Session) XepGui(m *protocol.Message) error {
+	if m == nil {
+		return errors.New("khong the xep message nil")
+	}
+	s.khoiTaoWriter()
+	s.muHang.RLock()
+	defer s.muHang.RUnlock()
+	select {
+	case <-s.dungWriter:
+		return ErrPhienDaDong
+	default:
+	}
+
+	s.batDauWriterMotLan.Do(func() {
+		s.writerDaBatDau.Store(true)
+		go s.vongWriter()
+	})
+
+	ban := &protocol.Message{Command: m.Command}
+	if len(m.Data) > 0 {
+		ban.Data = append([]byte(nil), m.Data...)
+	}
+	select {
+	case <-s.dungWriter:
+		return ErrPhienDaDong
+	case s.hangGui <- ban:
+		return nil
+	default:
+		return ErrHangGuiDay
+	}
+}
+
+func (s *Session) khoiTaoWriter() {
+	s.khoiTaoWriterMotLan.Do(func() {
+		s.hangGui = make(chan *protocol.Message, sucChuaHangGui)
+		s.dungWriter = make(chan struct{})
+		s.writerXong = make(chan struct{})
+	})
+}
+
+func (s *Session) vongWriter() {
+	defer close(s.writerXong)
+	for {
+		// Uu tien tin hieu dong truoc queue: sau write error/DongCham, phan
+		// queue con lai phai bi bo, khong duoc ghi tiep.
+		select {
+		case <-s.dungWriter:
+			return
+		default:
+		}
+		select {
+		case <-s.dungWriter:
+			return
+		case m := <-s.hangGui:
+			if err := s.Gui(m); err != nil {
+				slog.Debug("writer session ket thuc", "ip", s.DiaChiIP, "loi", err)
+				s.DongCham()
+				return
+			}
+		}
+	}
+}
+
+// DongCham chi danh dau/dong socket, tuyet doi khong cho writer. Actor goi
+// ham nay khi queue day de khong bi client cham chan vong gameplay.
+func (s *Session) DongCham() {
+	s.khoiTaoWriter()
+	s.dongMotLan.Do(func() {
+		s.muHang.Lock()
+		close(s.dungWriter)
+		s.muHang.Unlock()
+		_ = s.conn.Close()
+	})
+}
+
 func (s *Session) Dong() {
-	s.dongMotLan.Do(func() { s.conn.Close() })
+	s.DongCham()
+	if !s.writerDaBatDau.Load() {
+		return
+	}
+	select {
+	case <-s.writerXong:
+	case <-time.After(thoiGianChoWriter):
+		slog.Warn("cho writer session thoat qua han", "ip", s.DiaChiIP)
+	}
 }
 
 // PhucVu chay vong doi mot ket noi cho toi khi dong.

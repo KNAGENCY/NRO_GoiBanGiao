@@ -1,16 +1,16 @@
 # Nhật ký agent — ai đã làm gì
 
-## ⏳ ĐANG CHỜ GÌ NGAY LÚC NÀY — cập nhật: 31/07/2026
+## ⏳ ĐANG CHỜ GÌ NGAY LÚC NÀY — cập nhật: 02/08/2026
 
 > Ai vào cũng đọc khối này trước. **Xong việc thì phải sửa lại khối này**, nếu không nó
 > thành thông tin cũ gây hại hơn là không có.
 
 - ✅ **Client Unity ĐÃ VÀO ĐƯỢC GAME** (28/07) — chủ dự án tự bấm Play, tự động login. Server 100% đúng. Chi tiết chuỗi 4 fix + 3 sửa đổi tay ở client Unity: **BAT-DAU §8 hai bullet cuối + §12 dòng 28/07** — ai chưa đọc ĐỪNG sửa gì thêm ở `D:\NRO_Project` hoặc RMS Unity.
-- ✅ **Vertical slice Task 8 đã được independent audit APPROVE** trên worktree `kh-vertical-slice`: ngoài grid 5×17 fail-closed, map 1 dùng footprint 120×408 authoritative; chưa gộp `main`.
-- ✅ **KH6 (chiến đấu) + KH11 (lưu trạng thái) XONG** — gộp `main` (`162bbe9`, `6ea467f`). `server/` rảnh, agent khác vào được. Luật số một: **actor không bao giờ chờ ổ đĩa**.
-- ✅ **Task 9/telemetry-control-runner đã được independent audit APPROVE** trên `kh-vertical-slice`, commit `01af875`.
-- ⛔ **Task 10 clean full + warm thật vẫn NOT RUN**: provenance đã rõ — Task 7 release `e5b093...` version 21 là canonical lịch sử, nhưng server HEAD đã chuyển sang Task 8 lock `54a638...` version runtime/map 22. Full ArtRoot Task 8 đã bị dọn cùng `.task8-build-2..4`, nên **BLOCKED `E2E-ASSET-006`** cho tới khi phục hồi hoặc được duyệt build/publish lại đúng cặp; không ghép tay hay dùng release 21.
-- ⚠️ **Thư mục chính vẫn giữ POC cũ bẩn** trên `kh-mapping-anh`; không reset/xoá/cherry-pick đè. Các worktree `kh-actor`, `kh-assets`, `kh-unity-e2e` là lịch sử/nhánh nguồn, không tự dọn.
+- ✅ **VERTICAL SLICE (Task 0–9) ĐÃ GỘP `main`** (merge `2c41aa4`, 02/08). Gồm **code server NPC (Iruka) + va chạm Làng Lá + khuvuc**, **`assets/` nhúng có khóa hash** (`part.bin` Naruto thật — thay placeholder Dragon Ball), và **đường ống `assetpack` (Python)** sinh lại asset từ manifest. **Kiểm chứng tay trước khi gộp:** `go build`+`vet` sạch, `go test ./...` xanh cả 7 gói (game 83s), `pytest assetpack` 124/124. **`server/` lại rảnh.**
+- ✅ **KH6 (chiến đấu) + KH11 (lưu trạng thái) XONG** — gộp `main` (`162bbe9`, `6ea467f`). Luật số một: **actor không bao giờ chờ ổ đĩa**.
+- ⏳ **CÒN DỞ — bộ chứng minh chơi thật bằng Unity (Task 10–12):** runner `tools/e2e` + `unity-overlay` đã gộp kèm nhưng **clean full/warm gameplay NOT RUN** (từng vướng lock ArtRoot, đã rebuild v22 `RESOURCE-PREFLIGHT-OK` nhưng chưa chạy trọn). Đây là việc kế tiếp, **làm thành đợt riêng** — cần chạy 2 client Unity thật + thu evidence. Bằng chứng chạy (`e2e-runs/`, `.artifacts/`, `artqa-canonical-run/`) đã **gitignore**, ĐỪNG commit.
+- 🗑️ **POC `kh-mapping-anh` đã bỏ** — sửa tay `part.bin` bị thay thế hoàn toàn bởi `part.bin` thật từ `assetpack`. Thay đổi POC được `git stash` (nhãn `POC-mapping-anh-...`), không mất nhưng không dùng nữa.
+- 🧹 **11 worktree cũ ở `.worktrees/` chưa dọn** (`kh-vertical-slice` đã gộp; các nhánh `kh-agent-*`, `kh-actor`, `kh-assets`, `kh-task*`, `kh-unity-e2e` là nhánh nguồn/lịch sử). Rà rồi xoá worktree + nhánh đã gộp khi rảnh — **cẩn thận `git worktree remove`**, đừng xoá tay thư mục.
 
 ---
 
@@ -63,3 +63,4 @@ lên nhau.
 | 31/07/2026 | Codex (Task 10 canonical hardening) | Không cherry-pick B; port thủ công guard audit vào A: server/asset/applied lock độc lập, zero-byte/SHA/array rỗng, Sói source 1, HP 137/150, clean+warm PASS, sequence per-client; 24 case và 4 mutation. Preflight thật cho stale lock đi qua, scope `task10_full` | `kh-vertical-slice` / `docs(e2e): harden task 10 canonical oracle` | **BLOCKED `E2E-ASSET-006`:** `task7-build-21-a` khác embedded lock; gameplay NOT RUN, không production account/Task 11 |
 | 31/07/2026 | Codex (Task 10 asset provenance) | Truy ngược Task 7/8 lock, release, Git blob và 668 output: Task 7 release là `e5b093...` version 21; server HEAD là Task 8 `54a638...`, pair `afd03...`, runtime/map 22. Không còn full ArtRoot Task 8 sau cleanup `.task8-build-2..4`; runner không tự chọn build A | `kh-vertical-slice` / tài liệu chẩn đoán | **BLOCKED:** cần phục hồi artifact Task 8 hoặc phê duyệt build+publish lại release immutable version 22. Không sửa runner/Unity, không gameplay/Task 11 |
 | 01/08/2026 | Codex (Task 8 ArtRoot v22 rebuild) | Rebuild deterministic từ đúng 684 input: A/B 669 file byte-identical, 668 output khớp lock `54a638...`, pair `afd03...`, version `22/21/22/21`. Fresh overlay snapshot và immutable release v22 đã publish; Unity batch ghi `RESOURCE-PREFLIGHT-OK` | `kh-vertical-slice` / `feat(asset): rebuild canonical task8 artroot v22` | Giữ A/B và release, chưa cleanup. Gameplay Task 10 vẫn NOT RUN; không production account, không Task 11 |
+| 02/08/2026 | Claude Opus 4.8 (phiên review) | **Review + GỘP nhánh `kh-vertical-slice` vào `main`** (`--no-ff`, merge `2c41aa4`). Trước khi gộp tự kiểm chứng (không tin sổ): nhánh chỉ *chồng thêm* lên `main` (gộp sạch, 0 xung đột); `go build`+`vet` sạch; `go test ./...` xanh **cả 7 gói** (game 83s); `pytest assetpack` **124/124**; `assets/part.bin` là bản Naruto thật 87.846B (khác placeholder 87.707B), server nhúng + khóa hash. Gộp cả nhánh vì phần e2e dở chỉ là script nằm im, build vẫn xanh. Thêm `e2e-runs/` + `.artifacts/` + `artqa-canonical-run/` + `server/server-log.txt` vào `.gitignore`. Bỏ POC `kh-mapping-anh` (đã stash) | `main` / `2c41aa4` | **Vertical slice Task 10–12 (chơi thật 2 client Unity) CÒN DỞ** — làm đợt riêng. 11 worktree `.worktrees/` chưa dọn. `server/` rảnh |

@@ -8,7 +8,7 @@
 > một bản vá, một phát hiện lỗi) thì **phải cập nhật file này ngay** rồi mới commit.
 > Cách cập nhật xem mục [11. Quy ước cập nhật](#11-quy-ước-cập-nhật-file-này).
 
-**Cập nhật lần cuối:** 01/08/2026 (đã rebuild deterministic A/B và publish immutable ArtRoot Task 8 v22: lock `54a638...`, pair `afd03...`, version `22/21/22/21`; `RESOURCE-PREFLIGHT-OK`. Gameplay Task 10 vẫn chưa chạy) · **Nhánh đang làm:** `kh-vertical-slice` · **Mốc oracle đã audit:** `0eb4c60` · **main:** `485b095`
+**Cập nhật lần cuối:** 02/08/2026 (**gộp vertical slice Task 0–9 vào `main`** — merge `2c41aa4`; kiểm tay: Go 7 gói xanh, `pytest assetpack` 124/124, `part.bin` Naruto thật nhúng có khóa hash. Còn dở: gameplay Unity Task 10–12) · **main:** `2c41aa4`
 
 ---
 
@@ -127,11 +127,16 @@ Mỗi kế hoạch đều đi qua: thiết kế → kế hoạch → thi công t
 | VS-9 | **Telemetry Unity, server control và runner** | Telemetry JSONL loopback có token/command ID/sequence và main-thread dispatch; session cũ không thể lọt lệnh sang client mới. Server control chỉ mở bằng env rõ ràng, bind loopback và tắt qua đúng `donDepKhiTat`. Fixture chỉ dùng `nro_test`, đúng 2 account/run và cleanup fail-safe. Runner có preflight/timeout/evidence SHA. Unity contract thật **50 assertion**, Go toàn repo + vet, PowerShell self-test và control smoke DB thật đều xanh; **independent audit APPROVE** | `01af875` |
 | VS-10 | **Clean full E2E và warm-upgrade smoke** | Canonical A đã harden thủ công theo audit B, không cherry-pick: 24 case qua runner boundary; tách server/asset/applied lock, file zero-byte/SHA/array rỗng fail-closed, Sói `source_id=1`, HP `137/150`, clean+warm cùng PASS, sequence per-client. Bốn mutation đều bị bắt. Asset blocker đã được xử đúng provenance: build A/B **669/669 byte-identical**, publish release Task 8 lock `54a638...`, pair `afd03...`, version `22/21/22/21`, Unity resource preflight thật PASS. **Gameplay thật vẫn chưa chạy** | `e6582ce`, `0eb4c60`, `f56341f` |
 
-**Tình trạng chất lượng hiện tại:** `go test ./...` — **toàn bộ 6 gói xanh, 0 đỏ**
-(gói `game` ~70s), chạy lặp `-count=5` không chập chờn. `gofmt` sạch (trừ nhiễu CRLF file
-cũ, §9), `go vet` sạch. Vertical slice Task 7 có full `python -m unittest discover -s assetpack/tests -v`
-**123/123 xanh** và preflight Unity staging thật. KH6 còn được **soi toàn nhánh (opus)** + **2 canary** (thả bug thật
-để kiểm: reviewer bắt được lỗi byte im lặng, test E2E bắt được lỗi tích hợp).
+> **VERTICAL SLICE (VS-6A…VS-10, tức Task 0–9) ĐÃ GỘP `main`** — merge `2c41aa4` (02/08/2026),
+> `--no-ff`. Các dòng VS ở trên trước ghi "nhánh `kh-vertical-slice`" nay đã nằm trên `main`.
+> **Còn dở: Task 10–12 — chơi thật 2 client Unity + nghiệm thu.** Runner đã gộp kèm (`tools/e2e`,
+> `unity-overlay`) nhưng **gameplay chưa chạy trọn**; làm thành đợt riêng.
+
+**Tình trạng chất lượng hiện tại (kiểm tay 02/08 trên `main` sau gộp):** `go test ./...` —
+**toàn bộ 7 gói xanh, 0 đỏ** (gói `game` ~83s), `go build`+`go vet` sạch, `gofmt` sạch (trừ
+nhiễu CRLF file cũ, §9). `pytest assetpack` **124/124 xanh** (máy sinh `part.bin`/catalog/collision).
+KH6 còn được **soi toàn nhánh (opus)** + **2 canary** (thả bug thật để kiểm: reviewer bắt
+được lỗi byte im lặng, test E2E bắt được lỗi tích hợp).
 
 **Người chơi hiện đã làm được gì:** đăng ký trên web → đăng nhập vào game → tạo nhân
 vật, chọn làng → vào bản đồ làng → đi lại, thấy người khác → **chọn chiêu, đánh quái,
@@ -548,3 +553,4 @@ Commit riêng cho việc cập nhật tài liệu thì dùng tiền tố `docs:`
 | 31/07/2026 | **Task 10 canonical hardening theo audit B, không cherry-pick B:** port thủ công guard vào schema A và runner boundary thật. Suite 24 case tách server/asset/applied lock, zero-byte/SHA/array rỗng, Sói source 1, HP 137/150, clean+warm cùng PASS và sequence per-client; 4 mutation đều đỏ đúng. Runner dùng Restart Manager read-only; preflight thật cho hai stale lock đi qua, ghi `scope=task10_full`, rồi dừng đúng `E2E-ASSET-006` vì ArtRoot/embedded lock lệch. Go full + vet xanh; gameplay chưa chạy. |
 | 31/07/2026 | **Task 10 — chẩn đoán asset provenance `E2E-ASSET-006`:** Task 7 A/B/release cùng lock `e5b093...` version 21; server HEAD đã chuyển có chủ ý ở Task 8 sang lock `54a638...`, pair `afd03...`, runtime/map 22. Các ArtRoot tạm Task 8 `.task8-build-2..4` đã bị dọn, không còn release/full client pair version 22; runner nhận build A từ tham số caller chứ không tự chọn. Dừng BLOCKED, không ghép tay, không build lại, không chạy gameplay/Task 11. |
 | 01/08/2026 | **Rebuild canonical ArtRoot Task 8 v22 theo phê duyệt:** preflight 684/684 input, hai Unity lock owner=0; build A/B đều 669 file và byte-identical; lock `54a638...`, pair `afd03...`, version `22/21/22/21`, 668 output đúng record. Tạo fresh snapshot bằng overlay chính thức, publish immutable release theo lock SHA và Unity batch có đúng một `RESOURCE-PREFLIGHT-OK`. Giữ nguyên A/B/release; không sửa `D:\NRO_Project`, không gameplay, không Task 11. |
+| 02/08/2026 | **VERTICAL SLICE (Task 0–9) GỘP `main`** — merge `2c41aa4` (`--no-ff`). Sau khi review + tự kiểm chứng (nhánh chỉ chồng thêm lên `main`, gộp 0 xung đột; `go build`+`vet` sạch; `go test ./...` xanh **7 gói** — game 83s; `pytest assetpack` **124/124**; `assets/part.bin` Naruto thật 87.846B nhúng + khóa hash). Đưa về `main`: **code server NPC Iruka + va chạm Làng Lá + `assets/` nhúng** và **đường ống `assetpack`** — thay hoàn toàn POC sửa tay `part.bin` (đã bỏ, stash). Chặn `e2e-runs/`+`.artifacts/`+`artqa-canonical-run/`+`server/server-log.txt` vào `.gitignore`. **Còn dở: Task 10–12 chơi thật 2 client Unity + nghiệm thu** (đợt riêng); 11 worktree `.worktrees/` chưa dọn |

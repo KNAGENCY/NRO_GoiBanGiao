@@ -88,3 +88,7 @@ docs/my-thuat/*.zip
 __pycache__/
 *.pyc
 .pytest_cache/
+
+# --- 11. BAN SAO LUU DB (pg_dump) ---
+# Chua du lieu nguoi choi (nhu muc 1) — TUYET DOI khong dua len git.
+backups/

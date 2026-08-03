@@ -22,10 +22,12 @@ if (-not $go) { Write-Host "[DO] khong tim thay 'go' (PATH hoac D:\Go\bin)" -For
 $cong = Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue |
     Where-Object { $_.LocalPort -in 5432, 5433 } |
     Select-Object -ExpandProperty LocalPort -Unique | Select-Object -First 1
+$khongCoDB = $false
 if ($cong) {
     $env:NRO_TEST_DSN = "postgres://postgres:nrodev123@127.0.0.1:$cong/nro_test"
     Write-Host "PostgreSQL o cong $cong -> NRO_TEST_DSN da dat (test can DB SE chay)" -ForegroundColor DarkGray
 } else {
+    $khongCoDB = $true
     Write-Host "PostgreSQL khong chay -> test can DB tu SKIP" -ForegroundColor Yellow
 }
 
@@ -104,8 +106,15 @@ if (Test-Path "$goc\assetpack") {
 }
 
 Write-Host "`n================ TONG KET ================" -ForegroundColor Cyan
+if ($khongCoDB) {
+    # F7: dung de "xanh gia" khi Postgres vang mat — test store/migration (code
+    # chay MOI lan khoi dong) da bi SKIP. Bao DO noi bat, khong lang le xanh.
+    Write-Host "!! CANH BAO: PostgreSQL KHONG chay -> test CSDL (store/migration) DA BI SKIP, CHUA duoc kiem !!" -ForegroundColor Red
+    Write-Host "   Bat DB roi chay lai de kiem day du: D:\PostgreSQL\bin\pg_ctl.exe -D D:\PostgreSQL\data start" -ForegroundColor Red
+}
 if ($loi.Count -eq 0) {
-    Write-Host "TAT CA XANH." -ForegroundColor Green
+    if ($khongCoDB) { Write-Host "Cac buoc chay duoc: XANH (nhung THIEU test CSDL — xem canh bao tren)." -ForegroundColor Yellow }
+    else { Write-Host "TAT CA XANH." -ForegroundColor Green }
     exit 0
 } else {
     Write-Host "CO $($loi.Count) BUOC DO: $($loi -join ', ')" -ForegroundColor Red

@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"fmt"
+	"io/fs"
 	"log/slog"
 	"sort"
 )
@@ -11,12 +12,39 @@ import (
 //go:embed migrations/*.sql
 var thuMucMigration embed.FS
 
-// ApDungMigrationConLai ap moi migration CHUA co trong bang schema_migrations,
-// theo dung thu tu ten file (0001, 0002, ...). Moi migration chay trong MOT
-// transaction: loi bat ky -> rollback + DUNG (fail-closed, khong de schema nua
-// voi). Idempotent: da ap thi bo qua (va migration hien tai dung IF NOT EXISTS
-// nen ap len DB da co san schema cung an toan). Tra ve so migration MOI ap.
+// khoaMigration: khoa advisory CO DINH cho toan bo qua trinh migration. Hai
+// server khoi dong cung luc (vd auto-restart chong nhau) se NOI TIEP nhau chu
+// khong dua nhau tao bang -> tranh loi "duplicate key pg_type..." kho hieu, va
+// server thu hai chi thay "da ap het" roi chay tiep.
+const khoaMigration int64 = 771020304050607
+
+// ApDungMigrationConLai ap moi migration CHUA co trong schema_migrations, theo
+// thu tu ten file, moi cai mot transaction fail-closed. Xem apDungMigrationTuFS.
 func (s *Store) ApDungMigrationConLai(ctx context.Context) (soApMoi int, err error) {
+	return s.apDungMigrationTuFS(ctx, thuMucMigration)
+}
+
+// apDungMigrationTuFS lam viec that. Nhan fs.FS de test TIEM DUOC fs gia: vd
+// migration hong -> kiem fail-closed (tra loi + KHONG ghi phien ban do); vd
+// migration phu thuoc nhau -> kiem ap dung thu tu. Idempotent: da ap thi bo qua;
+// migration hien tai dung IF NOT EXISTS nen ap len DB da co san schema cung an toan.
+func (s *Store) apDungMigrationTuFS(ctx context.Context, fsys fs.FS) (soApMoi int, err error) {
+	// Advisory lock: chi MOT server chay migration tai mot thoi diem. Server thu
+	// hai CHO o day roi thay da ap het -> soApMoi=0, chay tiep binh thuong (khong
+	// chet vi dua nhau tao bang). Khoa giu tren mot ket noi rieng suot ca ham.
+	conn, err := s.pool.Acquire(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("lay ket noi cho migration that bai: %w", err)
+	}
+	defer conn.Release()
+	if _, err := conn.Exec(ctx, "SELECT pg_advisory_lock($1)", khoaMigration); err != nil {
+		return 0, fmt.Errorf("lay advisory lock migration that bai: %w", err)
+	}
+	defer func() {
+		// Go khoa du thanh cong hay loi. context.Background vi ctx goc co the da huy.
+		_, _ = conn.Exec(context.Background(), "SELECT pg_advisory_unlock($1)", khoaMigration)
+	}()
+
 	if _, err = s.pool.Exec(ctx,
 		`CREATE TABLE IF NOT EXISTS schema_migrations (
 			phien_ban TEXT PRIMARY KEY,
@@ -43,7 +71,7 @@ func (s *Store) ApDungMigrationConLai(ctx context.Context) (soApMoi int, err err
 		return 0, fmt.Errorf("duyet schema_migrations that bai: %w", err)
 	}
 
-	danhSach, err := thuMucMigration.ReadDir("migrations")
+	danhSach, err := fs.ReadDir(fsys, "migrations")
 	if err != nil {
 		return 0, fmt.Errorf("doc thu muc migration that bai: %w", err)
 	}
@@ -59,7 +87,7 @@ func (s *Store) ApDungMigrationConLai(ctx context.Context) (soApMoi int, err err
 		if daAp[ph] {
 			continue
 		}
-		noiDung, err := thuMucMigration.ReadFile("migrations/" + ph)
+		noiDung, err := fs.ReadFile(fsys, "migrations/"+ph)
 		if err != nil {
 			return soApMoi, fmt.Errorf("doc file migration %s that bai: %w", ph, err)
 		}

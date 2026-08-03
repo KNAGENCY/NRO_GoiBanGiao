@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"testing"
+	"testing/fstest"
 )
 
 func moStoreTest(t *testing.T) *Store {
@@ -72,5 +73,62 @@ func TestApDungMigration_GhiDungPhienBan(t *testing.T) {
 		if !co {
 			t.Fatalf("schema_migrations thieu phien ban %q", ph)
 		}
+	}
+}
+
+// TestApDungMigration_FailClosed khoa thuoc tinh QUAN TRONG NHAT (reviewer F1):
+// migration hong -> TRA LOI + KHONG ghi phien ban do (rollback). Dung fs gia de
+// tiem migration sai cu phap. Dot bien fail-open (return -> continue) se lam
+// test nay DO.
+func TestApDungMigration_FailClosed(t *testing.T) {
+	s := moStoreTest(t)
+	ctx := context.Background()
+	_, _ = s.pool.Exec(ctx, `DROP TABLE IF EXISTS _mt_a`)
+	t.Cleanup(func() { _, _ = s.pool.Exec(context.Background(), `DROP TABLE IF EXISTS _mt_a`) })
+
+	fsys := fstest.MapFS{
+		"migrations/0001_tot.sql":  {Data: []byte(`CREATE TABLE _mt_a (id INT);`)},
+		"migrations/0002_hong.sql": {Data: []byte(`DAY LA SQL SAI CU PHAP;`)},
+	}
+	n, err := s.apDungMigrationTuFS(ctx, fsys)
+	if err == nil {
+		t.Fatal("migration hong PHAI tra loi (fail-closed), nhung err=nil (fail-open?)")
+	}
+	if n != 1 {
+		t.Fatalf("soApMoi=%d, mong 1 (0001 xong truoc khi 0002 hong)", n)
+	}
+	var co0001, co0002 bool
+	if err := s.pool.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM schema_migrations WHERE phien_ban='0001_tot.sql')`).Scan(&co0001); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.pool.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM schema_migrations WHERE phien_ban='0002_hong.sql')`).Scan(&co0002); err != nil {
+		t.Fatal(err)
+	}
+	if !co0001 {
+		t.Fatal("0001 phai duoc ghi (da commit truoc khi 0002 hong)")
+	}
+	if co0002 {
+		t.Fatal("0002 HONG khong duoc ghi vao schema_migrations (phai rollback)")
+	}
+}
+
+// TestApDungMigration_TheoThuTu (reviewer F2): 0002 phu thuoc bang 0001 tao ra.
+// Ap dung thu tu -> ca hai xong; sai thu tu -> 0002 vo vi bang chua ton tai.
+func TestApDungMigration_TheoThuTu(t *testing.T) {
+	s := moStoreTest(t)
+	ctx := context.Background()
+	_, _ = s.pool.Exec(ctx, `DROP TABLE IF EXISTS _mt_b`)
+	t.Cleanup(func() { _, _ = s.pool.Exec(context.Background(), `DROP TABLE IF EXISTS _mt_b`) })
+
+	fsys := fstest.MapFS{
+		"migrations/0001_tao.sql":  {Data: []byte(`CREATE TABLE _mt_b (id INT);`)},
+		"migrations/0002_dung.sql": {Data: []byte(`INSERT INTO _mt_b (id) VALUES (1);`)},
+	}
+	n, err := s.apDungMigrationTuFS(ctx, fsys)
+	if err != nil {
+		t.Fatalf("ap theo thu tu that bai: %v (0002 phu thuoc bang cua 0001)", err)
+	}
+	if n != 2 {
+		t.Fatalf("soApMoi=%d, mong 2", n)
 	}
 }

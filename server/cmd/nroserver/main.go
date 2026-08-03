@@ -228,13 +228,19 @@ func main() {
 	slog.Info("da noi CSDL thanh cong.")
 
 	// No ha tang C: tu ap migration CON THIEU truoc khi mo cong. Fail-closed —
-	// schema sai thi DUNG, khong mo cong voi CSDL nua voi.
-	if soAp, err := kho.ApDungMigrationConLai(ctx); err != nil {
-		slog.Error("KHONG THE KHOI DONG: ap migration CSDL that bai.", "loi", err)
+	// schema sai thi DUNG, khong mo cong voi CSDL nua voi. Han gio 60s de migration
+	// treo (khoa bang, hoac cho advisory lock cua server khac) khong lam khoi dong
+	// ket vo han — thoat co thong bao thay vi treo im.
+	ctxMig, huyMig := context.WithTimeout(ctx, 60*time.Second)
+	soAp, errMig := kho.ApDungMigrationConLai(ctxMig)
+	huyMig()
+	if errMig != nil {
+		slog.Error("KHONG THE KHOI DONG: ap migration CSDL that bai.", "loi", errMig)
 		slog.Error("Cach kiem tra: xem migration nao loi o log tren; sua SQL roi chay lai. May chu KHONG mo cong voi schema sai.")
 		kho.Close()
 		os.Exit(1)
-	} else if soAp > 0 {
+	}
+	if soAp > 0 {
 		slog.Info("da ap migration CSDL luc khoi dong", "so_ap_moi", soAp)
 	}
 

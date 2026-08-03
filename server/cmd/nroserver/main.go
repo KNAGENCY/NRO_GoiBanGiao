@@ -227,6 +227,17 @@ func main() {
 	}
 	slog.Info("da noi CSDL thanh cong.")
 
+	// No ha tang C: tu ap migration CON THIEU truoc khi mo cong. Fail-closed —
+	// schema sai thi DUNG, khong mo cong voi CSDL nua voi.
+	if soAp, err := kho.ApDungMigrationConLai(ctx); err != nil {
+		slog.Error("KHONG THE KHOI DONG: ap migration CSDL that bai.", "loi", err)
+		slog.Error("Cach kiem tra: xem migration nao loi o log tren; sua SQL roi chay lai. May chu KHONG mo cong voi schema sai.")
+		kho.Close()
+		os.Exit(1)
+	} else if soAp > 0 {
+		slog.Info("da ap migration CSDL luc khoi dong", "so_ap_moi", soAp)
+	}
+
 	// Chan tin hieu dung TRUOC khi vao vong lap lang nghe, de dam bao khong
 	// bao gio bo lot Ctrl+C dung luc dang khoi dong.
 	sigCh := make(chan os.Signal, 1)

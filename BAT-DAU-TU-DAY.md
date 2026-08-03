@@ -8,7 +8,7 @@
 > một bản vá, một phát hiện lỗi) thì **phải cập nhật file này ngay** rồi mới commit.
 > Cách cập nhật xem mục [11. Quy ước cập nhật](#11-quy-ước-cập-nhật-file-này).
 
-**Cập nhật lần cuối:** 03/08/2026 (**lưới chắn panic — mảnh A "vá nợ hạ tầng" — ĐÃ GỘP `main` `3c0a539`**: 6/6 goroutine máy chủ nay qua lưới `antoan.ChayCoLuoi`; actor khu vực chạy tiếp sau panic + van an toàn, mỗi kết nối tự đóng, hệ lưu bỏ đúng bản lỗi. Đã soi đối kháng: đọc code 6 chỗ + tự chạy test + đột biến độc lập (gỡ lưới `xuLy` → test đỏ vì panic lan ra). `go test ./... -count=5` xanh cả 8 gói, `build`/`vet`/`gofmt` sạch. Trước đó 02/08 gộp vertical slice Task 0–9 — merge `47b8f77`) · **main:** `3c0a539`
+**Cập nhật lần cuối:** 03/08/2026 (**§6.10b "treo cả khu vực" — XÁC MINH ĐÃ VÁ từ trước** (commit `a135979`, đã chạy test lại): sổ sửa bỏ báo động giả ở §6.10b/§8; **client Unity thật** đã login → vào map → render nhân vật qua server Go (test khói tay); kế tiếp **KH6c stress test 20 client**. Trước đó: **lưới chắn panic — mảnh A "vá nợ hạ tầng" — ĐÃ GỘP `main` `3c0a539`**: 6/6 goroutine máy chủ nay qua lưới `antoan.ChayCoLuoi`; actor khu vực chạy tiếp sau panic + van an toàn, mỗi kết nối tự đóng, hệ lưu bỏ đúng bản lỗi. Đã soi đối kháng: đọc code 6 chỗ + tự chạy test + đột biến độc lập (gỡ lưới `xuLy` → test đỏ vì panic lan ra). `go test ./... -count=5` xanh cả 8 gói, `build`/`vet`/`gofmt` sạch. Trước đó 02/08 gộp vertical slice Task 0–9 — merge `47b8f77`) · **main:** `3c0a539`
 
 ---
 
@@ -218,17 +218,24 @@ Xếp theo thứ tự nên làm:
    Luật: **chỉ luồng `vongLap` của khu vực được chạm vào trạng thái khu vực.**
 10. **Gói `-28/13` (clientOk) bị gửi lại lần hai** cũng gây tranh chấp tương tự. Đã chốt
     guard chống chạy lại; tương tự cho `-39`.
-10b. **Actor tự đi phát gói mạng = một kết nối treo làm đứng cả khu vực** (phát hiện
-    27/07 khi AI quái của Task 9 thành nguồn lưu lượng tự phát). `phatChoNguoiKhac` /
-    `phatChoCaKhuVuc` gọi `phien.Gui()` **đồng bộ ngay trên goroutine `vongLap`**; `Gui()`
-    có hạn giờ ghi **30 giây** (`net/session.go`). Một client ngừng đọc (mạng chập chờn,
-    app xuống nền, hoặc cố ý) làm `vongLap` đứng tối đa 30s → cả bản đồ đứng hình, quái
-    ngừng hồi sinh. Tệ hơn: `Gui()` lỗi chỉ ghi log, **không gạch tên** người đó khỏi
-    `nguoiTrong` → lần phát sau lại treo tiếp, **lặp vô hạn**. Thiết kế KH5 đã yêu cầu gỡ
-    phiên hỏng nhưng phần đó **chưa vào code**. Đây là **lỗ hổng Nghiêm trọng #1** của
-    review toàn dự án 27/07 — **Kế hoạch B phải tách gửi mạng khỏi actor** (mỗi phiên một
-    hàng đợi gửi riêng, actor chỉ ném gói vào rồi đi tiếp). Task 9 né tạm trong test, chưa
-    sửa gốc.
+10b. **[✅ ĐÃ VÁ — commit `a135979`, xác minh chạy test lại 03/08/2026]** Giữ nguyên mô tả
+    vì là bài học kiến trúc quan trọng nhất. **Actor tự đi phát gói mạng = một kết nối treo
+    làm đứng cả khu vực** (phát hiện 27/07 khi AI quái của Task 9 thành nguồn lưu lượng tự
+    phát). *Trước khi vá:* `phatChoNguoiKhac` / `phatChoCaKhuVuc` gọi `phien.Gui()` **đồng bộ
+    ngay trên goroutine `vongLap`**; `Gui()` có hạn giờ ghi **30 giây** (`net/session.go`).
+    Một client ngừng đọc (mạng chập chờn, app xuống nền, hoặc cố ý) làm `vongLap` đứng tối đa
+    30s → cả bản đồ đứng hình, quái ngừng hồi sinh. Tệ hơn: `Gui()` lỗi chỉ ghi log, **không
+    gạch tên** người đó khỏi `nguoiTrong` → lần phát sau lại treo tiếp, **lặp vô hạn**. Đây
+    từng là **lỗ hổng Nghiêm trọng #1** của review toàn dự án 27/07.
+    **Đã vá (`a135979` "tach writer socket khoi actor gameplay"):** mỗi phiên một hàng đợi
+    gửi riêng `hangGui` (sức chứa 256) + goroutine `vongWriter` riêng; actor gọi `XepGui`
+    **chỉ ném gói vào queue rồi đi tiếp, không bao giờ chạm socket**; client đầy hàng bị
+    `loaiNhieuNguoiLoiGui` **gạch tên khỏi `nguoiTrong` + `DongCham`** (đóng socket không
+    chờ) rồi báo `-6` cho người còn lại. Chứng minh 2 tầng: `TestXepGuiKhongChanFIFO256...`
+    (net — `XepGui` không chặn, chặn ở 256) và
+    `TestActorLoaiClientChamKhongChanClientKhoe_SERVER_ACTOR_005` (game — probe actor
+    **<100ms** khi 1 client đầy hàng → actor KHÔNG treo, gạch đúng client chậm). Đã chạy lại
+    03/08, cả hai xanh (`-count=5`). **KH6c (stress 20 client) sẽ chứng minh thêm dưới tải thật.**
 
 ### Về kiểm thử (bài học lặp lại nhiều lần nhất)
 
@@ -408,9 +415,9 @@ Gom lại thành **Kế hoạch B**, sửa lẻ từng cái là vô nghĩa:
   **hai sự kiện độc lập trùng nhau trong vài mili-giây**.
 - **KH11 — actor bận > 100 ms thì cả khu vực bị bỏ qua một lượt lưu**: `AnhChupNguoiChoi`
   chờ tối đa 100 ms rồi trả rỗng; `LuuTatCa` bỏ qua nguyên khu vực đó (có ghi `slog.Warn`,
-  không câm hẳn). Kết hợp với **§6.10b** (actor bị chặn tới 30 giây vì tự gửi gói mạng) thì
-  lúc tắt máy chủ, một khu vực đang dính lỗi đó sẽ mất tới 60 giây tiến độ. **Thêm một lý do
-  để Kế hoạch B ưu tiên tách gửi gói mạng khỏi actor.**
+  không câm hẳn). *(Cập nhật 03/08: nhánh actor-kẹt-30s vì tự gửi gói mạng đã được vá — xem
+  **§6.10b ĐÃ VÁ** — nên actor giờ chỉ có thể bận vì tính toán gameplay nặng, không vì
+  socket. Vẫn nên đo dưới tải thật bằng KH6c stress test.)*
 - **KH6 Task 11**: chưa chặn tự đánh chính mình (`-60` với `idMucTieu==idNhanVat`) — vô hại
   ở KH6 (chưa có luật đội/PvP), hoãn tới KH9.
 - **Nghiệm thu Unity 28/07 — client Unity đã bị tinker tay, KHÔNG REPRODUCE ĐƯỢC trên máy khác.**

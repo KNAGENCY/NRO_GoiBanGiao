@@ -86,6 +86,12 @@ type KhuVuc struct {
 	// DAI DANG THAT (panic khong dut) moi tich luy toi nguong roi dung rieng
 	// khu vuc.
 	soPanicLienTiep int
+
+	// Do tre nhip (KH6c): mocNhipTruoc chi vongLap cham (mot luong) nen la bien
+	// thuong; soNhipTre/treNhipLauNhatMs la atomic vi test/giam sat doc song song.
+	mocNhipTruoc     time.Time
+	soNhipTre        atomic.Int64
+	treNhipLauNhatMs atomic.Int64
 }
 
 // nguongPanicDungKhuVuc: so nhip panic LIEN TIEP toi da truoc khi van an toan
@@ -521,6 +527,25 @@ func (k *KhuVuc) ghiNhanNhip(daPanic bool) (nenDung bool) {
 	return false
 }
 
+// nguongNhipTre: khoang cach giua hai nhip vuot con so nay thi tinh la "tre"
+// (2x chu ky 100ms). Kieu hang so de kiem thu dot bien sua duoc.
+const nguongNhipTre = 200 * time.Millisecond
+
+// capNhatTreNhip nhan khoang cach tu nhip truoc toi nhip nay. Vuot nguong thi
+// dem (soNhipTre) + cap nhat max (treNhipLauNhatMs). Ham THUAN theo nghia khong
+// doc dong ho — vongLap truyen khoang cach vao — nen test tat dinh duoc. Chi
+// vongLap ghi treNhipLauNhatMs (mot chu so huu) nen khong dua ghi; atomic chi
+// de test/giam sat DOC song song an toan.
+func (k *KhuVuc) capNhatTreNhip(khoangCach time.Duration) {
+	if khoangCach <= nguongNhipTre {
+		return
+	}
+	k.soNhipTre.Add(1)
+	if ms := khoangCach.Milliseconds(); ms > k.treNhipLauNhatMs.Load() {
+		k.treNhipLauNhatMs.Store(ms)
+	}
+}
+
 // vongLap la than actor: doc hop thu, nhip tim 100ms, hoac dung khi co lenh
 // dung. Day la NOI DUY NHAT doc/ghi trang thai khu vuc (nguoiTrong, ...) —
 // khong goroutine nao khac duoc dung truc tiep cac field nay.
@@ -561,6 +586,17 @@ func (k *KhuVuc) vongLap() {
 				return
 			}
 		case <-ticker.C:
+			// KH6c: do khoang cach THUC (wall-clock) giua hai nhip. CO Y dung
+			// time.Now() thang (KHONG phai k.dongHo tiem duoc) vi day la do NHIP
+			// THAT cua vong lap — dongHo chi de tiem "gio game" cho logic gameplay,
+			// con o day ta can biet actor co giu duoc cadence 100ms that hay khong.
+			// Ticker cua Go BO tick neu actor ban khong kip nhan -> khoang cach
+			// > 100ms bao actor dang bi don. Nhip dau (moc zero) bo qua vi chua co moc.
+			bayGio := time.Now()
+			if !k.mocNhipTruoc.IsZero() {
+				k.capNhatTreNhip(bayGio.Sub(k.mocNhipTruoc))
+			}
+			k.mocNhipTruoc = bayGio
 			daPanic := antoan.ChayCoLuoi("khuvuc.nhipTim", k.nhipTim)
 			if k.ghiNhanNhip(daPanic) {
 				return

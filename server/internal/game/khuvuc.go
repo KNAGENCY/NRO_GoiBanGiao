@@ -8,6 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"nroserver/internal/antoan"
 	"nroserver/internal/protocol"
 	"nroserver/internal/store"
 )
@@ -76,7 +77,21 @@ type KhuVuc struct {
 	// se bat), atomic.Int64 la kieu zero-value-san-sang, an toan doc/ghi tu
 	// nhieu goroutine ma khong can mutex rieng.
 	soLanGuiRoi atomic.Int64
+
+	// soPanicLienTiep dem so NHIP GAMEPLAY (xuLy/nhipTim) panic LIEN TIEP GAN
+	// NHAT — van an toan cua manh A §3.2a. CHI luong vongLap doc/ghi (dung ky
+	// luat "mot chu so huu" nhu moi truong khac cua actor) nen la int thuong,
+	// khong can atomic. Reset ve 0 ngay khi co MOT nhip trot lot -> loi THOANG
+	// QUA (dung y "khu vuc cu chay tiep") khong bao gio cham nguong; chi loi
+	// DAI DANG THAT (panic khong dut) moi tich luy toi nguong roi dung rieng
+	// khu vuc.
+	soPanicLienTiep int
 }
+
+// nguongPanicDungKhuVuc: so nhip panic LIEN TIEP toi da truoc khi van an toan
+// dung rieng khu vuc (manh A §3.2a: "100 nhip = 10 giay panic lien khong dut" o
+// nhip tim 100ms). Dat kieu hang so o mot noi de doi de + de kiem thu dot bien.
+const nguongPanicDungKhuVuc = 100
 
 // guiTin la phan toi thieu cua mot phien (session) ma actor can de gui goi tin
 // cho client. *mynet.Session thoa man interface nay; test dung phien gia.
@@ -240,6 +255,16 @@ func heNguyenToNguoiChoi(lang int16) byte {
 	}
 	return heNguyenToTheoLang[lang]
 }
+
+// suKienChay la DIEM CHEN (seam) danh RIENG cho kiem thu luoi panic (manh A
+// Task 2/3): xuLy chi goi sk.f(). VI SAO can no thay vi loi dung mot su kien
+// that co the panic: test luoi panic can bom mot panic CO KIEM SOAT, CHAC
+// CHAN, vao dung goroutine actor (khong phu thuoc chi tiet cai dat cua mot su
+// kien that — neu mai sau ai them nil-check vao su kien do, panic bien mat,
+// test luoi hoa vo dung). Day KHONG phai nhanh "if test" trong logic that: no
+// la mot loai su kien rieng, runtime that khong bao gio gui no. Giu o day (canh
+// cac suKien khac) de xuLy nhan dien duoc trong type switch.
+type suKienChay struct{ f func() }
 
 // Hai su kien truy van duoi day chi con la fallback cho integration test cu
 // tu cap hopThu ma khong BatDau. Runtime dung control mailbox rieng.
@@ -473,6 +498,29 @@ func (k *KhuVuc) BatDau() {
 	go k.vongLap()
 }
 
+// ghiNhanNhip cap nhat van an toan sau MOT nhip gameplay (xuLy/nhipTim) va tra
+// ve co NEN DUNG rieng khu vuc hay khong. daPanic=true (nhip vua roi bi panic,
+// da bi ChayCoLuoi chan) -> tang bo dem lien tiep; false (nhip trot) -> reset
+// ve 0. Tach ham thuan RIENG (khong nhet thang vao vongLap) de test goi mot
+// chuoi panic/trot MA KHONG phu thuoc ticker thoi gian thuc — dung tinh than
+// da tach kiemVaLuu/chonMucTieu/hoiSinhQuai khoi vong lap o cac task truoc.
+//
+// CHI luong vongLap goi ham nay (qua ticker/hop thu) hoac test goi truc tiep
+// khi actor chua BatDau -> soPanicLienTiep khong bao gio bi hai luong cham.
+func (k *KhuVuc) ghiNhanNhip(daPanic bool) (nenDung bool) {
+	if !daPanic {
+		k.soPanicLienTiep = 0 // mot nhip trot -> loi thoang qua khong tich luy
+		return false
+	}
+	k.soPanicLienTiep++
+	if k.soPanicLienTiep >= nguongPanicDungKhuVuc {
+		slog.Error("khu vuc hong dai dang, dung rieng no de khong quay nong CPU + ngap log",
+			"mapId", k.banDo.MapID, "soPanicLienTiep", k.soPanicLienTiep)
+		return true
+	}
+	return false
+}
+
 // vongLap la than actor: doc hop thu, nhip tim 100ms, hoac dung khi co lenh
 // dung. Day la NOI DUY NHAT doc/ghi trang thai khu vuc (nguoiTrong, ...) —
 // khong goroutine nao khac duoc dung truc tiep cac field nay.
@@ -484,9 +532,17 @@ func (k *KhuVuc) vongLap() {
 	for {
 		// Drain control truoc gameplay. Vong default nay tranh mot mailbox
 		// gameplay luon day lam snapshot/leave/stop bi doi vo han.
+		//
+		// LUOI PANIC (manh A §3.2a): BOC TUNG lan xu ly bang antoan.ChayCoLuoi,
+		// KHONG boc ca vongLap — boc ngoai thi panic van thoat vong lap, giet
+		// CA khu vuc; boc trong thi mot su kien loi chi bo dung su kien do, nhip
+		// sau khu vuc chay binh thuong (quyet dinh da chot cua chu du an: khu
+		// vuc gap loi cu chay tiep).
 		select {
 		case sk := <-k.hopThuDieuKhien:
-			if k.xuLyDieuKhien(sk) {
+			var dung bool
+			antoan.ChayCoLuoi("khuvuc.dieuKhien", func() { dung = k.xuLyDieuKhien(sk) })
+			if dung {
 				return
 			}
 			continue
@@ -494,13 +550,21 @@ func (k *KhuVuc) vongLap() {
 		}
 		select {
 		case sk := <-k.hopThuDieuKhien:
-			if k.xuLyDieuKhien(sk) {
+			var dung bool
+			antoan.ChayCoLuoi("khuvuc.dieuKhien", func() { dung = k.xuLyDieuKhien(sk) })
+			if dung {
 				return
 			}
 		case sk := <-k.hopThu:
-			k.xuLy(sk)
+			daPanic := antoan.ChayCoLuoi("khuvuc.xuLy", func() { k.xuLy(sk) })
+			if k.ghiNhanNhip(daPanic) {
+				return
+			}
 		case <-ticker.C:
-			k.nhipTim()
+			daPanic := antoan.ChayCoLuoi("khuvuc.nhipTim", k.nhipTim)
+			if k.ghiNhanNhip(daPanic) {
+				return
+			}
 		}
 	}
 }
@@ -579,6 +643,11 @@ func (k *KhuVuc) saoNguoiChoi(idNhanVat int64) []store.NhanVat {
 //     ra khong con trong map nen tu nhien khong nhan duoc goi cua chinh minh).
 func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 	switch sk := sk.(type) {
+	case suKienChay:
+		// Diem chen test luoi panic (xem suKienChay o dau file): chay ham do
+		// bom vao. Runtime that khong bao gio gui su kien nay.
+		sk.f()
+
 	case suKienVao:
 		delete(k.anhChupDaRoi, sk.nv.ID)
 		// 1) Gui -5 cua TUNG nguoi CU cho nguoi MOI (de nguoi moi thay nguoi cu).

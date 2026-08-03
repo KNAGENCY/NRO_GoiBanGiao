@@ -27,9 +27,21 @@ type khoLuuGia struct {
 	// mot lan roi tu hoi phuc" — dung tinh huong CSDL chap chon thoang qua.
 	soLoiDauTien int
 	daGoi        int // dem so lan da goi — CHI dung/sua duoi mu.Lock(), khong can atomic rieng
+
+	// panicId != 0: khi CapNhatNhanVat nhan dung nhan vat co ID nay thi PANIC —
+	// diem chen (seam) cho test luoi panic Task 5 (mo phong ham ghi HONG NANG:
+	// nil deref / bug lap trinh, khong phai error tra ve binh thuong). Bat bien
+	// sau khoi tao (dat mot lan luc tao) nen doc khong can khoa, giong doTre.
+	panicId int64
 }
 
 func (k *khoLuuGia) CapNhatNhanVat(ctx context.Context, nv store.NhanVat) error {
+	// Diem chen test luoi panic (xem truong panicId): panic TRUOC khi cham
+	// mutex/ghi lai goiGhi -> ban nay coi nhu ghi hong hoan toan, ban ke tiep
+	// (id khac) van phai duoc luu neu luoi tho ghi lam dung viec.
+	if k.panicId != 0 && nv.ID == k.panicId {
+		panic("khoLuuGia: ghi hong gia (test luoi panic)")
+	}
 	// Sleep TRUOC khi dung k.mu — kho that (PostgreSQL) cham o tang mang/dia,
 	// khong phai o tang khoa noi bo cua chinh no; mo phong dung vi tri do giup
 	// test (b) đo đúng cái test muốn đo: "Xep goi kho cham" chu khong phai
@@ -305,6 +317,42 @@ func TestThoGhiDongVaChoXongGhiHetHangDoi(t *testing.T) {
 	for _, id := range []int64{1, 2, 3} {
 		if !thay[id] {
 			t.Fatalf("thieu ban ghi cho id=%d — hang doi CHUA duoc ghi het khi DongVaChoXong tra ve", id)
+		}
+	}
+}
+
+// khoLuuCoId tra ve kho gia da ghi duoc it nhat MOT ban cho id nay chua.
+func khoLuuCoId(k *khoLuuGia, id int64) bool {
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	for _, nv := range k.goiGhi {
+		if nv.ID == id {
+			return true
+		}
+	}
+	return false
+}
+
+// TestThoGhi_MotBanGhiPanic_NguoiKeTiepVanLuu (manh A Task 5): mot ban ghi lam
+// ham ghi PANIC KHONG duoc giet ca goroutine ghi — nguoi KE TIEP van phai duoc
+// luu. Kho gia panic khi gap id=1; id=2 phai xuong kho binh thuong.
+func TestThoGhi_MotBanGhiPanic_NguoiKeTiepVanLuu(t *testing.T) {
+	kg := &khoLuuGia{panicId: 1} // ghi id 1 -> panic; con lai luu binh thuong
+	tg := MoThoGhi(kg, 1)
+	defer dongVaChoXongVoiHan(t, tg, 2*time.Second)
+
+	tg.Xep(store.NhanVat{ID: 1}) // panic khi ghi
+	tg.Xep(store.NhanVat{ID: 2}) // phai luu duoc
+
+	hetGio := time.After(2 * time.Second)
+	for {
+		if khoLuuCoId(kg, 2) {
+			break // PASS: ban ke tiep duoc luu du ban truoc panic
+		}
+		select {
+		case <-hetGio:
+			t.Fatal("ban ghi ke tiep (id=2) khong duoc luu sau khi ban truoc panic — luoi tho ghi khong chan panic")
+		case <-time.After(10 * time.Millisecond):
 		}
 	}
 }

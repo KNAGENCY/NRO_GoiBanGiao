@@ -4,6 +4,7 @@ import (
 	"sync"
 	"time"
 
+	"nroserver/internal/antoan"
 	"nroserver/internal/store"
 )
 
@@ -135,10 +136,13 @@ func (b *BoLuuDinhKy) vongLap() {
 	defer ticker.Stop()
 	defer close(b.xong)
 
+	// LUOI PANIC (manh A §3.2c #4): boc THAN moi vong, KHONG boc ngoai — boc
+	// ngoai thi panic giet ca vong lap, mat han tinh nang luu dinh ky. Mot nhip
+	// luu loi -> bo nhip do, vong van quay nhip sau.
 	for {
 		select {
 		case <-ticker.C:
-			b.kiemVaLuu(b.dongHo())
+			antoan.ChayCoLuoi("luudinhky.nhip", func() { b.kiemVaLuu(b.dongHo()) })
 		case <-b.dung:
 			return
 		}

@@ -7,6 +7,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"nroserver/internal/antoan"
 	"nroserver/internal/store"
 )
 
@@ -156,19 +157,22 @@ func (t *ThoGhi) vongLap() {
 	defer ticker.Stop()
 	defer close(t.xong)
 
+	// LUOI PANIC (manh A §3.2c #5): boc THAN moi vong (loi dieu phoi xa hang
+	// doi), KHONG boc ngoai — boc ngoai thi panic giet ca vong lap, mat han
+	// tinh nang luu. Mot nhip xa loi -> bo nhip do, vong van quay nhip sau.
 	for {
 		select {
 		case <-t.coViec:
-			t.ghiHetHangDoi()
+			antoan.ChayCoLuoi("thogi.xa", t.ghiHetHangDoi)
 		case <-ticker.C:
-			t.ghiHetHangDoi()
+			antoan.ChayCoLuoi("thogi.xa", t.ghiHetHangDoi)
 		case <-t.dung:
 			// Lenh dung: XA HET hang doi con lai MOT LAN CUOI (dac ta §4
 			// diem C — "ghi het nhung gi con trong hang doi") roi thoat.
 			// Day la BEST-EFFORT mot dot (khong lap vo han neu cu loi mai) —
 			// ctx cua nguoi goi DongVaChoXong la cai chan thoi gian cho o
 			// tang tren, khong phai o day.
-			t.ghiHetHangDoi()
+			antoan.ChayCoLuoi("thogi.xa", t.ghiHetHangDoi)
 			return
 		}
 	}
@@ -238,7 +242,11 @@ func (t *ThoGhi) ghiHetHangDoi() {
 		go func(nv store.NhanVat) {
 			defer cho.Done()
 			defer func() { <-giayPhep }()
-			t.ghiMotBan(nv)
+			// LUOI PANIC (manh A §3.2c #6): mot ban ghi hong (ham ghi panic)
+			// chi bo DUNG nguoi do (da co log kem stack), tho ghi van luu nguoi
+			// tiep theo — KHONG cho panic lan ra giet ca goroutine ghi (se lam
+			// sap tien trinh, mat het duong luu).
+			antoan.ChayCoLuoi("thogi.ghi", func() { t.ghiMotBan(nv) })
 		}(nv)
 	}
 	cho.Wait()

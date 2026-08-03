@@ -1,0 +1,22 @@
+#!/bin/sh
+# Git pre-push hook: chan push neu kiem-tra-tat-ca.ps1 do.
+#
+# Cai (mot lan): git config core.hooksPath scripts/hooks
+# Bo qua mot lan (KHONG khuyen khich): git push --no-verify
+#
+# Dat trong repo (khong phai .git/hooks) de version-controlled + chia se duoc.
+
+goc="$(git rev-parse --show-toplevel)"
+echo "pre-push: dang chay kiem-tra-tat-ca.ps1 (build + vet + gofmt + go test + pytest)..."
+
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$goc/kiem-tra-tat-ca.ps1"
+ma=$?
+
+if [ "$ma" -ne 0 ]; then
+    echo ""
+    echo "pre-push: KIEM TRA DO (ma $ma) -> CHAN push."
+    echo "Sua cho do roi push lai. Neu that su can bo qua: git push --no-verify"
+    exit 1
+fi
+echo "pre-push: kiem tra XANH -> cho push."
+exit 0

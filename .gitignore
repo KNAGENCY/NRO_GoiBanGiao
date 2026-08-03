@@ -83,3 +83,12 @@ my thuat/
 docs/my-thuat/anh-nguon/
 docs/my-thuat/anh-game/
 docs/my-thuat/*.zip
+
+# --- 10. RAC PYTHON (pytest/CI sinh ra) ---
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# --- 11. BAN SAO LUU DB (pg_dump) ---
+# Chua du lieu nguoi choi (nhu muc 1) — TUYET DOI khong dua len git.
+backups/

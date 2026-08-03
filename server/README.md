@@ -142,3 +142,34 @@ CSDL. Nhưng **đặt sai cổng thì KHÔNG skip — nó đỏ hàng loạt** (
 $env:NRO_TEST_DSN = "postgres://postgres:nrodev123@127.0.0.1:CONG/nro_test"
 go test ./... -v
 ```
+
+## Migration CSDL (tự áp khi khởi động)
+
+Server **tự áp migration còn thiếu** mỗi lần khởi động (`internal/store/migrate.go`): mỗi file
+`internal/store/migrations/NNNN_*.sql` chạy đúng một lần, theo dõi trong bảng `schema_migrations`,
+mỗi cái một transaction. Thêm thay đổi lược đồ = **thêm file `.sql` đánh số tăng dần**; KHÔNG sửa
+file cũ đã áp. Migration lỗi → server **thoát, không mở cổng** (fail-closed). Hết cảnh gõ `psql` tay.
+
+## Sao lưu & khôi phục CSDL
+
+Sao lưu (script ở gốc repo, tự dò cổng, `pg_dump -Fc`, giữ 14 bản, tự xóa cũ):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File ..\sao-luu-db.ps1
+```
+
+Cài chạy hằng ngày (một lần trên VPS, cần admin): `..\cai-lich-sao-luu.ps1`.
+
+Khôi phục từ một bản — ⚠️ `--clean` **ghi đè** dữ liệu hiện tại:
+
+```powershell
+D:\PostgreSQL\bin\pg_restore.exe -h 127.0.0.1 -p CONG -U postgres -d nro --clean ..\backups\nro-XXX.dump
+```
+
+## Kiểm tra tất cả trong một lệnh (CI local)
+
+```powershell
+powershell -ExecutionPolicy Bypass -File ..\kiem-tra-tat-ca.ps1
+```
+
+Chặn push khi đỏ: cài hook một lần bằng `git config core.hooksPath scripts/hooks`.

@@ -13,6 +13,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"nroserver/internal/antoan"
 	"nroserver/internal/protocol"
 )
 
@@ -141,24 +142,33 @@ func (s *Session) khoiTaoWriter() {
 
 func (s *Session) vongWriter() {
 	defer close(s.writerXong)
-	for {
-		// Uu tien tin hieu dong truoc queue: sau write error/DongCham, phan
-		// queue con lai phai bi bo, khong duoc ghi tiep.
-		select {
-		case <-s.dungWriter:
-			return
-		default:
-		}
-		select {
-		case <-s.dungWriter:
-			return
-		case m := <-s.hangGui:
-			if err := s.Gui(m); err != nil {
-				slog.Debug("writer session ket thuc", "ip", s.DiaChiIP, "loi", err)
-				s.DongCham()
+	// LUOI PANIC (manh A §3.2b): panic luc GHI cho mot ket noi (vd loi la trong
+	// tang khung goi) KHONG duoc lam sap ca tien trinh. Boc than vong bang luoi
+	// chung; neu chan duoc panic thi dong DUNG ket noi do (DongCham) roi thoat —
+	// defer close(writerXong) o tren van chay nen Dong() khong treo cho.
+	daChanPanic := antoan.ChayCoLuoi("net.vongwriter:"+s.DiaChiIP, func() {
+		for {
+			// Uu tien tin hieu dong truoc queue: sau write error/DongCham, phan
+			// queue con lai phai bi bo, khong duoc ghi tiep.
+			select {
+			case <-s.dungWriter:
 				return
+			default:
+			}
+			select {
+			case <-s.dungWriter:
+				return
+			case m := <-s.hangGui:
+				if err := s.Gui(m); err != nil {
+					slog.Debug("writer session ket thuc", "ip", s.DiaChiIP, "loi", err)
+					s.DongCham()
+					return
+				}
 			}
 		}
+	})
+	if daChanPanic {
+		s.DongCham()
 	}
 }
 
@@ -215,23 +225,31 @@ func PhucVu(conn net.Conn, taoXuLy func() XuLyGoiTin) {
 		defer c.KhiDong()
 	}
 
-	if err := batTay(s); err != nil {
-		slog.Warn("bat tay that bai", "ip", diaChi, "loi", err)
-		return
-	}
+	// LUOI PANIC (manh A §3.2b): mot panic BAT KY trong luc phuc vu MOT ket noi
+	// (bat tay hong, goi tin doc gia, bug tang xu ly) KHONG duoc lam sap ca tien
+	// trinh, da van TOAN BO nguoi choi. ChayCoLuoi chan + ghi log kem stack; khi
+	// no tra ve, PhucVu ket thuc binh thuong nen defer s.Dong()/KhiDong o tren
+	// VAN CHAY -> dung ket noi nay duoc dong sach (giai phong phien theo dung
+	// duong da co), nguoi choi khac khong he han gi.
+	antoan.ChayCoLuoi("net.phucvu:"+diaChi, func() {
+		if err := batTay(s); err != nil {
+			slog.Warn("bat tay that bai", "ip", diaChi, "loi", err)
+			return
+		}
 
-	for {
-		_ = conn.SetReadDeadline(time.Now().Add(thoiGianChoGoiTin))
-		m, err := s.framer.ReadMessage()
-		if err != nil {
-			slog.Debug("ket noi ket thuc", "ip", diaChi, "loi", err)
-			return
+		for {
+			_ = conn.SetReadDeadline(time.Now().Add(thoiGianChoGoiTin))
+			m, err := s.framer.ReadMessage()
+			if err != nil {
+				slog.Debug("ket noi ket thuc", "ip", diaChi, "loi", err)
+				return
+			}
+			if err := xuLy.XuLy(s, m); err != nil {
+				slog.Warn("xu ly goi tin that bai", "ip", diaChi, "lenh", m.Command, "loi", err)
+				return
+			}
 		}
-		if err := xuLy.XuLy(s, m); err != nil {
-			slog.Warn("xu ly goi tin that bai", "ip", diaChi, "lenh", m.Command, "loi", err)
-			return
-		}
-	}
+	})
 }
 
 // batTay thuc hien buoc trao khoa. Client mo ket noi la gui ngay goi -27

@@ -546,6 +546,19 @@ func (k *KhuVuc) capNhatTreNhip(khoangCach time.Duration) {
 	}
 }
 
+// danhDauNhip la DUONG NOI (dung trong vongLap) giua dong ho that va
+// capNhatTreNhip: nhan moc thoi gian NHIP NAY, bo qua nhip dau (mocNhipTruoc
+// zero), tinh khoang cach toi nhip truoc roi goi capNhatTreNhip, cuoi cung GAN
+// LAI moc. Tach rieng de test tat dinh KHOA duoc duong noi nay (chi test
+// capNhatTreNhip roi tin wiring la chua du — xem TestDanhDauNhip). CHI vongLap
+// goi -> mocNhipTruoc mot chu so huu.
+func (k *KhuVuc) danhDauNhip(bayGio time.Time) {
+	if !k.mocNhipTruoc.IsZero() {
+		k.capNhatTreNhip(bayGio.Sub(k.mocNhipTruoc))
+	}
+	k.mocNhipTruoc = bayGio
+}
+
 // vongLap la than actor: doc hop thu, nhip tim 100ms, hoac dung khi co lenh
 // dung. Day la NOI DUY NHAT doc/ghi trang thai khu vuc (nguoiTrong, ...) —
 // khong goroutine nao khac duoc dung truc tiep cac field nay.
@@ -588,15 +601,10 @@ func (k *KhuVuc) vongLap() {
 		case <-ticker.C:
 			// KH6c: do khoang cach THUC (wall-clock) giua hai nhip. CO Y dung
 			// time.Now() thang (KHONG phai k.dongHo tiem duoc) vi day la do NHIP
-			// THAT cua vong lap — dongHo chi de tiem "gio game" cho logic gameplay,
-			// con o day ta can biet actor co giu duoc cadence 100ms that hay khong.
-			// Ticker cua Go BO tick neu actor ban khong kip nhan -> khoang cach
-			// > 100ms bao actor dang bi don. Nhip dau (moc zero) bo qua vi chua co moc.
-			bayGio := time.Now()
-			if !k.mocNhipTruoc.IsZero() {
-				k.capNhatTreNhip(bayGio.Sub(k.mocNhipTruoc))
-			}
-			k.mocNhipTruoc = bayGio
+			// THAT cua vong lap — dongHo chi de tiem "gio game" cho logic gameplay;
+			// neu test dong bang dongHo ma o day cung dung no thi tre nhip mu tit.
+			// Toan bo logic moc/tinh-khoang-cach nam trong danhDauNhip de test khoa.
+			k.danhDauNhip(time.Now())
 			daPanic := antoan.ChayCoLuoi("khuvuc.nhipTim", k.nhipTim)
 			if k.ghiNhanNhip(daPanic) {
 				return

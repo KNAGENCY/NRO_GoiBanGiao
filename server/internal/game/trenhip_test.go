@@ -48,3 +48,35 @@ func TestCapNhatTreNhip(t *testing.T) {
 		t.Fatalf("treNhipLauNhatMs=%d, mong giu 500", got)
 	}
 }
+
+// TestDanhDauNhip khoa DUONG NOI (thu reviewer bat: dot bien wiring van xanh).
+// danhDauNhip nhan mot moc thoi gian, BO QUA nhip dau (chua co moc truoc), roi
+// tinh khoang cach toi moc truoc va goi capNhatTreNhip, cuoi cung GAN LAI moc.
+// Test tat dinh (truyen time gia) -> bat duoc dot bien "quen gan mocNhipTruoc".
+func TestDanhDauNhip(t *testing.T) {
+	k := &KhuVuc{}
+	t0 := time.Unix(1000, 0)
+
+	// Nhip dau: chua co moc -> khong dem gi, chi ghi moc.
+	k.danhDauNhip(t0)
+	if got := k.soNhipTre.Load(); got != 0 {
+		t.Fatalf("nhip dau khong duoc dem tre, soNhipTre=%d, mong 0", got)
+	}
+
+	// Nhip 2 cach 300ms (> nguong 200ms) -> dem 1, max 300.
+	k.danhDauNhip(t0.Add(300 * time.Millisecond))
+	if got := k.soNhipTre.Load(); got != 1 {
+		t.Fatalf("cach 300ms phai dem tre, soNhipTre=%d, mong 1", got)
+	}
+	if got := k.treNhipLauNhatMs.Load(); got != 300 {
+		t.Fatalf("treNhipLauNhatMs=%d, mong 300", got)
+	}
+
+	// Nhip 3 cach 100ms (< nguong) -> KHONG dem. Neu dot bien QUEN gan lai moc o
+	// nhip 2, moc van la t0 -> khoang cach thanh 400ms -> bi dem sai (2). Buoc nay
+	// chinh la cai khoa duong noi.
+	k.danhDauNhip(t0.Add(400 * time.Millisecond))
+	if got := k.soNhipTre.Load(); got != 1 {
+		t.Fatalf("cach 100ms khong duoc dem (moc phai da gan lai), soNhipTre=%d, mong giu 1", got)
+	}
+}

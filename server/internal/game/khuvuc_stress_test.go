@@ -37,6 +37,12 @@ func (p *phienStress) DongCham() { p.soLanDong.Add(1) }
 // nguoi con lai). 3 nguoi "cham" phai bi gach ma actor KHONG treo: prober phai
 // lay duoc anh chup (bang chung actor con song), va cuoi cung chi con 17 nguoi
 // khoe. Do la bang chung §6.10b khong tai dien duoi tai.
+//
+// Vi sao bom suKienDiChuyen (khong phai danh quai/xa chieu nhu spec §3.2 goi y):
+// (1) CUNG duong toi han — mailbox -> phatChoNguoiKhac -> XepGui -> gach client
+// cham; (2) danh quai can chieuDangChon != nil (nil se nil-deref), phuc tap hoa
+// setup ma khong them gia tri cho muc tieu "don broadcast". Throughput ~5M ev/2s
+// van la stress that.
 func TestStress20ClientDonBroadcastActorKhongTreo(t *testing.T) {
 	const soNguoi = 20
 	const soCham = 3
@@ -125,8 +131,11 @@ func TestStress20ClientDonBroadcastActorKhongTreo(t *testing.T) {
 
 	// 1) Actor KHONG treo kieu §6.10b: neu actor ket 30s tren socket client cham
 	//    thi prober se co 0 lan OK trong suot 2s. Yeu cau co lay duoc anh chup.
-	if soProbeOK.Load() == 0 {
-		t.Fatal("actor KHONG tra loi probe lan nao trong 2s -> nghi treo kieu §6.10b")
+	// Actor treo kieu §6.10b (ket 30s tren socket client cham) se cho ~0 probe OK
+	// trong 2s; actor khoe tra loi hang tram (do duoc: 167-205). Nguong 10 co
+	// margin rat lon nen khong flaky, ma van bat duoc "gan nhu treo".
+	if n := soProbeOK.Load(); n < 10 {
+		t.Fatalf("chi %d probe OK trong 2s (mong >=10) -> actor gan nhu treo kieu §6.10b", n)
 	}
 
 	// 2) Sau khi ngung don tai, actor phai hoi phuc va tra dung trang thai cuoi:
@@ -147,9 +156,25 @@ func TestStress20ClientDonBroadcastActorKhongTreo(t *testing.T) {
 		t.Fatalf("con %d nguoi, mong %d (phai gach het %d client cham)", conLai, soNguoi-soCham, soCham)
 	}
 
-	// 3) Chan stall benh ly (rong rai, chi bat treo that su dai).
-	if tre := k.treNhipLauNhatMs.Load(); tre >= 1000 {
-		t.Errorf("tre nhip lau nhat %dms >= 1000ms -> actor bi don qua nang", tre)
+	// 3) Tre nhip trong nguong spec §4 (500ms). Thuc te ~100ms tren may thuong
+	//    (do duoc: 0ms o nguong 200ms); 500ms la guard rong bat actor bi don benh ly.
+	if tre := k.treNhipLauNhatMs.Load(); tre >= 500 {
+		t.Errorf("tre nhip lau nhat %dms >= 500ms -> actor bi don qua nang", tre)
+	}
+
+	// 4) Moi client cham bi dong socket DUNG 1 lan (gach 1 lan); client khoe
+	//    KHONG bi dong. Dung phienStress.soLanDong (truoc day la bien chet).
+	var tongDongCham int64
+	for i := soNguoi - soCham; i < soNguoi; i++ {
+		tongDongCham += phiens[i].soLanDong.Load()
+	}
+	if tongDongCham != soCham {
+		t.Errorf("tong DongCham client cham = %d, mong %d", tongDongCham, soCham)
+	}
+	for i := 0; i < soNguoi-soCham; i++ {
+		if n := phiens[i].soLanDong.Load(); n != 0 {
+			t.Errorf("client khoe #%d bi DongCham %d lan, mong 0", i, n)
+		}
 	}
 
 	// --- BAO SO (quan sat, khong lam dieu kien dau/rot) ---

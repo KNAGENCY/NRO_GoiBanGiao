@@ -51,18 +51,25 @@ File mới `server/internal/game/khuvuc_stress_test.go`, hàm `TestStress20Clien
 2. Thêm **20 người chơi giả**. Phiên giả (`phienGiaKhuVuc`, mở rộng nếu cần): **đa số "khỏe"**
    (rút hàng đều) + **2–3 "chậm"** (không rút → hàng đầy → bị gạch). Trộn để test luôn cả đường
    gạch-client-chậm dưới tải.
-3. **20 goroutine**, mỗi cái là 1 người, lặp gửi sự kiện **xả chiêu (đánh quái)** — đường
-   broadcast **nặng nhất**: tính sát thương + `phatChoCaKhuVuc` cho cả 20 — vào actor qua
-   `k.Gui(...)`, trong **N giây** (đề xuất 2s) với nhịp cao (cố tình làm đầy hộp thư 256).
-4. **1 goroutine dò (prober)**: cứ ~10ms gọi `AnhChupNguoiChoiCoLoi(0)`, đo thời gian trả lời.
-   **Mỗi lần phải < 100ms** — đây là bằng chứng actor **không treo** dù đang bị dồn.
+3. **20 goroutine**, mỗi cái là 1 người, lặp gửi sự kiện broadcast vào actor qua `k.Gui(...)`,
+   trong **N giây** (đề xuất 2s) với nhịp cao (cố tình làm đầy hộp thư 256). *Thi công dùng
+   `suKienDiChuyen` (di chuyển) thay vì đánh quái: cùng đường tới hạn mailbox→`phatChoNguoiKhac`
+   →`XepGui`→gạch client chậm, mà không cần `chieuDangChon` (nil sẽ nil-deref) — throughput
+   ~5M sự kiện/2s vẫn là stress thật.*
+4. **1 goroutine dò (prober)**: cứ ~5ms gọi `AnhChupNguoiChoiCoLoi(0)`, đếm số lần trả lời được
+   (OK) và số lần quá hạn (timeout 100ms nội tại): actor **không treo** thì OK hàng trăm lần;
+   treo kiểu §6.10b (kẹt 30s) thì OK ~0.
 5. Kết thúc: dừng bơm, `Dung()` khu vực sạch (không rò goroutine).
 
 ### 3.3. Mảnh C — Khẳng định + báo số + đột biến
 
 **Khẳng định (test đỏ nếu sai):**
-- **Không treo:** mọi lần probe **< 100ms** (thu max, đỏ nếu vượt).
-- **Trễ nhịp có kiểm soát:** `treNhipLauNhatMs` **< 500ms** (ngưỡng đậu).
+- **Không treo (bằng chứng chính):** (a) actor trả lời **≥10 probe OK** trong 2s (treo §6.10b → ~0);
+  (b) sau khi ngừng tải, actor hồi phục + **gạch đủ client chậm** — chỉ actor đang chạy mới gạch
+  được, nên đây là bằng chứng "còn sống" mạnh nhất. *Timeout probe lẻ dưới tải cực nặng KHÔNG
+  fail (§6) — chỉ báo số.*
+- **Đóng socket đúng:** mỗi client chậm bị `DongCham` **đúng 1 lần**; client khỏe **không** bị đóng.
+- **Trễ nhịp có kiểm soát:** `treNhipLauNhatMs` **< 500ms** (ngưỡng đậu; thực tế ~100ms).
 - **Rơi hộp thư: chỉ BÁO SỐ, không hard-assert.** (`soLanGuiRoi > 0` phụ thuộc tốc độ máy →
   hard-assert sẽ chập chờn.) Đường đếm-rơi đã có test riêng `TestGuiHopThuDayDemVaLog`; KH6c chỉ
   đọc + in `soLanGuiRoi` để quan sát, không lấy làm điều kiện đậu/rớt.
@@ -71,17 +78,20 @@ File mới `server/internal/game/khuvuc_stress_test.go`, hàm `TestStress20Clien
 **Báo số (`t.Log`):** tổng sự kiện bơm, tổng rơi hộp thư (`soLanGuiRoi`), số nhịp trễ
 (`soNhipTre`), trễ lâu nhất (`treNhipLauNhatMs`), max thời gian probe.
 
-**Kiểm thử đột biến (bắt buộc — kỷ luật dự án §6.11):**
-- Sửa `capNhatTreNhip` luôn trả "không trễ" → test thuần của Mảnh A phải **đỏ**.
-- Thay 1 broadcast từ `XepGui` sang `Gui` đồng bộ → probe vọt > 100ms → test **đỏ**.
-- Bỏ `loaiNhieuNguoiLoiGui` → client chậm không bị gạch → khẳng định "còn đúng số khỏe" **đỏ**.
+**Kiểm thử đột biến (bắt buộc — kỷ luật dự án §6.11) — đã chạy thật:**
+- `capNhatTreNhip` no-op → `TestCapNhatTreNhip` **đỏ**. ✓
+- `danhDauNhip` quên gán lại mốc → `TestDanhDauNhip` **đỏ** (khóa đường nối đo nhịp — reviewer bắt). ✓
+- Hạ `nguongNhipTre` xuống 1ms (positive control) → `soNhipTre=19`, `treNhip=104ms` → chứng minh
+  vòng lặp đo THẬT khoảng cách ~100ms (không đo mù). ✓
+- Bỏ `loaiNhieuNguoiLoiGui` → client chậm không bị gạch → `conLai=20` → stress test **đỏ**. ✓
 
 ## 4. Ngưỡng đậu (tùy chỉnh trong test)
 
 | Chỉ số | Ngưỡng |
 |---|---|
-| Thời gian probe actor | luôn **< 100ms** |
-| Trễ nhịp lâu nhất | **< 500ms** |
+| Probe OK trong 2s | **≥ 10** (actor treo §6.10b → ~0) |
+| `DongCham` client chậm | **đúng 1 lần** mỗi người; client khỏe = 0 |
+| Trễ nhịp lâu nhất | **< 500ms** (thực tế ~100ms) |
 | Rơi hộp thư | chỉ **báo số** (không hard-assert, tránh chập chờn) |
 | Người còn lại sau test | = số người "khỏe" |
 

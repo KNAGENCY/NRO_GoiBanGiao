@@ -77,7 +77,21 @@ type KhuVuc struct {
 	// se bat), atomic.Int64 la kieu zero-value-san-sang, an toan doc/ghi tu
 	// nhieu goroutine ma khong can mutex rieng.
 	soLanGuiRoi atomic.Int64
+
+	// soPanicLienTiep dem so NHIP GAMEPLAY (xuLy/nhipTim) panic LIEN TIEP GAN
+	// NHAT — van an toan cua manh A §3.2a. CHI luong vongLap doc/ghi (dung ky
+	// luat "mot chu so huu" nhu moi truong khac cua actor) nen la int thuong,
+	// khong can atomic. Reset ve 0 ngay khi co MOT nhip trot lot -> loi THOANG
+	// QUA (dung y "khu vuc cu chay tiep") khong bao gio cham nguong; chi loi
+	// DAI DANG THAT (panic khong dut) moi tich luy toi nguong roi dung rieng
+	// khu vuc.
+	soPanicLienTiep int
 }
+
+// nguongPanicDungKhuVuc: so nhip panic LIEN TIEP toi da truoc khi van an toan
+// dung rieng khu vuc (manh A §3.2a: "100 nhip = 10 giay panic lien khong dut" o
+// nhip tim 100ms). Dat kieu hang so o mot noi de doi de + de kiem thu dot bien.
+const nguongPanicDungKhuVuc = 100
 
 // guiTin la phan toi thieu cua mot phien (session) ma actor can de gui goi tin
 // cho client. *mynet.Session thoa man interface nay; test dung phien gia.
@@ -484,6 +498,29 @@ func (k *KhuVuc) BatDau() {
 	go k.vongLap()
 }
 
+// ghiNhanNhip cap nhat van an toan sau MOT nhip gameplay (xuLy/nhipTim) va tra
+// ve co NEN DUNG rieng khu vuc hay khong. daPanic=true (nhip vua roi bi panic,
+// da bi ChayCoLuoi chan) -> tang bo dem lien tiep; false (nhip trot) -> reset
+// ve 0. Tach ham thuan RIENG (khong nhet thang vao vongLap) de test goi mot
+// chuoi panic/trot MA KHONG phu thuoc ticker thoi gian thuc — dung tinh than
+// da tach kiemVaLuu/chonMucTieu/hoiSinhQuai khoi vong lap o cac task truoc.
+//
+// CHI luong vongLap goi ham nay (qua ticker/hop thu) hoac test goi truc tiep
+// khi actor chua BatDau -> soPanicLienTiep khong bao gio bi hai luong cham.
+func (k *KhuVuc) ghiNhanNhip(daPanic bool) (nenDung bool) {
+	if !daPanic {
+		k.soPanicLienTiep = 0 // mot nhip trot -> loi thoang qua khong tich luy
+		return false
+	}
+	k.soPanicLienTiep++
+	if k.soPanicLienTiep >= nguongPanicDungKhuVuc {
+		slog.Error("khu vuc hong dai dang, dung rieng no de khong quay nong CPU + ngap log",
+			"mapId", k.banDo.MapID, "soPanicLienTiep", k.soPanicLienTiep)
+		return true
+	}
+	return false
+}
+
 // vongLap la than actor: doc hop thu, nhip tim 100ms, hoac dung khi co lenh
 // dung. Day la NOI DUY NHAT doc/ghi trang thai khu vuc (nguoiTrong, ...) —
 // khong goroutine nao khac duoc dung truc tiep cac field nay.
@@ -519,9 +556,15 @@ func (k *KhuVuc) vongLap() {
 				return
 			}
 		case sk := <-k.hopThu:
-			antoan.ChayCoLuoi("khuvuc.xuLy", func() { k.xuLy(sk) })
+			daPanic := antoan.ChayCoLuoi("khuvuc.xuLy", func() { k.xuLy(sk) })
+			if k.ghiNhanNhip(daPanic) {
+				return
+			}
 		case <-ticker.C:
-			antoan.ChayCoLuoi("khuvuc.nhipTim", k.nhipTim)
+			daPanic := antoan.ChayCoLuoi("khuvuc.nhipTim", k.nhipTim)
+			if k.ghiNhanNhip(daPanic) {
+				return
+			}
 		}
 	}
 }

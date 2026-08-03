@@ -83,3 +83,8 @@ my thuat/
 docs/my-thuat/anh-nguon/
 docs/my-thuat/anh-game/
 docs/my-thuat/*.zip
+
+# --- 10. RAC PYTHON (pytest/CI sinh ra) ---
+__pycache__/
+*.pyc
+.pytest_cache/

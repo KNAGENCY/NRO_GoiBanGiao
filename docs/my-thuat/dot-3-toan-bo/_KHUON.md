@@ -66,6 +66,27 @@
 | **Đá** | Thổ | nâu đất–xám đá |
 | **Mây** | Lôi | tím–trắng xanh, tia sét |
 
+## 3.5 MASTER PROMPT — phong cách khoá (dán vào công cụ gen ảnh)
+
+Mỗi file brief chỉ ghi **nội dung riêng từng ảnh**. Phong cách chung nằm ở đây — dán khối này vào Custom Tool (Google Flow / Nano Banana Pro) hoặc kèm mỗi lần gen:
+
+```
+Tao SPRITE GAME 2D phong cach PIXEL-ART chi tiet cho game nhap vai Naruto.
+PHONG CACH KHOA (ap cho MOI anh):
+- Pixel-art / game sprite 2D, CO DO BONG va chuyen mau (shading), vien trong dam sach.
+  TUYET DOI khong ve hinh khoi phang vector, khong to mau det.
+- Nen: mot mau phang don gian (xam trung tinh) de tach nen sau — KHONG ve boi canh,
+  KHONG do bong duoi chan. (Rieng anh nen ban do map_nen_* thi nen dac.)
+- Bang mau am, dam chat ninja co trang. Mau rieng theo LANG (bang §3).
+- Nhan vat/boss/npc: nhin nghieng side-view, mat xoay sang PHAI, toan than.
+- Do chi tiet >= 40 mau khac nhau cho nhan vat/boss/quai/vat pham; KHONG duoc phang
+  nhu anh xau (anh-tham-chieu/XAU-*.png). Dat anh vuong, chu de o giua, chua khoang trong.
+```
+
+**3 ảnh tham chiếu gắn kèm khi gen** (Nano Banana nhận tối đa 3): (1) phong cách `TOT-naruto-logo.png` — cố định mọi lần; (2) mức chi tiết `TOT-chitiet-nhanvat.png`; (3) một "ảnh gốc" đã tạo tốt của **cùng làng/nhân vật** để đồng bộ cả bộ. Kèm `XAU-boss-zabuza.png` như *ảnh phản diện* ("KHONG ve phang nhu anh nay").
+
+> **Mỗi file brief theo format `DOT-1B`:** tiêu đề nhóm → phong cách + màu hệ làng → **"subject block"** tiếng Anh (câu gốc cho AI) → **bảng ảnh**: `tên_x4.png · cỡ · mô tả chi tiết (màu + đặc trưng Naruto)`. Agent gen: master prompt (trên) + subject block + dòng mô tả của ảnh đó.
+
 ## 4. NỀN TRONG SUỐT
 
 - Mọi ảnh là **PNG có kênh alpha**, nền trong hoàn toàn. Ngoại lệ: `map_nen_*` (nền đặc).

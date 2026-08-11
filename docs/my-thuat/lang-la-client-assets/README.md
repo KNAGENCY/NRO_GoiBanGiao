@@ -10,7 +10,9 @@ Ngày: 05/08/2026 · Nhánh: `map-lang-la` · Thực hiện qua Unity MCP + tự
 |---|---|---|
 | `Logo/1.png` | 1 | Wordmark **NARUTO** (thay logo "Ngọc Rồng Kame") — xem bộ nhớ `logo-resource-sync` |
 | `res/x2/bg/`, `res/x4/bg/` | b00–b03 | **Nền map 1**: b03=trời (`map_nen_troi_1`), b02=núi Hokage (`map_nen_nuihokage` + padding đẩy lên), b00/b01=đất (màu fill vực) |
-| `res/x2/t/`, `res/x4/t/` | `1$V.png` (30 mỗi mức) | **Tile mặt đất map 1**: các value đất đã thay = `map_la_dat_1`; cỏ (7/9/11/12) giữ nguyên DB |
+| `res/x2/t/`, `res/x4/t/` | `1$V.png` (30 mỗi mức) | **Tile mặt đất map 1** (Lát 2): các value đất đã thay = `map_la_dat_1`; cỏ (7/9/11/12) giữ nguyên DB |
+| `res/x{1..4}/t/` | `1$40..1$50.png` | **Tile NHÀ CỬA (Lát 3)**: 40-42 mái ngói · 43-44 tường gỗ · 45 cửa · 46 cửa sổ · 47-48 hàng rào · 49 đèn lồng · 50 cổng làng (96×96 ở x2, tràn 2×2 ô) |
+| `res/mymap/1.bytes` | 1 | **Bố cục map 1 (Lát 3)** — 52×24; đã đặt 28 ô nhà cửa ở hàng 15-16 (3 nhà + cổng torii + hàng rào). Bản trước Lát 3: `1.bytes.bak-truoc-lat3` trong client |
 
 ## Khôi phục vào client
 

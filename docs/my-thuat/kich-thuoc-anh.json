@@ -1498,5 +1498,1269 @@
  "kn_may_tuchakra_x4.png": [
   64,
   64
+ ],
+ "boss_cat_bunhin_x4.png": [
+  160,
+  160
+ ],
+ "boss_cat_kiemphong_x4.png": [
+  160,
+  160
+ ],
+ "boss_cat_shukaku_x4.png": [
+  160,
+  160
+ ],
+ "boss_da_golem_lon_x4.png": [
+  160,
+  160
+ ],
+ "boss_da_tsuchikage_x4.png": [
+  160,
+  160
+ ],
+ "boss_da_tuvi_x4.png": [
+  160,
+  160
+ ],
+ "boss_may_batvi_x4.png": [
+  160,
+  160
+ ],
+ "boss_may_raikage_x4.png": [
+  160,
+  160
+ ],
+ "boss_may_songdao_x4.png": [
+  160,
+  160
+ ],
+ "boss_smu_mizukage_x4.png": [
+  160,
+  160
+ ],
+ "boss_smu_tamvi_x4.png": [
+  160,
+  160
+ ],
+ "boss_smu_thatdao_x4.png": [
+  160,
+  160
+ ],
+ "cd_cat_giao_nv_x4.png": [
+  200,
+  200
+ ],
+ "cd_cat_kazekage_x4.png": [
+  200,
+  200
+ ],
+ "cd_cat_thay_x4.png": [
+  200,
+  200
+ ],
+ "cd_da_giao_nv_x4.png": [
+  200,
+  200
+ ],
+ "cd_da_thay_x4.png": [
+  200,
+  200
+ ],
+ "cd_da_tsuchikage_x4.png": [
+  200,
+  200
+ ],
+ "cd_may_giao_nv_x4.png": [
+  200,
+  200
+ ],
+ "cd_may_raikage_x4.png": [
+  200,
+  200
+ ],
+ "cd_may_thay_x4.png": [
+  200,
+  200
+ ],
+ "cd_smu_giao_nv_x4.png": [
+  200,
+  200
+ ],
+ "cd_smu_mizukage_x4.png": [
+  200,
+  200
+ ],
+ "cd_smu_thay_x4.png": [
+  200,
+  200
+ ],
+ "map_cat_bacthang_x4.png": [
+  96,
+  96
+ ],
+ "map_cat_binhgom_x4.png": [
+  96,
+  96
+ ],
+ "map_cat_cat_1_x4.png": [
+  96,
+  96
+ ],
+ "map_cat_cat_2_x4.png": [
+  96,
+  96
+ ],
+ "map_cat_cauda_x4.png": [
+  96,
+  96
+ ],
+ "map_cat_concat_x4.png": [
+  96,
+  96
+ ],
+ "map_cat_conglang_x4.png": [
+  96,
+  96
+ ],
+ "map_cat_da_x4.png": [
+  96,
+  96
+ ],
+ "map_cat_datnut_x4.png": [
+  96,
+  96
+ ],
+ "map_cat_dennlong_x4.png": [
+  96,
+  96
+ ],
+ "map_cat_maivom_x4.png": [
+  96,
+  96
+ ],
+ "map_cat_tuongdat_1_x4.png": [
+  96,
+  96
+ ],
+ "map_cat_tuongdat_2_x4.png": [
+  96,
+  96
+ ],
+ "map_cat_xuongrong_x4.png": [
+  96,
+  96
+ ],
+ "map_da_bacthang_x4.png": [
+  96,
+  96
+ ],
+ "map_da_cauda_x4.png": [
+  96,
+  96
+ ],
+ "map_da_conglang_x4.png": [
+  96,
+  96
+ ],
+ "map_da_da_1_x4.png": [
+  96,
+  96
+ ],
+ "map_da_da_2_x4.png": [
+  96,
+  96
+ ],
+ "map_da_datnui_x4.png": [
+  96,
+  96
+ ],
+ "map_da_denduoc_x4.png": [
+  96,
+  96
+ ],
+ "map_da_hang_x4.png": [
+  96,
+  96
+ ],
+ "map_da_soi_x4.png": [
+  96,
+  96
+ ],
+ "map_da_tangda_x4.png": [
+  96,
+  96
+ ],
+ "map_da_thachnhu_x4.png": [
+  96,
+  96
+ ],
+ "map_da_tuongda_1_x4.png": [
+  96,
+  96
+ ],
+ "map_da_tuongda_2_x4.png": [
+  96,
+  96
+ ],
+ "map_da_vachda_x4.png": [
+  96,
+  96
+ ],
+ "map_may_bacthang_x4.png": [
+  96,
+  96
+ ],
+ "map_may_cautreo_x4.png": [
+  96,
+  96
+ ],
+ "map_may_conglang_x4.png": [
+  96,
+  96
+ ],
+ "map_may_cotloi_x4.png": [
+  96,
+  96
+ ],
+ "map_may_da_1_x4.png": [
+  96,
+  96
+ ],
+ "map_may_da_2_x4.png": [
+  96,
+  96
+ ],
+ "map_may_dadung_x4.png": [
+  96,
+  96
+ ],
+ "map_may_datnui_x4.png": [
+  96,
+  96
+ ],
+ "map_may_denloi_x4.png": [
+  96,
+  96
+ ],
+ "map_may_maithap_x4.png": [
+  96,
+  96
+ ],
+ "map_may_manmay_x4.png": [
+  96,
+  96
+ ],
+ "map_may_thongnui_x4.png": [
+  96,
+  96
+ ],
+ "map_may_tuongda_1_x4.png": [
+  96,
+  96
+ ],
+ "map_may_tuongda_2_x4.png": [
+  96,
+  96
+ ],
+ "map_nen_bien_x4.png": [
+  384,
+  192
+ ],
+ "map_nen_dao_x4.png": [
+  384,
+  192
+ ],
+ "map_nen_henui_x4.png": [
+  384,
+  192
+ ],
+ "map_nen_nuida_x4.png": [
+  384,
+  192
+ ],
+ "map_nen_nuimay_x4.png": [
+  384,
+  192
+ ],
+ "map_nen_samac_x4.png": [
+  384,
+  192
+ ],
+ "map_nen_vachda_x4.png": [
+  384,
+  192
+ ],
+ "map_nen_vachnui_x4.png": [
+  384,
+  192
+ ],
+ "map_smu_bacthang_x4.png": [
+  96,
+  96
+ ],
+ "map_smu_catuot_x4.png": [
+  96,
+  96
+ ],
+ "map_smu_caugo_x4.png": [
+  96,
+  96
+ ],
+ "map_smu_conglang_x4.png": [
+  96,
+  96
+ ],
+ "map_smu_cotgo_x4.png": [
+  96,
+  96
+ ],
+ "map_smu_datuot_x4.png": [
+  96,
+  96
+ ],
+ "map_smu_dauot_x4.png": [
+  96,
+  96
+ ],
+ "map_smu_denbao_x4.png": [
+  96,
+  96
+ ],
+ "map_smu_govan_x4.png": [
+  96,
+  96
+ ],
+ "map_smu_maidoc_x4.png": [
+  96,
+  96
+ ],
+ "map_smu_nuoc_1_x4.png": [
+  96,
+  96
+ ],
+ "map_smu_nuoc_2_x4.png": [
+  96,
+  96
+ ],
+ "map_smu_tuongda_1_x4.png": [
+  96,
+  96
+ ],
+ "map_smu_tuongda_2_x4.png": [
+  96,
+  96
+ ],
+ "npc_cat_giao_nv_x4.png": [
+  96,
+  128
+ ],
+ "npc_cat_kazekage_x4.png": [
+  96,
+  128
+ ],
+ "npc_cat_thay_x4.png": [
+  96,
+  128
+ ],
+ "npc_da_giao_nv_x4.png": [
+  96,
+  128
+ ],
+ "npc_da_thay_x4.png": [
+  96,
+  128
+ ],
+ "npc_da_tsuchikage_x4.png": [
+  96,
+  128
+ ],
+ "npc_may_giao_nv_x4.png": [
+  96,
+  128
+ ],
+ "npc_may_raikage_x4.png": [
+  96,
+  128
+ ],
+ "npc_may_thay_x4.png": [
+  96,
+  128
+ ],
+ "npc_smu_giao_nv_x4.png": [
+  96,
+  128
+ ],
+ "npc_smu_mizukage_x4.png": [
+  96,
+  128
+ ],
+ "npc_smu_thay_x4.png": [
+  96,
+  128
+ ],
+ "quai_cat_bocap_x4.png": [
+  96,
+  96
+ ],
+ "quai_cat_giun_cat_x4.png": [
+  96,
+  96
+ ],
+ "quai_cat_golem_cat_x4.png": [
+  96,
+  96
+ ],
+ "quai_cat_kenken_x4.png": [
+  96,
+  96
+ ],
+ "quai_cat_lac_da_x4.png": [
+  96,
+  96
+ ],
+ "quai_cat_linh_gac_x4.png": [
+  96,
+  96
+ ],
+ "quai_cat_nhen_x4.png": [
+  96,
+  96
+ ],
+ "quai_cat_ran_luc_x4.png": [
+  96,
+  96
+ ],
+ "quai_da_de_nui_x4.png": [
+  96,
+  96
+ ],
+ "quai_da_doi_hang_x4.png": [
+  96,
+  96
+ ],
+ "quai_da_gau_nui_x4.png": [
+  96,
+  96
+ ],
+ "quai_da_golem_x4.png": [
+  96,
+  96
+ ],
+ "quai_da_linh_gac_x4.png": [
+  96,
+  96
+ ],
+ "quai_da_nhen_da_x4.png": [
+  96,
+  96
+ ],
+ "quai_da_than_lan_x4.png": [
+  96,
+  96
+ ],
+ "quai_da_ung_nui_x4.png": [
+  96,
+  96
+ ],
+ "quai_may_bo_tot_x4.png": [
+  96,
+  96
+ ],
+ "quai_may_daibang_set_x4.png": [
+  96,
+  96
+ ],
+ "quai_may_golem_set_x4.png": [
+  96,
+  96
+ ],
+ "quai_may_ho_loi_x4.png": [
+  96,
+  96
+ ],
+ "quai_may_linh_gac_x4.png": [
+  96,
+  96
+ ],
+ "quai_may_soi_nui_x4.png": [
+  96,
+  96
+ ],
+ "quai_may_son_duong_x4.png": [
+  96,
+  96
+ ],
+ "quai_may_tinhmay_x4.png": [
+  96,
+  96
+ ],
+ "quai_smu_camap_x4.png": [
+  96,
+  96
+ ],
+ "quai_smu_cua_x4.png": [
+  96,
+  96
+ ],
+ "quai_smu_golem_bang_x4.png": [
+  96,
+  96
+ ],
+ "quai_smu_linh_gac_x4.png": [
+  96,
+  96
+ ],
+ "quai_smu_luondien_x4.png": [
+  96,
+  96
+ ],
+ "quai_smu_quaisuong_x4.png": [
+  96,
+  96
+ ],
+ "quai_smu_thuyquai_x4.png": [
+  96,
+  96
+ ],
+ "quai_smu_thuyxa_x4.png": [
+  96,
+  96
+ ],
+ "tp_cat_chunin_dau_x4.png": [
+  128,
+  128
+ ],
+ "tp_cat_chunin_than_x4.png": [
+  128,
+  160
+ ],
+ "tp_cat_jonin_dau_x4.png": [
+  128,
+  128
+ ],
+ "tp_cat_jonin_than_x4.png": [
+  128,
+  160
+ ],
+ "tp_cat_tanbinh_dau_x4.png": [
+  128,
+  128
+ ],
+ "tp_cat_tanbinh_than_x4.png": [
+  128,
+  160
+ ],
+ "tp_da_chunin_dau_x4.png": [
+  128,
+  128
+ ],
+ "tp_da_chunin_than_x4.png": [
+  128,
+  160
+ ],
+ "tp_da_jonin_dau_x4.png": [
+  128,
+  128
+ ],
+ "tp_da_jonin_than_x4.png": [
+  128,
+  160
+ ],
+ "tp_da_tanbinh_dau_x4.png": [
+  128,
+  128
+ ],
+ "tp_da_tanbinh_than_x4.png": [
+  128,
+  160
+ ],
+ "tp_may_chunin_dau_x4.png": [
+  128,
+  128
+ ],
+ "tp_may_chunin_than_x4.png": [
+  128,
+  160
+ ],
+ "tp_may_jonin_dau_x4.png": [
+  128,
+  128
+ ],
+ "tp_may_jonin_than_x4.png": [
+  128,
+  160
+ ],
+ "tp_may_tanbinh_dau_x4.png": [
+  128,
+  128
+ ],
+ "tp_may_tanbinh_than_x4.png": [
+  128,
+  160
+ ],
+ "tp_smu_chunin_dau_x4.png": [
+  128,
+  128
+ ],
+ "tp_smu_chunin_than_x4.png": [
+  128,
+  160
+ ],
+ "tp_smu_jonin_dau_x4.png": [
+  128,
+  128
+ ],
+ "tp_smu_jonin_than_x4.png": [
+  128,
+  160
+ ],
+ "tp_smu_tanbinh_dau_x4.png": [
+  128,
+  128
+ ],
+ "tp_smu_tanbinh_than_x4.png": [
+  128,
+  160
+ ],
+ "vp_cat_ao_t1_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_ao_t2_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_ao_t3_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_ao_t4_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_ao_t5_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_ao_t6_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_ao_t7_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_ao_t8_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_bangtran_t1_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_bangtran_t2_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_bangtran_t3_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_bangtran_t4_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_bangtran_t5_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_bangtran_t6_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_bangtran_t7_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_bangtran_t8_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_gang_t1_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_gang_t2_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_gang_t3_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_gang_t4_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_gang_t5_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_gang_t6_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_gang_t7_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_gang_t8_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_giay_t1_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_giay_t2_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_giay_t3_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_giay_t4_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_giay_t5_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_giay_t6_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_giay_t7_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_giay_t8_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_quan_t1_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_quan_t2_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_quan_t3_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_quan_t4_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_quan_t5_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_quan_t6_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_quan_t7_x4.png": [
+  64,
+  64
+ ],
+ "vp_cat_quan_t8_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_ao_t1_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_ao_t2_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_ao_t3_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_ao_t4_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_ao_t5_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_ao_t6_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_ao_t7_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_ao_t8_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_bangtran_t1_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_bangtran_t2_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_bangtran_t3_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_bangtran_t4_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_bangtran_t5_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_bangtran_t6_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_bangtran_t7_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_bangtran_t8_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_gang_t1_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_gang_t2_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_gang_t3_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_gang_t4_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_gang_t5_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_gang_t6_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_gang_t7_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_gang_t8_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_giay_t1_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_giay_t2_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_giay_t3_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_giay_t4_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_giay_t5_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_giay_t6_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_giay_t7_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_giay_t8_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_quan_t1_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_quan_t2_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_quan_t3_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_quan_t4_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_quan_t5_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_quan_t6_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_quan_t7_x4.png": [
+  64,
+  64
+ ],
+ "vp_da_quan_t8_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_ao_t1_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_ao_t2_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_ao_t3_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_ao_t4_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_ao_t5_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_ao_t6_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_ao_t7_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_ao_t8_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_bangtran_t1_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_bangtran_t2_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_bangtran_t3_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_bangtran_t4_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_bangtran_t5_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_bangtran_t6_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_bangtran_t7_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_bangtran_t8_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_gang_t1_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_gang_t2_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_gang_t3_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_gang_t4_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_gang_t5_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_gang_t6_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_gang_t7_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_gang_t8_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_giay_t1_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_giay_t2_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_giay_t3_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_giay_t4_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_giay_t5_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_giay_t6_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_giay_t7_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_giay_t8_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_quan_t1_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_quan_t2_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_quan_t3_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_quan_t4_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_quan_t5_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_quan_t6_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_quan_t7_x4.png": [
+  64,
+  64
+ ],
+ "vp_may_quan_t8_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_ao_t1_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_ao_t2_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_ao_t3_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_ao_t4_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_ao_t5_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_ao_t6_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_ao_t7_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_ao_t8_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_bangtran_t1_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_bangtran_t2_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_bangtran_t3_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_bangtran_t4_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_bangtran_t5_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_bangtran_t6_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_bangtran_t7_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_bangtran_t8_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_gang_t1_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_gang_t2_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_gang_t3_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_gang_t4_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_gang_t5_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_gang_t6_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_gang_t7_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_gang_t8_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_giay_t1_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_giay_t2_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_giay_t3_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_giay_t4_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_giay_t5_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_giay_t6_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_giay_t7_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_giay_t8_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_quan_t1_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_quan_t2_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_quan_t3_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_quan_t4_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_quan_t5_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_quan_t6_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_quan_t7_x4.png": [
+  64,
+  64
+ ],
+ "vp_smu_quan_t8_x4.png": [
+  64,
+  64
  ]
 }

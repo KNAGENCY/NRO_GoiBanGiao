@@ -22,6 +22,7 @@ lang-cat/  lang-suong-mu/  lang-da/  lang-may/   ← KHỐI CHÍNH đợt 3
 | Phần | Trạng thái | Ghi chú |
 |---|---|---|
 | `_KHUON.md`, mẫu `lang-cat/quai.md` | ✅ xong | nền tảng + mẫu format |
+| **Bảng cỡ `../kich-thuoc-anh.json`** | ✅ **đã thêm 316 tên đợt 3** (11/08) | 375 → **691 mục**, append-only. `KIEM-TRA-ANH.py` tra được mọi tên đợt 3 ngay. Bản cũ giữ ở `.bak-truoc-dot3`. Các file brief còn ghi "báo thêm vào kich-thuoc-anh.json" — **việc đó ĐÃ XONG**, agent vẽ khỏi làm |
 | `lang-*/trang-bi`, `nhan-vat`, `map` | 🟢 | nhân cấu trúc 343 (chắc chắn cần) |
 | `lang-*/quai`, `boss`, `npc` | 🟡 | bộ **đề xuất đại diện** — server chưa chốt nội dung 4 làng; chốt lại sau |
 | `lang-*/icon-chieu` | ↪ trỏ đợt 2 | 20 icon `kn_*` đã ở `../dot-2-can-ve/`, không lặp |

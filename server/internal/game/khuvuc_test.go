@@ -82,8 +82,9 @@ func (p *phienGiaKhuVuc) banTin() []*protocol.Message {
 func TestKhuVucXuLySuKien(t *testing.T) {
 	k := MoKhuVuc(TimBanDo(1))
 
-	nvA := &store.NhanVat{ID: 1, Ten: "A", HpToiDa: 100}
-	nvB := &store.NhanVat{ID: 2, Ten: "B", HpToiDa: 100}
+	// Vi tri khoi tao (100,384) = spawn hop le; luoi Lat 4 (52x24) chan (0,0) vi cot 0 la tuong bien.
+	nvA := &store.NhanVat{ID: 1, Ten: "A", HpToiDa: 100, ViTriX: 100, ViTriY: 384}
+	nvB := &store.NhanVat{ID: 2, Ten: "B", HpToiDa: 100, ViTriX: 100, ViTriY: 384}
 	pA := &phienGiaKhuVuc{}
 	pB := &phienGiaKhuVuc{}
 
@@ -118,7 +119,7 @@ func TestKhuVucXuLySuKien(t *testing.T) {
 
 	// Buoc 3: A di chuyen toi (50,50) — pB nhan them 1 goi -7 [idA][50][50];
 	// pA KHONG nhan gi them (client tu ve chuyen dong cua chinh minh).
-	k.xuLy(suKienDiChuyen{idNhanVat: nvA.ID, x: 50, y: 50})
+	k.xuLy(suKienDiChuyen{idNhanVat: nvA.ID, x: 150, y: 384})
 	if len(pA.nhan) != 1 {
 		t.Fatalf("buoc 3: pA nhan %d goi, mong doi van la 1 (khong nhan lai chinh minh)", len(pA.nhan))
 	}
@@ -133,14 +134,14 @@ func TestKhuVucXuLySuKien(t *testing.T) {
 	if id, err := r.Int(); err != nil || id != int32(nvA.ID) {
 		t.Fatalf("buoc 3: id trong goi -7 = %d, err=%v, mong doi %d", id, err, nvA.ID)
 	}
-	if x, err := r.Short(); err != nil || x != 50 {
-		t.Fatalf("buoc 3: x trong goi -7 = %d, err=%v, mong doi 50", x, err)
+	if x, err := r.Short(); err != nil || x != 150 {
+		t.Fatalf("buoc 3: x trong goi -7 = %d, err=%v, mong doi 150", x, err)
 	}
-	if y, err := r.Short(); err != nil || y != 50 {
-		t.Fatalf("buoc 3: y trong goi -7 = %d, err=%v, mong doi 50", y, err)
+	if y, err := r.Short(); err != nil || y != 384 {
+		t.Fatalf("buoc 3: y trong goi -7 = %d, err=%v, mong doi 384", y, err)
 	}
-	if nvA.ViTriX != 50 || nvA.ViTriY != 50 {
-		t.Fatalf("buoc 3: nvA vi tri = (%d,%d), mong doi (50,50) — phai la authoritative", nvA.ViTriX, nvA.ViTriY)
+	if nvA.ViTriX != 150 || nvA.ViTriY != 384 {
+		t.Fatalf("buoc 3: nvA vi tri = (%d,%d), mong doi (150,384) — phai la authoritative", nvA.ViTriX, nvA.ViTriY)
 	}
 
 	// Buoc 4: A roi khu vuc — pB nhan them 1 goi -6 [idA]; nvA bi xoa khoi map.

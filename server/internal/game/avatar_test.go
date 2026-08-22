@@ -104,7 +104,7 @@ func TestChanDungNguoiChoiKhongTrungChanDungNPC(t *testing.T) {
 	// de bat duoc ngay khi ai do doi portrait cua NPC thanh trung voi nguoi choi.
 	var cat struct {
 		NPCs []struct {
-			Portrait int16 `json:"portrait"`
+			Portrait int16  `json:"portrait"`
 			Ten      string `json:"name"`
 		} `json:"npcs"`
 	}

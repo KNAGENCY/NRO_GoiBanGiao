@@ -14,13 +14,14 @@ def dat(r, c, v):
 def lay(r, c):
     return data[2 + r*tmw + c] if (0 <= r < tmh and 0 <= c < tmw) else 0
 
-# ---- 1) DON SACH: xoa MOI tile cu (< 60), giu tile moi ----
-don = 0
+# ---- 1) DON SACH: xoa TOAN BO o (ke ca vat the cu cua cac lat truoc) ----
+#      Chi xoa tile < 60 la KHONG DU: vat the cu (>= 70) se con nguyen va
+#      chong len vat the moi -> nha long nha, quan long quan.
+don = sum(1 for r in range(tmh) for c in range(tmw) if lay(r, c) != 0)
 for r in range(tmh):
     for c in range(tmw):
-        if 0 < lay(r, c) < 60:
-            dat(r, c, 0); don += 1
-print(f"[don] xoa {don} tile cu (tan du ban do Dragon Ball)")
+        dat(r, c, 0)
+print(f"[don] xoa sach {don} o (ca tile nen lan vat the cu)")
 
 # ---- 2) DIA HINH: duong chan co GO va DOC, khong phang li ----
 # do cao mat dat theo cot: 18 = chuan; 17 = go cao; 19 = trung
@@ -53,9 +54,15 @@ for c in range(1, tmw-1):
         dat(mat, c, 62)
     else:
         dat(mat, c, 62)                       # mat co thuong
-    # than dat xuong day
+    # than dat xuong day — cang sau cang toi, xen ke bien the cho khoi phang
     for r in range(mat+1, tmh):
-        dat(r, c, 61 if bam(c, r) % 100 < 16 else 60)
+        # ranh gioi tang GON SONG theo cot, khong ke thang bang thuoc
+        song = (bam(c, 777) % 3) - 1        # -1, 0 hoac 1
+        sau = (r - mat) + song
+        if sau <= 2:    nen, phu = 60, 61   # sat mat: dat sang
+        elif sau <= 4:  nen, phu = 67, 60   # tang giua
+        else:           nen, phu = 68, 67   # tang day: toi nhat
+        dat(r, c, phu if bam(c, r) % 100 < 34 else nen)
     # vach o cho doi cao (mat cat dat lo ra)
     if trai > mat:
         for r in range(mat+1, trai+1): dat(r, c, 65)

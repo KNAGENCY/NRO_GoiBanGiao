@@ -16,7 +16,10 @@ MAP = "D:/NRO_Project/Assets/Resources/res/mymap/1.bytes"
 BIN = "D:/NRO_GoiBanGiao/server/internal/game/assets/map-1-collision.bin"
 LOCK = "D:/NRO_GoiBanGiao/server/internal/game/assets/asset-lock.json"
 
-TILE_NEN = range(60, 70)     # 60-69 la tile nen (dat/co/da); >= 70 la vat the trang tri
+# Tile NEN (nguoi dung duoc len tren): 60-69 la bo ban dau, 83-86 la bo bo sung
+# dot 2 (chan go, ke da, bac thang, bac thang dinh). Cac so khac >= 70 la VAT THE
+# trang tri, khong tinh la mat dat.
+TILE_NEN = set(range(60, 70)) | {83, 84, 85, 86}
 
 d = open(MAP, "rb").read()
 W, H = d[0], d[1]

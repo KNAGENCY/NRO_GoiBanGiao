@@ -16,9 +16,9 @@ func TestNhungTileSetDungKichThuoc(t *testing.T) {
 	// Van khoa kich thuoc lai vi day la file NHUNG: nhung nham file khac thi
 	// tileId roi ra ngoai [1,numTileMap] va client THOAT APP (loadMap bat
 	// Exception roi goi GameMidlet.instance.exit()).
-	const coTileSet = 1724
+	const coTileSet = 1734
 	if len(duLieuTileSet) != coTileSet {
-		t.Fatalf("duLieuTileSet = %d byte, mong doi %d (goc 1696 + khai bao tile Lang La)", len(duLieuTileSet), coTileSet)
+		t.Fatalf("duLieuTileSet = %d byte, mong doi %d (goc 1696 + khai bao tile Lang La: bo 60-69 va bo bo sung 83-86)", len(duLieuTileSet), coTileSet)
 	}
 	// So bo tile KHONG duoc doi: them tile vao bo san, khong them bo moi.
 	if duLieuTileSet[0] != 39 {

@@ -69,11 +69,14 @@ for c in range(1, tmw-1):
         elif sau <= 4:  nen, phu = 67, 60   # tang giua
         else:           nen, phu = 68, 67   # tang day: toi nhat
         dat(r, c, phu if bam(c, r) % 100 < 34 else nen)
-    # vach o cho doi cao (mat cat dat lo ra)
+    # Mat cat o cho doi cao. Concept ve lang dung tren KE DA XEP, khong phai
+    # vach dat tro — nay da co anh ke da (84) va chan go (83) nen dung dung.
     if trai > mat:
-        for r in range(mat+1, trai+1): dat(r, c, 65)
+        for r in range(mat+1, trai+1):
+            dat(r, c, 84 if r == mat+1 else 83)      # ke da o tren, chan go o duoi
     if phai > mat:
-        for r in range(mat+1, phai+1): dat(r, c, 66)
+        for r in range(mat+1, phai+1):
+            dat(r, c, 84 if r == mat+1 else 83)
 
 # ---- 3) VAT THE: dat theo do cao mat dat tung cho ----
 #   (r_chan = hang mat dat; vat cao N o -> dat o hang r_chan - N)
@@ -113,6 +116,15 @@ for c in (15, 30, 43):
 for c in (6, 20, 28, 39, 49):
     dat_vat(c, 81, 1)                      # bui co o chan cong trinh
 dat_vat(19, 78, 2)   # thung go canh torii
+
+# BAC THANG len nen cao (concept co cau thang da dan len cong torii).
+# Dat o mep TRAI cua nen cao: mot bac o chan, mot bac dinh noi vao mat co.
+dat(CAO.get(15, 18), 15, 85)          # bac thang o chan nen
+dat(CAO.get(16, 17), 16, 86)          # bac dinh, noi vao mat nen cao
+
+# Hai cay nho + bui ram moi, rai vao cho con thua de bot troi
+dat_vat(13, 87, 4)   # cay nho (4 o)
+dat_vat(38, 88, 2)   # bui ram (2 o)
 
 # Tuong VO HINH o bien: khong co thi nguoi choi roi xuong ho o mep map.
 #

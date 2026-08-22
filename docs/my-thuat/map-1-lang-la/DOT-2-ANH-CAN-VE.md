@@ -82,9 +82,20 @@ hệt nhau xuất hiện hai lần.
 
 | Tên file | `nen_nuihokage_rong_x4.png` |
 |---|---|
-| Kích thước | **1536×768**, vẽ liền một mạch, **không ghép đôi** |
+| Kích thước | ⚠️ **1536 LÀ SAI — phải 2976×768**, xem ghi chú dưới bảng |
 | Nội dung | dãy núi đá khắc **5 khuôn mặt Hokage khác nhau**, mỗi mặt một dáng |
 | Bố cục dọc | 0–55% chiều cao: trời + mây · 55–80%: khối núi đá · 80–100%: **chuyển dần sang đúng màu trời** |
+
+> ### ⚠️ Cỡ 1536 là SAI — em tính nhầm, phải 2976
+>
+> Ảnh giao ở mức x4, nhưng game hiển thị ở mức **x2** — tức bề rộng bị chia đôi.
+> Ảnh 1536 ở x4 chỉ còn **768px** trên màn, mà màn rộng **1454px** → núi vẫn **lặp
+> 1,9 lần** y như trước, vẫn thấy đường nối dọc.
+>
+> Muốn một màn chỉ thấy **một** dãy núi thì bản x4 phải rộng ít nhất **2908px**.
+> Lấy tròn theo bội số 96: **2976×768**.
+>
+> Điều này áp dụng cho **mọi ảnh nền** (núi, làng xa, mây, trời).
 
 **Rất quan trọng — phần 20% dưới cùng:** phải nhoà dần vào màu trời `RGB(10, 86, 154)`
 cho tới khi hàng cuối cùng là **đúng màu đó**. Nếu để chân núi cắt phẳng, trong game
@@ -155,7 +166,7 @@ dải mái ngói cao 13px rồi cụt, thành hàng mái nhà treo lơ lửng gi
 
 | Tên file | `nen_lang_xa_rong_x4.png` |
 |---|---|
-| Kích thước | 1536×576, vẽ liền mạch |
+| Kích thước | ⚠️ **phải 2976×576** (cùng lý do với núi — xem ghi chú ở Ưu tiên 3) |
 | Nội dung | mái ngói làng ninja nhìn từ xa, cây xanh xen kẽ, mờ như ở xa |
 | Đáy | **20% dưới nhoà dần sang** `RGB(10, 86, 154)` |
 

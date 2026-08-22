@@ -28,7 +28,9 @@ BIT_TRAI = 0x0008   # chan ben trai
 BIT_TRAN = 0x2000   # chan tu duoi nhay len
 
 # Tile nen Lang La va vai tro
-MAT_DAT = [60, 61, 62, 63, 64, 65, 66, 67, 68, 69]   # tat ca deu dung duoc len tren
+# 60-69 la bo tile nen ban dau; 83-86 la bo bo sung dot 2 (chan go, ke da,
+# bac thang, bac thang dinh) — deu la mat dat, deu dung duoc len tren.
+MAT_DAT = [60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 83, 84, 85, 86]
 
 # KHOI_DAC: chan di ngang. Phai co ca 62 (mat co) — day la cho tung sai:
 # nhan vat dung tren mat dat hang 18 thi client kiem chan ngang o cy - chh,
@@ -38,8 +40,8 @@ MAT_DAT = [60, 61, 62, 63, 64, 65, 66, 67, 68, 69]   # tat ca deu dung duoc len 
 #
 # Cho 62 chan ngang KHONG lam kho di lai o cho phang: dung tren hang 18 thi o
 # ngang tam than la hang 17, va hang 17 o cho phang la khong khi.
-KHOI_DAC = [60, 61, 62, 65, 66, 67, 68]              # dat than + mat co + hai vach go
-CO_TRAN = [60, 61, 67, 68]                           # dat than: khong nhay xuyen len
+KHOI_DAC = [60, 61, 62, 65, 66, 67, 68, 83, 84]      # dat than + mat co + vach go + ke da
+CO_TRAN = [60, 61, 67, 68, 83, 84]                   # khoi dac: khong nhay xuyen len
 
 THEM = {BIT_SAN: MAT_DAT, BIT_PHAI: KHOI_DAC, BIT_TRAI: KHOI_DAC, BIT_TRAN: CO_TRAN}
 

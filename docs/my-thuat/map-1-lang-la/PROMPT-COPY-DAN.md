@@ -135,7 +135,16 @@ Thay `[MÔ TẢ]`:
 
 ---
 
-## 4 LỖI AI HAY MẮC — kiểm lại trước khi giao
+## 6 LỖI AI HAY MẮC — kiểm lại trước khi giao
+
+**5. Nền "trong suốt" mà thật ra chỉ MỜ** (đã xảy ra thật với `nen_nuihokage`: alpha 226 thay vì 0).
+   Vùng phải trong suốt thì alpha phải **đúng bằng 0**, không phải "trắng nhạt" hay "mờ 90%".
+   Tự kiểm: mở ảnh, vùng đó phải thấy ô caro, KHÔNG phải màu trắng/xám.
+
+**6. Ảnh "lặp ngang" mà hai mép không khớp** (đã xảy ra thật với `nen_troi`: lệch 157/765).
+   Mép trái và mép phải phải nối liền như một dải vô tận. Tự kiểm: ghép 3 bản cạnh nhau,
+   KHÔNG được thấy đường sọc dọc ở chỗ nối.
+
 
 1. **Vẽ luôn nền đất/bóng dưới vật thể** → sai. Vật thể phải đứng riêng trên nền trong suốt.
 2. **Chừa khoảng trống dưới chân** → vật thể lơ lửng trong game. Chân phải chạm mép dưới.

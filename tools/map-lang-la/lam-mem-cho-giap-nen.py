@@ -23,6 +23,10 @@ FADE_DAY, THUAN_DAY, FADE_TREN = 0.30, 0.15, 0.22
 
 
 def mo(p):
+    # b01 duoc cat troi thua o buoc rieng (cat-troi-thua-lang-xa.py) nen phai doc
+    # BAN HIEN TAI, khong doc .bak-noi cu.
+    if os.path.basename(p).startswith(("b01", "b11")):
+        return np.array(Image.open(p).convert("RGB")).astype(float)
     goc = p + ".bak-noi"
     if not os.path.exists(goc):
         shutil.copy2(p, goc)
@@ -50,8 +54,14 @@ for muc in ["x1", "x2", "x3", "x4"]:
             for y in range(bd, h):
                 t = 1.0 if y >= kt else (lambda u: u * u * (3 - 2 * u))((y - bd) / max(1, kt - bd))
                 a[y] = a[y] * (1 - t) + MAU_NOI * t
-        # mep tren bat dau tu mau noi (tru lop tren cung b03 — tren no la khoang khong)
-        if ten != "b03":
+        # Mep TREN chi lam mem cho lop KHONG co nhiem vu che lop tren no.
+        #
+        # b01 (lang xa) la truong hop RIENG: trong concept, chan nui khong he fade
+        # — no bi GIAU SAU mai nha cua lang xa. Neu fade mep tren b01 ve mau troi
+        # thi phan tren lop nay thanh troi trong, chan nui lo ra, va giua nui voi
+        # nha gan hien mot khoang troi rong. Do chinh la cai lam "lang lo lung".
+        # Giu mep tren b01 DAC de no che chan nui.
+        if ten not in ("b03", "b01"):
             n = max(4, int(h * FADE_TREN))
             for y in range(n):
                 t = (lambda u: u * u * (3 - 2 * u))(y / n)

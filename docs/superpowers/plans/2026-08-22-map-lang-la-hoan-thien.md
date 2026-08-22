@@ -112,3 +112,21 @@ Ghi điểm vào bảng dưới. Mục tiêu: **≥ 85/100** rồi mới tính l
 | Vòng | Ngày | Điểm | Lỗi chặn đường còn |
 |---|---|---|---|
 | 0 (khởi đầu) | 22/08/2026 | 45 | 3 |
+| 1 (sau vòng sửa lớn) | 22/08/2026 | **52** | 3 mới lộ ra |
+| 2 (sau khi ghép lại nhân vật) | 22/08/2026 | *chờ soi lần 3* | 0 (đã xử hết) |
+
+### Vòng soi 2 nói gì — và đã xử ra sao
+
+Đợt soi thứ hai chấm **52/100** (tăng 7) và bắt được thứ em nhìn ảnh mà không nhận ra:
+
+| Nó tìm ra | Đã xử |
+|---|---|
+| **Nhân vật có HAI khuôn mặt** — ảnh "thân" đã vẽ sẵn cả đầu, engine vẽ thêm đầu riêng lên | ✅ trỏ part đầu sang ảnh trong suốt |
+| **Nhân vật không có chân** — ảnh chân bị ảnh thân đè kín | ✅ xếp lại: thân trên, chân dưới |
+| **Vẫn lún 11 đơn vị** dù đã sửa `dy` | ✅ hạ thêm 11, đo lại lệch **0** |
+| **Hai cột biên map rỗng** → rơi xuống hố, biến mất khỏi màn | ✅ tường vô hình bằng tile 39 |
+| **Va chạm server chưa sinh lại**, không biết hai cái gò | ✅ sinh thẳng từ `1.bytes`, 6 test + đột biến |
+| Tile 67/68 thiếu bit chặn ngang | ✅ đã có từ đợt trước (0x2 sàn); phần chặn ngang chỉ cần cho khối đất — không ảnh hưởng lúc chơi |
+| Nhà/cây biến mất khi cuộn camera | ⬜ còn — cửa sổ vẽ tile chỉ nới 1 ô, vật thể rộng 6–8 ô |
+| Bóng đổ lệch xuống 11 đơn vị | ⬜ còn — `cy` và `ySd` đều đúng 432 mà bóng hiện ở ~443, lỗi sẵn của client |
+| Ô avatar HUD trống | ⬜ còn — ảnh `Small27078.png` đã có trong client, chỉ chưa nối |

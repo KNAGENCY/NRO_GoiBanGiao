@@ -49,7 +49,11 @@ for c in range(1, tmw-1):
     trai, phai = CAO.get(c-1, mat), CAO.get(c+1, mat)
     # mat tren: co, hoac loi lat da
     if c in LOI_DI and mat == 18:
-        dat(mat, c, 69)                       # duong lat da
+        # hai dau loi di dung o CHUYEN TIEP (63/64) de co lan dan sang da,
+        # khong con la mot nhat cat doc phang li
+        if c == min(LOI_DI):    dat(mat, c, 63)   # co -> da
+        elif c == max(LOI_DI):  dat(mat, c, 64)   # da -> co
+        else:                   dat(mat, c, 69)   # duong lat da
     elif trai > mat:          # bac vuong: van dung mat co
         dat(mat, c, 62)
     elif phai > mat:                          # ben phai thap hon -> goc phai

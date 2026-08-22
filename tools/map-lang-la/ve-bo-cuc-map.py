@@ -105,19 +105,27 @@ for c in [21, 32]:
 for c in [8, 14, 28, 42, 49]:
     dat_vat(c, 81, 1)                      # bui co o cac khe, khong cham cong trinh
 
-# Tuong VO HINH hai cot bien: khong co thi nguoi choi roi xuong ho o mep map
-# va camera dung truoc mep nen nhan vat BIEN MAT khoi man hinh. Tile 39 da duoc
-# khai bao dac ca bon huong trong bang goc, anh cua no da lam trong suot.
+# Tuong VO HINH o bien: khong co thi nguoi choi roi xuong ho o mep map.
+#
+# Dat HAI COT moi ben chu khong phai mot. Ly do: camera dung o cmxLim =
+# (tmw-1)*24 - gW, tuc chi nhin duoc toi x = 1224; ma than nhan vat ve SANG PHAI
+# diem neo (moc TOP|LEFT khi quay phai). Neu tuong chi o cot cuoi thi nhan vat
+# van di duoc toi sat 1224 va truot HAN ra ngoai mep phai — nguoi choi mat dau
+# chinh minh, chi con mot mau bong o mep.
+#
+# Tile 39 da duoc khai bao dac ca bon huong trong bang goc, anh cua no da lam
+# trong suot nen tuong khong ve ra gi.
 for r in range(tmh):
-    dat(r, 0, 39)
-    dat(r, tmw - 1, 39)
+    for c in (0, 1, tmw - 2, tmw - 1):
+        dat(r, c, 39)
 
 open(MAP, "wb").write(bytes(data))
 
 # ---- 4) KIEM LAI ----
 d2 = open(MAP, "rb").read()
 cells = list(d2[2:2+tmw*tmh])
-con_cu = sum(1 for v in cells if 0 < v < 60)
+# Tile 39 la TUONG co chu dich (dat o buoc tren), khong phai tan du.
+con_cu = sum(1 for v in cells if 0 < v < 60 and v != 39)
 print(f"[kiem] tile cu con sot: {con_cu} (phai = 0)")
 print(f"[kiem] file {len(d2)} byte, luoi {d2[0]}x{d2[1]}")
 print("\nSo do hang 9-23 (. trong | # dat/co moi | N vat the):")

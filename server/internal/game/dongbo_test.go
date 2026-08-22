@@ -86,7 +86,7 @@ func TestGoiVersionGameDungByte(t *testing.T) {
 	// troi theo mot thay doi khac. vsData 21 -> 22 khi part.bin doi (nang 3 manh
 	// nhan vat cho chan cham dat); khong tang thi client van dung part.bin cu
 	// trong RMS va nhan vat tiep tuc lun nua nguoi.
-	want := []byte{4, 24, 22, 21, 20, 0, 0}
+	want := []byte{4, 26, 22, 21, 20, 0, 0}
 	if !bytes.Equal(m.Data, want) {
 		t.Errorf("than versionGame = %v, mong doi %v", m.Data, want)
 	}

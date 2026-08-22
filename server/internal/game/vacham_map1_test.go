@@ -15,6 +15,11 @@ import "testing"
 const (
 	hangMatDatThuong = 18
 	hangMatDatGo     = 17
+
+	// So cot TUONG moi ben. Hai chu khong phai mot: camera dung truoc mep map
+	// nen neu chi mot cot thi nhan vat van di duoc toi sat mep va truot han ra
+	// ngoai man hinh — nguoi choi mat dau chinh minh.
+	soCotTuong = 2
 )
 
 // goCuaMap1 tra ve tap cot co mat dat nhich len hang 17 (duoi cong torii va
@@ -54,7 +59,7 @@ func TestVaChamMap1ChoDungTrenMatDat(t *testing.T) {
 	cacGo := goCuaMap1()
 	dac := func(cot, hang int) bool { return c.cells[hang*c.width+cot] == 1 }
 
-	for cot := 1; cot < c.width-1; cot++ {
+	for cot := soCotTuong; cot < c.width-soCotTuong; cot++ {
 		hangMat := hangMatDatThuong
 		if cacGo[cot] {
 			hangMat = hangMatDatGo
@@ -75,7 +80,7 @@ func TestVaChamMap1ChoDungTrenMatDat(t *testing.T) {
 func TestVaChamMap1DacHetPhanLongDat(t *testing.T) {
 	c := taiCollisionMap1(t)
 	cacGo := goCuaMap1()
-	for cot := 1; cot < c.width-1; cot++ {
+	for cot := soCotTuong; cot < c.width-soCotTuong; cot++ {
 		hangMat := hangMatDatThuong
 		if cacGo[cot] {
 			hangMat = hangMatDatGo
@@ -108,7 +113,7 @@ func TestVaChamMap1ChanNgangHaiCaiGo(t *testing.T) {
 func TestVaChamMap1CoTuongHaiBien(t *testing.T) {
 	c := taiCollisionMap1(t)
 	for hang := 0; hang < c.height; hang++ {
-		for _, cot := range []int{0, c.width - 1} {
+		for _, cot := range []int{0, 1, c.width - 2, c.width - 1} {
 			if c.cells[hang*c.width+cot] != 1 {
 				t.Errorf("tuong bien cot %d hang %d rong -> chay tuot ra ngoai map", cot, hang)
 			}
@@ -120,7 +125,7 @@ func TestVaChamMap1KhongDacTrenTroi(t *testing.T) {
 	c := taiCollisionMap1(t)
 	// Tren mat dat cao nhat (hang 17) phai la khong khi, tru hai tuong bien.
 	for hang := 0; hang < hangMatDatGo; hang++ {
-		for cot := 1; cot < c.width-1; cot++ {
+		for cot := soCotTuong; cot < c.width-soCotTuong; cot++ {
 			if c.cells[hang*c.width+cot] == 1 {
 				t.Errorf("o dac lo lung tren troi tai cot %d hang %d", cot, hang)
 			}

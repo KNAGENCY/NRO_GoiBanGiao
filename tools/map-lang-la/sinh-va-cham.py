@@ -44,10 +44,15 @@ cells = bytearray(W * H)
 for c in range(W):
     for r in range(mat_dat[c] + 1, H):    # BO hang mat dat, chi dac tu duoi no
         cells[r * W + c] = 1
-# Hai tuong bien: dac het chieu cao, neu khong nhan vat chay tuot ra ngoai map.
-for r in range(H):
-    cells[r * W] = 1
-    cells[r * W + (W - 1)] = 1
+# Cot TUONG (tile 39) -> dac het chieu cao. Bo cuc dat hai cot moi ben, khong
+# phai mot: camera dung truoc mep nen neu chi mot cot thi nhan vat van di duoc
+# toi sat mep va truot han ra ngoai man hinh.
+TILE_TUONG = 39
+cot_tuong = {c for c in range(W) if any(o[r * W + c] == TILE_TUONG for r in range(H))}
+for c in sorted(cot_tuong):
+    for r in range(H):
+        cells[r * W + c] = 1
+print(f"cot tuong (tile {TILE_TUONG}): {sorted(cot_tuong)}")
 
 # In lai de mat nguoi kiem duoc
 print("     " + "".join(str(i % 10) for i in range(W)))

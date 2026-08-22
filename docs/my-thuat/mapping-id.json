@@ -2194,19 +2194,19 @@
       "type": 0,
       "frames": [
         {
-          "sprite_id": 27083,
+          "sprite_id": 27041,
           "dx": 0,
-          "dy": -22
+          "dy": -41
         },
         {
-          "sprite_id": 27083,
+          "sprite_id": 27042,
           "dx": 0,
-          "dy": -22
+          "dy": -41
         },
         {
-          "sprite_id": 27083,
+          "sprite_id": 27043,
           "dx": 0,
-          "dy": -22
+          "dy": -41
         }
       ]
     },
@@ -2217,87 +2217,87 @@
         {
           "sprite_id": 27044,
           "dx": 0,
-          "dy": -46
+          "dy": -50
         },
         {
           "sprite_id": 27045,
           "dx": 0,
-          "dy": -46
+          "dy": -50
         },
         {
           "sprite_id": 27046,
           "dx": 0,
-          "dy": -46
+          "dy": -50
         },
         {
           "sprite_id": 27047,
           "dx": 0,
-          "dy": -46
+          "dy": -50
         },
         {
           "sprite_id": 27048,
           "dx": 0,
-          "dy": -46
+          "dy": -50
         },
         {
           "sprite_id": 27049,
           "dx": 0,
-          "dy": -46
+          "dy": -50
         },
         {
           "sprite_id": 27050,
           "dx": 0,
-          "dy": -46
+          "dy": -50
         },
         {
           "sprite_id": 27051,
           "dx": 0,
-          "dy": -46
+          "dy": -50
         },
         {
           "sprite_id": 27052,
           "dx": 0,
-          "dy": -46
+          "dy": -50
         },
         {
           "sprite_id": 27053,
           "dx": 0,
-          "dy": -46
+          "dy": -50
         },
         {
           "sprite_id": 27054,
           "dx": 0,
-          "dy": -46
+          "dy": -50
         },
         {
           "sprite_id": 27055,
           "dx": 0,
-          "dy": -46
+          "dy": -50
         },
         {
           "sprite_id": 27056,
           "dx": 0,
-          "dy": -46
+          "dy": -50
         },
         {
           "sprite_id": 27057,
           "dx": 0,
-          "dy": -46
+          "dy": -50
         },
         {
           "sprite_id": 27058,
           "dx": 0,
-          "dy": -46
+          "dy": -50
         },
         {
           "sprite_id": 27059,
           "dx": 0,
-          "dy": -46
+          "dy": -50
         },
         {
           "sprite_id": 27060,
           "dx": 0,
-          "dy": -46
+          "dy": -50
         }
       ]
     },

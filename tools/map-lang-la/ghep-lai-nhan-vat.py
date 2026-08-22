@@ -8,17 +8,28 @@ Engine ve ca hai -> tren man hinh co hai con mat o hai do cao, hai cai tai.
 Cung luc do, 14 anh "chan" (27061-27074) bi anh than ve de len kin -> quan cut
 ngang dui, khong thay dep dau.
 
-CACH CHUA (khong can ve lai anh):
-  1. Khong ve part dau nua — tro 3 khung cua part 30 sang mot anh TRONG SUOT.
-     Anh than da co dau roi nen nhan vat van du mat.
-  2. Xep lai chieu cao: chan cham dat, than nam TREN chan chu khong trum len.
+DA THU MOT CACH SAI, ghi lai de khong lam lai: tro part dau sang anh TRONG SUOT.
+Het hai mat that, nhung anh than chi ve NUA DUOI cai dau (cat phang ngay tren
+chan may) — xoa manh dau la xoa luon so, toc gai va BANG TRAN LA KONOHA, tuc
+mat dau hieu nhan dien cua ninja Lang La. Nhin anh la thay dinh dau bi vat phang.
 
-     chan:  cao 32 don vi, muon day chan = cy  ->  dy = -32 + off(10) = -22
-     than:  cao 40 don vi, muon day than = cy - 12 (lo 12 don vi chan duoi)
-                                            ->  dy = -52 + off(17) = -35
+CACH CHUA DUNG (khong can ve lai anh): giu manh dau, nhung dat cho no PHU DUNG
+len phan dau da ve san trong anh than.
 
-     Than ve SAU chan nen no de len phan hong/tay cua anh chan — dung y do
-     cua bo sprite (anh chan co san hai ban tay o phia tren).
+  Bang tu the CharInfo[0] (Char.cs:483) cho tuong quan GOC giua ba manh:
+      dau  offset 34   |  than offset 16  |  chan offset 10
+  tuc dau cao hon than 18 don vi, than cao hon chan 6. Anh ve tai
+  y0 = cy - offset + dy, nen giu nguyen tuong quan thi ba manh van ghep dung —
+  chi can dich CA CUM cung mot luong.
+
+  1. Dich ca cum len 11 don vi de day chan trung mep co (do trong game, xem
+     LOI-DA-GAP.md §7 — co mot do lech he thong ~11-12 don vi giua toa do logic
+     va toa do ve, chua truy ra goc).
+  2. Rieng manh dau lech them: cho CAM cua anh dau trung CAM cua dau-trong-than.
+     Tinh ra dau dy = -24 trong khi than/chan = -33.
+
+  Than ve SAU chan nen de len phan hong/tay cua anh chan — dung y do cua bo
+  sprite (anh chan co san hai ban tay o phia tren).
 """
 import hashlib
 import json
@@ -36,10 +47,22 @@ MAPPING = "D:/NRO_GoiBanGiao/docs/my-thuat/mapping-id.json"
 
 ID_TRONG = 27083          # id moi cho anh trong suot (chua ai dung)
 SO_FRAME = {0: 3, 1: 17, 2: 14}
-# Do THUC NGHIEM trong game (khong tin cong thuc): voi than -35 / chan -22,
-# duong mat co cat ngang HONG nhan vat — chan chim 11 don vi. Ha ca cum
-# xuong them 11 de day dep trung mep co.
-DY_MOI = {30: None, 57: -46, 58: -33}   # None = part dau, chi doi id
+# Tuong quan GOC (dau 34 / than 16 / chan 10) chi dung voi sprite Ngoc Rong, vi
+# anh than cua ho TRONG SUOT o phan duoi nen chan lo ra. Anh than moi (27044-60)
+# ve DAC toi tan day anh, giu tuong quan goc la than che kin chan.
+#
+# Nen tinh lai tu cho hai anh PHAI trung nhau — hai ban tay ve o ca anh than lan
+# anh chan:
+#     tay trong than: hang 60-79 cua anh 80  -> 30..40 don vi tu dinh anh
+#     tay trong chan: hang 14-30 cua anh 64  ->  7..15 don vi tu dinh anh
+#     cho trung:  (cy-16+dy_than) + 30 = (cy-10+dy_chan) + 7
+#              => dy_than = dy_chan - 17
+#
+# chan dy=-33 (day chan trung mep co, ke ca do lech he thong ~11 don vi)
+# than dy=-50 (tay trung, va day than o cy-26 nen chan lo ra 15 don vi: du dep
+#              va ong chan)
+# dau  dy=-41 (cam cua anh dau trung cam cua dau-trong-than)
+DY_MOI = {30: -41, 57: -50, 58: -33}
 
 # --- 1) tao anh trong suot o ca 4 muc zoom ---
 for muc, canh in (("x1", 32), ("x2", 64), ("x3", 96), ("x4", 128)):
@@ -65,13 +88,9 @@ for pid in range(so_part):
     for f in range(n):
         vi_id, vi_dy = i, i + 3
         if pid in DY_MOI:
-            if pid == 30:
-                d[vi_id:vi_id + 2] = struct.pack(">h", ID_TRONG)   # dau -> anh trong suot
-                bao.setdefault(pid, []).append("id->trong")
-            else:
-                moi = DY_MOI[pid]
-                d[vi_dy] = struct.pack("b", moi)[0]
-                bao.setdefault(pid, []).append(f"dy->{moi}")
+            moi = DY_MOI[pid]
+            d[vi_dy] = struct.pack("b", moi)[0]
+            bao.setdefault(pid, []).append(f"dy->{moi}")
         i += 4
 if i != len(d):
     raise SystemExit(f"doc het {i}/{len(d)} byte — DUNG LAI")
@@ -114,10 +133,7 @@ for pid in (30, 57, 58):
     if not m:
         raise SystemExit(f"khong tim thay khoi part {pid} trong mapping-id — DUNG LAI")
     khoi = m.group(0)
-    if pid == 30:
-        khoi = re.sub(r'"sprite_id":\s*\d+', f'"sprite_id": {ID_TRONG}', khoi)
-    else:
-        khoi = re.sub(r'"dy":\s*-?\d+', f'"dy": {DY_MOI[pid]}', khoi)
+    khoi = re.sub(r'"dy":\s*-?\d+', f'"dy": {DY_MOI[pid]}', khoi)
     van_m = van_m[:m.start()] + khoi + van_m[m.end():]
 json.loads(van_m)
 open(MAPPING, "w", encoding="utf-8", newline="").write(van_m)

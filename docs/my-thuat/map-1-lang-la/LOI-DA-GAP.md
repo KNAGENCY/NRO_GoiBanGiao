@@ -98,3 +98,36 @@ Chỗ giáp nhau **luôn rơi vào hàng 324/384 của ảnh núi** (≈ 84% chi
 | **Nền lặp lộ liễu** — `b01`, `b02`, `b03` đều là bản 384px ghép đôi thành 768px, nên núi Hokage lặp 2 lần trong một màn, có đường nối dọc ở giữa | Cần **vẽ lại ảnh nền rộng, không lặp** — việc của người tạo ảnh |
 | **Tile dốc chéo (63, 64) không khớp bậc thẳng** — hiện đang né bằng cách dùng mặt cỏ 62 cho bậc vuông | Cần **bộ ảnh dốc khớp nhau** (dốc lên/xuống + chân dốc) |
 | **Map trống** — không NPC, không quái, không vật phẩm | Thuộc phần server, chưa tới lượt |
+
+---
+
+## 6. Nhà và cây biến mất đột ngột khi cuộn camera
+
+**Triệu chứng.** Đi sang phải, đến một điểm nào đó thì cả cái nhà (hoặc cả cây cổ thụ) **biến mất trong một khung hình**, dù còn gần 200px thân của nó đáng lẽ vẫn nằm trong màn.
+
+**Nguyên nhân.** Vật thể lớn được nhét vào lưới tile như **một ô đơn**, nhưng ảnh của nó trải rộng 6–8 ô sang phải. Vòng vẽ tile chỉ chạy từ `gssx`, mà `gssx = cmx / 24 - 1` — chỉ nới **một ô** sang trái. Khi ô neo trượt ra khỏi mép trái, cả vật thể bị bỏ qua.
+
+**Cách sửa.** Nới mép trái đủ bọc vật rộng nhất, và phải tính **sau** `gssxe` để mép phải giữ nguyên:
+
+```csharp
+gssxe = gssx + gssw;      // tính mép phải TRƯỚC
+gssx -= OBOC_VAT_LON;     // rồi mới lùi mép trái (9 ô)
+if (gssx < 0) gssx = 0;
+```
+
+Sửa ở **cả hai** chỗ tính `gssx` trong `GameScr.cs` (dòng ~1613 và ~1809). Kiểm chứng: ở `cmx=497`, trước khi sửa `gssx=19` > cột cây 15 nên cây mất sạch; sau khi sửa `gssx=10` nên cây vẫn vẽ.
+
+---
+
+## 7. Bóng đổ nằm chìm trong lòng đất
+
+**Triệu chứng.** Nhân vật đứng đúng trên cỏ, nhưng cái bóng lại nằm tách hẳn xuống dưới, trong tầng đất.
+
+**Cách đo (dùng lại được cho mọi thứ vẽ sai chỗ).** Chụp hai ảnh với nhân vật ở hai vị trí khác nhau **trong lúc camera đứng yên** (đứng gần mép trái thì `cmx` bị kẹp về một giá trị), rồi trừ pixel hai ảnh. Vùng khác nhau chính là nhân vật + bóng, tách bạch khỏi nền:
+
+- thân nhân vật: ảnh y 542–626 (đáy trùng mép cỏ — đúng)
+- bóng: y 646–656, **tách rời hẳn** — tâm lệch +25px ảnh = +12,5 đơn vị
+
+**Cách sửa.** Bù đúng lượng đo được trong `Char.paintShadow`: `g.drawImage(TileMap.bong, xSd, ySd - BU_BONG_Y, 3)` với `BU_BONG_Y = 12`.
+
+**Chưa truy ra gốc**, và ghi rõ điều đó trong mã: `xSd`/`ySd` đều bằng `cx`/`cy` và đều đúng (432), bóng lại đi qua đúng hàm `drawRegion` như thân nhân vật. Nghi do `g.translate(0, GameCanvas.transY)` gọi trước `paintShadow` trong `GameScr`, nhưng `transY = 7` không khớp con số đo được. Ai truy ra gốc thì bỏ lượng bù này đi.

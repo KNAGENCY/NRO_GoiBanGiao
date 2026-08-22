@@ -430,7 +430,14 @@ func (b *BoXuLy) xuLyClientOk(s *mynet.Session) error {
 		return err
 	}
 
-	slog.Info("da gui the gioi (tileset + ME_INFO + MAP INFO), client se render",
+	// -42 CHI SO: mau, chakra, suc danh. Gui SAU MAP INFO vi client chi bat dau
+	// ve HUD khi da vao man choi. Thieu goi nay thi thanh mau va thanh chakra
+	// nam im o 0 — khong phai loi hien thi, ma la client that su khong biet.
+	if err := s.Gui(goiChiSoNhanVat(b.nhanVat)); err != nil {
+		return err
+	}
+
+	slog.Info("da gui the gioi (tileset + ME_INFO + MAP INFO + chi so), client se render",
 		"ten", b.nhanVat.Ten, "mapId", bd.MapID, "lang", b.nhanVat.Lang, "id", b.nhanVat.ID)
 	return nil
 }

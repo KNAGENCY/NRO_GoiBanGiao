@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"log/slog"
 
 	"nroserver/internal/protocol"
 	"nroserver/internal/store"
@@ -86,6 +87,57 @@ func goiXuatHien(nv *store.NhanVat) (*protocol.Message, error) {
 		return nil, fmt.Errorf("dung goi -5 that bai: ten nhan vat %d dai %d byte, vuot gioi han writeUTF", nv.ID, len(nv.Ten))
 	}
 	return m, nil
+}
+
+// goiXuatHienBoss la vo boc cua goiXuatHienDayDu cho BOSS (KH6b Task 7): dien
+// tham so tu Boss (id/hp/toa do — thu doi theo tung tick) + PhaBoss dang chay
+// (ten/cap/lang/outfit/typePk — thu doi theo tung PHA).
+//
+// Tra nil khi KHONG dung duoc goi, va nguoi goi PHAI kiem nil truoc khi
+// XepGui: xep mot con tro nil vao hang gui la panic hoac mot goi rong tren
+// day. Ba truong hop tra nil:
+//   - b == nil (con tro lac vao tu noi goi);
+//   - b.PhaHienTaiData() == nil — PhaHienTai nam ngoai [0, len(DuLieu)), tuc
+//     boss chua vao pha nao / da qua pha cuoi / du lieu rong;
+//   - ten pha dai qua muc writeUTF chiu duoc (goiXuatHienDayDu tra nil).
+//
+// TypePk: lay tu du lieu pha, nhung neu du lieu de 0 thi THAY BANG TypePkBoss
+// va ghi CANH BAO — de 0 tren day thi client (Char.cs paintHp) thoat som,
+// khong ve thanh mau, nguoi choi danh boss ma khong biet con bao nhieu mau.
+// Canh bao la bat buoc: thay the am tham se giau mot lo hong du lieu that.
+func goiXuatHienBoss(b *Boss) *protocol.Message {
+	if b == nil {
+		return nil
+	}
+	pha := b.PhaHienTaiData()
+	if pha == nil {
+		slog.Error("dung goi -5 boss that bai: khong co pha dang chay",
+			"idBoss", b.Id, "phaHienTai", b.PhaHienTai, "soPha", len(b.DuLieu))
+		return nil
+	}
+
+	typePk := pha.TypePk
+	if typePk == 0 {
+		slog.Warn("du lieu pha boss thieu TypePk (=0), dung TypePkBoss thay the — client se khong ve thanh mau neu de 0",
+			"idBoss", b.Id, "phaHienTai", b.PhaHienTai, "ten", pha.Ten)
+		typePk = TypePkBoss
+	}
+
+	m := goiXuatHienDayDu(
+		b.Id, pha.Ten, pha.Cap,
+		b.Hp, b.HpToiDa,
+		b.ViTriX, b.ViTriY,
+		HinhDangHien{
+			Lang:   pha.Lang,
+			Outfit: pha.Outfit,
+			TypePk: typePk,
+		},
+	)
+	if m == nil {
+		slog.Error("dung goi -5 boss that bai: ten pha vuot gioi han writeUTF",
+			"idBoss", b.Id, "phaHienTai", b.PhaHienTai, "soByteTen", len(pha.Ten))
+	}
+	return m
 }
 
 // (Ban goc con gui kem -103 (co) va -8 (neu dang chet). KH5 BO ca hai vi nhan

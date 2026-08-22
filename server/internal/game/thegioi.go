@@ -79,7 +79,13 @@ func goiMeInfo(nv *store.NhanVat) (*protocol.Message, error) {
 	w.Byte(0) // (d) itemsBag.size
 	w.Byte(0) // (d) itemsBox.size
 
-	w.Short(0) // headAvatar.size (DataGame.sendHeadAvatar rong)
+	// Bang anh xa headId -> avatarId. Client tra bang nay de biet ve anh nao vao
+	// o chan dung tren HUD (Char.getAvatar, dung o Panel.cs). Gui 0 cap thi
+	// getAvatar tra -1 va client bo qua — o chan dung TRONG TRON, dung loi da thay
+	// trong game.
+	w.Short(1) // headAvatar.size = 1 cap
+	w.Short(HeadNhanVat)
+	w.Short(AvatarNhanVat)
 	w.Short(0) // conMeo[gender][0]
 	w.Short(0) // conMeo[gender][1]
 	w.Short(0) // conMeo[gender][2]
@@ -91,6 +97,18 @@ func goiMeInfo(nv *store.NhanVat) (*protocol.Message, error) {
 	// (e) BO 3 truong cuoi (aura/effFront/hat).
 	return protocol.NewMessage(lenhMeInfo, w), nil
 }
+
+// HeadNhanVat / AvatarNhanVat: cap anh xa cho o chan dung tren HUD.
+//
+//	HeadNhanVat   = part dau cua nhan vat nguoi choi (mapping-id.json, parts[].id)
+//	AvatarNhanVat = sprite chan dung rieng trong bo ArtRoot (27041-27082)
+//
+// Hai so nay phai KHAC nhau: tro chan dung ve chinh anh part dau thi o HUD hien
+// mot cai dau bi cat cup chu khong phai chan dung.
+const (
+	HeadNhanVat   int16 = 30
+	AvatarNhanVat int16 = 27078
+)
 
 // goiMapInfo dung goi -24 MAP INFO: gio kich switchToMe() ben client (roi man
 // "Xin cho"). Byte-exact theo tai lieu §9 (da doi chieu Zone.mapInfo, Zone.java:

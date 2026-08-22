@@ -90,6 +90,29 @@ func (t TrangThaiBoss) String() string {
 	}
 }
 
+// DangHien tra true khi boss o trang thai ma client DANG THAY no tren man hinh
+// — tuc la khoang tu luc phat -5 (BossHien) cho toi truoc luc phat -6
+// (BossRaDi). Bon buoc HIEN, CHAO, HOAT_DONG, TROI deu la "dang tro len": boss
+// vua chet (TROI) van con xac tren man hinh cho toi khi RA_DI don di.
+//
+// Day la nguon su that DUY NHAT cho cau hoi "nguoi moi vao khu vuc co phai
+// nhan goi -5 cua con boss nay khong" (khuvuc.go, case suKienVao va themBoss).
+// Viet o day chu khong o khuvuc.go vi day la thuoc tinh cua VONG DOI boss, va
+// no la ham THUAN — dung pham vi file nay.
+//
+// Hai buoc KHONG hien: BossNghi (chua co mat trong the gioi, dang dem nguoc)
+// va BossRaDi (da don di / dang don). Gia tri ngoai bang cung tra false — du
+// lieu hong thi coi nhu khong co tren man hinh, an toan hon la gui mot goi -5
+// khong biet dua tren cai gi.
+func (t TrangThaiBoss) DangHien() bool {
+	switch t {
+	case BossHien, BossChao, BossHoatDong, BossTroi:
+		return true
+	default:
+		return false
+	}
+}
+
 // ---------------------------------------------------------------------------
 // 2. Mo hinh du lieu (thiet ke §4 — data-driven, KHONG 95 class con)
 // ---------------------------------------------------------------------------

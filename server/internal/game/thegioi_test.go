@@ -105,7 +105,11 @@ func TestGoiMeInfoByteDung(t *testing.T) {
 	b("itemsBody.size", 0)
 	b("itemsBag.size", 0)
 	b("itemsBox.size", 0)
-	sh("headAvatar.size", 0)
+	// Mot cap anh xa headId -> avatarId, de client biet ve anh nao vao o chan
+	// dung tren HUD. Gui 0 cap thi Char.getAvatar tra -1 va o do trong tron.
+	sh("headAvatar.size", 1)
+	sh("headAvatar[0].headId", HeadNhanVat)
+	sh("headAvatar[0].avatarId", AvatarNhanVat)
 	sh("conMeo0", 0)
 	sh("conMeo1", 0)
 	sh("conMeo2", 0)

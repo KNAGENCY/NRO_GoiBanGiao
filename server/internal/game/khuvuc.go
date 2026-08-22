@@ -48,6 +48,20 @@ type KhuVuc struct {
 	// va nhan BAN SAO qua kenh traLoi (xem suKienXinDanhSachQuai ben duoi).
 	quai []*Quai
 
+	// boss la danh sach boss dang song trong khu vuc nay (KH6b Task 7). CUNG
+	// QUY TAC SO HUU voi k.quai ngay tren: CHI luong vongLap duoc doc/ghi —
+	// khong getter doc thang tu ben ngoai, khong con tro nao thoat ra ngoai
+	// actor. Dat CANH k.quai co y: hai danh sach nay la toan bo "thu do may
+	// dieu khien" ma actor so huu.
+	//
+	// KHAC k.quai o mot diem: quai duoc sinh MOT LAN trong MoKhuVuc
+	// (taoQuaiMacDinh), con boss thi KHONG — MoKhuVuc de danh sach nay RONG
+	// (nil slice, append van chay). Boss chi vao khu vuc qua themBoss, do bo
+	// dieu phoi lich NGOAI actor goi (CHAN-3/CHAN-7 cua ke hoach: MoKhuVuc va
+	// MoSoKhuVuc GIU NGUYEN hanh vi, khong tu khoi dong hay sinh gi moi — bo
+	// test tich hop dung "5 khu vuc im lang" lam moc).
+	boss []*Boss
+
 	// dongHo la DONG HO TIEM DUOC cho toan bo logic co moc thoi gian trong
 	// actor (Ke hoach 6 Task 8: hoi sinh 5s + hoi mau 30s trong nhipTim, va
 	// kiem bat tu trong case suKienDanhQuai) — RANG BUOC CHUNG cua brief Task
@@ -59,6 +73,20 @@ type KhuVuc struct {
 	// tiep trang thai noi bo" da ap dung cho k.quai/k.nguoiTrong o cac Task
 	// truoc) de dieu khien "bay gio" theo y muon, khong sleep.
 	dongHo func() time.Time
+
+	// loa la duong DUY NHAT actor duoc dung de bao mot tin ra TOAN MAY CHU
+	// (KH6b Task 6, CHAN-2). nil = chua noi day -> xepThongBao im lang, KHONG
+	// panic: rat nhieu test (va ca giai doan truoc khi main.go goi GanLoa)
+	// dung MoKhuVuc truc tiep, khong he co loa.
+	//
+	// VI SAO atomic.Pointer chu khong phai *BoPhatThanh thuong: SoKhuVuc.GanLoa
+	// gan loa SAU khi MoSoKhuVuc da BatDau() 5 actor (luat 4: MoSoKhuVuc giu
+	// nguyen, khong tu khoi dong them gi) — nen loi ghi nay den tu goroutine
+	// main TRONG LUC cac actor dang chay va co the doc truong nay tu vongLap.
+	// Con tro thuong o day la data race THAT (go test -race bat duoc ngay khi
+	// Task 12 them loi doc trong actor); atomic.Pointer co zero value san sang
+	// dung (nil) nen MoKhuVuc khong can khoi tao gi them.
+	loa atomic.Pointer[BoPhatThanh]
 
 	hopThu          chan suKienKhuVuc
 	hopThuDieuKhien chan suKienDieuKhien
@@ -297,6 +325,20 @@ func heNguyenToNguoiChoi(lang int16) byte {
 // la mot loai su kien rieng, runtime that khong bao gio gui no. Giu o day (canh
 // cac suKien khac) de xuLy nhan dien duoc trong type switch.
 type suKienChay struct{ f func() }
+
+// suKienPhatGoi la yeu cau "phat san goi tin nay cho ca khu vuc" den tu MOT
+// GOROUTINE NGOAI actor — hien tai chi co goroutine loa (SoKhuVuc.PhatToanServer,
+// sokhuvuc.go) gui no.
+//
+// VI SAO PHAI DI QUA HOP THU chu khong goi thang k.phatChoCaKhuVuc: danh sach
+// nguoiTrong thuoc so huu cua vongLap (luat §1.6) — mot goroutine khac duyet
+// no la data race. Va vi sao la hop thu GAMEPLAY (k.Gui) chu khong phai hop
+// thu DIEU KHIEN: guiDieuKhien CHO toi thoiGianChoControl = 100ms; goroutine
+// loa dung o do thi ca duong phat thanh nghen theo, va neu mai sau co ai goi
+// PhatToanServer tu trong mot actor thi do la tu khoa chac chan. k.Gui khong
+// bao gio chan — hop thu day thi bo goi (mot dong chu mat di la chap nhan
+// duoc; mot actor bi treo thi khong).
+type suKienPhatGoi struct{ m *protocol.Message }
 
 // Hai su kien truy van duoi day chi con la fallback cho integration test cu
 // tu cap hopThu ma khong BatDau. Runtime dung control mailbox rieng.
@@ -704,9 +746,11 @@ func (k *KhuVuc) saoNguoiChoi(idNhanVat int64) []store.NhanVat {
 // thai khu vuc (goi tu vongLap, hoac truc tiep tu test khi actor CHUA BatDau).
 //
 // THU TU phat tin (quan trong, xem brief KH5 Task 5):
-//   - suKienVao: gui -5 cua TUNG nguoi CU cho nguoi MOI TRUOC (nguoi moi thay
-//     nguoi cu), roi moi them nguoi moi vao map (de khong tu gui -5 cho chinh
-//     minh o buoc sau), roi phat -5 cua nguoi moi cho nhung nguoi con lai.
+//   - suKienVao: gui -5 cua TUNG nguoi CU va cua TUNG BOSS dang hien cho nguoi
+//     MOI TRUOC (nguoi moi thay moi thu da co san), roi moi them nguoi moi vao
+//     map (de khong tu gui -5 cho chinh minh o buoc sau), roi phat -5 cua nguoi
+//     moi cho nhung nguoi con lai. Boss khong nhan gi o buoc cuoi — no khong co
+//     phien mang, khong can biet ai vua vao.
 //   - suKienDiChuyen: cap nhat vi tri THAT (authoritative) truoc, roi phat -7
 //     cho NGUOI KHAC (client tu ve chuyen dong cua chinh minh, khong gui lai).
 //   - suKienRa: xoa khoi map TRUOC, roi phat -6 cho nguoi con lai (nguoi da
@@ -717,6 +761,14 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 		// Diem chen test luoi panic (xem suKienChay o dau file): chay ham do
 		// bom vao. Runtime that khong bao gio gui su kien nay.
 		sk.f()
+
+	case suKienPhatGoi:
+		// Goi da duoc DUNG SAN o ngoai (goroutine loa) — actor chi lam dung
+		// mot viec re: day no toi tung nguoi dang trong khu vuc. KHONG kiem
+		// nil o day: nguoi GUI chiu trach nhiem do (SoKhuVuc.PhatToanServer da
+		// kiem, xem sokhuvuc.go). Mot nhanh phong thu thua o day se la nhanh
+		// khong test nao giet duoc — che mat chinh cai loi no dinh chan.
+		k.phatChoCaKhuVuc(sk.m)
 
 	case suKienVao:
 		delete(k.anhChupDaRoi, sk.nv.ID)
@@ -730,6 +782,30 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 			}
 			if err := sk.phien.XepGui(m); err != nil {
 				slog.Warn("gui -5 nguoi cu cho nguoi moi that bai", "loi", err)
+				sk.phien.DongCham()
+				return
+			}
+		}
+		// 1b) Gui -5 cua tung BOSS dang HIEN cho nguoi MOI (KH6b Task 7). Van
+		//     thuoc buoc (1) "nguoi moi thay nhung gi da co san": boss la MOT
+		//     NHAN VAT voi client, dung chung goi -5 voi nguoi choi. Boss KHONG
+		//     can biet ai vua vao (no khong co phien mang) nen KHONG co chieu
+		//     nguoc lai o buoc (3).
+		//
+		//     Bo qua boss chua hien (NGHI) hoac da don di (RA_DI) — xem
+		//     TrangThaiBoss.DangHien. Bo qua ca goi nil (du lieu pha hong/ten
+		//     qua dai): goiXuatHienBoss da ghi log ro ly do, o day chi tuyet
+		//     doi KHONG XepGui mot con tro nil.
+		for _, b := range k.boss {
+			if b == nil || !b.TrangThai.DangHien() {
+				continue
+			}
+			m := goiXuatHienBoss(b)
+			if m == nil {
+				continue
+			}
+			if err := sk.phien.XepGui(m); err != nil {
+				slog.Warn("gui -5 boss cho nguoi moi that bai", "loi", err)
 				sk.phien.DongCham()
 				return
 			}
@@ -1214,6 +1290,58 @@ func (k *KhuVuc) phatChoCaKhuVuc(m *protocol.Message) {
 		}
 	}
 	k.loaiNhieuNguoiLoiGui(loi)
+}
+
+// themBoss dua MOT con boss vao khu vuc va bao cho moi nguoi dang co mat
+// (KH6b Task 7). Day la duong VAO DUY NHAT cua k.boss — bo dieu phoi lich
+// (Task 13, ngoai actor) gui lenh sinh qua hop thu, may trang thai (Task 9)
+// goi ham nay TU TRONG vongLap.
+//
+// CHAY TRONG ACTOR: chi dung phien.XepGui qua phatChoCaKhuVuc (khong Gui()),
+// khong cho doi ai, khong sinh goroutine — dung ky luat cua moi ham khac trong
+// file nay.
+//
+// b == nil -> khong lam gi (KHONG panic, KHONG them mot o nil vao danh sach
+// de moi vong lap sau nay phai kiem lai).
+//
+// Boss CHUA hien (NGHI) van duoc THEM vao danh sach nhung KHONG phat goi nao:
+// bo dieu phoi co the nap truoc mot con dang dem nguoc GiayNghi: phat -5 luc
+// do la lam boss hien som, sai vong doi. Goi nil (du lieu pha hong) cung khong
+// phat — goiXuatHienBoss da ghi log ly do; boss van nam trong danh sach de may
+// trang thai co co hoi sua/don no o cac buoc sau.
+func (k *KhuVuc) themBoss(b *Boss) {
+	if b == nil {
+		return
+	}
+	k.boss = append(k.boss, b)
+	if !b.TrangThai.DangHien() {
+		return
+	}
+	m := goiXuatHienBoss(b)
+	if m == nil {
+		return
+	}
+	k.phatChoCaKhuVuc(m)
+}
+
+// xepThongBao la THU DUY NHAT actor duoc goi de bao mot tin ra toan may chu
+// (vd nhipBoss: "Boss Cuu Vi da xuat hien"). No CHI xep mot yeu cau vao hang
+// doi cua loa roi tra ve NGAY — khong cham mang, khong cho ai, khong dung
+// guiDieuKhien (bay §6.10b: cho 100ms tren hop thu ma chinh vongLap dang ban
+// = tu khoa chac chan). Viec phat that do goroutine cua loa lam.
+//
+// loa == nil -> khong lam gi, KHONG panic: khu vuc chua duoc noi day (moi
+// MoKhuVuc trong test, hoac may chu chua chay GanLoa) van phai chay binh
+// thuong.
+//
+// Moc thoi gian lay tu k.dongHo() (khong phai time.Now) theo dung rang buoc
+// chung cua actor — MocTao chi dung de do do tre hang doi trong log.
+func (k *KhuVuc) xepThongBao(noiDung string) {
+	loa := k.loa.Load()
+	if loa == nil {
+		return
+	}
+	loa.Xep(YeuCauThongBao{NoiDung: noiDung, MocTao: k.dongHo()})
 }
 
 func (k *KhuVuc) loaiNguoiLoiGui(id int64) {

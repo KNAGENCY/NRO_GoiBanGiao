@@ -201,3 +201,37 @@ func ChieuCuaLang(idLang byte) []MauChieu {
 	}
 	return chieuTheoLang[idLang]
 }
+
+// TraCapChieu tra ve MOT CAP cu the cua mot chieu — cua tra cuu DUY NHAT dung
+// chung cho nguoi choi va boss (Ke hoach 6b, don nen sau soi doi khang).
+//
+// Vi sao can: BoChieu cua boss (boss.go) khai {templateId, cap} nhung KiemDanhHopLe
+// doi *CapChieu. Truoc day cho chuyen doi duy nhat la doan inline trong actor
+// (khuvuc.go, case suKienChonChieu) — doan do LUON lay CacCap[0], tuc BO QUA cot
+// cap. Neu boss tu viet lai doan tra cuu thi se co BAN SAO LOGIC THU HAI, va
+// khac biet giua hai ban se hong IM LANG (khong test nao bat).
+//
+// Fail-closed: tra nil khi BAT KY dieu kien nao khong hop le (lang ngoai bang,
+// khong tim thay templateId, cap ngoai [1, len(CacCap)]). Nguoi goi PHAI kiem nil
+// — nil di tiep vao KiemDanhHopLe se bi tu choi voi ly do "chua chon chieu", tuc
+// van an toan, nhung kiem som thi log ro rang hon.
+//
+// cap tinh tu 1 (cap 1 = CacCap[0]) — dung quy uoc hien thi cho nguoi choi, KHONG
+// phai chi so mang. cap = 0 la KHONG hop le (tra nil) chu khong am tham hieu la 1:
+// du lieu boss quen dien cap phai lo ra ngay chu khong chay nham cap 1.
+func TraCapChieu(idLang byte, templateId byte, cap byte) *CapChieu {
+	danhMuc := ChieuCuaLang(idLang)
+	if cap == 0 {
+		return nil
+	}
+	for i := range danhMuc {
+		if danhMuc[i].Id != templateId {
+			continue
+		}
+		if int(cap) > len(danhMuc[i].CacCap) {
+			return nil
+		}
+		return &danhMuc[i].CacCap[cap-1]
+	}
+	return nil
+}

@@ -156,6 +156,32 @@ type nguoiTrongKhuVuc struct {
 	lucHoiSinh time.Time
 }
 
+// benDanhTuNguoi doi mot nguoi choi trong khu vuc thanh BenDanh (chotkiem.go)
+// — adapter cua Ke hoach 6b Task 5. Truoc do KiemDanhHopLe nhan thang
+// *nguoiTrongKhuVuc; tach ra de boss (kieu rieng, khong co store.NhanVat) di
+// CHUNG mot duong kiem voi nguoi choi thay vi co ban sao logic thu hai.
+//
+// VoHanChakra LUON false o day: mien chakra la dac quyen rieng cua boss, nguoi
+// choi khong bao gio duoc cho qua kiem #2 (TestBenDanhTuNguoiChepDungTruong
+// khoa dieu nay).
+//
+// nguoi == nil (hoac chua co nv) tra ve BenDanh zero — Chieu == nil nen
+// KiemDanhHopLe tu choi voi ly do "chua chon chieu", GIU NGUYEN hanh vi cua
+// nhanh bao ve `nguoiDanh == nil` truoc khi tach ham.
+func benDanhTuNguoi(nguoi *nguoiTrongKhuVuc) BenDanh {
+	if nguoi == nil || nguoi.nv == nil {
+		return BenDanh{}
+	}
+	return BenDanh{
+		X:             nguoi.nv.ViTriX, // int32, KHONG ep xuong int16 (xem BenDanh.X)
+		Y:             nguoi.nv.ViTriY,
+		ChakraHienTai: nguoi.nv.ChakraHienTai,
+		LanDanhCuoi:   nguoi.lanDanhCuoi,
+		Chieu:         nguoi.chieuDangChon,
+		VoHanChakra:   false, // xem chu thich tren — khong bao gio doi thanh true cho nguoi choi
+	}
+}
+
 // suKienKhuVuc la kieu su kien actor xu ly qua hop thu. Ke hoach 5 Task 5 se
 // lam day logic xu ly; Task 1 chi dinh nghia khung.
 type suKienKhuVuc interface{}
@@ -808,7 +834,7 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 		}
 
 		bayGio := k.dongHo() // Task 8: dong ho tiem duoc, KHONG goi time.Now() thang o day nua.
-		ketQua := KiemDanhHopLe(nguoi, ViTriCoMau{
+		ketQua := KiemDanhHopLe(benDanhTuNguoi(nguoi), ViTriCoMau{
 			X:         mucTieu.X,
 			Y:         mucTieu.Y,
 			HpHienTai: mucTieu.Hp,
@@ -990,7 +1016,7 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 		}
 
 		bayGio := k.dongHo() // Task 8/11: dong ho tiem duoc, KHONG goi time.Now() thang.
-		ketQua := KiemDanhHopLe(nguoi, ViTriCoMau{
+		ketQua := KiemDanhHopLe(benDanhTuNguoi(nguoi), ViTriCoMau{
 			X:         int16(mucTieu.nv.ViTriX),
 			Y:         int16(mucTieu.nv.ViTriY),
 			HpHienTai: mucTieu.nv.HpHienTai,

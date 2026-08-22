@@ -107,6 +107,15 @@ type MocNoiGian struct {
 	HeSoDame   float64 // nhan vao sat thuong boss gay ra
 	HeSoDef    float64 // nhan vao sat thuong boss NHAN (nho hon = trau hon)
 	Chat       string  // cau boss noi khi cham moc nay (goi 44)
+
+	// HeSoNhip nhan vao Boss.NhipDanhHienTai (nho hon 1 = danh NHANH hon).
+	// 0 nghia la KHONG doi nhip.
+	//
+	// ⚠️ TUYET DOI khong duoc "doi nhip" bang cach sua CapChieu.HoiChieuMs:
+	// BenDanh.Chieu la CON TRO tro thang vao catalog chieu TOAN CUC dung chung
+	// voi NGUOI CHOI — sua qua do la doi hoi chieu cua moi nguoi trong ca may
+	// chu. Nhip cua boss ap RIENG, ngoai KiemDanhHopLe.
+	HeSoNhip float64
 }
 
 // PhaBoss la MOT PHA cua mot boss (thiet ke §4). Mot boss cu the = []PhaBoss:
@@ -123,6 +132,17 @@ type PhaBoss struct {
 	Cap    byte     // cap hien thi (goi -5 truong 3), hop le 1..255
 	Outfit [6]int16 // head, body, leg, flagBag, aura, effFront
 	Dame   int64    // sat thuong goc cua pha (dua vao TinhSatThuong)
+
+	// TypePk la truong 5 cua goi -5. PHAI khac 0 — client (Char.cs paintHp)
+	// THOAT SOM khong ve thanh mau khi cTypePk == 0 VA cFlag == 0, ma goi -5
+	// cua ta luon ghi cFlag = 0. De 0 thi nguoi choi danh boss ma KHONG THAY
+	// mau boss con bao nhieu. Dung hang so TypePkBoss, dung ghi so tran.
+	TypePk byte
+
+	// NhipDanhMs la khoang cach toi thieu giua hai don cua pha nay (mili giay),
+	// nap vao Boss.NhipDanhHienTai khi vao pha. 0 = de he thong hoi chieu cua
+	// chieu tu lo (xem MocNoiGian.HeSoNhip).
+	NhipDanhMs int32
 
 	HpChon  []int64    // luc sinh chon NGAU NHIEN mot gia tri trong day
 	MapVao  []int32    // luc hien chon NGAU NHIEN mot khu vuc trong day
@@ -186,6 +206,27 @@ type Boss struct {
 	// trong logic co the test.
 	MocThoiGian time.Time
 
+	// LanDanhCuoi la thoi diem boss DUNG THANH CONG mot chieu lan gan nhat —
+	// KHAC HAN MocThoiGian (moc vao TRANG THAI). Day la nguon du lieu cho
+	// buoc kiem hoi chieu #3 cua KiemDanhHopLe (chotkiem.go): thieu truong nay
+	// thi BenDanh.LanDanhCuoi phai de zero value, bayGio.Sub(zero) ra khoang
+	// cuc lon nen hoi chieu LUON QUA -> boss danh MOI TICK 100ms (10 don/giay).
+	// Zero value = chua tung danh -> lan danh dau tien duoc phep ngay.
+	LanDanhCuoi time.Time
+
+	// LucHienPha la thoi diem boss VAO trang thai HIEN cua pha hien tai. Dung
+	// lam ViTriCoMau.LucHoiSinh khi boss lam MUC TIEU (nguoi danh boss) — cho
+	// boss khoang bat tu ngan sau moi lan bien hinh, giong nguoi choi/quai vua
+	// hoi sinh. KHONG dung MocThoiGian vao viec nay: MocThoiGian doi theo MOI
+	// buoc trang thai (CHAO, HOAT_DONG...) nen boss se bat tu lai moi buoc.
+	LucHienPha time.Time
+
+	// NhipDanhHienTai la khoang cach toi thieu giua hai don cua boss, tinh
+	// bang mili giay. Nap tu PhaBoss.NhipDanhMs khi vao pha, roi MocNoiGian
+	// nhan HeSoNhip vao day khi boss noi gian. Ap NGOAI KiemDanhHopLe (xem
+	// chu thich MocNoiGian.HeSoNhip).
+	NhipDanhHienTai int32
+
 	// SatThuongTheoNguoi cong don sat thuong tung nguoi choi gay ra cho boss,
 	// dung de chia thuong theo dong gop khi boss chet (quyet dinh 3, thiet ke
 	// §2). Nap qua CongSatThuong; chia qua ChiaThuongTheoDongGop; xoa sach sau
@@ -233,6 +274,17 @@ const (
 
 // Tran int64, dung lam moc bao hoa khi cong don sat thuong (xem CongSatThuong).
 const tongSatThuongToiDa int64 = 9_223_372_036_854_775_807 // = math.MaxInt64
+
+// TypePkBoss la gia tri truong 5 (typePk) cua goi -5 danh cho boss.
+//
+// BANG CHUNG (khong bia so):
+//   - 1-MAY-CHU-GAME/src/consts/ConstPlayer.java:21  ->  PK_ALL = 5
+//   - 1-MAY-CHU-GAME/src/boss/Boss.java:280          ->  boss doi typePk sang PK_ALL
+//   - 1-MAY-CHU-GAME/src/boss/Boss.java:553          ->  boss CHI danh khi typePk == PK_ALL
+//
+// Vi sao BAT BUOC khac 0: client chi ve thanh mau cho nhan vat khi typePk/flag
+// khac 0. De 0 thi nguoi choi danh boss ma khong thay mau boss con bao nhieu.
+const TypePkBoss byte = 5
 
 // KepHp kep mot gia tri mau ve mien [0, 2_147_483_647] roi tra ve int32.
 //

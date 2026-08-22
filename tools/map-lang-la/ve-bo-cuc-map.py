@@ -27,8 +27,8 @@ print(f"[don] xoa sach {don} o (ca tile nen lan vat the cu)")
 # do cao mat dat theo cot: 18 = chuan; 17 = go cao; 19 = trung
 CAO = {}
 for c in range(tmw):
-    if 23 <= c <= 27:     CAO[c] = 17     # go duoi cong torii (cong dung tren be cao)
-    elif 34 <= c <= 41:   CAO[c] = 17     # go duoi nha lon (khop dung cot 34-41)
+    if 16 <= c <= 28:     CAO[c] = 17     # nen cao cua khu trung tam (torii + nha lon)
+    elif False:           CAO[c] = 17     # (go thu hai da gop vao khu trung tam)
     else:                 CAO[c] = 18
 # lam muot: khong de bac nhay > 1 o
 for c in range(1, tmw):
@@ -81,29 +81,38 @@ def dat_vat(cot, slot, cao_o):
     r_chan = CAO.get(cot, 18)
     dat(r_chan - cao_o, cot, slot)
 
-# BO CUC — moi cong trinh mot khoang rieng, khong cai nao cam vao cai nao.
+# BO CUC — XEP DAY DAC nhu CONCEPT DA DUYET.
 #
-# Map chi rong 52 o ma truoc do nhoi 4 cong trinh lon (6+8+8+8 = 30 o) cong
-# torii va cay, nen cai nao cung dinh cai nao: torii cam vao nha vua, cay tran
-# ra ngoai map, den long nam trong long nha nho, hai hang rao cam xuyen cot
-# torii va dan phang len tuong nha lon.
+# Do lai concept va game moi thay minh da di lac: o dai nha cua, concept co 0%
+# be ngang la troi (nha che kin, lang la MOT KHOI LIEN), con game co 39-55% —
+# cac cong trinh dung roi rac tren nen troi. Do la cai chu du an goi la
+# "nhu dang choi xep hinh".
 #
-# Bo NHA VUA de lay lai khoang tho, va dua CAY vao giua map — truoc do ca man
-# chi co mot cay dinh sat bien phai, khuc giua khong co mang xanh nao.
+# Vong truoc con bo bot nha va gian vat the ra "cho khoi cham nhau" — dung huong
+# ky thuat nhung SAI huong bo cuc, vi trong concept nha CHONG LAN nhau la binh
+# thuong va chinh cho do tao chieu sau.
 #
-#          cot      vat                 ghi chu
-dat_vat(2,  70, 6)   # 2-7    nha nho
-dat_vat(9,  78, 2)   # 9-10   thung go
-dat_vat(12, 76, 4)   # 12-13  den long
-dat_vat(15, 80, 8)   # 15-20  cay          (dua vao giua map)
-dat_vat(23, 74, 5)   # 23-27  cong torii   (dung tren go 23-27)
-dat_vat(29, 77, 3)   # 29-31  gieng
-dat_vat(34, 72, 8)   # 34-41  nha lon      (dung tron tren go 34-41)
-dat_vat(43, 73, 6)   # 43-48  quan mi
-for c in [21, 32]:
-    dat_vat(c, 75, 2)                      # hang rao lam lan can hai chan go
-for c in [8, 14, 28, 42, 49]:
-    dat_vat(c, 81, 1)                      # bui co o cac khe, khong cham cong trinh
+# Nay xep sat lai, cho chong 1-2 o, dung lai anh nha (concept cung co nhieu nha
+# giong nhau), phu kin 48/48 o dung duoc.
+#
+#          cot      vat            ghi chu
+dat_vat(2,  70, 6)   #  2-7    nha nho
+dat_vat(8,  71, 6)   #  8-15   nha vua
+dat_vat(16, 74, 5)   # 16-20   cong torii   (tren nen cao)
+dat_vat(21, 72, 8)   # 21-28   nha lon      (tren nen cao)
+dat_vat(29, 77, 3)   # 29-31   gieng
+dat_vat(32, 73, 6)   # 32-39   quan mi
+dat_vat(40, 80, 8)   # 40-45   cay
+dat_vat(44, 70, 6)   # 44-49   nha nho lan hai
+# vat nho dat XEN vao chan cong trinh — trong concept den long va hang rao cung
+# nam de len chan nha, do la mot phan cua ve day dac
+dat_vat(7,  76, 4)   # den long truoc nha vua
+dat_vat(31, 76, 4)   # den long truoc quan
+for c in (15, 30, 43):
+    dat_vat(c, 75, 2)                      # hang rao xen giua cac nha
+for c in (6, 20, 28, 39, 49):
+    dat_vat(c, 81, 1)                      # bui co o chan cong trinh
+dat_vat(19, 78, 2)   # thung go canh torii
 
 # Tuong VO HINH o bien: khong co thi nguoi choi roi xuong ho o mep map.
 #

@@ -25,11 +25,10 @@ const (
 // goCuaMap1 tra ve tap cot co mat dat nhich len hang 17 (duoi cong torii va
 // duoi nha lon). Giu dung mot cho khai bao de doi bo cuc chi sua o day.
 func goCuaMap1() map[int]bool {
+	// Nen cao cua khu trung tam: cong torii + nha lon dung tren do (bo cuc day
+	// dac theo concept — xem tools/map-lang-la/ve-bo-cuc-map.py).
 	g := map[int]bool{}
-	for c := 23; c <= 27; c++ {
-		g[c] = true
-	}
-	for c := 34; c <= 41; c++ {
+	for c := 16; c <= 28; c++ {
 		g[c] = true
 	}
 	return g
@@ -96,14 +95,14 @@ func TestVaChamMap1DacHetPhanLongDat(t *testing.T) {
 func TestVaChamMap1ChanNgangHaiCaiGo(t *testing.T) {
 	c := taiCollisionMap1(t)
 	// Hang 18 duoi go phai DAC: do la than go, di ngang vao la chui vao trong go.
-	for _, cot := range []int{23, 25, 27, 34, 38, 41} {
+	for _, cot := range []int{16, 20, 24, 28} {
 		if c.cells[hangMatDatThuong*c.width+cot] != 1 {
 			t.Errorf("cot %d hang %d (than go) dang rong -> di xuyen ngang vao trong go duoc",
 				cot, hangMatDatThuong)
 		}
 	}
 	// Cot ngay ben canh go thi hang 18 phai rong (mat dat thuong).
-	for _, cot := range []int{22, 28, 33, 42} {
+	for _, cot := range []int{14, 15, 29, 30} {
 		if c.cells[hangMatDatThuong*c.width+cot] == 1 {
 			t.Errorf("cot %d hang %d dang dac nhung day la mat dat thuong", cot, hangMatDatThuong)
 		}

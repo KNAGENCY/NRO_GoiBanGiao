@@ -80,7 +80,13 @@ func TestGoiVersionGameDungByte(t *testing.T) {
 		t.Fatalf("lenh = %d, mong doi -28", m.Command)
 	}
 	// than: [4][vsData][vsMap][vsSkill][vsItem][0][countCaption=0]
-	want := []byte{4, 21, 22, 21, 20, 0, 0}
+	//
+	// So viet cung co chu dich: doi mot byte o day nghia la client se coi cache
+	// cua no da cu va tai lai du lieu tinh — phai la quyet dinh co y, khong duoc
+	// troi theo mot thay doi khac. vsData 21 -> 22 khi part.bin doi (nang 3 manh
+	// nhan vat cho chan cham dat); khong tang thi client van dung part.bin cu
+	// trong RMS va nhan vat tiep tuc lun nua nguoi.
+	want := []byte{4, 22, 22, 21, 20, 0, 0}
 	if !bytes.Equal(m.Data, want) {
 		t.Errorf("than versionGame = %v, mong doi %v", m.Data, want)
 	}

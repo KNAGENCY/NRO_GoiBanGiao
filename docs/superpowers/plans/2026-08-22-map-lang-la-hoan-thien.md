@@ -73,6 +73,12 @@ Viết đề bài kèm ảnh tham chiếu, giao cho agent vẽ. Xếp theo mức
 | 2 | **3–4 biến thể tile đất sâu** + lớp tối dần theo độ sâu | gần 1/4 màn hình là đất chết kẻ ô bàn cờ |
 | 3 | **Vẽ lại b02 núi Hokage** — bản 768px thật, to gấp 3–4 lần | núi lặp 2 lần/màn · đường nối dọc |
 | 4 | **Sprite bóng đổ elip mờ** cho mọi công trình | nhà/giếng/cây như sticker dán |
+
+> **Đã thử làm bóng bằng code — không được, đã hoàn tác.** Ý tưởng: vẽ elip mờ vào
+> đáy ảnh vật thể. Vấn đề: chân vật nằm sát **mép dưới ảnh**, nên nửa dưới elip rơi
+> ra ngoài ảnh, phần còn lại thì bị chính thân vật che. Trong game gần như không
+> thấy gì. Bóng phải là **sprite riêng vẽ lên tile mặt đất** (hoặc ảnh vật thể phải
+> chừa sẵn khoảng trống dưới chân) — nghĩa là việc của người vẽ, không phải của code.
 | 5 | **Kè đá + bậc thang đá** dưới torii | concept đã duyệt có, game không có |
 | 6 | **2 ô chuyển tiếp cỏ ↔ lát đá** + túm cỏ, đá lẻ rải mép | nhát cắt dọc giữa cỏ và lối đá |
 | 7 | **Vẽ lại b01 làng xa** cao hơn, đáy tắt dần | mái nhà treo lơ lửng ở y=561 |

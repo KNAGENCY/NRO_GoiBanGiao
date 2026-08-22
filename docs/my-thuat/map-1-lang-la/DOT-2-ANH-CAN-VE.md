@@ -3,6 +3,19 @@
 Viết ngày 22/08/2026, sau khi đã sửa hết những gì code sửa được.
 Điểm hiện tại: **45/100 → đang đo lại**. Mọi lỗi còn lại đều nằm ở *ảnh*, không ở code.
 
+## Phong cách: **hand-painted, KHÔNG pixel art** — chốt cho toàn bộ 24 ảnh
+
+Cả nền, nhà cửa, cây, cổng torii trong game đều là tranh vẽ mịn (hand-painted), và
+concept đã duyệt cũng vậy. Tile đất/cỏ đang dùng cũng hand-painted.
+
+Đây không phải chuyện thẩm mỹ tuỳ chọn: đợt soi độc lập vòng 3 đã nêu đúng lỗi này —
+*"nét vẽ nhân vật pixel art thô đứng cạnh tranh vẽ mịn, nhìn 1 giây là thấy hai game
+khác nhau"*. Thêm tile pixel art vào giữa nền hand-painted sẽ làm hỏng thêm, không cứu được.
+
+Vậy: **vẽ mịn tất cả**, cùng bảng màu và cùng độ chi tiết với nhà cửa đã có trong game.
+
+---
+
 > Kích thước dưới đây là **mức x4** (mức gốc). Các mức x1/x2/x3 mình tự thu nhỏ, người vẽ chỉ cần giao x4.
 > Ảnh nền để **PNG không cần trong suốt**; tile và vật thể để **PNG có kênh trong suốt**.
 
@@ -26,7 +39,7 @@ Khi mặt đất cao lên một bậc, phần đất lộ ra ở mặt cắt đa
 hẳn nên lộ đường cắt. Cả 3 ảnh phải ghép được với nhau và với ô đất thường mà không thấy mối nối.
 
 ```
-English prompt: seamless 96x96 pixel-art tile, cross-section of a dirt embankment
+English prompt: seamless 96x96 hand-painted tile, cross-section of a dirt embankment
 wall, exposed soil with small roots and pebbles, warm brown earth tones matching
 grass-topsoil tile, hand-painted 2D game tileset style, edges must tile seamlessly
 with adjacent dirt tiles, transparent background outside the tile square, no border,
@@ -53,7 +66,7 @@ tầng đất biến thành bàn cờ. Bốn ảnh này phải **rất gần nha
 Vân phải chạy **hết ra tận mép** cả 4 cạnh và **khớp với chính nó khi lặp** (tileable).
 
 ```
-English prompt: seamless tileable 96x96 pixel-art dirt tile, dense fine soil
+English prompt: seamless tileable 96x96 hand-painted dirt tile, dense fine soil
 texture with tiny stones and cracks, texture runs edge to edge and tiles
 seamlessly in all four directions, warm brown, hand-painted 2D game tileset,
 flat lighting no directional shadow, no border, no outline

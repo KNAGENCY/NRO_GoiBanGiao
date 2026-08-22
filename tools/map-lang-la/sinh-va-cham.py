@@ -23,13 +23,28 @@ W, H = d[0], d[1]
 o = list(d[2:2 + W * H])
 print(f"bo cuc client: {W}x{H}")
 
-cells = bytearray(W * H)
+# QUY UOC HAI BEN KHAC NHAU — doc ky truoc khi sua:
+#   client: o co bit 2 la SAN, nhan vat dung TREN no (dung o dinh o)
+#   server: o dac la KHONG VAO DUOC, kiem chinh diem (cx, cy) cua nhan vat
+# Nhan vat dung tren mat co hang 18 co cy = 432, ma 432/24 = 18 -> server phai
+# thay hang 18 RONG thi vi tri do moi hop le. Vi vay o "mat dat" phai de rong,
+# chi phan DUOI mat dat moi dac.
+#
+# Tim hang mat dat cua tung cot: hang dau tien tu tren xuong co tile nen.
+mat_dat = {}
 for c in range(W):
     for r in range(H):
-        v = o[r * W + c]
-        if v in TILE_NEN:
-            cells[r * W + c] = 1
-# Hai tuong bien: client de trong nhung khong co tuong thi nhan vat chay tuot ra ngoai.
+        if o[r * W + c] in TILE_NEN:
+            mat_dat[c] = r
+            break
+    else:
+        mat_dat[c] = H          # cot khong co dat (chi tuong bien)
+
+cells = bytearray(W * H)
+for c in range(W):
+    for r in range(mat_dat[c] + 1, H):    # BO hang mat dat, chi dac tu duoi no
+        cells[r * W + c] = 1
+# Hai tuong bien: dac het chieu cao, neu khong nhan vat chay tuot ra ngoai map.
 for r in range(H):
     cells[r * W] = 1
     cells[r * W + (W - 1)] = 1

@@ -27,8 +27,8 @@ print(f"[don] xoa sach {don} o (ca tile nen lan vat the cu)")
 # do cao mat dat theo cot: 18 = chuan; 17 = go cao; 19 = trung
 CAO = {}
 for c in range(tmw):
-    if 6 <= c <= 11:      CAO[c] = 17     # go cao ben trai
-    elif 30 <= c <= 37:   CAO[c] = 17     # go cao ben phai
+    if 23 <= c <= 27:     CAO[c] = 17     # go duoi cong torii (cong dung tren be cao)
+    elif 34 <= c <= 41:   CAO[c] = 17     # go duoi nha lon (khop dung cot 34-41)
     else:                 CAO[c] = 18
 # lam muot: khong de bac nhay > 1 o
 for c in range(1, tmw):
@@ -40,7 +40,9 @@ def bam(c, r):
     x = (x ^ (x >> 13)) * 1274126177
     return (x ^ (x >> 16)) & 0xFFFF
 
-LOI_DI = set(range(20, 27))     # loi dat lat da giua lang
+# Loi lat da phai nam o cho PHANG. De o 20-26 thi no chui xuong duoi go
+# (go 23-27), chi con lo ra mot mang da o mat cat vach — trong rat la.
+LOI_DI = set(range(8, 15))      # loi dat lat da truoc day nha, cho phang
 
 for c in range(1, tmw-1):
     mat = CAO[c]
@@ -75,20 +77,29 @@ def dat_vat(cot, slot, cao_o):
     r_chan = CAO.get(cot, 18)
     dat(r_chan - cao_o, cot, slot)
 
-dat_vat(3,  70, 6)    # nha nho     (6 o)
-dat_vat(13, 71, 6)    # nha vua     (6 o)
-dat_vat(31, 72, 8)    # nha lon     (8 o)
-dat_vat(40, 73, 6)    # nha quan    (6 o)
-dat_vat(19, 74, 5)    # cong torii  (5 o)
-dat_vat(28, 77, 3)    # gieng       (3 o)
-dat_vat(9,  78, 2)    # thung go    (2 o)
-dat_vat(45, 79, 3)    # bien hieu   (3 o)
-dat_vat(47, 80, 8)    # cay         (8 o)
-dat_vat(7,  76, 4)    # den long    (4 o)
-for c in [17, 22, 35]:
-    dat_vat(c, 75, 2)                       # hang rao (2 o)
-for c in [5, 16, 26, 38, 44]:
-    dat_vat(c, 81, 1)                       # bui co   (1 o)
+# BO CUC — moi cong trinh mot khoang rieng, khong cai nao cam vao cai nao.
+#
+# Map chi rong 52 o ma truoc do nhoi 4 cong trinh lon (6+8+8+8 = 30 o) cong
+# torii va cay, nen cai nao cung dinh cai nao: torii cam vao nha vua, cay tran
+# ra ngoai map, den long nam trong long nha nho, hai hang rao cam xuyen cot
+# torii va dan phang len tuong nha lon.
+#
+# Bo NHA VUA de lay lai khoang tho, va dua CAY vao giua map — truoc do ca man
+# chi co mot cay dinh sat bien phai, khuc giua khong co mang xanh nao.
+#
+#          cot      vat                 ghi chu
+dat_vat(2,  70, 6)   # 2-7    nha nho
+dat_vat(9,  78, 2)   # 9-10   thung go
+dat_vat(12, 76, 4)   # 12-13  den long
+dat_vat(15, 80, 8)   # 15-20  cay          (dua vao giua map)
+dat_vat(23, 74, 5)   # 23-27  cong torii   (dung tren go 23-27)
+dat_vat(29, 77, 3)   # 29-31  gieng
+dat_vat(34, 72, 8)   # 34-41  nha lon      (dung tron tren go 34-41)
+dat_vat(43, 73, 6)   # 43-48  quan mi
+for c in [21, 32]:
+    dat_vat(c, 75, 2)                      # hang rao lam lan can hai chan go
+for c in [8, 14, 28, 42, 49]:
+    dat_vat(c, 81, 1)                      # bui co o cac khe, khong cham cong trinh
 
 open(MAP, "wb").write(bytes(data))
 

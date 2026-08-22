@@ -115,9 +115,17 @@ for c in [8, 14, 28, 42, 49]:
 #
 # Tile 39 da duoc khai bao dac ca bon huong trong bang goc, anh cua no da lam
 # trong suot nen tuong khong ve ra gi.
-for r in range(tmh):
-    for c in (0, 1, tmw - 2, tmw - 1):
-        dat(r, c, 39)
+# Chi dat tuong o phan TREN mat dat. Neu dat tuong ca cot thi phan duoi khong
+# co tile dat nao -> mep man hinh ho ra mot dai mau troi, nhin nhu map bi khuyet.
+# Chan ngang cua client kiem o hang (mat dat - 1) nen tuong tu hang do tro len
+# la du giu nguoi choi lai.
+for c in (0, 1, tmw - 2, tmw - 1):
+    mat = CAO.get(c, 18)
+    for r in range(tmh):
+        if r < mat:
+            dat(r, c, 39)                                  # tuong vo hinh
+        else:
+            dat(r, c, 61 if bam(c, r) % 100 < 34 else 60)  # dat, de mep nhin lien mach
 
 open(MAP, "wb").write(bytes(data))
 

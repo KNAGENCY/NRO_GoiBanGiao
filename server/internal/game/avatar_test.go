@@ -1,6 +1,7 @@
 package game
 
 import (
+	"encoding/json"
 	"testing"
 
 	"nroserver/internal/protocol"
@@ -95,5 +96,28 @@ func TestAnhChanDungKhacAnhDau(t *testing.T) {
 	}
 	if AvatarNhanVat <= 0 || HeadNhanVat <= 0 {
 		t.Error("id chan dung / dau phai duong")
+	}
+}
+
+func TestChanDungNguoiChoiKhongTrungChanDungNPC(t *testing.T) {
+	// Nguoi choi va NPC khong duoc dung chung mot khuon mat. Doc thang catalog
+	// de bat duoc ngay khi ai do doi portrait cua NPC thanh trung voi nguoi choi.
+	var cat struct {
+		NPCs []struct {
+			Portrait int16 `json:"portrait"`
+			Ten      string `json:"name"`
+		} `json:"npcs"`
+	}
+	if err := json.Unmarshal(duLieuCatalog, &cat); err != nil {
+		t.Fatalf("doc catalog loi: %v", err)
+	}
+	if len(cat.NPCs) == 0 {
+		t.Skip("catalog chua co NPC nao de doi chieu")
+	}
+	for _, npc := range cat.NPCs {
+		if npc.Portrait == AvatarNhanVat {
+			t.Errorf("chan dung nguoi choi (%d) trung chan dung NPC %q — hai ben se cung mot khuon mat",
+				AvatarNhanVat, npc.Ten)
+		}
 	}
 }

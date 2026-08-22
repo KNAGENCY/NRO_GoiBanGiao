@@ -101,13 +101,15 @@ func goiMeInfo(nv *store.NhanVat) (*protocol.Message, error) {
 // HeadNhanVat / AvatarNhanVat: cap anh xa cho o chan dung tren HUD.
 //
 //	HeadNhanVat   = part dau cua nhan vat nguoi choi (mapping-id.json, parts[].id)
-//	AvatarNhanVat = sprite chan dung rieng trong bo ArtRoot (27041-27082)
+//	AvatarNhanVat = sprite chan dung RIENG cua nguoi choi
 //
-// Hai so nay phai KHAC nhau: tro chan dung ve chinh anh part dau thi o HUD hien
-// mot cai dau bi cat cup chu khong phai chan dung.
+// KHONG duoc dung 27078: do la 'iruka-portrait', chan dung NPC thay Iruka da
+// dang ky trong catalog.json. Dung chung thi nguoi choi va NPC co cung mot khuon
+// mat. 27084 la anh cat tu chinh anh dau nhan vat (27041), thu nho vua o xanh
+// tren HUD — xem tools/map-lang-la/tao-chan-dung-nguoi-choi.py.
 const (
 	HeadNhanVat   int16 = 30
-	AvatarNhanVat int16 = 27078
+	AvatarNhanVat int16 = 27084
 )
 
 // goiMapInfo dung goi -24 MAP INFO: gio kich switchToMe() ben client (roi man

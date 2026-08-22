@@ -131,3 +131,44 @@ Sửa ở **cả hai** chỗ tính `gssx` trong `GameScr.cs` (dòng ~1613 và ~1
 **Cách sửa.** Bù đúng lượng đo được trong `Char.paintShadow`: `g.drawImage(TileMap.bong, xSd, ySd - BU_BONG_Y, 3)` với `BU_BONG_Y = 12`.
 
 **Chưa truy ra gốc**, và ghi rõ điều đó trong mã: `xSd`/`ySd` đều bằng `cx`/`cy` và đều đúng (432), bóng lại đi qua đúng hàm `drawRegion` như thân nhân vật. Nghi do `g.translate(0, GameCanvas.transY)` gọi trước `paintShadow` trong `GameScr`, nhưng `transY = 7` không khớp con số đo được. Ai truy ra gốc thì bỏ lượng bù này đi.
+
+
+---
+
+## 8. Đường kẻ ngang chạy suốt màn hình ở đáy mỗi lớp nền
+
+**Triệu chứng.** Một (hoặc nhiều) đường kẻ ngang vắt qua cả khung hình, **đứng yên khi cuộn camera** — khác với mối nối *dọc* do ảnh nền ghép đôi.
+
+**Nguyên nhân.** Các lớp nền là PNG **đặc**, vẽ với chiều cao cố định. Dưới đáy mỗi lớp, engine điền nốt màn hình bằng **một màu đơn** (`fillRect` với màu hàng đáy của ảnh). Nếu đáy ảnh còn nội dung — mây, mái ngói, tán cây — thì trên đường đáy là nội dung, dưới là mảng màu phẳng.
+
+**Cách sửa.** Cho phần dưới mỗi lớp nhoà dần về đúng màu **đỉnh lớp kế dưới**, và 20% cuối cùng là màu đó **thuần** (hết vân). Script: `tools/map-lang-la/lam-mem-day-lop-nen.py` — xử cả ba cặp b03→b02, b02→b01, b01→b00 trong một lần.
+
+Đo kiểm bằng **độ gợn sóng hàng đáy**: `b01` 13,7 → 0,0 và `b03` 1,6 → 0,0.
+
+> **Bẫy khi đo:** "độ lệch chuẩn của hàng" phải tính **theo chiều ngang, cho từng kênh màu**.
+> Tính `std` trên cả 3 kênh thì một hàng đồng màu `(12,95,169)` cho ra std ≈ 64 — đọc nhầm
+> thành "còn nhiều vân" trong khi hàng đó đã phẳng tuyệt đối.
+
+**Không phải mọi đường ngang đều là lỗi.** Đo ở *ba cột khác nhau* trước khi kết luận: nếu chỉ một cột nhảy còn các cột kia chuyển mượt thì đó là ranh giới tự nhiên của vật (đỉnh núi, mép mái nhà), không phải mối nối lớp.
+
+---
+
+## 9. Ô chân dung trên HUD
+
+**Không phải "ô bị hỏng".** HUD gốc Ngọc Rồng **không hề vẽ chân dung** — ô xanh bên trái chỉ có tên và sức mạnh, phần còn lại bỏ trống; cái hình nhìn như "biểu tượng ảnh hỏng" thực ra là **hoạ tiết vẽ sẵn trong chính ảnh khung** `myTexture2dpanel.png`.
+
+Nên việc phải làm là **thêm hẳn chỗ vẽ**, không phải "nối bảng ánh xạ vào HUD":
+
+1. Máy chủ gửi bảng ánh xạ `headId → avatarId` trong ME_INFO (trước gửi `size = 0` nên `Char.getAvatar` trả −1).
+2. Thêm `SmallImage.drawSmallImage(g, c.avatarz(), 6, 6, …)` vào `GameScr.paintImageBar`.
+3. Dịch tên và sức mạnh sang phải 15 đơn vị, nếu không chữ đè lên mặt.
+
+**Đừng dùng ảnh 27078 làm chân dung người chơi** — đó là `iruka-portrait`, chân dung NPC thầy Iruka đã đăng ký trong `catalog.json`. Dùng chung thì người chơi và NPC có cùng một khuôn mặt. Ảnh riêng: `Small27084`, cắt từ chính ảnh đầu nhân vật (`tools/map-lang-la/tao-chan-dung-nguoi-choi.py`).
+
+---
+
+## 10. Tường vô hình không được chiếm cả cột
+
+Đặt tile tường (ảnh trong suốt) **cả cột** thì phần dưới mặt đất không có tile nào — mép màn hình hở ra một dải màu trời, nhìn như map bị khuyết.
+
+Chỉ đặt tường ở phần **trên mặt đất**; phần dưới dùng tile đất bình thường. Chặn ngang của client kiểm ở hàng *(mặt đất − 1)* nên thế là đủ giữ người chơi lại. Đo kiểm: mép trái dưới mặt đất còn **0%** pixel màu trời.

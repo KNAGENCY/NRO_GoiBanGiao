@@ -33,7 +33,7 @@ var duLieuAssetLock []byte
 // Ba version runtime phải bằng đúng asset-lock, không còn là số chọn tay. Item
 // chưa thuộc lát cắt artifact nên giữ mốc Naruto hiện hành của server.
 const (
-	vsData  byte = 22 // 21 -> 22: part.bin doi (nang 3 manh nhan vat cho chan cham dat)
+	vsData  byte = 24 // moi lan part.bin doi phai tang, khong client dung ban cu trong RMS
 	vsMap   byte = 22
 	vsSkill byte = 21
 	vsItem  byte = 20

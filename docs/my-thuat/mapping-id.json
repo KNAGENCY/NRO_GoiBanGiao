@@ -2194,17 +2194,17 @@
       "type": 0,
       "frames": [
         {
-          "sprite_id": 27041,
+          "sprite_id": 27083,
           "dx": 0,
           "dy": -22
         },
         {
-          "sprite_id": 27042,
+          "sprite_id": 27083,
           "dx": 0,
           "dy": -22
         },
         {
-          "sprite_id": 27043,
+          "sprite_id": 27083,
           "dx": 0,
           "dy": -22
         }
@@ -2217,87 +2217,87 @@
         {
           "sprite_id": 27044,
           "dx": 0,
-          "dy": -22
+          "dy": -46
         },
         {
           "sprite_id": 27045,
           "dx": 0,
-          "dy": -22
+          "dy": -46
         },
         {
           "sprite_id": 27046,
           "dx": 0,
-          "dy": -22
+          "dy": -46
         },
         {
           "sprite_id": 27047,
           "dx": 0,
-          "dy": -22
+          "dy": -46
         },
         {
           "sprite_id": 27048,
           "dx": 0,
-          "dy": -22
+          "dy": -46
         },
         {
           "sprite_id": 27049,
           "dx": 0,
-          "dy": -22
+          "dy": -46
         },
         {
           "sprite_id": 27050,
           "dx": 0,
-          "dy": -22
+          "dy": -46
         },
         {
           "sprite_id": 27051,
           "dx": 0,
-          "dy": -22
+          "dy": -46
         },
         {
           "sprite_id": 27052,
           "dx": 0,
-          "dy": -22
+          "dy": -46
         },
         {
           "sprite_id": 27053,
           "dx": 0,
-          "dy": -22
+          "dy": -46
         },
         {
           "sprite_id": 27054,
           "dx": 0,
-          "dy": -22
+          "dy": -46
         },
         {
           "sprite_id": 27055,
           "dx": 0,
-          "dy": -22
+          "dy": -46
         },
         {
           "sprite_id": 27056,
           "dx": 0,
-          "dy": -22
+          "dy": -46
         },
         {
           "sprite_id": 27057,
           "dx": 0,
-          "dy": -22
+          "dy": -46
         },
         {
           "sprite_id": 27058,
           "dx": 0,
-          "dy": -22
+          "dy": -46
         },
         {
           "sprite_id": 27059,
           "dx": 0,
-          "dy": -22
+          "dy": -46
         },
         {
           "sprite_id": 27060,
           "dx": 0,
-          "dy": -22
+          "dy": -46
         }
       ]
     },
@@ -2308,72 +2308,72 @@
         {
           "sprite_id": 27061,
           "dx": 0,
-          "dy": -22
+          "dy": -33
         },
         {
           "sprite_id": 27062,
           "dx": 0,
-          "dy": -22
+          "dy": -33
         },
         {
           "sprite_id": 27063,
           "dx": 0,
-          "dy": -22
+          "dy": -33
         },
         {
           "sprite_id": 27064,
           "dx": 0,
-          "dy": -22
+          "dy": -33
         },
         {
           "sprite_id": 27065,
           "dx": 0,
-          "dy": -22
+          "dy": -33
         },
         {
           "sprite_id": 27066,
           "dx": 0,
-          "dy": -22
+          "dy": -33
         },
         {
           "sprite_id": 27067,
           "dx": 0,
-          "dy": -22
+          "dy": -33
         },
         {
           "sprite_id": 27068,
           "dx": 0,
-          "dy": -22
+          "dy": -33
         },
         {
           "sprite_id": 27069,
           "dx": 0,
-          "dy": -22
+          "dy": -33
         },
         {
           "sprite_id": 27070,
           "dx": 0,
-          "dy": -22
+          "dy": -33
         },
         {
           "sprite_id": 27071,
           "dx": 0,
-          "dy": -22
+          "dy": -33
         },
         {
           "sprite_id": 27072,
           "dx": 0,
-          "dy": -22
+          "dy": -33
         },
         {
           "sprite_id": 27073,
           "dx": 0,
-          "dy": -22
+          "dy": -33
         },
         {
           "sprite_id": 27074,
           "dx": 0,
-          "dy": -22
+          "dy": -33
         }
       ]
     },

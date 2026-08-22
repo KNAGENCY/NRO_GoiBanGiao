@@ -9,11 +9,18 @@ import (
 )
 
 func TestNhungTileSetDungKichThuoc(t *testing.T) {
-	// File tileset nhung phai la file goc 1696 byte, byte dau (numTileMap) = 39.
-	// Sai kich thuoc = nhung nham -> tileId ngoai [1,numTileMap] -> client thoat app.
-	if len(duLieuTileSet) != 1696 {
-		t.Fatalf("duLieuTileSet = %d byte, mong doi 1696 (file tile_set_info goc)", len(duLieuTileSet))
+	// File tileset = file goc Ngoc Rong 1696 byte, CONG phan khai bao tile nen
+	// Lang La (60-69) them vao bo 1 = 1716 byte. Xem tileset_langla_test.go va
+	// tools/map-lang-la/them-tile-vao-tileset.py.
+	//
+	// Van khoa kich thuoc lai vi day la file NHUNG: nhung nham file khac thi
+	// tileId roi ra ngoai [1,numTileMap] va client THOAT APP (loadMap bat
+	// Exception roi goi GameMidlet.instance.exit()).
+	const coTileSet = 1716
+	if len(duLieuTileSet) != coTileSet {
+		t.Fatalf("duLieuTileSet = %d byte, mong doi %d (goc 1696 + khai bao tile Lang La)", len(duLieuTileSet), coTileSet)
 	}
+	// So bo tile KHONG duoc doi: them tile vao bo san, khong them bo moi.
 	if duLieuTileSet[0] != 39 {
 		t.Errorf("numTileMap (byte dau) = %d, mong doi 39", duLieuTileSet[0])
 	}

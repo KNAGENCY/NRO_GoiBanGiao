@@ -193,3 +193,46 @@ Cả map hiện chỉ có **một** cây. Cần thêm 2 dáng khác để rải 
 4. **Ảnh nền không được ghép đôi.** Vẽ liền một mạch đủ bề rộng.
 5. **Đáy ảnh nền phải nhoà về đúng màu đã ghi**, không được cắt phẳng.
 6. **Tile phải lặp được với chính nó** — dán 4 bản cạnh nhau không thấy mối nối.
+
+
+---
+
+# Đợt 3 — hai việc còn lại sau khi lắp đợt 2
+
+Đo sau khi lắp đủ 24 ảnh đợt 2 (so với concept đã duyệt):
+
+| | Concept | Game hiện tại |
+|---|---|---|
+| Trời toàn màn | 24% | **25%** ✅ |
+| Ở dải nhà cửa, bề ngang là trời | 0% | **3%** ✅ |
+| Đất phẳng lì | 27% | **92%** ❌ |
+
+Hai việc còn lại:
+
+## A. Vẽ lại nền cho ĐÚNG CỠ — 2 ảnh
+
+Cỡ trong đợt 2 là **sai của tôi**: giao ở mức x4 nhưng game hiển thị ở x2, bề rộng bị chia đôi. Ảnh 1536 chỉ còn 768px trên màn rộng 1454px → núi vẫn lặp 1,9 lần, vẫn thấy đường nối dọc ở giữa màn.
+
+| Tên file | Cỡ đúng | Ghi chú |
+|---|---|---|
+| `nen_nuihokage_rong2_x4.png` | **2976×768** | cùng nội dung như bản vừa vẽ (rất đạt), chỉ cần **rộng gấp đôi** — thêm núi kéo dài sang hai bên, đừng nhân đôi ảnh cũ |
+| `nen_lang_xa_rong2_x4.png` | **2976×576** | như trên |
+
+Đáy vẫn phải nhoà về `RGB(10, 86, 154)` như bản trước — chỗ đó bản vừa rồi làm **rất chuẩn**, giữ nguyên cách làm.
+
+## B. Tile đất cần VÂN RÕ, không chỉ nhiễu mịn — 4 ảnh
+
+Bốn tile đất đợt 2 lặp rất liền mạch (đo được: mép nối lệch chỉ 3/96) — đó là ưu điểm thật. Nhưng chúng **quá trơn**: lòng đất chiếm hơn 1/4 màn hình mà 92% pixel gần như cùng một màu, nhìn vẫn là mảng nâu chết.
+
+Trong concept, lòng đất có **mạch đá nằm ngang, rễ cây thò xuống, đá cuội to nhỏ** — đó mới là thứ lấp được khoảng đó.
+
+| Tên file | Là gì |
+|---|---|
+| `tile_dat_van_1_x4.png` | đất có **mạch đá nằm ngang** rõ, vài viên cuội |
+| `tile_dat_van_2_x4.png` | đất có **rễ cây** thò xuống |
+| `tile_dat_van_3_x4.png` | đất lẫn **đá cuội to** |
+| `tile_dat_van_4_x4.png` | đất trơn (để xen giữa, cho đỡ rối) |
+
+**Vẫn giữ ba luật đã đúng ở đợt 2:** lặp được với chính nó (mép nối lệch dưới 5), bốn ảnh gần nhau về độ sáng (chênh dưới 8%), vân chạy hết ra mép.
+
+Khác lần trước ở chỗ: **vân phải ĐỌC RA ĐƯỢC** ở cỡ thật, không phải nhiễu hạt mịn. Nhìn một ô 96px ở khoảng cách bình thường phải thấy "à, có mạch đá" chứ không phải "một mảng nâu".

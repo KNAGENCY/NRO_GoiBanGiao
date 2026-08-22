@@ -46,12 +46,17 @@ func TestTaiCollisionKhoaHashVaCanarySolid(t *testing.T) {
 	if err != nil {
 		t.Fatalf("TaiCollision() loi: %v", err)
 	}
-	if !col.DiDuoc(100, 384) || !col.DiDuocDoan(100, 384, 110, 384) || col.DiDuoc(100, 10) || col.DiDuocDoan(10, 10, 100, 10) {
-		t.Fatal("artifact phai co spawn/segment walkable va o solid chan duong")
+	// Lưới 52×24 (Lát 4): spawn (100,384) + mặt đứng hàng 18 (y=432) walkable;
+	// đất dưới mặt (hàng 19+, y≥456) và tường biên (cột 0/51) là solid chặn.
+	if !col.DiDuoc(100, 384) || !col.DiDuocDoan(100, 384, 110, 384) || !col.DiDuoc(356, 432) || !col.DiDuocDoan(100, 432, 300, 432) {
+		t.Fatal("spawn/mat dung hang 18 phai walkable")
+	}
+	if col.DiDuoc(100, 460) || col.DiDuoc(10, 100) || col.DiDuocDoan(30, 100, 10, 100) || col.DiDuocDoan(100, 432, 100, 470) {
+		t.Fatal("dat duoi mat (hang 19+) va tuong bien (cot 0) phai solid chan duong")
 	}
 	mutated := append([]byte(nil), duLieuCollision...)
-	// Ô cản production nằm ở cell index 4 (sau header 4 byte).
-	mutated[8] = 0
+	// Đảo một ô đất solid (hàng 19, cột 1) — hash phải bắt được.
+	mutated[4+19*52+1] = 0
 	if _, err := TaiCollision(mutated, duLieuAssetLock); err == nil || !strings.Contains(err.Error(), "ASSET-COLLISION-006") {
 		t.Fatalf("canary dao solid phai do ASSET-COLLISION-006, got %v", err)
 	}
@@ -67,25 +72,27 @@ func TestCollisionFailClosedNgoaiFootprintArtifact(t *testing.T) {
 		t.Fatalf("TaiCollision() loi: %v", err)
 	}
 
-	// Artifact 5x17, mỗi cell 24x24 nên miền hợp lệ chính xác là
-	// x=[0,119], y=[0,407]. Cell cuối (4,16) là nền đi được.
-	if !col.DiDuoc(119, 407) {
-		t.Fatal("mép trong cuối (119,407) phải theo cell (4,16) walkable")
+	// Artifact 52x24 (Lát 4), mỗi cell 24x24 nên miền hợp lệ chính xác là
+	// x=[0,1247], y=[0,575]. (1223,431) = cột 50 hàng 17 — ô khí walkable
+	// sát mép trong (cột 51 là tường biên, hàng 18 là mặt đứng cuối).
+	if !col.DiDuoc(1223, 431) || !col.DiDuoc(1223, 432) {
+		t.Fatal("mép trong (cột 50) phải walkable tới hết mặt đứng hàng 18")
 	}
 	for _, p := range []struct {
 		x, y int16
 	}{
-		{120, 384},
-		{121, 384},
-		{100, 408},
+		{1248, 384}, // ngoài biên phải
+		{100, 576},  // ngoài biên dưới
 		{-1, 384},
 		{100, -1},
+		{1247, 384}, // cột 51 = tường biên solid
+		{10, 384},   // cột 0 = tường biên solid
 	} {
 		if col.DiDuoc(p.x, p.y) {
-			t.Fatalf("DiDuoc(%d,%d) = true, ngoài footprint/âm phải fail-closed", p.x, p.y)
+			t.Fatalf("DiDuoc(%d,%d) = true, ngoài footprint/tường biên phải fail-closed", p.x, p.y)
 		}
 	}
-	if col.DiDuocDoan(100, 384, 121, 384) {
+	if col.DiDuocDoan(100, 384, 1249, 384) {
 		t.Fatal("đoạn từ trong grid đi ra ngoài phải fail-closed")
 	}
 }

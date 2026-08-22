@@ -52,8 +52,19 @@ func TestKiemDiChuyenLangLaKhongThoatKhoiCollisionGrid(t *testing.T) {
 	if bd == nil {
 		t.Fatal("thiếu map 1 Làng Lá")
 	}
-	if kiemDiChuyenHopLe(bd, 100, 384, 121, 384) {
-		t.Fatal("map 1 không được cho bước từ spawn ra ngoài collision grid")
+	// Lưới 52×24 (Lát 4): đi trong vùng khí/mặt đứng hợp lệ; chui xuống đất
+	// (hàng 19+), đâm tường biên (cột 0/51) hay ra ngoài footprint đều bị chặn.
+	if !kiemDiChuyenHopLe(bd, 100, 384, 300, 384) || !kiemDiChuyenHopLe(bd, 356, 432, 500, 432) {
+		t.Fatal("map 1 phải cho đi trong vùng hợp lệ (khí + mặt đứng hàng 18)")
+	}
+	if kiemDiChuyenHopLe(bd, 100, 432, 100, 470) {
+		t.Fatal("map 1 không được cho chui xuống đất (hàng 19+)")
+	}
+	if kiemDiChuyenHopLe(bd, 100, 384, 10, 384) {
+		t.Fatal("map 1 không được cho đâm vào tường biên (cột 0)")
+	}
+	if kiemDiChuyenHopLe(bd, 1200, 384, 1290, 384) {
+		t.Fatal("map 1 không được cho bước ra ngoài footprint 1248×576")
 	}
 }
 

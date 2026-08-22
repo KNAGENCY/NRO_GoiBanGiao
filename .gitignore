@@ -92,3 +92,4 @@ __pycache__/
 # --- 11. BAN SAO LUU DB (pg_dump) ---
 # Chua du lieu nguoi choi (nhu muc 1) — TUYET DOI khong dua len git.
 backups/
+docs/my-thuat/kich-thuoc-anh.json.bak-*

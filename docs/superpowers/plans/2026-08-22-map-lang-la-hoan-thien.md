@@ -17,12 +17,22 @@ Ba lỗi này khiến map không thể cho ai xem. Sửa hết mới đi tiếp.
 | # | Việc | Trạng thái |
 |---|---|---|
 | 1.1 | Khai loại va chạm cho tile 60–69 trong `tile_set_info.bin` (bit 2 sàn / 4 phải / 8 trái / 0x2000 trần) | ✅ xong, 4 test + 2 đột biến |
-| 1.2 | Sửa `map-1-collision.bin` lệch 1 hàng: mặt cỏ ở hàng 18 và gò ở hàng 17 phải đặc | ⬜ |
-| 1.3 | Truy ra và gỡ **cột tre lơ lửng** chạy dọc giữa màn hình (không khớp file nền nào — rác từ map cũ) | ⬜ |
-| 1.4 | Hai **nhát chém ngang** y=344 (chân núi) và y=561 (làng xa): nền là PNG đặc, mép lớp trên xén phẳng lớp dưới | ⬜ |
-| 1.5 | Kiểm trong game: nhân vật đứng trên cỏ, đi lại, leo được gò | ⬜ |
+| 1.2 | `map-1-collision.bin` — **hoá ra không lệch**: client dừng nhân vật ở *đỉnh* ô sàn (`cy+1` mới là ô đặc), server kiểm chính `cy` nên hàng 18 rỗng là đúng. Đo thật: `cy=432`, hợp lệ cả hai phía | ✅ không phải sửa |
+| 1.3 | Gỡ **cột tre lơ lửng** — client vẽ cứng `caycot.png` cho `mapID == 1` (di sản Ngọc Rồng: map 1 cũ là rừng tre) | ✅ xong |
+| 1.4 | **Nhát chém y=344** (chân núi): làm chân `b02` tan dần vào trời từ 68%→84% chiều cao. Bước nhảy 36,9 → không còn trong top | ✅ xong |
+| 1.4b | **Nhát chém y=561** (đáy làng xa): làm mềm đáy `b01` cho khớp đỉnh `b00`. Chỗ nối bị nhà che nên khó thấy | ✅ xong |
+| 1.5 | Nhân vật **vô hình** dù đã đứng đúng chỗ: `mGraphics.drawRegion(Small,…)` chỉ có `throw new NotImplementedException()` → `paintCharBody` chết ở mảnh đầu tiên, chỉ còn cái bóng | ✅ xong |
+| 1.6 | Nhân vật **lún nửa người**: `dy` của 34 frame part 30/57/58 từ 0 → −22; kèm `vsData` 21→22 và cắm 42 sprite ArtRoot chính thức vào client | ✅ xong |
+| 1.7 | Tắt dòng gỡ rối `X: … Y: …` trên HUD (thêm công tắc `ModFunc.hienToaDoGoRoi`) | ✅ xong |
+| 1.8 | **Thanh máu và chakra hiện 0** — server **chưa bao giờ gửi gói `-42`** (chỉ số nhân vật: HP/MP gốc, HP/MP đầy, HP/MP hiện tại, tốc độ, sát thương, thủ, chí mạng). Client không có nguồn nào khác để biết máu | ⬜ **thuộc KH6 Task 15**, xem ghi chú dưới |
 
-**Chốt vòng 1:** nhân vật hiện ra và đi lại được → cho agent soi lần 2.
+**Chốt vòng 1:** nhân vật hiện ra và đi lại được → cho agent soi lần 2. ✅ đã soi.
+
+> **Ghi chú việc 1.8.** Lộ trình ghi KH6 (chiến đấu) đã xong, nhưng còn **Task 15 — nghiệm thu tay
+> bằng client Unity**, và chính lỗi này là thứ Task 15 đáng lẽ bắt được: đánh nhau mà hai bên đều
+> 0 máu thì không kiểm được gì. Cấu trúc gói `-42` đọc được từ `Controller.cs:1704`; phần trong
+> `try/catch` là tuỳ chọn (client tự đặt 0 nếu thiếu), nên bản ngắn tới `cCriticalGoc` là đủ dùng.
+> Để riêng vì đây là việc của KH6, không phải của map — và đang có việc Boss dở trên cùng nhánh.
 
 ---
 

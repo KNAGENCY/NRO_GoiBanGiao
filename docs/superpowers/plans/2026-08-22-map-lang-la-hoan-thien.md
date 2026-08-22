@@ -36,20 +36,30 @@ Ba lỗi này khiến map không thể cho ai xem. Sửa hết mới đi tiếp.
 
 ---
 
-## Vòng 2 — Dọn chỗ đặt sai (không cần vẽ gì)
+## Vòng 2 — Dọn chỗ đặt sai (không cần vẽ gì) ✅ xong
 
-| # | Việc |
-|---|---|
-| 2.1 | Hàng rào cắm xuyên cột cổng torii — dời sang cột trống |
-| 2.2 | Góc phải nhà lớn treo lơ lửng ngoài mép gò (nhà cột 31–38, gò chỉ tới 37) — nới gò hoặc dời nhà |
-| 2.3 | Nhà nhỏ bị gò nuốt mất nửa phải; bụi cỏ cạnh đó bị xẻ dọc |
-| 2.4 | Giếng bị vách gò xén mất một chân; bỏ bớt 1 trong 2 giếng gần giống nhau |
-| 2.5 | Cây bị mép map cắt mất 1/3 tán — dời vào trong |
-| 2.6 | Biển hiệu đang cắm bên trong quán ramen (quán vốn đã có 4 biển) — dời ra |
-| 2.7 | Dọn viền rác tile 65/66 (cột sọc xám như mã vạch, lộ ở 4 chỗ) |
-| 2.8 | Tắt dòng debug `X: … Y: …` trên HUD; sửa gói gửi HP/chakra đang hiện 0 |
+Cách làm hoá ra quan trọng hơn từng việc: **đo bề rộng thật của từng vật thể** rồi
+tìm cặp chồng nhau bằng máy, thay vì nhìn bằng mắt. Ra 5 chỗ cắm vào nhau mà mắt
+thường không tách được.
 
-**Chốt vòng 2:** không vật thể nào bị cắt / treo / chồng → soi lần 3.
+| # | Việc | Trạng thái |
+|---|---|---|
+| 2.1 | Hàng rào cắm xuyên cột cổng torii | ✅ dời sang chân gò |
+| 2.2 | Góc phải nhà lớn treo lơ lửng (nhà cột 31–38, gò chỉ tới 37) | ✅ gò đặt **khớp đúng** cột nhà (34–41) |
+| 2.3 | Nhà nhỏ bị gò nuốt nửa phải | ✅ dời gò ra khỏi nhà |
+| 2.4 | Giếng bị vách gò xén chân | ✅ giếng về chỗ phẳng (29–31) |
+| 2.5 | Cây bị mép map cắt mất 1/3 tán | ✅ **đưa vào giữa map** (15–20) — chữa luôn "cả map chỉ có 1 cây, dính sát biên" |
+| 2.6 | Biển hiệu cắm bên trong quán | ✅ bỏ hẳn (ảnh quán đã có sẵn 4 biển) |
+| 2.7 | Viền rác tile 65/66 | ✅ xong từ đợt trước |
+| 2.8 | Tắt dòng gỡ rối HUD | ✅ xong |
+| 2.9 | Lối lát đá chui xuống dưới gò, chỉ lộ mảng đá ở mặt cắt vách | ✅ dời sang chỗ phẳng (8–14) |
+| 2.10 | Tầng đất sâu là mảng nâu phẳng có miếng vá vuông | ✅ tối dần theo độ sâu, ranh giới gợn sóng |
+
+> **Gốc rễ nhiều lỗi ở đây:** map chỉ rộng 52 ô mà nhồi **4 công trình lớn**
+> (6+8+8+8 = 30 ô) cộng torii và cây — không đủ chỗ, nên cái nào cũng dính cái nào.
+> Đã **bỏ nhà vừa** để lấy lại khoảng thở. Bài học cho các map sau: đếm ô trước khi xếp.
+
+**Chốt vòng 2:** không công trình nào chồng / treo / tràn map → soi lần 3.
 
 ---
 

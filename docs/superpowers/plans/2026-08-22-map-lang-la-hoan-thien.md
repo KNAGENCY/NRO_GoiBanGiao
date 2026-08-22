@@ -113,7 +113,23 @@ Ghi điểm vào bảng dưới. Mục tiêu: **≥ 85/100** rồi mới tính l
 |---|---|---|---|
 | 0 (khởi đầu) | 22/08/2026 | 45 | 3 |
 | 1 (sau vòng sửa lớn) | 22/08/2026 | **52** | 3 mới lộ ra |
-| 2 (sau khi ghép lại nhân vật) | 22/08/2026 | *chờ soi lần 3* | 0 (đã xử hết) |
+| 2 (sau khi ghép lại nhân vật) | 22/08/2026 | **56** | 2 nặng mới lộ ra |
+| 3 (sau khi lắp lại đầu + gò chặn + tường 2 cột) | 22/08/2026 | *chờ soi lần 4* | 0 |
+
+### Vòng soi 3 nói gì — bài học đắt nhất
+
+Đợt soi thứ ba chấm **56/100** (tăng 4) nhưng chỉ ra **3 trong 9 bản sửa là hỏng hoặc phản tác dụng**:
+
+| Nó tìm ra | Đã xử |
+|---|---|
+| **Xoá mảnh đầu là SAI** — ảnh thân chỉ vẽ *nửa dưới* đầu, xoá mảnh đầu là mất luôn tóc gai và **băng trán Konoha** | ✅ trả mảnh đầu về, tính chỗ ghép từ chỗ **hai bàn tay phải trùng nhau** |
+| **Hai cái gò không chặn được người** — client kiểm chặn ngang ở *hàng 17*, mà hàng 17 ở gò là mặt cỏ (tile 62) chưa có bit chặn → client cho đi xuyên, server chặn → desync | ✅ thêm 62/67/68 vào nhóm chặn ngang |
+| **Đi tới cuối map là mất dấu nhân vật** — camera dừng trước mép, thân vẽ sang phải điểm neo | ✅ hai cột tường mỗi bên; đo lại: client kẹp ở `cx=1189`, màn x=692 < 727 |
+
+> **Bài học:** tương quan trong bảng tư thế gốc (đầu 34 / thân 16 / chân 10) chỉ đúng với
+> sprite Ngọc Rồng, vì ảnh thân của họ **trong suốt ở phần dưới** nên chân lộ ra. Ảnh thân
+> mới vẽ **đặc tới đáy** — giữ tương quan gốc là thân che kín chân. Phải tính lại từ chỗ
+> hai ảnh *phải* trùng nhau, không suy từ bảng.
 
 ### Vòng soi 2 nói gì — và đã xử ra sao
 

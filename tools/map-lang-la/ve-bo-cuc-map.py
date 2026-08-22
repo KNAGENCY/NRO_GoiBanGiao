@@ -105,6 +105,13 @@ for c in [21, 32]:
 for c in [8, 14, 28, 42, 49]:
     dat_vat(c, 81, 1)                      # bui co o cac khe, khong cham cong trinh
 
+# Tuong VO HINH hai cot bien: khong co thi nguoi choi roi xuong ho o mep map
+# va camera dung truoc mep nen nhan vat BIEN MAT khoi man hinh. Tile 39 da duoc
+# khai bao dac ca bon huong trong bang goc, anh cua no da lam trong suot.
+for r in range(tmh):
+    dat(r, 0, 39)
+    dat(r, tmw - 1, 39)
+
 open(MAP, "wb").write(bytes(data))
 
 # ---- 4) KIEM LAI ----

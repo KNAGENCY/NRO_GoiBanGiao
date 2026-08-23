@@ -149,8 +149,18 @@ Cách làm đúng:
 **Phải vẽ:** mọi thứ cần **nội dung mới** — vân đất, kè đá, bậc thang, nền rộng không lặp, bóng đổ.
 
 **Đã thử bằng máy và thất bại, đừng thử lại:**
-- *Vẽ bóng đổ bằng code* — chân vật nằm sát mép dưới ảnh nên bóng không có chỗ lan; trong game gần như không thấy gì.
-- *Tăng tương phản để lòng đất bớt phẳng* — chênh 48% thì tầng đất thành **bàn cờ**, tệ hơn mảng phẳng ban đầu. Hai ô cạnh nhau lệch quá **8%** là mắt bắt ngay ranh ô.
+
+| Đã thử | Vì sao hỏng |
+|---|---|
+| Vẽ **bóng đổ** bằng code | Chân vật nằm sát mép dưới ảnh nên bóng không có chỗ lan; trong game gần như không thấy gì |
+| **Tăng tương phản** để lòng đất bớt phẳng | Chênh 48% thì tầng đất thành **bàn cờ** — tệ hơn mảng phẳng ban đầu. Hai ô cạnh nhau lệch quá **8%** là mắt bắt ngay ranh ô |
+| **Ghép mạch đá** vào tile đất từ ảnh đá có sẵn | Sinh từ một mẫu nên **mạch lặp y hệt trong mọi ô** → lưới ô vuông rõ hơn cả lúc chưa làm |
+
+> **Quy luật rút ra từ cả ba lần:** máy **sắp xếp** được, **hoà màu** được, nhưng
+> **không tạo được nội dung mới**. Thứ gì cần *mỗi ô một khác* — vân đất, mạch đá,
+> rễ cây — thì bắt buộc phải vẽ, vì sinh từ một mẫu là lặp, mà lặp thì mắt bắt ngay.
+>
+> Ba lần thử này tốn khoảng một tiếng. Nhận ra quy luật sớm thì tiết kiệm được.
 
 ---
 

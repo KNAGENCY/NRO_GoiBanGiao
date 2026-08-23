@@ -18,8 +18,20 @@ import numpy as np
 import os
 import shutil
 
-MAU_NOI = np.array([10.0, 86.0, 154.0])   # mau troi, dung cho MOI cho giap
-FADE_DAY, THUAN_DAY, FADE_TREN = 0.30, 0.15, 0.22
+# Moi CAP lop mot mau noi rieng: mau DINH cua lop ke duoi (sau khi lop do da
+# duoc cat troi thua). Truoc day dung mot mau troi dam chung cho tat ca, ket qua
+# la chan nui (troi dam 10,86,154) gap dinh lang xa (suong sang 162,211,229) —
+# buoc nhay 84,7, mot duong ke ngang moi.
+#
+# Lan truoc thu "day chuyen" nay va HONG, nhung ly do khac: luc do lop lang xa
+# CHUA cat troi, dinh no van la troi, nen fade chan nui ve do la fade ve mau sai.
+# Cat troi xong roi thi dinh lang xa la SUONG — chan nui tan vao suong moi dung.
+FADE_DAY, THUAN_DAY, FADE_TREN = 0.30, 0.15, 0.10
+
+
+def mau_dinh(p):
+    a = np.array(Image.open(p).convert("RGB")).astype(float)
+    return a[:5].reshape(-1, 3).mean(axis=0)
 
 
 def mo(p):
@@ -50,6 +62,9 @@ for muc in ["x1", "x2", "x3", "x4"]:
         gon = a[-1].std(axis=0).mean()
         # day nhoa ve mau noi (tru lop cuoi b00 — duoi no khong con lop nao)
         if ten != "b00":
+            duoi = {"b03": "b02", "b02": "b01", "b01": "b00"}[ten]
+            p_duoi = d + duoi + ".png"
+            MAU_NOI = mau_dinh(p_duoi) if os.path.exists(p_duoi) else np.array([10.0, 86.0, 154.0])
             bd, kt = int(h * (1 - FADE_DAY)), int(h * (1 - THUAN_DAY))
             for y in range(bd, h):
                 t = 1.0 if y >= kt else (lambda u: u * u * (3 - 2 * u))((y - bd) / max(1, kt - bd))
@@ -61,11 +76,15 @@ for muc in ["x1", "x2", "x3", "x4"]:
         # thi phan tren lop nay thanh troi trong, chan nui lo ra, va giua nui voi
         # nha gan hien mot khoang troi rong. Do chinh la cai lam "lang lo lung".
         # Giu mep tren b01 DAC de no che chan nui.
-        if ten not in ("b03", "b01"):
+        # Mep tren KHONG fade ve mau khac nua — lam vay la xoa mat noi dung che
+        # chan lop tren. Chi lam muot rat nhe trong 10% dau bang chinh mau trung
+        # binh cua vung do, du de bo cai mep cat cung.
+        if ten != "b03":
             n = max(4, int(h * FADE_TREN))
+            tb = a[:n].reshape(-1, 3).mean(axis=0)
             for y in range(n):
                 t = (lambda u: u * u * (3 - 2 * u))(y / n)
-                a[y] = MAU_NOI * (1 - t) + a[y] * t
+                a[y] = tb * (1 - t) + a[y] * t
         luu(a, p, d, ten)
         bao.append(f"{ten} {gon:4.1f}->{a[-1].std(axis=0).mean():3.1f}")
     print(f"[{muc}] " + " | ".join(bao))

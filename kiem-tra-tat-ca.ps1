@@ -47,34 +47,20 @@ try {
     Buoc "go build" { & $go build ./... }
     Buoc "go vet"   { & $go vet ./... }
 
-    # gofmt: file cu co dau dong CRLF bi gofmt bao nhieu (§9 BAT-DAU) — KHONG phai
-    # loi format that. Loc ra danh sach nhieu da biet; con lai (file MOI sai format)
-    # -> DO. Sua goc CRLF (gitattributes) la viec rieng sau.
+    # gofmt: sau khi chuan hoa LF (.gitattributes `eol=lf` + blob deu LF), gofmt phai
+    # SACH tren moi working tree dung. Khong con danh sach nhieu CRLF hardcode nua —
+    # gofmt bao file nao la loi that: format sai, HOAC working tree con CRLF cu chua
+    # renormalize (sua: `git checkout -- <file>` hoac `git add --renormalize .`).
     Write-Host "`n=== gofmt ===" -ForegroundColor Cyan
-    # Nhieu CRLF da biet (§9 BAT-DAU): file cu dau dong CRLF, gofmt bao nhung KHONG
-    # phai loi format. So sanh theo DUONG DAN (chuan hoa /), khong theo ten file —
-    # de cmd/nroserver/main.go van bi soi (khac cmd/thuclient/main.go trong list).
-    # File MOI sai format se khong nam trong list -> DO. Bo list khi chuan hoa gitattributes.
-    $nhieuCRLF = @(
-        'internal/auth/password_test.go',
-        'internal/net/listener.go',
-        'internal/protocol/frame.go',
-        'internal/protocol/frame_test.go',
-        'internal/protocol/integration_test.go',
-        'internal/protocol/keystream.go',
-        'internal/protocol/keystream_test.go',
-        'internal/protocol/message.go',
-        'cmd/thuclient/main.go'
-    )
     if ($gofmt) {
-        $ra = & $gofmt -l internal cmd 2>&1
-        $xau = @($ra | Where-Object { $_ } | ForEach-Object { ($_ -replace '\\', '/') } | Where-Object { $_ -notin $nhieuCRLF })
+        $xau = @(& $gofmt -l internal cmd 2>&1 | Where-Object { $_ })
         if ($xau.Count -gt 0) {
-            Write-Host "[DO] gofmt: file sai format (ngoai nhieu CRLF cu):" -ForegroundColor Red
+            Write-Host "[DO] gofmt: file sai dinh dang (hoac con CRLF cu chua chuan hoa):" -ForegroundColor Red
             $xau | ForEach-Object { Write-Host "     $_" -ForegroundColor Red }
+            Write-Host "     Neu chi la CRLF cu: git checkout -- <file>  (hoac: git add --renormalize .)" -ForegroundColor Yellow
             $loi.Add("gofmt")
         } else {
-            Write-Host "[OK] gofmt (chi con nhieu CRLF cu da biet)" -ForegroundColor Green
+            Write-Host "[OK] gofmt" -ForegroundColor Green
         }
     } else {
         Write-Host "[BO QUA] khong tim thay gofmt" -ForegroundColor Yellow

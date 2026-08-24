@@ -25,6 +25,15 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: server/go.mod
+      - name: gofmt (dinh dang phai sach)
+        working-directory: server
+        # Sau khi chuan hoa LF (.gitattributes eol=lf), gofmt phai khong in gi.
+        # `gofmt -l` liet ke file sai dinh dang; co file nao -> fail build.
+        run: |
+          xau=$(gofmt -l internal cmd)
+          if [ -n "$xau" ]; then
+            echo "gofmt bao file sai dinh dang:"; echo "$xau"; exit 1
+          fi
       - name: build + vet + test
         working-directory: server
         env:

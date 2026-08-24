@@ -4,6 +4,12 @@
 # dung y het. Ep LF dut diem tieng on do.
 * text=auto eol=lf
 
+# Ngoai le: file batch Windows (.bat/.cmd) giu CRLF. cmd.exe doc file theo byte,
+# vai cau truc nhieu dong (goto/if long nhau) co the loi neu la LF. Du an nay dung
+# server tren VPS Windows bang cac .bat (run.bat, script cai dat 1-5) nen giu CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
 # Nhi phan: khong dong xuong dong. part.bin la du lieu sprite nhan vat nhung.
 *.bin binary
 *.jar binary

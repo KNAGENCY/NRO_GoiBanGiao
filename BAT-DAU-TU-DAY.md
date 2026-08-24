@@ -464,6 +464,11 @@ Gom lại thành **Kế hoạch B**, sửa lẻ từng cái là vô nghĩa:
 
 ## 9. Bẫy môi trường trên máy này
 
+- **PowerShell 5.1 có thể để `$PSScriptRoot` RỖNG lúc gán giá trị mặc định cho `param`.**
+  `param([string]$Manifest = (Join-Path $PSScriptRoot ...))` làm script chết **trước khi**
+  chạy dòng đầu tiên. Cách đúng: để tham số mặc định rỗng, rồi gán bằng `$PSScriptRoot`
+  **ngay sau** khối `param`. Đã có test chạy script mà không truyền `-ManifestPath`.
+  *(Cứu từ nhánh `kh-unity-e2e` — đây là thứ duy nhất nhánh đó có mà `main` chưa có.)*
 - **Không chạy được `go test -race`** — thiếu trình biên dịch C (cgo), không có quyền admin
   để cài. Bù lại bằng: **kỷ luật actor** (soi từng đường chạm trạng thái) + **stress test**
   (`-count=3` hoặc `-count=5`). Với mô hình actor thì cách này đủ chắc, vì tính đúng đến từ

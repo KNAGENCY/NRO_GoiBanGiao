@@ -383,6 +383,13 @@ Gom lại thành **Kế hoạch B**, sửa lẻ từng cái là vô nghĩa:
 
 ## 8. Nợ kỹ thuật lặt vặt (không chặn việc gì)
 
+- **`assetpack/tests/test_task6b_canonical_preflight.py` chưa bao giờ chạy.** Nó hỏng ngay lúc
+  *thu thập* (`IndexError` ở `SHARED_ROOT = ROOT.parents[1]`, dòng 12): hằng số này giả định repo
+  nằm sâu **2 tầng thư mục** — đúng hồi file được viết trong một git worktree, sai ở
+  `D:\NRO_GoiBanGiao`. Hệ quả: **toàn bộ chốt kiểm trong file im lặng không chạy**, và
+  `pytest assetpack` phải thêm `--ignore=assetpack/tests/test_task6b_canonical_preflight.py`
+  mới ra 118 xanh. Sửa xong nhớ kiểm xem các chốt kiểm mới chạy có **đỏ** không — chúng chưa
+  từng chạy nên có thể đang ghim thứ đã trôi mất.
 - `Dung()` gọi trước `BatDau()` sẽ panic (cạnh biên, chưa ai gặp).
 - Client gửi `-39` trước `-28/13` → không làm gì (im lặng, đúng nhưng chưa có test).
 - Đăng nhập trùng tài khoản ghi đè người cũ trong khu vực (có từ trước).

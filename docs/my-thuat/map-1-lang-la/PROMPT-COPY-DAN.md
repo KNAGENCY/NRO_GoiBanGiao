@@ -135,9 +135,16 @@ Thay `[MÔ TẢ]`:
 
 ---
 
-## 4 LỖI AI HAY MẮC — kiểm lại trước khi giao
+## 6 LỖI AI HAY MẮC — kiểm lại trước khi giao
 
 1. **Vẽ luôn nền đất/bóng dưới vật thể** → sai. Vật thể phải đứng riêng trên nền trong suốt.
 2. **Chừa khoảng trống dưới chân** → vật thể lơ lửng trong game. Chân phải chạm mép dưới.
+   *(Đã xảy ra thật: `nha_nho` hở 20px, `tt_cong_torii` hở 3px.)*
 3. **Vẽ nhà quá thấp** → nhân vật cao hơn nhà. Nhà phải cao gấp 2,5–3 lần người (xem thước).
 4. **Trả về cỡ lẻ** (1024x1024) → phải đúng cỡ trong bảng (bội số 96). AI không xuất đúng thì cắt/resize lại trước khi giao.
+5. **Nền "trong suốt" mà thật ra chỉ MỜ** — *(đã xảy ra thật: `nen_nuihokage` alpha 226 thay vì 0 → màng trắng đục che mất trời)*.
+   Vùng phải trong suốt thì alpha **đúng bằng 0**, không phải "trắng nhạt" hay "mờ 90%".
+   Tự kiểm: mở ảnh, vùng đó phải thấy **ô caro**, KHÔNG phải màu trắng/xám.
+6. **Ảnh "lặp ngang" mà hai mép không khớp** — *(đã xảy ra thật: `nen_troi` lệch 157/765)*.
+   Mép trái và mép phải phải nối liền như một dải vô tận.
+   Tự kiểm: **ghép 3 bản cạnh nhau**, không được thấy đường sọc dọc ở chỗ nối.

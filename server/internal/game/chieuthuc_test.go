@@ -229,3 +229,60 @@ func TestCatalogChieuGoiCatalogSkillGhiDungHet(t *testing.T) {
 		t.Error("goi -28/7 that con byte thua sau khi doc het 5 lang — sai khuon byte")
 	}
 }
+
+// TestTraCapChieuFailClosed khoa cua tra cuu chieu dung chung cho nguoi choi va
+// boss (Ke hoach 6b). Diem quan trong: MOI dau vao khong hop le deu tra nil chu
+// KHONG am tham roi ve cap 1 — vi du lieu boss quen dien cap phai lo ra ngay.
+func TestTraCapChieuFailClosed(t *testing.T) {
+	// Lay mot chieu THAT tu danh muc lang 0 lam moc so sanh.
+	danhMuc := ChieuCuaLang(0)
+	if len(danhMuc) == 0 || len(danhMuc[0].CacCap) == 0 {
+		t.Fatal("danh muc chieu lang 0 rong — fixture sai")
+	}
+	mau := danhMuc[0]
+	soCap := byte(len(mau.CacCap))
+
+	// Hop le: cap 1 phai tra DUNG con tro toi CacCap[0] (khong phai ban sao).
+	if got := TraCapChieu(0, mau.Id, 1); got != &danhMuc[0].CacCap[0] {
+		t.Fatalf("TraCapChieu(0, %d, 1) khong tra dung con tro CacCap[0]", mau.Id)
+	}
+	// Hop le: cap cuoi cung.
+	if got := TraCapChieu(0, mau.Id, soCap); got != &danhMuc[0].CacCap[soCap-1] {
+		t.Fatalf("TraCapChieu(0, %d, %d) khong tra dung cap cuoi", mau.Id, soCap)
+	}
+
+	xau := []struct {
+		ten        string
+		lang       byte
+		templateId byte
+		cap        byte
+	}{
+		{"cap 0 KHONG duoc hieu la cap 1", 0, mau.Id, 0},
+		{"cap vuot so cap co that", 0, mau.Id, soCap + 1},
+		{"cap cuc lon", 0, mau.Id, 255},
+		{"lang ngoai bang (5)", 5, mau.Id, 1},
+		{"lang ngoai bang (255)", 255, mau.Id, 1},
+		{"templateId khong ton tai", 0, 250, 1},
+		{"templateId = 0 (id bat dau tu 1)", 0, 0, 1},
+	}
+	for _, c := range xau {
+		t.Run(c.ten, func(t *testing.T) {
+			if got := TraCapChieu(c.lang, c.templateId, c.cap); got != nil {
+				t.Fatalf("TraCapChieu(%d, %d, %d) = %+v, phai la nil (fail-closed)",
+					c.lang, c.templateId, c.cap, got)
+			}
+		})
+	}
+
+	// Moi lang hop le (0..4) deu phai tra duoc chieu dau tien cua no — chan
+	// truong hop bang chieu chi nap cho mot lang.
+	for lang := byte(0); lang <= 4; lang++ {
+		dm := ChieuCuaLang(lang)
+		if len(dm) == 0 {
+			t.Fatalf("lang %d khong co chieu nao", lang)
+		}
+		if got := TraCapChieu(lang, dm[0].Id, 1); got == nil {
+			t.Fatalf("lang %d: TraCapChieu(%d, 1) tra nil, phai co", lang, dm[0].Id)
+		}
+	}
+}

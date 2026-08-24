@@ -52,9 +52,12 @@ func TestKiemDiChuyenLangLaKhongThoatKhoiCollisionGrid(t *testing.T) {
 	if bd == nil {
 		t.Fatal("thiếu map 1 Làng Lá")
 	}
-	// Lưới 52×24 (Lát 4): đi trong vùng khí/mặt đứng hợp lệ; chui xuống đất
-	// (hàng 19+), đâm tường biên (cột 0/51) hay ra ngoài footprint đều bị chặn.
-	if !kiemDiChuyenHopLe(bd, 100, 384, 300, 384) || !kiemDiChuyenHopLe(bd, 356, 432, 500, 432) {
+	// Lưới 52×24: đi trong vùng khí/mặt đứng hợp lệ; chui xuống đất (hàng 19+),
+	// đâm tường biên (cột 0/1 và 50/51) hay ra ngoài footprint đều bị chặn.
+	//
+	// Đoạn đi trên mặt đất phải chọn chỗ PHẲNG. Khu trung tâm (cột 16-28) là nền
+	// cao — ở đó hàng 18 là thân gò nên bị chặn, đúng ý. Cột 2-13 là chỗ phẳng.
+	if !kiemDiChuyenHopLe(bd, 100, 384, 300, 384) || !kiemDiChuyenHopLe(bd, 100, 432, 330, 432) {
 		t.Fatal("map 1 phải cho đi trong vùng hợp lệ (khí + mặt đứng hàng 18)")
 	}
 	if kiemDiChuyenHopLe(bd, 100, 432, 100, 470) {

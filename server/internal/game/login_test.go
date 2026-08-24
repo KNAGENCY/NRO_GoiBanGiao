@@ -850,6 +850,13 @@ func TestClientOkGuiVaoTheGioi(t *testing.T) {
 	if m24.Command != -24 {
 		t.Fatalf("goi 3 = lenh %d, mong doi -24 (MAP INFO)", m24.Command)
 	}
+
+	// -42 CHI SO gui ngay sau MAP INFO. Khong doc thi ong pipe day va may chu
+	// ket thuc bang loi ghi, khong phai loi logic.
+	m42 := docMotGoi(t, fClient)
+	if m42.Command != -42 {
+		t.Fatalf("goi sau -24 = lenh %d, mong doi -42 (chi so nhan vat)", m42.Command)
+	}
 	// MAP INFO byte dau (sau khong co lenh con) = mapId = 1.
 	if len(m24.Data) == 0 || m24.Data[0] != 1 {
 		t.Errorf("MAP INFO mapId = %v, mong doi 1 (mapId cua nhan vat)", m24.Data)
@@ -923,7 +930,7 @@ func TestClientOkKhongChayLaiLanHai(t *testing.T) {
 		}
 	}
 
-	// Lan 1: phai nhan du 3 goi theo dung thu tu (nhu TestClientOkGuiVaoTheGioi).
+	// Lan 1: phai nhan du 4 goi theo dung thu tu (nhu TestClientOkGuiVaoTheGioi).
 	guiClientOk()
 	m82 := docMotGoi(t, fClient)
 	if m82.Command != -82 {
@@ -936,6 +943,10 @@ func TestClientOkKhongChayLaiLanHai(t *testing.T) {
 	m24 := docMotGoi(t, fClient)
 	if m24.Command != -24 {
 		t.Fatalf("lan 1, goi 3 = lenh %d, mong doi -24", m24.Command)
+	}
+	m42 := docMotGoi(t, fClient)
+	if m42.Command != -42 {
+		t.Fatalf("lan 1, goi 4 = lenh %d, mong doi -42 (chi so nhan vat)", m42.Command)
 	}
 
 	// Lan 2: gui LAI -28/13 — PHAI khong nhan them goi nao (chot chong goi lai).
@@ -974,6 +985,7 @@ func TestVaoKhuVucLanHaiKhongPhatGoiTrung(t *testing.T) {
 	docMotGoi(t, fClient) // -82
 	docMotGoi(t, fClient) // -30
 	docMotGoi(t, fClient) // -24
+	docMotGoi(t, fClient) // -42 chi so nhan vat
 
 	// Gui -39 (vao khu vuc) HAI LAN LIEN TIEP — mo phong client gui trung.
 	if err := fClient.WriteMessage(&protocol.Message{Command: lenhVaoKhuVuc}); err != nil {

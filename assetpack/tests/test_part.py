@@ -13,8 +13,16 @@ ROOT = Path(__file__).resolve().parents[2]
 LEGACY_PART = ROOT / "server" / "internal" / "game" / "part.bin"
 MANIFEST = ROOT / "docs" / "my-thuat" / "mapping-id.json"
 FRAME_COUNTS = {0: 3, 1: 17, 2: 14}
+
+# Do doi DOC cua ba manh nhan vat, don vi game. Ghim CUNG o day (khong doc tu
+# manifest) de oracle van doc lap: sua nham manifest la test nay do.
+#
+# Vi sao khong phai 0: anh than chi ve NUA DUOI cua dau, nen ba manh phai chong
+# len nhau dung cho hai ban tay trung nhau. Ba so nay do trong game that (dot lam
+# map 1 Lang La) - lech mot o la nhan vat cut co hoac lun toi that lung.
+DY_DAU, DY_THAN, DY_CHAN = -41, -50, -33
 LEGACY_SHA256 = "09349f28a95b46469b691abf87d6b341f3395f53ca8d6d704b48ab706992826b"
-BUILT_SHA256 = "9f9c8ee290d8ff367ad7450584d7c1544adc41916924d9ec4a41a93229e6f327"
+BUILT_SHA256 = "4fba8a7038b0687bac5d49bbd5499a43b0d3955d693f30ea573672d140dfd618"
 
 
 def scan_legacy_records(data: bytes):
@@ -69,17 +77,18 @@ class PartBinaryTest(unittest.TestCase):
 
         expected = list(legacy_records)
         expected[30] = b"\x00" + b"".join(
-            struct.pack(">hbb", sprite_id, 0, 0) for sprite_id in (27041, 27042, 27043)
+            struct.pack(">hbb", sprite_id, 0, DY_DAU)
+            for sprite_id in (27041, 27042, 27043)
         )
         expected[57] = b"\x01" + b"".join(
-            struct.pack(">hbb", sprite_id, 0, 0)
+            struct.pack(">hbb", sprite_id, 0, DY_THAN)
             for sprite_id in (
                 27044, 27045, 27046, 27047, 27048, 27049, 27050, 27051, 27052,
                 27053, 27054, 27055, 27056, 27057, 27058, 27059, 27060,
             )
         )
         expected[58] = b"\x02" + b"".join(
-            struct.pack(">hbb", sprite_id, 0, 0)
+            struct.pack(">hbb", sprite_id, 0, DY_CHAN)
             for sprite_id in (
                 27061, 27062, 27063, 27064, 27065, 27066, 27067,
                 27068, 27069, 27070, 27071, 27072, 27073, 27074,

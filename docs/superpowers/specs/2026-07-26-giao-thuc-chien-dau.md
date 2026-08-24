@@ -186,10 +186,27 @@ modified-UTF8. Mọi `idNguoiChoi` là **int**; mọi `mobId` là **byte** (đá
 | Lệnh | Tên | Thân gói |
 |---|---|---|
 | `54` | Đánh quái | `byte mobId`; **nếu `mobId == -1`** thì đọc thêm `int masterId` |
-| `-60` | Đánh người chơi | `int idNguoiBiDanh` |
+| `-60` | Đánh người chơi | **`int idNguoiBiDanh` × N + `byte cdir`** ⚠️ *(sửa 22/08/2026 — xem ghi chú dưới bảng)* |
 | `34` | Chọn chiêu | `short templateId` — **là `template.id`, KHÔNG phải `skillId`** |
 | `-16` | Hồi sinh | *(rỗng)* |
 | `-20` | Nhặt đồ | `short itemMapId` *(KH7)* |
+
+> ### ⚠️ Đính chính gói LÊN `-60` (22/08/2026 — bằng chứng từ client thật)
+>
+> Bảng trên trước đây ghi thân gói `-60` chỉ có **một** `int idNguoiBiDanh`. **Sai.**
+> Client Unity (`D:\NRO_Project\Assets\Scripts\Game1\Service.cs:1256-1265`) ghi một **vòng lặp** `writeInt(charID)` cho
+> mọi mục tiêu đang chọn, rồi **luôn** ghi thêm `writeSByte(cdir)` ở cuối (dòng 1265,
+> nằm ngoài cả ba nhánh `54`/`-60`).
+>
+> Server Go hiện đọc đúng **một** `r.Int()` (`login.go` `xuLyDanhNguoiChoi`) nên **vô tình
+> đúng** ở trường hợp phổ biến (đánh 1 mục tiêu) và bỏ qua phần dư — không crash vì khung
+> gói có độ dài riêng. Server Java gốc cũng chỉ đọc 1 int
+> (`1-MAY-CHU-GAME/src/server/Controller.java:709`, `readByte()` bị chú thích).
+>
+> **Hệ quả cần nhớ:** khi làm KH6b (boss) hoặc PvP nhiều mục tiêu, muốn xử lý đủ danh sách
+> thì phải sửa parser + thêm test byte cho gói lên. Trước khi có nhu cầu đó, giữ nguyên
+> hành vi hiện tại nhưng **đừng tin dòng bảng cũ**.
+
 
 ⚠️ **`54` là gói độ dài biến thiên** (1 byte hoặc 5 byte). KH6 chưa làm thú cưng nhưng
 **vẫn phải đọc đúng 5 byte** khi gặp `-1` rồi bỏ qua, nếu không sẽ lệch dòng.

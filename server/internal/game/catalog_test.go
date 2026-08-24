@@ -72,11 +72,18 @@ func TestCollisionFailClosedNgoaiFootprintArtifact(t *testing.T) {
 		t.Fatalf("TaiCollision() loi: %v", err)
 	}
 
-	// Artifact 52x24 (Lát 4), mỗi cell 24x24 nên miền hợp lệ chính xác là
-	// x=[0,1247], y=[0,575]. (1223,431) = cột 50 hàng 17 — ô khí walkable
-	// sát mép trong (cột 51 là tường biên, hàng 18 là mặt đứng cuối).
-	if !col.DiDuoc(1223, 431) || !col.DiDuoc(1223, 432) {
-		t.Fatal("mép trong (cột 50) phải walkable tới hết mặt đứng hàng 18")
+	// Artifact 52x24, mỗi cell 24x24 nên miền hợp lệ chính xác là
+	// x=[0,1247], y=[0,575].
+	//
+	// Tường biên nay là HAI cột mỗi bên (0,1 và 50,51) chứ không phải một: camera
+	// dừng trước mép map, nên nếu chỉ một cột thì nhân vật vẫn đi được tới sát
+	// mép và trượt hẳn ra ngoài màn hình. Vậy ô khí trong cùng bên phải là cột 49.
+	// (1199,431) = cột 49 hàng 17; (1199,432) = cột 49 hàng 18 = mặt đứng.
+	if !col.DiDuoc(1199, 431) || !col.DiDuoc(1199, 432) {
+		t.Fatal("mép trong (cột 49) phải walkable tới hết mặt đứng hàng 18")
+	}
+	if col.DiDuoc(1223, 431) {
+		t.Error("cột 50 phải là tường biên — nếu không nhân vật đi tới đó là ra ngoài màn hình")
 	}
 	for _, p := range []struct {
 		x, y int16

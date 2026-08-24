@@ -9,7 +9,14 @@
 // luc "Chot kiem truoc khi danh"): bat tu -> chakra -> hoi chieu -> chet ->
 // tam. DUNG SAI THU TU la sai vi cac kiem KHONG doc lap — vi du kiem chakra
 // truoc bat tu se cho phep tieu chakra vao mot don khong bao gio trung (bat tu
-// chan o buoc sau), khac hanh vi ban goc.
+// chan o buoc sau), khac hanh vi ban goc. TestThuTuKiemGiuNguyen
+// (chotkiem_test.go) khoa dung thu tu nay.
+//
+// KE HOACH 6b (Task 5, don nen truoc phan boss): ham nay TRUOC day nhan thang
+// *nguoiTrongKhuVuc, tuc chi NGUOI CHOI moi danh duoc — boss la kieu rieng,
+// khong co store.NhanVat, khong co bang chakra, nen khong the truyen vao. Nay
+// no nhan kieu du lieu thuan BenDanh de CA HAI BEN di chung mot duong kiem:
+// mot bo luat, mot cho sua, khong co ban sao logic thu hai cho boss.
 package game
 
 import "time"
@@ -27,6 +34,51 @@ const (
 	// nhung server tinh tre 1 tick roi tu choi oan.
 	hoiChieuNoi = 50 * time.Millisecond
 )
+
+// BenDanh la BEN CHU DONG cua mot don danh: chinh xac nhung gi KiemDanhHopLe
+// can doc tu ke tan cong, khong hon. Kieu du lieu THUAN (khong con tro toi
+// trang thai khu vuc, tru con tro chi-doc toi cap chieu) nen nguoi choi va
+// boss deu dung duoc — xem benDanhTuNguoi (khuvuc.go) cho phia nguoi choi.
+type BenDanh struct {
+	// X, Y la vi tri ben danh — int32 DUNG kieu store.NhanVat.ViTriX/Y
+	// (store.go:38-39), KHONG thu hep xuong int16.
+	//
+	// Vi sao khong int16 du ViTriCoMau (muc tieu) la int16: ban truoc khi tach
+	// ham doc THANG int64(nguoiDanh.nv.ViTriX) tu int32, nen ep xuong int16 o
+	// adapter la mot phep THU HEP mieng am tham — toa do ngoai [-32768, 32767]
+	// se cuon vong va kiem tam (#5) tinh tren con so sai. Hien tai bien map
+	// chan &lt; 4096 nen chua vo, nhung do la trung hop chu khong phai bao dam.
+	// Giu int32 thi kiem #5 (da tinh bang int64) khong doi mot phep nao, va
+	// KHONG doi mot byte nao tren day: goi -5 van tu ep int16 rieng o cho no.
+	X, Y int32
+
+	// ChakraHienTai: int32, DUNG kieu store.NhanVat.ChakraHienTai (store.go)
+	// de phia nguoi choi chep sang khong phai ep kieu, khong mat gia tri.
+	ChakraHienTai int32
+
+	// LanDanhCuoi la thoi diem ben nay DUNG THANH CONG mot chieu lan gan nhat.
+	// Zero value (chua tung dung chieu nao) khien bayGio.Sub(LanDanhCuoi) ra
+	// mot khoang RAT LON, nen kiem hoi chieu tu nhien CHO PHEP ngay lan dau —
+	// khong can if/else rieng.
+	LanDanhCuoi time.Time
+
+	// Chieu la cap chieu dang chon. nil = chua chon chieu -> tu choi ngay o
+	// bao ve dau ham (truoc ca kiem bat tu).
+	Chieu *CapChieu
+
+	// VoHanChakra BO QUA hoan toan kiem chakra (#2). Danh cho BOSS: boss
+	// khong co bang chakra nao ca nen "du chakra khong" la cau hoi vo nghia
+	// voi no. Noi dieu do BANG KIEU DU LIEU thay vi nhoi mot con so ma thuat
+	// (vd cho ChakraHienTai = 31_07_2002 roi cau mong khong chieu nao ton hon
+	// the) — so ma thuat kieu do la mot qua bom hen gio: no dung cho toi khi
+	// ai do them mot chieu ton nhieu chakra hon, va luc vo thi khong co mot
+	// dong code nao giai thich con so ay.
+	//
+	// Voi NGUOI CHOI truong nay LUON false (benDanhTuNguoi, khuvuc.go).
+	// No CHI mien kiem #2, KHONG mien bat tu / hoi chieu / muc tieu chet /
+	// tam — TestVoHanChakraKHONGBoQuaKiemKhac khoa dieu do.
+	VoHanChakra bool
+}
 
 // ViTriCoMau la vi tri + luong mau cua MOT MUC TIEU (nguoi choi hoac quai) can
 // de chot kiem truoc khi danh. Kieu MOI — brief Task 3 cho phep dinh nghia tai
@@ -68,29 +120,30 @@ type KetQuaKiem struct {
 	LyDo string
 }
 
-// KiemDanhHopLe chot 5 kiem truoc khi cho phep nguoiDanh dung chieuDangChon
-// cua no len mucTieu, tai thoi diem bayGio. HAM THUAN: khong sua nguoiDanh,
-// khong doc dong ho he thong — moi thu qua tham so.
-func KiemDanhHopLe(nguoiDanh *nguoiTrongKhuVuc, mucTieu ViTriCoMau, bayGio time.Time) KetQuaKiem {
+// KiemDanhHopLe chot 5 kiem truoc khi cho phep benDanh dung chieu cua no len
+// mucTieu, tai thoi diem bayGio. HAM THUAN: khong sua gi, khong doc dong ho
+// he thong — moi thu qua tham so.
+func KiemDanhHopLe(benDanh BenDanh, mucTieu ViTriCoMau, bayGio time.Time) KetQuaKiem {
 	// Bao ve ngoai bang 5-dong: chua chon chieu thi khong co gi de kiem tam/
-	// chakra/hoi chieu ca — tranh panic khi nguoiDanh.chieuDangChon == nil.
-	if nguoiDanh == nil || nguoiDanh.chieuDangChon == nil {
+	// chakra/hoi chieu ca — tranh panic khi benDanh.Chieu == nil.
+	if benDanh.Chieu == nil {
 		return KetQuaKiem{ChoPhep: false, LyDo: "chua chon chieu"}
 	}
-	cap := nguoiDanh.chieuDangChon
+	cap := benDanh.Chieu
 
 	// #1 Bat tu: muc tieu vua hoi sinh < 1500ms truoc bayGio.
 	if bayGio.Sub(mucTieu.LucHoiSinh) < thoiGianBatTuSauHoiSinh {
 		return KetQuaKiem{ChoPhep: false, LyDo: "muc tieu dang bat tu"}
 	}
 
-	// #2 Chakra: nguoiDanh khong du chakra cho chieu dang chon.
-	if nguoiDanh.nv.ChakraHienTai < int32(cap.ChakraDung) {
+	// #2 Chakra: benDanh khong du chakra cho chieu dang chon. Boss
+	// (VoHanChakra) bo qua HAN buoc nay — xem chu thich truong do o tren.
+	if !benDanh.VoHanChakra && benDanh.ChakraHienTai < int32(cap.ChakraDung) {
 		return KetQuaKiem{ChoPhep: false, LyDo: "khong du chakra"}
 	}
 
 	// #3 Hoi chieu: daTroiQua tu lan dung chieu truoc phai >= hoiChieu - noi.
-	daTroiQua := bayGio.Sub(nguoiDanh.lanDanhCuoi)
+	daTroiQua := bayGio.Sub(benDanh.LanDanhCuoi)
 	hoiChieu := time.Duration(cap.HoiChieuMs) * time.Millisecond
 	if daTroiQua < hoiChieu-hoiChieuNoi {
 		return KetQuaKiem{ChoPhep: false, LyDo: "chieu chua hoi"}
@@ -105,8 +158,8 @@ func KiemDanhHopLe(nguoiDanh *nguoiTrongKhuVuc, mucTieu ViTriCoMau, bayGio time.
 	// voi kiemDiChuyenHopLe o dichuyen.go). cap.Dx la tam danh cua chieu (xem
 	// chu thich truong Dx trong chieuthuc.go: "client doc ca hai, dung chung
 	// 1 gia tri tam").
-	dx := int64(mucTieu.X) - int64(nguoiDanh.nv.ViTriX)
-	dy := int64(mucTieu.Y) - int64(nguoiDanh.nv.ViTriY)
+	dx := int64(mucTieu.X) - int64(benDanh.X)
+	dy := int64(mucTieu.Y) - int64(benDanh.Y)
 	distSq := dx*dx + dy*dy
 	tamSq := int64(cap.Dx) * int64(cap.Dx)
 	if distSq > tamSq {

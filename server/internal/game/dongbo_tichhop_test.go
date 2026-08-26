@@ -470,7 +470,13 @@ func kiemMeInfo(t *testing.T, m *protocol.Message, nv *store.NhanVat) {
 	meByte("itemsBody.size", 0)
 	meByte("itemsBag.size", 0)
 	meByte("itemsBox.size", 0)
-	meShort("headAvatar.size", 0)
+	// headAvatar: may chu gui MOT cap (part dau -> sprite chan dung) de client ve
+	// duoc o chan dung tren HUD. Truoc day gui 0 cap nen o do trong tron.
+	// Ba so nay phai khop HeadNhanVat/AvatarNhanVat trong thegioi.go — lech la
+	// client doc lech 4 byte roi ca doan duoi goi sai theo.
+	meShort("headAvatar.size", 1)
+	meShort("headAvatar.head", HeadNhanVat)
+	meShort("headAvatar.avatar", AvatarNhanVat)
 	meShort("conMeo0", 0)
 	meShort("conMeo1", 0)
 	meShort("conMeo2", 0)
@@ -611,4 +617,8 @@ func TestVersionDanceDayDu(t *testing.T) {
 	kiemTileSetInfo(t, cl.doiGoiLenh(t, -82))
 	kiemMeInfo(t, cl.doiGoiLenh(t, -30), nv)
 	kiemMapInfo(t, cl.doiGoiLenh(t, -24), nv, bd)
+	// -42 CHI SO gui NGAY SAU MAP INFO (login.go xuLyClientOk). Khong doc thi ong
+	// pipe day, may chu ket thuc bang loi GHI het gio 30 giay — trong nhu treo,
+	// khong phai loi logic. Da lam do 13 test tich hop vi thieu dung dong nay.
+	cl.doiGoiLenh(t, lenhChiSoNhanVat)
 }

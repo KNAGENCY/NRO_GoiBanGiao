@@ -98,6 +98,10 @@ func dangNhapLaiVaoTheGioiVaKhuVuc(t *testing.T, cl *clientGia, ten, matKhau str
 	cl.doiGoiLenh(t, -82)
 	cl.doiGoiLenh(t, -30)
 	cl.doiGoiLenh(t, -24)
+	// -42 CHI SO gui NGAY SAU MAP INFO (login.go xuLyClientOk). Khong doc thi ong
+	// pipe day, may chu ket thuc bang loi GHI het gio 30 giay — trong nhu treo,
+	// khong phai loi logic. Da lam do 13 test tich hop vi thieu dung dong nay.
+	cl.doiGoiLenh(t, lenhChiSoNhanVat)
 
 	cl.baoVaoKhuVuc()
 }

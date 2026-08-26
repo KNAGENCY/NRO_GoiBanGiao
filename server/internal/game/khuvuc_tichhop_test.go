@@ -1068,10 +1068,18 @@ func TestTichHop_DanhQuaiVuotTamVanPhatGoiChiMangFalse(t *testing.T) {
 		t.Fatal("chon chieu (34) khong duoc phat goi tin nao NGOAI quai AI")
 	}
 
-	// A di chuyen tu (100,384) toi (0,384), van nam trong collision grid.
-	// Quai Id=0 mac dinh o (160,384) -> khoang cach SAU khi di chuyen
-	// la |0-160| = 160 > tam can chien 100 -> vuot tam.
-	toXXa := int16(0)
+	// A di chuyen tu (100,384) ra o di duoc XA NHAT ve ben trai, roi danh quai
+	// Id=0 o (160,384) tu ngoai tam can chien 100.
+	//
+	// PHAI la 48, KHONG duoc la 0: tu khi map 1 Lang La co TUONG VO HINH o hai
+	// cot bien (de nguoi choi khong roi xuong ho o mep map), cac o x=0..36 deu
+	// bi chan. Gui -7 toi x=0 bi actor tu choi, A DUNG YEN o x=100, khoang cach
+	// toi quai chi con |100-160| = 60 < 100 -> quai TRUNG don 2 sat thuong va
+	// test do voi "goi -9 byte sai". Doi bo cuc map ma quen dong nay thi trieu
+	// chung se lai la "sai byte", khong he giong nguyen nhan that.
+	//
+	// |48-160| = 112 > 100 -> vuot tam, dung y do cua test.
+	toXXa := int16(48)
 	toYXa := int16(nvA.ViTriY)
 	clA.guiDiChuyen(toXXa, toYXa)
 	// -7 chi phat cho NGUOI KHAC (client tu ve chuyen dong cua chinh minh) —

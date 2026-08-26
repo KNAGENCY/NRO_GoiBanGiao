@@ -22,6 +22,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 	"net"
 	"os"
 	"strconv"
@@ -105,9 +106,19 @@ func taoTaiKhoanCoMatKhau(t *testing.T, ten, matKhau string) int64 {
 	if err != nil {
 		t.Fatalf("chen tai khoan thu %q that bai: %v", ten, err)
 	}
+	// Don dep KHONG duoc nuot loi. Truoc day dung `_, _ =`: khi PostgreSQL tat
+	// giua chung, hai lenh xoa nay that bai IM LANG va de lai mot hang trong
+	// bang — hang do lam moi lan chay SAU do bao "duplicate key", trong nhu loi
+	// cua test khac han. Bao ngay tai cho la biet phai don tay.
 	t.Cleanup(func() {
-		_, _ = pool.Exec(context.Background(), `DELETE FROM nhan_vat WHERE tai_khoan_id = $1`, id)
-		_, _ = pool.Exec(context.Background(), `DELETE FROM tai_khoan WHERE id = $1`, id)
+		if _, err := pool.Exec(context.Background(),
+			`DELETE FROM nhan_vat WHERE tai_khoan_id = $1`, id); err != nil {
+			t.Errorf("don dep nhan_vat cua tai khoan %d that bai: %v", id, err)
+		}
+		if _, err := pool.Exec(context.Background(),
+			`DELETE FROM tai_khoan WHERE id = $1`, id); err != nil {
+			t.Errorf("don dep tai_khoan %d (%q) that bai — hang nay se lam cac lan chay sau bao duplicate key: %v", id, ten, err)
+		}
 	})
 
 	return id
@@ -116,10 +127,20 @@ func taoTaiKhoanCoMatKhau(t *testing.T, ten, matKhau string) int64 {
 // demHauToTichHop la bo dem nguyen tu RIENG cho file nay (khac demHauTo cua
 // package store — hai package tach biet, khong dung chung bien duoc, cung
 // khong can thiet vi moi package tu quan ly khong gian ten cua minh).
-var demHauToTichHop int64
+//
+// Bat dau tu mot MOC NGAU NHIEN chu khong tu 0. Ly do: bo dem tu 0 sinh ra
+// DUNG mot day ten o MOI lan chay (farA1, farA2, ...), nen chi can MOT dong
+// sot lai trong CSDL thu — vi don dep that bai, vi du PostgreSQL tat giua
+// chung — la moi lan chay sau deu do o dung cho do voi "duplicate key",
+// mot thong bao khong he goi y nguyen nhan that.
+//
+// Tran 9000: ten NHAN VAT phai khop ^[A-Za-z0-9]{5,10}$, tien to dai nhat
+// dang dung la 6 ky tu ("trungA") -> hau to toi da 4 chu so.
+var demHauToTichHop = rand.Int63n(9000)
 
-// hauToNganNgau tra mot chuoi so duy nhat cho moi lan goi, de ten tai
-// khoan/nhan vat giua cac test (va giua cac lan chay lai) khong dung nhau.
+// hauToNganNgau tra mot chuoi so duy nhat cho moi lan goi trong CUNG mot lan
+// chay, de ten tai khoan/nhan vat giua cac test khong dung nhau. Giua CAC LAN
+// CHAY thi dua vao moc ngau nhien cua demHauToTichHop — xem chu thich o do.
 // Dung bo dem nguyen tu (sync/atomic), KHONG dung dia chi con tro (%p co the
 // trung khi stack duoc tai su dung) — giong het ly do da giai thich o
 // hauToNganNgau trong internal/store/store_test.go. Hau to luon ngan (toi da

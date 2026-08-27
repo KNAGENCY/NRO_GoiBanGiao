@@ -1,15 +1,44 @@
 import hashlib
 import json
+import subprocess
 import tempfile
 import unittest
 from copy import deepcopy
 from pathlib import Path
 
 
-ROOT = Path(__file__).parents[2]
+ROOT = Path(__file__).resolve().parents[2]
 MAPPING = ROOT / "docs/my-thuat/mapping-id.json"
 REVIEW = ROOT / "docs/my-thuat/review/vertical-slice-v1.json"
-SHARED_ROOT = ROOT.parents[1]
+
+
+def _shared_root() -> Path:
+    """Thu muc chua kho anh nguon (docs/my-thuat/anh-nguon/) — KHONG nam trong git.
+
+    TAI SAO phai suy ra thay vi dung thang ROOT: `.gitignore` loai
+    `docs/my-thuat/anh-nguon/` va `anh-game/` ra khoi repo, nen mot **git worktree**
+    hoan toan KHONG co hai thu muc do — chi ban checkout chinh (noi chua thu muc
+    `.git` that) moi co anh. Hoi git "thu muc .git chung nam dau" la cach duy nhat
+    dung o CA HAI truong hop (checkout thang lan worktree) va o moi vi tri o dia.
+
+    Ban cu viet `ROOT.parents[1]` — dung y het, nhung no ma hoa cung gia dinh
+    "repo nam sau 2 tang thu muc" (dung voi worktree kieu `<goc>/.worktrees/<ten>`,
+    no `IndexError` o checkout thang) → ca file chua bao gio chay duoc.
+    """
+    try:
+        out = subprocess.run(
+            ["git", "rev-parse", "--path-format=absolute", "--git-common-dir"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return ROOT
+    return Path(out).resolve().parent
+
+
+SHARED_ROOT = _shared_root()
 
 
 class CanonicalTask6BPreflightTests(unittest.TestCase):

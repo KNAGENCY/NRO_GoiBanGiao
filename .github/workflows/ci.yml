@@ -58,5 +58,12 @@ jobs:
       - name: pytest assetpack
         env:
           PYTHONUTF8: '1'
-        # Bo test_task6b_canonical_preflight.py: gia dinh layout git-worktree (bug path co san).
-        run: python -m pytest assetpack -q --ignore=assetpack/tests/test_task6b_canonical_preflight.py
+        # KHONG con --ignore: loi path cu (SHARED_ROOT = ROOT.parents[1]) da duoc va,
+        # SHARED_ROOT nay hoi `git rev-parse --git-common-dir` nen dung o moi checkout.
+        #
+        # CANH BAO cho ai bat CI len lan dau: ca ba file `test_task6b_*` deu doc kho anh
+        # nguon `docs/my-thuat/anh-nguon/` - thu muc nay bi .gitignore loai (hang tram MB)
+        # nen may CI KHONG co. Chung chi xanh tren may co ban checkout chinh day du.
+        # Muon chay that tren CI thi phai tai kho anh ve truoc (R2/artifact), hoac ignore
+        # CA BA file - dung chi ignore mot cai roi tuong la xong.
+        run: python -m pytest assetpack -q

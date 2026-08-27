@@ -154,6 +154,23 @@ func TestBongDoMap1NamDungTrenMatDat(t *testing.T) {
 	}
 }
 
+// TestBeDaKhopVoiCollision: hai hang mat dat cua map 1 (hangDatBongDo va
+// hangBeDaBongDo) chi dung khi be da THAT SU nam o dung cac cot 16..28. Doc
+// lai bien do tu chinh file collision — sua bo cuc map ma quen sua bang bong
+// do thi test nay bao truoc, thay vi de bong do lo lung trong game.
+func TestBeDaKhopVoiCollision(t *testing.T) {
+	const oTile = 24
+	for cot := int16(2); cot <= 49; cot++ {
+		x := cot * oTile
+		treBe := !collisionLangLa.DiDuoc(x, hangDatBongDo*oTile) // hang 18 dac = day la be da
+		trongBe := cot >= cotBeDaDau && cot <= cotBeDaCuoi
+		if treBe != trongBe {
+			t.Errorf("cot %d: collision noi %v con hang so cotBeDa noi %v — be da da doi cho, bang bong do phai sua theo",
+				cot, treBe, trongBe)
+		}
+	}
+}
+
 // TestMoiMauDungToiDaHaiLan: qua 2 lan la client bat dau lat guong anh
 // (TileMap.isExistMoreOne -> trans = 2). Bong do doi xung nen mat thuong
 // khong thay, nhung day la mot hanh vi ngam cua client — giu duoi nguong de

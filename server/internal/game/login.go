@@ -258,6 +258,8 @@ func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 		return b.xuLyHoiSinh()
 	case lenhMoNPC: // 33 — client mo hoi thoai NPC
 		return b.xuLyMoNPC(s, m)
+	case lenhDoiMap: // -23 — client bam cong roi map (xem doimap.go)
+		return b.xuLyDoiMap(s)
 	default:
 		// Lenh chua ho tro: bo qua, khong ngat ket noi — client gui vai goi
 		// phu ngay sau khi noi (vi du setClientType), day la chuyen BINH
@@ -365,9 +367,13 @@ func (b *BoXuLy) phucVuCatalog(s *mynet.Session, m *protocol.Message) error {
 	return s.Gui(m)
 }
 
-// xuLyClientOk: client bao da nhan du 4 catalog va san sang (-28/13). Ke hoach 4
-// gui NGAY 3 goi de client render: -82 tileset -> -30/0 ME_INFO -> -24 MAP INFO.
-// Thu tu quan trong: -82 PHAI truoc -24 (§7), khong thi client thoat han app.
+// xuLyClientOk: client bao da nhan du 4 catalog va san sang (-28/13). Gui ngay
+// chuoi goi de client render:
+//
+//	-31 bang mau bong do -> -82 tileset -> -30/0 ME_INFO -> -24 MAP INFO -> -42 chi so
+//
+// Thu tu quan trong: -82 PHAI truoc -24 (§7), khong thi client thoat han app;
+// -31 cung phai truoc -24 (khong thi bong do bi bo qua im lang, xem bgitem.go).
 func (b *BoXuLy) xuLyClientOk(s *mynet.Session) error {
 	// Chi chay MOT LAN moi phien: neu chua co nhan vat, hoac da san sang roi thi bo
 	// qua. Chan tai nhap quan trong vi sau khi -39 giao nv cho actor, chay lai
@@ -393,6 +399,14 @@ func (b *BoXuLy) xuLyClientOk(s *mynet.Session) error {
 	// CHUA gui suKienVao o day — doi -39 (client tai xong map) moi dua vao khu vuc.
 	if b.soKhuVuc != nil {
 		b.khuVuc = b.soKhuVuc.Tra(b.nhanVat.MapID)
+	}
+
+	// -31 bang mau bong do (bg-item) — BAT BUOC truoc -24, va chi can gui MOT
+	// LAN moi phien (client giu TileMap.vItemBg qua ca cac lan doi map).
+	// Thieu goi nay thi cac bong do trong -24 bi client bo qua IM LANG:
+	// TileMap.getBIById tra null va no `continue` khong ve gi (xem bgitem.go).
+	if err := s.Gui(goiMauBgItem()); err != nil {
+		return err
 	}
 
 	// -82 tileset — BAT BUOC truoc -24.
@@ -437,7 +451,7 @@ func (b *BoXuLy) xuLyClientOk(s *mynet.Session) error {
 		return err
 	}
 
-	slog.Info("da gui the gioi (tileset + ME_INFO + MAP INFO + chi so), client se render",
+	slog.Info("da gui the gioi (mau bong do + tileset + ME_INFO + MAP INFO + chi so), client se render",
 		"ten", b.nhanVat.Ten, "mapId", bd.MapID, "lang", b.nhanVat.Lang, "id", b.nhanVat.ID)
 	return nil
 }

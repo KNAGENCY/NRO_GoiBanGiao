@@ -1,0 +1,245 @@
+package game
+
+import (
+	"testing"
+
+	"nroserver/internal/protocol"
+	"nroserver/internal/store"
+)
+
+// docGoi gom ba ham doc quen thuoc lai mot cho, de cac test byte-chinh-xac
+// duoi day khong phai lap ba closure giong het nhau.
+type docGoi struct {
+	t *testing.T
+	r *protocol.Reader
+}
+
+func moDocGoi(t *testing.T, m *protocol.Message) *docGoi {
+	t.Helper()
+	return &docGoi{t: t, r: protocol.NewReader(m.Data)}
+}
+
+func (d *docGoi) b(ten string, muon byte) {
+	d.t.Helper()
+	g, err := d.r.Byte()
+	if err != nil || g != muon {
+		d.t.Fatalf("%s = %d (loi %v), mong doi %d", ten, g, err, muon)
+	}
+}
+
+func (d *docGoi) sh(ten string, muon int16) {
+	d.t.Helper()
+	g, err := d.r.Short()
+	if err != nil || g != muon {
+		d.t.Fatalf("%s = %d (loi %v), mong doi %d", ten, g, err, muon)
+	}
+}
+
+func (d *docGoi) utf(ten string, muon string) {
+	d.t.Helper()
+	g, err := d.r.UTF()
+	if err != nil || g != muon {
+		d.t.Fatalf("%s = %q (loi %v), mong doi %q", ten, g, err, muon)
+	}
+}
+
+func (d *docGoi) hetGoi(ten string) {
+	d.t.Helper()
+	if _, err := d.r.Byte(); err == nil {
+		d.t.Errorf("%s: con byte thua — goi phai het o day", ten)
+	}
+}
+
+// TestGoiMauBgItemByteDung khoa TUNG BYTE cua goi -31.
+//
+// Gia tri o day GHIM BANG TAY (khong doc tu danhSachMauBgItem) — dung luat
+// §6.12 cua BAT-DAU-TU-DAY: test lay ky vong tu chinh nguon minh dang kiem
+// thi doi gi cung "dung", thanh diem mu.
+func TestGoiMauBgItemByteDung(t *testing.T) {
+	m := goiMauBgItem()
+	if m.Command != -31 {
+		t.Fatalf("lenh = %d, mong doi -31", m.Command)
+	}
+	d := moDocGoi(t, m)
+
+	d.sh("soMau", 8)
+	for i := 0; i < 8; i++ {
+		d.sh("anhId", int16(500+i))
+		d.b("lop", 2)  // layer 2: ve sau nen dat, truoc nhan vat, KHONG nhuom mau
+		d.sh("dx", 0)  //
+		d.sh("dy", -6) // keo bong len sat chan cong trinh
+		d.b("soO", 0)  // BAT BUOC 0 — client co loi chi so o vong doc o nay
+	}
+	d.hetGoi("-31")
+}
+
+// TestMauBgItemKhongDinhBayCuaClient khoa lai cac gia tri ma client Unity
+// doi xu DAC BIET. Day khong phai test "code lam dung nhu code" — moi so
+// trong danh sach duoi deu doc ra tu mot dong `if` cu the trong client, va
+// neu ai do doi AnhBongDoDau sang mot dai khac thi test nay la thu duy nhat
+// bao truoc.
+func TestMauBgItemKhongDinhBayCuaClient(t *testing.T) {
+	// BgItem.paint (BgItem.cs) bo qua han 96 va 279; ve them nuoc chay cho 11;
+	// keo camera cho 28 va 67..70. BgItem.isMiniBgz keo camera cho 79,80,81,
+	// 85,86,90,91,92 va 99..108.
+	bay := map[int16]string{
+		11: "ve them hieu ung nuoc chay",
+		28: "bi keo theo camera (transX)",
+		67: "bi keo theo camera", 68: "bi keo theo camera",
+		69: "bi keo theo camera", 70: "bi keo theo camera",
+		96: "bi client bo qua han", 279: "bi client an khi hieu ung Mabu",
+		79: "isMiniBg — bi keo theo camera", 80: "isMiniBg", 81: "isMiniBg",
+		85: "isMiniBg", 86: "isMiniBg", 90: "isMiniBg", 91: "isMiniBg", 92: "isMiniBg",
+		99: "isMiniBg", 100: "isMiniBg", 101: "isMiniBg", 102: "isMiniBg",
+		103: "isMiniBg", 104: "isMiniBg", 105: "isMiniBg", 106: "isMiniBg",
+		107: "isMiniBg", 108: "isMiniBg",
+	}
+	daDung := map[int16]bool{}
+	for i, mau := range danhSachMauBgItem {
+		if ly, dinh := bay[mau.AnhID]; dinh {
+			t.Errorf("mau %d (%s) dung anhId %d — client doi xu dac biet voi so nay: %s",
+				i, mau.Ten, mau.AnhID, ly)
+		}
+		if mau.AnhID == -1 {
+			t.Errorf("mau %d dung anhId -1 — client dung -1 lam co 'khong ve'", i)
+		}
+		if daDung[mau.AnhID] {
+			t.Errorf("anhId %d dung hai lan — moi mau phai co file anh rieng", mau.AnhID)
+		}
+		daDung[mau.AnhID] = true
+		// >= 500: ban Ngoc Rong goc dung so hieu bg-item trong khoang ~0..350.
+		// Client co bo nho dem anh tren dia theo khoa `x{zoom}bgItem{AnhID}`
+		// (Rms.loadRMS) va KHONG kiem lai phien ban khi may chu khong gui -93 —
+		// tai su dung mot so hieu cu la lay nham anh Dragon Ball trong cache cua
+		// nguoi tung choi server cu, mot loi hoan toan im lang.
+		if mau.AnhID < 500 {
+			t.Errorf("mau %d (%s) dung anhId %d < 500 — de trung cache RMS cua ban Ngoc Rong cu",
+				i, mau.Ten, mau.AnhID)
+		}
+		if mau.Lop != 2 {
+			t.Errorf("mau %d (%s) o lop %d — bong do phai o lop 2 (sau nen dat, truoc nhan vat, khong bi nhuom mau)",
+				i, mau.Ten, mau.Lop)
+		}
+	}
+	if len(danhSachMauBgItem) != 8 {
+		t.Errorf("co %d mau, mong doi 8 (dung 8 file bong_*.png da ve)", len(danhSachMauBgItem))
+	}
+}
+
+// TestBongDoMap1NamDungTrenMatDat la test co GIA TRI THAT SU o day: no doi
+// chieu bang dat cho bong do voi mot nguon DOC LAP — file
+// assets/map-1-collision.bin.
+//
+// Luat: o tile dat bong do phai DI DUOC, va o ngay DUOI no phai DAC. Do
+// chinh la dinh nghia "mat dat". Dat cao mot o -> bong lo lung; thap mot o ->
+// bong chim trong dat. Ca hai deu la loi IM LANG (client van ve, chi nhin sai).
+func TestBongDoMap1NamDungTrenMatDat(t *testing.T) {
+	const oTile = 24
+	for i, d := range bgItemMap1 {
+		x := d.TileX * oTile
+		y := d.TileY * oTile
+		if !collisionLangLa.DiDuoc(x, y) {
+			t.Errorf("bong do #%d o o (%d,%d) nam trong vach da — phai la o di duoc", i, d.TileX, d.TileY)
+		}
+		if collisionLangLa.DiDuoc(x, y+oTile) {
+			t.Errorf("bong do #%d o o (%d,%d): o ngay duoi van di duoc — day khong phai mat dat, bong se lo lung",
+				i, d.TileX, d.TileY)
+		}
+		if int(d.Mau) < 0 || int(d.Mau) >= len(danhSachMauBgItem) {
+			t.Errorf("bong do #%d tro toi mau %d — ngoai bang mau (client se bo qua im lang)", i, d.Mau)
+		}
+	}
+	if len(bgItemMap1) == 0 {
+		t.Fatal("map 1 khong con bong do nao — 8 anh bong do lai thanh vo dung")
+	}
+}
+
+// TestMoiMauDungToiDaHaiLan: qua 2 lan la client bat dau lat guong anh
+// (TileMap.isExistMoreOne -> trans = 2). Bong do doi xung nen mat thuong
+// khong thay, nhung day la mot hanh vi ngam cua client — giu duoi nguong de
+// bang dat cho khong phu thuoc vao no.
+func TestMoiMauDungToiDaHaiLan(t *testing.T) {
+	dem := map[int16]int{}
+	for _, d := range bgItemMap1 {
+		dem[d.Mau]++
+	}
+	for mau, n := range dem {
+		if n > 2 {
+			t.Errorf("mau %d duoc dat %d lan (> 2) — client se lat guong xen ke cac ban sao", mau, n)
+		}
+	}
+}
+
+// TestGoiMapInfoMap1CoBongDo khoa tung byte cua o bg-item trong MAP INFO cua
+// map 1. Gia tri ghim tay (§6.12).
+func TestGoiMapInfoMap1CoBongDo(t *testing.T) {
+	nv := &store.NhanVat{MapID: 1, ViTriX: 100, ViTriY: 384}
+	m, err := goiMapInfo(nv, TimBanDo(1), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	d := moDocGoi(t, m)
+
+	// Nhay qua phan dau toi truoc o bg-item.
+	d.b("mapId", 1)
+	d.b("planetId", 0)
+	d.b("tileId", 1)
+	d.b("bgId", 0)
+	d.b("type", 0)
+	d.utf("mapName", "Làng Lá")
+	d.b("zoneId", 0)
+	d.sh("x", 100)
+	d.sh("y", 384)
+	nhayWaypointMap1(d)
+	d.b("mobCount", 0)
+	d.b("byte du phong", 0)
+	d.b("npcCount", 1)
+	d.b("npc.status", 0)
+	d.sh("npc.x", 172)
+	d.sh("npc.y", 384)
+	d.b("npc.template", 0)
+	d.sh("npc.portrait", 27078)
+	d.b("itemCount", 0)
+
+	// --- o bg-item ---
+	d.sh("soBong", 11)
+	cho := [][3]int16{
+		{0, 2, 18},  // bong nha nho — nha nho trai
+		{4, 8, 18},  // bong gieng   — gieng trai
+		{2, 10, 18}, // bong quan    — quan trai
+		{3, 16, 17}, // bong torii   — tren be da
+		{6, 19, 17}, // bong thung   — tren be da
+		{1, 21, 17}, // bong nha lon — tren be da
+		{4, 29, 18}, // bong gieng   — gieng phai
+		{7, 31, 18}, // bong den     — cot den phai
+		{2, 32, 18}, // bong quan    — quan phai
+		{5, 40, 18}, // bong cay     — cay lon
+		{0, 44, 18}, // bong nha nho — nha nho phai
+	}
+	for i, c := range cho {
+		d.sh("bong.mau", c[0])
+		d.sh("bong.tileX", c[1])
+		d.sh("bong.tileY", c[2])
+		_ = i
+	}
+
+	d.sh("effMap", 0)
+	d.b("bgType", 0)
+	d.b("idSpaceShip", 0)
+	d.b("isMapDouble", 0)
+	d.hetGoi("MAP INFO map 1")
+}
+
+// nhayWaypointMap1 doc qua dung mot cong cua map 1 (1 byte dem + 8 byte toa
+// do + 2 byte co + chuoi ten). Dung o cac test chi quan tam phan phia sau.
+func nhayWaypointMap1(d *docGoi) {
+	d.t.Helper()
+	d.b("waypointCount", 1)
+	d.sh("wp.minX", 408)
+	d.sh("wp.minY", 384)
+	d.sh("wp.maxX", 472)
+	d.sh("wp.maxY", 432)
+	d.b("wp.laCong", 1)
+	d.b("wp.ngoaiTuyen", 0)
+	d.utf("wp.ten", "Cổng Làng Lá")
+}

@@ -519,7 +519,24 @@ func kiemMapInfo(t *testing.T, m *protocol.Message, nv *store.NhanVat, bd *BanDo
 	if y, err := r.Short(); err != nil || y != int16(nv.ViTriY) {
 		t.Fatalf("y = %d (loi %v), mong doi %d", y, err, nv.ViTriY)
 	}
-	must("waypointCount", 0)
+	// Map 1 (Lang La) co DUNG MOT cong roi map; cac map con lai chua co.
+	// Byte-chinh-xac cua o cong thuoc ve TestGoiMapInfoMap1CoCongRoiMap
+	// (diemdi_test.go) — o day chi doc dung so byte de phan sau khong lech.
+	if bd.MapID == 1 {
+		must("waypointCount", 1)
+		for _, ten := range []string{"minX", "minY", "maxX", "maxY"} {
+			if _, err := r.Short(); err != nil {
+				t.Fatalf("cong thieu truong %s: %v", ten, err)
+			}
+		}
+		must("wp.laCong", 1)
+		must("wp.ngoaiTuyen", 0)
+		if _, err := r.UTF(); err != nil {
+			t.Fatalf("cong thieu ten: %v", err)
+		}
+	} else {
+		must("waypointCount", 0)
+	}
 	must("mobCount", 0)
 	must("byte du phong", 0) // giua mob va npc
 	if bd.MapID == 1 {
@@ -539,8 +556,21 @@ func kiemMapInfo(t *testing.T, m *protocol.Message, nv *store.NhanVat, bd *BanDo
 		must("npcCount", 0)
 	}
 	must("itemCount", 0)
-	if bg, err := r.Short(); err != nil || bg != 0 {
-		t.Fatalf("bgItem = %d (loi %v), mong doi short 0", bg, err)
+	// Map 1 co 11 bong do (bg-item); cac map khac chua co my thuat rieng nen
+	// van la short 0. Byte-chinh-xac thuoc ve TestGoiMapInfoMap1CoBongDo.
+	soBongMongDoi := int16(0)
+	if bd.MapID == 1 {
+		soBongMongDoi = 11
+	}
+	if bg, err := r.Short(); err != nil || bg != soBongMongDoi {
+		t.Fatalf("bgItem = %d (loi %v), mong doi short %d", bg, err, soBongMongDoi)
+	}
+	for i := int16(0); i < soBongMongDoi; i++ {
+		for _, ten := range []string{"mau", "tileX", "tileY"} {
+			if _, err := r.Short(); err != nil {
+				t.Fatalf("bong do #%d thieu truong %s: %v", i, ten, err)
+			}
+		}
 	}
 	if ef, err := r.Short(); err != nil || ef != 0 {
 		t.Fatalf("effMap = %d (loi %v), mong doi short 0", ef, err)

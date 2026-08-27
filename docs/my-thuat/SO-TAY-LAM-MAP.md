@@ -85,7 +85,16 @@ python tools/map-lang-la/lap-anh-dot-2.py     # tự thu nhỏ ra 4 mức zoom
 
 Ảnh nền còn phải chép sang bản `b1x` — client nạp theo `typeBg = 1`, không phải `b0x`. Quên là sửa mãi không thấy đổi.
 
-### Bước 5 — Xếp bố cục **dày**
+### Bước 5 — Xếp bố cục **dày**, bằng Tiled
+
+> **Đừng xếp bố cục bằng cách sửa số trong Python nữa.** Map 1 làm kiểu đó: 93 con số cứng
+> trong `ve-bo-cuc-map.py`, sửa một số là script xoá sạch 1248 ô rồi vẽ lại từ đầu. Đó là
+> *sinh lại*, không phải *sửa* — và đó chính là cái cảm giác "chắp vá, xếp hình".
+>
+> Dùng [`tools/map-lang-la/tiled/`](../../tools/map-lang-la/tiled/README.md): bố cục sống trong
+> một file `.tmx` sửa được bằng chuột, **có ảnh concept làm lớp giấy can nằm dưới**, và
+> `xem-truoc.py` vẽ ra ảnh trong **0,6 giây** — không cần mở Unity.
+
 
 Đếm ô trước khi xếp: map 52 ô, trừ 4 ô tường biên còn **48 ô dùng được**. Công trình phải **phủ kín 48 ô**, cho chồng lấn 1–2 ô. Dùng lại một mẫu nhà nhiều lần là bình thường — concept cũng vậy.
 
@@ -144,7 +153,7 @@ Cách làm đúng:
 
 ## 6. Việc gì máy làm, việc gì phải vẽ
 
-**Máy làm được:** xếp bố cục, sinh va chạm từ bố cục, nhoà mép nối các lớp, xoá viền bẩn tile, tạo ô chuyển tiếp bằng cách trộn hai tile, cắt trời thừa, làm tối dần theo độ sâu, tạo chân dung từ ảnh đầu nhân vật.
+**Máy làm được:** xếp bố cục (**qua Tiled, không phải qua code**), sinh va chạm từ bố cục, nhoà mép nối các lớp, xoá viền bẩn tile, tạo ô chuyển tiếp bằng cách trộn hai tile, cắt trời thừa, làm tối dần theo độ sâu, tạo chân dung từ ảnh đầu nhân vật.
 
 **Phải vẽ:** mọi thứ cần **nội dung mới** — vân đất, kè đá, bậc thang, nền rộng không lặp, bóng đổ.
 

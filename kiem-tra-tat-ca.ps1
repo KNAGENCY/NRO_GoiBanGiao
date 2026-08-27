@@ -74,16 +74,17 @@ if (Test-Path "$goc\assetpack") {
     $py = TimExe 'python' 'python'
     if ($py) {
         # Chay TU GOC repo (khong phai trong assetpack/) de "import assetpack" thay goi.
-        # Bo test_task6b_canonical_preflight.py: no gia dinh layout git-worktree
-        # (SHARED_ROOT = ROOT.parents[1]) nen vo tren checkout chinh — bug path co san
-        # cua test do (khong lien quan code); sua rieng sau.
+        # KHONG con --ignore nao: test_task6b_canonical_preflight.py tung phai bo vi
+        # SHARED_ROOT = ROOT.parents[1] gia dinh repo nam sau 2 tang thu muc (dung
+        # trong git worktree, IndexError o checkout thang) -> ca file im lang khong
+        # chay. Nay SHARED_ROOT hoi git "--git-common-dir" nen dung o moi vi tri.
         # PYTHONUTF8=1: test_manifest.py chay subprocess roi giai ma output; console
         # khong-UTF-8 (PowerShell gbk/cp936) se UnicodeDecodeError. Ep UTF-8 -> on dinh.
         $env:PYTHONUTF8 = '1'
         Push-Location "$goc"
         try {
             Buoc "pytest assetpack" {
-                & $py -m pytest assetpack -q --ignore=assetpack/tests/test_task6b_canonical_preflight.py
+                & $py -m pytest assetpack -q
             }
         } finally { Pop-Location }
     } else {

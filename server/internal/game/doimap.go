@@ -7,10 +7,28 @@
 // requestChangeMap, Waypoint.cs), va CHI go ba thu do khi may chu tra loi.
 // Khong tra loi = nhan vat DUNG HINH VINH VIEN, phai thoat game.
 //
-// Vi vay hai duong ra cua ham xuLyDoiMap deu PHAI gui mot goi:
+// Vi vay MOI duong ra cua ham xuLyDoiMap — tru DUY NHAT mot cai — deu PHAI
+// gui mot goi. Ke het TAM CAI ra day de khong ai them duong ra thu chin ma
+// quen:
 //
-//	dung trong cong  -> -22 (xoa map cu) roi -24 (MAP INFO map moi)
-//	khong o cong nao -> 46 (dat lai vi tri) de mo khoa client tai cho
+//	chua vao khu vuc            -> IM LANG (duong ra DUY NHAT im lang: client
+//	                               khong the dang cho, xem chot dau ham)
+//	khong chup duoc trang thai  -> 46
+//	mapId hien tai ngoai danh muc -> 46
+//	nhan vat dang chet          -> 46
+//	khong dung trong cong nao   -> 46
+//	cong tro toi map khong co   -> 46
+//	go khoi khu vuc cu that bai -> 46
+//	THANH CONG                  -> -22 (xoa map cu) roi -24 (MAP INFO map moi)
+//
+// Ban dau chu thich nay chi ke HAI duong ("khong dung trong cong" va "thanh
+// cong") trong khi code co BON — hai duong "khong chup duoc trang thai" va
+// "mapId ngoai danh muc" tra `return nil` im lang. Do khong phai loi ly
+// thuyet: han cho actor tra loi chi 100ms (thoiGianChoControl, khuvuc.go)
+// trong khi actor phai rut can hang gameplay ton dong truoc khi tra loi, va
+// van an toan con DUNG HAN actor sau 100 nhip panic lien tiep — tu luc do MOI
+// nguoi bam cong trong khu vuc do deu roi vao duong "khong chup duoc trang
+// thai" va ket cung.
 package game
 
 import (
@@ -27,7 +45,7 @@ import (
 //	-22  Service.clearMap (Service.java:573) — than RONG. Client (Controller.
 //	     cs:3538) xoa muc tieu dang ngam, reset nut, khoa phim cho map moi.
 //	 46  Service.resetPoint (Service.java:558) — short x, short y. Client
-//	     (Controller.cs:3136) MO KHOA: isLockKey = false, va setResetPoint
+//	     (Controller.cs:3137) MO KHOA: isLockKey = false, va setResetPoint
 //	     (Char.cs:3199) an hop thoai cho + dat ischangingMap = false khi y
 //	     khong doi.
 const (
@@ -100,23 +118,45 @@ func (b *BoXuLy) xuLyDoiMap(s *mynet.Session) error {
 		return nil
 	}
 
-	bdCu := TimBanDo(b.nhanVat.MapID)
-	if bdCu == nil {
-		return nil
-	}
-
-	// (1) vi tri authoritative
+	// (1) vi tri authoritative. Buoc nay dat TRUOC MOI CHOT KHAC (ke ca chot
+	// "mapId hien tai co trong danh muc khong") CO CHU DICH: no la thu duy
+	// nhat cho ra mot toa do hop le de mo khoa client, nen moi duong ra sau no
+	// deu co san mot goi 46 dung dan de gui.
 	ban, err := b.khuVuc.AnhChupNguoiChoiCoLoi(b.nhanVat.ID)
 	if err != nil || len(ban) == 0 {
-		slog.Warn("khong chup duoc trang thai de doi map", "idNhanVat", b.nhanVat.ID, "loi", err)
-		return nil
+		// Duong ra 2. Xay ra that khi actor cua khu vuc da bi van an toan dung
+		// han (nguongPanicDungKhuVuc, khuvuc.go) hoac dang qua ban den muc vuot
+		// han 100ms cua control. Truoc day cho nay `return nil` — tuc la MOI
+		// nguoi bam cong trong khu vuc do deu dung hinh vinh vien, phai thoat
+		// game.
+		//
+		// Khong con actor de hoi thi vi tri duy nhat may chu con biet la ban
+		// ghi trong phien. Doc no o day la doc mot truong ma actor CO THE dang
+		// ghi (ky luat §6.9) — chap nhan CO CHU DICH: doi lai la mot toa do co
+		// the lech vai chuc don vi (client tu chinh qua nhanh `cy - y != 0` cua
+		// Char.setResetPoint, Char.cs:3204-3216), con khong gui gi la nguoi choi mat
+		// phien choi. Tha lech con hon treo.
+		slog.Warn("khong chup duoc trang thai de doi map — mo khoa client bang vi tri trong phien",
+			"idNhanVat", b.nhanVat.ID, "loi", err)
+		return s.XepGui(goiDatLaiViTri(int16(b.nhanVat.ViTriX), int16(b.nhanVat.ViTriY)))
 	}
 	hienTai := ban[0]
 	x, y := int16(hienTai.ViTriX), int16(hienTai.ViTriY)
 
+	bdCu := TimBanDo(hienTai.MapID)
+	if bdCu == nil {
+		// Duong ra 3: ban ghi nhan vat mang mot mapId khong con trong danh muc
+		// (du lieu cu sau khi doi bang ban do, hoac mot ban va lam hep danh
+		// muc). Khong tra cuu duoc cong nao ca — nhung van PHAI mo khoa, va o
+		// day da co vi tri authoritative de lam viec do.
+		slog.Error("nhan vat dang o mapId khong co trong danh muc ban do — khong tra cuu duoc cong",
+			"idNhanVat", b.nhanVat.ID, "mapId", hienTai.MapID)
+		return s.XepGui(goiDatLaiViTri(x, y))
+	}
+
 	// Nhan vat dang chet -> tu choi, nhung VAN PHAI mo khoa client.
 	if hienTai.HpHienTai <= 0 {
-		return s.Gui(goiDatLaiViTri(x, y))
+		return s.XepGui(goiDatLaiViTri(x, y))
 	}
 
 	wp := timDiemDi(bdCu, x, y)
@@ -124,7 +164,7 @@ func (b *BoXuLy) xuLyDoiMap(s *mynet.Session) error {
 		// Khong dung trong cong nao. Xay ra khi client va may chu lech vi tri
 		// (nguoi choi bam dung luc goi di chuyen chua toi), hoac khi mot client
 		// sua doi tu gui -23. Mo khoa tai cho, KHONG doi map.
-		return s.Gui(goiDatLaiViTri(x, y))
+		return s.XepGui(goiDatLaiViTri(x, y))
 	}
 	bdMoi := TimBanDo(wp.DenMap)
 	if bdMoi == nil || b.soKhuVuc == nil || b.soKhuVuc.Tra(wp.DenMap) == nil {
@@ -134,7 +174,7 @@ func (b *BoXuLy) xuLyDoiMap(s *mynet.Session) error {
 		// va van mo khoa cho nguoi choi choi tiep.
 		slog.Error("cong roi map tro toi map khong ton tai",
 			"tuMap", bdCu.MapID, "denMap", wp.DenMap, "ten", wp.Ten)
-		return s.Gui(goiDatLaiViTri(x, y))
+		return s.XepGui(goiDatLaiViTri(x, y))
 	}
 
 	// (2) roi khu vuc cu — DONG BO, cho actor xu ly xong.
@@ -143,7 +183,7 @@ func (b *BoXuLy) xuLyDoiMap(s *mynet.Session) error {
 		// hai khu vuc cung luc, hai actor cung ghi mot con tro.
 		slog.Error("khong go duoc nguoi choi khoi khu vuc khi doi map — huy doi map",
 			"idNhanVat", b.nhanVat.ID, "loi", err)
-		return s.Gui(goiDatLaiViTri(x, y))
+		return s.XepGui(goiDatLaiViTri(x, y))
 	}
 	b.daVaoKhuVuc = false
 
@@ -175,14 +215,28 @@ func (b *BoXuLy) xuLyDoiMap(s *mynet.Session) error {
 	}
 
 	// (4) -22 roi -24.
-	if err := s.Gui(goiXoaMap()); err != nil {
+	//
+	// XepGui (hang doi FIFO cua phien) chu KHONG PHAI Gui (ghi thang socket).
+	// Ly do KHONG phai an toan luong — Gui co mutex nen khung goi khong bao gio
+	// vo — ma la THU TU: actor phat moi goi gameplay bang XepGui, nen mot goi
+	// -5 (nguoi khac xuat hien o map CU) vua duoc xep vao hang van con nam do
+	// cho goroutine writer. Ghi thang -22/-24 la NHAY HANG len truoc no: client
+	// tai xong map moi, roi writer moi xa goi -5 cu ra — va vi -24 da goi
+	// resetAllvector() lam vCharInMap rong, goi -5 den sau lai them nguoi do
+	// vao. Ket qua: mot nhan vat MA cua Lang La dung giua Lang Cat.
+	//
+	// Cung ly do do, MOI goi 46 o cac duong ra ben tren cung dung XepGui: sau
+	// khi vao the gioi thi doimap.go la cho DUY NHAT con ghi thang socket, bo
+	// no di la ca duong hau-dang-nhap chay chung mot hang FIFO, khong con cho
+	// nao chen ngang duoc nua.
+	if err := s.XepGui(goiXoaMap()); err != nil {
 		return err
 	}
 	mapInfo, err := goiMapInfo(b.nhanVat, bdMoi, b.khuVuc.DanhSachQuaiSnapshot())
 	if err != nil {
 		return err
 	}
-	if err := s.Gui(mapInfo); err != nil {
+	if err := s.XepGui(mapInfo); err != nil {
 		return err
 	}
 

@@ -59,6 +59,31 @@ func TestTimBanDoTheoMapId(t *testing.T) {
 	}
 }
 
+// TestTimBanDoSaoSAUCaDanhSachCong khoa dong `cp.DiemDi = append(...)` trong
+// TimBanDo — cai bay ma chinh chu thich cua ham do canh bao ma truoc gio
+// khong test nao chung minh.
+//
+// VI SAO NGUY HIEM neu mat: sao mot struct chi sao HEADER cua slice, ba mang
+// (con tro/len/cap) van tro vao CUNG mot mang nen. Nguoi goi tuong minh dang
+// cam mot ban rieng, sua mot cong — va sua that vao DANH MUC HE THONG, tu do
+// MOI phien sau deu thay cong sai. Loi kieu nay khong co trieu chung tuc thi:
+// no chi hien ra khi nguoi choi bam cong roi bi nem sang map khac.
+func TestTimBanDoSaoSAUCaDanhSachCong(t *testing.T) {
+	bd := TimBanDo(1)
+	if len(bd.DiemDi) == 0 {
+		t.Fatal("map 1 phai co it nhat mot cong de kiem duoc phep sao sau")
+	}
+	// Sua ban sao that nang tay: doi CA dich lan ten cong.
+	bd.DiemDi[0].DenMap = 99
+	bd.DiemDi[0].Ten = "cong bi sua bay"
+	bd.DiemDi[0].MinX = -1
+
+	lai := TimBanDo(1)
+	if lai.DiemDi[0].DenMap == 99 || lai.DiemDi[0].Ten == "cong bi sua bay" || lai.DiemDi[0].MinX == -1 {
+		t.Errorf("TimBanDo dung chung mang DiemDi voi danh muc goc: sua ban sao lam hong cong that (%+v)", lai.DiemDi[0])
+	}
+}
+
 func TestCatalogMap6ChiLaTemplateChuaPlayable(t *testing.T) {
 	if len(catalogLangLa.Maps) != 6 {
 		t.Fatalf("catalog phải quảng bá đủ 6 template map, được %d", len(catalogLangLa.Maps))

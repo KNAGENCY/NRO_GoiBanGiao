@@ -122,7 +122,7 @@ func TestDiemHaCanhVeMap1DiDuoc(t *testing.T) {
 }
 
 // TestChuaTrongKhepKinHaiDau: bien cua khung phai KHEP KIN, dung het nhu
-// client (Char.cs:1663 `cx >= minX && cx <= maxX`). Lech mot don vi la nguoi
+// client (Char.cs:1664 `cx >= minX && cx <= maxX`). Lech mot don vi la nguoi
 // choi bam duoc nut ma may chu bao "khong o trong cong" — vong lap vo nghia.
 func TestChuaTrongKhepKinHaiDau(t *testing.T) {
 	c := DiemDi{MinX: 10, MinY: 20, MaxX: 30, MaxY: 40}

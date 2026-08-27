@@ -126,27 +126,77 @@ func TestMauBgItemKhongDinhBayCuaClient(t *testing.T) {
 	}
 }
 
+// rongMauTheoO la CHIEU RONG (tinh bang O TILE 24 don vi) cua tung file anh
+// bong do, GHIM BANG TAY theo dung luat §6.12 — day la kich thuoc THAT cua
+// cac file docs/my-thuat/map-1-lang-la/anh-da-tao/bong_*.png o muc x4, chia
+// cho 4 roi chia cho 24:
+//
+//	500 bong nha nho  576px x4 -> 144 don vi -> 6 o
+//	501 bong nha lon  768px     -> 192       -> 8 o
+//	502 bong quan     768px     -> 192       -> 8 o
+//	503 bong torii    480px     -> 120       -> 5 o
+//	504 bong gieng    288px     ->  72       -> 3 o
+//	505 bong cay      576px     -> 144       -> 6 o
+//	506 bong thung    192px     ->  48       -> 2 o
+//	507 bong den      192px     ->  48       -> 2 o
+//
+// VI SAO may chu KHONG giu con so nay trong bgitem.go: giao thuc khong gui
+// chieu rong xuong client (client tu do kich thuoc file anh), nen mot truong
+// nhu vay se la du lieu chet ma khong ai buoc phai giu dung. O day thi nguoc
+// lai: no LA ky vong doc lap ma test dung de kiem bang dat cho.
+var rongMauTheoO = map[int16]int16{
+	mauBongNhaNho: 6,
+	mauBongNhaLon: 8,
+	mauBongQuan:   8,
+	mauBongTorii:  5,
+	mauBongGieng:  3,
+	mauBongCay:    6,
+	mauBongThung:  2,
+	mauBongDen:    2,
+}
+
 // TestBongDoMap1NamDungTrenMatDat la test co GIA TRI THAT SU o day: no doi
 // chieu bang dat cho bong do voi mot nguon DOC LAP — file
 // assets/map-1-collision.bin.
 //
-// Luat: o tile dat bong do phai DI DUOC, va o ngay DUOI no phai DAC. Do
-// chinh la dinh nghia "mat dat". Dat cao mot o -> bong lo lung; thap mot o ->
-// bong chim trong dat. Ca hai deu la loi IM LANG (client van ve, chi nhin sai).
+// Luat: MOI O TILE ma anh bong do PHU LEN (khong chi o neo!) phai DI DUOC, va
+// o ngay DUOI no phai DAC. Do chinh la dinh nghia "mat dat". Dat cao mot o ->
+// bong lo lung; thap mot o -> bong chim trong dat. Ca hai deu la loi IM LANG
+// (client van ve, chi nhin sai).
+//
+// VI SAO PHAI KIEM CA CHIEU RONG chu khong chi o neo: map 1 co HAI muc mat
+// dat (nen thap y=432 va be da cot 16..28 y=408). Mot bong do rong 8 o neo o
+// cot 10 keo dai toi cot 17 — hai o cuoi cua no roi vao VACH DA DUNG DUNG cua
+// be, tuc la duoc ve o do cao khong co mat dat nao. Ban truoc cua test nay
+// chi kiem o neo nen "quan trai" (cot 10) di qua im lang dung loi do.
 func TestBongDoMap1NamDungTrenMatDat(t *testing.T) {
 	const oTile = 24
+	if len(rongMauTheoO) != len(danhSachMauBgItem) {
+		t.Fatalf("bang rongMauTheoO co %d dong, bang mau co %d — them mau moi thi phai ghim ca chieu rong o day",
+			len(rongMauTheoO), len(danhSachMauBgItem))
+	}
 	for i, d := range bgItemMap1 {
-		x := d.TileX * oTile
-		y := d.TileY * oTile
-		if !collisionLangLa.DiDuoc(x, y) {
-			t.Errorf("bong do #%d o o (%d,%d) nam trong vach da — phai la o di duoc", i, d.TileX, d.TileY)
-		}
-		if collisionLangLa.DiDuoc(x, y+oTile) {
-			t.Errorf("bong do #%d o o (%d,%d): o ngay duoi van di duoc — day khong phai mat dat, bong se lo lung",
-				i, d.TileX, d.TileY)
-		}
 		if int(d.Mau) < 0 || int(d.Mau) >= len(danhSachMauBgItem) {
 			t.Errorf("bong do #%d tro toi mau %d — ngoai bang mau (client se bo qua im lang)", i, d.Mau)
+			continue
+		}
+		rong, co := rongMauTheoO[d.Mau]
+		if !co {
+			t.Errorf("bong do #%d dung mau %d ma bang rongMauTheoO khong co dong nao — khong kiem duoc chieu rong", i, d.Mau)
+			continue
+		}
+		y := d.TileY * oTile
+		for o := int16(0); o < rong; o++ {
+			cot := d.TileX + o
+			x := cot * oTile
+			if !collisionLangLa.DiDuoc(x, y) {
+				t.Errorf("bong do #%d (neo o cot %d, rong %d o): o (%d,%d) nam trong vach da — anh se de len da",
+					i, d.TileX, rong, cot, d.TileY)
+			}
+			if collisionLangLa.DiDuoc(x, y+oTile) {
+				t.Errorf("bong do #%d (neo o cot %d, rong %d o): o ngay duoi (%d,%d) van di duoc — cho do khong co mat dat, bong se lo lung",
+					i, d.TileX, rong, cot, d.TileY+1)
+			}
 		}
 	}
 	if len(bgItemMap1) == 0 {
@@ -223,7 +273,7 @@ func TestGoiMapInfoMap1CoBongDo(t *testing.T) {
 	cho := [][3]int16{
 		{0, 2, 18},  // bong nha nho — nha nho trai
 		{4, 8, 18},  // bong gieng   — gieng trai
-		{2, 10, 18}, // bong quan    — quan trai
+		{2, 8, 18},  // bong quan    — quan trai (neo o cot 8, khong phai 10: xem bgItemMap1)
 		{3, 16, 17}, // bong torii   — tren be da
 		{6, 19, 17}, // bong thung   — tren be da
 		{1, 21, 17}, // bong nha lon — tren be da

@@ -321,3 +321,302 @@ func TestTichHop_DoiMapGoNguoiChoiKhoiKhuVucCu(t *testing.T) {
 		t.Errorf("khu vuc map 1 van con nguoi choi %d sau khi ho da di qua cong", nv.ID)
 	}
 }
+
+// ---------------------------------------------------------------------------
+// BON DUONG RA CUA xuLyDoiMap — hai duong duoi day truoc ban nay IM LANG,
+// tuc la nguoi choi bam cong xong DUNG HINH VINH VIEN (client tu khoa minh
+// roi doi may chu, xem chu thich dau doimap.go). Hai test duoi khoa lai
+// chung. Chung KHONG phai gia dinh: han cho control chi 100ms
+// (thoiGianChoControl, khuvuc.go) trong khi actor phai rut can hang gameplay
+// truoc khi tra loi, va van an toan con DUNG HAN actor sau 100 nhip panic
+// lien tiep — tu luc do MOI nguoi bam cong trong khu vuc do deu roi vao
+// duong ra thu hai.
+// ---------------------------------------------------------------------------
+
+// TestTichHop_DoiMapKhiMapHienTaiKhongCoDanhMucVanMoKhoaClient khoa duong ra
+// "TimBanDo(mapId hien tai) == nil".
+//
+// Xay ra khi ban ghi nhan vat mang mot mapId khong con trong danh muc (du
+// lieu cu sau khi doi bang ban do, hoac mot ban va lam hep danh muc lai).
+// Truoc ban nay may chu tra ve nil — khong goi nao — va nguoi choi ket o hop
+// thoai "Xin cho".
+func TestTichHop_DoiMapKhiMapHienTaiKhongCoDanhMucVanMoKhoaClient(t *testing.T) {
+	khoThat := moKhoThatChoTest(t)
+	ctx := context.Background()
+
+	soKhuVuc := moSoKhuVucKhongQuaiMacDinh(t)
+	defer soKhuVuc.DungTatCa()
+
+	matKhau := "matkhau123"
+	tenTK := "nomap" + hauToNganNgau(t)
+	taiKhoan := taoTaiKhoanCoMatKhau(t, tenTK, matKhau)
+	tenNV := "Nomap" + hauToNganNgau(t)
+
+	cl := moPhienClientGiaKhuVuc(t, khoThat, soKhuVuc)
+	defer cl.dong()
+	dangNhapTaoNhanVatVaoTheGioi(t, cl, tenTK, matKhau, tenNV)
+	cl.baoVaoKhuVuc()
+
+	nv, err := khoThat.LayNhanVatTheoTaiKhoan(ctx, taiKhoan)
+	if err != nil {
+		t.Fatalf("LayNhanVatTheoTaiKhoan that bai: %v", err)
+	}
+	k := soKhuVuc.Tra(1)
+	choNguoiVaoKhuVuc(t, k, nv.ID)
+
+	// Doi mapId cua ban ghi nhan vat sang mot so KHONG co trong danh muc.
+	// Lam TU TRONG actor (suKienChay) — actor la chu so huu con tro nhan vat,
+	// dung het cach cac test khac trong file nay ha mau nhan vat.
+	xong := make(chan struct{})
+	k.Gui(suKienChay{f: func() {
+		if nguoi, co := k.nguoiTrong[nv.ID]; co {
+			nguoi.nv.MapID = 99 // 99 khong nam trong 5 map cua danh muc
+		}
+		close(xong)
+	}})
+	<-xong
+
+	cl.guiDoiMap()
+
+	m46 := cl.doiGoiLenh(t, lenhDatLaiViTri)
+	d := moDocGoi(t, m46)
+	d.sh("x", 100)
+	d.sh("y", 384)
+	d.hetGoi("goi 46")
+	if !cl.khongConGoiGi(t) {
+		t.Fatal("sau goi 46 con goi nua — nhan vat o mapId la khong duoc doi map di dau ca")
+	}
+}
+
+// TestTichHop_DoiMapKhiActorDaDungVanMoKhoaClient khoa duong ra "khong chup
+// duoc trang thai".
+//
+// Kich ban THAT lam no xay ra: van an toan cua actor (nguongPanicDungKhuVuc =
+// 100 nhip panic lien tiep, khuvuc.go) da dung han actor cua khu vuc. Tu luc
+// do AnhChupNguoiChoiCoLoi tra ErrActorDaDung cho MOI nguoi trong khu vuc do
+// — truoc ban nay tat ca deu ket cung o hop thoai "Xin cho" ngay khi bam
+// cong. O day dung Dung() de dat actor vao dung trang thai do mot cach chac
+// chan, khong phai bom 100 panic that.
+func TestTichHop_DoiMapKhiActorDaDungVanMoKhoaClient(t *testing.T) {
+	khoThat := moKhoThatChoTest(t)
+	ctx := context.Background()
+
+	soKhuVuc := moSoKhuVucKhongQuaiMacDinh(t)
+	defer soKhuVuc.DungTatCa()
+
+	matKhau := "matkhau123"
+	tenTK := "stopa" + hauToNganNgau(t)
+	taiKhoan := taoTaiKhoanCoMatKhau(t, tenTK, matKhau)
+	tenNV := "Stopa" + hauToNganNgau(t)
+
+	cl := moPhienClientGiaKhuVuc(t, khoThat, soKhuVuc)
+	defer cl.dong()
+	dangNhapTaoNhanVatVaoTheGioi(t, cl, tenTK, matKhau, tenNV)
+	cl.baoVaoKhuVuc()
+
+	nv, err := khoThat.LayNhanVatTheoTaiKhoan(ctx, taiKhoan)
+	if err != nil {
+		t.Fatalf("LayNhanVatTheoTaiKhoan that bai: %v", err)
+	}
+	k := soKhuVuc.Tra(1)
+	choNguoiVaoKhuVuc(t, k, nv.ID)
+
+	if err := k.Dung(); err != nil {
+		t.Fatalf("khong dung duoc actor khu vuc 1: %v", err)
+	}
+
+	cl.guiDoiMap()
+
+	m46 := cl.doiGoiLenh(t, lenhDatLaiViTri)
+	d := moDocGoi(t, m46)
+	// Khong con actor de hoi thi vi tri duy nhat may chu con biet la ban ghi
+	// trong phien — lech mot chut con hon treo (client tu chinh qua nhanh
+	// `cy - y != 0` cua Char.setResetPoint).
+	d.sh("x", 100)
+	d.sh("y", 384)
+	d.hetGoi("goi 46")
+	if !cl.khongConGoiGi(t) {
+		t.Fatal("sau goi 46 con goi nua — khong chup duoc trang thai thi TUYET DOI khong duoc doi map")
+	}
+}
+
+// TestTichHop_CongTroToiMapChuaCoKhuVucVanMoKhoaClient khoa chot "map dich co
+// ton tai khong" (doimap.go). Bo chot do di thi b.khuVuc thanh nil roi
+// b.khuVuc.DanhSachQuaiSnapshot() panic — nghia la mot dong CAU HINH sai
+// trong bang DiemDi lam SAP ca goroutine phien, chu khong chi lam mot nguoi
+// choi khong di duoc.
+//
+// Dung mot SoKhuVuc CHI CO map 1 de dung dung tinh huong "cong tro toi map
+// chua duoc mo khu vuc" ma khong phai dong vao danh muc ban do he thong.
+func TestTichHop_CongTroToiMapChuaCoKhuVucVanMoKhoaClient(t *testing.T) {
+	khoThat := moKhoThatChoTest(t)
+
+	// Chi mo khu vuc cho map 1 — map 2 (dich cua cong torii) khong co khu vuc.
+	soKhuVuc := &SoKhuVuc{theoMap: make(map[int32]*KhuVuc)}
+	k1 := MoKhuVuc(TimBanDo(1))
+	k1.quai = nil // AN TOAN: goroutine vongLap chua chay (BatDau o duoi)
+	k1.BatDau()
+	soKhuVuc.theoMap[1] = k1
+	defer soKhuVuc.DungTatCa()
+
+	matKhau := "matkhau123"
+	tenTK := "nozon" + hauToNganNgau(t)
+	taoTaiKhoanCoMatKhau(t, tenTK, matKhau)
+	tenNV := "Nozon" + hauToNganNgau(t)
+
+	cl := moPhienClientGiaKhuVuc(t, khoThat, soKhuVuc)
+	defer cl.dong()
+	dangNhapTaoNhanVatVaoTheGioi(t, cl, tenTK, matKhau, tenNV)
+	cl.baoVaoKhuVuc()
+
+	cl.guiDiChuyen(441, 408)
+	cl.guiDoiMap()
+
+	m46 := cl.doiGoiLenh(t, lenhDatLaiViTri)
+	d := moDocGoi(t, m46)
+	d.sh("x", 441)
+	d.sh("y", 408)
+	d.hetGoi("goi 46")
+	if !cl.khongConGoiGi(t) {
+		t.Fatal("cong tro toi map chua co khu vuc ma van gui them goi — co the da doi map vao hu vo")
+	}
+}
+
+// TestTichHop_DoiMapLuuMapMoiXuongCSDLNgay khoa dong `b.thoGhi.Xep(*b.nhanVat)`
+// trong xuLyDoiMap.
+//
+// VI SAO PHAI CO: tu luc may chu ghi mapId moi vao ban ghi cho toi luc client
+// gui -39, nguoi choi KHONG nam trong khu vuc nao — ca duong luu dinh ky
+// (luudinhky.go duyet theo khu vuc) lan duong luu khi dong phien deu khong
+// thay ho. Mat ket noi dung khe do ma thieu dong Xep() thi lan dang nhap sau
+// nguoi choi hien lai o LANG CU. Dong do co 8 dong chu thich bien ho nhung
+// truoc ban nay khong test nao chung minh no con day.
+//
+// Test CO Y khong gui -39: no kiem tra dung khe cua so do.
+func TestTichHop_DoiMapLuuMapMoiXuongCSDLNgay(t *testing.T) {
+	khoThat := moKhoThatChoTest(t)
+	ctx := context.Background()
+
+	soKhuVuc := moSoKhuVucKhongQuaiMacDinh(t)
+	defer soKhuVuc.DungTatCa()
+
+	tho := MoThoGhi(khoThat, 2)
+	defer func() {
+		if err := tho.DongVaChoXong(context.Background()); err != nil {
+			t.Errorf("dong tho ghi that bai: %v", err)
+		}
+	}()
+
+	matKhau := "matkhau123"
+	tenTK := "luuma" + hauToNganNgau(t)
+	taiKhoan := taoTaiKhoanCoMatKhau(t, tenTK, matKhau)
+	tenNV := "Luuma" + hauToNganNgau(t)
+
+	// Dung duong moPhienDangNhapTrungChoTest vi no nhan mot *BoXuLy da chuan
+	// bi san — moPhienClientGiaKhuVuc tu tao BoXuLy ben trong nen khong cach
+	// nao gan tho ghi vao.
+	b := NewBoXuLy(khoThat, soKhuVuc)
+	b.DatThoGhi(tho)
+	cl := moPhienDangNhapTrungChoTest(t, b)
+	defer cl.dong()
+	dangNhapTaoNhanVatVaoTheGioi(t, cl, tenTK, matKhau, tenNV)
+	cl.baoVaoKhuVuc()
+
+	cl.guiDiChuyen(441, 408)
+	cl.guiDoiMap()
+	cl.doiGoiLenh(t, lenhXoaMap)
+	cl.doiGoiLenh(t, lenhMapInfo)
+
+	// CHUA gui -39: nguoi choi dang o "khe" khong thuoc khu vuc nao. Ban ghi
+	// trong CSDL VAN phai da sang map 2. Cho co han vi tho ghi cham dia tren
+	// mot goroutine rieng (thogi.go) — day la doi do TRE, khong phai doan mo.
+	hetHan := time.Now().Add(5 * time.Second)
+	for {
+		nv, err := khoThat.LayNhanVatTheoTaiKhoan(ctx, taiKhoan)
+		if err != nil {
+			t.Fatalf("LayNhanVatTheoTaiKhoan that bai: %v", err)
+		}
+		if nv.MapID == 2 {
+			if nv.ViTriX != 100 || nv.ViTriY != 384 {
+				t.Errorf("vi tri da luu = (%d,%d), mong doi diem ha canh (100,384)", nv.ViTriX, nv.ViTriY)
+			}
+			return
+		}
+		if time.Now().After(hetHan) {
+			t.Fatalf("sau 5s ban ghi trong CSDL van o mapId %d — doi map khong luu ngay, mat ket noi luc nay la nguoi choi hien lai o lang cu", nv.MapID)
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+}
+
+// TestTichHop_DoiMapXetCongBangViTriLayTuActor khoa buoc "chup anh trang thai
+// tu actor" — cu the la chuyen actor RUT CAN hang gameplay truoc khi tra loi
+// (xuLyGameplayDaXepTruoc, khuvuc.go).
+//
+// Kich ban: actor dang ban (o day chan co kiem soat bang suKienChay; ngoai
+// doi that la mot nhip nang hoac mot dot su kien don day), buoc di toi cong
+// DA nam trong hop thu nhung CHUA duoc xu ly, roi goi -23 toi. Doc thang
+// b.nhanVat.ViTriX luc nay se thay vi tri CU (ngoai cong) va tra ve goi 46 —
+// nguoi choi bam cong ma khong di duoc, khong hieu tai sao. Chup anh qua hop
+// thu dieu khien thi actor buoc phai xu ly not buoc di truoc khi tra loi, nen
+// vi tri nhan duoc la vi tri THAT.
+func TestTichHop_DoiMapXetCongBangViTriLayTuActor(t *testing.T) {
+	khoThat := moKhoThatChoTest(t)
+	ctx := context.Background()
+
+	soKhuVuc := moSoKhuVucKhongQuaiMacDinh(t)
+	defer soKhuVuc.DungTatCa()
+
+	matKhau := "matkhau123"
+	tenTK := "actor" + hauToNganNgau(t)
+	taiKhoan := taoTaiKhoanCoMatKhau(t, tenTK, matKhau)
+	tenNV := "Actor" + hauToNganNgau(t)
+
+	cl := moPhienClientGiaKhuVuc(t, khoThat, soKhuVuc)
+	defer cl.dong()
+	dangNhapTaoNhanVatVaoTheGioi(t, cl, tenTK, matKhau, tenNV)
+	cl.baoVaoKhuVuc()
+
+	nv, err := khoThat.LayNhanVatTheoTaiKhoan(ctx, taiKhoan)
+	if err != nil {
+		t.Fatalf("LayNhanVatTheoTaiKhoan that bai: %v", err)
+	}
+	k := soKhuVuc.Tra(1)
+	choNguoiVaoKhuVuc(t, k, nv.ID)
+
+	// Chan actor lai — bat tay hai chieu de CHAC CHAN no dang dung trong ham
+	// nay chu khong phai "sap toi".
+	daVao := make(chan struct{})
+	choTha := make(chan struct{})
+	k.Gui(suKienChay{f: func() {
+		close(daVao)
+		<-choTha
+	}})
+	<-daVao
+
+	// Buoc di toi giua cong: su kien nam trong hop thu, actor dang bi chan nen
+	// CHUA ai xu ly no -> ban ghi nhan vat van dang o (100,384).
+	cl.guiDiChuyen(441, 408)
+	// -23 den ngay sau. Luong phien se dung lai o buoc chup anh (hop thu dieu
+	// khien) cho toi khi actor duoc tha.
+	cl.guiDoiMap()
+
+	// Doi cho yeu cau chup anh THAT SU vao hop thu dieu khien roi moi tha
+	// actor — tha som thi actor kip xu ly buoc di TRUOC khi -23 toi, luc do
+	// test se "xanh gia". Nhip cho rat ngan vi han cho control chi 100ms
+	// (thoiGianChoControl).
+	hetHan := time.Now().Add(2 * time.Second)
+	for len(k.hopThuDieuKhien) == 0 && time.Now().Before(hetHan) {
+		time.Sleep(200 * time.Microsecond)
+	}
+	close(choTha)
+
+	// Actor tha ra: rut can hang gameplay (ap dung buoc di) ROI moi tra loi
+	// chup anh -> vi tri la (441,408) -> dung trong cong -> doi map that.
+	if m := cl.doiGoiLenh(t, lenhXoaMap); m.Command != lenhXoaMap {
+		t.Fatalf("mong doi goi -22, nhan %d", m.Command)
+	}
+	m24 := cl.doiGoiLenh(t, lenhMapInfo)
+	d := moDocGoi(t, m24)
+	d.b("mapId", 2)
+}

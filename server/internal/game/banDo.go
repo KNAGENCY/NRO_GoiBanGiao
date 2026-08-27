@@ -62,7 +62,7 @@ type DiemDi struct {
 }
 
 // Chua trong: DiemDi kiem nhan vat co dung trong khung khong. Bien la KHEP
-// KIN ca hai dau, dung het nhu client (Char.cs:1663 `cx >= minX && cx <=
+// KIN ca hai dau, dung het nhu client (Char.cs:1664 `cx >= minX && cx <=
 // maxX`) va nhu ban Java (MapService.isPlayerInWaypoint) — lech mot don vi o
 // day la nguoi choi bam duoc nut nhung may chu bao "khong o trong cong".
 func (d DiemDi) ChuaTrong(x, y int16) bool {

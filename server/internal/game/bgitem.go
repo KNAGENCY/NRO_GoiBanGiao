@@ -9,7 +9,7 @@
 //	     mot phien, PHAI truoc -24. Client luu vao TileMap.vItemBg.
 //	-24  DAT CHO — moi bong do la 3 short: chi so mau + o tile X + o tile Y.
 //
-// Client tra mau bang `TileMap.getBIById(id)` (Controller.cs:5207) — id
+// Client tra mau bang `TileMap.getBIById(id)` (Controller.cs:5206) — id
 // chinh la CHI SO trong danh sach -31 (Controller.cs:3741 `bgItem.id =
 // num177`, tuc bien dem vong lap). Tra khong thay thi client BO QUA IM
 // LANG, khong ve gi, khong log. Do la ly do phai gui -31 truoc, va la ly do
@@ -21,7 +21,7 @@ import "nroserver/internal/protocol"
 
 // lenhMauBgItem: goi XUONG -31 gui bang mau bg-item.
 // Nguon: 1-MAY-CHU-GAME/src/data/DataGame.java:296-311 (sendDataItemBG) doi
-// chieu D:\NRO_Project\Assets\Scripts\Game1\Controller.cs:3735-3756 (case -31).
+// chieu D:\NRO_Project\Assets\Scripts\Game1\Controller.cs:3734-3756 (case -31).
 const lenhMauBgItem int8 = -31
 
 // LopBongDo = layer 2. DAY LA LUA CHON QUAN TRONG, khong phai so tuy y —
@@ -66,7 +66,7 @@ type MauBgItem struct {
 //
 // TAI SAO 500 chu khong phai 0-7 (nho, gon hon): client co MOT bo nho dem
 // anh bg-item tren dia theo khoa `x{zoom}bgItem{AnhID}` (Rms.loadRMS,
-// Controller.cs:5242). Neu khoa da ton tai thi client dung ANH TRONG CACHE va
+// Controller.cs:5241). Neu khoa da ton tai thi client dung ANH TRONG CACHE va
 // KHONG BAO GIO doc thu muc Resources nua. Ban Ngoc Rong goc dung so hieu
 // bg-item trong khoang ~0..350, nen may nguoi choi da tung choi server cu co
 // the con cache o cac so do — cam vao day la lay nham anh cu, loi IM LANG
@@ -132,7 +132,7 @@ const (
 // DatBgItem la MOT cho dat bong do trong mot ban do.
 //
 // TileX/TileY tinh theo O TILE, khong phai don vi game: client nhan lai 24
-// (`bgItem.x = num8 * TileMap.size`, Controller.cs:5211, TileMap.size = 24).
+// (`bgItem.x = num8 * TileMap.size`, Controller.cs:5214, TileMap.size = 24).
 type DatBgItem struct {
 	Mau   int16
 	TileX int16
@@ -164,10 +164,25 @@ const (
 // khi mot mau xuat hien QUA 2 lan (TileMap.isExistMoreOne, TileMap.cs:177).
 // Bong do doi xung nen lat guong khong nhin thay, nhung giu <= 2 de bang nay
 // khong phu thuoc vao mot chi tiet mo cua client.
+//
+// LUAT DAT CHO (test TestBongDoMap1NamDungTrenMatDat khoa lai): anh bong do
+// ve tu O NEO sang PHAI het chieu rong cua no, nen KHONG chi o neo ma CA DAY
+// O ma no phu len deu phai o cung mot muc mat dat. Map 1 co hai muc (nen thap
+// hang 18 va be da cot 16..28 hang 17) — mot bong rong 8 o neo o cot 10 se
+// keo toi cot 17, tuc hai o cuoi bi ve de len VACH DA DUNG DUNG cua be, o do
+// cao khong co mat dat nao. Do chinh la loi cua "quan trai" o ban truoc.
 var bgItemMap1 = []DatBgItem{
-	{Mau: mauBongNhaNho, TileX: 2, TileY: hangDatBongDo},   // nha nho trai, mat tien x 50..177
-	{Mau: mauBongGieng, TileX: 8, TileY: hangDatBongDo},    // gieng trai, x 200..245
-	{Mau: mauBongQuan, TileX: 10, TileY: hangDatBongDo},    // quan trai, x 230..383
+	{Mau: mauBongNhaNho, TileX: 2, TileY: hangDatBongDo}, // nha nho trai, mat tien x 50..177
+	{Mau: mauBongGieng, TileX: 8, TileY: hangDatBongDo},  // gieng trai, x 200..245
+	// Quan trai (mat tien x 230..383) — anh rong 8 o (192 don vi). Neo o cot 8
+	// (x 192..384) chu KHONG phai cot 10: cot 10 keo bong toi x 432, tram len
+	// hai o dau cua be da (cot 16-17, be bat dau o x 384) va ve mot vet toi
+	// tren vach da. Cot 8 la o neo LON NHAT ma anh van dung tron tren nen
+	// thap. Doi lai bong lech sang trai vai chuc don vi so voi mat tien quan
+	// (vung alpha that cua file la x+11..x+181, tuc 203..373) va trum len ca
+	// bong gieng ben canh — hai cai bong chong nhau tren cung mot nen dat thi
+	// chi hoi dam hon, con bong de len vach da thi sai han hinh khoi.
+	{Mau: mauBongQuan, TileX: 8, TileY: hangDatBongDo},     // quan trai, x 230..383
 	{Mau: mauBongTorii, TileX: 16, TileY: hangBeDaBongDo},  // cong torii tren be da, x 388..495
 	{Mau: mauBongThung, TileX: 19, TileY: hangBeDaBongDo},  // thung go tren be da, x 455..505
 	{Mau: mauBongNhaLon, TileX: 21, TileY: hangBeDaBongDo}, // nha lon 2 tang tren be da, x 505..695

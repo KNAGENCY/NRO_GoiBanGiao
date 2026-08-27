@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test:matkhau": "tsx lib/matkhau.test.ts"
+    "test:matkhau": "tsx lib/matkhau.test.ts",
+    "test:phien": "tsx lib/xacthucphien.test.ts",
+    "test": "npm run test:matkhau && npm run test:phien"
   },
   "dependencies": {
     "next": "16.2.11",

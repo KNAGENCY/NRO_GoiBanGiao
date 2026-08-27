@@ -38,16 +38,23 @@ export async function dangKy(formData: FormData): Promise<void> {
   const matKhauBam = bamMatKhau(matKhau);
 
   let idTaiKhoan: number;
+  let theHePhien: number;
   try {
     // Chu y: cot id la BIGSERIAL — postgres.js tra ve dang CHUOI (khong phai
     // number) de tranh mat do chinh xac voi so 64-bit. Phai ep kieu ve number
     // truoc khi dua vao phien, neu khong docPhien() se coi payload khong hop le.
-    const ketQua = await sql<{ id: string }[]>`
+    //
+    // Lay luon `the_he_phien` bang RETURNING thay vi SELECT lai: token phai
+    // mang theo so the he thi sau nay moi thu hoi duoc phien (xem
+    // lib/xacthucphien.ts). Tai khoan moi thi so nay bang 0, nhung doc that ra
+    // van hon ghi cung — mai sau doi mac dinh trong migration khong vo cho nay.
+    const ketQua = await sql<{ id: string; the_he_phien: number }[]>`
       INSERT INTO tai_khoan (ten_dang_nhap, mat_khau_bam)
       VALUES (${ten}, ${matKhauBam})
-      RETURNING id
+      RETURNING id, the_he_phien
     `;
     idTaiKhoan = Number(ketQua[0].id);
+    theHePhien = ketQua[0].the_he_phien;
   } catch (err: unknown) {
     const ma = (err as { code?: string } | undefined)?.code;
     if (ma === "23505") {
@@ -62,6 +69,6 @@ export async function dangKy(formData: FormData): Promise<void> {
     redirect(duongDanLoi("Có lỗi xảy ra, vui lòng thử lại sau.", ten));
   }
 
-  await taoPhien({ id: idTaiKhoan, ten, laAdmin: false });
+  await taoPhien({ id: idTaiKhoan, ten, laAdmin: false, theHe: theHePhien });
   redirect("/");
 }

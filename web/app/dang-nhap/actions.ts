@@ -23,9 +23,16 @@ export async function dangNhap(formData: FormData): Promise<void> {
   // number) de tranh mat do chinh xac voi so 64-bit. Phai ep kieu ve number
   // truoc khi dua vao phien (xem taoPhien ben duoi).
   const hang = await sql<
-    { id: string; ten_dang_nhap: string; mat_khau_bam: string; bi_khoa: boolean; la_admin: boolean }[]
+    {
+      id: string;
+      ten_dang_nhap: string;
+      mat_khau_bam: string;
+      bi_khoa: boolean;
+      la_admin: boolean;
+      the_he_phien: number;
+    }[]
   >`
-    SELECT id, ten_dang_nhap, mat_khau_bam, bi_khoa, la_admin
+    SELECT id, ten_dang_nhap, mat_khau_bam, bi_khoa, la_admin, the_he_phien
       FROM tai_khoan
      WHERE lower(ten_dang_nhap) = lower(${ten})
      LIMIT 1
@@ -46,10 +53,13 @@ export async function dangNhap(formData: FormData): Promise<void> {
     redirect(duongDanLoi("Tài khoản này đã bị khoá. Vui lòng liên hệ quản trị viên.", ten));
   }
 
+  // `theHe` di kem token de sau nay thu hoi duoc phien nay tu xa (dang xuat,
+  // doi mat khau) — xem lib/xacthucphien.ts.
   await taoPhien({
     id: Number(taiKhoan.id),
     ten: taiKhoan.ten_dang_nhap,
     laAdmin: taiKhoan.la_admin,
+    theHe: taiKhoan.the_he_phien,
   });
   redirect("/");
 }

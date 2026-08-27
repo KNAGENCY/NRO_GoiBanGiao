@@ -1,0 +1,30 @@
+-- Cot `the_he_phien` — "so the he" cua phien dang nhap, moi tai khoan mot so.
+--
+-- VI SAO CAN COT NAY (van de that, khong phai nghi ngo):
+-- Cookie phien cua web la JWT tu chua, song 7 ngay. Truoc day web tin tuyet
+-- doi vao noi dung token, nen "dang xuat" chi la xoa cookie o MOT trinh duyet:
+-- ai da sao duoc chuoi token (log, may dung chung, tien ich trinh duyet) van
+-- con mot phien hop le suot 7 ngay, va doi mat khau cung khong duoi duoc ke
+-- dang ngoi trong phien cu ra.
+--
+-- CACH CHUA: token mang theo so the he tai thoi diem phat hanh; moi lan doc
+-- phien web doi chieu so do voi cot nay. Muon huy TAT CA phien cua mot tai
+-- khoan (dang xuat, doi mat khau, nghi bi lo token) chi can cong them 1 —
+-- moi token cu lech so va chet ngay, khong phai luu danh sach token o dau ca.
+--
+-- Vi sao KHONG lam bang mot bang `phien` rieng (moi phien mot dong, dang xuat
+-- thi xoa dong): bang do can don rac dinh ky, va may chu game (Go) dung chung
+-- CSDL nay se co them mot bang no khong hieu. Mot cot dem la du cho nhu cau
+-- hien tai. Cai gia phai tra: dang xuat o dien thoai se dang xuat luon o may
+-- tinh (huy theo TAI KHOAN chu khong theo tung thiet bi) — chap nhan duoc, va
+-- doi lai duoc mien phi chuc nang "thoat khoi moi thiet bi".
+--
+-- Vi sao INTEGER chu khong BIGINT: so nay chi tang khi nguoi dung dang xuat
+-- hoac doi mat khau. Het 2 ti lan cho mot tai khoan la chuyen khong the.
+--
+-- NOT NULL + DEFAULT 0 la BAT BUOC: may chu game (Go) doc bang `tai_khoan`
+-- bang danh sach cot TUONG MINH va KHONG biet cot nay (xem
+-- server/internal/store/store.go). Co gia tri mac dinh thi moi lenh INSERT
+-- san co cua Go van chay nguyen ven — khong phai sua mot dong Go nao.
+ALTER TABLE tai_khoan
+    ADD COLUMN IF NOT EXISTS the_he_phien INTEGER NOT NULL DEFAULT 0;

@@ -1,35 +1,35 @@
 // Phien dang nhap luu trong cookie ky JWT (thu vien jose), httpOnly de
 // JavaScript phia trinh duyet khong doc duoc — chong danh cap phien qua XSS.
+//
+// File nay chi lo phan COOKIE. Toan bo phan quyet dinh "token nay con hieu
+// luc khong" nam o lib/xacthucphien.ts — doc chu thich dau file do de biet vi
+// sao moi lan doc phien deu hoi CSDL, va nhung huong nao da bi loai.
 import { cookies } from "next/headers";
-import { jwtVerify, SignJWT } from "jose";
+import { cache } from "react";
+import {
+  TEN_COOKIE,
+  THOI_HAN_GIAY,
+  docIdTuToken,
+  huyToanBoPhien,
+  kyToken,
+  xacThucToken,
+  type DuLieuPhien,
+  type NoiDungToken,
+} from "./xacthucphien";
 
-const TEN_COOKIE = "phien";
-const THOI_HAN = "7d"; // 7 ngay
+export type { DuLieuPhien, NoiDungToken };
+export { huyToanBoPhien };
 
-export type DuLieuPhien = {
-  id: number;
-  ten: string;
-  laAdmin: boolean;
-};
-
-function layKhoaBiMat(): Uint8Array {
-  const bi_mat = process.env.AUTH_SECRET;
-  if (!bi_mat) {
-    throw new Error(
-      "Thieu bien moi truong AUTH_SECRET. Tao file web/.env.local tu " +
-        "web/.env.local.example roi dien mot chuoi ngau nhien dai."
-    );
-  }
-  return new TextEncoder().encode(bi_mat);
-}
-
-/** Tao cookie phien sau khi dang nhap/dang ky thanh cong. */
-export async function taoPhien(du_lieu: DuLieuPhien): Promise<void> {
-  const token = await new SignJWT({ ...du_lieu })
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime(THOI_HAN)
-    .sign(layKhoaBiMat());
+/**
+ * Tao cookie phien sau khi dang nhap/dang ky thanh cong.
+ *
+ * Ben goi phai truyen `theHe` — lay tu cot `the_he_phien` cua chinh tai khoan
+ * do (SELECT luc dang nhap, hoac RETURNING luc dang ky). Bat buoc truyen chu
+ * khong tu doc o day de khong am tham them mot truy van vao duong dang nhap,
+ * va de TypeScript chan viec quen mat no.
+ */
+export async function taoPhien(noiDung: NoiDungToken): Promise<void> {
+  const token = await kyToken(noiDung);
 
   const kho_cookie = await cookies();
   kho_cookie.set(TEN_COOKIE, token, {
@@ -37,34 +37,44 @@ export async function taoPhien(du_lieu: DuLieuPhien): Promise<void> {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 24 * 7, // 7 ngay, tinh bang giay
+    maxAge: THOI_HAN_GIAY,
   });
 }
 
-/** Doc va xac thuc phien hien tai. Tra null neu chua dang nhap hoac token hong/het han. */
-export async function docPhien(): Promise<DuLieuPhien | null> {
+/**
+ * Doc va xac thuc phien hien tai. Tra null neu chua dang nhap, token hong/het
+ * han, tai khoan bi khoa, hoac phien da bi thu hoi.
+ *
+ * Boc trong React `cache()`: mot request cua Next.js thuong goi docPhien()
+ * nhieu lan (layout goi mot lan, page goi mot lan, server action goi mot lan
+ * nua). `cache()` nho ket qua trong PHAM VI MOT REQUEST, nen chi phi thuc te
+ * la **1 truy van CSDL cho moi request**, khong phai moi lan goi. Het request
+ * la bo nho do bien mat — khong co chuyen du lieu cu song sot sang request
+ * sau, tuc khoa tai khoan van an vao ngay lap tuc.
+ */
+export const docPhien = cache(async function docPhien(): Promise<DuLieuPhien | null> {
   const kho_cookie = await cookies();
-  const token = kho_cookie.get(TEN_COOKIE)?.value;
-  if (!token) return null;
+  return xacThucToken(kho_cookie.get(TEN_COOKIE)?.value);
+});
 
-  try {
-    const { payload } = await jwtVerify(token, layKhoaBiMat());
-    if (
-      typeof payload.id !== "number" ||
-      typeof payload.ten !== "string" ||
-      typeof payload.laAdmin !== "boolean"
-    ) {
-      return null;
-    }
-    return { id: payload.id, ten: payload.ten, laAdmin: payload.laAdmin };
-  } catch {
-    // Token het han, sai chu ky, hoac bi sua — coi nhu chua dang nhap.
-    return null;
-  }
-}
-
-/** Xoa cookie phien (dang xuat). */
+/**
+ * Dang xuat. Lam HAI viec, va viec thu hai moi la viec quan trong:
+ *  1. Xoa cookie o trinh duyet nay.
+ *  2. Cong 1 vao `the_he_phien` -> moi ban sao cua token (o thiet bi khac, hay
+ *     trong tay ke da cop duoc chuoi cookie) chet ngay lap tuc.
+ *
+ * Danh doi da biet truoc: dang xuat o dien thoai se dang xuat luon o may tinh.
+ * Doi lai, "dang xuat" moi thuc su co nghia — xem lib/xacthucphien.ts muc (d).
+ */
 export async function xoaPhien(): Promise<void> {
   const kho_cookie = await cookies();
+  const token = kho_cookie.get(TEN_COOKIE)?.value;
   kho_cookie.delete(TEN_COOKIE);
+
+  // docIdTuToken chu khong phai docPhien(): tai khoan co the dang bi khoa,
+  // luc do docPhien() tra null nhung ta VAN can huy phien cua ho.
+  const id = await docIdTuToken(token);
+  if (id !== null) {
+    await huyToanBoPhien(id);
+  }
 }

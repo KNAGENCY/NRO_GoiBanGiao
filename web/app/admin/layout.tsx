@@ -2,11 +2,17 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { docPhien } from "@/lib/phien";
 
-// Lop kiem tra thu hai (defense-in-depth) song song voi middleware.ts o goc
-// du an: middleware chan o tang request truoc khi vao route, con o day doc
-// lai phien tu server component de chac chan khong co nhanh nao trong
-// /admin/* render duoc du server action hay cache nao do lam middleware bi
-// bo qua. Ca hai lop DEU kiem o server, khong tin client.
+// ĐÂY là chốt kiểm quyền admin thật sự của cả miền /admin/*.
+//
+// proxy.ts o goc du an chi loc so bo (co phien hop le hay khong) — no chay o
+// Edge runtime nen khong doc duoc CSDL, ma tu ban vá "phien thu hoi duoc" thi
+// co `laAdmin` trong token khong con dang tin nua. Con docPhien() o day doc
+// cot `la_admin` MOI NHAT tu CSDL, nen ai vua bi ha quyen la bi day ra ngay
+// lan bam chuot ke tiep, khong phai cho token het han 7 ngay.
+//
+// Moi server action trong /admin cung tu kiem lai bang docPhien() — de van an
+// toan neu bi goi thang, bo qua giao dien. Nho React cache(), ca layout va
+// action cung mot request chi ton MOT truy van CSDL.
 export default async function AdminLayout({
   children,
 }: {

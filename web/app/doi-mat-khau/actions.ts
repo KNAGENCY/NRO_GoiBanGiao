@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
 import { bamMatKhau, kiemMatKhau } from "@/lib/matkhau";
-import { docPhien } from "@/lib/phien";
+import { docPhien, taoPhien } from "@/lib/phien";
 
 function duongDanLoi(loi: string): string {
   const qs = new URLSearchParams({ loi });
@@ -43,12 +43,32 @@ export async function doiMatKhau(formData: FormData): Promise<void> {
     redirect(duongDanLoi("Mật khẩu cũ không đúng."));
   }
 
+  // Doi mat khau xong thi day MOI phien cu ra ngoai — day la ly do chinh
+  // nguoi ta doi mat khau: nghi co ke khac dang dung tai khoan cua minh. Cong
+  // 1 vao `the_he_phien` ngay trong cung lenh UPDATE (mot vong CSDL, va khong
+  // co khe cua nao giua hai buoc) lam moi token da phat hanh chet ngay.
   const matKhauBamMoi = bamMatKhau(matKhauMoi);
-  await sql`
+  const hangMoi = await sql<
+    { ten_dang_nhap: string; la_admin: boolean; the_he_phien: number }[]
+  >`
     UPDATE tai_khoan
-       SET mat_khau_bam = ${matKhauBamMoi}
+       SET mat_khau_bam = ${matKhauBamMoi},
+           the_he_phien = the_he_phien + 1
      WHERE id = ${phien.id}
+    RETURNING ten_dang_nhap, la_admin, the_he_phien
   `;
+
+  // ...ke ca token cua CHINH trinh duyet nay. Nen cap lai cookie moi ngay, de
+  // nguoi vua doi mat khau khong bi da ra trang dang nhap mot cach kho hieu.
+  const tk = hangMoi[0];
+  if (tk) {
+    await taoPhien({
+      id: phien.id,
+      ten: tk.ten_dang_nhap,
+      laAdmin: tk.la_admin,
+      theHe: tk.the_he_phien,
+    });
+  }
 
   redirect("/tai-khoan?doi_mat_khau=1");
 }

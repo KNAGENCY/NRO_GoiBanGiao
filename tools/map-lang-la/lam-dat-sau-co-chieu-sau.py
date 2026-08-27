@@ -54,4 +54,9 @@ for muc in ["x1", "x2", "x3", "x4"]:
         Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), "RGBA").save(p)
     print(f"[{muc}] tao lai tile 61/67/68 tu tile 60 ({w}x{h})")
 
-print("\nxong — nho chay lai ve-bo-cuc-map.py de dung tang moi")
+# Ghi chu cu o day bao "chay lai ve-bo-cuc-map.py". Khong can, va gio cung
+# khong chay duoc nua (file do da nghi huu): script nay chi ve lai ANH cua tile
+# 61/67/68, ma map DA dat san cac tile do roi. Chi can client nap anh moi.
+print("\nxong. Map da dat san tile 61/67/68 nen khong phai xep lai bo cuc.")
+print("Chi can client nap anh moi: tang vsData trong server/internal/game/dongbo.go,")
+print("khong tang thi client dung ban cu trong bo dem va nhin nhu khong doi gi.")

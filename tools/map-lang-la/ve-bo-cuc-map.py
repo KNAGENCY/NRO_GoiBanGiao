@@ -1,9 +1,83 @@
 # -*- coding: utf-8 -*-
-# VE LAI bo cuc map 1 TU DAU: don sach tan du tile Dragon Ball, dat lai bang tile Lang La.
+"""DA NGHI HUU — day la CACH CU de xep bo cuc map 1. Doc thi duoc, chay thi khong.
+
+    Chay nham file nay = mat toan bo bo cuc dang co.
+    Vi vay no CHAN NGAY o dong dau, phai co co --toi-that-su-muon-ve-lai-tu-dau
+    moi chiu chay.
+
+VI SAO NGHI HUU
+  93 con so cung nam trong 167 dong code. Muon dich mot can nha sang trai 2 o
+  thi sua mot con so roi chay lai — ma chay lai la XOA SACH 1248 o roi ve lai
+  tu dau. Do khong phai la SUA, do la SINH LAI: moi lan sinh lai deu doi vai
+  thu ngoai y muon. Chinh cai do lam ra cam giac "chap va, xep hinh".
+
+  Thay bang cau noi Tiled (tools/map-lang-la/tiled/): bo cuc song trong mot file
+  .tmx sua duoc bang chuot, sua tung o mot, khong xoa gi ca.
+
+VI SAO KHONG XOA HAN FILE NAY
+  No la HO SO GOC cua bo cuc map 1 dang chay: doc no la biet vi sao tung cong
+  trinh nam o dung cot do, va nhung ghi chu trong no (nen cao, tuong bien hai
+  cot, loi lat da phai nam cho phang) la kien thuc that su ton cong moi co.
+"""
 import shutil
+import sys
+import time
 
 MAP = "D:/NRO_Project/Assets/Resources/res/mymap/1.bytes"
-shutil.copy2(MAP, MAP + ".bak-truoc-ve-lai")
+CO_EP_CHAY = "--toi-that-su-muon-ve-lai-tu-dau"
+
+CANH_BAO = f"""
+================================================================================
+  DUNG LAI. FILE NAY DA NGHI HUU - VA KHONG CO GI BI THAY DOI CA.
+================================================================================
+
+Ban vua chay  ve-bo-cuc-map.py  - cach CU de xep bo cuc map 1.
+
+  Moi lan chay, no XOA SACH 1248 o cua map roi ve lai tu dau bang 93 con so
+  cung viet trong code. Nghia la: chay nham mot cai la bay mat toan bo bo cuc
+  dang co. Lan nay chua dong vao file map - no dung lai truoc khi kip lam gi.
+
+GIO XEP BO CUC BANG TILED - sua bang chuot, tung o mot, khong xoa gi:
+
+  1) Nhin bo cuc dang co (0,6 giay, khong can mo Unity):
+       python tools/map-lang-la/tiled/xem-truoc.py --khung
+
+  2) Dua map dang co ra file sua duoc:
+       python tools/map-lang-la/tiled/map-sang-tiled.py
+
+  3) Mo  tools/map-lang-la/tiled/map-1-lang-la.tmx  bang Tiled (mapeditor.org,
+     mien phi). Keo tha nha cua cho vua y - co san anh concept lam giay can
+     nam duoi de doi chieu. Luu lai.
+
+  4) Dua nguoc ve map game, roi sinh lai va cham:
+       python tools/map-lang-la/tiled/tiled-sang-map.py
+       python tools/map-lang-la/sinh-va-cham.py
+
+  Huong dan day du:  tools/map-lang-la/tiled/README.md
+
+FILE NAY VAN GIU LAI de doc: no ghi lai vi sao tung cong trinh nam o dung cot
+do. Doc thi duoc, chay thi khong.
+
+Neu ban THAT SU muon vut bo cuc hien tai di va ve lai tu dau (rat hiem khi
+dung - gan nhu luc nao Tiled cung la thu ban muon), thi go them co nay:
+
+    python tools/map-lang-la/ve-bo-cuc-map.py {CO_EP_CHAY}
+
+================================================================================
+"""
+
+if CO_EP_CHAY not in sys.argv:
+    print(CANH_BAO)
+    # Thoat NGAY, truoc ca dong shutil.copy2 ben duoi: khong doc, khong ghi,
+    # khong sao luu — chay nham thi khong mat gi het.
+    raise SystemExit(1)
+
+# Sao luu co DAU THOI GIAN. Ban cu ghi de len dung mot ten .bak-truoc-ve-lai,
+# nen chay hai lan la ban luu "truoc khi ve lai" bi chinh lan chay thu hai de
+# len — mat luon cai bo cuc minh dinh cuu.
+ban_luu = f"{MAP}.bak-truoc-ve-lai-{time.strftime('%Y%m%d-%H%M%S')}"
+shutil.copy2(MAP, ban_luu)
+print(f"[sao luu] {ban_luu}")
 data = bytearray(open(MAP, "rb").read())
 tmw, tmh = data[0], data[1]
 

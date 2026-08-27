@@ -61,6 +61,8 @@ python tools/map-lang-la/do-map.py <ảnh-concept.png>
 
 Ghi lại 7 con số. **Đó là đích.** Không có đích thì mọi bản sửa đều là đoán.
 
+Lệnh này còn xuất một **ảnh chẩn đoán** ra `tools/map-lang-la/chan-doan/`. Mở nó ra xem concept "đúng" trông thế nào khi bị tô màu — sau này đặt cạnh ảnh chẩn đoán của game là thấy ngay chỗ lệch.
+
 ### Bước 2 — Viết đề bài ảnh, có 5 phần bắt buộc
 
 1. **Phong cách** — chốt một thứ. *(Đã vấp: brief cùng một câu vừa ghi `pixel-art` vừa ghi `hand-painted`; agent vẽ phải hỏi lại.)*
@@ -94,6 +96,9 @@ python tools/map-lang-la/lap-anh-dot-2.py     # tự thu nhỏ ra 4 mức zoom
 > Dùng [`tools/map-lang-la/tiled/`](../../tools/map-lang-la/tiled/README.md): bố cục sống trong
 > một file `.tmx` sửa được bằng chuột, **có ảnh concept làm lớp giấy can nằm dưới**, và
 > `xem-truoc.py` vẽ ra ảnh trong **0,6 giây** — không cần mở Unity.
+>
+> `ve-bo-cuc-map.py` giờ **tự chặn**: chạy lên nó in cảnh báo rồi dừng, không đụng vào map.
+> Giữ lại chỉ để **đọc** — nó ghi vì sao từng công trình nằm ở đúng cột đó.
 
 
 Đếm ô trước khi xếp: map 52 ô, trừ 4 ô tường biên còn **48 ô dùng được**. Công trình phải **phủ kín 48 ô**, cho chồng lấn 1–2 ô. Dùng lại một mẫu nhà nhiều lần là bình thường — concept cũng vậy.
@@ -105,6 +110,16 @@ python tools/map-lang-la/do-map.py <ảnh-game.png>
 ```
 
 **Một giây.** Chưa đạt thì sửa rồi đo lại. Chỉ khi 6/7 chỉ số đạt mới sang bước 7.
+
+> **Chỉ số nào `!!` thì mở ảnh chẩn đoán ra, đừng sửa mò.**
+> `tools/map-lang-la/chan-doan/<tên-ảnh>-chan-doan.png` — tám ô, mỗi ô tô màu
+> thẳng lên ảnh đúng chỗ làm hỏng chỉ số đó: đất phẳng tô cam, cột trời lọt
+> xuống dải nhà tô đỏ, hàng pixel có đường kẻ ngang vạch đỏ, khối núi tô lục.
+> Biết "đất phẳng 91%" mà không biết phẳng **ở đâu** thì vẫn phải đoán — đó
+> chính là cái vòng "chắp vá" của map 1.
+>
+> Ô số 1 (trời) cố tình để lộ **bẫy 1** ở mục 4: làng xa mờ cũng bị tô là trời.
+> Nhìn thấy tận mắt rồi thì đừng đi "chữa" theo con số đó.
 
 ### Bước 7 — Bấy giờ mới gọi agent soi
 
@@ -133,6 +148,8 @@ Gọi agent khi bước 6 chưa đạt là **đốt 45–80 phút** để nghe l
 1. **Mặt nạ "màu trời" bắt cả làng xa mờ** (cũng xanh nhạt) → số không nhúc nhích dù ảnh đổi rõ. Đo bằng **độ chi tiết**, đừng đo bằng màu.
 2. **Độ lệch chuẩn của một hàng** phải tính theo chiều ngang **cho từng kênh màu**. Tính trên cả 3 kênh thì hàng đồng màu `(12,95,169)` ra std ≈ 64 — đọc nhầm thành "còn nhiều vân" trong khi hàng đó phẳng tuyệt đối.
 3. **Không phải đường ngang nào cũng là lỗi.** Chỉ tính là đường kẻ khi **đa số cột cùng nhảy**. Vài cột nhảy là ranh giới tự nhiên (đỉnh núi, mép mái). Đã đọc nhầm đỉnh núi thành đường kẻ rồi đi "sửa" nhầm, làm hỏng chân núi.
+
+Cả ba bẫy giờ **nhìn thấy được** trong ảnh chẩn đoán của `do-map.py`: ô 1 để lộ mặt nạ màu bắt cả làng xa, ô 3 đo bằng độ chi tiết nên không dính bẫy đó, ô 6 chỉ vạch đỏ những hàng mà đa số cột cùng nhảy và ghi rõ "chưa phải lỗi" khi bước nhảy còn dưới ngưỡng.
 
 ---
 

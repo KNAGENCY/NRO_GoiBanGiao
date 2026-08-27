@@ -55,4 +55,9 @@ for muc in ["x1", "x2", "x3", "x4"]:
         Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), "RGBA").save(p)
     print(f"[{muc}] tao o chuyen tiep 63 (co->da) va 64 (da->co), {w}x{h}")
 
-print("\nxong — nho chay lai ve-bo-cuc-map.py de dat hai o nay vao hai dau loi di")
+# Ghi chu cu o day bao "chay lai ve-bo-cuc-map.py". File do da nghi huu (chay
+# no la xoa sach ca map roi ve lai) — dat tile bay gio lam bang Tiled.
+print("\nxong. Hai o nay moi chi la ANH; con phai DAT chung vao hai dau loi di:")
+print("  python tools/map-lang-la/tiled/map-sang-tiled.py")
+print("  ... mo tiled/map-1-lang-la.tmx bang Tiled, dat tile 63 va 64, luu ...")
+print("  python tools/map-lang-la/tiled/tiled-sang-map.py")

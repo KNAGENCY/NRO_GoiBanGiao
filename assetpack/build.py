@@ -26,6 +26,7 @@ from .map import MapError, encode_collision, validate_collision_semantics, valid
 from .mob import MobError, encode_mob, validate_mob_golden
 from .part import build_part, parse_part
 from .skill import encode_skill
+from .tileset import TilesetError, apply_tile_set_overlay, validate_floor_closure
 from .visual import (
     render_full_map,
     render_hud_golden,
@@ -968,6 +969,19 @@ def _build_into(manifest: dict[str, Any], base_dir: Path, root: Path) -> dict[st
         _fail(code, message)
     except AnimationError as error:
         _fail("ASSET-ANIMATION-008", str(error))
+
+    # Bảng gốc chỉ khai báo tile 1-39 của Ngọc Rồng. Map Làng Lá dùng tile 60-69
+    # và 83-88, không khai thì client đặt types[]=0 cho cả màn → nhân vật rơi
+    # xuyên đất. Trước đây phần thêm này làm TAY rồi commit thẳng file .bin, nên
+    # build lại là âm thầm lùi về bảng gốc và tái sinh lỗi. Giờ phép thêm nằm
+    # trong manifest và do đường ống thi hành, kết quả bị ghim bằng golden.
+    if "tile_set_overlay" in inputs:
+        try:
+            tileset = apply_tile_set_overlay(tileset, inputs["tile_set_overlay"])
+        except TilesetError as error:
+            message = str(error)
+            code = message.split(":", 1)[0] if message.startswith("ASSET-") else "ASSET-TILESET-012"
+            _fail(code, message)
     try:
         part_data = build_part(manifest, legacy)
         parse_part(part_data)
@@ -1003,6 +1017,23 @@ def _build_into(manifest: dict[str, Any], base_dir: Path, root: Path) -> dict[st
     except MapError as error:
         _fail("ASSET-COLLISION-006", str(error))
     (server / "map-1-collision.bin").write_bytes(collision)
+
+    # Lưới đúng chưa đủ: máy chủ chặn theo `tile_art[].solid`, còn client cho
+    # đứng theo bit sàn trong bảng tile. Tile máy chủ bảo "đặc" mà client không
+    # khai là sàn thì hai bên nói ngược nhau — người chơi rơi xuyên đất rồi bị
+    # máy chủ kéo ngược. Đây là chốt chặn CUỐI: nó đỏ kể cả khi ai đó xoá hẳn
+    # `tile_set_overlay` khỏi manifest, tức quả mìn không dựng lại được nữa.
+    try:
+        validate_floor_closure(
+            tileset,
+            tile_set_index=inputs.get("tile_set_overlay", {}).get("tile_set_index", 0),
+            base_tile_count=inputs["tile_set_baseline"]["semantic"]["tile_count"],
+            solid_used={row["id"] for row in tile_rows if row["solid"]} & set(indexes),
+        )
+    except TilesetError as error:
+        message = str(error)
+        code = message.split(":", 1)[0] if message.startswith("ASSET-") else "ASSET-TILESET-013"
+        _fail(code, message)
 
     try:
         skill_data = encode_skill(manifest["skills"])

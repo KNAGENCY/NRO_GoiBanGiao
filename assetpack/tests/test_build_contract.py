@@ -489,6 +489,58 @@ class BuildContractTests(unittest.TestCase):
             with self.assertRaisesRegex(BuildError, "ASSET-TILESET-010"):
                 build(manifest, root / "out", review, base_dir=root)
 
+    def test_tile_set_overlay_duoc_thi_hanh_chu_khong_chep_thang_bang_goc(self):
+        """Đường ống phải THI HÀNH overlay, không được chép thẳng bảng gốc.
+
+        Nếu ai đó gỡ đoạn nối overlay trong `build.py`, chốt kiểm đối chiếu
+        artifact vẫn có thể xanh trên máy có sẵn file .bin cũ — test này bịt
+        đúng khe đó bằng một manifest tổng hợp, không phụ thuộc kho ảnh nguồn.
+        """
+        from assetpack.build import build
+        from assetpack.tileset import apply_tile_set_overlay
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = self._complete_manifest(root)
+            goc = (root / manifest["build_inputs"]["tile_set_info_path"]).read_bytes()
+            overlay = {
+                "tile_set_index": 0,
+                "groups": [{"bit": 2, "role": "san", "tiles": [60, 61]}],
+            }
+            mong_doi = apply_tile_set_overlay(goc, overlay, check_result=False)
+            overlay["result"] = {
+                "byte_length": len(mong_doi),
+                "sha256": hashlib.sha256(mong_doi).hexdigest(),
+            }
+            manifest["build_inputs"]["tile_set_overlay"] = overlay
+            review = self._write_complete_review(root, manifest)
+            out = root / "out"
+            build(manifest, out, review, base_dir=root)
+            ra = (out / "server/tile_set_info.bin").read_bytes()
+            self.assertEqual(ra, mong_doi)
+            self.assertNotEqual(ra, goc)
+
+    def test_build_tu_choi_khi_tile_dac_khong_duoc_khai_la_san(self):
+        """Tile máy chủ coi là đặc mà client không khai sàn = rơi xuyên đất.
+
+        Đây là chốt chặn cuối: nó đỏ kể cả khi `tile_set_overlay` bị xoá hẳn
+        khỏi manifest, tức không dựng lại được quả mìn cũ.
+        """
+        from assetpack.build import BuildError, build
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = self._complete_manifest(root)
+            # Tile 60 nằm ngoài bảng gốc (chỉ khai 1..39) nên client không biết nó.
+            manifest["build_inputs"]["tile_art"][60]["solid"] = True
+            manifest["build_inputs"]["map"]["indexes"][0] = 60
+            self.assertNotIn("tile_set_overlay", manifest["build_inputs"])
+            review = self._write_complete_review(root, manifest)
+            out = root / "out"
+            with self.assertRaisesRegex(BuildError, "ASSET-TILESET-013"):
+                build(manifest, out, review, base_dir=root)
+            self.assertFalse(out.exists())
+
     def test_zero_tile_size_returns_stable_build_error(self):
         from assetpack.build import BuildError, build
 

@@ -155,7 +155,19 @@ func TestGoiMapInfoVoiQuaiByteDung(t *testing.T) {
 	b("zoneId", 0)
 	sh("x", 100)
 	sh("y", 384)
-	b("waypointCount", 0)
+	// Map 1 co DUNG MOT cong roi map (Cong Lang La). Byte-chinh-xac cua o nay
+	// thuoc ve TestGoiMapInfoMap1CoCongRoiMap (diemdi_test.go); o day chi doc
+	// qua cho dung so byte, vi test nay soi phan QUAI phia sau.
+	b("waypointCount", 1)
+	sh("wp.minX", 408)
+	sh("wp.minY", 384)
+	sh("wp.maxX", 472)
+	sh("wp.maxY", 432)
+	b("wp.laCong", 1)
+	b("wp.ngoaiTuyen", 0)
+	if ten, err := r.UTF(); err != nil || ten != "Cổng Làng Lá" {
+		t.Fatalf("wp.ten = %q (loi %v)", ten, err)
+	}
 
 	b("mobCount", 2)
 
@@ -201,7 +213,20 @@ func TestGoiMapInfoVoiQuaiByteDung(t *testing.T) {
 	b("npc.template", 0)
 	sh("npc.portrait", 27078)
 	b("itemCount", 0)
-	sh("bgItem", 0)
+	// Map 1 co 11 bong do; byte-chinh-xac thuoc ve TestGoiMapInfoMap1CoBongDo
+	// (bgitem_test.go). O day chi doc qua cho dung so byte.
+	sh("soBong", 11)
+	for i := 0; i < 11; i++ {
+		if _, err := r.Short(); err != nil {
+			t.Fatalf("bong do #%d thieu truong mau: %v", i, err)
+		}
+		if _, err := r.Short(); err != nil {
+			t.Fatalf("bong do #%d thieu truong tileX: %v", i, err)
+		}
+		if _, err := r.Short(); err != nil {
+			t.Fatalf("bong do #%d thieu truong tileY: %v", i, err)
+		}
+	}
 	sh("effMap", 0)
 	b("bgType", 0)
 	b("idSpaceShip", 0)

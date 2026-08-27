@@ -5,6 +5,7 @@ package game
 
 import (
 	_ "embed"
+	"fmt"
 
 	"nroserver/internal/protocol"
 	"nroserver/internal/store"
@@ -117,7 +118,9 @@ const (
 // 738-869). LUU Y bay cam:
 //
 //	(a) BYTE DU PHONG 0 giua mob va npc (Zone.java:805) — QUEN la lech toan bo phan sau.
-//	(b) bg-item RONG van phai short 0 (2 byte), KHONG bo trang.
+//	(b) bg-item (bong do) RONG van phai short 0 (2 byte), KHONG bo trang —
+//	    xem ghiBgItem trong bgitem.go. Bong do CHI hien neu goi -31 (bang mau)
+//	    da duoc gui truoc do trong phien, khong thi client bo qua im lang.
 //	(c) x/y lay tu VI TRI NHAN VAT (nv.ViTriX/Y) — Zone dung pl.location, khong phai
 //	    spawn ban do; giu dung de KH5 van dung sau khi nguoi choi da di chuyen.
 //	(d) -82 PHAI da duoc gui truoc goi nay (xuLyClientOk dam bao thu tu), va tileId
@@ -143,14 +146,16 @@ func goiMapInfo(nv *store.NhanVat, bd *BanDo, quai []*Quai) (*protocol.Message, 
 	w.Short(int16(nv.ViTriX)) // (c) x = vi tri nhan vat
 	w.Short(int16(nv.ViTriY)) // (c) y
 
-	w.Byte(0)                // waypointCount = 0
+	if err := ghiDiemDi(w, bd); err != nil { // waypointCount + tung cong roi map
+		return nil, err
+	}
 	ghiDanhSachQuai(w, quai) // mobCount + tung con quai (§3.6, Ke hoach 6 Task 5)
 	w.Byte(0)                // (a) BYTE DU PHONG — giua mob va npc, DUNG QUEN
 	ghiNPCMap(w, bd)
 	w.Byte(0) // itemCount = 0
 
-	w.Short(0) // (b) bg-item: short 0 (map trong, khong bo trang)
-	w.Short(0) // effMapCount = 0
+	ghiBgItem(w, bd) // (b) bg-item — map trong van ghi short 0, KHONG bo trang
+	w.Short(0)       // effMapCount = 0
 
 	w.Byte(bd.BgType) // bgType
 	w.Byte(0)         // idSpaceShip = 0
@@ -162,4 +167,47 @@ func goiMapInfo(nv *store.NhanVat, bd *BanDo, quai []*Quai) (*protocol.Message, 
 		w.Byte(0)
 	}
 	return protocol.NewMessage(lenhMapInfo, w), nil
+}
+
+// ghiDiemDi ghi o waypoint cua MAP INFO.
+//
+// KHUON BYTE (Zone.java:753-767 == Controller.cs:5055 — DA DOI CHIEU CA HAI
+// PHIA theo luat §6.16 cua BAT-DAU-TU-DAY):
+//
+//	byte soCong
+//	moi cong: short MinX | short MinY | short MaxX | short MaxY |
+//	          bool LaCong | bool NgoaiTuyen | UTF Ten
+//
+// soCong la MOT byte (khong phai short) — Zone.java writeByte, client
+// readByte. Mot ban do co hon 255 cong la khong the, nhung neu co thi phai
+// cat chu khong duoc de tran am tham; hien moi ban do chi co 1 cong nen chi
+// can chan bang mot loi ro rang.
+//
+// GIU DUNG MOT CONG MOI BAN DO cho toi khi co ly do that su phai them:
+// Char.isInEnterOnlinePoint (Char.cs:1656-1668) tra cuu song song hai danh
+// sach TileMap.vGo va PopUp.vPopups BANG CUNG MOT CHI SO, tuc no ngam gia
+// dinh hai danh sach xep cung thu tu. Voi mot cong thi gia dinh do luon
+// dung; voi nhieu cong no phu thuoc vao thu tu cac popup khac duoc them —
+// mot cho de vo am tham.
+func ghiDiemDi(w *protocol.Writer, bd *BanDo) error {
+	if bd == nil {
+		w.Byte(0)
+		return nil
+	}
+	if len(bd.DiemDi) > 255 {
+		return fmt.Errorf("map %d co %d cong roi map, vuot 255 (soCong la 1 byte)", bd.MapID, len(bd.DiemDi))
+	}
+	w.Byte(byte(len(bd.DiemDi)))
+	for _, d := range bd.DiemDi {
+		w.Short(d.MinX)
+		w.Short(d.MinY)
+		w.Short(d.MaxX)
+		w.Short(d.MaxY)
+		w.Bool(d.LaCong)
+		w.Bool(d.NgoaiTuyen)
+		if err := w.UTF(d.Ten); err != nil {
+			return fmt.Errorf("ten cong %q cua map %d khong ghi duoc: %w", d.Ten, bd.MapID, err)
+		}
+	}
+	return nil
 }

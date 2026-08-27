@@ -823,8 +823,10 @@ func fClientHetHanNgan(t *testing.T, f *protocol.Framer) bool {
 }
 
 func TestClientOkGuiVaoTheGioi(t *testing.T) {
-	// Client gui -28/13 khi da vao the gioi -> may chu gui DUNG 3 goi theo thu tu
-	// -82 (tileset) -> -30 (ME_INFO) -> -24 (MAP INFO). -82 PHAI truoc -24 (§7).
+	// Client gui -28/13 khi da vao the gioi -> may chu gui chuoi goi theo thu tu
+	// -31 (bang mau bong do) -> -82 (tileset) -> -30 (ME_INFO) -> -24 (MAP INFO).
+	// CA -82 LAN -31 phai truoc -24: thieu -82 thi client thoat han app (§7),
+	// thieu -31 thi bong do trong -24 bi bo qua im lang (xem bgitem.go).
 	b := NewBoXuLy(&khoGia{}, nil)
 	b.nhanVat = &store.NhanVat{ID: 7, Ten: "Naruto", Lang: 0, KieuToc: 5,
 		SucManh: 100, Vang: 1000, Ngoc: 0, MapID: 1, ViTriX: 100, ViTriY: 384}
@@ -838,17 +840,21 @@ func TestClientOkGuiVaoTheGioi(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	m31 := docMotGoi(t, fClient)
+	if m31.Command != -31 {
+		t.Fatalf("goi 1 = lenh %d, mong doi -31 (bang mau bong do, BAT BUOC truoc -24)", m31.Command)
+	}
 	m82 := docMotGoi(t, fClient)
 	if m82.Command != -82 {
-		t.Fatalf("goi 1 = lenh %d, mong doi -82 (tileset, BAT BUOC truoc -24)", m82.Command)
+		t.Fatalf("goi 2 = lenh %d, mong doi -82 (tileset, BAT BUOC truoc -24)", m82.Command)
 	}
 	m30 := docMotGoi(t, fClient)
 	if m30.Command != -30 {
-		t.Fatalf("goi 2 = lenh %d, mong doi -30 (ME_INFO)", m30.Command)
+		t.Fatalf("goi 3 = lenh %d, mong doi -30 (ME_INFO)", m30.Command)
 	}
 	m24 := docMotGoi(t, fClient)
 	if m24.Command != -24 {
-		t.Fatalf("goi 3 = lenh %d, mong doi -24 (MAP INFO)", m24.Command)
+		t.Fatalf("goi 4 = lenh %d, mong doi -24 (MAP INFO)", m24.Command)
 	}
 
 	// -42 CHI SO gui ngay sau MAP INFO. Khong doc thi ong pipe day va may chu
@@ -909,7 +915,7 @@ func TestNhanClientOk(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 // TestClientOkKhongChayLaiLanHai la kiem chung QUAN TRONG cho chot chong goi
-// lai cua xuLyClientOk. Gui -28/13 lan 1 phai nhan du 3 goi -82/-30/-24 (dung
+// lai cua xuLyClientOk. Gui -28/13 lan 1 phai nhan du chuoi -31/-82/-30/-24 (dung
 // nhu TestClientOkGuiVaoTheGioi). Gui LAI -28/13 lan 2 (client that khong lam
 // vay, nhung mot con gia hoac goi lap tren mang co the) PHAI bi bo qua HOAN
 // TOAN im lang — khong duoc gui THEM bat ky goi nao, chung to xuLyClientOk
@@ -930,23 +936,27 @@ func TestClientOkKhongChayLaiLanHai(t *testing.T) {
 		}
 	}
 
-	// Lan 1: phai nhan du 4 goi theo dung thu tu (nhu TestClientOkGuiVaoTheGioi).
+	// Lan 1: phai nhan du 5 goi theo dung thu tu (nhu TestClientOkGuiVaoTheGioi).
 	guiClientOk()
+	m31 := docMotGoi(t, fClient)
+	if m31.Command != -31 {
+		t.Fatalf("lan 1, goi 1 = lenh %d, mong doi -31", m31.Command)
+	}
 	m82 := docMotGoi(t, fClient)
 	if m82.Command != -82 {
-		t.Fatalf("lan 1, goi 1 = lenh %d, mong doi -82", m82.Command)
+		t.Fatalf("lan 1, goi 2 = lenh %d, mong doi -82", m82.Command)
 	}
 	m30 := docMotGoi(t, fClient)
 	if m30.Command != -30 {
-		t.Fatalf("lan 1, goi 2 = lenh %d, mong doi -30", m30.Command)
+		t.Fatalf("lan 1, goi 3 = lenh %d, mong doi -30", m30.Command)
 	}
 	m24 := docMotGoi(t, fClient)
 	if m24.Command != -24 {
-		t.Fatalf("lan 1, goi 3 = lenh %d, mong doi -24", m24.Command)
+		t.Fatalf("lan 1, goi 4 = lenh %d, mong doi -24", m24.Command)
 	}
 	m42 := docMotGoi(t, fClient)
 	if m42.Command != -42 {
-		t.Fatalf("lan 1, goi 4 = lenh %d, mong doi -42 (chi so nhan vat)", m42.Command)
+		t.Fatalf("lan 1, goi 5 = lenh %d, mong doi -42 (chi so nhan vat)", m42.Command)
 	}
 
 	// Lan 2: gui LAI -28/13 — PHAI khong nhan them goi nao (chot chong goi lai).
@@ -976,12 +986,13 @@ func TestVaoKhuVucLanHaiKhongPhatGoiTrung(t *testing.T) {
 	fClient, dong := dungPhienThat(t, b)
 	defer dong()
 
-	// Bat tay -28/13 truoc de b.khuVuc duoc gan (xuLyClientOk). Doc het 3 goi.
+	// Bat tay -28/13 truoc de b.khuVuc duoc gan (xuLyClientOk). Doc het cac goi.
 	w := protocol.NewWriter()
 	w.Byte(lenhConClientOk)
 	if err := fClient.WriteMessage(protocol.NewMessage(lenhKhongTrenBanDo, w)); err != nil {
 		t.Fatalf("gui -28/13 that bai: %v", err)
 	}
+	docMotGoi(t, fClient) // -31 bang mau bong do
 	docMotGoi(t, fClient) // -82
 	docMotGoi(t, fClient) // -30
 	docMotGoi(t, fClient) // -24

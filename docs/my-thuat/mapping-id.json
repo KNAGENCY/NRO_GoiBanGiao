@@ -4003,6 +4003,40 @@
         "tile_count": 39
       }
     },
+    "tile_set_overlay": {
+      "note": "Bảng gốc Ngọc Rồng chỉ khai báo tile 1-39, trong khi map Làng Lá dùng tile 60-69 và 83-88. Tile không được khai thì client đặt types[]=0 cho cả màn, tức không có sàn, và nhân vật rơi xuyên đất xuống đáy màn (lỗi thật đã vá 22/08/2026). Khối này là phép THÊM tile Làng Lá vào bảng gốc; đường ống thi hành nó lúc build nên không còn phải sửa tay file .bin nữa. Chỉ thêm vào bộ tile của map 1, tuyệt đối không sửa hay xoá gì của bảng gốc — 39 bộ tile còn lại là di sản chưa ai review.",
+      "tile_set_index": 0,
+      "groups": [
+        {
+          "bit": 2,
+          "role": "san-dung-duoc-len-tren",
+          "note": "Mặt đất. 60-69 là bộ nền Làng Lá đợt 1; 83-86 là bộ bổ sung đợt 2 (chân gỗ, kệ đá, bậc thang, bậc thang đỉnh) — đều là mặt đất, đều đứng được lên trên. Đây là bit mà thiếu nó thì rơi xuyên đất.",
+          "tiles": [60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 83, 84, 85, 86]
+        },
+        {
+          "bit": 4,
+          "role": "chan-ben-phai",
+          "note": "Khối chặn đi ngang. Phải có cả 62 (mặt cỏ) — đây là chỗ từng sai: nhân vật đứng trên mặt đất hàng 18 thì client kiểm chặn ngang ở hàng 17, mà ở gò thì hàng 17 chính là mặt cỏ của gò. Bỏ 62 ra là người chơi đi xuyên vào sườn gò trong khi máy chủ chặn, thành ra đứng chết một chỗ.",
+          "tiles": [60, 61, 62, 65, 66, 67, 68, 83, 84]
+        },
+        {
+          "bit": 8,
+          "role": "chan-ben-trai",
+          "note": "Đối xứng với bit 4, cùng danh sách.",
+          "tiles": [60, 61, 62, 65, 66, 67, 68, 83, 84]
+        },
+        {
+          "bit": 8192,
+          "role": "chan-nhay-tu-duoi-len",
+          "note": "Chỉ khối đặc thật mới chặn nhảy xuyên từ dưới lên. Mặt cỏ 62 và các tile nền mỏng KHÔNG có bit này để còn nhảy lên bục được.",
+          "tiles": [60, 61, 67, 68, 83, 84]
+        }
+      ],
+      "result": {
+        "byte_length": 1734,
+        "sha256": "5234327c2d96248d67961585702dc1d31cea68c5b3e98fac86a3c38aceba149b"
+      }
+    },
     "tile_art": [
       {
         "index": 0,

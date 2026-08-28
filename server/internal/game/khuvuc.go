@@ -397,6 +397,25 @@ type dieuKhienRa struct {
 
 func (dieuKhienRa) laDieuKhien() {}
 
+// dieuKhienSinhBoss la LENH SINH BOSS do bo dieu phoi lich (lichboss.go, NGOAI
+// actor) gui vao (KH6b Task 13, CHAN-3+CHAN-7). Con boss da duoc DUNG XONG HOAN
+// TOAN o ben ngoai — actor chi viec nhan lay va cam vao khu vuc.
+//
+// Vi sao dung HOP THU DIEU KHIEN chu khong phai hop thu gameplay: hop thu
+// gameplay la best-effort (day thi BO goi, dem soLanGuiRoi). Mot lenh sinh boss
+// bi bo im lang nghia la ca chu ky lich do khong co boss ma khong ai hay —
+// trong khi hop thu dieu khien bao loi RO RANG cho nguoi goi (qua han / actor
+// da dung) de bo dieu phoi con biet duong hoan lai hay ngung han.
+//
+// CHUYEN GIAO QUYEN SO HUU: sau khi gui con tro nay vao kenh, bo dieu phoi
+// TUYET DOI khong duoc cham vao *Boss nua — ke tu day no thuoc ve actor (dung
+// quy tac so huu cua k.quai/k.boss). Day la ly do lenh mang mot con tro DA DUNG
+// SAN thay vi mang "du lieu de actor tu dung": neu actor tu dung, no se phai
+// doc lich/dong ho/chon ngau nhien — dung cai ma CHAN-7 cam.
+type dieuKhienSinhBoss struct{ boss *Boss }
+
+func (dieuKhienSinhBoss) laDieuKhien() {}
+
 type dieuKhienDung struct{}
 
 func (dieuKhienDung) laDieuKhien() {}
@@ -533,6 +552,25 @@ func (k *KhuVuc) RoiKhuVuc(idNhanVat int64) error {
 	case <-time.After(thoiGianChoControl):
 		return ErrControlQuaHan
 	}
+}
+
+// SinhBoss la DUONG VAO DUY NHAT tu ben ngoai actor de dua mot con boss vao
+// khu vuc (KH6b Task 13). Chi bo dieu phoi lich (lichboss.go) goi — va sau nay
+// la duong spawn theo trigger cua ban 2.
+//
+// ⚠️ TUYET DOI KHONG goi tu TRONG actor (tu vongLap/nhipTim/xuLy): guiDieuKhien
+// cho toi thoiGianChoControl = 100ms tren CHINH hop thu ma vongLap dang ban ->
+// tu khoa chac chan (bay §6.10b). Sinh boss tu trong actor thi goi thang
+// themBoss.
+//
+// Tra loi thay vi nuot: bo dieu phoi PHAI phan biet duoc "khu vuc dang ban, lat
+// nua thu lai" (ErrControlQuaHan) voi "khu vuc chet roi, thu lai vo ich"
+// (ErrActorDaDung) — xem thuSinh trong lichboss.go.
+//
+// b == nil van di qua hop thu binh thuong; themBoss ben trong actor tu bo qua
+// (khong panic, khong them o nil vao danh sach).
+func (k *KhuVuc) SinhBoss(b *Boss) error {
+	return k.guiDieuKhien(dieuKhienSinhBoss{boss: b})
 }
 
 func (k *KhuVuc) guiDieuKhien(sk suKienDieuKhien) error {
@@ -694,6 +732,14 @@ func (k *KhuVuc) xuLyDieuKhien(sk suKienDieuKhien) bool {
 		k.xuLy(suKienRa{idNhanVat: sk.idNhanVat})
 		delete(k.anhChupDaRoi, sk.idNhanVat)
 		close(sk.xong)
+	case dieuKhienSinhBoss:
+		// KHONG goi xuLyGameplayDaXepTruoc o day (khac ba case tren): ba case
+		// kia la TRUY VAN — chung phai thay het gameplay da xep truoc thi cau
+		// tra loi moi dung. Day la MOT LENH, khong tra loi gi ca; va du no
+		// chay truoc hay sau mot suKienVao dang cho thi nguoi moi van thay
+		// boss: chay truoc -> suKienVao lap qua k.boss va gui -5; chay sau ->
+		// themBoss phat -5 cho ca khu vuc (da co nguoi moi trong do).
+		k.themBoss(sk.boss)
 	case dieuKhienDung:
 		return true
 	}

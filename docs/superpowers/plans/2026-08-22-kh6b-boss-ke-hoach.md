@@ -66,3 +66,31 @@ BAY DA KIEM CHUNG BANG CODE THAT (dua vao brief tung task):
 - specs/2026-07-26-giao-thuc-chien-dau.md dong 189 da dinh chinh -60 (danh sach id + cdir) tu 22/08/2026 — dung mo lai chuyen nay.
 
 VIEC KEM: sau khi chot danh sach nay, ghi thanh file ke hoach D:/NRO_GoiBanGiao/docs/superpowers/plans/2026-08-22-ke-hoach-kh6b-boss.md va cap nhat BAT-DAU-TU-DAY.md (§11) truoc khi commit.
+
+## Trạng thái thật — soát lại bằng CODE ngày 28/08/2026
+
+Bảng task ở trên ghi trạng thái **cũ hơn thực tế**. Đã kiểm từng task bằng cách `grep` chính
+mã nguồn (không tin sổ), kết quả:
+
+| Task | Bằng chứng trong code | Trạng thái |
+|---|---|---|
+| 2 | `lenhThongBaoToanServer` (`thongbao.go`), `lenhChat` (`chat.go`) | ✅ xong |
+| 3 | `type Boss struct` (`boss.go`) | ✅ xong |
+| 4 | `func goiXuatHienDayDu` + `type HinhDangHien` (`xuathien.go`) | ✅ xong |
+| 5 | `type BenDanh` + `KiemDanhHopLe` thuần (`chotkiem.go`) | ✅ xong |
+| **6** | `loathongbao.go` **chưa tồn tại** | ⏳ **đang làm 28/08** |
+| 7 | `k.boss = append` + `themBoss` (`khuvuc.go` ~1312) | ✅ xong |
+| 8 | `satThuongTheoNguoi` | ✅ xong |
+| 9 | máy trạng thái vòng đời boss | ✅ xong |
+| 10 | AI boss trong nhịp tim | ✅ xong |
+| 11 | `MocNoiGian` | ✅ xong |
+| **12** | chưa có chia thưởng theo đóng góp | ⬜ chờ task 6 |
+| **13** | `lichboss.go` chưa tồn tại | ⬜ |
+| **14** | `main.go` chưa nhắc tới boss lần nào | ⬜ chờ 6 + 13 |
+| **15** | `noidungboss.go` chưa tồn tại | ⬜ chờ 14 |
+
+**Còn 5 task: 6 → 12 → 13 → 14 → 15.** Cả 6 lẫn 13 đều chạm `khuvuc.go` (63KB) nên **phải
+tuần tự** — đúng cảnh báo ở mục "Thứ tự thi công" bên trên, không giao song song được.
+
+Sẵn sàng cho task 6: `SoKhuVuc.PhatToanServer` đã có ở `sokhuvuc.go:43`; khuôn để bắt chước
+là `thogi.go` (hàng đợi không chặn) và `luudinhky.go:111-172` (`BatDau`/`Dung` hai bước).

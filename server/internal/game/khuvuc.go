@@ -1128,6 +1128,145 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 			return
 		}
 
+		// ─── KH6b Task 8: don danh nham vao BOSS ────────────────────────────
+		//
+		// VI SAO NHANH NAY NAM O DAY chu khong phai mot goi len rieng: boss
+		// vao the gioi bang CHINH goi -5 cua nguoi choi (goiXuatHienBoss,
+		// xuathien.go) nen voi client no la mot "char" trong map — nut danh
+		// gui LEN dung goi -60 nay, chi khac o con so id. Client khong he co
+		// khai niem "danh boss".
+		//
+		// DAU CUA ID la thu duy nhat can de biet don nay nham vao ai: id boss
+		// LUON AM (CapIdBoss, boss.go), id nhan vat lay tu bigserial nen LUON
+		// DUONG. Chot dau AM o day (thay vi tra ca hai bang roi so ket qua) de
+		// mot id bia dat KHONG BAO GIO lac duoc vao duong nguoi choi, va nguoc
+		// lai — hai duong khong nuot nhau.
+		//
+		// CAM sua parser -60 trong login.go (CHAN-1 cua ke hoach KH6b): than
+		// goi len that su la "danh sach id + cdir" (Service.cs:1256-1265) ma
+		// may chu doc dung MOT int nen VO TINH DUNG voi mot muc tieu. Nhanh
+		// nay CHI doc gia tri id da parse san, khong dung toi tang parser.
+		if sk.idMucTieu < 0 {
+			// Chi boss DANG TREN MAN HINH moi la muc tieu hop le.
+			// TrangThai.DangHien() la DUNG dieu kien ma suKienVao va themBoss
+			// dung de quyet dinh co gui -5 hay khong, nen o day no cho mot
+			// dinh nghia duy nhat: "danh duoc" = "thay duoc". Boss dang NGHI
+			// (dem nguoc, client chua he biet id do) va boss da RA_DI (da don
+			// di) roi vao CUNG mot nhanh voi id bia dat: bo qua im lang, dung
+			// cach nhanh nay da xu ly mot idMucTieu khong khop ai. Mot id bia
+			// TUYET DOI khong duoc lam sap actor.
+			//
+			// Chot nay con che cho CLIENT: khi phat -60, client tim ca hai
+			// dau bang findCharInMap va dung ket qua NGAY (char3.cx,
+			// Controller.cs:3934) — doan do nam NGOAI khoi try/catch cua no.
+			// Phat mot don nham vao con boss ma client chua he nhan -5 la ban
+			// mot null-deref sang cho moi nguoi trong khu vuc.
+			var boss *Boss
+			for _, b := range k.boss {
+				if b != nil && b.Id == sk.idMucTieu && b.TrangThai.DangHien() {
+					boss = b
+					break
+				}
+			}
+			if boss == nil {
+				return
+			}
+
+			bayGio := k.dongHo() // dong ho tiem duoc, KHONG time.Now() thang.
+			ketQua := KiemDanhHopLe(benDanhTuNguoi(nguoi), ViTriCoMau{
+				X: boss.ViTriX,
+				Y: boss.ViTriY,
+				// HpHienTai lam kiem #4 ("muc tieu da chet") tu nhien che not
+				// CAI XAC boss: BossTroi LUON co Hp == 0 (bossChet dat) nen
+				// khong can them mot nhanh trang thai rieng o day — va don vao
+				// xac boss im lang DUNG NHU don vao mot nguoi choi da chet.
+				HpHienTai: boss.Hp,
+				// LucHienPha (KHONG PHAI MocThoiGian — xem chu thich hai
+				// truong do trong boss.go): boss vua vao pha moi duoc mot
+				// khoang bat tu 1500ms, giong het nguoi choi/quai vua hoi
+				// sinh. MocThoiGian doi theo MOI buoc trang thai nen dung no
+				// se lam boss bat tu lai o moi buoc.
+				LucHoiSinh: boss.LucHienPha,
+			}, bayGio)
+			if !ketQua.ChoPhep {
+				return // 4 kiem dau hong -> im lang, dung nhu hai nhanh danh o tren
+			}
+			nguoi.lanDanhCuoi = bayGio
+
+			chiMang := false // KH6 chua chot cong thuc chi mang — xem case suKienDanhQuai
+			var satThuong int32
+			if !ketQua.Truot {
+				lang := TimLang(nguoi.nv.Lang)
+				var satThuongGoc int64
+				if lang != nil {
+					satThuongGoc = int64(lang.SatThuongKhoiDau)
+				}
+				// He nguyen to cua BOSS lay tu Lang cua PHA dang chay: boss co
+				// lang that (PhaBoss.Lang, dung cho ca goi -5) nen KHONG dung
+				// heQuaiChuaXacDinh nhu quai. Pha nil (du lieu noi dung hong)
+				// -> roi ve trung tinh 100%, khong doan bua va khong nil-deref.
+				heBoss := heQuaiChuaXacDinh
+				if pha := boss.PhaHienTaiData(); pha != nil {
+					heBoss = heNguyenToNguoiChoi(pha.Lang)
+				}
+				satThuong = TinhSatThuong(satThuongGoc, nguoi.chieuDangChon,
+					heNguyenToNguoiChoi(nguoi.nv.Lang), heBoss, chiMang)
+				// TODO(Task 11 — noi gian theo %mau): MocNoiGian.HeSoDef nhan
+				// vao DUNG CHO NAY (sat thuong boss NHAN). Chua ap o Task 8 vi
+				// may trang thai chua kich hoat moc nao.
+			}
+			// Vuot tam thi KHONG duoc chi mang — client CHI hien chu "miss"
+			// khi chiMang == false. Dung ly do va dung vi tri voi hai nhanh
+			// danh o tren (dat SAU moi cho co the gan chiMang).
+			if ketQua.Truot {
+				chiMang = false
+			}
+
+			// bossNhanSatThuong la DUONG DUY NHAT duoc tru mau boss (chu thich
+			// cua chinh ham do): no ghi so dong gop, kep mau, va chay tron
+			// nghi thuc "boss chet" (chia thuong + thong bao) khi don nay ket
+			// lieu. Tu `boss.Hp -= satThuong` o day la bo qua CA hai thu do —
+			// nguoi choi mat sach phan thuong ma khong mot dong log nao bao.
+			hpTruoc := boss.Hp
+			daChet := k.bossNhanSatThuong(boss, nguoi.nv.ID, int64(satThuong), bayGio)
+
+			// Con so bao xuong client la SAT THUONG THAT SU DA AP (hieu mau
+			// truoc/sau), khong phai con so vua tinh ra. Hai cai nay lech nhau
+			// o dung cho dac ta §1.2 noi: don danh manh hon mau con lai. Lay
+			// hieu thay vi tu kep lai o day co hai cai loi: (a) chi con MOT
+			// noi kep mau — chinh bossNhanSatThuong — nen khong the lech nhau;
+			// (b) neu ham do tu choi don (trang thai boss doi giua chung),
+			// hieu bang 0 nen goi phat ra la mot cu "miss" that tha, khong bao
+			// gio co chuyen goi bao mot con so ma may chu khong he tru.
+			// Client tu tru con so nay khoi thanh mau boss (Char.doInjure) nen
+			// bao thua la lech thanh mau ngay lap tuc.
+			satThat := hpTruoc - boss.Hp
+
+			// Goi phat ra la -60 (KHONG PHAI -9/-12 cua quai): hai goi quai
+			// mang `byte mobId` — mot id boss am 4 byte khong nhet vao do
+			// duoc — va client tim muc tieu cua -60 bang GameScr.findCharInMap
+			// (Controller.cs:3989), dung cai kho ma boss dang nam trong nho
+			// goi -5. Phat cho CA KHU VUC (ke ca nguoi danh) dung nhu hai
+			// nhanh danh o tren.
+			//
+			// int32(boss.Id): dung phep thu hep ma goiXuatHienDayDu da dung
+			// khi ghi id boss vao goi -5, nen con so o day KHOP CHINH XAC id
+			// ma client dang giu.
+			//
+			// KHONG gui kem -30/9 (cap nhat mau) nhu nhanh PvP — hai ly do
+			// khien no CAN o do deu khong ton tai o day: goi -5 cua NGUOI CHOI
+			// ghi hp = HpToiDa (nguoi vao giua tran thay nguoi khac day mau)
+			// nen phai co goi sua, con goi -5 cua BOSS ghi b.Hp THAT; va con
+			// so trong -60 la sat thuong da ap that nen moi client tru ra dung
+			// bang may chu. Them mot goi nua chi la nhan doi luu luong o dung
+			// cho dong nguoi nhat cua game.
+			skillId := byte(nguoi.chieuDangChon.SkillId)
+			k.phatChoCaKhuVuc(goiDanhNguoiChoi(
+				int32(nguoi.nv.ID), skillId, int32(boss.Id), satThat, daChet, chiMang,
+			))
+			return
+		}
+
 		// Tim nguoi BI DANH trong khu vuc theo idMucTieu. Khong tim thay (da
 		// roi khu vuc giua chung, hoac client gui id cu/gia) -> im lang bo
 		// qua, dung tinh than voi suKienDanhQuai khi mobId khong khop con

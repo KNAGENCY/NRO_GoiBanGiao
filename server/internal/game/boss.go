@@ -182,6 +182,27 @@ type PhaBoss struct {
 	// (quyet dinh 4, thiet ke §2). Mac dinh false — im lang, an toan hon:
 	// them nham mot boss lon se lam ngap kenh toan server.
 	LaBossLon bool
+
+	// DiemThuong la TONG so diem phat ra khi GIET PHA NAY — chia cho nhung
+	// nguoi da danh theo ti le dong gop (quyet dinh 3, thiet ke §2; chia bang
+	// ChiaThuongTheoDongGop, tra bang traThuongBoss o khuvuc.go).
+	//
+	// VI SAO O PhaBoss CHU KHONG O Boss: hai ly do, ca hai deu la hau qua that
+	// neu dat nham cho.
+	//   1. Thuong duoc chia o MOI LAN PHA CHET (xem may trang thai §5: chet ->
+	//      TROI -> RA_DI -> con pha thi HIEN pha+1). Mot con so dat o Boss se
+	//      tra CUNG mot muc cho pha 1 (yeu) va pha cuoi (manh) — sai ngay ve
+	//      can bang, va khong sua duoc bang du lieu.
+	//   2. Boss la trang thai CHAY (Hp, ViTri, TrangThai, MocThoiGian — doi
+	//      tung tick); PhaBoss la DU LIEU NOI DUNG (Dame, HpChon, NhipDanhMs —
+	//      chu du an chinh tay). Do lon phan thuong la du lieu can bang, dung
+	//      chuong voi Dame/HpChon. Dat o Boss thi moi duong sinh boss lai phai
+	//      NHO chep no vao — dung kieu "bia ra tai cho" ma bay #7 thiet ke §7
+	//      canh bao.
+	//
+	// 0 (mac dinh) = pha KHONG thuong gi ca — im lang, an toan: mot pha quen
+	// khai bao se khong tu nhien phat ra diem tu con so nao.
+	DiemThuong int64
 }
 
 // CapHopLe kiem truong Cap co nam trong mien 1..255 khong (xem chu thich
@@ -362,14 +383,30 @@ func (b *Boss) CongSatThuong(idNguoi int64, sat int64) {
 	if b.SatThuongTheoNguoi == nil {
 		b.SatThuongTheoNguoi = make(map[int64]int64)
 	}
-	cu := b.SatThuongTheoNguoi[idNguoi]
-	// cu + sat > MaxInt64 <=> cu > MaxInt64 - sat. Viet theo kieu TRU (khong
-	// phai cong roi so sanh) vi phep cong da tran roi thi so sanh vo nghia.
-	if cu > tongSatThuongToiDa-sat {
-		b.SatThuongTheoNguoi[idNguoi] = tongSatThuongToiDa
-		return
+	b.SatThuongTheoNguoi[idNguoi] = congBaoHoa(b.SatThuongTheoNguoi[idNguoi], sat)
+}
+
+// congBaoHoa cong hai so, BAO HOA o MaxInt64 thay vi cuon vong ve so am.
+//
+// Dung o HAI cho co cung mot rui ro: cong don sat thuong (CongSatThuong) va
+// cong phan thuong vao nv.KinhNghiem (traThuongBoss, khuvuc.go). Ca hai deu la
+// bo dem chi TANG, khong bao gio giam, nen mot lan cuon vong la mot lan mat
+// trang so lieu MA KHONG BAO LOI GI — dung loai loi kho chan doan nhat.
+//
+// Viet theo kieu TRU ("a > max - b") chu khong phai cong roi so sanh: phep
+// cong da tran roi thi moi so sanh sau do deu vo nghia.
+//
+// b <= 0 tra ve a nguyen ven — hai duong goi deu da loc so khong duong tu
+// truoc (sat <= 0 bi CongSatThuong bo, phan <= 0 bi ChiaThuongTheoDongGop bo),
+// nen day chi la lop chan cuoi, khong phai duong chay chinh.
+func congBaoHoa(a, b int64) int64 {
+	if b <= 0 {
+		return a
 	}
-	b.SatThuongTheoNguoi[idNguoi] = cu + sat
+	if a > tongSatThuongToiDa-b {
+		return tongSatThuongToiDa
+	}
+	return a + b
 }
 
 // ChiaThuongTheoDongGop chia tongDiem cho tung nguoi THEO TI LE dong gop
@@ -449,4 +486,41 @@ func nhanRoiChia(a, b, c int64) int64 {
 		return tongSatThuongToiDa
 	}
 	return int64(q)
+}
+
+// ---------------------------------------------------------------------------
+// 5. Hai cau chu chay ngang man hinh (goi 93) — ham THUAN
+// ---------------------------------------------------------------------------
+
+// tenAnDanh la ten thay the khi KHONG tra duoc ten nguoi ha boss: ho da roi
+// khu vuc / mat ket noi ngay sau don ket lieu, hoac ten rong trong CSDL.
+//
+// Vi sao co ten thay the chu khong bo han cau thong bao: don ket lieu la mot
+// SU KIEN THAT da xay ra, ca may chu dang cho tin do; im lang vi khong tra
+// duoc mot cai ten se lam nguoi choi tuong boss van con song. Va vi sao khong
+// noi chuoi rong vao giua cau: "  vua ha guc Boss X!" doc nhu mot loi hien
+// thi, con day la mot cau hoan chinh.
+const tenAnDanh = "Một ninja bí ẩn"
+
+// cauBossXuatHien / cauBossBiHa dung NOI DUNG hai thong bao toan server cua he
+// boss (thiet ke §5: announce 93 luc HIEN va luc bi ha, chi khi LaBossLon).
+//
+// Tach thanh ham THUAN — khong phai noi chuoi ngay tai cho goi — vi ba ly do:
+//   - Day la thu NGUOI CHOI DOC. Mot test ghim nguyen van (khong ghep lai tu
+//     chinh hang so trong code) la thu duy nhat bat duoc "ai do sua loi chao
+//     cua ca may chu" thanh mot thay doi CO CHU DICH thay vi mot tai nan.
+//   - Chung khong cham trang thai gi nen goi duoc tu trong actor ma khong phai
+//     nghi ve ky luat §6.9.
+//   - Mot cho duy nhat de sau nay them mau/bien the, khong phai di sua hai noi.
+//
+// KHONG kiem do dai o day: goi 93 cho phep toi 65535 byte sau ma hoa
+// (goiThongBaoToanServer, thongbao.go) va ten boss/nguoi choi khong bao gio
+// gan nguong do; neu co, goiThongBaoToanServer da log ro va tra nil — mot lop
+// chan la du, hai lop chi lam nhanh chet khong test nao voi toi.
+func cauBossXuatHien(tenBoss string) string {
+	return "Boss " + tenBoss + " vừa xuất hiện!"
+}
+
+func cauBossBiHa(tenNguoi, tenBoss string) string {
+	return tenNguoi + " vừa hạ gục Boss " + tenBoss + "!"
 }

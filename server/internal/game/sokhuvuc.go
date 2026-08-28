@@ -66,6 +66,30 @@ func (s *SoKhuVuc) GanLoa(loa *BoPhatThanh) {
 	loa.BatDau(s.PhatToanServer)
 }
 
+// LoaDaGan tra ve cai loa dang cam vao TAT CA khu vuc, hoac nil neu con khu
+// vuc nao chua duoc gan (hoac cac khu vuc dang cam hai cai loa khac nhau).
+//
+// Ham nay ton tai VI MOT LY DO DUY NHAT: cho cmd/nroserver khoa duoc bang test
+// rang main.go THAT SU goi GanLoa. Truong k.loa la noi bo cua package nay, nen
+// neu khong co cua so nay thi tu ben ngoai KHONG CACH NAO phan biet "da noi
+// day" voi "quen noi day" — ma "quen noi day" chinh la lo hong Task 14 di va:
+// xepThongBao thay loa nil thi LANG LE return, khong mot dong log.
+//
+// Tra ve chinh con tro (khong phai bool) de test con khang dinh duoc no la
+// DUNG cai loa ma main() dang giu tay cam — gan mot cai roi tat mot cai khac
+// thi goroutine phat con song mai sau khi may chu tuong da tat sach.
+func (s *SoKhuVuc) LoaDaGan() *BoPhatThanh {
+	var chung *BoPhatThanh
+	for _, k := range s.theoMap {
+		l := k.loa.Load()
+		if l == nil || (chung != nil && l != chung) {
+			return nil
+		}
+		chung = l
+	}
+	return chung
+}
+
 // DungTatCa dung sach moi khu vuc (goi luc tat may chu) va tra loi neu bat
 // ky actor nao khong thoat. Van thu dung HET khu vuc de mot actor ket khong
 // lam bo qua viec don dep cac actor con lai.

@@ -106,3 +106,65 @@ Kế hoạch viết trước khi thi công nên tên file trong đó là dự đ
 May là lần soát nhầm đó không vô ích: agent chuyển sang nghiệm thu bằng kiểm thử đột biến và
 tìm ra **loa đảo thứ tự thông báo** — bốn thông báo A,B,C,D lên sóng thành A,D,C,B, người chơi
 đọc "Boss đã bị hạ" trước "Boss xuất hiện". Đã vá (`0a82053`).
+
+
+---
+
+## Task 12b — Sổ nợ phần thưởng (28/08/2026, nhánh `so-no-thuong` dựng trên `cf18340`)
+
+> ⚠️ **Bảng "Trạng thái thật" bên trên là bản của nhánh này (`cf18340`), KHÁC bản trên
+> `main` (`f6b16cb`).** `main` đã sửa lại task 8–11 thành *"khai khống — thực tế chưa làm"*
+> sau một lần soát thứ hai. Kiểm bằng chính mã nguồn ở nhánh này thì: `khuvuc.go` có
+> `CongSatThuong` 1 lần và `BossTroi` 4 lần (task 12 tự làm phần tối thiểu nó cần), nhưng
+> `MocNoiGian` và `BossChao` vẫn **0 lần** — tức task 11 và 9 vẫn chưa trọn. Ai gộp nhánh
+> này nhớ lấy bản bảng của `main`, đừng lấy bản ở trên.
+
+**Vấn đề.** Task 12 chốt một hạn chế có chủ đích: người đóng góp sát thương nhưng **đã rời
+khu vực / mất kết nối** đúng lúc boss chết thì không nhận được gì — `traThuongBoss` chỉ ghi
+một dòng `slog.Warn` kèm số điểm bị bỏ. Lý do khi đó đúng và đến giờ vẫn đúng: actor không
+sở hữu con trỏ `*store.NhanVat` của người đã rời (§6.9), còn đẩy một bản chụp cũ qua `ThoGhi`
+thì **ghi đè cả dòng**, kéo lùi mọi thứ người đó làm từ lúc rời đi.
+
+**Cách giải.** Mở đường thứ ba: khoản đó thành một **món nợ bền** trong bảng
+`thuong_cho_nhan`, đi qua hàng đợi `SoNoThuong` (khuôn `ThoGhi` — actor chỉ chạm một map
+trong bộ nhớ vài chục nano-giây, không cham CSDL), và được trả ở **lần đăng nhập sau**.
+
+| Mảnh | File |
+|---|---|
+| Bảng + ràng buộc | `server/internal/store/migrations/0004_thuong_cho_nhan.sql` |
+| Ghi nợ / nhận nợ (một giao dịch) | `server/internal/store/nothuong.go` |
+| Hàng đợi ngoài actor | `server/internal/game/sonothuong.go` |
+| `traThuongBoss` ghi nợ thay vì bỏ | `server/internal/game/khuvuc.go` (`xepNoThuong`) |
+| Trả nợ lúc đăng nhập | `server/internal/game/login.go` (`traNoThuongDangCho`) |
+| Nối dây + tắt sạch | `server/internal/game/moluutru.go`, `sokhuvuc.go`, `tatmaychu.go` |
+
+**Ba bẫy đã phải xử — ghi lại kẻo người sau vấp:**
+
+1. **Thứ tự trả nợ không thể đảo.** `store.NhanNoThuong` cộng vào *cột* `kinh_nghiem`, nhưng
+   bản `*store.NhanVat` trong RAM (thứ actor sẽ sở hữu từ đó trở đi) vẫn mang số cũ. `ThoGhi`
+   ghi đè cả dòng, nên chỉ cần một lần lưu định kỳ 60 giây là con số cũ đó **xoá sạch phần
+   vừa cộng** — đúng cái bẫy đã khiến khoản thưởng này không trả được ngay từ đầu, rình sẵn ở
+   đầu bên kia. Vì vậy `traNoThuongDangCho` cộng luôn vào `nv` ngay sau khi CSDL cộng xong.
+2. **Hàng đợi nợ CỘNG DỒN, không ghi đè.** `ThoGhi` ghi đè vì "bản chụp mới luôn tốt hơn bản
+   cũ"; ở sổ nợ mỗi khoản là một món tiền riêng — ghi đè là làm biến mất phần thưởng của
+   người chơi. Ghi lỗi thì cả lô được xếp lại (cộng dồn) để thử ở nhịp sau.
+3. **Đánh dấu và cộng phải nằm trong MỘT giao dịch.** Tách ra hai giao dịch thì một cú sập
+   giữa chừng hoặc ăn mất phần thưởng (đánh dấu xong, chưa cộng) hoặc phát hai lần (cộng
+   xong, chưa đánh dấu). Gọi `NhanNoThuong` hai lần liên tiếp phải ra `500` rồi `0`.
+
+**Nối dây có chủ đích tránh `main.go`** (đang thuộc task 14, có agent khác làm): sổ nợ được
+mở và cắm trong `MoLuuTru` — đúng chỗ dự án đã chốt là điểm lắp ráp duy nhất — và `TatMayChu`
+lấy nó từ `SoKhuVuc` thay vì đổi chữ ký. Ba test khoá riêng việc nối dây, vì bài học của
+chính task 12 là `CongSatThuong` từng nằm trong `boss.go` suốt từ task 3 mà không ai gọi tới.
+
+**Nghiệm thu.** 30 test mới (7 store + 7 hàng đợi + 7 actor + 6 đăng nhập + 3 nối dây), mỗi
+mảnh đều thấy ĐỎ trước khi viết code. **Kiểm thử đột biến 8/8 bị giết:** bỏ `da_nhan = false`
+· bỏ lọc `nhan_vat_id` · hàng đợi ghi đè thay vì cộng dồn · vứt lô khi ghi lỗi · quay về bỏ
+qua người vắng mặt · cộng CSDL mà không cộng vào bản trong RAM · mở sổ nợ nhưng quên cắm vào
+khu vực · tắt máy chủ không xả nốt sổ nợ. `go test ./...` 8/8 gói xanh, `gofmt` + `vet` sạch.
+`-race` **không chạy được** trên máy này (thiếu `gcc`, xem §9) — bù bằng `-count=5`.
+
+**Còn nợ lại (không chặn gì):** bảng `thuong_cho_nhan` chỉ tăng, chưa có đường dọn các dòng
+`da_nhan = true` cũ; và chỉ hỗ trợ `loai_thuong = 'kinh_nghiem'` — cột để mở nhưng thêm loại
+mới phải sửa **cả** ràng buộc CHECK **lẫn** `NhanNoThuong`, nếu không khoản nợ loại mới sẽ
+nằm lại vĩnh viễn không ai trả.

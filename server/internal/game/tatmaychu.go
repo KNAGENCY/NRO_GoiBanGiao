@@ -37,5 +37,8 @@ import (
 func TatMayChu(ctx context.Context, soKhuVuc *SoKhuVuc, thoGhi *ThoGhi) error {
 	soKhuVuc.LuuTatCa(thoGhi)
 	err := thoGhi.DongVaChoXong(ctx)
-	return errors.Join(err, soKhuVuc.DungTatCa())
+	errDung := soKhuVuc.DungTatCa()
+	// So no dong SAU CUNG, khi khong con actor nao co the xep them khoan nao
+	// nua — dong som hon la vut di dung nhung khoan cuoi cung.
+	return errors.Join(err, errDung, soKhuVuc.DongSoNo(ctx))
 }

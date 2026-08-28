@@ -88,6 +88,21 @@ type KhuVuc struct {
 	// dung (nil) nen MoKhuVuc khong can khoi tao gi them.
 	loa atomic.Pointer[BoPhatThanh]
 
+	// soNo la duong DUY NHAT actor duoc dung de tra thuong cho nguoi KHONG con o
+	// trong khu vuc (da roi map, hoac mat ket noi dung luc boss chet). Actor chi
+	// XepNo — cham mot map trong bo nho vai chuc nano-giay — con viec ghi CSDL do
+	// goroutine cua SoNoThuong lam (sonothuong.go).
+	//
+	// VI SAO KHONG CONG THANG cho ho: actor khong so huu con tro store.NhanVat
+	// cua nguoi da roi (§6.9), va day mot ban chup cu qua ThoGhi thi GHI DE CA
+	// DONG, keo lui moi thu ho lam tu luc roi di.
+	//
+	// nil = chua noi day -> xepNoThuong im lang bo qua, KHONG panic (giong het
+	// loa o tren: rat nhieu test dung MoKhuVuc truc tiep). atomic.Pointer vi cung
+	// mot ly do voi loa — GanSoNo chay tu goroutine main SAU khi cac actor da
+	// BatDau, con vong lap actor thi doc truong nay.
+	soNo atomic.Pointer[SoNoThuong]
+
 	hopThu          chan suKienKhuVuc
 	hopThuDieuKhien chan suKienDieuKhien
 	xong            chan struct{}
@@ -1531,20 +1546,23 @@ func (k *KhuVuc) bossChet(b *Boss, idNguoiHa int64, bayGio time.Time) {
 // day cho ThoGhi. Ghi vao nv la du de ben; cai gia toi da la 60 giay tien do
 // neu may chu sap dot ngot — dung muc da chot cho MOI chi so khac trong game.
 //
-// NGUOI DA ROI KHU VUC BI BO QUA — cai gia da can nhac va chap nhan:
+// NGUOI DA ROI KHU VUC DUOC GHI NO, khong con bi bo (ban dau task nay bo ho —
+// xem lich su file de doi chieu). Ly do KHONG cong thang cho ho van nguyen ven:
 //   - Ho khong con trong k.nguoiTrong, nghia la actor nay KHONG con so huu con
 //     tro nv cua ho (ho dang o khu vuc khac, hoac phien da dong). Ghi vao mot
 //     con tro minh khong so huu la dung bay §6.9 (tranh chap du lieu that).
 //   - Duong vong "day mot ban store.NhanVat cu cho ThoGhi" con te hon: ThoGhi
 //     ghi de CA DONG, nen ban chup cu se KEO LUI moi thu ho lam tu luc roi di
 //     (vi tri, mau, vang) — mat du lieu that de doi lay mot khoan thuong.
-//   - Cach dung la mot SO NO phan thuong ben (bang CSDL rieng + duong nhan lai
-//     luc dang nhap). Do la mot TINH NANG RIENG — can bang moi, migration moi,
-//     duong nhan thuong luc dang nhap — khong phai task nay. CHUA CO AI LAM;
-//     neu tinh cong bang nay quan trong thi phai mo mot task rieng cho no.
 //
-// Vi vay o day chi log muc canh bao KEM SO DIEM — de neu chuyen do xay ra
-// nhieu that thi co so lieu ma quyet dinh, thay vi mat im lang.
+// Nen phan cua ho di duong thu ba: k.xepNoThuong xep mot khoan NO vao hang doi
+// cua SoNoThuong (sonothuong.go) — mot map trong bo nho, khoa mutex vai chuc
+// nano-giay, KHONG cham CSDL tu trong actor. Goroutine rieng cua so no ghi
+// xuong bang thuong_cho_nhan, va login.go tra vao lan dang nhap sau.
+//
+// Chua noi day so no (k.soNo == nil) thi quay ve hanh vi cu: log canh bao kem
+// so diem bi bo. Khong panic, khong lam dut duong chia thuong cho nguoi con o
+// lai — moi test cu va giai doan truoc khi main.go goi GanSoNo deu di qua day.
 //
 // pha nhan qua THAM SO (khong tu goi PhaHienTaiData lai) de chac chan chia
 // theo DUNG pha ma bossChet vua thong bao — mot cho duy nhat doc pha.
@@ -1556,12 +1574,38 @@ func (k *KhuVuc) traThuongBoss(b *Boss, pha *PhaBoss) {
 	for id, diem := range phan {
 		nguoi, co := k.nguoiTrong[id]
 		if !co || nguoi == nil || nguoi.nv == nil {
-			slog.Warn("nguoi dong gop khong con trong khu vuc luc boss chet — BO phan thuong",
-				"idBoss", b.Id, "idNguoi", id, "diemBoQua", diem)
+			k.xepNoThuong(b.Id, id, diem)
 			continue
 		}
 		nguoi.nv.KinhNghiem = congBaoHoa(nguoi.nv.KinhNghiem, diem)
 	}
+}
+
+// xepNoThuong ghi mot khoan thuong thanh NO cho nguoi khong con o trong khu
+// vuc. Chay TRONG actor, nen chi duoc lam dung mot viec: nem vao hang doi roi
+// di tiep. Moi thu cham CSDL nam trong goroutine cua SoNoThuong.
+//
+// idBoss chi de dien vao log — so no khong luu nguon, va co y khong luu: bang
+// thuong_cho_nhan la so TIEN, khong phai so su kien. Muon truy nguon thi doc
+// log, dung lam phinh bang ma moi lan dang nhap deu phai quet qua.
+//
+// so no chua duoc noi day -> giu nguyen hanh vi cu (log canh bao kem so diem
+// bi bo). Day la duong ma moi test cu va ca giai doan truoc khi main.go goi
+// GanSoNo di qua.
+func (k *KhuVuc) xepNoThuong(idBoss, idNguoi, diem int64) {
+	so := k.soNo.Load()
+	if so == nil {
+		slog.Warn("nguoi dong gop khong con trong khu vuc luc boss chet — BO phan thuong (chua noi so no)",
+			"idBoss", idBoss, "idNguoi", idNguoi, "diemBoQua", diem)
+		return
+	}
+	so.XepNo(store.NoThuong{
+		NhanVatID: idNguoi,
+		Loai:      store.LoaiThuongKinhNghiem,
+		SoDiem:    diem,
+	})
+	slog.Info("nguoi dong gop khong con trong khu vuc luc boss chet — GHI NO, tra o lan dang nhap sau",
+		"idBoss", idBoss, "idNguoi", idNguoi, "diem", diem)
 }
 
 // tenNguoiTrongKhuVuc tra ten hien thi cua mot nguoi choi dang o trong khu

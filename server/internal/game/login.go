@@ -896,6 +896,9 @@ func (b *BoXuLy) xuLyDangNhap(s *mynet.Session, m *protocol.Message) error {
 		slog.Error("loi he thong khi tai nhan vat", "ip", s.DiaChiIP, "loi", err)
 		return guiTuChoi(s, "Không tải được nhân vật, vui lòng thử lại sau.")
 	}
+	// Tra het so no phan thuong dang cho TRUOC khi vao the gioi — xem
+	// traNoThuongDangCho ve ly do thu tu nay khong the dao.
+	b.traNoThuongDangCho(nv)
 	return b.vaoTheGioi(s, nv) // da co -> vao the gioi (stub Ke hoach 2)
 }
 
@@ -919,6 +922,60 @@ func guiTuChoi(s *mynet.Session, cau string) error {
 // guiChuyenSangTaoNhanVat bao client mo man hinh tao nhan vat (lenh 2, than rong).
 func guiChuyenSangTaoNhanVat(s *mynet.Session) error {
 	return s.Gui(&protocol.Message{Command: lenhTaoNhanVat})
+}
+
+// traNoThuongKhiVao la phan MO RONG khong xuat cua Kho ma duong dang nhap dung
+// de tra so no phan thuong (bang thuong_cho_nhan) — dung khuon voi
+// ghiDongBoKhiBiDa o dau file: mot interface HEP duoc type-assert KHI CAN, thay
+// vi them phuong thuc vao Kho.
+//
+// VI SAO KHONG NHET VAO Kho: lam vay thi MOI kho gia trong moi test hien co
+// (hang chuc cai, phan lon khong lien quan gi toi thuong) deu phai cai them mot
+// phuong thuc rong. *store.Store thoa man interface nay tu nhien, nen may chu
+// that co day du tinh nang ma khong test nao phai sua.
+type traNoThuongKhiVao interface {
+	NhanNoThuong(ctx context.Context, nhanVatID int64) (int64, error)
+}
+
+// traNoThuongDangCho cong het no phan thuong dang cho cua nhan vat nay vao CSDL
+// VA vao ban dang giu trong bo nho.
+//
+// PHAI CHAY TRUOC vaoTheGioi, va PHAI cong vao ca ban trong bo nho — day la
+// diem de sai nhat cua ca tinh nang. store.NhanNoThuong cong vao COT
+// kinh_nghiem duoi CSDL, nhung ban *store.NhanVat trong RAM (thu ma actor khu
+// vuc se so huu tu day tro di) van dang mang so CU. ThoGhi ghi DE CA DONG, nen
+// chi can mot lan luu dinh ky (60 giay) la con so cu do xoa sach phan vua cong.
+// Cong vao nv o day lam hai ban khop lai ngay lap tuc.
+//
+// LOI KHONG CHAN DUONG VAO: CSDL hong o buoc nay thi giao dich bi huy va no van
+// nam nguyen trong bang — lan dang nhap sau se tra. Chan cua vao vi mot khoan
+// thuong la doi mot phien choi lay mot con so, khong dang.
+//
+// Kho khong cai NhanNoThuong (moi kho gia trong test cu) -> khong lam gi.
+func (b *BoXuLy) traNoThuongDangCho(nv *store.NhanVat) {
+	if nv == nil {
+		return
+	}
+	kho, co := b.kho.(traNoThuongKhiVao)
+	if !co {
+		return
+	}
+
+	ctx, huy := context.WithTimeout(context.Background(), hanGioGhi)
+	defer huy()
+
+	diem, err := kho.NhanNoThuong(ctx, nv.ID)
+	if err != nil {
+		slog.Error("khong tra duoc so no phan thuong — no van con trong bang, se tra lan sau",
+			"idNhanVat", nv.ID, "loi", err)
+		return
+	}
+	if diem <= 0 {
+		return
+	}
+	nv.KinhNghiem = congBaoHoa(nv.KinhNghiem, diem)
+	slog.Info("da tra so no phan thuong luc dang nhap",
+		"idNhanVat", nv.ID, "diem", diem, "kinhNghiemMoi", nv.KinhNghiem)
 }
 
 // vaoTheGioi la diem hen chung cho ca hai duong: dang nhap co san nhan vat, va

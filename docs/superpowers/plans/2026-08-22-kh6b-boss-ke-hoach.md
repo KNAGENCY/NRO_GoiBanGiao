@@ -80,16 +80,35 @@ mã nguồn (không tin sổ), kết quả:
 | 5 | `type BenDanh` + `KiemDanhHopLe` thuần (`chotkiem.go`) | ✅ xong |
 | 6 | `BoPhatThanh` ở **`thongbao.go`** (KHÔNG phải `loathongbao.go`), có từ `6e51dd8` | ✅ xong — soát 28/08 tìm theo **tên file** nên kết luận nhầm |
 | 7 | `k.boss = append` + `themBoss` (`khuvuc.go` ~1312) | ✅ xong |
-| 8 | `satThuongTheoNguoi` | ✅ xong |
-| 9 | máy trạng thái vòng đời boss | ✅ xong |
-| 10 | AI boss trong nhịp tim | ✅ xong |
-| 11 | `MocNoiGian` | ✅ xong |
-| **12** | chưa có chia thưởng theo đóng góp | ⏳ **việc tiếp theo** |
-| **13** | `lichboss.go` chưa tồn tại | ⬜ |
-| **14** | `main.go` chưa nhắc tới boss lần nào | ⬜ chờ 6 + 13 |
-| **15** | `noidungboss.go` chưa tồn tại | ⬜ chờ 14 |
+| 8 | định tuyến `-60` id âm → boss, trong `case suKienDanhNguoiChoi` (`khuvuc.go` 1128+, +139 dòng) | ✅ xong 28/08 — dùng lại `KiemDanhHopLe` + `TinhSatThuong` + `bossNhanSatThuong` |
+| 9 | `nhipBoss` + `mayTrangThaiBoss` + `bossRoiTheGioi` (`khuvuc.go` 2038+), `Boss.The` nối `TheSongBoss.Tat()` | ✅ xong 28/08 — **trừ nhánh biến hình ở RA_DI**, chờ GATE task 1 |
+| **10** | `nhipTim` không xử lý boss | ⬜ **CHƯA LÀM** |
+| **11** | `khuvuc.go` có **0 lần** nhắc `MocNoiGian` — tên đó chỉ nằm ở `boss.go` (task 3) | ⬜ **CHƯA LÀM** |
+| 12 | `bossNhanSatThuong` + `bossChet` + `traThuongBoss` (`khuvuc.go` 1317+), `PhaBoss.DiemThuong` | ✅ xong 28/08 — **nhưng `bossNhanSatThuong` chưa ai gọi, chờ task 8** |
+| 13 | `lichboss.go` + 3 chỗ trong `khuvuc.go` (dòng 400–417, 554–573, 732–739) | ✅ xong 28/08 |
+| 14 | `noiBoPhatThanh()` + `GanLoa` 5 khu vực, thứ tự tắt `boLuu → loa → TatMayChu → Close` | ⏳ **nửa xong** — bộ phát thanh đã nối; **lịch boss chưa bật** (có chú thích đánh dấu chỗ) |
+| 15 | `noidungboss.go` — 2 boss mẫu (1 con 2 pha + boss lớn + `MocNoiGian`) | ⏳ **nửa xong** — dữ liệu đủ; **smoke client Unity chưa làm** (chỉ chủ dự án làm được) |
 
-**Còn 4 task: 12 → 13 → 14 → 15.** Cả 6 lẫn 13 đều chạm `khuvuc.go` (63KB) nên **phải
+**Còn 2 task: `10 → 11`** — cả hai chạm `khuvuc.go` nên **phải tuần tự**.
+
+Task 9 đã để sẵn hai chỗ nối, có đánh dấu trong code:
+- bước `BossHoatDong` **để trống** cho task 10, kèm test `TestBossHoatDongDungYen_ChoTask10` ghim nguyên
+  trạng "im lặng" — task 10 **buộc phải sửa test đó**, tức có một chỗ bắt dừng lại đọc.
+- nhánh **còn pha** ở `BossRaDi` liệt kê đủ những trường phải đặt lại, chờ task 11.
+
+> ⚠️ **Task 1 (GATE hỏi client về biến hình) VẪN CHƯA LÀM** — file research chưa tồn tại.
+> Nó **chặn task 11**: chưa biết client có chấp nhận một id đã `-6` quay lại bằng `-5` hay không.
+> Làm task 11 mà bỏ qua GATE này là đoán, và đoán sai thì boss biến hình xong **biến mất**.
+
+Task 12, 13, 15 đã xong và gộp `main` (`922eed8`); task 14 xong nửa bộ phát thanh.
+
+> ⚠️ **Hai mối nối đang treo, cố ý:**
+> - `bossNhanSatThuong` (task 12) **chưa ai gọi** — task 8 phải gọi nó sau khi tính sát thương,
+>   và **tuyệt đối không tự `b.Hp -= ...`** (làm vậy là bỏ qua cả sổ đóng góp lẫn chốt chống chia
+>   thưởng hai lần). Câu này đã ghi ngay trong chú thích hàm.
+> - `TheSongBoss.Tat()` (task 13) **chưa ai gọi** — task 9 phải gọi khi boss hết pha và rời thế
+>   giới, nếu không mỗi mục lịch chỉ sinh **đúng một lần** rồi thôi.
+> - Lịch boss **chưa bật** ở `main.go` — task 14 đã để chú thích đánh dấu đúng hai chỗ bật/tắt. Cả 6 lẫn 13 đều chạm `khuvuc.go` (63KB) nên **phải
 tuần tự** — đúng cảnh báo ở mục "Thứ tự thi công" bên trên, không giao song song được.
 
 Sẵn sàng cho task 6: `SoKhuVuc.PhatToanServer` đã có ở `sokhuvuc.go:43`; khuôn để bắt chước
@@ -107,17 +126,32 @@ May là lần soát nhầm đó không vô ích: agent chuyển sang nghiệm th
 tìm ra **loa đảo thứ tự thông báo** — bốn thông báo A,B,C,D lên sóng thành A,D,C,B, người chơi
 đọc "Boss đã bị hạ" trước "Boss xuất hiện". Đã vá (`0a82053`).
 
+### Soát nhầm LẦN HAI — 28/08, cùng một kiểu sai
+
+Lần một: grep theo **tên file** kế hoạch dự đoán (`loathongbao.go`) → tưởng task 6 chưa làm, thực ra
+đã xong ở `thongbao.go`.
+
+Lần hai: grep theo **tên kiểu** trên toàn bộ `*.go` → trúng `boss.go` rồi tưởng task 8–11 đã xong.
+Nhưng `boss.go` là sản phẩm của **task 3** (mô hình dữ liệu). Thứ task 8–11 phải làm là **nối chúng
+vào actor**, tức phải xuất hiện trong `khuvuc.go` — nơi đó có **0 lần**.
+
+**Cách soát đúng, dùng từ giờ:** grep **trong đúng file mà task đó phải sửa** (cột "File" của bảng
+task), không grep toàn thư mục. Một cái tên tồn tại không có nghĩa là nó được gọi.
+
+```bash
+# Sai: grep -r "MocNoiGian" *.go          -> trung boss.go, ket luan nham
+# Dung: grep -c "MocNoiGian" khuvuc.go    -> 0, tuc CHUA noi day
+```
 
 ---
 
 ## Task 12b — Sổ nợ phần thưởng (28/08/2026, nhánh `so-no-thuong` dựng trên `cf18340`)
 
-> ⚠️ **Bảng "Trạng thái thật" bên trên là bản của nhánh này (`cf18340`), KHÁC bản trên
-> `main` (`f6b16cb`).** `main` đã sửa lại task 8–11 thành *"khai khống — thực tế chưa làm"*
-> sau một lần soát thứ hai. Kiểm bằng chính mã nguồn ở nhánh này thì: `khuvuc.go` có
-> `CongSatThuong` 1 lần và `BossTroi` 4 lần (task 12 tự làm phần tối thiểu nó cần), nhưng
-> `MocNoiGian` và `BossChao` vẫn **0 lần** — tức task 11 và 9 vẫn chưa trọn. Ai gộp nhánh
-> này nhớ lấy bản bảng của `main`, đừng lấy bản ở trên.
+> ℹ️ **Ghi chú lịch sử:** nhánh này dựng trên `cf18340` (task 12) khi commit đó còn chưa
+> gộp `main`. Trong lúc làm, `main` đã tiến lên: task 12 được gộp (`922eed8`), rồi task 8
+> (`15be8df`) và task 9 (`9e6f6c9`). Đã gộp `main` vào nhánh này và giải xung đột —
+> `khuvuc.go` tự gộp được, `sokhuvuc.go` chỉ là hai hàm mới đặt cạnh nhau (`LoaDaGan` của
+> task 14 và `GanSoNo`/`DongSoNo` của mục này).
 
 **Vấn đề.** Task 12 chốt một hạn chế có chủ đích: người đóng góp sát thương nhưng **đã rời
 khu vực / mất kết nối** đúng lúc boss chết thì không nhận được gì — `traThuongBoss` chỉ ghi
@@ -189,11 +223,15 @@ viễn** mới phân biệt được. Và viết lại nó cho thấy hậu qu�
 bản soi mô tả: tách hàng đợi hai tầng (làm vì lý do khác) đã vô tình chữa chỗ "một lô hỏng
 làm kẹt cả đường ghi", nên van xả giờ chỉ còn ngăn `choThuLai` phình mãi.
 
-**⚠️ NHƯNG TÍNH NĂNG CHƯA TỪNG CHẠY.** `bossNhanSatThuong` — đường duy nhất nạp
-`SatThuongTheoNguoi` — không có ai gọi ngoài test, vì **task 9/10/11 chưa làm**. Máy chủ thật
-chưa có con boss nào ăn được đòn, nên `traThuongBoss` chia một map rỗng và sổ nợ chưa từng
-ghi khoản nào. Đây đúng cái bẫy mục này viết ra để cảnh báo — nó vẫn còn, chỉ **lùi lên một
-tầng** cao hơn chỗ ba test nối dây khoá được.
+**Về câu hỏi "tính năng có chạy thật không" — đã đổi câu trả lời giữa chừng.** Lúc hai agent
+soi (nền `cf18340`), `bossNhanSatThuong` — đường duy nhất nạp `SatThuongTheoNguoi` — **không
+có ai gọi ngoài test**, nên `traThuongBoss` chia một map rỗng và sổ nợ chưa từng ghi khoản
+nào. Đó đúng là cái bẫy mục này viết ra để cảnh báo, chỉ lùi lên một tầng cao hơn chỗ ba test
+nối dây khoá được. **Nhưng trong lúc làm, task 8 đã xong và gộp `main`** (`15be8df` — "người
+chơi đánh được boss"), nối đúng mối treo đó: `khuvuc.go` trên `main` gọi `bossNhanSatThuong`
+thật khi người chơi đánh trúng boss. Sau khi gộp `main` vào đây thì đường đi đã thông từ đầu
+tới cuối. **Vẫn chưa nghiệm thu tay bằng client Unity thật** — đó là việc chỉ chủ dự án làm
+được, và không test nào thay thế được.
 
 **Còn nợ lại (không chặn gì):** bảng `thuong_cho_nhan` chỉ tăng, chưa có đường dọn các dòng
 `da_nhan = true` cũ; và chỉ hỗ trợ `loai_thuong = 'kinh_nghiem'` — cột để mở nhưng thêm loại

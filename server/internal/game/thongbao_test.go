@@ -207,12 +207,13 @@ func TestBoPhatThanhTonTrongNhipToiThieu(t *testing.T) {
 		if len(daPhat) > truoc {
 			mocPhat = append(mocPhat, lech)
 		}
-		// Sau moc 1400ms: B bi day som PHAI con nam trong hang doi (xep lai,
-		// khong bi vut bo) — day la nua thu hai cua hop dong chong ngap.
+		// Sau moc 1400ms: B den som PHAI con nguyen trong hang doi — nua thu hai
+		// cua hop dong chong ngap la "hoan lai", khong phai "vut bo".
 		if lech == 1400*time.Millisecond {
 			if con := len(b.hangDoi); con != 1 {
 				t.Fatalf("tai +1400ms (chua du nhip), hang doi con %d yeu cau, muon 1 "+
-					"(thong bao den som phai duoc XEP LAI cho toi luot, khong duoc mat)", con)
+					"(thong bao den som phai CON NGUYEN o dau hang cho toi luot: "+
+					"nhip chua du gio khong duoc dong vao hang doi, cang khong duoc vut bo)", con)
 			}
 			if soBo := b.SoLanBo(); soBo != 0 {
 				t.Fatalf("tai +1400ms, SoLanBo() = %d, muon 0 (hang doi con cho, khong duoc bo)", soBo)
@@ -364,5 +365,88 @@ func TestBoPhatThanhVongLapThatPhatQuaBatDau(t *testing.T) {
 		}
 	case <-time.After(3 * time.Second):
 		t.Fatal("sau 3 giay that, vongLap that (qua BatDau + ticker) van chua phat thong bao nao")
+	}
+}
+
+// TestBoPhatThanhGiuDungThuTuDuoiNhipThat chay nhip() theo DUNG CADENCE THAT
+// cua vongLap (moi nhipKiemPhatThanh = 50ms, xem thongbao.go) thay vi vai moc
+// chon tay — vi day chinh la dieu kien lam lo khuyet tat: giua hai lan phat
+// cach nhau 1,5 giay co toi ~29 nhip "chua du gio" chay qua hang doi.
+//
+// Hop dong bi khoa o day: THU TU. Bon thong bao xep A, B, C, D phai len song
+// dung thu tu do. Voi nguoi choi, thu tu la NGHIA: "Boss Cuu Vi da xuat hien"
+// phai den TRUOC "Boss Cuu Vi da bi ha", nguoc lai la vo ly.
+//
+// Vi sao phai co test nay rieng — TestBoPhatThanhTonTrongNhipToiThieu chua du:
+// test do chi co HAI thong bao, nen sau khi A len song chi con DUNG MOT cai
+// nam cho, ma mot hang doi mot phan tu thi khong the dao thu tu duoc. Khuyet
+// tat chi hien ra khi co TU HAI cai tro len cung nam cho.
+func TestBoPhatThanhGiuDungThuTuDuoiNhipThat(t *testing.T) {
+	b := MoBoPhatThanh()
+	t0 := time.Now()
+
+	muon := []string{"A", "B", "C", "D"}
+	for _, s := range muon {
+		b.Xep(YeuCauThongBao{NoiDung: s, MocTao: t0})
+	}
+
+	var daPhat []string
+	phat := func(s string) { daPhat = append(daPhat, s) }
+
+	// Ghim CUNG 50ms va 5 giay (khong doc lai hang so nhipKiemPhatThanh) —
+	// dung ly do da ghi o TestBoPhatThanhTonTrongNhipToiThieu: doc lai hang so
+	// se lam test dong tinh voi code neu ai do sua nhip.
+	for lech := time.Duration(0); lech <= 5*time.Second; lech += 50 * time.Millisecond {
+		b.nhip(t0.Add(lech), phat)
+	}
+
+	if len(daPhat) != len(muon) {
+		t.Fatalf("da phat %v (%d cai), muon du %d cai — khong duoc mat cai nao",
+			daPhat, len(daPhat), len(muon))
+	}
+	for i := range muon {
+		if daPhat[i] != muon[i] {
+			t.Fatalf("thu tu phat = %v, muon %v — hang doi thong bao phai la FIFO: "+
+				"mot nhip CHUA DU GIO khong duoc dong vao hang doi (lay ra roi xep lai "+
+				"cuoi hang chinh la XOAY VONG thu tu)", daPhat, muon)
+		}
+	}
+	if soBo := b.SoLanBo(); soBo != 0 {
+		t.Fatalf("SoLanBo() = %d, muon 0 — hang doi con thua cho, khong duoc bo cai nao", soBo)
+	}
+}
+
+// TestBoPhatThanhBatDauHaiLanKhongPanic khoa nhanh phong thu trong BatDau()
+// (CompareAndSwap). Khong co no, loi goi thu hai chay them mot vongLap nua, va
+// CA HAI cung `defer close(b.xong)` — nen luc Dung() cai thu hai panic "close
+// of closed channel" tren mot goroutine NEN: khong ai bat duoc, ca tien trinh
+// may chu chet. Mot dong log doi lay mot cu sap may chu.
+//
+// Test cung do SO GOROUTINE de bat duoc ban cai lui "chi khong panic thoi":
+// neu ai do doi CompareAndSwap thanh Store roi them recover o dau do, con
+// goroutine thu hai VAN song va van rut chung hang doi — sai am tham.
+func TestBoPhatThanhBatDauHaiLanKhongPanic(t *testing.T) {
+	truoc := soGoroutineOnDinh(t)
+
+	b := MoBoPhatThanh()
+	b.BatDau(func(string) {})
+	b.BatDau(func(string) {}) // lan hai: phai la viec KHONG
+
+	sau := soGoroutineOnDinh(t)
+	if them := sau - truoc; them != 1 {
+		t.Fatalf("hai lan BatDau() de lai %d goroutine moi, muon dung 1 — "+
+			"loi goi thu hai phai bi bo qua, khong duoc chay them vongLap", them)
+	}
+
+	// Va Dung() sau do phai sach: khong panic, khong treo.
+	xong := make(chan struct{})
+	go func() {
+		defer close(xong)
+		b.Dung()
+	}()
+	select {
+	case <-xong:
+	case <-time.After(2 * time.Second):
+		t.Fatal("Dung() treo sau hai lan BatDau()")
 	}
 }

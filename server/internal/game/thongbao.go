@@ -62,6 +62,18 @@ const (
 	// roi `Functions.sleep(1500)`. Tuc la ban Java that su chay dung nhip nay
 	// suot nhieu nam — day la con so DA KIEM CHUNG TRONG SAN XUAT, khong phai
 	// so ta tu nghi ra.
+	//
+	// He qua phai chap nhan: 10 con boss chet cung luc thi hang doi xa het
+	// trong 15 giay. DA CAN NHAC va CO Y KHONG gop/bo trung:
+	//   - Bo trung theo noi dung gan nhu khong bao gio kich hoat — moi boss mot
+	//     ten nen hai dong chu khac nhau; con khi no THAT SU trung (cung mot
+	//     boss hoi sinh roi chet lai) thi do la HAI su kien that, gop lai la
+	//     giau mat mot lan.
+	//   - Gop kieu "3 boss vua bi ha" doi bo phat thanh phai HIEU noi dung, ma
+	//     o day no chi thay mot chuoi kin. Muon gop thi phai gop o NOI SINH RA
+	//     tin (Task 12, khuvuc.go) — noi con biet do la boss nao — chu khong
+	//     phai o duong ong van chuyen.
+	// Duong ong giu nguyen su ngo nghech co chu dich cua no.
 	nhipToiThieuThongBao = 1500 * time.Millisecond
 
 	// nhipKiemPhatThanh la tan suat DRIVER THAT (ticker cua vongLap) — KHONG
@@ -180,10 +192,21 @@ func (b *BoPhatThanh) SoLanBo() int64 { return b.soLanBo.Load() }
 // cho tung nguoi dang online.
 //
 // phat() chay tren goroutine CUA BO PHAT THANH, KHONG PHAI tren actor nao —
-// nen no DUOC PHEP cham mang/o dia/log thoai mai. Dung goi BatDau hai lan (se
-// co hai goroutine cung rut mot hang doi, va Dung() chi cho mot cai thoat).
+// nen no DUOC PHEP cham mang/o dia/log thoai mai.
+//
+// Goi lan thu hai la VIEC KHONG (bo qua + log muc loi), khong phai lan thu hai
+// im lang chay them mot goroutine nua. Vi sao phai chan chu khong de mac: hai
+// vongLap cung song thi CA HAI cung `defer close(b.xong)`, nen luc tat may chu
+// cai thu hai se panic "close of closed channel" tren mot goroutine nen —
+// khong ai bat duoc, ca tien trinh may chu chet. Doi mot loi goi sai thanh mot
+// dong log re hon nhieu. CompareAndSwap (khong phai Store) chinh la cho lam
+// duoc dieu do: nguoi DAU TIEN doi duoc false->true moi la nguoi chay that.
 func (b *BoPhatThanh) BatDau(phat func(string)) {
-	b.daBatDau.Store(true)
+	if !b.daBatDau.CompareAndSwap(false, true) {
+		slog.Error("BatDau() bo phat thanh duoc goi HAI LAN — bo qua lan nay " +
+			"(hai goroutine cung rut mot hang doi se lam tat may chu panic)")
+		return
+	}
 	go b.vongLap(phat)
 }
 
@@ -215,14 +238,15 @@ func (b *BoPhatThanh) vongLap(phat func(string)) {
 // vongLap o luudinhky.go): test goi TRUC TIEP voi bayGio tiem san, khong phu
 // thuoc ticker that.
 //
-// Ba nhanh:
-//  1. Hang doi rong -> khong lam gi.
-//  2. CHUA du nhipToiThieuThongBao ke tu lan phat truoc -> XEP LAI yeu cau vao
-//     hang doi cho toi luot. Yeu cau KHONG BI MAT — day la khac biet cot loi so
-//     voi "chong ngap kieu vut bo": nguoi choi van doc duoc thong bao, chi la
-//     doc cham hon nhip toi thieu. Ngoai le DUY NHAT: hang doi trong luc do da
-//     bi lap day boi Xep() khac -> luc do moi dem soLanBo (van khong duoc chan).
-//  3. Du nhip -> ghi lanPhatCuoi roi goi phat().
+// Ba nhanh, THEO DUNG THU TU NAY:
+//  1. CHUA du nhipToiThieuThongBao ke tu lan phat truoc -> ve tay khong, KHONG
+//     DONG VAO hang doi. Yeu cau KHONG BI MAT (khac han "chong ngap kieu vut
+//     bo"): no nam yen nguyen cho o dau hang, nguoi choi van doc duoc, chi la
+//     doc cham hon nhip toi thieu. Vi sao khong dong vao: xem chu thich trong
+//     than ham — day la cho tung sinh loi dao thu tu.
+//  2. Du nhip nhung hang doi rong -> khong lam gi (khong cham lanPhatCuoi, de
+//     thong bao den sau do khong bi bat cho oan).
+//  3. Du nhip va co hang -> lay MOT cai o DAU hang, ghi lanPhatCuoi roi phat().
 //
 // lanPhatCuoi dat TRUOC khi goi phat() (dung tinh than lanLuuCuoi cua
 // BoLuuDinhKy va q.LanDanhCuoi cua khuvuc.go): moc phan anh luc BAT DAU phat,
@@ -230,20 +254,29 @@ func (b *BoPhatThanh) vongLap(phat func(string)) {
 // mot phat() cham 3 giay se khien thong bao ke tiep di ngay lap tuc, thung
 // dung lop chong ngap.
 func (b *BoPhatThanh) nhip(bayGio time.Time, phat func(string)) {
+	// KIEM DONG HO TRUOC, LAY RA SAU — thu tu hai buoc nay la CA HOP DONG FIFO.
+	// Ban dau ham nay lam nguoc lai (lay ra roi thay chua du gio thi xep lai
+	// cuoi hang), va do la mot khuyet tat THAT: vongLap dap 50ms mot nhip
+	// (nhipKiemPhatThanh) trong khi hai lan phat cach nhau 1,5 giay, tuc la
+	// giua hai lan phat co toi ~29 nhip "chua du gio" chay qua. Moi nhip do
+	// XOAY hang doi di mot nac, nen 4 thong bao A,B,C,D xep dung thu tu lai
+	// len song thanh A,D,C,B — nguoi choi doc "Boss da bi ha" TRUOC "Boss xuat
+	// hien". Khong dong vao hang doi khi chua du gio thi khong co gi de xoay.
+	//
+	// Chua du gio con phai tra ve SOM vi mot ly do thu hai: cai lay-ra-xep-lai
+	// do lam LO chinh sach bo. Xep() bo cai MOI (select+default khi kenh day);
+	// nhung neu nhip lay mot cai ra roi Xep() cua actor kip chen vao cho trong
+	// vua he ra, cu xep-lai se that bai va bo mat cai CU NHAT — hai chinh sach
+	// bo tron lan, khong ai doan noi cai nao song.
+	if !b.lanPhatCuoi.IsZero() && bayGio.Sub(b.lanPhatCuoi) < nhipToiThieuThongBao {
+		return
+	}
+
 	var yc YeuCauThongBao
 	select {
 	case yc = <-b.hangDoi:
 	default:
 		return // hang doi rong — khong co gi de phat
-	}
-
-	if !b.lanPhatCuoi.IsZero() && bayGio.Sub(b.lanPhatCuoi) < nhipToiThieuThongBao {
-		select {
-		case b.hangDoi <- yc:
-		default:
-			b.soLanBo.Add(1)
-		}
-		return
 	}
 
 	b.lanPhatCuoi = bayGio
@@ -273,6 +306,22 @@ func (b *BoPhatThanh) baoCaoSoBo() {
 //
 // Goi khi CHUA BatDau() cung an toan (tra ve ngay, khong treo) — nho co
 // daBatDau: khong co goroutine nao thi khong co gi de cho.
+//
+// CO Y KHONG XA NOT HANG DOI — day la cho DI NGUOC ThoGhi.DongVaChoXong
+// (thogi.go, "ghi het nhung gi con trong hang doi roi moi tra ve"), nen phai
+// noi ro vi sao lech:
+//
+//   - ThoGhi giu CHI SO NHAN VAT: mat mot ban ghi la mat tien/cap do that cua
+//     nguoi choi, khong lay lai duoc. Cho vai giay luc tat may la dang.
+//   - BoPhatThanh giu DONG CHU: xa not co nghia la ton trong nhip 1,5 giay cho
+//     tung cai, tuc hang doi day (64) se giu tien trinh lai toi 96 GIAY —
+//     trong khi han gio tat may chu ca cum chi ~30 giay (tatmaychu.go). Va xa
+//     cho ai doc? Dung thu tu tat la loa.Dung() TRUOC SoKhuVuc.DungTatCa()
+//     (xem GanLoa, sokhuvuc.go), tuc cac phien dang bi dong lai ngay sau do —
+//     khong con ai o day de doc not may dong chu ay.
+//
+// Cung mot tinh than voi lua chon "hang doi day thi BO" o Xep(): hai loai du
+// lieu, hai chinh sach.
 func (b *BoPhatThanh) Dung() {
 	b.dungMotLan.Do(func() {
 		close(b.dung)

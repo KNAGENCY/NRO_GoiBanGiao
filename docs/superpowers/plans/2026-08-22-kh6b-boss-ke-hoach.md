@@ -81,7 +81,7 @@ mã nguồn (không tin sổ), kết quả:
 | 6 | `BoPhatThanh` ở **`thongbao.go`** (KHÔNG phải `loathongbao.go`), có từ `6e51dd8` | ✅ xong — soát 28/08 tìm theo **tên file** nên kết luận nhầm |
 | 7 | `k.boss = append` + `themBoss` (`khuvuc.go` ~1312) | ✅ xong |
 | 8 | định tuyến `-60` id âm → boss, trong `case suKienDanhNguoiChoi` (`khuvuc.go` 1128+, +139 dòng) | ✅ xong 28/08 — dùng lại `KiemDanhHopLe` + `TinhSatThuong` + `bossNhanSatThuong` |
-| **9** | `khuvuc.go` có **0 lần** nhắc `BossChao`/`BossTroi`/`BossRaDi` | ⬜ **CHƯA LÀM** |
+| 9 | `nhipBoss` + `mayTrangThaiBoss` + `bossRoiTheGioi` (`khuvuc.go` 2038+), `Boss.The` nối `TheSongBoss.Tat()` | ✅ xong 28/08 — **trừ nhánh biến hình ở RA_DI**, chờ GATE task 1 |
 | **10** | `nhipTim` không xử lý boss | ⬜ **CHƯA LÀM** |
 | **11** | `khuvuc.go` có **0 lần** nhắc `MocNoiGian` — tên đó chỉ nằm ở `boss.go` (task 3) | ⬜ **CHƯA LÀM** |
 | 12 | `bossNhanSatThuong` + `bossChet` + `traThuongBoss` (`khuvuc.go` 1317+), `PhaBoss.DiemThuong` | ✅ xong 28/08 — **nhưng `bossNhanSatThuong` chưa ai gọi, chờ task 8** |
@@ -89,7 +89,12 @@ mã nguồn (không tin sổ), kết quả:
 | 14 | `noiBoPhatThanh()` + `GanLoa` 5 khu vực, thứ tự tắt `boLuu → loa → TatMayChu → Close` | ⏳ **nửa xong** — bộ phát thanh đã nối; **lịch boss chưa bật** (có chú thích đánh dấu chỗ) |
 | 15 | `noidungboss.go` — 2 boss mẫu (1 con 2 pha + boss lớn + `MocNoiGian`) | ⏳ **nửa xong** — dữ liệu đủ; **smoke client Unity chưa làm** (chỉ chủ dự án làm được) |
 
-**Còn 3 task: `9 → 10 → 11`** — nền móng boss trong actor. Cả ba chạm `khuvuc.go` nên **phải tuần tự**.
+**Còn 2 task: `10 → 11`** — cả hai chạm `khuvuc.go` nên **phải tuần tự**.
+
+Task 9 đã để sẵn hai chỗ nối, có đánh dấu trong code:
+- bước `BossHoatDong` **để trống** cho task 10, kèm test `TestBossHoatDongDungYen_ChoTask10` ghim nguyên
+  trạng "im lặng" — task 10 **buộc phải sửa test đó**, tức có một chỗ bắt dừng lại đọc.
+- nhánh **còn pha** ở `BossRaDi` liệt kê đủ những trường phải đặt lại, chờ task 11.
 
 > ⚠️ **Task 1 (GATE hỏi client về biến hình) VẪN CHƯA LÀM** — file research chưa tồn tại.
 > Nó **chặn task 11**: chưa biết client có chấp nhận một id đã `-6` quay lại bằng `-5` hay không.

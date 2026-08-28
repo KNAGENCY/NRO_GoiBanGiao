@@ -204,10 +204,12 @@ func (s *Session) Dong() {
 // bo xu ly — khong can ban do phien->trang thai, va khi ket noi dong thi bo xu
 // ly duoc thu gom theo, khong ro ri.
 func PhucVu(conn net.Conn, taoXuLy func() XuLyGoiTin) {
-	diaChi := "khong-ro"
-	if a, ok := conn.RemoteAddr().(*net.TCPAddr); ok {
-		diaChi = a.IP.String()
-	}
+	// Dung CHUNG ipCua (listener.go) voi vong Accept: hai cai gac theo IP
+	// (gioi han ket noi o listener, chan do mat khau o tang game qua
+	// s.DiaChiIP) BAT BUOC phai goi cung mot dia chi la cung mot khoa. Neu
+	// hai noi tinh khoa khac nhau, mot trong hai gac se dem nham va co ma
+	// nhu khong.
+	diaChi := ipCua(conn)
 
 	s := &Session{
 		conn:     conn,

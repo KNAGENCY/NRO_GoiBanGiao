@@ -38,7 +38,7 @@ func TestMoLuuTruNoiDuBaDiem(t *testing.T) {
 	soKhuVuc := MoSoKhuVuc()
 	t.Cleanup(func() { _ = soKhuVuc.DungTatCa() })
 
-	thoGhi, boLuu, taoXuLy := MoLuuTru(kho, soKhuVuc, 4)
+	thoGhi, boLuu, taoXuLy := MoLuuTru(kho, soKhuVuc, 4, 0, 0)
 	if boLuu != nil {
 		t.Cleanup(boLuu.Dung)
 	}

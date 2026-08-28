@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"nroserver/internal/auth"
+	"nroserver/internal/chanip"
 	mynet "nroserver/internal/net"
 	"nroserver/internal/protocol"
 	"nroserver/internal/store"
@@ -22,6 +23,22 @@ import (
 const (
 	LyDoSaiThongTin = "Sai tài khoản hoặc mật khẩu."
 	LyDoBiKhoa      = "Tài khoản đang bị khóa. Liên hệ quản trị viên."
+
+	// LyDoQuaNhieuLanSai la cau tra loi khi gac chong do mat khau (chanip)
+	// khong cho dia chi mang nay thu them nua.
+	//
+	// VI SAO cau nay noi THAT ly do, khac han hai cau tren von co tinh mo ho:
+	// hai cau tren mo ho de KHONG lo bi mat cua NGUOI KHAC (tai khoan nao co
+	// that). Cau nay khong lo bi mat cua ai ca — no chi noi ve chinh cai may
+	// dang go, va no dem theo DIA CHI MANG chu khong theo ten tai khoan, nen
+	// khong the dung de do xem mot tai khoan co ton tai hay khong.
+	//
+	// Doi lai, no cuu duoc mot nguoi choi that: hang nghin nguoi Viet Nam
+	// dung chung mot dia chi IP cua nha mang: neu ai do cung dia chi vua go
+	// sai qua nhieu, nguoi choi that se bi va lay. Neu luc do may chu van tra
+	// "Sai tài khoản hoặc mật khẩu.", ho se ngoi doi mat khau cua minh mai ma
+	// khong hieu tai sao. Cau nay bao ho biet chi can cho vai phut.
+	LyDoQuaNhieuLanSai = "Đăng nhập sai quá nhiều lần từ đường mạng này. Vui lòng thử lại sau vài phút."
 )
 
 // Lenh trong giao thuc. Cac gia tri nay lay tu ban Java cu, DUNG DOI:
@@ -173,6 +190,17 @@ type BoXuLy struct {
 	// test hien co (goi NewBoXuLy(kho, soKhuVuc) truc tiep, khong goi
 	// DatSoDangNhap) van bien dich va chay dung y het truoc Task 7.
 	soDangNhap *SoDangNhap
+
+	// gacDangNhap la gac chong do mat khau DUNG CHUNG toan may chu (mot cai
+	// duy nhat, tao trong MoLuuTru) — khac moi truong khac cua BoXuLy von
+	// rieng tung phien. Phai dung chung thi moi dem duoc: ke do mat khau se
+	// mo ket noi MOI cho moi lan thu, neu bo dem nam trong tung phien thi moi
+	// lan dem lai bat dau tu 0 va khong bao gio cham nguong.
+	//
+	// nil la gia tri mac dinh AN TOAN theo nghia "khong lam gi" — cac test cu
+	// goi NewBoXuLy truc tiep van chay y het truoc. Duong SAN XUAT thi luon
+	// duoc dat (MoLuuTru), va TestMoLuuTruNoiGacChongDo khoa dieu do lai.
+	gacDangNhap *chanip.GacDangNhap
 }
 
 func NewBoXuLy(kho Kho, soKhuVuc *SoKhuVuc) *BoXuLy {
@@ -204,6 +232,12 @@ func (b *BoXuLy) DatThoGhi(t GhiKhiRoi) {
 	b.thoGhi = t
 }
 
+// DatGacDangNhap gan gac chong do mat khau DUNG CHUNG cho phien nay — goi tu
+// MoLuuTru, cung khuon "thiet lap sau khoi tao" nhu hai ham tren.
+func (b *BoXuLy) DatGacDangNhap(g *chanip.GacDangNhap) {
+	b.gacDangNhap = g
+}
+
 // KiemTraDangNhap chua toan bo luat dang nhap, tach khoi phan mang de kiem thu.
 func (b *BoXuLy) KiemTraDangNhap(ctx context.Context, ten, matKhau string) (KetQuaDangNhap, error) {
 	ten = strings.TrimSpace(ten)
@@ -218,6 +252,16 @@ func (b *BoXuLy) KiemTraDangNhap(ctx context.Context, ten, matKhau string) (KetQ
 
 	tk, err := b.kho.LayTaiKhoan(ctx, ten)
 	if errors.Is(err, store.ErrKhongThayTaiKhoan) {
+		// Cau tra loi da giong het nhanh "sai mat khau" o duoi, nhung tra ve
+		// NGAY o day thi THOI GIAN lai to het: nhanh duoi phai chay ham bam
+		// 100.000 vong (~13 ms), nhanh nay thi khong. Ke xau bam gio la liet
+		// ke duoc tai khoan nao co that, roi don het suc do mat khau vao dung
+		// nhung ten do. Chay mot lan bam GIA de hai nhanh ton bang nhau.
+		//
+		// Do that truoc/sau khi them dong nay: chenh lech tu 10,5 ms xuong
+		// con duoi 0,1 ms (xem rothoigian_test.go, no do ca sai so cua chinh
+		// phep do de con so co y nghia).
+		auth.CanBangThoiGian(matKhau)
 		return KetQuaDangNhap{LyDo: LyDoSaiThongTin}, nil
 	}
 	if err != nil {
@@ -771,13 +815,51 @@ func (b *BoXuLy) xuLyDangNhap(s *mynet.Session, m *protocol.Message) error {
 		return nil
 	}
 
+	// CHAN DO MAT KHAU (no bao mat §7, lo hong 1). Da do that truoc day: 200
+	// lan sai lien tiep khong bi chan gi ca, 76 lan/giay. Gac dem so lan sai
+	// theo DIA CHI MANG va tu choi khi mot dia chi sai qua nhieu — xem
+	// internal/chanip de biet vi sao dem theo dia chi mang chu khong theo ten
+	// tai khoan (dem theo ten thi ke xau co tinh go sai la khoa duoc tai
+	// khoan cua nguoi khac).
+	//
+	// Chan o DAY, truoc KiemTraDangNhap, la co chu dich: cai dat gia nhat cua
+	// mot lan thu la ham bam 100.000 vong (~13 ms CPU) nam ben trong do. Chan
+	// sau khi da tra gia do thi chi ngan duoc viec DOAN TRUNG mat khau, khong
+	// ngan duoc viec vat kiet CPU may chu — ma hai thu do deu la muc dich cua
+	// ke tan cong.
+	//
+	// VE CHUYEN "nhanh bi chan tra ve nhanh hon nhanh khong bi chan co phai
+	// la mot ro ri thoi gian moi khong": khong. Ro ri thoi gian nguy hiem la
+	// loai lam lo BI MAT CUA NGUOI KHAC — o day la "tai khoan nao co that"
+	// (lo hong 2). Trang thai "dia chi mang nay dang bi chan" khong phai bi
+	// mat cua ai ca: no chi noi ve chinh may dang go, no dem theo dia chi
+	// mang nen KHONG phu thuoc mot chut nao vao tai khoan duoc go, va cau tra
+	// ve (LyDoQuaNhieuLanSai) da noi thang dieu do bang loi roi. Bat nhanh
+	// nay cung chay bam 13 ms cho "deu" chi lam mot viec duy nhat: bien lop
+	// bao ve thanh duong vat kiet CPU dung nhu ke tan cong mong muon.
+	if b.gacDangNhap != nil && !b.gacDangNhap.ChoPhep(s.DiaChiIP) {
+		return guiTuChoi(s, LyDoQuaNhieuLanSai)
+	}
+
 	kq, err := b.KiemTraDangNhap(context.Background(), ten, matKhau)
 	if err != nil {
 		// Loi he thong: bao chung chung, khong lo chi tiet ky thuat ra ngoai.
+		//
+		// KHONG tru the cua dia chi mang nay: loi la o phia may chu (vd CSDL
+		// chet), khong phai nguoi choi go sai. Neu tru, mot dot CSDL hong vai
+		// phut se bien thanh ca gio nguoi choi khong dang nhap duoc SAU KHI
+		// CSDL da song lai — mot su co nho tu no phong to.
 		slog.Error("loi he thong khi dang nhap", "ip", s.DiaChiIP, "loi", err)
 		return guiTuChoi(s, "Không đăng nhập được, vui lòng thử lại sau.")
 	}
 	if !kq.ThanhCong {
+		if b.gacDangNhap != nil && b.gacDangNhap.GhiNhanSai(s.DiaChiIP) {
+			// Ghi DUNG MOT dong cho moi dot bi chan (xem GhiNhanSai): day la
+			// dau hieu nguoi van hanh can thay khi co ai do dang do mat khau,
+			// ma khong lam ngap nhat ky.
+			slog.Warn("chan do mat khau: dia chi mang nay da het luot thu",
+				"ip", s.DiaChiIP)
+		}
 		slog.Info("dang nhap that bai", "ip", s.DiaChiIP, "ten", ten, "ly_do", kq.LyDo)
 		return guiTuChoi(s, kq.LyDo)
 	}

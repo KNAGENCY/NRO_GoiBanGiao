@@ -78,19 +78,31 @@ mã nguồn (không tin sổ), kết quả:
 | 3 | `type Boss struct` (`boss.go`) | ✅ xong |
 | 4 | `func goiXuatHienDayDu` + `type HinhDangHien` (`xuathien.go`) | ✅ xong |
 | 5 | `type BenDanh` + `KiemDanhHopLe` thuần (`chotkiem.go`) | ✅ xong |
-| **6** | `loathongbao.go` **chưa tồn tại** | ⏳ **đang làm 28/08** |
+| 6 | `BoPhatThanh` ở **`thongbao.go`** (KHÔNG phải `loathongbao.go`), có từ `6e51dd8` | ✅ xong — soát 28/08 tìm theo **tên file** nên kết luận nhầm |
 | 7 | `k.boss = append` + `themBoss` (`khuvuc.go` ~1312) | ✅ xong |
 | 8 | `satThuongTheoNguoi` | ✅ xong |
 | 9 | máy trạng thái vòng đời boss | ✅ xong |
 | 10 | AI boss trong nhịp tim | ✅ xong |
 | 11 | `MocNoiGian` | ✅ xong |
-| **12** | chưa có chia thưởng theo đóng góp | ⬜ chờ task 6 |
+| **12** | chưa có chia thưởng theo đóng góp | ⏳ **việc tiếp theo** |
 | **13** | `lichboss.go` chưa tồn tại | ⬜ |
 | **14** | `main.go` chưa nhắc tới boss lần nào | ⬜ chờ 6 + 13 |
 | **15** | `noidungboss.go` chưa tồn tại | ⬜ chờ 14 |
 
-**Còn 5 task: 6 → 12 → 13 → 14 → 15.** Cả 6 lẫn 13 đều chạm `khuvuc.go` (63KB) nên **phải
+**Còn 4 task: 12 → 13 → 14 → 15.** Cả 6 lẫn 13 đều chạm `khuvuc.go` (63KB) nên **phải
 tuần tự** — đúng cảnh báo ở mục "Thứ tự thi công" bên trên, không giao song song được.
 
 Sẵn sàng cho task 6: `SoKhuVuc.PhatToanServer` đã có ở `sokhuvuc.go:43`; khuôn để bắt chước
 là `thogi.go` (hàng đợi không chặn) và `luudinhky.go:111-172` (`BatDau`/`Dung` hai bước).
+
+### Bài học từ lần soát nhầm 28/08
+
+Tôi soát trạng thái bằng cách `grep` theo **tên file kế hoạch dự kiến** (`loathongbao.go`) và
+kết luận task 6 chưa làm. Thực tế nó đã xong từ `6e51dd8`, chỉ nằm ở `thongbao.go`.
+
+**Soát trạng thái phải grep theo THỨ CODE LÀM ĐƯỢC, không theo tên file kế hoạch đoán trước.**
+Kế hoạch viết trước khi thi công nên tên file trong đó là dự đoán, không phải sự thật.
+
+May là lần soát nhầm đó không vô ích: agent chuyển sang nghiệm thu bằng kiểm thử đột biến và
+tìm ra **loa đảo thứ tự thông báo** — bốn thông báo A,B,C,D lên sóng thành A,D,C,B, người chơi
+đọc "Boss đã bị hạ" trước "Boss xuất hiện". Đã vá (`0a82053`).

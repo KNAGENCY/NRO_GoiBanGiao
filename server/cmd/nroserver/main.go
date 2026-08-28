@@ -11,10 +11,12 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
+	"nroserver/internal/chanip"
 	"nroserver/internal/game"
 	mynet "nroserver/internal/net"
 	"nroserver/internal/store"
@@ -55,6 +57,35 @@ func mucNhatKyTuChuoi(s string) (muc slog.Level, hopLe bool) {
 	default:
 		return slog.LevelInfo, false
 	}
+}
+
+// docSoNguyenMoiTruong doc mot so nguyen duong tu bien moi truong, roi ve
+// macDinh neu bien chua dat hoac dat gia tri khong dung.
+//
+// VI SAO ba con so cua hai cai gac theo dia chi mang phai chinh duoc bang bien
+// moi truong, khac voi moi hang so khac cua may chu: chung la cho DUY NHAT ma
+// mot con so dat qua chat se DUOI NGUOI CHOI THAT ra ngoai. Nha mang Viet Nam
+// dung NAT lon — hang nghin nguoi choi co the cung mot dia chi IP cong cong.
+// Neu ngay mo cua thay nguoi choi cua mot nha mang bao "khong vao duoc" hang
+// loat, nguoi van hanh phai noi so ra duoc NGAY LUC DO, khong the ngoi doi mot
+// ban bien dich moi.
+//
+// Gia tri sai (chu, so am, so 0) KHONG duoc lang le bien thanh "khong gioi han
+// gi ca" — kieu hong do khong co trieu chung nao cho toi dung hom bi tan cong.
+// Roi ve mac dinh va ghi mot dong canh bao de nguoi van hanh biet gia tri ho
+// dat da bi bo qua.
+func docSoNguyenMoiTruong(ten string, macDinh int) int {
+	tho := strings.TrimSpace(os.Getenv(ten))
+	if tho == "" {
+		return macDinh
+	}
+	n, err := strconv.Atoi(tho)
+	if err != nil || n <= 0 {
+		slog.Warn("bien moi truong khong doc duoc thanh so nguyen duong, dung gia tri mac dinh",
+			"bien", ten, "gia_tri_nhan_duoc", tho, "mac_dinh", macDinh)
+		return macDinh
+	}
+	return n
 }
 
 // khoDong la phan toi thieu store.Store can de don dep luc tat may chu — CHI
@@ -261,13 +292,31 @@ func main() {
 	// BATDAU (tu dong luu moi 60 giay — dac ta §9 muc 1), va taoXuLy tra ve
 	// MOT BoXuLy MOI da DatThoGhi(thoGhi) cho MOI ket noi (dung ben duoi thay
 	// game.NewBoXuLy truc tiep).
-	thoGhi, boLuu, taoXuLy := game.MoLuuTru(kho, soKhuVuc, soThoGhiMacDinh)
+	//
+	// No bao mat §7: MoLuuTru cung tao va noi day gac CHAN DO MAT KHAU (mot
+	// cai chung cho ca may chu). Hai so cau hinh cua no doc tu bien moi
+	// truong — xem docSoNguyenMoiTruong ben duoi de biet vi sao can no long
+	// duoc ma khong phai bien dich lai.
+	sucChua := docSoNguyenMoiTruong("NRO_CHONGDO_SUCCHUA", chanip.SucChuaMacDinh)
+	nhipHoiPhuc := time.Duration(docSoNguyenMoiTruong(
+		"NRO_CHONGDO_HOIPHUC_GIAY", int(chanip.NhipHoiPhucMacDinh/time.Second))) * time.Second
+	thoGhi, boLuu, taoXuLy := game.MoLuuTru(kho, soKhuVuc, soThoGhiMacDinh, sucChua, nhipHoiPhuc)
+
+	// No bao mat §7 (lo hong 3): gioi han so ket noi cung luc tren MOT dia chi
+	// IP. Khong co no thi mot may duy nhat mo bao nhieu ket noi tuy thich va
+	// an het bo nho may chu.
+	toiDaKetNoi := docSoNguyenMoiTruong("NRO_TOIDA_KETNOI_MOI_IP", chanip.ToiDaKetNoiMoiIPMacDinh)
+	gacKetNoi := chanip.MoGacKetNoi(toiDaKetNoi)
+	slog.Info("gac theo dia chi mang da bat",
+		"chong_do_suc_chua", sucChua,
+		"chong_do_hoi_phuc", nhipHoiPhuc,
+		"toi_da_ket_noi_moi_ip", toiDaKetNoi)
 
 	// LangNghe chay vo han (Accept trong vong lap), nen phai chay tren
 	// goroutine rieng de goroutine chinh con ranh tay cho tin hieu dung.
 	loiMayChu := make(chan error, 1)
 	go func() {
-		loiMayChu <- mynet.LangNghe(diaChi, func() mynet.XuLyGoiTin {
+		loiMayChu <- mynet.LangNghe(diaChi, gacKetNoi, func() mynet.XuLyGoiTin {
 			return taoXuLy()
 		})
 	}()

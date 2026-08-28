@@ -1062,7 +1062,7 @@ func TestTichHop_NgatKetNoiThuong_LuuQuaDuongNoiDayDayDu(t *testing.T) {
 
 	// DUNG DUONG NOI DAY SAN XUAT THAT (moluutru.go, dung y het main.go) — xem
 	// chu thich ham ve ly do day la diem BAT BUOC cua test nay.
-	thoGhi, boLuu, taoXuLy := MoLuuTru(khoThat, soKhuVuc, 2)
+	thoGhi, boLuu, taoXuLy := MoLuuTru(khoThat, soKhuVuc, 2, 0, 0)
 	defer boLuu.Dung()
 	defer func() {
 		// Luoi an toan don dep (an toan goi NHIEU LAN — DongVaChoXong dung

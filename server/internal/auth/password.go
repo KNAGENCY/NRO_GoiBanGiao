@@ -34,6 +34,47 @@ const (
 // Muc 1 trieu la gap 10 lan gia tri dang dung (100.000), du du dat de sau nay
 // tang so vong theo phan cung moi, ma van chan duoc truong hop du lieu hong.
 
+// bamGia la mot chuoi bam THAT nhung cua mot mat khau ngau nhien 32 byte ma
+// khong ai tren doi biet — sinh MOT LAN bang chinh auth.Hash() roi dan cung
+// vao day.
+//
+// VI SAO CAN NO. Khi mot nguoi go ten dang nhap khong ton tai, may chu truoc
+// day tra loi NGAY. Con khi ho go dung ten mot tai khoan co that nhung sai
+// mat khau, may chu phai chay ham bam 100.000 vong, ton khoang 13 mili-giay.
+// Cau chu tra ve giong het nhau trong ca hai truong hop, nhung KHOANG THOI
+// GIAN thi khong — va ke xau chi can bam gio la doc duoc dieu cau chu giau:
+// ten nao co that. Biet duoc danh sach ten co that roi, ho don het suc do mat
+// khau vao dung nhung ten do.
+//
+// Cach bit: nhanh "khong tim thay tai khoan" van chay mot lan doi chieu voi
+// chuoi bam gia nay, de hai nhanh ton dung bang nhau (xem CanBangThoiGian).
+//
+// VI SAO LA HANG SO DAN CUNG chu khong bam luc chay: bam luc khoi dong thi
+// ton them mot lan tinh 13 ms va phai xu ly loi o cho khong dang co loi; bam
+// luc CHAY thi con te hon — moi lan dang nhap sai lai bam them mot lan nua,
+// gap doi chi phi, va gia tri thi khong bao gio dung toi. Mot hang so thi
+// khong ton gi ca va luon giong het nhau giua cac lan chay.
+//
+// BAY: neu sau nay ai doi soVong (vd tang len theo phan cung moi) ma quen sinh
+// lai chuoi nay, chuoi gia se re hon chuoi that va lo hong quay lai TRONG IM
+// LANG. TestBamGiaDungSoVongVoiBamThat (canbangthoigian_test.go) khoa dung
+// chuyen do — no so so vong khai trong chuoi nay voi soVong hien hanh.
+const bamGia = "pbkdf2$100000$EFa6zfs8OPQu2ElK9pwrNg==$Gq029T/1wNMS7ZKZ0W2ciMNWnMWFuYsL3YuL383FqB4="
+
+// CanBangThoiGian ton dung bang khoi luong tinh toan cua mot lan Verify that,
+// roi LUON tra ve false.
+//
+// Goi no o moi nhanh tu choi dang nhap ma KHONG di qua Verify — hien tai la
+// nhanh "khong tim thay tai khoan" trong game.KiemTraDangNhap. Xem chu thich
+// cua bamGia o tren de biet vi sao.
+//
+// Ket qua tra ve luon la false, nhung van tra ve (thay vi ham khong tra gi)
+// de noi goi co the dung no vao mot bieu thuc — nho vay khong ai, ke ca trinh
+// bien dich, coi loi goi nay la thua ma cat bo mat.
+func CanBangThoiGian(matKhau string) bool {
+	return Verify(matKhau, bamGia)
+}
+
 // IsHashed cho biet chuoi luu trong CSDL da o dang bam hay con la mat khau tho
 // cua he thong cu.
 func IsHashed(luuTru string) bool {

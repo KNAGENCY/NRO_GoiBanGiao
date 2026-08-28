@@ -1,5 +1,11 @@
 package game
 
+import (
+	"time"
+
+	"nroserver/internal/chanip"
+)
+
 // KhoDayDu la giao dien CSDL DAY DU ma may chu can luc khoi dong: bon ham tra
 // cuu/tao nhan vat (Kho, login.go) CONG mot ham ghi lai toan bo trang thai
 // (KhoLuu, thogi.go). *store.Store (kho that) thoa man ca hai tu nhien,
@@ -39,15 +45,29 @@ type KhoDayDu interface {
 // soThoGhi: xem MoThoGhi (thogi.go) — so goroutine ghi CSDL song song toi da
 // trong MOI dot xa hang doi. Quyet dinh chon N bao nhieu la cua tang goi
 // (main.go), ham nay chi chuyen tiep thang cho MoThoGhi.
-func MoLuuTru(kho KhoDayDu, soKhuVuc *SoKhuVuc, soThoGhi int) (thoGhi *ThoGhi, boLuu *BoLuuDinhKy, taoXuLy func() *BoXuLy) {
+// No bao mat §7 (lo hong 1 — chan do mat khau): MoLuuTru cung tao MOT
+// GacDangNhap CHUNG cho ca may chu va gan vao MOI BoXuLy. Phai la MOT cai
+// chung, khong phai moi phien mot cai: ke do mat khau mo ket noi MOI cho moi
+// lan thu, nen mot bo dem nam trong tung phien se luon bat dau lai tu 0 va
+// khong bao gio cham nguong — dung nghia "co ma nhu khong".
+//
+// Dat o day, giong het thoGhi/boLuu/soDangNhap, vi bai hoc Task 6 van con
+// nguyen gia tri: ha tang khong duoc noi day o MoLuuTru la ha tang nam do
+// khong ai goi toi, test tu che van xanh ma may chu that van tho.
+//
+// sucChua / nhipHoiPhuc: xem chanip.SucChuaMacDinh va chanip.NhipHoiPhucMacDinh
+// de biet vi sao chon nhung con so do. Truyen 0 cho ca hai la lay mac dinh.
+func MoLuuTru(kho KhoDayDu, soKhuVuc *SoKhuVuc, soThoGhi int, sucChua int, nhipHoiPhuc time.Duration) (thoGhi *ThoGhi, boLuu *BoLuuDinhKy, taoXuLy func() *BoXuLy) {
 	thoGhi = MoThoGhi(kho, soThoGhi)
 	boLuu = MoBoLuuDinhKy(soKhuVuc, thoGhi)
 	boLuu.BatDau()
 	soDangNhap := MoSoDangNhap()
+	gacDangNhap := chanip.MoGacDangNhap(sucChua, nhipHoiPhuc)
 	taoXuLy = func() *BoXuLy {
 		b := NewBoXuLy(kho, soKhuVuc)
 		b.DatThoGhi(thoGhi)
 		b.DatSoDangNhap(soDangNhap)
+		b.DatGacDangNhap(gacDangNhap)
 		return b
 	}
 	return thoGhi, boLuu, taoXuLy

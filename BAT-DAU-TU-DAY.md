@@ -593,6 +593,14 @@ Gom lại thành **Kế hoạch B**, sửa lẻ từng cái là vô nghĩa:
   *Vì sao ghi lại:* ngày 26/07 một agent thấy tài liệu ghi `5433` mà máy nghe `5432`, đã
   kết luận nhầm là "tài liệu sai từ đầu" rồi ghim `5432` vào — chỉ dời quả mìn sang lần
   khởi động sau. Bài học thật là **ghim số nào cũng sai; phải dạy cách tự kiểm.**
+- **Python đọc đầu ra `go test` bằng bảng mã GBK rồi VỠ khi gặp chữ tiếng Việt.**
+  `subprocess.run(..., capture_output=True, text=True)` trên máy này lấy codepage hệ thống,
+  nên tên boss *"Cửu Vĩ"* trong thông báo test làm cả script chết với
+  `UnicodeDecodeError: 'gbk' codec`. Luôn truyền `encoding="utf-8", errors="replace"`.
+  **Vì sao đáng ghi:** vấp lần đầu 28/08 khi chạy kiểm thử đột biến — script chết **sau khi**
+  đã ghi đột biến vào `khuvuc.go` mà **chưa kịp** khôi phục, tức là để lại mã nguồn ở trạng
+  thái cố tình làm hỏng. May là phát hiện ngay. **Kịch bản đột biến phải bọc `try/finally`**
+  để file luôn được trả về nguyên trạng dù test nổ kiểu gì, và nên sao lưu ra chỗ khác trước.
 - **PowerShell không có `&&`** — dùng `;` hoặc `if ($?) { ... }`.
 - **Windows dùng `python`, không phải `python3`.** Thứ cần GPU/CUDA thì dùng `py -3.12`.
 - Đặt biến môi trường phải là **dòng riêng**, không nối cùng dòng lệnh.

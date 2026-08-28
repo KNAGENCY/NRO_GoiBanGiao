@@ -80,16 +80,19 @@ mã nguồn (không tin sổ), kết quả:
 | 5 | `type BenDanh` + `KiemDanhHopLe` thuần (`chotkiem.go`) | ✅ xong |
 | 6 | `BoPhatThanh` ở **`thongbao.go`** (KHÔNG phải `loathongbao.go`), có từ `6e51dd8` | ✅ xong — soát 28/08 tìm theo **tên file** nên kết luận nhầm |
 | 7 | `k.boss = append` + `themBoss` (`khuvuc.go` ~1312) | ✅ xong |
-| 8 | `satThuongTheoNguoi` | ✅ xong |
-| 9 | máy trạng thái vòng đời boss | ✅ xong |
-| 10 | AI boss trong nhịp tim | ✅ xong |
-| 11 | `MocNoiGian` | ✅ xong |
-| **12** | chưa có chia thưởng theo đóng góp | ⏳ **việc tiếp theo** |
-| **13** | `lichboss.go` chưa tồn tại | ⬜ |
+| **8** | `khuvuc.go` có **0 lần** nhắc `CongSatThuong` — tên đó chỉ nằm ở `boss.go` (task 3) | ⬜ **CHƯA LÀM** |
+| **9** | `khuvuc.go` có **0 lần** nhắc `BossChao`/`BossTroi`/`BossRaDi` | ⬜ **CHƯA LÀM** |
+| **10** | `nhipTim` không xử lý boss | ⬜ **CHƯA LÀM** |
+| **11** | `khuvuc.go` có **0 lần** nhắc `MocNoiGian` — tên đó chỉ nằm ở `boss.go` (task 3) | ⬜ **CHƯA LÀM** |
+| **12** | chưa có chia thưởng theo đóng góp | ⏳ đang làm — **nhưng phụ thuộc 8/9/11 chưa có** |
+| 13 | `lichboss.go` + 3 chỗ trong `khuvuc.go` (dòng 400–417, 554–573, 732–739) | ✅ xong 28/08 |
 | **14** | `main.go` chưa nhắc tới boss lần nào | ⬜ chờ 6 + 13 |
 | **15** | `noidungboss.go` chưa tồn tại | ⬜ chờ 14 |
 
-**Còn 4 task: 12 → 13 → 14 → 15.** Cả 6 lẫn 13 đều chạm `khuvuc.go` (63KB) nên **phải
+**Còn 6 task, KHÔNG phải 4:** `8 → 9 → 10 → 11` (nền móng boss trong actor, **chưa làm**) rồi mới tới
+`12` và `15`. Task 13 xong 28/08, task 14 đang làm phần bộ phát thanh.
+
+Task 8–11 đều chạm `khuvuc.go` nên **phải tuần tự**. Cả 6 lẫn 13 đều chạm `khuvuc.go` (63KB) nên **phải
 tuần tự** — đúng cảnh báo ở mục "Thứ tự thi công" bên trên, không giao song song được.
 
 Sẵn sàng cho task 6: `SoKhuVuc.PhatToanServer` đã có ở `sokhuvuc.go:43`; khuôn để bắt chước
@@ -106,3 +109,20 @@ Kế hoạch viết trước khi thi công nên tên file trong đó là dự đ
 May là lần soát nhầm đó không vô ích: agent chuyển sang nghiệm thu bằng kiểm thử đột biến và
 tìm ra **loa đảo thứ tự thông báo** — bốn thông báo A,B,C,D lên sóng thành A,D,C,B, người chơi
 đọc "Boss đã bị hạ" trước "Boss xuất hiện". Đã vá (`0a82053`).
+
+### Soát nhầm LẦN HAI — 28/08, cùng một kiểu sai
+
+Lần một: grep theo **tên file** kế hoạch dự đoán (`loathongbao.go`) → tưởng task 6 chưa làm, thực ra
+đã xong ở `thongbao.go`.
+
+Lần hai: grep theo **tên kiểu** trên toàn bộ `*.go` → trúng `boss.go` rồi tưởng task 8–11 đã xong.
+Nhưng `boss.go` là sản phẩm của **task 3** (mô hình dữ liệu). Thứ task 8–11 phải làm là **nối chúng
+vào actor**, tức phải xuất hiện trong `khuvuc.go` — nơi đó có **0 lần**.
+
+**Cách soát đúng, dùng từ giờ:** grep **trong đúng file mà task đó phải sửa** (cột "File" của bảng
+task), không grep toàn thư mục. Một cái tên tồn tại không có nghĩa là nó được gọi.
+
+```bash
+# Sai: grep -r "MocNoiGian" *.go          -> trung boss.go, ket luan nham
+# Dung: grep -c "MocNoiGian" khuvuc.go    -> 0, tuc CHUA noi day
+```

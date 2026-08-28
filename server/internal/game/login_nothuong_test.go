@@ -27,20 +27,21 @@ import (
 type khoBietTraNo struct {
 	*khoGia
 
-	traVe int64 // so diem no tra ve
-	loi   error
+	traVe         int64 // so diem no tra ve
+	kinhNghiemMoi int64 // gia tri kinh_nghiem MOI ma CSDL tra ra sau khi cong
+	loi           error
 
 	soLanGoi int
 	idDaGoi  int64
 }
 
-func (k *khoBietTraNo) NhanNoThuong(ctx context.Context, nhanVatID int64) (int64, error) {
+func (k *khoBietTraNo) NhanNoThuong(ctx context.Context, nhanVatID int64) (int64, int64, error) {
 	k.soLanGoi++
 	k.idDaGoi = nhanVatID
 	if k.loi != nil {
-		return 0, k.loi
+		return 0, 0, k.loi
 	}
-	return k.traVe, nil
+	return k.traVe, k.kinhNghiemMoi, nil
 }
 
 // TestDangNhapNhanNoThuongCongVaoNhanVat la bai kiem trung tam cua nua tra:
@@ -49,8 +50,9 @@ func (k *khoBietTraNo) NhanNoThuong(ctx context.Context, nhanVatID int64) (int64
 func TestDangNhapNhanNoThuongCongVaoNhanVat(t *testing.T) {
 	nv := &store.NhanVat{ID: 7, Ten: "Naruto", KinhNghiem: 7}
 	kho := &khoBietTraNo{
-		khoGia: &khoGia{tk: taiKhoanHopLeChoTest(), nhanVat: nv},
-		traVe:  500,
+		khoGia:        &khoGia{tk: taiKhoanHopLeChoTest(), nhanVat: nv},
+		traVe:         500,
+		kinhNghiemMoi: 507, // 7 co san + 500 no, doc ra tu chinh giao dich
 	}
 
 	chayDangNhap(t, kho, "nguoidung", "matkhau")
@@ -147,13 +149,38 @@ func TestDangNhapNhanNoBaoHoaKhongTran(t *testing.T) {
 	const maxInt64 = int64(9_223_372_036_854_775_807)
 	nv := &store.NhanVat{ID: 7, Ten: "Naruto", KinhNghiem: maxInt64 - 10}
 	kho := &khoBietTraNo{
-		khoGia: &khoGia{tk: taiKhoanHopLeChoTest(), nhanVat: nv},
-		traVe:  1000,
+		khoGia:        &khoGia{tk: taiKhoanHopLeChoTest(), nhanVat: nv},
+		traVe:         1000,
+		kinhNghiemMoi: 9_223_372_036_854_775_807, // CSDL da bao hoa san
 	}
 
 	chayDangNhap(t, kho, "nguoidung", "matkhau")
 
 	if nv.KinhNghiem != maxInt64 {
 		t.Errorf("KinhNghiem = %d, mong doi bao hoa o %d", nv.KinhNghiem, maxInt64)
+	}
+}
+
+// TestDangNhapGanKinhNghiemTuCSDLChuKhongTuCong khoa lua chon GAN thay vi CONG.
+//
+// Ban trong RAM co the da CU hon CSDL: mot ban ghi cua phien truoc con nam
+// trong hang doi ThoGhi luc ta doc nhan vat. Tu cong lay tu so cu thi ra so cu
+// — sai im lang. Gia tri dung la cai doc ra tu chinh giao dich vua cong.
+//
+// Test dung mot ban RAM CO Y lech han so voi ket qua CSDL tra ve, roi doi hoi
+// ban RAM phai theo CSDL.
+func TestDangNhapGanKinhNghiemTuCSDLChuKhongTuCong(t *testing.T) {
+	nv := &store.NhanVat{ID: 7, Ten: "Naruto", KinhNghiem: 100} // ban RAM (cu)
+	kho := &khoBietTraNo{
+		khoGia:        &khoGia{tk: taiKhoanHopLeChoTest(), nhanVat: nv},
+		traVe:         50,
+		kinhNghiemMoi: 9999, // CSDL noi con so that la day, khong phai 100+50
+	}
+
+	chayDangNhap(t, kho, "nguoidung", "matkhau")
+
+	if nv.KinhNghiem != 9999 {
+		t.Errorf("KinhNghiem = %d, mong doi 9999 (GAN theo CSDL). Neu ra 150 tuc la "+
+			"dang tu cong tu ban RAM — ban do co the da cu hon CSDL", nv.KinhNghiem)
 	}
 }

@@ -157,12 +157,43 @@ mở và cắm trong `MoLuuTru` — đúng chỗ dự án đã chốt là điể
 lấy nó từ `SoKhuVuc` thay vì đổi chữ ký. Ba test khoá riêng việc nối dây, vì bài học của
 chính task 12 là `CongSatThuong` từng nằm trong `boss.go` suốt từ task 3 mà không ai gọi tới.
 
-**Nghiệm thu.** 30 test mới (7 store + 7 hàng đợi + 7 actor + 6 đăng nhập + 3 nối dây), mỗi
-mảnh đều thấy ĐỎ trước khi viết code. **Kiểm thử đột biến 8/8 bị giết:** bỏ `da_nhan = false`
-· bỏ lọc `nhan_vat_id` · hàng đợi ghi đè thay vì cộng dồn · vứt lô khi ghi lỗi · quay về bỏ
-qua người vắng mặt · cộng CSDL mà không cộng vào bản trong RAM · mở sổ nợ nhưng quên cắm vào
-khu vực · tắt máy chủ không xả nốt sổ nợ. `go test ./...` 8/8 gói xanh, `gofmt` + `vet` sạch.
-`-race` **không chạy được** trên máy này (thiếu `gcc`, xem §9) — bù bằng `-count=5`.
+**Nghiệm thu, vòng 1.** 30 test mới, mỗi mảnh đều thấy ĐỎ trước khi viết code; đột biến 8/8
+bị giết. `go test ./...` 8/8 gói xanh, `gofmt` + `vet` sạch. `-race` **không chạy được** trên
+máy này (thiếu `gcc`, xem §9) — bù bằng `-count=5`.
+
+**Nghiệm thu, vòng 2 — sau khi HAI agent soi đối kháng độc lập.** Vòng 1 chưa đủ. Một agent
+soi tính đúng đắn, một agent tấn công chính bộ test bằng 27 đột biến tự nghĩ: **11 bị giết,
+16 sống sót**. Kết quả:
+
+- **Một LỖI THẬT không test nào thấy:** lưới chống panic đặt cao hơn một tầng so với chỗ cần.
+  `ghiHetHangDoi` lấy hẳn lô nợ ra khỏi hàng đợi rồi mới gọi kho, còn `xepLai` chỉ chạy trên
+  đường *trả lỗi* — nên `GhiNoThuong` mà **panic** thì cả lô bốc hơi im lặng, ngược hẳn điều
+  chú thích của chính hàm đó cam kết. `ThoGhi` không dính vì nó có lưới **hai tầng**; bản đầu
+  chỉ chép tầng ngoài.
+- **Ba đường mất/nhân đôi tiền khi CSDL trục trặc:** commit mập mờ → thêm `khoa_lo` + ràng
+  buộc duy nhất + `ON CONFLICT DO NOTHING` (kéo theo hàng đợi phải tách hai tầng: lô hỏng thử
+  lại NGUYÊN VẸN, khoản mới đi lô riêng); vòng thử lại không có van xả → bỏ lô sau 5 lần;
+  `DongVaChoXong` báo "tắt sạch" khi vừa đánh rơi tiền → trả lỗi lần xả cuối, kèm hạn giờ
+  riêng trong `TatMayChu`.
+- **Chú thích `GanSoNo` chỉ dẫn NGƯỢC thứ tự tắt máy chủ** — chép từ `GanLoa` mà quên sửa.
+- **Điểm mù oracle (§6.12)** trong chính test của bản đầu: lấy kỳ vọng từ hằng số mà code
+  đang dùng, nên đổi tên hằng thì cả gói `game` vẫn xanh.
+
+Sau vòng sửa: **+20 test**, tổng **50** (7 store + 8 store đường lỗi + 7 hàng đợi +
+11 hàng đợi đường hỏng + 7 actor + 7 đăng nhập + 3 nối dây).
+
+**Vòng đột biến thứ hai** (13 cái, tự chạy trên chính bản vá): 10 bị giết, 3 sống sót, đã
+bịt cả ba. Cái đầu tiên đáng ghi lại: **test van xả tôi vừa viết cũng sai** — kho giả từ
+chối theo *lần gọi* nên lần thứ 6 thành công ở cả hai bản; phải có một lô hỏng **vĩnh
+viễn** mới phân biệt được. Và viết lại nó cho thấy hậu quả của việc thiếu van xả **nhẹ hơn**
+bản soi mô tả: tách hàng đợi hai tầng (làm vì lý do khác) đã vô tình chữa chỗ "một lô hỏng
+làm kẹt cả đường ghi", nên van xả giờ chỉ còn ngăn `choThuLai` phình mãi.
+
+**⚠️ NHƯNG TÍNH NĂNG CHƯA TỪNG CHẠY.** `bossNhanSatThuong` — đường duy nhất nạp
+`SatThuongTheoNguoi` — không có ai gọi ngoài test, vì **task 9/10/11 chưa làm**. Máy chủ thật
+chưa có con boss nào ăn được đòn, nên `traThuongBoss` chia một map rỗng và sổ nợ chưa từng
+ghi khoản nào. Đây đúng cái bẫy mục này viết ra để cảnh báo — nó vẫn còn, chỉ **lùi lên một
+tầng** cao hơn chỗ ba test nối dây khoá được.
 
 **Còn nợ lại (không chặn gì):** bảng `thuong_cho_nhan` chỉ tăng, chưa có đường dọn các dòng
 `da_nhan = true` cũ; và chỉ hỗ trợ `loai_thuong = 'kinh_nghiem'` — cột để mở nhưng thêm loại

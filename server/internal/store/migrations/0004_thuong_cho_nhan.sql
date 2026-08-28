@@ -20,6 +20,11 @@ CREATE TABLE IF NOT EXISTS thuong_cho_nhan (
     nhan_vat_id BIGINT      NOT NULL REFERENCES nhan_vat(id) ON DELETE CASCADE,
     loai_thuong TEXT        NOT NULL,
     so_diem     BIGINT      NOT NULL,
+    -- Dinh danh LO ghi. Cung (khoa_lo, nhan_vat_id, loai_thuong) la duy nhat,
+    -- nen ghi LAI cung mot lo la viec KHONG. Day la thu duy nhat chan duoc
+    -- chuyen: PostgreSQL commit that xong roi moi tra loi cho client (het han
+    -- gio, dut ket noi) -> ben goi thu lai -> nguoi choi nhan thuong HAI LAN.
+    khoa_lo     TEXT        NOT NULL,
     moc_tao     TIMESTAMPTZ NOT NULL DEFAULT now(),
     da_nhan     BOOLEAN     NOT NULL DEFAULT false,
     nhan_luc    TIMESTAMPTZ,
@@ -41,12 +46,21 @@ CREATE TABLE IF NOT EXISTS thuong_cho_nhan (
     -- nhan thi khong duoc co. Sai lech giua chung lam moi bao cao "ai nhan gi
     -- luc nao" thanh vo nghia ma khong bao loi o dau ca.
     CONSTRAINT thuong_cho_nhan_nhan_luc_khop
-        CHECK ((da_nhan AND nhan_luc IS NOT NULL) OR (NOT da_nhan AND nhan_luc IS NULL))
+        CHECK ((da_nhan AND nhan_luc IS NOT NULL) OR (NOT da_nhan AND nhan_luc IS NULL)),
+
+    -- Chan nhan doi khi ben goi thu lai mot lo — xem chu thich cot khoa_lo.
+    -- Gop theo (nguoi, loai) trong bo nho truoc khi ghi, nen mot lo chi co
+    -- DUNG MOT dong cho moi cap do; rang buoc nay vi vay khong chan nham gi ca.
+    CONSTRAINT thuong_cho_nhan_lo_duy_nhat
+        UNIQUE (khoa_lo, nhan_vat_id, loai_thuong)
 );
 
 -- Index MOT PHAN (chi cac dong chua nhan). Duong doc duy nhat cua bang nay la
 -- "no chua nhan cua nguoi X" chay o MOI lan dang nhap; con cac dong da nhan chi
 -- nam do lam so sach. Index mot phan vi vay nho hon han index day du va khong
--- phinh theo lich su — bang nay chi tang, khong bao gio xoa dong.
+-- phinh theo lich su: no chi chua dung nhung dong dang cho, ma so do bi chan tu
+-- nhien theo so nguoi choi. (Bang van co the mat dong — ON DELETE CASCADE o tren
+-- don sach no cua mot nhan vat bi xoa — nhung khong co duong nao xoa dong da
+-- nhan de don dep, xem §8 BAT-DAU-TU-DAY.md.)
 CREATE INDEX IF NOT EXISTS thuong_cho_nhan_chua_nhan
     ON thuong_cho_nhan (nhan_vat_id) WHERE da_nhan = false;

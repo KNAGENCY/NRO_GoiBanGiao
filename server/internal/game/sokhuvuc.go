@@ -79,9 +79,14 @@ func (s *SoKhuVuc) GanLoa(loa *BoPhatThanh) {
 // ngay khi mo, nen o day chi con viec cam day.
 //
 // CO Y KHONG goi tu MoSoKhuVuc, cung ly do voi GanLoa (luat 4: MoSoKhuVuc phai
-// GIU NGUYEN hanh vi). Chi cmd/nroserver/main.go goi ham nay; khi tat may chu
-// phai goi soNo.DongVaChoXong TRUOC s.DungTatCa() de khoan no cuoi cung kip
-// xuong dia truoc khi khong con ai xep them.
+// GIU NGUYEN hanh vi). Noi goi that la MoLuuTru (moluutru.go) — KHONG phai
+// main.go: so no duoc lap rap cung cho voi ThoGhi/BoLuuDinhKy, va main.go khong
+// nhac toi no lan nao.
+//
+// THU TU LUC TAT MAY CHU: DongSoNo phai chay SAU s.DungTatCa(), khong phai
+// truoc. Chung nao con mot actor song thi con co the co boss chet va co them
+// khoan no duoc xep; dong so no truoc la vut di dung nhung khoan cuoi cung.
+// TatMayChu (tatmaychu.go) lam dung thu tu do.
 func (s *SoKhuVuc) GanSoNo(so *SoNoThuong) {
 	for _, k := range s.theoMap {
 		k.soNo.Store(so)

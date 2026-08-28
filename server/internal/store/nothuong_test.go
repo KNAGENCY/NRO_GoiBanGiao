@@ -97,8 +97,8 @@ func TestNhanNoThuong_CongVaoKinhNghiemRoiDanhDauDaNhan(t *testing.T) {
 	nv := taoNguoiThu(t, s, "notestaa")
 
 	if err := s.GhiNoThuong(ctx, []NoThuong{
-		{NhanVatID: nv.ID, Loai: LoaiThuongKinhNghiem, SoDiem: 300},
-		{NhanVatID: nv.ID, Loai: LoaiThuongKinhNghiem, SoDiem: 200},
+		{NhanVatID: nv.ID, Loai: LoaiThuongKinhNghiem, SoDiem: 300, KhoaLo: "lo-a1"},
+		{NhanVatID: nv.ID, Loai: LoaiThuongKinhNghiem, SoDiem: 200, KhoaLo: "lo-a2"},
 	}); err != nil {
 		t.Fatalf("ghi no: %v", err)
 	}
@@ -106,7 +106,7 @@ func TestNhanNoThuong_CongVaoKinhNghiemRoiDanhDauDaNhan(t *testing.T) {
 		t.Fatalf("sau khi ghi: %d dong no chua nhan, mong 2", got)
 	}
 
-	tong, err := s.NhanNoThuong(ctx, nv.ID)
+	tong, _, err := s.NhanNoThuong(ctx, nv.ID)
 	if err != nil {
 		t.Fatalf("nhan no: %v", err)
 	}
@@ -130,15 +130,15 @@ func TestNhanNoThuong_GoiLanHaiKhongNhanDoi(t *testing.T) {
 	nv := taoNguoiThu(t, s, "notestbb")
 
 	if err := s.GhiNoThuong(ctx, []NoThuong{
-		{NhanVatID: nv.ID, Loai: LoaiThuongKinhNghiem, SoDiem: 777},
+		{NhanVatID: nv.ID, Loai: LoaiThuongKinhNghiem, SoDiem: 777, KhoaLo: "lo-b1"},
 	}); err != nil {
 		t.Fatalf("ghi no: %v", err)
 	}
-	if _, err := s.NhanNoThuong(ctx, nv.ID); err != nil {
+	if _, _, err := s.NhanNoThuong(ctx, nv.ID); err != nil {
 		t.Fatalf("nhan lan 1: %v", err)
 	}
 
-	tong2, err := s.NhanNoThuong(ctx, nv.ID)
+	tong2, _, err := s.NhanNoThuong(ctx, nv.ID)
 	if err != nil {
 		t.Fatalf("nhan lan 2: %v", err)
 	}
@@ -163,7 +163,7 @@ func TestNhanNoThuong_KhongCoNoThiKhongDoiGi(t *testing.T) {
 		t.Fatalf("dat kinh nghiem san: %v", err)
 	}
 
-	tong, err := s.NhanNoThuong(ctx, nv.ID)
+	tong, _, err := s.NhanNoThuong(ctx, nv.ID)
 	if err != nil {
 		t.Fatalf("nhan no khi khong co no: %v", err)
 	}
@@ -185,13 +185,13 @@ func TestNhanNoThuong_KhongDungToiNoNguoiKhac(t *testing.T) {
 	b := taoNguoiThu(t, s, "notestee")
 
 	if err := s.GhiNoThuong(ctx, []NoThuong{
-		{NhanVatID: a.ID, Loai: LoaiThuongKinhNghiem, SoDiem: 100},
-		{NhanVatID: b.ID, Loai: LoaiThuongKinhNghiem, SoDiem: 900},
+		{NhanVatID: a.ID, Loai: LoaiThuongKinhNghiem, SoDiem: 100, KhoaLo: "lo-d1"},
+		{NhanVatID: b.ID, Loai: LoaiThuongKinhNghiem, SoDiem: 900, KhoaLo: "lo-d1"},
 	}); err != nil {
 		t.Fatalf("ghi no: %v", err)
 	}
 
-	tong, err := s.NhanNoThuong(ctx, a.ID)
+	tong, _, err := s.NhanNoThuong(ctx, a.ID)
 	if err != nil {
 		t.Fatalf("nhan no cua a: %v", err)
 	}
@@ -221,12 +221,12 @@ func TestNhanNoThuong_BaoHoaKhongTran(t *testing.T) {
 		t.Fatalf("dat kinh nghiem gan tran: %v", err)
 	}
 	if err := s.GhiNoThuong(ctx, []NoThuong{
-		{NhanVatID: nv.ID, Loai: LoaiThuongKinhNghiem, SoDiem: 1_000_000},
+		{NhanVatID: nv.ID, Loai: LoaiThuongKinhNghiem, SoDiem: 1_000_000, KhoaLo: "lo-f1"},
 	}); err != nil {
 		t.Fatalf("ghi no: %v", err)
 	}
 
-	if _, err := s.NhanNoThuong(ctx, nv.ID); err != nil {
+	if _, _, err := s.NhanNoThuong(ctx, nv.ID); err != nil {
 		t.Fatalf("nhan no gan tran: %v", err)
 	}
 	const maxInt64 = int64(9_223_372_036_854_775_807)
@@ -257,7 +257,7 @@ func TestGhiNoThuong_TuChoiSoDiemKhongDuong(t *testing.T) {
 
 	for _, diem := range []int64{0, -50} {
 		if err := s.GhiNoThuong(ctx, []NoThuong{
-			{NhanVatID: nv.ID, Loai: LoaiThuongKinhNghiem, SoDiem: diem},
+			{NhanVatID: nv.ID, Loai: LoaiThuongKinhNghiem, SoDiem: diem, KhoaLo: "lo-g1"},
 		}); err == nil {
 			t.Fatalf("ghi no voi so diem %d KHONG loi, mong bi tu choi", diem)
 		}

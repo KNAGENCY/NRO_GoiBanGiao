@@ -934,7 +934,7 @@ func guiChuyenSangTaoNhanVat(s *mynet.Session) error {
 // phuong thuc rong. *store.Store thoa man interface nay tu nhien, nen may chu
 // that co day du tinh nang ma khong test nao phai sua.
 type traNoThuongKhiVao interface {
-	NhanNoThuong(ctx context.Context, nhanVatID int64) (int64, error)
+	NhanNoThuong(ctx context.Context, nhanVatID int64) (tong int64, kinhNghiemMoi int64, err error)
 }
 
 // traNoThuongDangCho cong het no phan thuong dang cho cua nhan vat nay vao CSDL
@@ -964,7 +964,7 @@ func (b *BoXuLy) traNoThuongDangCho(nv *store.NhanVat) {
 	ctx, huy := context.WithTimeout(context.Background(), hanGioGhi)
 	defer huy()
 
-	diem, err := kho.NhanNoThuong(ctx, nv.ID)
+	diem, kinhNghiemMoi, err := kho.NhanNoThuong(ctx, nv.ID)
 	if err != nil {
 		slog.Error("khong tra duoc so no phan thuong — no van con trong bang, se tra lan sau",
 			"idNhanVat", nv.ID, "loi", err)
@@ -973,7 +973,11 @@ func (b *BoXuLy) traNoThuongDangCho(nv *store.NhanVat) {
 	if diem <= 0 {
 		return
 	}
-	nv.KinhNghiem = congBaoHoa(nv.KinhNghiem, diem)
+	// GAN, khong cong: kinhNghiemMoi doc ra tu chinh giao dich vua cong, nen no
+	// dung ke ca khi ban trong RAM da cu hon CSDL (mot ban ghi cua phien truoc
+	// con nam trong hang doi ThoGhi luc ta doc nhan vat). Tu cong lay tu so cu
+	// thi ra so cu — dung kieu sai im lang.
+	nv.KinhNghiem = kinhNghiemMoi
 	slog.Info("da tra so no phan thuong luc dang nhap",
 		"idNhanVat", nv.ID, "diem", diem, "kinhNghiemMoi", nv.KinhNghiem)
 }

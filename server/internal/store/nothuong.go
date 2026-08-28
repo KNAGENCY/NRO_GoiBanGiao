@@ -2,7 +2,10 @@ package store
 
 import (
 	"context"
+	"errors"
 	"fmt"
+
+	"github.com/jackc/pgx/v5"
 )
 
 // LoaiThuongKinhNghiem la loai no DUY NHAT hien co. Phai khop y het danh sach
@@ -24,6 +27,21 @@ type NoThuong struct {
 	NhanVatID int64
 	Loai      string
 	SoDiem    int64
+
+	// KhoaLo la dinh danh cua LO ghi ma khoan nay thuoc ve — thu DUY NHAT chan
+	// duoc chuyen nhan doi phan thuong.
+	//
+	// VI SAO CAN: PostgreSQL co the DA COMMIT THAT roi moi tra loi cho client
+	// (het han gio, dut ket noi ngay sau commit). Ben goi khong phan biet duoc
+	// "chua ghi" voi "ghi roi ma khong biet", nen no thu lai — va khong co gi
+	// chan thi khoan thuong do vao bang HAI LAN, nguoi choi nhan gap doi.
+	// Cung (KhoaLo, NhanVatID, Loai) la duy nhat, nen lan chen thu hai cua CUNG
+	// mot lo khong them duoc gi.
+	//
+	// Doi lai, ben goi phai thu lai lo NGUYEN VEN (cung khoa, cung so diem) —
+	// tron them khoan moi vao lo cu se bi ON CONFLICT nuot mat phan moi. Xem
+	// hang doi hai tang trong game/sonothuong.go.
+	KhoaLo string
 }
 
 // GhiNoThuong ghi mot LO khoan no xuong CSDL trong MOT cau lenh.
@@ -47,16 +65,23 @@ func (s *Store) GhiNoThuong(ctx context.Context, ds []NoThuong) error {
 	idNhanVat := make([]int64, len(ds))
 	loai := make([]string, len(ds))
 	soDiem := make([]int64, len(ds))
+	khoaLo := make([]string, len(ds))
 	for i, no := range ds {
 		idNhanVat[i] = no.NhanVatID
 		loai[i] = no.Loai
 		soDiem[i] = no.SoDiem
+		khoaLo[i] = no.KhoaLo
 	}
 
+	// ON CONFLICT DO NOTHING tren (khoa_lo, nhan_vat_id, loai_thuong): ghi LAI
+	// cung mot lo la viec KHONG, khong phai ghi them. Day la thu duy nhat chan
+	// duoc chuyen "CSDL da commit that roi moi tra loi" -> ben goi thu lai ->
+	// nguoi choi nhan thuong hai lan. Xem chu thich NoThuong.KhoaLo.
 	if _, err := s.pool.Exec(ctx,
-		`INSERT INTO thuong_cho_nhan (nhan_vat_id, loai_thuong, so_diem)
-		 SELECT * FROM unnest($1::bigint[], $2::text[], $3::bigint[])`,
-		idNhanVat, loai, soDiem,
+		`INSERT INTO thuong_cho_nhan (nhan_vat_id, loai_thuong, so_diem, khoa_lo)
+		 SELECT * FROM unnest($1::bigint[], $2::text[], $3::bigint[], $4::text[])
+		 ON CONFLICT (khoa_lo, nhan_vat_id, loai_thuong) DO NOTHING`,
+		idNhanVat, loai, soDiem, khoaLo,
 	); err != nil {
 		return fmt.Errorf("ghi no thuong that bai: %w", err)
 	}
@@ -82,10 +107,16 @@ func (s *Store) GhiNoThuong(ctx context.Context, ds []NoThuong) error {
 // Loc theo loai_thuong = kinh_nghiem (khong lay het) de mot loai no moi duoc
 // them vao CSDL trong tuong lai KHONG bi ham nay danh dau "da nhan" roi vut di
 // ma khong tra gi ca. Tha de no nam lai cho toi khi co nguoi viet duong tra.
-func (s *Store) NhanNoThuong(ctx context.Context, nhanVatID int64) (int64, error) {
+//
+// TRA VE HAI SO: tong vua cong, VA gia tri kinh_nghiem MOI doc ra tu chinh giao
+// dich nay. Nguoi goi GAN so thu hai vao ban trong bo nho thay vi tu cong lay —
+// vi ban trong RAM co the da CU hon CSDL (mot ban ghi cua phien truoc con nam
+// trong hang doi ThoGhi luc ta doc), va cong vao mot so cu thi ket qua cung cu.
+// Lay thang tu giao dich la cach duy nhat chac chan hai ben khop nhau.
+func (s *Store) NhanNoThuong(ctx context.Context, nhanVatID int64) (tong int64, kinhNghiemMoi int64, err error) {
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
-		return 0, fmt.Errorf("mo giao dich nhan no that bai: %w", err)
+		return 0, 0, fmt.Errorf("mo giao dich nhan no that bai: %w", err)
 	}
 	// Rollback sau Commit la mot phep khong-lam-gi trong pgx, nen defer nay an
 	// toan tuyet doi o ca hai duong ra.
@@ -99,55 +130,62 @@ func (s *Store) NhanNoThuong(ctx context.Context, nhanVatID int64) (int64, error
 		nhanVatID, LoaiThuongKinhNghiem,
 	)
 	if err != nil {
-		return 0, fmt.Errorf("danh dau no da nhan that bai: %w", err)
+		return 0, 0, fmt.Errorf("danh dau no da nhan that bai: %w", err)
 	}
-	var tong int64
 	for rows.Next() {
 		var diem int64
 		if err := rows.Scan(&diem); err != nil {
 			rows.Close()
-			return 0, fmt.Errorf("doc so diem no that bai: %w", err)
+			return 0, 0, fmt.Errorf("doc so diem no that bai: %w", err)
 		}
 		tong = congBaoHoaKinhNghiem(tong, diem)
 	}
 	rows.Close()
 	if err := rows.Err(); err != nil {
-		return 0, fmt.Errorf("duyet no that bai: %w", err)
+		return 0, 0, fmt.Errorf("duyet no that bai: %w", err)
 	}
 
 	if tong == 0 {
 		// Khong co no: dung o day, KHONG cham vao bang nhan_vat. Duong nay chay
 		// o moi lan dang nhap nen phai re nhat co the.
+		//
+		// Tra kinhNghiemMoi = 0 kem tong = 0: nguoi goi thay tong <= 0 thi khong
+		// dung toi so thu hai. Co y KHONG doc them mot cau SELECT chi de dien
+		// cho du — day la duong pho bien nhat, phai re nhat.
 		if err := tx.Commit(ctx); err != nil {
-			return 0, fmt.Errorf("chot giao dich nhan no that bai: %w", err)
+			return 0, 0, fmt.Errorf("chot giao dich nhan no that bai: %w", err)
 		}
-		return 0, nil
+		return 0, 0, nil
 	}
 
 	// LEAST(...::numeric, tran) — bao hoa thay vi tran. Cong tren kieu numeric
 	// (khong gioi han chu so) roi moi kep ve bigint: neu cong thang tren bigint
 	// thi PostgreSQL nem loi 22003 va HUY ca giao dich, nghia la nguoi choi gan
 	// tran kinh nghiem se khong bao gio nhan duoc no nao nua.
-	ct, err := tx.Exec(ctx,
+	// RETURNING kinh_nghiem: lay lai gia tri MOI ngay trong giao dich, de nguoi
+	// goi gan thang vao ban trong bo nho. Khong co no thi hai ben chi khop khi
+	// ban RAM tinh co dang bang CSDL luc ta doc — mot gia dinh de vo.
+	err = tx.QueryRow(ctx,
 		`UPDATE nhan_vat
 		    SET kinh_nghiem = LEAST(kinh_nghiem::numeric + $1::numeric, $2::numeric)::bigint
-		  WHERE id = $3`,
+		  WHERE id = $3
+		 RETURNING kinh_nghiem`,
 		tong, tranKinhNghiem, nhanVatID,
-	)
-	if err != nil {
-		return 0, fmt.Errorf("cong thuong vao nhan vat that bai: %w", err)
-	}
-	if ct.RowsAffected() == 0 {
+	).Scan(&kinhNghiemMoi)
+	if errors.Is(err, pgx.ErrNoRows) {
 		// Khoa ngoai khong cho no ton tai ma nhan vat thi khong — nen den day
 		// duoc la du lieu da hong. Tra loi de giao dich bi huy: tha khong tra
 		// thuong con hon danh dau da tra ma khong cong cho ai.
-		return 0, ErrKhongThayNhanVat
+		return 0, 0, ErrKhongThayNhanVat
+	}
+	if err != nil {
+		return 0, 0, fmt.Errorf("cong thuong vao nhan vat that bai: %w", err)
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		return 0, fmt.Errorf("chot giao dich nhan no that bai: %w", err)
+		return 0, 0, fmt.Errorf("chot giao dich nhan no that bai: %w", err)
 	}
-	return tong, nil
+	return tong, kinhNghiemMoi, nil
 }
 
 // congBaoHoaKinhNghiem cong hai so khong am, dung o tran thay vi cuon vong ve

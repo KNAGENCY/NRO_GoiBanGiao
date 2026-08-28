@@ -3,6 +3,7 @@ package game
 import (
 	"context"
 	"errors"
+	"time"
 )
 
 // TatMayChu thuc hien DUNG THU TU BAT BUOC cua dac ta
@@ -34,11 +35,23 @@ import (
 // hong" (mat vai thay doi GAN NHAT chua kip ghi) con hon treo ca tien trinh
 // may chu khong bao gio thoat duoc — dung tinh than context.WithTimeout da
 // giai thich o hanGioGhi (thogi.go).
+// hanGioDongSoNo la khoan thoi gian RIENG cho lan xa cuoi cung cua so no luc
+// tat may chu — xem ly do trong than TatMayChu.
+const hanGioDongSoNo = 10 * time.Second
+
 func TatMayChu(ctx context.Context, soKhuVuc *SoKhuVuc, thoGhi *ThoGhi) error {
 	soKhuVuc.LuuTatCa(thoGhi)
 	err := thoGhi.DongVaChoXong(ctx)
 	errDung := soKhuVuc.DungTatCa()
+
 	// So no dong SAU CUNG, khi khong con actor nao co the xep them khoan nao
 	// nua — dong som hon la vut di dung nhung khoan cuoi cung.
-	return errors.Join(err, errDung, soKhuVuc.DongSoNo(ctx))
+	//
+	// HAN GIO RIENG, khong dung chung ctx: neu thoGhi vua tieu het ngan sach
+	// (mot CSDL cham la du), ctx da het han va DongSoNo se tra ngay ctx.Err()
+	// ma khong kip xa lan nao — tien cua nguoi choi bi vut di vi mot buoc TRUOC
+	// no cham. Cho no mot khoan rieng, van co tran de khong treo tien trinh.
+	ctxNo, huy := context.WithTimeout(context.Background(), hanGioDongSoNo)
+	defer huy()
+	return errors.Join(err, errDung, soKhuVuc.DongSoNo(ctxNo))
 }

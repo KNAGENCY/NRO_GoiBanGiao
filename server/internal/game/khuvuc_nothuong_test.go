@@ -4,8 +4,6 @@ import (
 	"context"
 	"testing"
 	"time"
-
-	"nroserver/internal/store"
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -182,7 +180,11 @@ func TestXepNoThuongDungLoaiKinhNghiem(t *testing.T) {
 	if len(kho.daGhi) != 1 {
 		t.Fatalf("ghi %d dong no, mong doi 1", len(kho.daGhi))
 	}
-	if kho.daGhi[0].Loai != store.LoaiThuongKinhNghiem {
-		t.Errorf("loai no = %q, mong doi %q", kho.daGhi[0].Loai, store.LoaiThuongKinhNghiem)
+	// GHIM CHUOI CUNG, khong dung store.LoaiThuongKinhNghiem — day la diem mu
+	// oracle ma kiem thu dot bien phoi ra (§6.12): lay ky vong tu chinh hang so
+	// ma code dang dung nghia la doi ten hang so thi test VAN XANH, trong khi
+	// khoan no ghi ra mang loai la va nam lai vinh vien khong ai tra.
+	if kho.daGhi[0].Loai != "kinh_nghiem" {
+		t.Errorf("loai no = %q, mong doi %q", kho.daGhi[0].Loai, "kinh_nghiem")
 	}
 }

@@ -42,6 +42,7 @@ func TestMoLuuTruNoiSoNoVaoMoiKhuVuc(t *testing.T) {
 	if boLuu != nil {
 		t.Cleanup(boLuu.Dung)
 	}
+	t.Cleanup(func() { _ = soKhuVuc.DongSoNo(context.Background()) })
 
 	for mapId, k := range soKhuVuc.theoMap {
 		if k.soNo.Load() == nil {
@@ -93,6 +94,8 @@ func TestMoLuuTruKhoKhongBietGhiNoThiVanChay(t *testing.T) {
 	if boLuu != nil {
 		t.Cleanup(boLuu.Dung)
 	}
+
+	t.Cleanup(func() { _ = soKhuVuc.DongSoNo(context.Background()) })
 
 	for mapId, k := range soKhuVuc.theoMap {
 		if k.soNo.Load() != nil {

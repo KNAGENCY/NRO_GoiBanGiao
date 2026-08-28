@@ -80,7 +80,7 @@ mã nguồn (không tin sổ), kết quả:
 | 5 | `type BenDanh` + `KiemDanhHopLe` thuần (`chotkiem.go`) | ✅ xong |
 | 6 | `BoPhatThanh` ở **`thongbao.go`** (KHÔNG phải `loathongbao.go`), có từ `6e51dd8` | ✅ xong — soát 28/08 tìm theo **tên file** nên kết luận nhầm |
 | 7 | `k.boss = append` + `themBoss` (`khuvuc.go` ~1312) | ✅ xong |
-| **8** | `khuvuc.go` có **0 lần** nhắc `CongSatThuong` — tên đó chỉ nằm ở `boss.go` (task 3) | ⬜ **CHƯA LÀM** |
+| 8 | định tuyến `-60` id âm → boss, trong `case suKienDanhNguoiChoi` (`khuvuc.go` 1128+, +139 dòng) | ✅ xong 28/08 — dùng lại `KiemDanhHopLe` + `TinhSatThuong` + `bossNhanSatThuong` |
 | **9** | `khuvuc.go` có **0 lần** nhắc `BossChao`/`BossTroi`/`BossRaDi` | ⬜ **CHƯA LÀM** |
 | **10** | `nhipTim` không xử lý boss | ⬜ **CHƯA LÀM** |
 | **11** | `khuvuc.go` có **0 lần** nhắc `MocNoiGian` — tên đó chỉ nằm ở `boss.go` (task 3) | ⬜ **CHƯA LÀM** |
@@ -89,8 +89,11 @@ mã nguồn (không tin sổ), kết quả:
 | 14 | `noiBoPhatThanh()` + `GanLoa` 5 khu vực, thứ tự tắt `boLuu → loa → TatMayChu → Close` | ⏳ **nửa xong** — bộ phát thanh đã nối; **lịch boss chưa bật** (có chú thích đánh dấu chỗ) |
 | 15 | `noidungboss.go` — 2 boss mẫu (1 con 2 pha + boss lớn + `MocNoiGian`) | ⏳ **nửa xong** — dữ liệu đủ; **smoke client Unity chưa làm** (chỉ chủ dự án làm được) |
 
-**Còn đúng 4 task: `8 → 9 → 10 → 11`** — nền móng boss trong actor. Cả bốn chạm `khuvuc.go` nên
-**phải tuần tự**, không giao song song được.
+**Còn 3 task: `9 → 10 → 11`** — nền móng boss trong actor. Cả ba chạm `khuvuc.go` nên **phải tuần tự**.
+
+> ⚠️ **Task 1 (GATE hỏi client về biến hình) VẪN CHƯA LÀM** — file research chưa tồn tại.
+> Nó **chặn task 11**: chưa biết client có chấp nhận một id đã `-6` quay lại bằng `-5` hay không.
+> Làm task 11 mà bỏ qua GATE này là đoán, và đoán sai thì boss biến hình xong **biến mất**.
 
 Task 12, 13, 15 đã xong và gộp `main` (`922eed8`); task 14 xong nửa bộ phát thanh.
 

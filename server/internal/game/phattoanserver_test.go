@@ -291,3 +291,133 @@ func TestGanLoaNoiDayTuActorToiMoiNguoi(t *testing.T) {
 		t.Fatalf("goi 93 nhan duoc sai than:\n got  = %v\n muon = %v", m.Data, muon)
 	}
 }
+
+// TestActorKhongBiChanKhiLoaBanVaHangDoiDay la CHOT KIEM cua ca CHAN-2, do
+// dung dieu kien XAU NHAT co the xay ra that.
+//
+// TestActorKhongGoiGuiDieuKhienKhiXepThongBao o tren do actor luc duong phat
+// thanh RANH RANG va hang doi RONG — no chi chung minh "duong sach thi di
+// duoc". Test nay do dung luc:
+//
+//   - goroutine loa DANG KET CUNG trong phat() — mo phong duong phat that su
+//     tac (mot client ngung doc socket, dung bay §6.10b tung lam actor treo 30
+//     giay) — nen no khong rut hang doi mot cai nao nua;
+//   - hang doi da DAY den tran, khong con mot cho trong nao.
+//
+// Do la luc mot cai hang doi lam sai se chan actor. Bon dieu bi khoa:
+//
+//  1. KHONG TREO — han gio 2 giay. Doi Xep() thanh gui chan (b.hangDoi <- yc,
+//     bo select+default) thi actor ket VINH VIEN o day.
+//  2. NHANH — 500 lan xepThongBao phai xong trong duoi 100ms, tuc duoi MOT
+//     nhip tim cua actor (khuvuc.go dung ticker 100ms). Chi do "khong treo" la
+//     chua du: mot ban cai lui kieu "cho cho du nhip 1,5 giay" van tra ve kip
+//     trong 2 giay ma da lam actor lo 15 nhip.
+//  3. KHONG CHAM HOP THU DIEU KHIEN — dem NGAY TRUOC/NGAY SAU, va dem TU TRONG
+//     actor (meo tat dinh da giai thich o test tren: chinh actor dang ban nen
+//     khong ai rut bot con dem duoc).
+//  4. BO CHU KHONG CHO — soLanBo phai tang DUNG 500. Day la nua con lai cua
+//     hop dong: "khong chan" ma lai am tham nuot mat con so thi khong ai chan
+//     doan duoc mot duong phat thanh dang tac.
+func TestActorKhongBiChanKhiLoaBanVaHangDoiDay(t *testing.T) {
+	// Ghim CUNG 64 (khong doc lai tranHangDoiThongBao) — cung ly do da ghi o
+	// TestBoPhatThanhXepKhongChanKhiHangDoiDay: doc lai hang so se lam test
+	// dong tinh voi code neu ai do noi tran ra.
+	const sucChua = 64
+	const soXepTuActor = 500
+
+	tha := make(chan struct{})          // dong kenh nay moi tha goroutine loa ra
+	daVaoPhat := make(chan struct{}, 1) // bao "loa da THAT SU ket trong phat()"
+
+	loa := MoBoPhatThanh()
+	loa.BatDau(func(string) {
+		select {
+		case daVaoPhat <- struct{}{}:
+		default:
+		}
+		<-tha
+	})
+
+	k := MoKhuVuc(TimBanDo(1))
+	k.loa.Store(loa)
+	k.BatDau()
+
+	// Thu tu don dep (defer chay nguoc): THA + tat loa TRUOC, roi moi dung khu
+	// vuc — dung thu tu ma main.go phai theo (xem GanLoa, sokhuvuc.go). Khong
+	// dong `tha` truoc thi loa.Dung() treo vinh vien o <-b.xong vi vongLap con
+	// dang ket trong phat().
+	defer k.Dung()
+	defer func() {
+		close(tha)
+		loa.Dung()
+	}()
+
+	// Buoc 1: moi goroutine loa vao phat() roi ket lai o do.
+	loa.Xep(YeuCauThongBao{NoiDung: "cai nay lam loa ket lai", MocTao: time.Now()})
+	select {
+	case <-daVaoPhat:
+	case <-time.After(3 * time.Second):
+		t.Fatal("sau 3 giay goroutine loa van chua vao phat() — kich ban test chua dung, " +
+			"chua the noi gi ve viec actor co bi chan hay khong")
+	}
+
+	// Buoc 2: do day hang doi den DUNG tran. Loa dang ket nen khong ai rut ra.
+	for i := 0; i < sucChua; i++ {
+		loa.Xep(YeuCauThongBao{NoiDung: "do cho day", MocTao: time.Now()})
+	}
+	if con := len(loa.hangDoi); con != sucChua {
+		t.Fatalf("hang doi loa giu %d yeu cau, muon DAY dung %d — kich ban test chua dung", con, sucChua)
+	}
+	if soBo := loa.SoLanBo(); soBo != 0 {
+		t.Fatalf("SoLanBo() = %d ngay sau khi do vua du tran, muon 0", soBo)
+	}
+
+	// Buoc 3: TU TRONG actor (suKienChay chay tren dung goroutine vongLap), don
+	// mot con bao thong bao vao cai hang doi da day cung do.
+	type doDuoc struct {
+		truoc, sau int
+		tieuTon    time.Duration
+	}
+	ketQua := make(chan doDuoc, 1)
+	k.Gui(suKienChay{f: func() {
+		truoc := len(k.hopThuDieuKhien)
+		batDau := time.Now()
+		for i := 0; i < soXepTuActor; i++ {
+			k.xepThongBao("Boss Cuu Vi da bi ha")
+		}
+		ketQua <- doDuoc{truoc: truoc, sau: len(k.hopThuDieuKhien), tieuTon: time.Since(batDau)}
+	}})
+
+	var d doDuoc
+	select {
+	case d = <-ketQua:
+	case <-time.After(2 * time.Second):
+		t.Fatalf("actor BI TREO qua 2 giay khi don %d thong bao vao hang doi DAY trong luc "+
+			"loa dang ket trong phat() — Xep() phai la select+default (BO), khong duoc cho",
+			soXepTuActor)
+	}
+
+	if d.tieuTon >= 100*time.Millisecond {
+		t.Fatalf("actor mat %v de xep %d thong bao — qua MOT nhip tim (100ms, khuvuc.go). "+
+			"Xep() chi duoc lam mot select+default va mot atomic.Add: khong cho duong phat "+
+			"thanh, khong cho du nhip 1,5 giay", d.tieuTon, soXepTuActor)
+	}
+	if d.sau != d.truoc {
+		t.Fatalf("xepThongBao lam hop thu DIEU KHIEN tang tu %d len %d — actor KHONG duoc "+
+			"cham hop thu dieu khien (cho 100ms tren hop thu chinh no dang ban = tu khoa)",
+			d.truoc, d.sau)
+	}
+	if soBo := loa.SoLanBo(); soBo != int64(soXepTuActor) {
+		t.Fatalf("SoLanBo() = %d sau %d lan xep vao hang doi DAY, muon dung %d — bo thi phai "+
+			"DEM: nuot im lang thi khong ai chan doan duoc duong phat thanh dang tac",
+			soBo, soXepTuActor, soXepTuActor)
+	}
+
+	// Buoc 4: hoi actor mot cau QUA HOP THU DIEU KHIEN trong khi loa VAN CON
+	// KET. Tra loi duoc trong han (thoiGianChoControl = 100ms) chung minh diem
+	// cot loi cua ca CHAN-2: actor va loa la HAI luong doc lap — loa tac khong
+	// keo actor tac theo.
+	if _, err := k.AnhChupNguoiChoiCoLoi(0); err != nil {
+		t.Fatalf("actor khong tra loi duoc mot cau hoi dieu khien (%v) trong khi loa dang "+
+			"ket — hai luong nay PHAI doc lap voi nhau", err)
+	}
+}

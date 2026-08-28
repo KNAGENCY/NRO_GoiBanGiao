@@ -84,15 +84,23 @@ mã nguồn (không tin sổ), kết quả:
 | **9** | `khuvuc.go` có **0 lần** nhắc `BossChao`/`BossTroi`/`BossRaDi` | ⬜ **CHƯA LÀM** |
 | **10** | `nhipTim` không xử lý boss | ⬜ **CHƯA LÀM** |
 | **11** | `khuvuc.go` có **0 lần** nhắc `MocNoiGian` — tên đó chỉ nằm ở `boss.go` (task 3) | ⬜ **CHƯA LÀM** |
-| **12** | chưa có chia thưởng theo đóng góp | ⏳ đang làm — **nhưng phụ thuộc 8/9/11 chưa có** |
+| 12 | `bossNhanSatThuong` + `bossChet` + `traThuongBoss` (`khuvuc.go` 1317+), `PhaBoss.DiemThuong` | ✅ xong 28/08 — **nhưng `bossNhanSatThuong` chưa ai gọi, chờ task 8** |
 | 13 | `lichboss.go` + 3 chỗ trong `khuvuc.go` (dòng 400–417, 554–573, 732–739) | ✅ xong 28/08 |
-| **14** | `main.go` chưa nhắc tới boss lần nào | ⬜ chờ 6 + 13 |
-| **15** | `noidungboss.go` chưa tồn tại | ⬜ chờ 14 |
+| 14 | `noiBoPhatThanh()` + `GanLoa` 5 khu vực, thứ tự tắt `boLuu → loa → TatMayChu → Close` | ⏳ **nửa xong** — bộ phát thanh đã nối; **lịch boss chưa bật** (có chú thích đánh dấu chỗ) |
+| 15 | `noidungboss.go` — 2 boss mẫu (1 con 2 pha + boss lớn + `MocNoiGian`) | ⏳ **nửa xong** — dữ liệu đủ; **smoke client Unity chưa làm** (chỉ chủ dự án làm được) |
 
-**Còn 6 task, KHÔNG phải 4:** `8 → 9 → 10 → 11` (nền móng boss trong actor, **chưa làm**) rồi mới tới
-`12` và `15`. Task 13 xong 28/08, task 14 đang làm phần bộ phát thanh.
+**Còn đúng 4 task: `8 → 9 → 10 → 11`** — nền móng boss trong actor. Cả bốn chạm `khuvuc.go` nên
+**phải tuần tự**, không giao song song được.
 
-Task 8–11 đều chạm `khuvuc.go` nên **phải tuần tự**. Cả 6 lẫn 13 đều chạm `khuvuc.go` (63KB) nên **phải
+Task 12, 13, 15 đã xong và gộp `main` (`922eed8`); task 14 xong nửa bộ phát thanh.
+
+> ⚠️ **Hai mối nối đang treo, cố ý:**
+> - `bossNhanSatThuong` (task 12) **chưa ai gọi** — task 8 phải gọi nó sau khi tính sát thương,
+>   và **tuyệt đối không tự `b.Hp -= ...`** (làm vậy là bỏ qua cả sổ đóng góp lẫn chốt chống chia
+>   thưởng hai lần). Câu này đã ghi ngay trong chú thích hàm.
+> - `TheSongBoss.Tat()` (task 13) **chưa ai gọi** — task 9 phải gọi khi boss hết pha và rời thế
+>   giới, nếu không mỗi mục lịch chỉ sinh **đúng một lần** rồi thôi.
+> - Lịch boss **chưa bật** ở `main.go` — task 14 đã để chú thích đánh dấu đúng hai chỗ bật/tắt. Cả 6 lẫn 13 đều chạm `khuvuc.go` (63KB) nên **phải
 tuần tự** — đúng cảnh báo ở mục "Thứ tự thi công" bên trên, không giao song song được.
 
 Sẵn sàng cho task 6: `SoKhuVuc.PhatToanServer` đã có ở `sokhuvuc.go:43`; khuôn để bắt chước

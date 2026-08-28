@@ -224,11 +224,14 @@ func MoBoLichBoss(soKhuVuc *SoKhuVuc, lich []MucLichBoss) *BoLichBoss {
 // phep sinh con moi. Ngoai mien -> nil (TheSongBoss nil-safe nen noi goi khong
 // phai kiem).
 //
-// ⚠️ NO CHUA DUOC NOI DAY: hom nay chua co ai goi Tat(), nen moi muc lich sinh
-// DUNG MOT LAN roi thoi. Do la lua chon CO CHU DICH — hong ve phia AN TOAN: mot
-// con boss thieu thi nguoi choi thieu mot muc tieu; mot vong lap sinh boss
-// khong phanh thi khu vuc ngap boss va khong co cach nao go. Task 9 noi day
-// bang cach goi l.TheSong(i).Tat() khi boss het pha va roi the gioi.
+// ✅ DA NOI DAY (Task 9, 28/08/2026) — nhung KHONG qua ham nay: taoBoss cam
+// thang the song vao con boss no de ra (truong Boss.The), va may trang thai
+// trong actor goi b.The.Tat() o buoc boss roi han the gioi (bossRoiTheGioi,
+// khuvuc.go). Lam vay de actor khong phai biet gi ve bo dieu phoi lan chi so
+// cua muc lich — no chi cam mot cai cong tac va gat khi xong viec.
+//
+// Ham nay van con vi hai le: test doc duoc trang thai that cua tung muc, va
+// duong "tat tu ben ngoai" (lenh admin, tat may chu) sau nay se can no.
 func (l *BoLichBoss) TheSong(i int) *TheSongBoss {
 	if i < 0 || i >= len(l.muc) {
 		return nil
@@ -410,14 +413,27 @@ func (l *BoLichBoss) taoBoss(m *mucDangChay, pha *PhaBoss, bd *BanDo, bayGio tim
 	copy(duLieu, m.DuLieu)
 
 	return &Boss{
-		Id:              CapIdBoss(),
-		PhaHienTai:      0,
-		DuLieu:          duLieu,
-		Hp:              hp,
-		HpToiDa:         hp,
-		ViTriX:          bd.SpawnX,
-		ViTriY:          bd.SpawnY,
-		TrangThai:       BossHien,
+		Id:         CapIdBoss(),
+		PhaHienTai: 0,
+		DuLieu:     duLieu,
+		Hp:         hp,
+		HpToiDa:    hp,
+		ViTriX:     bd.SpawnX,
+		ViTriY:     bd.SpawnY,
+		TrangThai:  BossHien,
+
+		// KH6b Task 9 — SOI DAY VE: con boss mang theo the song cua chinh muc
+		// lich da de ra no, de khi no roi han the gioi, may trang thai trong
+		// actor goi duoc The.Tat() va mo lai cua so sinh cho muc nay.
+		//
+		// Vi sao NOI QUA CON BOSS chu khong phai "actor goi l.TheSong(i).Tat()":
+		// cach kia bat actor phai biet ca bo dieu phoi lan chi so cua muc lich —
+		// mot chieu phu thuoc nguoc, tu khu vuc len he thong da sinh ra no. Voi
+		// duong nay actor khong biet lich la gi, no chi cam mot cai cong tac va
+		// gat khi xong viec. Con tro ra ngoai actor o day an toan vi ca
+		// TheSongBoss chi la mot atomic.Bool (xem chu thich truong Boss.The).
+		The: m.the,
+
 		MocThoiGian:     bayGio,
 		LucHienPha:      bayGio,
 		NhipDanhHienTai: pha.NhipDanhMs,

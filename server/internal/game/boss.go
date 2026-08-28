@@ -282,6 +282,52 @@ type Boss struct {
 	// lam con tro chay tien mot chieu de moi moc chi no DUNG MOT LAN. Dat lai
 	// ve 0 moi khi doi pha.
 	MocNoiGianDaQua int
+
+	// ── Bon truong duoi day THEM O TASK 9 (may trang thai vong doi) ─────────
+
+	// The la SOI DAY DUY NHAT chay NGUOC tu actor ve bo dieu phoi lich
+	// (lichboss.go): khi con boss nay roi HAN khoi the gioi, may trang thai goi
+	// The.Tat() de mo lai cua so sinh cho muc lich da de ra no. Khong co no,
+	// moi muc lich sinh DUNG MOT LAN roi thoi (xem ghi chu BoLichBoss.TheSong).
+	//
+	// VI SAO ACTOR DUOC PHEP GIU CON TRO NAY — day la ngoai le co bang chung,
+	// khong phai ngoai le tuy tien: ca struct TheSongBoss chi co DUNG MOT
+	// truong, va truong do la atomic.Bool. Moi loi doc/ghi tu ca hai phia (bo
+	// dieu phoi goi Bat/ConSong, actor goi Tat) deu la MOT phep nguyen tu —
+	// khong co trang thai nao ghep tu nhieu truong de ma bat gap no giua chung.
+	// ⚠️ Neu mai sau ai them mot truong THUONG vao TheSongBoss thi cau tren het
+	// dung va phai doi cach noi day (vd gui mot su kien qua hop thu).
+	//
+	// nil la hop le va la mac dinh: boss dung trong test — va sau nay boss sinh
+	// tu duong trigger hay lenh admin — khong thuoc muc lich nao ca.
+	// TheSongBoss.Tat() nil-safe nen may trang thai khong phai kiem truoc.
+	The *TheSongBoss
+
+	// ChiSoThoaiHien / ChiSoThoaiChet la con tro chay tren mang ThoaiHien /
+	// ThoaiChet cua pha hien tai: "cau ke tiep se noi la cau thu may".
+	//
+	// VI SAO HAI CON TRO RIENG chu khong phai mot cai dung chung roi dat lai
+	// moi khi doi trang thai: boss CO THE CHET NGAY GIUA LUC DANG CHAO (nguoi
+	// choi xong vao danh luon). Voi mot con tro dung chung, luc do no dang nam
+	// giua mang ThoaiHien, va buoc TROI se doc ThoaiChet TU GIUA — boss chet ma
+	// nuot mat may cau trang troi dau tien, mot loi khong ai nhin ra la loi.
+	// Dat lai con tro o buoc vao TROI thi phai sua bossChet (Task 12), ham dang
+	// co phien khac lam viec ben trong. Hai con tro rieng lam dung viec do ma
+	// khong cham vao ai: moi cai chi thuoc ve DUNG MOT trang thai.
+	//
+	// Dat lai CA HAI ve 0 khi doi pha — viec cua Task 11 (bien hinh).
+	ChiSoThoaiHien int
+	ChiSoThoaiChet int
+
+	// MocThoaiCuoi la thoi diem boss noi cau gan nhat — goc de dem "cau vua noi
+	// da treo tren dau du lau chua" truoc khi noi cau tiep theo.
+	//
+	// KHAC MocThoiGian (moc vao TRANG THAI) va KHAC LanDanhCuoi (moc danh
+	// trung): ba nhip nay chay doc lap nhau. Gop bat ky hai cai nao lai cung
+	// tao mot rang buoc gia — vd noi mot cau se lam dai them thoi gian nam xac.
+	//
+	// Zero value = chua noi cau nao -> cau DAU TIEN duoc noi ngay, khong cho.
+	MocThoaiCuoi time.Time
 }
 
 // ---------------------------------------------------------------------------

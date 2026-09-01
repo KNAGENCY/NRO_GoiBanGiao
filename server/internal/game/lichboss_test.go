@@ -517,3 +517,49 @@ func TestLichBossRongKhongLamGi(t *testing.T) {
 		t.Error("TheSong() ngoai mien phai tra nil")
 	}
 }
+
+// ---------------------------------------------------------------------------
+// KH6b Task 14 (phan hai) — chuyen NoiDungBoss (kho noi dung, noidungboss.go)
+// sang MucLichBoss (dinh dang bo dieu phoi doc duoc). Hai kieu nay tach rieng
+// co chu dich (xem chu thich noidungboss.go muc 4 va MucLichBoss o tren): kho
+// noi dung con mang theo Ma + ViTri (chua dung toi trong lich), bo dieu phoi
+// chi can DuLieu ([]PhaBoss). Ham chuyen doi la CAU noi giua hai file, nen dat
+// ngay trong lichboss.go — noi dinh nghia dich (MucLichBoss) song.
+// ---------------------------------------------------------------------------
+
+// TestMucLichTuNoiDungBossGiuNguyenDuLieuPha khoa dung dan chuyen doi don gian
+// nhat: MOI NoiDungBoss trong danh sach dau vao phai tro thanh MOT MucLichBoss
+// cung so luong, DuLieu (cac pha) phai giu nguyen NOI DUNG — sai thu tu hoac
+// thieu mot con la boss do se sinh voi pha sai (map sai, HP sai).
+func TestMucLichTuNoiDungBossGiuNguyenDuLieuPha(t *testing.T) {
+	ds := DanhSachNoiDungBoss()
+	if len(ds) == 0 {
+		t.Fatal("DanhSachNoiDungBoss() rong — khong con gi de kiem chuyen doi (kho noi dung Task 15 co the da doi)")
+	}
+
+	muc := MucLichTuNoiDungBoss(ds)
+	if len(muc) != len(ds) {
+		t.Fatalf("so muc lich = %d, muon = %d (moi con boss trong kho noi dung phai thanh MOT muc lich)",
+			len(muc), len(ds))
+	}
+	for i, nd := range ds {
+		if len(muc[i].DuLieu) != len(nd.Pha) {
+			t.Fatalf("muc %d (%s): so pha = %d, muon = %d", i, nd.Ma, len(muc[i].DuLieu), len(nd.Pha))
+		}
+		for j, pha := range nd.Pha {
+			if muc[i].DuLieu[j].Ten != pha.Ten || muc[i].DuLieu[j].Cap != pha.Cap {
+				t.Fatalf("muc %d (%s) pha %d: du lieu KHONG khop kho noi dung goc (Ten/Cap doi)",
+					i, nd.Ma, j)
+			}
+		}
+	}
+}
+
+// TestMucLichTuNoiDungBossRongTraRong: dau vao rong phai tra lat cat rong,
+// khong panic, khong tra nil khien noi goi phai kiem them mot lop.
+func TestMucLichTuNoiDungBossRongTraRong(t *testing.T) {
+	muc := MucLichTuNoiDungBoss(nil)
+	if len(muc) != 0 {
+		t.Fatalf("dau vao rong nhung tra ve %d muc", len(muc))
+	}
+}

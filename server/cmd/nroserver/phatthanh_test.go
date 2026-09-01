@@ -206,7 +206,7 @@ func TestDonDepKhiTatDungLoaTruocKhiLuuVaDungKhuVuc(t *testing.T) {
 	ctx, huy := context.WithTimeout(context.Background(), 10*time.Second)
 	defer huy()
 
-	if err := donDepKhiTat(ctx, kd, soKhuVuc, thoGhi, boLuu, loa); err != nil {
+	if err := donDepKhiTat(ctx, kd, soKhuVuc, thoGhi, boLuu, game.MoBoLichBoss(soKhuVuc, nil), loa); err != nil {
 		t.Fatalf("donDepKhiTat loi trong dieu kien binh thuong: %v", err)
 	}
 
@@ -247,7 +247,7 @@ func TestDonDepKhiTatVoiLoaThatKhongTreoKhongPanic(t *testing.T) {
 		go func() {
 			ctx, huy := context.WithTimeout(context.Background(), 10*time.Second)
 			defer huy()
-			xong <- donDepKhiTat(ctx, &khoDongGia{}, soKhuVuc, thoGhi, boLuu, loa)
+			xong <- donDepKhiTat(ctx, &khoDongGia{}, soKhuVuc, thoGhi, boLuu, game.MoBoLichBoss(soKhuVuc, nil), loa)
 		}()
 		select {
 		case err := <-xong:
@@ -270,7 +270,7 @@ func TestDonDepKhiTatVoiLoaThatKhongTreoKhongPanic(t *testing.T) {
 
 		ctx, huy := context.WithTimeout(context.Background(), 10*time.Second)
 		defer huy()
-		if err := donDepKhiTat(ctx, kd, soKhuVuc, thoGhi, boLuu, loa); err != nil {
+		if err := donDepKhiTat(ctx, kd, soKhuVuc, thoGhi, boLuu, game.MoBoLichBoss(soKhuVuc, nil), loa); err != nil {
 			t.Fatalf("lan tat thu nhat loi: %v", err)
 		}
 
@@ -278,7 +278,7 @@ func TestDonDepKhiTatVoiLoaThatKhongTreoKhongPanic(t *testing.T) {
 		go func() {
 			ctx2, huy2 := context.WithTimeout(context.Background(), 10*time.Second)
 			defer huy2()
-			xong <- donDepKhiTat(ctx2, kd, soKhuVuc, thoGhi, boLuu, loa)
+			xong <- donDepKhiTat(ctx2, kd, soKhuVuc, thoGhi, boLuu, game.MoBoLichBoss(soKhuVuc, nil), loa)
 		}()
 		select {
 		case <-xong: // loi hay khong deu duoc — mien la KHONG panic va KHONG treo

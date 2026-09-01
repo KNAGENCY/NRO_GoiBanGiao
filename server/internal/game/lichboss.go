@@ -219,6 +219,36 @@ func MoBoLichBoss(soKhuVuc *SoKhuVuc, lich []MucLichBoss) *BoLichBoss {
 	return l
 }
 
+// MucLichTuNoiDungBoss chuyen kho noi dung boss (noidungboss.go, Task 15)
+// sang dinh dang bo dieu phoi lich doc duoc ([]MucLichBoss, Task 13).
+//
+// VI SAO CAN HAM NAY: NoiDungBoss va MucLichBoss deu mang []PhaBoss nhung
+// KHONG PHAI cung mot kieu — NoiDungBoss con co Ma (khoa tra cuu, danh cho
+// lenh admin sau nay) va ViTri (Task 13/14 chua dung toi, danh cho duong dat
+// chan chinh xac cua Task 15/16). Bo dieu phoi lich (thuSinh) chi doc PHA DAU
+// cua DuLieu — no khong can biet ten hay vi tri chi tiet, chi can []PhaBoss.
+// Ep hai kieu lam mot se bat MucLichBoss cong khai (kieu du lieu Task 15)
+// phai vac theo may truong dieu phoi noi bo — dung nguoc voi ranh gioi da ghi
+// o chu thich MucLichBoss ben tren.
+//
+// MOI NoiDungBoss -> DUNG MOT MucLichBoss, giu nguyen thu tu danh sach dau
+// vao (bo dieu phoi khong quan tam thu tu giua cac muc, nhung giu thu tu
+// giup log/test doc duoc "muc thu i ung voi con boss nao" ma khong can them
+// mot bang tra cuu rieng).
+//
+// KHONG can sao chep DuLieu them mot lop: DanhSachNoiDungBoss()/
+// TimNoiDungBoss() (noidungboss.go) DA tra ban sao SAU roi — MoBoLichBoss
+// (goi ham nay lam dau vao) lai tu sao PhaBoss vao mucDangChay.MucLichBoss
+// khi khoi tao muc, va taoBoss sao THEM mot lan nua luc sinh boss that. Sao
+// o day la sao lan ba vo ich, khong doi them an toan nao.
+func MucLichTuNoiDungBoss(ds []NoiDungBoss) []MucLichBoss {
+	muc := make([]MucLichBoss, 0, len(ds))
+	for _, nd := range ds {
+		muc = append(muc, MucLichBoss{DuLieu: nd.Pha})
+	}
+	return muc
+}
+
 // TheSong tra the song cua muc thu i — day la HANDLE ma duong "boss da roi khoi
 // the gioi" (may trang thai, Task 9) se dung de bao cho bo dieu phoi biet duoc
 // phep sinh con moi. Ngoai mien -> nil (TheSongBoss nil-safe nen noi goi khong

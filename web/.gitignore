@@ -12,6 +12,10 @@
 .env
 .env.local
 .env*.local
+# File mau khong chua bi mat that va PHAI duoc git theo doi (README bao copy tu
+# no). Mau `.env.*` trong .gitignore GOC bat luon ca file nay, nen phai go ra
+# day. Kiem lai bang: git check-ignore -v web/.env.local.example
+!.env.local.example
 
 # Debug
 npm-debug.log*

@@ -274,11 +274,17 @@ func TestBossChaoKhongCoThoaiSangHoatDongNgay(t *testing.T) {
 	}
 }
 
-// TestBossHoatDongDungYen_ChoTask10: o ban nay buoc HOAT_DONG chua lam gi ca
-// (AI danh/di chuyen/thoai-danh la Task 10). Test nay ghim NGUYEN TRANG do lai
-// de khi Task 10 lam that, no phai SUA test nay — tuc la co mot cho bat buoc
-// dung lai doc, thay vi lang le them hanh vi vao mot buoc khong ai kiem.
-func TestBossHoatDongDungYen_ChoTask10(t *testing.T) {
+// TestBossHoatDongKhongCoBoChieuThiImLang THAY THE
+// TestBossHoatDongDungYen_ChoTask10 (Task 9 ghim nguyen trang "im lang" de
+// Task 10 buoc phai dung lai doc — day chinh la lan doc do, 02/09/2026).
+//
+// Hanh vi that cua buoc HOAT_DONG nay o khuvuc_aiboss_test.go. Test nay giu lai
+// PHAN CON DUNG cua ban ghim cu, va no van la mot khang dinh CO GIA TRI: mot
+// pha khong khai bao BoChieu thi tam danh = 0 -> tam duoi = 0 -> KHONG CO muc
+// tieu nao hop le -> boss dung im. Do la lua chon FAIL-CLOSED co chu dich: du
+// lieu noi dung thieu bo chieu KHONG duoc bien thanh mot con boss danh bang
+// tay khong voi tam vo han.
+func TestBossHoatDongKhongCoBoChieuThiImLang(t *testing.T) {
 	t0 := time.Date(2026, 8, 28, 10, 0, 0, 0, time.UTC)
 	luc := t0
 	k, p := khuVucBossGia(&luc)
@@ -295,7 +301,7 @@ func TestBossHoatDongDungYen_ChoTask10(t *testing.T) {
 		t.Fatalf("boss dang HOAT_DONG tu doi sang %s — khong ai duoc quyen doi buoc nay tru khi bi danh chet", b.TrangThai)
 	}
 	if n := len(p.banTin()); n != 0 {
-		t.Fatalf("buoc HOAT_DONG phat %d goi — Task 9 chua lam AI, phai im lang (Task 10 se doi test nay)", n)
+		t.Fatalf("buoc HOAT_DONG phat %d goi — pha KHONG co BoChieu thi khong co muc tieu nao hop le, phai im lang", n)
 	}
 }
 

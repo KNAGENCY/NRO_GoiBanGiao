@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"math"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -1886,7 +1887,7 @@ func (k *KhuVuc) nhipTim() {
 	// Boss cap nhat trong nhip 100ms cua khu vuc, KHONG luong 150ms rieng nhu
 	// ban Java — bay #5 cua thiet ke §7: hai luong cung ghi viTri la tranh chap
 	// du lieu that.
-	k.nhipBoss(bayGio)
+	k.nhipBoss(nguoi, bayGio)
 }
 
 // hoiSinhQuai xu ly nhanh "quai dang cho hoi sinh" cua nhipTim — GOI KHI
@@ -2182,13 +2183,18 @@ func (k *KhuVuc) noiThoaiBoss(b *Boss, cau []string, chiSo *int, bayGio time.Tim
 // bayGio nhan tu nhipTim (khong tu goi k.dongHo() lai) de MOI con boss trong
 // cung mot nhip duoc xet tren CUNG mot moc thoi gian — cung ly do da ghi o
 // nhipTim cho dan quai.
-func (k *KhuVuc) nhipBoss(bayGio time.Time) {
+// nguoi la ANH CHUP nguoi choi ma nhipTim da dung MOT LAN cho ca nhip — truyen
+// xuong thay vi cho tung con boss tu xay lai tu k.nguoiTrong: mot map->slice
+// moi con boss moi tick la chi phi am tham lon len theo do dong, va (quan trong
+// hon) hai con boss trong cung mot nhip se nhin thay hai anh chup khac nhau neu
+// ai do vo tinh sua trang thai o giua.
+func (k *KhuVuc) nhipBoss(nguoi []*nguoiTrongKhuVuc, bayGio time.Time) {
 	if len(k.boss) == 0 {
 		return
 	}
 	conLai := k.boss[:0] // dung lai chinh mang cu: chi don ve phia truoc
 	for _, b := range k.boss {
-		if k.mayTrangThaiBoss(b, bayGio) {
+		if k.mayTrangThaiBoss(b, nguoi, bayGio) {
 			continue
 		}
 		conLai = append(conLai, b)
@@ -2210,7 +2216,7 @@ func (k *KhuVuc) nhipBoss(bayGio time.Time) {
 // giong ban Java (Boss.java:315-349, mot `switch` moi lan update). Cai gia la
 // moi buoc chuyen ton them 100ms; khong ai nhin thay 100ms, va doi lai than ham
 // doc duoc tu tren xuong nhu chinh so do vong doi.
-func (k *KhuVuc) mayTrangThaiBoss(b *Boss, bayGio time.Time) bool {
+func (k *KhuVuc) mayTrangThaiBoss(b *Boss, nguoi []*nguoiTrongKhuVuc, bayGio time.Time) bool {
 	if b == nil {
 		return true // mot o nil lac vao danh sach: go luon, dung de moi tick sau phai kiem lai
 	}
@@ -2251,14 +2257,13 @@ func (k *KhuVuc) mayTrangThaiBoss(b *Boss, bayGio time.Time) bool {
 		}
 
 	case BossHoatDong:
-		// ⚠️ CHO NOI CUA TASK 10 (AI boss): chon muc tieu + danh bang chieu KH6
-		// + di chuyen khi ngoai tam + thinh thoang noi mot cau ThoaiDanh.
-		// Task 9 CO Y de trong: boss dung yen chiu don, va roi buoc nay CHI khi
-		// bi danh chet (bossNhanSatThuong -> bossChet -> TROI).
+		// KH6b Task 10 — AI: chon muc tieu, danh bang chieu KH6, di lai gan khi
+		// ngoai tam, thinh thoang noi mot cau. Chi tiet + ly do o aiBoss.
 		//
-		// Task 10 cung se doi TestBossHoatDongDungYen_ChoTask10 — test do ghim
-		// nguyen trang "im lang" lai de viec them hanh vi vao day la mot quyet
-		// dinh phai doc, khong phai mot thay doi lot qua.
+		// KHONG doi trang thai o day: boss roi buoc HOAT_DONG CHI khi bi danh
+		// chet (bossNhanSatThuong -> bossChet -> TROI). AI khong duoc tu quyet
+		// ket thuc doi minh.
+		k.aiBoss(b, pha, nguoi, bayGio)
 
 	case BossTroi:
 		// Cai xac. Hai dieu kien PHAI cung du, va thu tu kiem la co y:
@@ -2296,6 +2301,385 @@ func (k *KhuVuc) mayTrangThaiBoss(b *Boss, bayGio time.Time) bool {
 		return k.bossRoiTheGioi(b, bayGio)
 	}
 	return false
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// KH6b Task 10 — AI BOSS (than cua buoc HOAT_DONG)
+//
+// Moi thu duoi day chay TRONG nhipTim 100ms cua actor: khong cham mang, khong
+// cham CSDL, khong cho ai (ky luat §6.9/§6.10b). Moi goi phat ra di qua
+// phatChoCaKhuVuc/phatChoNguoiKhac nhu moi nhanh chien dau khac.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const (
+	// heSoTamDuoiBoss: tam DUOI (aggro) = tam chieu XA NHAT cua pha × he so
+	// nay. Lay theo du lieu chu khong ghim mot con so rieng — mot con boss
+	// toan chieu can chien (tam 100) khong co ly do gi de duoi nguoi tu dau
+	// ben kia ban do, con boss co chieu tam xa (300) thi phai duoi xa hon.
+	//
+	// 2 lan: du de boss buoc ra khoi cho dung ma khong bien thanh con cho san
+	// bam theo nguoi choi qua nua ban do. Day la con so CAN BANG (doan ban
+	// dau) — khong co bang chung nao trong ban Java, va no se duoc chinh khi
+	// co noi dung that. Ghi ro o day de lan sau ai doi thi biet minh dang doi
+	// mot lua chon, khong phai mot hang so co nguon.
+	heSoTamDuoiBoss int64 = 2
+
+	// buocBossMoiNhip: boss di toi da bao nhieu don vi trong MOT nhip 100ms.
+	//
+	// 24 = DUNG mot o cua luoi va cham map 1 (TaiCollision bat buoc tileWidth
+	// == tileHeight == 24, catalog.go). Con so nay khong phai chon cho dep:
+	// buoc dai hon mot o thi mot buoc co the NHAY QUA mot buc tuong mong
+	// (DiDuocDoan lay mau doc duong di nen van bat duoc, nhung se co nhung
+	// khe hep ma boss "lot" qua tuy theo goc); buoc bang mot o thi moi lan
+	// kiem va cham deu tren dung do phan giai ma ban do duoc ve.
+	//
+	// 24 don vi/100ms = 240 don vi/giay, xap xi toc do chay cua nguoi choi
+	// (NguongBuoc 500 moi goi di chuyen, client gui vai goi mot giay).
+	buocBossMoiNhip int16 = 24
+
+	// nhipThoaiDanhBoss: "thinh thoang" cua ThoaiDanh (thiet ke §5) la MOT CON
+	// SO — 15 giay giua hai cau.
+	//
+	// Vi sao khong nhanh hon: goi 44 phat cho CA khu vuc, va mot con boss noi
+	// lien mom bien khung chat thanh rac, nguoi choi tat luon khung chat roi
+	// khong doc duoc gi ca. Vi sao khong cham hon: mot tran boss thuong ket
+	// thuc trong khoang mot phut, cham hon nua thi phan lon cau thoai khong
+	// bao gio duoc ai nghe.
+	//
+	// Day la con so CAN BANG do em chon (ban Java khong co nhip nay — no chat
+	// theo su kien). Khac han hai hang so treoThoai o tren: chung co bang
+	// chung tu Boss.java:507-510, con con so nay thi khong.
+	nhipThoaiDanhBoss = 15 * time.Second
+)
+
+// aiBoss chay MOT nhip AI cho mot con boss dang o buoc HOAT_DONG.
+//
+// THU TU BON VIEC LA CO Y:
+//
+//  1. Chon muc tieu. KHONG co ai -> return NGAY, khong cham mot truong nao
+//     (LanDanhCuoi, MocThoaiCuoi, vi tri). Day dung la cai bay ma aiQuai da
+//     ghi lai tu ban Java (Mob.java:386-390 dat lai moc thoi gian NGOAI nhanh
+//     "co nguoi choi", khien con quai vua thay nguoi phai cho them gan mot
+//     nhip nua moi duoc danh).
+//  2. Noi thoai. Truoc khi danh, de cau noi va don danh cua cung mot nhip di
+//     cung nhau; va CHI khi da co muc tieu — boss lam bam mot minh giua ban do
+//     trong la loi ai cung nhin thay.
+//  3. Thu danh. Neu co mot chieu voi toi thi danh va DUNG o day.
+//  4. Khong chieu nao voi toi -> di lai gan.
+//
+// Boss dang trong nhip hoi (buoc 3 tu choi vi chua toi luot) thi KHONG di
+// chuyen: no dung yen thu the, khong bo di roi lai lan vao — dung nhu ban Java
+// (Boss.java chi di chuyen khi khong danh duoc vi KHOANG CACH).
+func (k *KhuVuc) aiBoss(b *Boss, pha *PhaBoss, nguoi []*nguoiTrongKhuVuc, bayGio time.Time) {
+	tamXaNhat := tamChieuXaNhatCuaPha(pha)
+	if tamXaNhat <= 0 {
+		// Pha khong khai bao BoChieu (hoac du lieu chieu hong): FAIL-CLOSED.
+		// Khong co chieu thi khong co tam, khong co tam thi khong co muc tieu
+		// — boss dung im thay vi bien thanh mot con danh tay khong tam vo han.
+		return
+	}
+
+	mucTieu := chonMucTieuBoss(b, nguoi, tamXaNhat*heSoTamDuoiBoss, bayGio)
+	if mucTieu == nil {
+		return
+	}
+
+	k.thoaiDanhBoss(b, pha, bayGio)
+
+	if k.bossThuDanh(b, pha, mucTieu, bayGio) {
+		return
+	}
+	k.bossDiToi(b, int16(mucTieu.nv.ViTriX), int16(mucTieu.nv.ViTriY))
+}
+
+// tamChieuXaNhatCuaPha tra ve tam danh LON NHAT trong bo chieu cua pha (0 khi
+// pha khong co chieu nao tra cuu duoc). Dung lam goc tinh tam duoi.
+//
+// Tra cuu qua TraCapChieu (chieuthuc.go) — cua DUY NHAT doi {templateId, cap}
+// thanh *CapChieu, dung chung voi nguoi choi. Tu doc catalog o day se tao ban
+// sao logic thu hai, va khac biet giua hai ban se hong IM LANG.
+func tamChieuXaNhatCuaPha(pha *PhaBoss) int64 {
+	if pha == nil {
+		return 0
+	}
+	var xaNhat int64
+	for _, bo := range pha.BoChieu {
+		cap := TraCapChieu(byte(pha.Lang), byte(bo[0]), byte(bo[1]))
+		if cap == nil {
+			continue
+		}
+		if int64(cap.Dx) > xaNhat {
+			xaNhat = int64(cap.Dx)
+		}
+	}
+	return xaNhat
+}
+
+// chonMucTieuBoss chon nguoi boss se danh trong nhip nay, theo HAI TANG UU TIEN
+// — dung khuon AI quai (Quai.chonMucTieu, quai.go) vi cung mot cau hoi:
+//
+//	Tang 1: nguoi DA DANH boss nay, ai gay NHIEU sat thuong nhat thi bi nham
+//	        truoc. Boss quay lai voi ke danh no dau nhat — de nguoi tank giu
+//	        duoc boss, va de mot nguoi di ngang qua khong bi cuop mat su chu y
+//	        giua tran.
+//	Tang 2: khong ai tung danh (boss vua hien) -> ai GAN NHAT.
+//
+// Ba dieu kien loai, deu bat buoc va deu co dot bien rieng trong test:
+//   - da chet (HpHienTai <= 0): mot cai xac khong phai muc tieu.
+//   - dang bat tu sau hoi sinh (< 1500ms, dac ta §1.7): boss phai ton trong y
+//     het nguoi choi va quai, neu khong no don chet nguoi ta ngay khi ho vua
+//     bam nut hoi sinh.
+//   - ngoai tam duoi: boss khong duoc duoi nguoi qua nua ban do.
+//
+// "Da roi khu vuc" KHONG can dieu kien rieng: `nguoi` la anh chup cua
+// k.nguoiTrong ngay trong nhip nay, ai da ra thi khong con trong do.
+//
+// HOA thi lay ID NHO HON. Khong phai vi id nho quan trong hon — ma vi `nguoi`
+// duoc xay tu mot map, va thu tu duyet map trong Go la NGAU NHIEN moi lan chay.
+// Khong co chot pha hoa nay thi hai nguoi dung cach deu nhau se lam boss quay
+// qua quay lai giua ho moi tick, va khong test nao chay on dinh duoc.
+func chonMucTieuBoss(b *Boss, nguoi []*nguoiTrongKhuVuc, tamDuoi int64, bayGio time.Time) *nguoiTrongKhuVuc {
+	tamSq := tamDuoi * tamDuoi
+
+	var (
+		gopNhat    *nguoiTrongKhuVuc // tang 1
+		gopCaoNhat int64
+		ganNhat    *nguoiTrongKhuVuc // tang 2
+		ganNhatSq  int64
+	)
+
+	for _, n := range nguoi {
+		if n == nil || n.nv == nil {
+			continue
+		}
+		if n.nv.HpHienTai <= 0 {
+			continue
+		}
+		if bayGio.Sub(n.lucHoiSinh) < thoiGianBatTuSauHoiSinh {
+			continue
+		}
+		dx := int64(n.nv.ViTriX) - int64(b.ViTriX)
+		dy := int64(n.nv.ViTriY) - int64(b.ViTriY)
+		distSq := dx*dx + dy*dy
+		if distSq > tamSq {
+			continue
+		}
+
+		if gop := b.SatThuongTheoNguoi[n.nv.ID]; gop > 0 {
+			if gopNhat == nil || gop > gopCaoNhat ||
+				(gop == gopCaoNhat && n.nv.ID < gopNhat.nv.ID) {
+				gopNhat, gopCaoNhat = n, gop
+			}
+		}
+		if ganNhat == nil || distSq < ganNhatSq ||
+			(distSq == ganNhatSq && n.nv.ID < ganNhat.nv.ID) {
+			ganNhat, ganNhatSq = n, distSq
+		}
+	}
+
+	if gopNhat != nil {
+		return gopNhat
+	}
+	return ganNhat
+}
+
+// nhipDanhBoss tra khoang cach TOI THIEU giua hai don cua boss.
+//
+// 0 (pha khong khai NhipDanhMs) nghia la "de hoi chieu cua chinh chieu do lo" —
+// KiemDanhHopLe van kiem cap.HoiChieuMs nen boss khong bao gio danh moi tick.
+//
+// TODO(Task 11 — noi gian theo %mau): Task 11 nhan MocNoiGian.HeSoNhip vao
+// b.NhipDanhHienTai NGAY LUC cham moc (mot lan), khong phai o day moi tick —
+// nhan moi tick thi he so se cong don vo tan. Ham nay chi DOC con so da co.
+func nhipDanhBoss(b *Boss) time.Duration {
+	if b.NhipDanhHienTai <= 0 {
+		return 0
+	}
+	return time.Duration(b.NhipDanhHienTai) * time.Millisecond
+}
+
+// bossThuDanh thu tung chieu trong BoChieu cua pha va danh bang chieu DAU TIEN
+// duoc phep — thu tu khai bao trong du lieu CHINH LA thu tu uu tien, do nguoi
+// lam noi dung quyet dinh (khong co luat an nao o code).
+//
+// Tra true khi da THAT SU danh (co phat goi). false = khong chieu nao voi toi,
+// nguoi goi se cho boss di lai gan.
+//
+// KiemDanhHopLe la duong kiem DUY NHAT — cung mot bo luat voi nguoi choi
+// (chotkiem.go, Task 5 don nen). BenDanh.VoHanChakra = true vi boss khong co
+// bang chakra nao ca; no CHI mien kiem chakra, KHONG mien bat tu/hoi chieu/muc
+// tieu chet/tam.
+//
+// ketQua.Truot (vuot tam) o day KHONG phat goi "miss" nhu huong nguoi->nguoi:
+// boss chua he quyet dinh danh, no dang HOI xem chieu nay co toi khong. Thu
+// chieu ke tiep, roi di lai gan — dung nhu mot con boss that lam.
+func (k *KhuVuc) bossThuDanh(b *Boss, pha *PhaBoss, mucTieu *nguoiTrongKhuVuc, bayGio time.Time) bool {
+	if nhip := nhipDanhBoss(b); nhip > 0 && bayGio.Sub(b.LanDanhCuoi) < nhip {
+		return false // con trong nhip cua pha -> dung yen thu the, khong di
+	}
+
+	for _, bo := range pha.BoChieu {
+		cap := TraCapChieu(byte(pha.Lang), byte(bo[0]), byte(bo[1]))
+		if cap == nil {
+			continue
+		}
+		ketQua := KiemDanhHopLe(BenDanh{
+			X:           int32(b.ViTriX),
+			Y:           int32(b.ViTriY),
+			LanDanhCuoi: b.LanDanhCuoi,
+			Chieu:       cap,
+			VoHanChakra: true, // boss khong co bang chakra — xem chu thich truong do
+		}, ViTriCoMau{
+			X:          int16(mucTieu.nv.ViTriX),
+			Y:          int16(mucTieu.nv.ViTriY),
+			HpHienTai:  mucTieu.nv.HpHienTai,
+			LucHoiSinh: mucTieu.lucHoiSinh,
+		}, bayGio)
+		if !ketQua.ChoPhep || ketQua.Truot {
+			continue
+		}
+		k.bossDanhNguoi(b, pha, cap, mucTieu, bayGio)
+		return true
+	}
+	return false
+}
+
+// bossDanhNguoi ap MOT don cua boss len mot nguoi choi va phat dung bo goi ma
+// huong NGUOI-DANH-NGUOI (case suKienDanhNguoiChoi) da dung — KHONG PHAI -9/-12
+// cua quai.
+//
+// VI SAO -60 CHU KHONG PHAI -11/-10 (goi quai danh nguoi): hai goi do mang
+// `byte mobId`, mot id boss AM 4 byte khong nhet vao duoc. Voi client, boss la
+// mot NHAN VAT (no vao the gioi bang chinh goi -5 cua nguoi choi), nen moi thu
+// nham vao no hay phat ra tu no deu di duong nhan vat.
+//
+// BA GOI, dung thu tu va dung nguoi nhan:
+//   - -60 CA KHU VUC: hoat anh + con so sat thuong. Client cua nan nhan tu tru
+//     con so nay khoi thanh mau cua chinh minh, nen no KHONG can goi rieng.
+//   - -30/9 NGUOI KHAC (khong phai nan nhan): goi -60 khong mang truong "hp con
+//     lai" nen nhung nguoi khac can goi nay de ve lai dung thanh mau nan nhan.
+//     CHI gui khi mau THUC SU doi.
+//   - -17/-8 khi nan nhan chet: di DUNG duong xuLyNguoiChoiChet da co (Ke hoach
+//     6 Task 13) — khong che duong bao chet thu hai.
+func (k *KhuVuc) bossDanhNguoi(b *Boss, pha *PhaBoss, cap *CapChieu, mucTieu *nguoiTrongKhuVuc, bayGio time.Time) {
+	// CHI o day LanDanhCuoi moi duoc dat lai — dung nhanh "that su danh", cung
+	// ky luat voi aiQuai va voi hai nhanh danh cua nguoi choi.
+	b.LanDanhCuoi = bayGio
+
+	// chiMang: KH6 CHUA chot cong thuc/ti le chi mang (khong dac ta nao) ->
+	// luon false, dung lua chon an toan ma ca ba nhanh danh hien co dang dung.
+	chiMang := false
+
+	// He nguyen to THAT cua ca hai phia: boss co lang that (PhaBoss.Lang, dung
+	// cho ca goi -5) nen KHONG dung heQuaiChuaXacDinh nhu quai.
+	//
+	// TODO(Task 11 — noi gian theo %mau): MocNoiGian.HeSoDame nhan vao DUNG CHO
+	// NAY (sat thuong boss GAY RA). HeSoDef thi nam o huong nguoc lai, trong
+	// nhanh nguoi-danh-boss (case suKienDanhNguoiChoi) — hai he so hai cho, dung
+	// nham cho la lam boss vua trau vua manh gap doi.
+	satThuong := TinhSatThuong(pha.Dame, cap,
+		heNguyenToNguoiChoi(pha.Lang), heNguyenToNguoiChoi(mucTieu.nv.Lang), chiMang)
+
+	// §1.2: sat thuong khong duoc VUOT mau con lai. Khong co nhanh §1.3 ("day
+	// mau khong chet boi mot don") — dac ta ghi RO quy tac do CHI danh cho
+	// QUAI, khong cho nguoi choi.
+	if satThuong > mucTieu.nv.HpHienTai {
+		satThuong = mucTieu.nv.HpHienTai
+	}
+	if satThuong < 0 { // phong thu: du lieu Dame am khong duoc HOI MAU nguoi choi
+		satThuong = 0
+	}
+	mucTieu.nv.HpHienTai -= satThuong
+	daChet := mucTieu.nv.HpHienTai <= 0
+
+	// int32(b.Id): dung phep thu hep ma goiXuatHienDayDu da dung khi ghi id
+	// boss vao goi -5, nen con so o day KHOP CHINH XAC id client dang giu.
+	k.phatChoCaKhuVuc(goiDanhNguoiChoi(
+		int32(b.Id), byte(cap.SkillId), int32(mucTieu.nv.ID), satThuong, daChet, chiMang,
+	))
+
+	if satThuong > 0 {
+		k.phatChoNguoiKhac(mucTieu.nv.ID, goiCapNhatMau(
+			int32(mucTieu.nv.ID), mucTieu.nv.HpHienTai, mucTieu.nv.HpToiDa,
+		))
+	}
+
+	if daChet {
+		k.xuLyNguoiChoiChet(mucTieu)
+	}
+}
+
+// bossDiToi buoc boss MOT buoc (toi da buocBossMoiNhip) ve phia (dichX, dichY)
+// va bao ca khu vuc bang goi -7. Tra true khi that su di duoc.
+//
+// VA CHAM: di qua kiemDiChuyenHopLe (dichuyen.go) — CHINH ham ma goi di chuyen
+// cua nguoi choi phai qua. Boss khong duoc co mot luat rieng: neu no di xuyen
+// nui ma nguoi choi thi khong, no se dung giua da roi ban ra, khong ai danh lai
+// duoc. Ham do cung lo luon bien ban do cho cac map chua co luoi va cham.
+//
+// Vuong tuong -> DUNG YEN (khong truot doc tuong, khong tim duong vong): tim
+// duong that su la mot bai toan rieng, va lam nua voi thi sinh ra kieu boss
+// rung lac tai cho. Boss dung im la de nhin ra "cho nay chan duong", con boss
+// rung lac thi trong nhu game hong.
+//
+// Phat cho CA KHU VUC (khong phai phatChoNguoiKhac): boss khong co phien mang
+// nen khong co ai de "tru ra" — moi nguoi trong khu vuc deu phai thay no di.
+func (k *KhuVuc) bossDiToi(b *Boss, dichX, dichY int16) bool {
+	dx := float64(dichX) - float64(b.ViTriX)
+	dy := float64(dichY) - float64(b.ViTriY)
+	khoang := math.Hypot(dx, dy)
+	if khoang < 1 {
+		return false // da dung ngay tren muc tieu
+	}
+
+	buoc := float64(buocBossMoiNhip)
+	if buoc > khoang {
+		buoc = khoang // khong buoc qua muc tieu roi lai quay dau
+	}
+	// math.Round CHI dung cho HUONG DI (toa do), TUYET DOI khong dung o duong
+	// tinh sat thuong — sat thuong van la so nguyen tu dau den cuoi
+	// (TinhSatThuong, satthuong.go), day la hai the gioi khac nhau.
+	toiX := b.ViTriX + int16(math.Round(dx/khoang*buoc))
+	toiY := b.ViTriY + int16(math.Round(dy/khoang*buoc))
+	if toiX == b.ViTriX && toiY == b.ViTriY {
+		return false
+	}
+	if !kiemDiChuyenHopLe(k.banDo, b.ViTriX, b.ViTriY, toiX, toiY) {
+		return false
+	}
+
+	b.ViTriX, b.ViTriY = toiX, toiY
+	k.phatChoCaKhuVuc(goiDiChuyen(b.Id, toiX, toiY))
+	return true
+}
+
+// thoaiDanhBoss noi mot cau ThoaiDanh khi da du nhipThoaiDanhBoss ke tu cau
+// truoc. GOI KHI da co muc tieu (xem aiBoss) — boss lam bam mot minh giua ban
+// do trong la loi ai cung nhin thay.
+//
+// QUAY VONG tren mang thoai (chi so % len) — KHAC han noiThoaiBoss cua buoc
+// CHAO/TROI, cai do doc HET mang mot lan roi thoi. Ly do khac nhau: loi chao va
+// loi trang troi la mot MAN, co dau co cuoi; con thoai danh la ban nhac nen
+// chay suot tran — mot tran dai hon so cau khai bao la chuyen binh thuong, va
+// im bat sau cau cuoi thi trong nhu boss het pin.
+//
+// Dung chung b.MocThoaiCuoi voi hai buoc kia LA CO Y: mot con boss chi co mot
+// cai mieng. Cau chao cuoi cung vua ra xong thi cau thoai danh dau tien phai
+// doi, khong dam len nhau.
+func (k *KhuVuc) thoaiDanhBoss(b *Boss, pha *PhaBoss, bayGio time.Time) {
+	if len(pha.ThoaiDanh) == 0 {
+		return
+	}
+	// MocThoaiCuoi zero (pha khong co ThoaiHien nen buoc CHAO khong noi gi) ->
+	// bayGio.Sub(zero) rat lon -> cau dau ra NGAY. Dung y do: boss vua vao tran
+	// thi noi mot cau, khong phai dung im 15 giay roi moi len tieng.
+	if bayGio.Sub(b.MocThoaiCuoi) < nhipThoaiDanhBoss {
+		return
+	}
+	cau := pha.ThoaiDanh[b.ChiSoThoaiDanh%len(pha.ThoaiDanh)]
+	k.phatChoCaKhuVuc(goiChat44(b.Id, cau))
+	b.ChiSoThoaiDanh = (b.ChiSoThoaiDanh + 1) % len(pha.ThoaiDanh)
+	b.MocThoaiCuoi = bayGio
 }
 
 // bossRoiTheGioi don MOT con boss ra khoi the gioi: bao client xoa hinh, dua

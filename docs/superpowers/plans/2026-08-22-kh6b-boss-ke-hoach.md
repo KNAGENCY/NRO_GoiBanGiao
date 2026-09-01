@@ -86,19 +86,21 @@ mã nguồn (không tin sổ), kết quả:
 | **11** | `khuvuc.go` có **0 lần** nhắc `MocNoiGian` — tên đó chỉ nằm ở `boss.go` (task 3) | ⬜ **CHƯA LÀM** |
 | 12 | `bossNhanSatThuong` + `bossChet` + `traThuongBoss` (`khuvuc.go` 1317+), `PhaBoss.DiemThuong` | ✅ xong 28/08 — **nhưng `bossNhanSatThuong` chưa ai gọi, chờ task 8** |
 | 13 | `lichboss.go` + 3 chỗ trong `khuvuc.go` (dòng 400–417, 554–573, 732–739) | ✅ xong 28/08 |
-| 14 | `noiBoPhatThanh()` + `GanLoa` 5 khu vực, thứ tự tắt `boLuu → loa → TatMayChu → Close` | ⏳ **nửa xong** — bộ phát thanh đã nối; **lịch boss chưa bật** (có chú thích đánh dấu chỗ) |
+| 14 | `noiBoPhatThanh()` + `noiLichBoss()`; tắt `boLuu → lichBoss → loa → TatMayChu → Close`; `MucLichTuNoiDungBoss` nối task 15 → 13 | ✅ xong 02/09 (`0709caf`) |
 | 15 | `noidungboss.go` — 2 boss mẫu (1 con 2 pha + boss lớn + `MocNoiGian`) | ⏳ **nửa xong** — dữ liệu đủ; **smoke client Unity chưa làm** (chỉ chủ dự án làm được) |
 
-**Còn 2 task: `10 → 11`** — cả hai chạm `khuvuc.go` nên **phải tuần tự**.
+**Còn 2 task: `10 → 11`** — cả hai chạm `khuvuc.go` nên **phải tuần tự**. Task 10 đang làm (Opus); task 11 giao ngay khi 10 gộp.
 
 Task 9 đã để sẵn hai chỗ nối, có đánh dấu trong code:
 - bước `BossHoatDong` **để trống** cho task 10, kèm test `TestBossHoatDongDungYen_ChoTask10` ghim nguyên
   trạng "im lặng" — task 10 **buộc phải sửa test đó**, tức có một chỗ bắt dừng lại đọc.
 - nhánh **còn pha** ở `BossRaDi` liệt kê đủ những trường phải đặt lại, chờ task 11.
 
-> ⚠️ **Task 1 (GATE hỏi client về biến hình) VẪN CHƯA LÀM** — file research chưa tồn tại.
-> Nó **chặn task 11**: chưa biết client có chấp nhận một id đã `-6` quay lại bằng `-5` hay không.
-> Làm task 11 mà bỏ qua GATE này là đoán, và đoán sai thì boss biến hình xong **biến mất**.
+> ✅ **Task 1 GATE — XONG 02/09** (`4dbc8db`): client **CHẤP NHẬN** id đã `-6` quay lại bằng `-5`
+> (`Controller.cs:4252-4272` xoá hẳn khỏi `vCharInMap`; `4110-4157` tạo `Char` mới và add lại).
+> Bẫy duy nhất `isUsePlane` **không chạm boss**: cờ chỉ bật trong `case -65` (teleport), server Go
+> không bao giờ gửi `-65`. → **Task 11 không còn gì chặn.** Khi thi công: gửi `-6` **trước** `-5`
+> cùng lượt actor qua `XepGui`, **giữ nguyên id**. File: `docs/superpowers/research/2026-09-02-kh6b-kiem-client-bien-hinh.md`.
 
 Task 12, 13, 15 đã xong và gộp `main` (`922eed8`); task 14 xong nửa bộ phát thanh.
 

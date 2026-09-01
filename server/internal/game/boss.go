@@ -319,6 +319,19 @@ type Boss struct {
 	ChiSoThoaiHien int
 	ChiSoThoaiChet int
 
+	// ChiSoThoaiDanh (THEM O TASK 10) la con tro chay tren mang ThoaiDanh cua
+	// pha hien tai — cau ke tiep boss se noi trong luc dang danh nhau.
+	//
+	// KHAC HAI CON TRO TREN o mot diem quan trong: no QUAY VONG (chi so % len)
+	// chu khong chay het roi dung. Loi chao va loi trang troi la mot MAN, co dau
+	// co cuoi; con thoai danh la ban nhac nen chay suot tran — mot tran dai hon
+	// so cau khai bao la chuyen binh thuong, va boss im bat sau cau cuoi thi
+	// trong nhu het pin.
+	//
+	// Dat lai ve 0 khi doi pha — viec cua Task 11 (bien hinh), CUNG CHO voi hai
+	// con tro tren.
+	ChiSoThoaiDanh int
+
 	// MocThoaiCuoi la thoi diem boss noi cau gan nhat — goc de dem "cau vua noi
 	// da treo tren dau du lau chua" truoc khi noi cau tiep theo.
 	//

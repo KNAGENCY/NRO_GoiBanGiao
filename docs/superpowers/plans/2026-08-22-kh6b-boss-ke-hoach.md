@@ -82,14 +82,14 @@ mã nguồn (không tin sổ), kết quả:
 | 7 | `k.boss = append` + `themBoss` (`khuvuc.go` ~1312) | ✅ xong |
 | 8 | định tuyến `-60` id âm → boss, trong `case suKienDanhNguoiChoi` (`khuvuc.go` 1128+, +139 dòng) | ✅ xong 28/08 — dùng lại `KiemDanhHopLe` + `TinhSatThuong` + `bossNhanSatThuong` |
 | 9 | `nhipBoss` + `mayTrangThaiBoss` + `bossRoiTheGioi` (`khuvuc.go` 2038+), `Boss.The` nối `TheSongBoss.Tat()` | ✅ xong 28/08 — **trừ nhánh biến hình ở RA_DI**, chờ GATE task 1 |
-| **10** | `nhipTim` không xử lý boss | ⬜ **CHƯA LÀM** |
+| 10 | `aiBoss` + `chonMucTieuBoss` + `bossDanhNguoi` + `bossDiToi` + `thoaiDanhBoss` (`khuvuc.go` 2306+), `Boss.ChiSoThoaiDanh` | ✅ xong 02/09 (`ec937f5`) |
 | **11** | `khuvuc.go` có **0 lần** nhắc `MocNoiGian` — tên đó chỉ nằm ở `boss.go` (task 3) | ⬜ **CHƯA LÀM** |
 | 12 | `bossNhanSatThuong` + `bossChet` + `traThuongBoss` (`khuvuc.go` 1317+), `PhaBoss.DiemThuong` | ✅ xong 28/08 — **nhưng `bossNhanSatThuong` chưa ai gọi, chờ task 8** |
 | 13 | `lichboss.go` + 3 chỗ trong `khuvuc.go` (dòng 400–417, 554–573, 732–739) | ✅ xong 28/08 |
 | 14 | `noiBoPhatThanh()` + `noiLichBoss()`; tắt `boLuu → lichBoss → loa → TatMayChu → Close`; `MucLichTuNoiDungBoss` nối task 15 → 13 | ✅ xong 02/09 (`0709caf`) |
 | 15 | `noidungboss.go` — 2 boss mẫu (1 con 2 pha + boss lớn + `MocNoiGian`) | ⏳ **nửa xong** — dữ liệu đủ; **smoke client Unity chưa làm** (chỉ chủ dự án làm được) |
 
-**Còn 2 task: `10 → 11`** — cả hai chạm `khuvuc.go` nên **phải tuần tự**. Task 10 đang làm (Opus); task 11 giao ngay khi 10 gộp.
+**Còn 1 task: `11`** (biến hình + nổi giận) — đang làm (Opus). Xong task 11 → **một** lượt soi đối kháng toàn KH6b (§10.6) → nghiệm thu tay client Unity (chủ dự án).
 
 Task 9 đã để sẵn hai chỗ nối, có đánh dấu trong code:
 - bước `BossHoatDong` **để trống** cho task 10, kèm test `TestBossHoatDongDungYen_ChoTask10` ghim nguyên

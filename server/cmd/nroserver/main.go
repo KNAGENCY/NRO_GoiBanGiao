@@ -108,6 +108,41 @@ type loaCoTheDung interface {
 	Dung()
 }
 
+// lichBossCoTheDung la phan toi thieu *game.BoLichBoss ma trinh tu tat may
+// chu can — CHI Dung(), cung ly do va cung khuon voi loaCoTheDung o tren: de
+// test tiem duoc mot bo dieu phoi gia BIET GHI LAI no bi dung vao luc nao
+// trong day don dep (xem lichboss_test.go). *game.BoLichBoss thoa man
+// interface nay tu nhien.
+type lichBossCoTheDung interface {
+	Dung()
+}
+
+// noiLichBoss dung bo dieu phoi lich boss CHUNG cua may chu tu kho noi dung
+// boss (noidungboss.go, Task 15) roi BatDau() no ngay — day la "diem noi day"
+// cua KH6b Task 14 phan hai.
+//
+// VI SAO PHAI CO HAM NAY, cung ly do voi noiBoPhatThanh o tren: truoc phan
+// hai nay, khong noi nao trong ca du an goi game.MoBoLichBoss/BatDau(). Toan
+// bo bo dieu phoi (Task 13, da qua review) nam do KHONG AI GOI TOI — may chu
+// khong bao gio sinh mot con boss nao, ma khong co lay MOT dong log bao hieu
+// dieu do (SoKhuVuc.MoSoKhuVuc() im lang theo dung CHAN-3, xem lichboss.go).
+//
+// game.MucLichTuNoiDungBoss chuyen kho noi dung (NoiDungBoss, mang ca Ma va
+// ViTri chua dung toi o Task 14) sang dinh dang bo dieu phoi doc duoc
+// ([]MucLichBoss, chi con DuLieu). Xem chu thich ham do de biet vi sao hai
+// kieu tach rieng.
+//
+// GOI DUNG MOT LAN luc khoi dong, NGAY SAU noiBoPhatThanh (xem khung chu
+// thich "CHO NOI BO DIEU PHOI LICH BOSS" trong main() — bo dieu phoi la
+// NGUON sinh thong bao boss, phai co loa som hon no thi thong bao dau tien
+// moi khong roi vao hu khong).
+func noiLichBoss(soKhuVuc *game.SoKhuVuc) *game.BoLichBoss {
+	lich := game.MucLichTuNoiDungBoss(game.DanhSachNoiDungBoss())
+	lichBoss := game.MoBoLichBoss(soKhuVuc, lich)
+	lichBoss.BatDau()
+	return lichBoss
+}
+
 // noiBoPhatThanh tao bo phat thanh CHUNG cua may chu roi cam no vao ca 5 khu
 // vuc — day la "diem noi day" cua KH6b Task 14.
 //
@@ -157,23 +192,40 @@ func noiBoPhatThanh(soKhuVuc *game.SoKhuVuc) *game.BoPhatThanh {
 //     phiên đứt lúc đó" — boLuu la mot nguon Xep() DOC LAP giong het
 //     KhiDong(), can chan truoc TIEN cho chac).
 //
-//  1. loa.Dung() — dung bo phat thanh toan may chu (KH6b Task 14). Vi sao
-//     dung O DAY, khong som hon va khong muon hon: xem doan "VE VI TRI CUA
-//     loa.Dung()" ngay duoi danh sach nay.
+//  1. lichBoss.Dung() — dung bo dieu phoi lich boss (KH6b Task 14 phan hai),
+//     NGAY TRUOC loa.Dung(). Cung logic voi (a)/(b) o duoi cho loa, ap dung
+//     mot buoc som hon: lichBoss la NGUON SINH ra thong bao (boss xuat hien
+//     goi k.Gui(suKienPhatGoi) qua loa), loa CHI LA duong ONG cho thong bao do
+//     chay qua. Tat ong truoc ma nguon van con bom thi thong bao moi chi con
+//     biet nam chet trong hang doi cua loa; tat nguon truoc, ong sau moi dam
+//     bao khong con gi bom vao mot cai ong da nguoi.
 //
-//  2. game.TatMayChu(ctx, soKhuVuc, thoGhi) — GOM CA BA buoc con lai cua dac
+//  2. loa.Dung() — dung bo phat thanh toan may chu (KH6b Task 14 phan mot).
+//     Vi sao dung O DAY, khong som hon va khong muon hon: xem doan "VE VI TRI
+//     CUA loa.Dung()" ngay duoi danh sach nay — ly do (a)/(b)/(c) o do ap dung
+//     dung y het cho lichBoss.Dung(), sai khac duy nhat la lichBoss phai dung
+//     TRUOC loa vi no la nguon con loa la ong dan (xem buoc 1). Ca hai (buoc
+//     1 va 2) DEU PHAI xong TRUOC buoc 3 (game.TatMayChu): ca hai deu day su
+//     kien vao hop thu GAMEPLAY cua khu vuc (lichBoss qua k.SinhBoss(), loa
+//     qua k.Gui(suKienPhatGoi)) — thu chen giua LuuTatCa (dau buoc 3) va han
+//     100ms cua no se lam anh chup nguoi choi bi rong, y het truong hop (a)
+//     duoi day.
+//
+//  3. game.TatMayChu(ctx, soKhuVuc, thoGhi) — GOM CA BA buoc con lai cua dac
 //     ta §4 diem C: LuuTatCa (xin anh chup TOAN BO nguoi choi o TAT CA khu
 //     vuc) -> DongVaChoXong (cho tho ghi ghi HET xuong dia, co han gio qua
 //     ctx) -> RỒI MỚI DungTatCa() (dung actor tung khu vuc). Xem tatmaychu.go
 //     de biet chi tiet vi sao thu tu nay BAT BUOC.
 //
-//  3. kho.Close() — dong pool CSDL, CHI SAU KHI tho ghi da ghi xong va actor
-//     da dung (ca hai nam trong buoc 2) — khong con ai dung toi kho nua luc nay.
+//  4. kho.Close() — dong pool CSDL, CHI SAU KHI tho ghi da ghi xong va actor
+//     da dung (ca hai nam trong buoc 3) — khong con ai dung toi kho nua luc nay.
 //
-// VE VI TRI CUA loa.Dung() (buoc 1) — day la mot lua chon can nhac, khong
-// phai tien tay nhet vao cho trong. Ba ly do, xep theo do nang:
+// VE VI TRI CUA lichBoss.Dung()/loa.Dung() (buoc 1-2) — day la mot lua chon
+// can nhac, khong phai tien tay nhet vao cho trong. Ba ly do, xep theo do
+// nang (viet cho loa, ap dung dung y het cho lichBoss vi ly do da giai thich
+// o buoc 1):
 //
-// (a) BAO VE LAN LUU CUOI CUNG — ly do NANG NHAT. LuuTatCa (dau buoc 2) hoi
+// (a) BAO VE LAN LUU CUOI CUNG — ly do NANG NHAT. LuuTatCa (dau buoc 3) hoi
 // tung khu vuc bang AnhChupNguoiChoi: di qua hop thu DIEU KHIEN va chi cho
 // toi thoiGianChoControl = 100ms, qua han la tra ve RONG, tuc CA KHU VUC DO
 // KHONG DUOC LUU. Ma truoc khi tra loi anh chup, actor con chay
@@ -185,12 +237,13 @@ func noiBoPhatThanh(soKhuVuc *game.SoKhuVuc) *game.BoPhatThanh {
 // hoan toan co the day cai hang xa do vuot 100ms -> anh chup rong -> mat
 // tien do CUA CA MOT KHU VUC NGUOI CHOI. Tat loa truoc la bit han duong do.
 //
-// (b) KHONG PHAT CHO NGUOI DA DI. Neu de loa song toi sau DungTatCa (cuoi
-// buoc 2), no van cham chi bom goi vao cac khu vuc dang bi dong — khong
-// panic (k.Gui kiem k.xong roi bo goi, khuvuc.go), nhung la cong vo ich va
-// lam nhieu chan doan. Rang buoc "loa.Dung() TRUOC DungTatCa" nay da duoc
-// ghi san tu truoc o hai cho: GanLoa (sokhuvuc.go) va BoPhatThanh.Dung
-// (thongbao.go) — buoc 1 chi la cho THI HANH no.
+// (b) KHONG PHAT CHO NGUOI DA DI. Neu de loa (hoac lichBoss) song toi sau
+// DungTatCa (cuoi buoc 3), no van cham chi bom su kien vao cac khu vuc dang
+// bi dong — khong panic (k.Gui kiem k.xong roi bo goi, khuvuc.go), nhung la
+// cong vo ich va lam nhieu chan doan. Rang buoc "loa.Dung() TRUOC DungTatCa"
+// nay da duoc ghi san tu truoc o hai cho: GanLoa (sokhuvuc.go) va
+// BoPhatThanh.Dung (thongbao.go) — buoc 2 chi la cho THI HANH no. Voi
+// lichBoss thi buoc 1 dong vai tro tuong duong.
 //
 // (c) RE, NEN KHONG LAM CHAM VIEC TAT MAY. Dung() chi dong mot kenh roi cho
 // vongLap thoat; no CO Y KHONG xa not hang doi (thongbao.go: xa not la ton
@@ -209,18 +262,18 @@ func noiBoPhatThanh(soKhuVuc *game.SoKhuVuc) *game.BoPhatThanh {
 // VI SAO SAU boLuu.Dung() chu khong phai TRUOC no: boLuu la manh DUY NHAT
 // trong day nay co the gay MAT DU LIEU AM THAM neu bi tri hoan (xem buoc 0),
 // nen no phai la thu dau tien bi chan — khong chen bat cu gi len truoc, ke ca
-// mot buoc re. Doi lai, loa song them vai mili-giay thi khong ai mat gi: lan
-// luu dinh ky ma boLuu dang lam do neu co hong thi buoc 2 luu lai het.
+// mot buoc re. Doi lai, loa/lichBoss song them vai mili-giay thi khong ai mat
+// gi: lan luu dinh ky ma boLuu dang lam do neu co hong thi buoc 3 luu lai het.
 //
 // Loi tu TatMayChu (thuong la ctx.Err() khi vuot han gio) duoc TRA VE cho
 // noi goi (main()) log canh bao — donDepKhiTat KHONG dung giua chung vi loi
-// do: DungTatCa() (nam trong buoc 2) va kho.Close() (buoc 3) VAN PHAI chay
+// do: DungTatCa() (nam trong buoc 3) va kho.Close() (buoc 4) VAN PHAI chay
 // du TatMayChu co loi hay khong, vi treo may chu vo han con te hon mot lan
 // tat "danh hong".
 //
 // VE "khong duong nao goi Xep sau khi DongVaChoXong tra ve, ke ca KhiDong()
 // cua phien dut luc do" (canh bao rieng cua brief Task 6): mot phien client
-// dut ket noi trong LUC soKhuVuc.DungTatCa() dang chay (phan cuoi buoc 2,
+// dut ket noi trong LUC soKhuVuc.DungTatCa() dang chay (phan cuoi buoc 3,
 // vong lap dung TUNG khu vuc mot) se goi KhiDong() (internal/game/login.go)
 // -> AnhChupNguoiChoi. VOI cac khu vuc DA dung, AnhChupNguoiChoi tra rong
 // ngay (guiTin cua actor khong con ai doc) nen KhiDong tu bo qua Xep (guard
@@ -234,8 +287,9 @@ func noiBoPhatThanh(soKhuVuc *game.SoKhuVuc) *game.BoPhatThanh {
 // (khong co co che "rut het session dang mo" — se can them ha tang theo doi
 // TOAN BO session dang song, ngoai pham vi Task 6). Ghi lai o day de nguoi
 // sau khong tuong nham day la khe ho CHUA duoc xem xet.
-func donDepKhiTat(ctx context.Context, kho khoDong, soKhuVuc *game.SoKhuVuc, thoGhi *game.ThoGhi, boLuu *game.BoLuuDinhKy, loa loaCoTheDung) error {
+func donDepKhiTat(ctx context.Context, kho khoDong, soKhuVuc *game.SoKhuVuc, thoGhi *game.ThoGhi, boLuu *game.BoLuuDinhKy, lichBoss lichBossCoTheDung, loa loaCoTheDung) error {
 	boLuu.Dung()
+	lichBoss.Dung()
 	loa.Dung()
 	err := game.TatMayChu(ctx, soKhuVuc, thoGhi)
 	kho.Close()
@@ -376,24 +430,14 @@ func main() {
 	// se bien mat khong dau vet, xem noiBoPhatThanh).
 	loa := noiBoPhatThanh(soKhuVuc)
 
-	// ┌── CHO NOI BO DIEU PHOI LICH BOSS (KH6b Task 13) ─────────────────────┐
-	// │ Task 13 dang lam SONG SONG luc viet dong nay — API cua no CHUA TON   │
-	// │ TAI, nen o day co y KHONG viet code goi truoc.                       │
-	// │                                                                      │
-	// │ BAT: ngay DUOI dong nay. Phai SAU noiBoPhatThanh — bo dieu phoi lich │
-	// │ sinh boss, ma boss xuat hien la sinh thong bao; bat no truoc khi co   │
-	// │ loa thi nhung dong dau tien roi vao hu khong.                        │
-	// │                                                                      │
-	// │ TAT: trong donDepKhiTat, NGAY TRUOC loa.Dung() — tuc thu tu day du la │
-	// │   boLuu.Dung() -> lichBoss.Dung() -> loa.Dung() -> TatMayChu -> Close │
-	// │ Ly do dat DUNG cho do (cung mot ly do da giai thich ky o donDepKhiTat │
-	// │ cho loa): bo dieu phoi lich la NGUON SINH ra thong bao, loa la duong  │
-	// │ ONG cho no chay qua. Tat nguon truoc, ong sau — nguoc lai thi ong tat │
-	// │ roi ma nguon van bom, thong bao chi con biet cach nam chet trong hang │
-	// │ doi. Va ca hai deu phai tat XONG TRUOC game.TatMayChu(...), vi ca hai │
-	// │ deu day su kien vao hop thu GAMEPLAY cua khu vuc — thu chen giua      │
-	// │ LuuTatCa va cai han 100ms cua no.                                     │
-	// └──────────────────────────────────────────────────────────────────────┘
+	// KH6b Task 14 (phan hai): bat bo dieu phoi lich boss NGAY DUOI dong tren
+	// — phai SAU noiBoPhatThanh vi bo dieu phoi la NGUON sinh boss (boss xuat
+	// hien la sinh thong bao goi 93), bat no truoc khi co loa thi nhung dong
+	// dau tien roi vao hu khong (chi tiet day du: xem noiLichBoss va khoi
+	// chu thich "VE VI TRI CUA lichBoss.Dung()/loa.Dung()" trong donDepKhiTat
+	// ben duoi — TAT dat NGAY TRUOC loa.Dung() trong ham do, cung ly do doi
+	// xung voi thu tu BAT o day).
+	lichBoss := noiLichBoss(soKhuVuc)
 
 	// Ke hoach 11 Task 6 diem B "NOI DAY THAT": TRUOC dong nay, khong noi nao
 	// trong ca du an goi MoThoGhi / MoBoLuuDinhKy(...).BatDau() / DatThoGhi —
@@ -434,7 +478,7 @@ func main() {
 
 	yeuCauTatE2E := make(chan struct{}, 1)
 	donDep := func(ctx context.Context) error {
-		return donDepKhiTat(ctx, kho, soKhuVuc, thoGhi, boLuu, loa)
+		return donDepKhiTat(ctx, kho, soKhuVuc, thoGhi, boLuu, lichBoss, loa)
 	}
 	control, controlListener, err := moE2EControl(cauHinhControl, yeuCauTatE2E)
 	if err != nil {

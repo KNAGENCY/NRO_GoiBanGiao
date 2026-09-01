@@ -80,7 +80,7 @@ func TestDonDepKhiTatGoiDuBonBuoc(t *testing.T) {
 	ctx, huy := context.WithTimeout(context.Background(), 5*time.Second)
 	defer huy()
 
-	if err := donDepKhiTat(ctx, kd, soKhuVuc, thoGhi, boLuu, game.MoBoPhatThanh()); err != nil {
+	if err := donDepKhiTat(ctx, kd, soKhuVuc, thoGhi, boLuu, game.MoBoLichBoss(soKhuVuc, nil), game.MoBoPhatThanh()); err != nil {
 		t.Fatalf("donDepKhiTat loi trong dieu kien binh thuong: %v", err)
 	}
 
@@ -120,7 +120,7 @@ func TestDonDepKhiTatVanDongKhoKhiTatMayChuLoi(t *testing.T) {
 	defer huy()
 	time.Sleep(5 * time.Millisecond) // dam bao ctx CHAC CHAN da het gio truoc khi goi
 
-	err := donDepKhiTat(ctx, kd, soKhuVuc, thoGhi, boLuu, game.MoBoPhatThanh())
+	err := donDepKhiTat(ctx, kd, soKhuVuc, thoGhi, boLuu, game.MoBoLichBoss(soKhuVuc, nil), game.MoBoPhatThanh())
 	if err == nil {
 		t.Fatal("donDepKhiTat khong tra loi du ctx da het gio tu truoc khi goi — mong doi ctx.Err()")
 	}

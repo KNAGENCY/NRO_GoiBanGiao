@@ -283,6 +283,26 @@ type Boss struct {
 	// ve 0 moi khi doi pha.
 	MocNoiGianDaQua int
 
+	// HeSoDameHienTai / HeSoDefHienTai (THEM O TASK 11) la hai he so noi gian
+	// DANG CO HIEU LUC: he so cua moc noi gian gan nhat da kich hoat trong pha
+	// nay. HeSoDame nhan vao sat thuong boss GAY RA (bossDanhNguoi); HeSoDef
+	// nhan vao sat thuong boss NHAN VAO (nhanh nguoi-danh-boss). Hai huong,
+	// hai cho — dat nham cho la boss vua manh gap ruoi vua trau gap ruoi.
+	//
+	// ⚠️ 0 NGHIA LA "CHUA NOI GIAN", DUOC HIEU LA x1 — khong phai x0. Doc bang
+	// heSoHoacMot(), dung doc thang. Ly do la mot su that ve Go chu khong phai
+	// so thich: zero value cua struct Boss{} la 0, va MOI duong sinh boss dang
+	// co (lichboss.taoBoss, ca chuc con boss trong test) deu KHONG dat hai
+	// truong nay. Neu 0 co nghia den, ca dan boss cua may chu ra doi voi sat
+	// thuong 0 va bat tu — mot loi cam ma trinh bien dich khong bao duoc.
+	//
+	// GHI DE, KHONG NHAN DON (khac han HeSoNhip): du lieu noi dung viet cac moc
+	// thanh mot cai THANG tuyet doi (1,30 roi 1,60 — xem noidungboss.go), nen
+	// moc sau THAY moc truoc. Nhan don thi 1,30 x 1,60 = 2,08, mot con so khong
+	// ai go vao du lieu va khong ai doc ra duoc tu du lieu.
+	HeSoDameHienTai float64
+	HeSoDefHienTai  float64
+
 	// ── Bon truong duoi day THEM O TASK 9 (may trang thai vong doi) ─────────
 
 	// The la SOI DAY DUY NHAT chay NGUOC tu actor ve bo dieu phoi lich
@@ -423,6 +443,85 @@ func (b *Boss) PhaHienTaiData() *PhaBoss {
 		return nil
 	}
 	return &b.DuLieu[b.PhaHienTai]
+}
+
+// ---------------------------------------------------------------------------
+// 4b. Noi gian theo %mau — ham THUAN (KH6b Task 11)
+// ---------------------------------------------------------------------------
+
+// heSoHoacMot doc mot he so noi gian: 0 (chua dat) duoc hieu la x1.
+//
+// PHAI di qua ham nay o MOI cho doc HeSoDameHienTai/HeSoDefHienTai — xem chu
+// thich hai truong do. So am cung tra 1: mot he so am se DOI DAU sat thuong,
+// bien don danh thanh don hoi mau, va du lieu can bang do nguoi go tay thi
+// khong the tin la luon duong.
+func heSoHoacMot(heSo float64) float64 {
+	if heSo <= 0 {
+		return 1
+	}
+	return heSo
+}
+
+// nhanHeSo nhan mot con so sat thuong voi he so noi gian, giu con so trong mien
+// [0, satThuongToiDa].
+//
+// BA quyet dinh, moi cai chan mot cach hong that:
+//
+//  1. heSo <= 0 -> KHONG DOI (x1), theo dung quy uoc cua heSoHoacMot.
+//  2. Don CO THAT (sat > 0) khong bao gio bi lam tron ve 0. He so 0,01 tren mot
+//     don 1 ra 0,01 -> int32 cat thanh 0: nguoi choi danh mai ma thanh mau boss
+//     khong nhuc nhich, khong mot dong log nao bao. Kep san o 1.
+//  3. Tinh bang float64 roi kep MOT LAN o buoc cuoi — nhan tren int32 se tran
+//     truoc khi kip kep (bay #4 thiet ke §7, cung ly do voi KepHp).
+func nhanHeSo(sat int32, heSo float64) int32 {
+	if sat <= 0 || heSo <= 0 {
+		if sat < 0 {
+			return 0
+		}
+		return sat
+	}
+	ra := int64(float64(sat) * heSo)
+	if ra < 1 {
+		ra = 1 // xem quyet dinh 2
+	}
+	if ra > satThuongToiDa {
+		ra = satThuongToiDa
+	}
+	return int32(ra)
+}
+
+// mocNoiGianVuaVuot tra CHI SO cua moc noi gian CUOI CUNG vua bi vuot qua (tinh
+// tu daQua tro di), hoac -1 khi chua vuot moc nao.
+//
+// Ham THUAN — khong cham boss, khong cham dong ho: nguoi goi (kiemMocNoiGian)
+// lo phan ap he so va phat chat.
+//
+// VI SAO TRA MOC CUOI CHU KHONG PHAI MOC KE TIEP: mot don cuc manh co the xuyen
+// qua nhieu moc trong CUNG MOT lan tru mau (vd tu 100% xuong 10% qua ca moc 50%
+// lan moc 20%). Bo qua cac moc bi nhay coc thi boss mat luon phan noi gian ma no
+// dang le phai co; con no tung moc mot moi don thi thang he so tut hau sau mau
+// thuc te. Tra moc cuoi de nguoi goi ap MOT LAN cho dung: he so lay cua moc
+// cuoi (chung la gia tri tuyet doi), HeSoNhip thi nhan don qua tung moc.
+//
+// hpToiDa <= 0 -> -1 (khong chia duoc cho 0, va mot con boss khong co mau toi da
+// thi moi nguong %HP deu vo nghia).
+//
+// So sanh bang PHEP NHAN CHEO (hp*100 <= hpToiDa*PhanTramHP) chu khong chia:
+// phep chia so nguyen lam tron xuong, nen boss 999/1000 mau se ra 99% — dung —
+// nhung 1/1000 ra 0% va mot moc dat o 0 se KHONG BAO GIO toi luot. Nhan cheo
+// tren int64 khong tran voi mien HP int32.
+func mocNoiGianVuaVuot(moc []MocNoiGian, hp, hpToiDa int32, daQua int) int {
+	if hpToiDa <= 0 || daQua < 0 {
+		return -1
+	}
+	vuot := -1
+	for i := daQua; i < len(moc); i++ {
+		if int64(hp)*100 > int64(hpToiDa)*int64(moc[i].PhanTramHP) {
+			break // chua toi moc nay -> moi moc sau (nguong thap hon) cung chua toi
+		}
+		vuot = i
+	}
+	return vuot
 }
 
 // CongSatThuong cong don sat thuong mot nguoi choi gay ra cho boss (thiet ke

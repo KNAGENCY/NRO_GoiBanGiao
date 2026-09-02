@@ -140,6 +140,47 @@ func (s *Store) ThaXuongDat(ctx context.Context, nvID int64, noiChua string, oSo
 	return id, nil
 }
 
+// HuyDoDuoiDatHetGio danh dau MOT mon dang nam DUOI_DAT la DA_HUY vi het gio
+// khong ai nhat. Duong nay KHONG CO CHU: mon chua tung thuoc ve ai.
+//
+//	UPDATE vat_pham SET noi_chua='DA_HUY' WHERE id=$1 AND noi_chua='DUOI_DAT'
+//
+// Cung mot khuon MOT BUOC voi NhatLen (D8): dieu kien `noi_chua='DUOI_DAT'` nam
+// TRONG chinh cau UPDATE, nen neu ai do vua nhat mon nay xong (noi_chua da la
+// 'TUI') thi cau nay cham 0 dong va KHONG lam gi ca — khong the "huy nham do
+// trong tui nguoi khac". Vi vay 0 dong la KET QUA BINH THUONG, tra ve
+// ErrDaCoNguoiNhat de tang tren chi log.
+//
+// Cung giao dich ghi mot dong lich su `tu_ai = NULL`, `sang_ai = NULL`, ly do
+// HET_GIO (BB3 — mon nao cung co giay khai tu). Cap (sang_ai NULL, ly_do
+// HET_GIO) doc duoc la "may chu don rac", khong nham voi BO (nguoi choi vut).
+func (s *Store) HuyDoDuoiDatHetGio(ctx context.Context, vatPhamID int64) error {
+	return s.trongGiaoDich(ctx, func(tx pgx.Tx) error {
+		var soLuong int32
+		err := tx.QueryRow(ctx,
+			`UPDATE vat_pham
+			    SET noi_chua = $1, o_so = NULL, sua_luc = now()
+			  WHERE id = $2 AND noi_chua = $3
+			  RETURNING so_luong`,
+			NoiChuaDaHuy, vatPhamID, NoiChuaDuoiDat).Scan(&soLuong)
+		if errors.Is(err, pgx.ErrNoRows) {
+			// 0 dong: mon khong con duoi dat (da bi nhat, hoac da huy roi).
+			return ErrDaCoNguoiNhat
+		}
+		if err != nil {
+			return dichLoiCSDL(err, "huy do duoi dat het gio that bai")
+		}
+
+		if _, err := tx.Exec(ctx,
+			`INSERT INTO vat_pham_lich_su (vat_pham_id, tu_ai, sang_ai, ly_do, so_luong)
+			 VALUES ($1, NULL, NULL, $2, $3)`,
+			vatPhamID, LyDoHetGio, soLuong); err != nil {
+			return dichLoiCSDL(err, "ghi lich su huy do het gio that bai")
+		}
+		return nil
+	})
+}
+
 // NhatLen chuyen mot mon tu DUOI_DAT vao o `oSo` trong TUI cua nhan vat nvID.
 //
 // D8 — MOT BUOC, khong kiem-roi-ghi:

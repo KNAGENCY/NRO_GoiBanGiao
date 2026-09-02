@@ -182,6 +182,13 @@ type clientGia struct {
 	t    *testing.T
 	f    *protocol.Framer
 	conn net.Conn
+
+	// b la CHINH BoXuLy cua phien nay. Giu lai de test tich hop kiem duoc
+	// TRANG THAI PHIEN (vd bang hanh trang b.hanhTrang, KH7 task 5) chu khong
+	// chi goi tin. AN TOAN doc tu goroutine test SAU khi da doc xong goi cuoi
+	// cung cua chuoi vao the gioi: luc do goroutine phien da chay xong
+	// xuLyClientOk va dang chan o buoc doc goi tiep theo.
+	b *BoXuLy
 }
 
 // moPhienClientGia dung mot phien XuLy that tren kho da cho (o file nay luon
@@ -202,7 +209,7 @@ func moPhienClientGia(t *testing.T, kho Kho) *clientGia {
 	khoaTho := docGoiKhoaThuCong(t, benClient)
 	f.SetKey(protocol.DeriveKey(khoaTho))
 
-	return &clientGia{t: t, f: f, conn: benClient}
+	return &clientGia{t: t, f: f, conn: benClient, b: b}
 }
 
 func (cl *clientGia) dong() { cl.conn.Close() }

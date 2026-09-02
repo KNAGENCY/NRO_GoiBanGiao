@@ -102,6 +102,10 @@ func dangNhapLaiVaoTheGioiVaKhuVuc(t *testing.T, cl *clientGia, ten, matKhau str
 	// pipe day, may chu ket thuc bang loi GHI het gio 30 giay — trong nhu treo,
 	// khong phai loi logic. Da lam do 13 test tich hop vi thieu dung dong nay.
 	cl.doiGoiLenh(t, lenhChiSoNhanVat)
+	// KH7 Task 5: ba goi hanh trang -37/-36/-35 khep lai chuoi vao the gioi.
+	cl.doiGoiLenh(t, lenhDoDangMac)
+	cl.doiGoiLenh(t, lenhTui)
+	cl.doiGoiLenh(t, lenhRuong)
 
 	cl.baoVaoKhuVuc()
 }

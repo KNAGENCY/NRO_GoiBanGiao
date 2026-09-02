@@ -242,7 +242,7 @@ func TestGoiTuiDocLaiDungTrinhTuClient(t *testing.T) {
 
 func TestGoiDoDangMacCoHeadVaODung(t *testing.T) {
 	ds := []store.VatPham{mon(1, 2, 0, store.NoiChuaMac, 1)}
-	m, err := GoiDoDangMac(ds, 300, soOMacChuan)
+	m, err := GoiDoDangMac(ds, 300, SoOMacChuan)
 	if err != nil {
 		t.Fatalf("GoiDoDangMac loi: %v", err)
 	}

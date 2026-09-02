@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+	"time"
 
 	"nroserver/internal/auth"
 	"nroserver/internal/chanip"
@@ -95,6 +96,24 @@ type Kho interface {
 // khong phai dung *ThoGhi that (di qua goroutine nen + ticker that se bat
 // test phai cho/doan thoi gian, de flaky). *ThoGhi thoa man interface nay tu
 // nhien, khong can glue code them.
+// hanhTrangKho la phan MO RONG khong xuat cua Kho ma duong VAO THE GIOI dung
+// de nap hanh trang (KH7 Task 5). *store.Store thoa man tu nhien (LayTui,
+// store/vatpham_kho.go).
+//
+// VI SAO KHONG NHET LayTui THANG VAO Kho: y het ly do da ghi o
+// traNoThuongKhiVao ben duoi — moi kho gia trong hang chuc test hien co se
+// phai moc them mot phuong thuc chang lien quan gi toi kich ban cua no. Phien
+// chay tren mot kho KHONG co LayTui (test cu) thi coi nhu nguoi choi khong co
+// mon nao: ba bang van dung SO O that, chi la moi o deu rong.
+type hanhTrangKho interface {
+	LayTui(ctx context.Context, nvID int64, noiChua string) ([]store.VatPham, error)
+}
+
+// hanhTrangHanCho: han cho cho ba cau truy van hanh trang luc vao the gioi.
+// Cham CSDL tren goroutine PHIEN duoc phep cho o dia (dac ta KH7 §5.3) — chi
+// KhuVuc.vongLap moi bi cam (§6.10b).
+const hanhTrangHanCho = 5 * time.Second
+
 type GhiKhiRoi interface {
 	Xep(nv store.NhanVat)
 }
@@ -124,6 +143,13 @@ type BoXuLy struct {
 	kho      Kho
 	taiKhoan *store.TaiKhoan // nil khi chua dang nhap
 	nhanVat  *store.NhanVat  // nil khi chua co / chua vao the gioi
+
+	// hanhTrang (KH7 Task 4/5): bang tra (noi chua, o so) -> vat_pham.id, dung
+	// CUNG LUC voi ba goi -36/-37/-35 va voi ME_INFO tu DUNG MOT lat cat
+	// (DungBangVaGoi). Task 7/9 tra o -> id qua day. Goroutine PHIEN so huu
+	// (§1.6/§6.9) — khong con tro nao ra ngoai goroutine nay, khong can khoa.
+	// nil la hop le: nguoi choi chua vao the gioi.
+	hanhTrang *BangHanhTrang
 
 	clientSanSang bool      // client da gui -28/13 (bat tay xong)
 	daVaoKhuVuc   bool      // da gui suKienVao (chan -39 goi lap gay -5 trung)
@@ -457,6 +483,36 @@ func (b *BoXuLy) xuLyClientOk(s *mynet.Session) error {
 		b.khuVuc = b.soKhuVuc.Tra(b.nhanVat.MapID)
 	}
 
+	// KH7 Task 5 — HANH TRANG. Nap TRUOC goi dau tien cua chuoi vao the gioi,
+	// vi hai le:
+	//
+	//  1. Chinh ME_INFO mang ba mang vat pham (so o + DU than o, xem goiMeInfo
+	//     (d2)), nen phai co du lieu truoc khi dung goi do.
+	//  2. LOI CSDL => KHONG gui MOT BYTE NAO. Neu nap o giua chuoi thi -31/-82
+	//     da bay di roi moi hong — nguoi choi ngoi man "Xin cho" voi mot phien
+	//     da nhan nua chuoi. Nap dau tien => hong la hong SACH, phien dong
+	//     ngay (loi tra len XuLy) va client bao mat ket noi that tha.
+	//
+	// Da can nhac phuong an "gui tui rong co chu dich" va LOAI: nguoi choi se
+	// thay hanh trang trong va tuong mat do, con bang tra o rong khien moi thao
+	// tac cua task 7/9 im lang khong lam gi — dung kieu hong ngam ma §1.10
+	// ("khong gui goi thieu") cam.
+	dsMon, errHT := b.hanhTrangNap(b.nhanVat.ID)
+	if errHT != nil {
+		slog.Error("khong nap duoc hanh trang, dong phien thay vi cho vao the gioi nua voi",
+			"loi", errHT, "ten", b.nhanVat.Ten, "id", b.nhanVat.ID)
+		return fmt.Errorf("nap hanh trang cua %d: %w", b.nhanVat.ID, errHT)
+	}
+	// MOT lat cat -> bang tra VA ba goi. Khong co duong nao dung bang tu lat cat
+	// nay roi dung goi tu lat cat khac (xem hanhtrang.go).
+	ht, errBG := DungBangVaGoi(dsMon, b.nhanVat.KieuToc, SoOTuiChuan, SoOMacChuan, SoORuongChuan)
+	if errBG != nil {
+		slog.Error("hanh trang khong dung duoc goi, dong phien",
+			"loi", errBG, "ten", b.nhanVat.Ten, "id", b.nhanVat.ID)
+		return fmt.Errorf("dung hanh trang cua %d: %w", b.nhanVat.ID, errBG)
+	}
+	b.hanhTrang = ht.Bang
+
 	// -31 bang mau bong do (bg-item) — BAT BUOC truoc -24, va chi can gui MOT
 	// LAN moi phien (client giu TileMap.vItemBg qua ca cac lan doi map).
 	// Thieu goi nay thi cac bong do trong -24 bi client bo qua IM LANG:
@@ -470,8 +526,9 @@ func (b *BoXuLy) xuLyClientOk(s *mynet.Session) error {
 		return err
 	}
 
-	// -30/0 ME_INFO.
-	meInfo, err := goiMeInfo(b.nhanVat)
+	// -30/0 ME_INFO — mang LUON ba mang vat pham (so o + than o), dung lat cat
+	// dsMon o tren.
+	meInfo, err := goiMeInfo(b.nhanVat, dsMon)
 	if err != nil {
 		return err
 	}
@@ -507,9 +564,43 @@ func (b *BoXuLy) xuLyClientOk(s *mynet.Session) error {
 		return err
 	}
 
-	slog.Info("da gui the gioi (mau bong do + tileset + ME_INFO + MAP INFO + chi so), client se render",
+	// KH7 Task 5 — ba goi hanh trang -37/-36/-35, PHAI sau -30/0: ME_INFO CAP
+	// LAI ca ba mang (Controller.cs:5860/:5907/:5942), nen goi nao den truoc no
+	// deu bi xoa sach khong bao. Dat o CUOI chuoi (sau -42) de thu tu cu
+	// -31 -> -82 -> -30 -> -24 -> -42 khong doi mot ly nao.
+	for _, g := range []*protocol.Message{ht.GoiMac, ht.GoiTui, ht.GoiRuong} {
+		if err := s.Gui(g); err != nil {
+			return err
+		}
+	}
+
+	slog.Info("da gui the gioi (mau bong do + tileset + ME_INFO + MAP INFO + chi so + hanh trang), client se render",
 		"ten", b.nhanVat.Ten, "mapId", bd.MapID, "lang", b.nhanVat.Lang, "id", b.nhanVat.ID)
 	return nil
+}
+
+// hanhTrangNap doc CA hanh trang cua mot nhan vat (MAC + TUI + RUONG) tu kho.
+//
+// Chay tren goroutine PHIEN (duoc phep cho o dia, §5.3), co han gio nhu moi lan
+// cham CSDL khac. Kho khong cai LayTui (moi kho gia trong test cu) -> tra danh
+// sach rong, KHONG loi.
+func (b *BoXuLy) hanhTrangNap(nvID int64) ([]store.VatPham, error) {
+	k, co := b.kho.(hanhTrangKho)
+	if !co {
+		return nil, nil
+	}
+	ctx, huy := context.WithTimeout(context.Background(), hanhTrangHanCho)
+	defer huy()
+
+	var ds []store.VatPham
+	for _, noi := range []string{store.NoiChuaMac, store.NoiChuaTui, store.NoiChuaRuong} {
+		phan, err := k.LayTui(ctx, nvID, noi)
+		if err != nil {
+			return nil, fmt.Errorf("lay %s: %w", noi, err)
+		}
+		ds = append(ds, phan...)
+	}
+	return ds, nil
 }
 
 // xuLyVaoKhuVuc: client gui -39 (da tai xong map) -> dua nhan vat vao khu vuc chung

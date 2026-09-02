@@ -53,7 +53,45 @@ func goiTileSetInfo() *protocol.Message {
 //	(d) 3 mang item (Body/Bag/Box) size = 0 cho nhan vat moi — item id la khong co
 //	    trong catalog -28/8 se NPE giua goi.
 //	(e) 3 truong cuoi (aura short, effFront byte, hat short) BO HAN — client bat loi em.
-func goiMeInfo(nv *store.NhanVat) (*protocol.Message, error) {
+//
+// (d2) BA MANG VAT PHAM — PHA A (docs/superpowers/research/2026-09-03-kh7-me-info-so-o.md):
+// SAU MOI con so kich co, client doc LUON noi dung tung o NGAY TRONG GOI NAY
+// (Controller.cs:5860-5968). Khuon than mot o GIONG HET goi -36/-37/-35
+// (ghiCacO, goihanhtrang.go). Ghi so o that ma KHONG ghi than o = lech toan bo
+// phan duoi goi.
+//
+// Con so la SO O (suc chua), KHONG phai so mon: client lap DU so o lan, o rong
+// la short -1, va indexUI = chi so o (Controller.cs:5921) — chinh la con so
+// client gui nguoc len khi nguoi choi bam vao mot o.
+//
+// DAU: itemsBody doc unsigned (<=255, :5860); itemsBag va itemsBox doc CO DAU
+// (<=127, :5907/:5942), va ngoai le tran o hai cho do KHONG nam trong try/catch
+// -> statusMe = 4 (:5969) khong bao gio chay -> nguoi choi ket man "Xin cho".
+// Hang tranSoO = 127 (goihanhtrang.go) kep ca ba.
+//
+// dsMon la CA lat cat vat pham cua nguoi choi (moi noi chua); ham tu loc theo
+// NoiChua giong ba goi hanh trang. Truyen LAT CAT chu khong truyen ba goi da
+// dung san — de ME_INFO va -36/-37/-35 luon noi cung mot su that.
+func goiMeInfo(nv *store.NhanVat, dsMon []store.VatPham) (*protocol.Message, error) {
+	// DUNG XONG TOAN BO DU LIEU ROI MOI GHI BYTE: loi o buoc xep o => khong gui
+	// gi ca, thay vi mot ME_INFO thieu byte lam client ket "Xin cho".
+	oMac, err := xepVaoO(dsMon, store.NoiChuaMac, SoOMacChuan)
+	if err != nil {
+		return nil, fmt.Errorf("ME_INFO (do mac): %w", err)
+	}
+	oTui, err := xepVaoO(dsMon, store.NoiChuaTui, SoOTuiChuan)
+	if err != nil {
+		return nil, fmt.Errorf("ME_INFO (tui): %w", err)
+	}
+	oRuong, err := xepVaoO(dsMon, store.NoiChuaRuong, SoORuongChuan)
+	if err != nil {
+		return nil, fmt.Errorf("ME_INFO (ruong): %w", err)
+	}
+	return goiMeInfoDaXep(nv, oMac, oTui, oRuong)
+}
+
+// goiMeInfoDaXep ghi byte sau khi ba mang o da duoc kiem het.
+func goiMeInfoDaXep(nv *store.NhanVat, oMac, oTui, oRuong []*store.VatPham) (*protocol.Message, error) {
 	w := protocol.NewWriter()
 	w.Byte(0) // (a) byte lenh con 0
 
@@ -76,9 +114,21 @@ func goiMeInfo(nv *store.NhanVat) (*protocol.Message, error) {
 	w.Int(0)              // ruby
 	w.Int(int32(nv.Ngoc)) // gem
 
-	w.Byte(0) // (d) itemsBody.size
-	w.Byte(0) // (d) itemsBag.size
-	w.Byte(0) // (d) itemsBox.size
+	// (d2) itemsBody: so o (unsigned byte) roi DU so o than o.
+	w.Byte(byte(len(oMac)))
+	if err := ghiCacO(w, oMac); err != nil {
+		return nil, fmt.Errorf("ME_INFO (do mac): %w", err)
+	}
+	// (d2) itemsBag: so o (byte CO DAU ben client) roi DU so o than o.
+	w.Byte(byte(len(oTui)))
+	if err := ghiCacO(w, oTui); err != nil {
+		return nil, fmt.Errorf("ME_INFO (tui): %w", err)
+	}
+	// (d2) itemsBox: so o (byte CO DAU ben client) roi DU so o than o.
+	w.Byte(byte(len(oRuong)))
+	if err := ghiCacO(w, oRuong); err != nil {
+		return nil, fmt.Errorf("ME_INFO (ruong): %w", err)
+	}
 
 	// Bang anh xa headId -> avatarId. Client tra bang nay de biet ve anh nao vao
 	// o chan dung tren HUD (Char.getAvatar, dung o Panel.cs). Gui 0 cap thi

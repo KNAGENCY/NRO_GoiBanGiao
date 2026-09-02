@@ -47,15 +47,28 @@ func docDenHeadAvatar(t *testing.T, data []byte) *protocol.Reader {
 	lo("gold")
 	in("ruby")
 	in("gem")
-	b("itemsBody.size")
-	b("itemsBag.size")
-	b("itemsBox.size")
+	// KH7 Task 5: sau moi con so kich co la DU so o than o (o rong = short -1).
+	// Bo qua ca ba bang de con tro dung ngay truoc headAvatar.size.
+	boMotBang := func(ten string) {
+		soO, err := r.Byte()
+		if err != nil {
+			t.Fatalf("doc %s.size loi: %v", ten, err)
+		}
+		for i := 0; i < int(soO); i++ {
+			if id, err := r.Short(); err != nil || id != -1 {
+				t.Fatalf("%s o %d = %d (loi %v), mong doi -1 (nhan vat thu khong co mon nao)", ten, i, id, err)
+			}
+		}
+	}
+	boMotBang("itemsBody")
+	boMotBang("itemsBag")
+	boMotBang("itemsBox")
 	return r
 }
 
 func TestMeInfoGuiBangAnhXaChanDung(t *testing.T) {
 	nv := &store.NhanVat{ID: 1, Ten: "Naruto", Lang: 0, KieuToc: 30}
-	m, err := goiMeInfo(nv)
+	m, err := goiMeInfo(nv, nil)
 	if err != nil {
 		t.Fatalf("goiMeInfo: %v", err)
 	}

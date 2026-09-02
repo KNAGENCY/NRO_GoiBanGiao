@@ -61,6 +61,15 @@ func MoLuuTru(kho KhoDayDu, soKhuVuc *SoKhuVuc, soThoGhi int, sucChua int, nhipH
 	thoGhi = MoThoGhi(kho, soThoGhi)
 	boLuu = MoBoLuuDinhKy(soKhuVuc, thoGhi)
 	boLuu.BatDau()
+	// So no phan thuong (sonothuong.go): CHI mo khi kho that su biet ghi no.
+	// Type-assert thay vi nhet KhoNo vao KhoDayDu — nhet vao thi hang chuc kho
+	// gia trong cac test khong lien quan gi toi thuong deu phai cai them mot
+	// phuong thuc rong. *store.Store thoa man tu nhien nen may chu that luon
+	// co so no.
+	if khoNo, co := kho.(KhoNo); co {
+		soKhuVuc.GanSoNo(MoSoNoThuong(khoNo, NhipGomNoMacDinh))
+	}
+
 	soDangNhap := MoSoDangNhap()
 	gacDangNhap := chanip.MoGacDangNhap(sucChua, nhipHoiPhuc)
 	taoXuLy = func() *BoXuLy {

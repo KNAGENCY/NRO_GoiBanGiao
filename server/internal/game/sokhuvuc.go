@@ -1,12 +1,20 @@
 package game
 
-import "errors"
+import (
+	"context"
+	"errors"
+)
 
 // SoKhuVuc giu 5 khu vuc actor co dinh (mapId 1-5) — tao san luc khoi dong may
 // chu, song suot doi tien trinh. Don gian hon tao/huy dong; 5 goroutine ngu la
 // chi phi khong dang ke. Tao/huy dong de danh khi co map tam (to doi/su kien).
 type SoKhuVuc struct {
 	theoMap map[int32]*KhuVuc
+
+	// soNo giu chinh so no da cam vao cac khu vuc, de TatMayChu co the dong no
+	// ma KHONG phai doi chu ky (main.go thuoc pham vi Task 14, dang co agent
+	// khac lam — tranh cham vao la tranh dung do).
+	soNo *SoNoThuong
 }
 
 // MoSoKhuVuc tao 5 khu vuc mapId 1-5 va KHOI DONG actor cua tung cai.
@@ -88,6 +96,39 @@ func (s *SoKhuVuc) LoaDaGan() *BoPhatThanh {
 		chung = l
 	}
 	return chung
+}
+
+// GanSoNo noi so no phan thuong (sonothuong.go) vao ca 5 khu vuc. Khac GanLoa
+// o mot diem: KHONG tu khoi dong gi ca — MoSoNoThuong da chay goroutine ghi
+// ngay khi mo, nen o day chi con viec cam day.
+//
+// CO Y KHONG goi tu MoSoKhuVuc, cung ly do voi GanLoa (luat 4: MoSoKhuVuc phai
+// GIU NGUYEN hanh vi). Noi goi that la MoLuuTru (moluutru.go) — KHONG phai
+// main.go: so no duoc lap rap cung cho voi ThoGhi/BoLuuDinhKy, va main.go khong
+// nhac toi no lan nao.
+//
+// THU TU LUC TAT MAY CHU: DongSoNo phai chay SAU s.DungTatCa(), khong phai
+// truoc. Chung nao con mot actor song thi con co the co boss chet va co them
+// khoan no duoc xep; dong so no truoc la vut di dung nhung khoan cuoi cung.
+// TatMayChu (tatmaychu.go) lam dung thu tu do.
+func (s *SoKhuVuc) GanSoNo(so *SoNoThuong) {
+	for _, k := range s.theoMap {
+		k.soNo.Store(so)
+	}
+	s.soNo = so
+}
+
+// DongSoNo xa not so no roi dung goroutine ghi cua no. Tra nil khi chua noi
+// day so no (kho khong biet ghi no) — khong phai loi.
+//
+// GOI SAU DungTatCa, khong truoc: chung nao con mot actor song thi con co the
+// co boss chet va co them khoan no duoc xep. Dong truoc la vut di dung nhung
+// khoan cuoi cung.
+func (s *SoKhuVuc) DongSoNo(ctx context.Context) error {
+	if s.soNo == nil {
+		return nil
+	}
+	return s.soNo.DongVaChoXong(ctx)
 }
 
 // DungTatCa dung sach moi khu vuc (goi luc tat may chu) va tra loi neu bat

@@ -146,3 +146,98 @@ task), không grep toàn thư mục. Một cái tên tồn tại không có ngh�
 # Sai: grep -r "MocNoiGian" *.go          -> trung boss.go, ket luan nham
 # Dung: grep -c "MocNoiGian" khuvuc.go    -> 0, tuc CHUA noi day
 ```
+
+---
+
+## Task 12b — Sổ nợ phần thưởng (28/08/2026, nhánh `so-no-thuong` dựng trên `cf18340`)
+
+> ℹ️ **Ghi chú lịch sử:** nhánh này dựng trên `cf18340` (task 12) khi commit đó còn chưa
+> gộp `main`. Trong lúc làm, `main` đã tiến lên: task 12 được gộp (`922eed8`), rồi task 8
+> (`15be8df`) và task 9 (`9e6f6c9`). Đã gộp `main` vào nhánh này và giải xung đột —
+> `khuvuc.go` tự gộp được, `sokhuvuc.go` chỉ là hai hàm mới đặt cạnh nhau (`LoaDaGan` của
+> task 14 và `GanSoNo`/`DongSoNo` của mục này).
+
+**Vấn đề.** Task 12 chốt một hạn chế có chủ đích: người đóng góp sát thương nhưng **đã rời
+khu vực / mất kết nối** đúng lúc boss chết thì không nhận được gì — `traThuongBoss` chỉ ghi
+một dòng `slog.Warn` kèm số điểm bị bỏ. Lý do khi đó đúng và đến giờ vẫn đúng: actor không
+sở hữu con trỏ `*store.NhanVat` của người đã rời (§6.9), còn đẩy một bản chụp cũ qua `ThoGhi`
+thì **ghi đè cả dòng**, kéo lùi mọi thứ người đó làm từ lúc rời đi.
+
+**Cách giải.** Mở đường thứ ba: khoản đó thành một **món nợ bền** trong bảng
+`thuong_cho_nhan`, đi qua hàng đợi `SoNoThuong` (khuôn `ThoGhi` — actor chỉ chạm một map
+trong bộ nhớ vài chục nano-giây, không cham CSDL), và được trả ở **lần đăng nhập sau**.
+
+| Mảnh | File |
+|---|---|
+| Bảng + ràng buộc | `server/internal/store/migrations/0004_thuong_cho_nhan.sql` |
+| Ghi nợ / nhận nợ (một giao dịch) | `server/internal/store/nothuong.go` |
+| Hàng đợi ngoài actor | `server/internal/game/sonothuong.go` |
+| `traThuongBoss` ghi nợ thay vì bỏ | `server/internal/game/khuvuc.go` (`xepNoThuong`) |
+| Trả nợ lúc đăng nhập | `server/internal/game/login.go` (`traNoThuongDangCho`) |
+| Nối dây + tắt sạch | `server/internal/game/moluutru.go`, `sokhuvuc.go`, `tatmaychu.go` |
+
+**Ba bẫy đã phải xử — ghi lại kẻo người sau vấp:**
+
+1. **Thứ tự trả nợ không thể đảo.** `store.NhanNoThuong` cộng vào *cột* `kinh_nghiem`, nhưng
+   bản `*store.NhanVat` trong RAM (thứ actor sẽ sở hữu từ đó trở đi) vẫn mang số cũ. `ThoGhi`
+   ghi đè cả dòng, nên chỉ cần một lần lưu định kỳ 60 giây là con số cũ đó **xoá sạch phần
+   vừa cộng** — đúng cái bẫy đã khiến khoản thưởng này không trả được ngay từ đầu, rình sẵn ở
+   đầu bên kia. Vì vậy `traNoThuongDangCho` cộng luôn vào `nv` ngay sau khi CSDL cộng xong.
+2. **Hàng đợi nợ CỘNG DỒN, không ghi đè.** `ThoGhi` ghi đè vì "bản chụp mới luôn tốt hơn bản
+   cũ"; ở sổ nợ mỗi khoản là một món tiền riêng — ghi đè là làm biến mất phần thưởng của
+   người chơi. Ghi lỗi thì cả lô được xếp lại (cộng dồn) để thử ở nhịp sau.
+3. **Đánh dấu và cộng phải nằm trong MỘT giao dịch.** Tách ra hai giao dịch thì một cú sập
+   giữa chừng hoặc ăn mất phần thưởng (đánh dấu xong, chưa cộng) hoặc phát hai lần (cộng
+   xong, chưa đánh dấu). Gọi `NhanNoThuong` hai lần liên tiếp phải ra `500` rồi `0`.
+
+**Nối dây có chủ đích tránh `main.go`** (đang thuộc task 14, có agent khác làm): sổ nợ được
+mở và cắm trong `MoLuuTru` — đúng chỗ dự án đã chốt là điểm lắp ráp duy nhất — và `TatMayChu`
+lấy nó từ `SoKhuVuc` thay vì đổi chữ ký. Ba test khoá riêng việc nối dây, vì bài học của
+chính task 12 là `CongSatThuong` từng nằm trong `boss.go` suốt từ task 3 mà không ai gọi tới.
+
+**Nghiệm thu, vòng 1.** 30 test mới, mỗi mảnh đều thấy ĐỎ trước khi viết code; đột biến 8/8
+bị giết. `go test ./...` 8/8 gói xanh, `gofmt` + `vet` sạch. `-race` **không chạy được** trên
+máy này (thiếu `gcc`, xem §9) — bù bằng `-count=5`.
+
+**Nghiệm thu, vòng 2 — sau khi HAI agent soi đối kháng độc lập.** Vòng 1 chưa đủ. Một agent
+soi tính đúng đắn, một agent tấn công chính bộ test bằng 27 đột biến tự nghĩ: **11 bị giết,
+16 sống sót**. Kết quả:
+
+- **Một LỖI THẬT không test nào thấy:** lưới chống panic đặt cao hơn một tầng so với chỗ cần.
+  `ghiHetHangDoi` lấy hẳn lô nợ ra khỏi hàng đợi rồi mới gọi kho, còn `xepLai` chỉ chạy trên
+  đường *trả lỗi* — nên `GhiNoThuong` mà **panic** thì cả lô bốc hơi im lặng, ngược hẳn điều
+  chú thích của chính hàm đó cam kết. `ThoGhi` không dính vì nó có lưới **hai tầng**; bản đầu
+  chỉ chép tầng ngoài.
+- **Ba đường mất/nhân đôi tiền khi CSDL trục trặc:** commit mập mờ → thêm `khoa_lo` + ràng
+  buộc duy nhất + `ON CONFLICT DO NOTHING` (kéo theo hàng đợi phải tách hai tầng: lô hỏng thử
+  lại NGUYÊN VẸN, khoản mới đi lô riêng); vòng thử lại không có van xả → bỏ lô sau 5 lần;
+  `DongVaChoXong` báo "tắt sạch" khi vừa đánh rơi tiền → trả lỗi lần xả cuối, kèm hạn giờ
+  riêng trong `TatMayChu`.
+- **Chú thích `GanSoNo` chỉ dẫn NGƯỢC thứ tự tắt máy chủ** — chép từ `GanLoa` mà quên sửa.
+- **Điểm mù oracle (§6.12)** trong chính test của bản đầu: lấy kỳ vọng từ hằng số mà code
+  đang dùng, nên đổi tên hằng thì cả gói `game` vẫn xanh.
+
+Sau vòng sửa: **+20 test**, tổng **50** (7 store + 8 store đường lỗi + 7 hàng đợi +
+11 hàng đợi đường hỏng + 7 actor + 7 đăng nhập + 3 nối dây).
+
+**Vòng đột biến thứ hai** (13 cái, tự chạy trên chính bản vá): 10 bị giết, 3 sống sót, đã
+bịt cả ba. Cái đầu tiên đáng ghi lại: **test van xả tôi vừa viết cũng sai** — kho giả từ
+chối theo *lần gọi* nên lần thứ 6 thành công ở cả hai bản; phải có một lô hỏng **vĩnh
+viễn** mới phân biệt được. Và viết lại nó cho thấy hậu quả của việc thiếu van xả **nhẹ hơn**
+bản soi mô tả: tách hàng đợi hai tầng (làm vì lý do khác) đã vô tình chữa chỗ "một lô hỏng
+làm kẹt cả đường ghi", nên van xả giờ chỉ còn ngăn `choThuLai` phình mãi.
+
+**Về câu hỏi "tính năng có chạy thật không" — đã đổi câu trả lời giữa chừng.** Lúc hai agent
+soi (nền `cf18340`), `bossNhanSatThuong` — đường duy nhất nạp `SatThuongTheoNguoi` — **không
+có ai gọi ngoài test**, nên `traThuongBoss` chia một map rỗng và sổ nợ chưa từng ghi khoản
+nào. Đó đúng là cái bẫy mục này viết ra để cảnh báo, chỉ lùi lên một tầng cao hơn chỗ ba test
+nối dây khoá được. **Nhưng trong lúc làm, task 8 đã xong và gộp `main`** (`15be8df` — "người
+chơi đánh được boss"), nối đúng mối treo đó: `khuvuc.go` trên `main` gọi `bossNhanSatThuong`
+thật khi người chơi đánh trúng boss. Sau khi gộp `main` vào đây thì đường đi đã thông từ đầu
+tới cuối. **Vẫn chưa nghiệm thu tay bằng client Unity thật** — đó là việc chỉ chủ dự án làm
+được, và không test nào thay thế được.
+
+**Còn nợ lại (không chặn gì):** bảng `thuong_cho_nhan` chỉ tăng, chưa có đường dọn các dòng
+`da_nhan = true` cũ; và chỉ hỗ trợ `loai_thuong = 'kinh_nghiem'` — cột để mở nhưng thêm loại
+mới phải sửa **cả** ràng buộc CHECK **lẫn** `NhanNoThuong`, nếu không khoản nợ loại mới sẽ
+nằm lại vĩnh viễn không ai trả.

@@ -359,8 +359,9 @@ func TestBossChetChuyenTrangThaiTroi(t *testing.T) {
 // mang o giay cuoi KHONG con trong k.nguoiTrong. Actor khong duoc panic, va
 // nhung nguoi CON LAI van phai duoc tra dung phan cua ho.
 //
-// Phan cua nguoi da roi bi BO (khong ai nhan ho) — day la cai gia da chot,
-// ly do ghi o chu thich traThuongBoss (khuvuc.go).
+// Phan cua nguoi da roi KHONG bi bo nua: no thanh mot khoan no trong so no
+// (xem khuvuc_nothuong_test.go). Test nay chi con lo mot viec — actor khong sap
+// va nguoi CON LAI van duoc tra dung ti le — nen no co y KHONG gan so no.
 func TestBossChetNguoiDongGopDaRoiKhuVucKhongLamSap(t *testing.T) {
 	k := khuVucTest(t)
 	nvA := datNguoi(t, k, 11, "A")

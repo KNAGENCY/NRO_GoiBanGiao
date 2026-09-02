@@ -414,3 +414,364 @@ func (b *BoXuLy) muaBanGuiLoi(s *mynet.Session, cau string) error {
 // Task mo NPC se goi ham nay. De o day (khong phai trong cuahang.go) vi no
 // cham truong cua BoXuLy.
 func (b *BoXuLy) DatCuaHangDangMo(ch *CuaHang) { b.muaBanCuaHangDangMo = ch }
+
+// ===========================================================================
+// KH7 Task 10 — BAN cho NPC (goi LEN `7`). Anh guong cua duong mua o tren.
+//
+// Giai ma giao thuc (PHA A):
+// docs/superpowers/research/2026-09-03-kh7-giai-ma-ban-7.md
+//
+// BA DIEU KHAC MUA — moi cai la mot cho de sai:
+//
+//  1. O thu ba cua goi `7` la CHI SO O, khong phai MauID. Nen duong ban bat
+//     buoc di qua bang phien dich o -> vat_pham.id (task 4, BangHanhTrang) —
+//     `vat_pham.id` khong bao gio xuong client (dac ta 2.3 / 4.1).
+//  2. Goi `7` co HAI VONG: action 0 = xin xac nhan (may chu tra hop thoai,
+//     KHONG doi gi trong CSDL), action khac 0 = ban that.
+//  3. Gia ban lay tu mon tuong ung trong CUA HANG DANG MO: max(1, Gia/4).
+//     MauVatPham khong co truong gia (xem PHA A muc 3) — quyet dinh nay co
+//     GHI RO trong tai lieu, dung sua o day ma khong sua tai lieu.
+//
+// Ky luat GIU NGUYEN tu duong mua, khong duoc noi long:
+//   - MOT giao dich CSDL cho ca "bot do" lan "cong tien" (store.BanMotGiaoDich).
+//   - Khoa idempotency `<nvID>:BAN:<soThuTu>`, cung bo dem soThuTuKinhTeKe.
+//   - KIEM HET roi moi cham CSDL de ghi.
+//   - Goi XUONG `6` (tien) LUON duoc gui, ke ca khi ban that bai.
+
+// lenhBan: goi LEN `7` (client xin ban) VA goi XUONG `7` (hop thoai xac nhan) —
+// cung mot ma lenh cho hai chieu, giong het cap `6`.
+const lenhBan int8 = 7
+
+// banWhereMac: gia tri o `where` nghia la "do dang MAC" (Java: itemsBody).
+// Moi gia tri khac deu la TUI. Ban 1 chi ban do trong TUI (PHA A muc 4 dong 1).
+const banWhereMac int8 = 0
+
+// banChiaGia: gia ban = gia mua chia cho con so nay (ban Java: cost /= 4), san 1.
+const banChiaGia int32 = 4
+
+var (
+	// ErrBanDoDangMac: xin ban do dang mac — ban 1 tu choi.
+	ErrBanDoDangMac = errors.New("khong ban duoc do dang mac")
+	// ErrBanOTrong: o do khong co mon nao.
+	ErrBanOTrong = errors.New("o do khong co mon nao")
+	// ErrBanKhongMuaMon: cua hang dang mo khong ban mau nay -> cung khong mua lai.
+	ErrBanKhongMuaMon = errors.New("cua hang khong mua mon nay")
+	// ErrOSoKhongHopLe: chi so o ngoai bien.
+	ErrOSoKhongHopLe = errors.New("o so khong hop le")
+)
+
+// KhoBan la phan toi thieu cua *store.Store ma duong ban can. Hep, cung khuon
+// voi KhoMuaBan.
+type KhoBan interface {
+	LayTui(ctx context.Context, nvID int64, noiChua string) ([]store.VatPham, error)
+	BanMotGiaoDich(ctx context.Context, yc store.YeuCauBan) (store.KetQuaBan, error)
+}
+
+// banDuTinh la ket qua cua buoc TINH — moi thu da kiem xong, chua cham CSDL.
+// Dung cho ca hai vong: vong xac nhan chi can no de dung cau hoi, vong ban that
+// dua thang no vao giao dich.
+type banDuTinh struct {
+	VatPhamID int64
+	MauID     int16
+	TenMon    string
+	SoLuong   int32
+	DonGia    int32
+	Tien      LoaiTien
+	DVang     int64
+	DNgoc     int64
+}
+
+// KetQuaBanHang la thu tang tren can biet de dung goi tra ve.
+type KetQuaBanHang struct {
+	VatPhamID  int64
+	MauID      int16
+	TenMon     string
+	SoLuongBan int32
+	SoLuongCon int32
+	DaHuyMon   bool
+	// DVang/DNgoc: so tien DA cong (duong hoac 0).
+	DVang int64
+	DNgoc int64
+	// LaLapLai: goi nay la ban sao cua mot lan ban truoc (D3).
+	LaLapLai bool
+}
+
+// banDonGia doi gia mua thanh gia ban: chia banChiaGia, san 1 (ban Java:
+// `cost /= 4; if (cost == 0) cost = 1;`).
+func banDonGia(giaMua int32) int32 {
+	g := giaMua / banChiaGia
+	if g < 1 {
+		g = 1
+	}
+	return g
+}
+
+// banTinhToan lam TOAN BO phan kiem cua duong ban, KHONG cham CSDL de ghi.
+//
+//	ch      — cua hang DANG MO (may chu giu)
+//	tui     — lat cat tui doc tu CSDL; bang phien dich o -> id duoc dung TU
+//	          CHINH lat cat nay, nen khong the lech (xem hanhtrang.go)
+//	oSo     — o thu ba cua goi `7`
+//	soLuong — 0 nghia la BAN CA CHONG (giao thuc khong co o so luong; con so
+//	          duong chi den tu test hoac tu duong goi tuong lai)
+func banTinhToan(ch *CuaHang, tui []store.VatPham, oSo int16, soLuong int32) (banDuTinh, error) {
+	if ch == nil {
+		return banDuTinh{}, ErrKhongMoCuaHang
+	}
+	if oSo < 0 || int(oSo) >= tranSoO {
+		return banDuTinh{}, fmt.Errorf("%w: %d", ErrOSoKhongHopLe, oSo)
+	}
+
+	// O -> vat_pham.id qua bang phien dich (task 4). Dung lat cat `tui` de dung
+	// bang: dung mot lat cat cho ca id lan so luong, khong the tra o A ra mon B.
+	bang, err := DungBangHanhTrang(tui)
+	if err != nil {
+		return banDuTinh{}, err
+	}
+	id, co := bang.TraId(store.NoiChuaTui, oSo)
+	if !co {
+		return banDuTinh{}, ErrBanOTrong
+	}
+	var vp *store.VatPham
+	for i := range tui {
+		if tui[i].ID == id {
+			vp = &tui[i]
+			break
+		}
+	}
+	if vp == nil {
+		// Khong the xay ra: bang duoc dung TU chinh `tui`.
+		return banDuTinh{}, ErrBanOTrong
+	}
+
+	if soLuong == 0 {
+		soLuong = vp.SoLuong // giao thuc: ban ca chong
+	}
+	if soLuong < 1 {
+		return banDuTinh{}, fmt.Errorf("%w: %d", ErrSoLuongKhongHopLe, soLuong)
+	}
+	if soLuong > vp.SoLuong {
+		return banDuTinh{}, fmt.Errorf("%w: ban %d, dang co %d",
+			store.ErrKhongDuSoLuong, soLuong, vp.SoLuong)
+	}
+
+	if vp.MauID < 0 || vp.MauID > 32767 {
+		return banDuTinh{}, fmt.Errorf("mau vat pham %d ngoai bien", vp.MauID)
+	}
+	mauID := int16(vp.MauID)
+	mon := muaBanTimMon(ch, mauID)
+	if mon == nil {
+		return banDuTinh{}, fmt.Errorf("%w: mau %d", ErrBanKhongMuaMon, mauID)
+	}
+	mau := TimMauVatPham(mauID)
+	if mau == nil {
+		return banDuTinh{}, fmt.Errorf("mau vat pham %d khong ton tai", mauID)
+	}
+
+	donGia := banDonGia(mon.Gia)
+	tong := int64(donGia) * int64(soLuong)
+	if tong < 0 {
+		return banDuTinh{}, fmt.Errorf("tong gia am (%d)", tong)
+	}
+	dt := banDuTinh{
+		VatPhamID: vp.ID, MauID: mauID, TenMon: mau.Ten,
+		SoLuong: soLuong, DonGia: donGia, Tien: mon.Tien,
+	}
+	switch mon.Tien {
+	case TienVang:
+		dt.DVang = tong
+	case TienNgoc:
+		dt.DNgoc = tong
+	default:
+		return banDuTinh{}, fmt.Errorf("loai tien %d khong hop le", mon.Tien)
+	}
+	return dt, nil
+}
+
+// BanChoCuaHang thi hanh mot lan ban cho cua hang NPC.
+//
+// Moi cau kiem nam TRONG banTinhToan, tuc TRUOC loi goi CSDL duy nhat o cuoi
+// ham — doi mot cau kiem xuong duoi la mo lai dung lo hong D16 cua ban Java.
+func BanChoCuaHang(ctx context.Context, kho KhoBan, nvID int64, ch *CuaHang,
+	tui []store.VatPham, oSo int16, soLuong int32, soThuTu uint64) (KetQuaBanHang, error) {
+
+	dt, err := banTinhToan(ch, tui, oSo, soLuong)
+	if err != nil {
+		return KetQuaBanHang{}, err
+	}
+
+	// --- Chi TOI DAY moi cham CSDL de GHI. Mot giao dich duy nhat. ---
+	kq, err := kho.BanMotGiaoDich(ctx, store.YeuCauBan{
+		NhanVatID: nvID,
+		KhoaIdem:  store.KhoaIdemBan(nvID, soThuTu),
+		VatPhamID: dt.VatPhamID,
+		NoiChua:   store.NoiChuaTui,
+		OSo:       oSo,
+		SoLuong:   dt.SoLuong,
+		DVang:     dt.DVang,
+		DNgoc:     dt.DNgoc,
+		LyDo:      store.LyDoBanNPC,
+	})
+	if err != nil {
+		return KetQuaBanHang{}, err
+	}
+	return KetQuaBanHang{
+		VatPhamID: kq.VatPhamID, MauID: dt.MauID, TenMon: dt.TenMon,
+		SoLuongBan: kq.SoLuongBan, SoLuongCon: kq.SoLuongCon, DaHuyMon: kq.DaHuyMon,
+		DVang: kq.DVang, DNgoc: kq.DNgoc, LaLapLai: kq.LaLapLai,
+	}, nil
+}
+
+// ---------------------------------------------------------------------------
+// Goi XUONG `7` — hop thoai xac nhan
+// ---------------------------------------------------------------------------
+
+// goiBanXacNhan dung goi XUONG `7`: [where byte][oSo short][cau hoi UTF].
+//
+// `where`/`oSo` phai DOI LAI nguyen van cai client vua gui — client giu chung de
+// gui lai o vong hai (Panel.cs idAction 3003). Tra nil neu cau hoi khong ghi
+// duoc (writeUTF do dai 2 byte).
+func goiBanXacNhan(where int8, oSo int16, cauHoi string) *protocol.Message {
+	w := protocol.NewWriter()
+	w.Byte(byte(where))
+	w.Short(oSo)
+	if err := w.UTF(cauHoi); err != nil {
+		return nil
+	}
+	return protocol.NewMessage(lenhBan, w)
+}
+
+// banTenTien doi loai tien thanh chu de ghep cau cho nguoi choi.
+func banTenTien(t LoaiTien) string {
+	if t == TienNgoc {
+		return "ngọc"
+	}
+	return "vàng"
+}
+
+// banCauHoi dung cau trong hop thoai xac nhan, theo khuon ban Java
+// (ShopService.showConfirmSellItem).
+func banCauHoi(dt banDuTinh) string {
+	tong := dt.DVang + dt.DNgoc
+	return fmt.Sprintf("Bạn có muốn bán\nx%d %s\nvới giá là %d %s?",
+		dt.SoLuong, dt.TenMon, tong, banTenTien(dt.Tien))
+}
+
+// banCauLoi doi loi ky thuat thanh cau nguoi choi doc duoc.
+func banCauLoi(err error) string {
+	switch {
+	case errors.Is(err, ErrBanDoDangMac):
+		return "Không thể bán đồ đang mặc"
+	case errors.Is(err, ErrBanOTrong):
+		return "Ô đó không có món nào"
+	case errors.Is(err, ErrBanKhongMuaMon):
+		return "Cửa hàng không mua món này"
+	case errors.Is(err, store.ErrKhongDuSoLuong), errors.Is(err, ErrSoLuongKhongHopLe):
+		return "Số lượng không hợp lệ"
+	default:
+		return "Không thể thực hiện"
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Handler goi LEN `7`
+// ---------------------------------------------------------------------------
+
+// xuLyBan xu ly goi LEN `7` — CA HAI VONG.
+//
+//	action == 0 : xin xac nhan. KHONG doi gi trong CSDL, tra goi `7` xuong.
+//	action != 0 : ban that. Tra -36 (tui moi) -> -25 (dong chu) -> 6 (tien).
+//
+// That bai (ca hai vong): -25 (ly do) -> 6 (tien KHONG doi). Goi `6` LUON la
+// goi cuoi — no dong hop thoai cho phia client.
+//
+// Goi rac (thieu byte) thi KHONG tra loi gi va KHONG ngat ket noi.
+func (b *BoXuLy) xuLyBan(s *mynet.Session, m *protocol.Message) error {
+	if b.nhanVat == nil {
+		return nil
+	}
+	r := protocol.NewReader(m.Data)
+	action, err := r.Byte()
+	if err != nil {
+		return nil
+	}
+	where, err := r.Byte()
+	if err != nil {
+		return nil
+	}
+	oSo, err := r.Short()
+	if err != nil {
+		return nil
+	}
+
+	// Ban 1 chi ban do trong TUI (PHA A muc 4 dong 1).
+	if int8(where) == banWhereMac {
+		return b.muaBanGuiLoi(s, banCauLoi(ErrBanDoDangMac))
+	}
+
+	ctx := context.Background()
+	kho, ok := b.kho.(KhoBan)
+	if !ok {
+		return b.muaBanGuiLoi(s, "Không thể thực hiện")
+	}
+	tui, err := kho.LayTui(ctx, b.nhanVat.ID, store.NoiChuaTui)
+	if err != nil {
+		return b.muaBanGuiLoi(s, "Không thể thực hiện")
+	}
+
+	// --- VONG MOT: xin xac nhan. Khong dong bo dem kinh te (chua ban gi ca). ---
+	if action == 0 {
+		dt, errTinh := banTinhToan(b.muaBanCuaHangDangMo, tui, oSo, 0)
+		if errTinh != nil {
+			return b.muaBanGuiLoi(s, banCauLoi(errTinh))
+		}
+		goi := goiBanXacNhan(int8(where), oSo, banCauHoi(dt))
+		if goi == nil {
+			return b.muaBanGuiLoi(s, "Không thể thực hiện")
+		}
+		return s.XepGui(goi)
+	}
+
+	// --- VONG HAI: ban that. soLuong = 0 -> ban CA CHONG (giao thuc khong co
+	// o so luong). ---
+	kq, errBan := BanChoCuaHang(ctx, kho, b.nhanVat.ID, b.muaBanCuaHangDangMo,
+		tui, oSo, 0, b.soThuTuKinhTeKe())
+	if errBan != nil {
+		return b.muaBanGuiLoi(s, banCauLoi(errBan))
+	}
+
+	// Chi SAU KHI commit tra ve nil moi cham ban trong bo nho. Goi lap KHONG
+	// duoc cong them lan nua — so tien trong ket qua la so cua lan dau, va lan
+	// dau da cong roi.
+	if !kq.LaLapLai {
+		b.nhanVat.Vang += kq.DVang
+		b.nhanVat.Ngoc += kq.DNgoc
+	}
+
+	// Doc lai tui tu CSDL (nguon su that) roi dung goi -36.
+	tuiMoi, err := kho.LayTui(ctx, b.nhanVat.ID, store.NoiChuaTui)
+	if err == nil {
+		if goi, err := GoiTui(tuiMoi, soOTuiChuan); err == nil {
+			if err := s.XepGui(goi); err != nil {
+				return err
+			}
+		}
+	}
+	thu := kq.DVang + kq.DNgoc
+	cau := fmt.Sprintf("Đã bán %s thu được %d %s", kq.TenMon, thu,
+		banTenTien(banLoaiTienCua(kq)))
+	if goi := goiMuaBanBao(cau); goi != nil {
+		if err := s.XepGui(goi); err != nil {
+			return err
+		}
+	}
+	return s.XepGui(goiMuaBanTien(b.nhanVat.Vang, b.nhanVat.Ngoc))
+}
+
+// banLoaiTienCua doan loai tien tu ket qua ban: chi mot trong hai o khac 0.
+func banLoaiTienCua(kq KetQuaBanHang) LoaiTien {
+	if kq.DNgoc != 0 {
+		return TienNgoc
+	}
+	return TienVang
+}

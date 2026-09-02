@@ -175,3 +175,193 @@ func (s *Store) MuaMotGiaoDich(ctx context.Context, yc YeuCauMua) (KetQuaMua, er
 	}
 	return kq, nil
 }
+
+// ---------------------------------------------------------------------------
+// KH7 Task 10 ? BAN cho NPC. Anh guong cua MuaMotGiaoDich o tren.
+// ---------------------------------------------------------------------------
+
+// LoaiHanhDongBan la phan giua cua khoa idempotency khi BAN.
+const LoaiHanhDongBan = "BAN"
+
+// KhoaIdemBan dung khoa idempotency cho mot lan ban. MOT cho duy nhat dung khoa
+// nay ? giong het KhoaIdemMua, va CO Y khac chu o giua de mot lan mua va mot
+// lan ban cung so thu tu khong bao gio dam vao nhau.
+func KhoaIdemBan(nvID int64, soThuTu uint64) string {
+	return fmt.Sprintf("%d:%s:%d", nvID, LoaiHanhDongBan, soThuTu)
+}
+
+// ErrKhongDuSoLuong: xin ban nhieu hon so dang co trong o do.
+var ErrKhongDuSoLuong = errors.New("khong du so luong de ban")
+
+// YeuCauBan la mot lan ban da duoc tang tren kiem xong moi thu.
+type YeuCauBan struct {
+	NhanVatID int64
+	// KhoaIdem: dung KhoaIdemBan de dung. Rong -> loi.
+	KhoaIdem string
+	// Mon dem ban ? dinh vi bang CA BA: id (tra tu bang hanh trang), noi chua,
+	// o so. Ca ba deu nam trong menh de WHERE (D4).
+	VatPhamID int64
+	NoiChua   string
+	OSo       int16
+	// SoLuong: so cai dem ban. Bang so dang co -> huy ca mon; it hon -> giam.
+	SoLuong int32
+	// DVang/DNgoc la DELTA, phai >= 0 khi ban.
+	DVang int64
+	DNgoc int64
+	LyDo  string
+}
+
+// KetQuaBan la thu duoc ghi vao `vat_pham_giao_dich.ket_qua`.
+type KetQuaBan struct {
+	VatPhamID  int64 `json:"vat_pham_id"`
+	SoLuongBan int32 `json:"so_luong_ban"`
+	SoLuongCon int32 `json:"so_luong_con"`
+	DaHuyMon   bool  `json:"da_huy_mon"`
+	DVang      int64 `json:"d_vang"`
+	DNgoc      int64 `json:"d_ngoc"`
+
+	// LaLapLai KHONG di vao CSDL: no noi ve LAN GOI NAY.
+	LaLapLai bool `json:"-"`
+}
+
+// BanMotGiaoDich thi hanh mot lan ban cho NPC: MOT BEGIN...COMMIT cho ca "bot
+// do" lan "cong tien".
+//
+// Thu tu CO Y ? nguoc voi mua, va day la diem quan trong nhat cua ham:
+//
+//  1. Khoa idempotency (D3). Da co -> GOI LAP, tra lai ket qua lan dau, khong
+//     lam gi them.
+//  2. Khoa dong mon `FOR UPDATE` roi kiem: dung chu, dung noi, dung o, du so
+//     luong. Guard chu so huu (D4) nam trong CHINH menh de WHERE ? phien "ma"
+//     doc du lieu cu se cham 0 dong va nhan ErrOTrong, khong bao gio ban ho do
+//     nguoi khac.
+//  3. BOT DO TRUOC, cong tien SAU. Neu buoc cong tien hong thi ca giao dich
+//     ROLLBACK -> do van con. Nguoc lai (cong tien truoc) cung an toan nho
+//     rollback, nhung thu tu nay khop voi ky luat chung "giao thu cua minh
+//     truoc, nhan ve sau".
+//
+// Hong o bat ky buoc nao: khong mat do, khong duoc tien, khong de lai khoa chet.
+func (s *Store) BanMotGiaoDich(ctx context.Context, yc YeuCauBan) (KetQuaBan, error) {
+	if yc.KhoaIdem == "" {
+		return KetQuaBan{}, fmt.Errorf("thieu khoa idempotency")
+	}
+	if !lyDoHopLe(yc.LyDo) {
+		return KetQuaBan{}, ErrLyDoKhongHopLe
+	}
+	if yc.SoLuong < 1 {
+		return KetQuaBan{}, ErrVatPhamKhongHopLe
+	}
+	if yc.DVang < 0 || yc.DNgoc < 0 {
+		// Chan tu goc: mot lan "ban" khong bao gio TRU tien cua nguoi choi.
+		return KetQuaBan{}, fmt.Errorf("ban chi duoc cong tien (dVang=%d, dNgoc=%d)", yc.DVang, yc.DNgoc)
+	}
+
+	var kq KetQuaBan
+	err := s.trongGiaoDich(ctx, func(tx pgx.Tx) error {
+		// BUOC 1 ? khoa idempotency (D3). Xem giai thich ON CONFLICT o
+		// MuaMotGiaoDich: mot buoc, khong khe TOCTOU nao.
+		var idGiaoDich int64
+		err := tx.QueryRow(ctx,
+			`INSERT INTO vat_pham_giao_dich (khoa_idem, ket_qua)
+			 VALUES ($1, '{}'::jsonb)
+			 ON CONFLICT (khoa_idem) DO NOTHING
+			 RETURNING id`,
+			yc.KhoaIdem,
+		).Scan(&idGiaoDich)
+		if errors.Is(err, pgx.ErrNoRows) {
+			var tho []byte
+			if err := tx.QueryRow(ctx,
+				`SELECT ket_qua FROM vat_pham_giao_dich WHERE khoa_idem = $1`,
+				yc.KhoaIdem,
+			).Scan(&tho); err != nil {
+				return fmt.Errorf("doc ket qua giao dich cu that bai: %w", err)
+			}
+			var cu KetQuaBan
+			if err := json.Unmarshal(tho, &cu); err != nil {
+				return ErrGiaoDichHongKetQua
+			}
+			if cu.VatPhamID == 0 {
+				return ErrGiaoDichHongKetQua
+			}
+			cu.LaLapLai = true
+			kq = cu
+			return nil
+		}
+		if err != nil {
+			return fmt.Errorf("ghi khoa idempotency that bai: %w", err)
+		}
+
+		// BUOC 2 ? khoa dong mon va kiem. CA BA dieu kien (chu, noi, o) VA id
+		// deu o trong WHERE: guard D4.
+		var soDangCo int32
+		err = tx.QueryRow(ctx,
+			`SELECT so_luong FROM vat_pham
+			  WHERE id = $1 AND chu_so_huu_id = $2 AND noi_chua = $3 AND o_so = $4
+			  FOR UPDATE`,
+			yc.VatPhamID, yc.NhanVatID, yc.NoiChua, yc.OSo).Scan(&soDangCo)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrOTrong
+		}
+		if err != nil {
+			return fmt.Errorf("khoa mon dem ban that bai: %w", err)
+		}
+		if yc.SoLuong > soDangCo {
+			return ErrKhongDuSoLuong
+		}
+
+		// BUOC 3 ? bot do.
+		daHuy := yc.SoLuong == soDangCo
+		if daHuy {
+			if err := huyVatPhamTrongTx(ctx, tx, yc.NhanVatID, yc.NoiChua, yc.OSo, yc.LyDo); err != nil {
+				return err
+			}
+		} else {
+			the, err := tx.Exec(ctx,
+				`UPDATE vat_pham
+				    SET so_luong = so_luong - $5, sua_luc = now()
+				  WHERE id = $1 AND chu_so_huu_id = $2 AND noi_chua = $3 AND o_so = $4`,
+				yc.VatPhamID, yc.NhanVatID, yc.NoiChua, yc.OSo, yc.SoLuong)
+			if err != nil {
+				return dichLoiCSDL(err, "bot so luong mon that bai")
+			}
+			if the.RowsAffected() == 0 {
+				return ErrOTrong
+			}
+			// BB3: doi chu (tu nguoi choi sang he thong) thi PHAI co dong lich su.
+			// `sang_ai` NULL = di ra khoi tay nguoi choi.
+			if _, err := tx.Exec(ctx,
+				`INSERT INTO vat_pham_lich_su (vat_pham_id, tu_ai, sang_ai, ly_do, so_luong)
+				 VALUES ($1, $2, NULL, $3, $4)`,
+				yc.VatPhamID, yc.NhanVatID, yc.LyDo, yc.SoLuong); err != nil {
+				return dichLoiCSDL(err, "ghi lich su ban that bai")
+			}
+		}
+
+		// BUOC 4 ? cong tien, cung giao dich.
+		if yc.DVang != 0 || yc.DNgoc != 0 {
+			if err := congTruTien(ctx, tx, yc.NhanVatID, yc.DVang, yc.DNgoc); err != nil {
+				return err
+			}
+		}
+
+		kq = KetQuaBan{
+			VatPhamID: yc.VatPhamID, SoLuongBan: yc.SoLuong,
+			SoLuongCon: soDangCo - yc.SoLuong, DaHuyMon: daHuy,
+			DVang: yc.DVang, DNgoc: yc.DNgoc,
+		}
+		thoKQ, err := json.Marshal(kq)
+		if err != nil {
+			return fmt.Errorf("ma hoa ket qua giao dich that bai: %w", err)
+		}
+		if _, err := tx.Exec(ctx,
+			`UPDATE vat_pham_giao_dich SET ket_qua = $2::jsonb WHERE id = $1`,
+			idGiaoDich, thoKQ); err != nil {
+			return fmt.Errorf("ghi ket qua giao dich that bai: %w", err)
+		}
+		return nil
+	})
+	if err != nil {
+		return KetQuaBan{}, err
+	}
+	return kq, nil
+}

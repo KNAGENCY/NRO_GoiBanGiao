@@ -277,6 +277,29 @@ func (s *Store) HuyVatPham(ctx context.Context, nvID int64, noiChua string, oSo 
 		return ErrLyDoKhongHopLe
 	}
 	return s.trongGiaoDich(ctx, func(tx pgx.Tx) error {
+		return huyVatPhamTrongTx(ctx, tx, nvID, noiChua, oSo, lyDo)
+	})
+}
+
+// HuyVatPhamTx la CHINH HuyVatPham nhung chay trong mot giao dich DANG MO
+// (KH7 Task 10) — xem ly do o CongTruTienTx (store.go): duong BAN phai huy mon
+// VA cong tien trong CUNG mot giao dich, neu khong thi dut giua chung la mat do
+// ma khong duoc tien (D2).
+//
+// Cung than `huyVatPhamTrongTx` voi ban khong-tx, nen hai duong khong the lech.
+func (s *Store) HuyVatPhamTx(ctx context.Context, tx pgx.Tx, nvID int64, noiChua string,
+	oSo int16, lyDo string) error {
+
+	if !lyDoHopLe(lyDo) {
+		return ErrLyDoKhongHopLe
+	}
+	return huyVatPhamTrongTx(ctx, tx, nvID, noiChua, oSo, lyDo)
+}
+
+// huyVatPhamTrongTx la than that su cua HuyVatPham/HuyVatPhamTx.
+func huyVatPhamTrongTx(ctx context.Context, tx pgx.Tx, nvID int64, noiChua string,
+	oSo int16, lyDo string) error {
+	{
 		var id int64
 		var soLuong int32
 		err := tx.QueryRow(ctx,
@@ -311,7 +334,7 @@ func (s *Store) HuyVatPham(ctx context.Context, nvID int64, noiChua string, oSo 
 			return dichLoiCSDL(err, "ghi lich su tieu huy that bai")
 		}
 		return nil
-	})
+	}
 }
 
 // trongGiaoDich chay `viec` trong mot giao dich CSDL: hong o bat cu buoc nao thi

@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { sql } from "@/lib/db";
-import { kiemMatKhau } from "@/lib/matkhau";
+import { canBangThoiGian, kiemMatKhau } from "@/lib/matkhau";
 import { taoPhien } from "@/lib/phien";
 
 function duongDanLoi(loi: string, ten?: string): string {
@@ -45,7 +45,18 @@ export async function dangNhap(formData: FormData): Promise<void> {
   // khoan / user enumeration).
   const THONG_BAO_SAI = "Tên đăng nhập hoặc mật khẩu không đúng.";
 
-  if (!taiKhoan || !kiemMatKhau(matKhau, taiKhoan.mat_khau_bam)) {
+  // Ro ri THOI GIAN: khong duoc viet `!taiKhoan || !kiemMatKhau(...)` — toan
+  // tu `||` doan mach (short-circuit) se BO QUA han kiemMatKhau() (~13ms PBKDF2)
+  // khi khong tim thay tai khoan, khien nhanh "khong ton tai" tra loi NHANH
+  // HON han nhanh "sai mat khau". Ke xau chi can bam gio dang nhap la biet
+  // duoc ten dang nhap nao co that (user enumeration qua kenh thoi gian).
+  // Vi vay: luon danh gia CA HAI nhanh — that (kiemMatKhau) hoac gia
+  // (canBangThoiGian, ton dung tung do bang), roi moi quyet dinh tu choi.
+  const matKhauDung = taiKhoan
+    ? kiemMatKhau(matKhau, taiKhoan.mat_khau_bam)
+    : canBangThoiGian(matKhau);
+
+  if (!taiKhoan || !matKhauDung) {
     redirect(duongDanLoi(THONG_BAO_SAI, ten));
   }
 

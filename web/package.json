@@ -8,7 +8,8 @@
     "start": "next start",
     "test:matkhau": "tsx lib/matkhau.test.ts",
     "test:phien": "tsx lib/xacthucphien.test.ts",
-    "test": "npm run test:matkhau && npm run test:phien"
+    "test:rothoigian": "tsx app/dang-nhap/rothoigian.test.ts",
+    "test": "npm run test:matkhau && npm run test:phien && npm run test:rothoigian"
   },
   "dependencies": {
     "next": "16.2.11",

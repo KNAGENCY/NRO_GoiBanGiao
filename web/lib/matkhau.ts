@@ -18,6 +18,32 @@ const SO_VONG_TOI_DA = 1_000_000; // chan tren, phong chuoi bam hong lam treo ma
 const SO_BYTE_MUOI = 16;
 const SO_BYTE_KHOA = 32; // 256 bit
 
+// BAM_GIA la mot chuoi bam THAT nhung cua mot mat khau ngau nhien 32 byte ma
+// khong ai tren doi biet — sinh MOT LAN bang chinh bamMatKhau() roi dan cung
+// vao day. Y het hang so `bamGia` ben may chu Go
+// (server/internal/auth/password.go) — doc chu thich o do de biet day du VI
+// SAO can no.
+//
+// Tom tat: truoc khi co hang so nay, nhanh "khong tim thay tai khoan" (web/
+// app/dang-nhap/actions.ts) tra loi NGAY, con nhanh "sai mat khau" phai chay
+// PBKDF2 100.000 vong (~13ms). Ke xau bam gio dang nhap la doc duoc ten dang
+// nhap nao co that. Cach bit: nhanh "khong tim thay" cung phai chay kiemMatKhau
+// voi mot chuoi bam gia (khong khop mat khau nao) de ton dung thoi gian nhu
+// nhanh that, roi moi tra loi loi chung.
+//
+// VI SAO LA HANG SO DAN CUNG chu khong bam luc chay: bam luc khoi dong ton
+// them 13ms va phai xu ly loi o cho khong dang co loi; bam luc CHAY thi con
+// te hon — moi lan dang nhap sai lai bam them mot lan, gap doi chi phi. Hang
+// so thi khong ton gi va luon giong nhau giua cac lan chay.
+//
+// BAY: neu sau nay doi SO_VONG ma quen sinh lai chuoi nay, chuoi gia se re
+// hon chuoi that va lo hong quay lai TRONG IM LANG — xem test "BAM_GIA phai
+// dung SO_VONG voi ham bam that" trong matkhau.test.ts.
+// Xuat ra (thay vi giu private) de test khoa duoc dung SO_VONG voi ham bam
+// that — xem TestBamGiaDungSoVongVoiBamThat ben Go, y het o matkhau.test.ts.
+export const BAM_GIA =
+  "pbkdf2$100000$ymOxsTrtw2kd1K8yPL4qyA==$rRXayQIM3KcEQgFBA8I7sKOfjsBb4Sl+WU8YXQ1wJWQ=";
+
 /** IsHashed: chuoi luu co phai dang bam pbkdf2$... hay khong. */
 export function laDaBam(luuTru: string): boolean {
   return luuTru.startsWith(TIEN_TO);
@@ -63,4 +89,20 @@ export function kiemMatKhau(matKhau: string, luuTru: string): boolean {
   if (duoc.length !== muon.length) return false;
 
   return timingSafeEqual(duoc, muon);
+}
+
+/**
+ * CanBangThoiGian: ton dung bang khoi luong tinh toan cua mot lan kiemMatKhau
+ * that (doi chieu voi BAM_GIA), roi LUON tra ve false.
+ *
+ * Goi no o nhanh "khong tim thay tai khoan" (khi khong co chuoi bam that nao
+ * de doi chieu) de nhanh do ton thoi gian xap xi nhanh "sai mat khau" — xem
+ * chu thich cua BAM_GIA o tren.
+ *
+ * Luon tra ve (thay vi khong tra gi) de noi goi dung duoc no trong mot bieu
+ * thuc, tranh bi trinh bien dich / linter coi la loi goi thua ma xoa mat.
+ */
+export function canBangThoiGian(matKhau: string): boolean {
+  kiemMatKhau(matKhau, BAM_GIA);
+  return false;
 }

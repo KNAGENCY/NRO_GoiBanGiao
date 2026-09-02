@@ -41,8 +41,8 @@ const (
 	tranSoMonMoiTab = 127
 	// tranSoOptionMoiMon: soOption la mot byte khong dau.
 	tranSoOptionMoiMon = 255
-	// tranParamOption: client doc ReadParamDQT -> readUnsignedShort (isReadInt=true).
-	tranParamOption = 65535
+	// tranParamOption (0..65535): dung ban chung o mauvatpham.go — xem chu thich
+	// o do va o goihanhtrang.go ve ly do chi khai bao MOT lan.
 )
 
 // LoaiTien noi mot mon hang lay tien gi. Ban 1 CHI hai loai (bay L10 cua dac ta:

@@ -73,9 +73,10 @@ const (
 	// tranOptionMoiMon: client doc soOption bang readUnsignedByte.
 	tranOptionMoiMon = 255
 
-	// tranParamOption: client doc param bang readUnsignedShort (ReadParamDQT
-	// voi isReadInt == true). Ghi ngoai mien nay la hien sai, khong bao loi.
-	tranParamOption = 65535
+	// tranParamOption (0..65535) dung chung voi cua hang: khai bao MOT lan o
+	// mauvatpham.go — task 3 va task 8 lam song song tung moi ben khai mot ban,
+	// gop lai la "redeclared" (03/09). Hang so mo ta mot su that CUA CLIENT
+	// (ReadParamDQT = unsigned short) nen chi duoc co mot noi noi dieu do.
 )
 
 // soOMacChuan: so o do dang mac cua ban 1 — 0 ao, 1 quan, 2 gang, 3 giay,

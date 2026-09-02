@@ -73,6 +73,14 @@ type MauVatPham struct {
 const (
 	// tranMauOption: client doc so mau bang MOT BYTE KHONG DAU.
 	tranMauOption = 255
+
+	// tranParamOption: gia tri LON NHAT cua param mot option. Client doc param
+	// bang ReadParamDQT = readUnsignedShort (ModFunc.isReadInt == true) -> 0..65535;
+	// ghi so am hoac lon hon la client hien sai ma khong bao loi (bay L3 spec KH7).
+	// Khai bao MOT LAN o day (danh muc option la goc chung) — goihanhtrang.go (tui/
+	// mac/ruong) va cuahang.go (-44) deu dung; hai task do lam song song tung moi
+	// ben tu khai mot ban, gop lai la "redeclared" (03/09) — bai hoc ghi §8.
+	tranParamOption = 65535
 	// tranMauVatPham: client doc so mau bang SHORT CO DAU (Controller.cs:6495).
 	tranMauVatPham = 32767
 	// tranThanGoiItem: client goi d.mark(100000) truoc khi doc (Controller.cs:6468).

@@ -144,24 +144,55 @@ func (s *Store) CapVatPham(ctx context.Context, nvID int64, noiChua string, oSo 
 
 	var idMoi int64
 	err = s.trongGiaoDich(ctx, func(tx pgx.Tx) error {
-		if err := tx.QueryRow(ctx,
-			`INSERT INTO vat_pham (mau_id, chu_so_huu_id, noi_chua, o_so, so_luong, chi_so_phu)
-			 VALUES ($1, $2, $3, $4, $5, $6::jsonb)
-			 RETURNING id`,
-			mauID, nvID, noiChua, oSo, soLuong, thoChiSo,
-		).Scan(&idMoi); err != nil {
-			return dichLoiCSDL(err, "chen vat pham that bai")
-		}
-		if _, err := tx.Exec(ctx,
-			`INSERT INTO vat_pham_lich_su (vat_pham_id, tu_ai, sang_ai, ly_do, so_luong)
-			 VALUES ($1, NULL, $2, $3, $4)`,
-			idMoi, nvID, lyDo, soLuong); err != nil {
-			return dichLoiCSDL(err, "ghi lich su sinh ra that bai")
-		}
-		return nil
+		var errTx error
+		idMoi, errTx = capVatPhamTrongTx(ctx, tx, nvID, noiChua, oSo, mauID, soLuong, thoChiSo, lyDo)
+		return errTx
 	})
 	if err != nil {
 		return 0, err
+	}
+	return idMoi, nil
+}
+
+// CapVatPhamTx la CHINH CapVatPham nhung chay trong mot giao dich DANG MO
+// (KH7 Task 9) — xem ly do o CongTruTienTx (store.go). Cung than SQL, cung ham
+// `capVatPhamTrongTx`, nen khong the lech nhau.
+func (s *Store) CapVatPhamTx(ctx context.Context, tx pgx.Tx, nvID int64, noiChua string, oSo int16,
+	mauID int32, soLuong int32, chiSoPhu ChiSoPhu, lyDo string) (int64, error) {
+
+	if !lyDoHopLe(lyDo) {
+		return 0, ErrLyDoKhongHopLe
+	}
+	if chiSoPhu.Opt == nil {
+		chiSoPhu.Opt = []TuyChon{}
+	}
+	thoChiSo, err := json.Marshal(chiSoPhu)
+	if err != nil {
+		return 0, fmt.Errorf("ma hoa chi_so_phu that bai: %w", err)
+	}
+	return capVatPhamTrongTx(ctx, tx, nvID, noiChua, oSo, mauID, soLuong, thoChiSo, lyDo)
+}
+
+// capVatPhamTrongTx la than that su: MOT INSERT mon + MOT INSERT lich su, khong
+// bao gio tach roi (BB2/BB3). Nhan `thoChiSo` da ma hoa san de hai duong goi
+// (CapVatPham / CapVatPhamTx) khong ma hoa hai kieu khac nhau.
+func capVatPhamTrongTx(ctx context.Context, tx pgx.Tx, nvID int64, noiChua string, oSo int16,
+	mauID int32, soLuong int32, thoChiSo []byte, lyDo string) (int64, error) {
+
+	var idMoi int64
+	if err := tx.QueryRow(ctx,
+		`INSERT INTO vat_pham (mau_id, chu_so_huu_id, noi_chua, o_so, so_luong, chi_so_phu)
+		 VALUES ($1, $2, $3, $4, $5, $6::jsonb)
+		 RETURNING id`,
+		mauID, nvID, noiChua, oSo, soLuong, thoChiSo,
+	).Scan(&idMoi); err != nil {
+		return 0, dichLoiCSDL(err, "chen vat pham that bai")
+	}
+	if _, err := tx.Exec(ctx,
+		`INSERT INTO vat_pham_lich_su (vat_pham_id, tu_ai, sang_ai, ly_do, so_luong)
+		 VALUES ($1, NULL, $2, $3, $4)`,
+		idMoi, nvID, lyDo, soLuong); err != nil {
+		return 0, dichLoiCSDL(err, "ghi lich su sinh ra that bai")
 	}
 	return idMoi, nil
 }

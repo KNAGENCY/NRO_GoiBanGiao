@@ -201,6 +201,17 @@ type BoXuLy struct {
 	// goi NewBoXuLy truc tiep van chay y het truoc. Duong SAN XUAT thi luon
 	// duoc dat (MoLuuTru), va TestMoLuuTruNoiGacChongDo khoa dieu do lai.
 	gacDangNhap *chanip.GacDangNhap
+
+	// muaBanCuaHangDangMo (KH7 Task 9): cua hang NPC phien nay dang mo. Client
+	// KHONG gui id cua hang trong goi `6` (xem PHA A §1.2), nen day la nguon
+	// su that duy nhat. nil = chua mo cua hang nao -> moi goi `6` bi tu choi.
+	muaBanCuaHangDangMo *CuaHang
+
+	// muaBanSoThuTu (KH7 Task 9, D3): bo dem hanh dong kinh te cua PHIEN nay.
+	// May chu giu — client khong bao gio duoc quyet dinh no. Tang moi lenh
+	// kinh te (soThuTuKinhTeKe, muaban.go); ghep thanh khoa idempotency
+	// `<nhanVatId>:MUA:<soThuTu>`.
+	muaBanSoThuTu uint64
 }
 
 func NewBoXuLy(kho Kho, soKhuVuc *SoKhuVuc) *BoXuLy {
@@ -304,6 +315,8 @@ func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 		return b.xuLyMoNPC(s, m)
 	case lenhDoiMap: // -23 — client bam cong roi map (xem doimap.go)
 		return b.xuLyDoiMap(s)
+	case lenhMua: // 6 — client xin mua hang NPC (xem muaban.go)
+		return b.xuLyMua(s, m)
 	default:
 		// Lenh chua ho tro: bo qua, khong ngat ket noi — client gui vai goi
 		// phu ngay sau khi noi (vi du setClientType), day la chuyen BINH

@@ -93,3 +93,6 @@ __pycache__/
 # Chua du lieu nguoi choi (nhu muc 1) — TUYET DOI khong dua len git.
 backups/
 docs/my-thuat/kich-thuoc-anh.json.bak-*
+
+# Do thi tri thuc do skill dothi (graphify) sinh ra — 4MB, tao lai duoc bang mot lenh
+graphify-out/

@@ -11,8 +11,14 @@ package game
 //        -> TestBanGuiLapChiCongTienMotLan do
 //   DB3 bo guard chu so huu trong menh de WHERE (D4)
 //        -> TestBanDoNguoiKhacKhongDoiGi do
-//   DB4 doi cau kiem "du so luong" xuong SAU khi da bot do / cong tien
-//        -> TestBanQuaSoLuongKhongChamTien do
+//   DB4 bo cau kiem "du so luong" o TANG KHO
+//        -> TestBanQuaSoLuongTangKhoCungTuChoi do
+//        (TestBanQuaSoLuongKhongChamTien giu chot chan o tang tren)
+//
+// DB1 da kiem tay: doi huyVatPhamTrongTx(ctx, tx, ...) thanh s.HuyVatPham(ctx,
+// ...) — tuc huy mon thanh giao dich RIENG — lam TestBanTienTranKhongMatDo treo
+// (giao dich rieng doi khoa FOR UPDATE ma giao dich ngoai dang giu) roi do khi
+// het gio. Treo cung la do; dieu quan trong la no KHONG con xanh.
 
 import (
 	"context"
@@ -325,6 +331,41 @@ func TestBanQuaSoLuongKhongChamTien(t *testing.T) {
 	}
 	if n := demGiaoDichMuaBan(t, pool, nv.ID); n != 0 {
 		t.Fatalf("tu choi som khong duoc de lai khoa idem nao, con %d", n)
+	}
+}
+
+// Cung cau kiem do, nhung o TANG KHO — chot chan thu hai, khong dua vao tang
+// tren goi dung. Test tren (BanChoCuaHang) bi banTinhToan chan tu som nen KHONG
+// cham toi cau kiem trong BanMotGiaoDich; test nay moi cham.
+func TestBanQuaSoLuongTangKhoCungTuChoi(t *testing.T) {
+	s := moKhoMuaBan(t)
+	nv, pool := taoNguoiMua(t, s, 100, 0)
+	ctx := context.Background()
+	tui := datMonVaoTui(t, s, nv.ID, 0, 0, 2)
+
+	_, err := s.BanMotGiaoDich(ctx, store.YeuCauBan{
+		NhanVatID: nv.ID,
+		KhoaIdem:  store.KhoaIdemBan(nv.ID, 1),
+		VatPhamID: tui[0].ID,
+		NoiChua:   store.NoiChuaTui,
+		OSo:       0,
+		SoLuong:   5, // chi co 2
+		DVang:     125,
+		LyDo:      store.LyDoBanNPC,
+	})
+	if !errors.Is(err, store.ErrKhongDuSoLuong) {
+		t.Fatalf("mong doi ErrKhongDuSoLuong, duoc %v", err)
+	}
+	vang, _ := docTienMuaBan(t, pool, nv.ID)
+	if vang != 100 {
+		t.Fatalf("vang = %d, phai giu nguyen 100", vang)
+	}
+	tuiSau, err := s.LayTui(ctx, nv.ID, store.NoiChuaTui)
+	if err != nil {
+		t.Fatalf("lay tui that bai: %v", err)
+	}
+	if len(tuiSau) != 1 || tuiSau[0].SoLuong != 2 {
+		t.Fatalf("mon phai con nguyen 2 cai, thay: %+v", tuiSau)
 	}
 }
 

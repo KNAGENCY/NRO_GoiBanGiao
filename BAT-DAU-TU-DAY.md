@@ -8,7 +8,7 @@
 > một bản vá, một phát hiện lỗi) thì **phải cập nhật file này ngay** rồi mới commit.
 > Cách cập nhật xem mục [11. Quy ước cập nhật](#11-quy-ước-cập-nhật-file-này).
 
-**Cập nhật lần cuối:** 03/09/2026 (**KH7 Task 2 — danh mục mẫu vật phẩm + gói `-28/8` subtype 0/1 có nội dung thật**, sau GATE giải mã hai phía; nhánh `kh7-task2-mauvatpham` chờ duyệt tay)
+**Cập nhật lần cuối:** 03/09/2026 (**KH7 Task 0 → 1 → 2 XONG, đều gộp `main`** — chặn nhân bản tiền `4283759`, bảng `vat_pham` `65ab768`, danh mục mẫu + gói `-28/8` thật `752d6a1`; mỗi cái điều phối kiểm tay + áp đột biến trước khi gộp. **Tiếp: task 3** gói -36/-37/-35)
 
 **Trước đó:** 27/08/2026 (**Cổng rời Làng Lá + 8 bóng đổ đã lắp được** — người chơi có đường ra khỏi map 1; và **gỡ quả mìn `tile_set_info.bin`** — build lại không còn làm nhân vật rơi xuyên đất)
 
@@ -149,7 +149,7 @@ vật, chọn làng → vào bản đồ làng → đi lại, thấy người kh
 bị quái đánh, đánh nhau (PvP), chết rồi hồi sinh**. Còn chờ **nghiệm thu tay bằng client
 Unity thật** (Task 15) — đó là việc chỉ chủ dự án làm được.
 
-**KH7 Task 2 (nhánh `kh7-task2-mauvatpham`, chờ duyệt tay):** GATE giải mã hai phía gói
+**KH7 Task 2 — ĐÃ DUYỆT TAY + GỘP `752d6a1`** (điều phối tự đối chiếu `loadItemNew` ↔ `goiCatalogItemMau` 9 trường, xác minh `readShortOptionTemp`=1 byte, tự áp đột biến đảo trường → 2 test đỏ): GATE giải mã hai phía gói
 `-28/8` xong ([`docs/superpowers/research/2026-09-03-kh7-giai-ma-28-8.md`](docs/superpowers/research/2026-09-03-kh7-giai-ma-28-8.md))
 — client và Java khớp 1-1, mọi "lệch" đều là tràn số im lặng phía Java. Rồi
 `server/internal/game/mauvatpham.go`: bảng 8 mẫu option + 5 mẫu vật phẩm Naruto, gửi **ba**

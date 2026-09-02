@@ -365,8 +365,8 @@ func TestCapNhatNhanVatGhiDungTungTruong(t *testing.T) {
 	moi.HpHienTai = 77
 	moi.ChakraToiDa = 300
 	moi.ChakraHienTai = 210
-	moi.Vang = 5000
-	moi.Ngoc = 250
+	moi.Vang = 5000 // BAT BIEN BB4 - dua gia tri khac, cho de bay (khong duoc ghi)
+	moi.Ngoc = 250  // BAT BIEN BB4 - dua gia tri khac, cho de bay (khong duoc ghi)
 
 	if err := s.CapNhatNhanVat(ctx, moi); err != nil {
 		t.Fatalf("CapNhatNhanVat loi: %v", err)
@@ -427,11 +427,16 @@ func TestCapNhatNhanVatGhiDungTungTruong(t *testing.T) {
 	if lay.ChakraHienTai != 210 {
 		t.Errorf("ChakraHienTai = %d, mong doi 210", lay.ChakraHienTai)
 	}
-	if lay.Vang != 5000 {
-		t.Errorf("Vang = %d, mong doi 5000", lay.Vang)
+	// Vang/Ngoc la BAT BIEN doi voi CapNhatNhanVat (BB4, duong nhan ban D7):
+	// ham nay KHONG duoc ghi tien du input mang gia tri khac. Phai giu nguyen
+	// gia tri goc (Vang=1000 luc tao, Ngoc=0 mac dinh). Tien chi doi qua
+	// CongTruTien. Neu ai do them lai `vang=$..,ngoc=$..` vao CapNhatNhanVat,
+	// hai khang dinh nay do.
+	if lay.Vang != 1000 {
+		t.Errorf("Vang = %d, mong doi giu nguyen 1000 (bat bien BB4 - CapNhatNhanVat KHONG ghi tien)", lay.Vang)
 	}
-	if lay.Ngoc != 250 {
-		t.Errorf("Ngoc = %d, mong doi 250", lay.Ngoc)
+	if lay.Ngoc != 0 {
+		t.Errorf("Ngoc = %d, mong doi giu nguyen 0 (bat bien BB4 - CapNhatNhanVat KHONG ghi tien)", lay.Ngoc)
 	}
 }
 

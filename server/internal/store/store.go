@@ -17,6 +17,7 @@ var (
 	ErrKhongThayNhanVat = errors.New("khong tim thay nhan vat")
 	ErrTenNhanVatDaDung = errors.New("ten nhan vat da ton tai")
 	ErrDaCoNhanVat      = errors.New("tai khoan da co nhan vat")
+	ErrKhongDuTien      = errors.New("khong du tien")
 )
 
 type TaiKhoan struct {
@@ -167,9 +168,9 @@ func (s *Store) LayNhanVatTheoTaiKhoan(ctx context.Context, taiKhoanID int64) (*
 
 // CapNhatNhanVat ghi lai TOAN BO trang thai nhan vat hien tai xuong CSDL -
 // khong chi 4 truong dang doi hom nay (vi tri, mau, chakra o KH6) ma ca cac
-// truong KH7/KH8 sap noi day (Cap, KinhNghiem, SucManh, Vang, Ngoc, MapID...).
-// Ghi het struct tu dau thi sau nay them truong moi vao NhanVat khong phai
-// sua lai cau SQL nay.
+// truong KH7/KH8 sap noi day (Cap, KinhNghiem, SucManh, MapID...) - TRU tien
+// (vang/ngoc), xem ghi chu BB4 o duoi. Ghi het struct tu dau thi sau nay them
+// truong moi vao NhanVat khong phai sua lai cau SQL nay.
 //
 // KHONG ghi ID, TaiKhoanID, Ten trong menh de SET: ba truong nay BAT BIEN sau
 // khi TaoNhanVat tao xong (dinh danh hang, chu so huu, ten hien thi voi rang
@@ -191,24 +192,83 @@ func (s *Store) LayNhanVatTheoTaiKhoan(ctx context.Context, taiKhoanID int64) (*
 // phai kem han gio (de xuat 5 giay), nhung do la trach nhiem cua noi GOI (vd
 // vong lap luu dinh ky se lam o task sau), giong cach ba ham con lai trong
 // file nay deu chi nhan ctx roi dung thang, khong tu bao boc.
+//
+// ⚠️ CO Y KHONG ghi vang/ngoc o day (bat bien BB4, dac ta §2.1 + duong nhan
+// ban D7). Truoc kia ham nay ghi `vang = $13, ngoc = $14` bang GIA TRI TUYET
+// DOI lay tu anh chup nv.Vang/nv.Ngoc. Vi duong luu dinh ky (ThoGhi ->
+// ghiMotBan -> CapNhatNhanVat) chup anh roi ghi BAT DONG BO sau, neu nguoi
+// choi tieu/kiem tien giua luc chup va luc xa hang doi, cu ghi tuyet doi se
+// GHI DE tien ve gia tri cu = nhan ban/rollback tien. Tien tu nay CHI doi qua
+// CongTruTien (cong/tru tai cho). CapNhatNhanVat khong bao gio cham vang/ngoc.
 func (s *Store) CapNhatNhanVat(ctx context.Context, nv NhanVat) error {
 	ct, err := s.pool.Exec(ctx,
 		`UPDATE nhan_vat
 		    SET lang = $1, kieu_toc = $2, map_id = $3, vi_tri_x = $4, vi_tri_y = $5,
 		        cap = $6, kinh_nghiem = $7, suc_manh = $8, hp_toi_da = $9,
 		        hp_hien_tai = $10, chakra_toi_da = $11, chakra_hien_tai = $12,
-		        vang = $13, ngoc = $14, dang_nhap_cuoi = now()
-		  WHERE id = $15`,
+		        dang_nhap_cuoi = now()
+		  WHERE id = $13`,
 		nv.Lang, nv.KieuToc, nv.MapID, nv.ViTriX, nv.ViTriY,
 		nv.Cap, nv.KinhNghiem, nv.SucManh, nv.HpToiDa,
 		nv.HpHienTai, nv.ChakraToiDa, nv.ChakraHienTai,
-		nv.Vang, nv.Ngoc, nv.ID,
+		nv.ID,
 	)
 	if err != nil {
 		return fmt.Errorf("cap nhat nhan vat that bai: %w", err)
 	}
 	if ct.RowsAffected() == 0 {
 		return ErrKhongThayNhanVat
+	}
+	return nil
+}
+
+// CongTruTien cong/tru vang va ngoc cua mot nhan vat TAI CHO (dVang/dNgoc co
+// the am de tru). Day la duong DUY NHAT hop le de doi tien (bat bien BB4, dac
+// ta §2.1). Ket qua khong bao gio duoc am (chan duong nhan ban D10 - ban Java
+// cu tru thang khong kiem so du -> tien am/in tien).
+//
+// Phan biet "khong du tien" voi "khong thay nhan vat": ca hai deu khien mot
+// cau `UPDATE ... WHERE vang+$1>=0` khop 0 dong, khong the phan biet bang moi
+// RowsAffected. Neu tach thanh hai cau (mot SELECT kiem ton tai + mot UPDATE)
+// thi co khe TOCTOU: giua hai cau, phien khac co the xoa nhan vat hoac doi so
+// du. Vi vay dung MOT cau duy nhat voi CTE:
+//   - `ton_tai` khoa dong bang FOR UPDATE (chan phien khac chen vao giua),
+//   - `cap_nhat` chi ghi khi so du sau van >= 0,
+//   - cau SELECT cuoi tra ve HAI co: co nhan vat khong, va co ghi duoc khong.
+//
+// Tu do: khong co nhan vat -> ErrKhongThayNhanVat; co nhan vat nhung khong ghi
+// -> ErrKhongDuTien; ghi duoc -> nil. Tat ca trong mot giao dich ngam, khong
+// co khe ho giua cac buoc.
+//
+// Cong tren kieu numeric roi kep ve bigint de mot delta lon khong lam
+// PostgreSQL nem loi tran (22003) huy ca cau; chan duoi van la >= 0.
+func (s *Store) CongTruTien(ctx context.Context, nvID, dVang, dNgoc int64) error {
+	var coNhanVat, daCapNhat bool
+	err := s.pool.QueryRow(ctx,
+		`WITH ton_tai AS (
+		     SELECT id, vang, ngoc FROM nhan_vat WHERE id = $1 FOR UPDATE
+		 ),
+		 cap_nhat AS (
+		     UPDATE nhan_vat n
+		        SET vang = (n.vang::numeric + $2::numeric)::bigint,
+		            ngoc = (n.ngoc::numeric + $3::numeric)::bigint
+		       FROM ton_tai t
+		      WHERE n.id = t.id
+		        AND t.vang::numeric + $2::numeric >= 0
+		        AND t.ngoc::numeric + $3::numeric >= 0
+		     RETURNING n.id
+		 )
+		 SELECT EXISTS(SELECT 1 FROM ton_tai), EXISTS(SELECT 1 FROM cap_nhat)`,
+		nvID, dVang, dNgoc,
+	).Scan(&coNhanVat, &daCapNhat)
+	if err != nil {
+		return fmt.Errorf("cong tru tien that bai: %w", err)
+	}
+	if !coNhanVat {
+		return ErrKhongThayNhanVat
+	}
+	if !daCapNhat {
+		return ErrKhongDuTien
 	}
 	return nil
 }

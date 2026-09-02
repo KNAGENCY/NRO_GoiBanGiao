@@ -89,7 +89,9 @@ mã nguồn (không tin sổ), kết quả:
 | 14 | `noiBoPhatThanh()` + `noiLichBoss()`; tắt `boLuu → lichBoss → loa → TatMayChu → Close`; `MucLichTuNoiDungBoss` nối task 15 → 13 | ✅ xong 02/09 (`0709caf`) |
 | 15 | `noidungboss.go` — 2 boss mẫu (1 con 2 pha + boss lớn + `MocNoiGian`) | ⏳ **nửa xong** — dữ liệu đủ; **smoke client Unity chưa làm** (chỉ chủ dự án làm được) |
 
-**KH6b BẢN 1 ĐỦ CODE — 02/09/2026, `ea43237`.** `main` xanh 8 gói. Đang: **một** lượt soi đối kháng toàn KH6b (§10.6, Opus). Sau đó: **nghiệm thu tay bằng client Unity** (task 15 phần 2 — chỉ chủ dự án làm được): thấy boss hiện, đánh được, boss đánh lại, biến hình giữ id, chạy chữ toàn server.
+**KH6b BẢN 1 — CODE XONG + ĐÃ SOI (03/09/2026, `1b57a55`).** Lượt soi đối kháng §10.6 = **28 đột biến**: 22 giết, 6 sống (3 tương đương, **3 lỗ hổng test đã bịt** bằng `khuvuc_dotbien_test.go`). **Không tìm thấy lỗi code sản xuất.** Phán quyết: **ĐẠT BẢN 1**. Chi tiết: `docs/superpowers/research/2026-09-03-kh6b-dot-bien-28.md`.
+
+**Còn duy nhất — chỉ chủ dự án làm được: nghiệm thu tay bằng client Unity** (task 15 phần 2): vào Làng Lá → chờ boss "Kẻ Lạ Mặt" hiện (GiayNghi 1800s; muốn nhanh thì hạ số này trong `noidungboss.go`) → đánh nó → nó đánh lại → hạ pha 1 → xác 3s → lột xác thành "Mặt Nạ Vỡ" **giữ nguyên chỗ** → dòng chữ chạy toàn server.
 
 Task 9 đã để sẵn hai chỗ nối, có đánh dấu trong code:
 - bước `BossHoatDong` **để trống** cho task 10, kèm test `TestBossHoatDongDungYen_ChoTask10` ghim nguyên

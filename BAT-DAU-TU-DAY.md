@@ -156,6 +156,15 @@ Unity thật** (Task 15) — đó là việc chỉ chủ dự án làm được.
 message `-28/8` theo đúng thứ tự 0 → 1 → 2 (subtype 2 phải cuối vì chỉ nó kích `clientOk`).
 Dữ liệu để **trong Go** như `noidungboss.go` — **không đụng `catalog.json`/`asset-lock.json`**.
 
+**KH7 Task 3 — XONG trên nhánh `kh7-task3-goihanhtrang`, CHƯA gộp.** Pha A: giải mã hai phía
+ba gói hành trang ([`docs/superpowers/research/2026-09-03-kh7-giai-ma-36-37-35.md`](docs/superpowers/research/2026-09-03-kh7-giai-ma-36-37-35.md))
+— **đủ rõ, không chỗ mập mờ**; cả ba gói dùng chung một khuôn "một món", dấu ô rỗng là
+`short -1` ở trường `templateId`. Pha B: `server/internal/game/goihanhtrang.go` —
+`GoiTui` (`-36`), `GoiDoDangMac` (`-37`, có `head` chèn giữa), `GoiRuong` (`-35`).
+**Sửa lỗi L1 của bản Java: ô rỗng LUÔN ghi `-1` ở cả ba gói.** Dựng xong dữ liệu mới ghi byte;
+dữ liệu hỏng → trả lỗi, không gửi gói thiếu. Trần ô = **127** (vì ME_INFO ghi số ô bằng byte
+CÓ DẤU). 12 test byte-chính-xác, 3/3 đột biến bị giết. **Chưa nối vào `login.go`** — đó là task 4.
+
 ---
 
 ## 5. Còn gì chưa làm

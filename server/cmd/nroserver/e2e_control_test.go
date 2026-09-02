@@ -170,7 +170,7 @@ func TestShutdownQuaControlDiQuaDonDepVaFlushThoGhiThat(t *testing.T) {
 		nil,
 		nil,
 		func(ctx context.Context) error {
-			return donDepKhiTat(ctx, khoDong, soKhuVuc, thoGhi, boLuu, game.MoBoLichBoss(soKhuVuc, nil), game.MoBoPhatThanh())
+			return donDepKhiTat(ctx, khoDong, soKhuVuc, thoGhi, boLuu, game.MoBoLichBoss(soKhuVuc, nil), game.MoBoPhatThanh(), &boGiaDemDung{}, &boGiaDemDung{})
 		},
 	)
 	if maThoat != 0 || loiNguon != nil || loiDonDep != nil {

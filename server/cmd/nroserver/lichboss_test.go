@@ -148,7 +148,7 @@ func TestDonDepKhiTatDungLichBossTruocLoa(t *testing.T) {
 	ctx, huy := context.WithTimeout(context.Background(), 10*time.Second)
 	defer huy()
 
-	if err := donDepKhiTat(ctx, kd, soKhuVuc, thoGhi, boLuu, lichBoss, loa); err != nil {
+	if err := donDepKhiTat(ctx, kd, soKhuVuc, thoGhi, boLuu, lichBoss, loa, &boGiaDemDung{}, &boGiaDemDung{}); err != nil {
 		t.Fatalf("donDepKhiTat loi trong dieu kien binh thuong: %v", err)
 	}
 

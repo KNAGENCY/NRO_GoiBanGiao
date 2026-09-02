@@ -131,6 +131,29 @@ func (s *SoKhuVuc) DongSoNo(ctx context.Context) error {
 	return s.soNo.DongVaChoXong(ctx)
 }
 
+// GanBoNhatDo cam MOT bo nhat do (KH7 Task 11) vao CA 5 khu vuc. Goi tu
+// goroutine main luc khoi dong; an toan nho atomic.Pointer trong KhuVuc.
+//
+// Chua goi -> moi yeu cau nhat bi tu choi im lang va mon quay lai mat dat
+// (xuLyXinNhat, dovuong.go). Do la ly do ham nay phai duoc goi TRUOC khi mo
+// cong nghe: nguoi choi vao truoc thi khong nhat duoc gi ma khong hieu vi sao.
+func (s *SoKhuVuc) GanBoNhatDo(b *BoNhatDo) {
+	for _, k := range s.theoMap {
+		k.GanBoNhat(b)
+	}
+}
+
+// GanBoRoiDo cam MOT bo roi do (KH7 Task 12) vao CA 5 khu vuc. Cung quy uoc
+// voi GanBoNhatDo o tren.
+//
+// Chua goi -> quai/boss chet khong roi gi (roiDoKhiChet thay nil thi tra 0),
+// KHONG panic — moi test cu dung MoSoKhuVuc/MoKhuVuc truc tiep van chay.
+func (s *SoKhuVuc) GanBoRoiDo(b *BoRoiDo) {
+	for _, k := range s.theoMap {
+		k.GanBoRoi(b)
+	}
+}
+
 // DungTatCa dung sach moi khu vuc (goi luc tat may chu) va tra loi neu bat
 // ky actor nao khong thoat. Van thu dung HET khu vuc de mot actor ket khong
 // lam bo qua viec don dep cac actor con lai.

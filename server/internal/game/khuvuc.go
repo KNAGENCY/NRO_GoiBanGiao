@@ -131,6 +131,22 @@ type KhuVuc struct {
 	// main SAU khi cac actor da BatDau, con vongLap thi doc truong nay.
 	boNhat atomic.Pointer[BoNhatDo]
 
+	// boRoi (KH7 Task 12) la duong DUY NHAT actor duoc dung de nho GHI CSDL
+	// viec SINH do roi khi quai/boss chet. Cung khuon, cung ly do, cung quy
+	// uoc nil-thi-im-lang voi boNhat ngay tren — xem roido.go.
+	//
+	// HAI bo TACH RIENG (khong gop lam mot) vi chung can hai interface kho
+	// KHAC NHAU (LayTui/NhatLen vs SinhDoDuoiDat) va hai kieu yeu cau khac
+	// nhau; gop lai chi de "do mot goroutine" se buoc mot bo phai biet ca hai
+	// nghiep vu ma khong duoc gi.
+	boRoi atomic.Pointer[BoRoiDo]
+
+	// roiDoNgauNhien la BO CHON NGAU NHIEN tiem duoc cho bang roi do — cung ly
+	// do va cung chu ky voi `chon` cua lichboss.go: test phai ep duoc "roi
+	// 100%" / "khong roi gi" ma khong phu thuoc may man. nil -> rand.IntN
+	// (roiDoKhiChet tu thay the), nen moi test cu dung MoKhuVuc van chay.
+	roiDoNgauNhien func(n int) int
+
 	hopThu          chan suKienKhuVuc
 	hopThuDieuKhien chan suKienDieuKhien
 	xong            chan struct{}
@@ -1108,6 +1124,12 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 			// la mot "vong doi" moi, khong ai duoc coi la da tung danh no nua.
 			mucTieu.DaTungDanh = nil
 			// KH6 chua co he vat pham (dac ta §0) -> doRoi luon rong.
+			// KH7 Task 12: XEP yeu cau sinh do roi (KHONG cham CSDL o day —
+			// roiDoKhiChet chi gieo ti le roi nem vao hang doi cua BoRoiDo).
+			k.roiDoKhiChet(mucTieu.X, mucTieu.Y, roiDoCuaQuai(mucTieu.MauId))
+			// doRoi trong goi -12 CO CHU DICH luon rong (soDoRoi = 0): do roi hien
+			// bang goi 68 rieng vai chuc ms sau. Ly do day du o dau file roido.go
+			// — DUNG "sua cho du" dong nay.
 			k.phatChoCaKhuVuc(goiQuaiChet(mucTieu.Id, satThuong, chiMang, nil))
 		} else {
 			// hieuUngId=255 (=-1): KH6 chua co hieu ung trang thai (dac ta §0).
@@ -1515,6 +1537,13 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 
 	case suKienDonDoHetGio:
 		k.donDoHetGio(sk.itemMapId)
+
+	case suKienDoDaSinh:
+		// KH7 Task 12: goroutine BoRoiDo bao "mon da co dong THAT trong CSDL".
+		// Chi luc do actor moi cap itemMapId + phat 68 ("ghi so truoc — giao
+		// sau", §2.3). Su kien nay KHONG BAO GIO den khi CSDL loi (xem
+		// BoRoiDo.lam) — do la ca ly do khong co mon ma.
+		k.thaDoXuongKhuVuc(sk.mon)
 	}
 }
 
@@ -1773,6 +1802,10 @@ func (k *KhuVuc) bossChet(b *Boss, idNguoiHa int64, bayGio time.Time) {
 	}
 
 	k.traThuongBoss(b, pha)
+	// KH7 Task 12: roi do — DUNG MOT LAN, ngay canh cho chia thuong, vi cung
+	// mot ly do bat bien 1 o tren: goi hai lan la nhan doi do phat ra tu khong
+	// khi. Chot "da chet roi thi thoi" o dau ham la thu bao ve dong nay.
+	k.roiDoKhiChet(b.ViTriX, b.ViTriY, roiDoCuaBoss(pha))
 	// XOA NGAY sau khi chia — xem bat bien 1. Gan nil (khong phai xoa tung
 	// khoa) de tra luon bo nho map ve cho bo don rac: mot pha dong nguoi co
 	// the de lai hang tram o trong, ma pha sau se tu tao map moi khi can.

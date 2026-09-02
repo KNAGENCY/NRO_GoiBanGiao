@@ -105,6 +105,32 @@ type KhuVuc struct {
 	// BatDau, con vong lap actor thi doc truong nay.
 	soNo atomic.Pointer[SoNoThuong]
 
+	// doDuoiDat la cac mon dang NAM DUOI DAT trong khu vuc nay (KH7 Task 11),
+	// khoa la itemMapId — mot so ngan CAP TRONG KHU VUC, khong phai vat_pham.id
+	// (id CSDL khong bao gio xuong client, dac ta KH7 §4.1).
+	//
+	// CUNG QUY TAC SO HUU voi k.quai/k.boss: CHI luong vongLap duoc doc/ghi.
+	// Do vuong la thu NHIEU NGUOI cung nhin thay nen no thuoc actor (§6.9) —
+	// khac hanh trang (mot nguoi thay, thuoc goroutine phien, xem hanhtrang.go).
+	//
+	// Day CHINH LA chot chong nhan ban lop 1 cua D8: actor go mon khoi map nay
+	// NGAY khi nhan yeu cau nhat hop le, truoc khi xep yeu cau ghi CSDL. Chi
+	// tiet ca luong: dovuong.go dau file.
+	doDuoiDat map[int16]*doVuong
+
+	// itemMapIdKe la bo cap itemMapId ke tiep. CHI vongLap cham (xem capItemMapId).
+	itemMapIdKe int16
+
+	// boNhat la duong DUY NHAT actor duoc dung de nho GHI CSDL viec nhat do —
+	// dung khuon voi soNo (tra thuong) ngay tren: actor chi XEP yeu cau, mot
+	// goroutine khac moi cham o dia (§6.10b cam vongLap cho o dia).
+	//
+	// nil = chua noi day -> xuLyXinNhat TRA MON LAI mat dat va khong lam gi
+	// (KHONG panic): rat nhieu test dung MoKhuVuc truc tiep, khong co bo nhat.
+	// atomic.Pointer vi cung ly do voi loa/soNo — GanBoNhat chay tu goroutine
+	// main SAU khi cac actor da BatDau, con vongLap thi doc truong nay.
+	boNhat atomic.Pointer[BoNhatDo]
+
 	hopThu          chan suKienKhuVuc
 	hopThuDieuKhien chan suKienDieuKhien
 	xong            chan struct{}
@@ -455,6 +481,7 @@ func MoKhuVuc(bd *BanDo) *KhuVuc {
 		nguoiTrong:   make(map[int64]*nguoiTrongKhuVuc),
 		anhChupDaRoi: make(map[int64]store.NhanVat),
 		quai:         taoQuaiMacDinh(bd),
+		doDuoiDat:    make(map[int16]*doVuong),
 		dongHo:       time.Now,
 	}
 	// Ke hoach 6 Task 8: khoi tao LanHoiMauCuoi = thoi diem spawn cho MOI con
@@ -1465,8 +1492,36 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 		// traLoi co buffer 1 nen gui khong bao gio block du ben goi da het
 		// gio cho va bo di — dung tinh than voi suKienXinDanhSachQuai.
 		sk.traLoi <- k.saoNguoiChoi(sk.idNhanVat)
+
+	// --- KH7 Task 11: do vuong duoi dat. Than cua ca bon case nam o
+	// dovuong.go (cung goi game) de khuvuc.go khong phinh them; chung deu la
+	// phuong thuc cua *KhuVuc nen van CHAY TRONG vongLap, dung ky luat actor.
+	case suKienThaDo:
+		id := k.thaDoXuongKhuVuc(sk.mon)
+		if sk.traLoi != nil {
+			// traLoi co buffer 1 o phia nguoi goi; select/default de actor
+			// KHONG BAO GIO cho, ke ca khi nguoi goi da bo di (§6.10b).
+			select {
+			case sk.traLoi <- id:
+			default:
+			}
+		}
+
+	case suKienXinNhat:
+		k.xuLyXinNhat(sk)
+
+	case suKienNhatXong:
+		k.xuLyNhatXong(sk)
+
+	case suKienDonDoHetGio:
+		k.donDoHetGio(sk.itemMapId)
 	}
 }
+
+// GanBoNhat noi bo ghi CSDL cho duong nhat do vao khu vuc nay. Goi TU
+// goroutine main (sau MoKhuVuc, co the sau ca BatDau) — an toan nho
+// atomic.Pointer, xem chu thich truong boNhat.
+func (k *KhuVuc) GanBoNhat(b *BoNhatDo) { k.boNhat.Store(b) }
 
 // phatChoNguoiKhac gui goi tin `m` cho MOI nguoi trong khu vuc TRU nguoi co id `truId`.
 func (k *KhuVuc) phatChoNguoiKhac(truId int64, m *protocol.Message) {

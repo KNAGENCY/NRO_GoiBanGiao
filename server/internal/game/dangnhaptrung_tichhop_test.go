@@ -92,7 +92,7 @@ func dangNhapLaiVaoTheGioiVaKhuVuc(t *testing.T, cl *clientGia, ten, matKhau str
 	cl.xinCatalog(lenhConCatalogSkill)
 	cl.doiGoi(t, lenhKhongTrenBanDo, lenhConCatalogSkill)
 	cl.xinCatalog(lenhConCatalogItem)
-	cl.doiGoi(t, lenhKhongTrenBanDo, lenhConCatalogItem)
+	doiChuoiCatalogItem(t, cl) // BA message: subtype 0, 1, 2 (KH7 task 2)
 
 	cl.guiClientOk()
 	cl.doiGoiLenh(t, -82)

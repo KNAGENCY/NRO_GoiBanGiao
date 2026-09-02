@@ -379,14 +379,32 @@ func kiemCatalogSkill5Lang(t *testing.T, m *protocol.Message) {
 	}
 }
 
-// kiemCatalogItemSubtype2 khang dinh than goi -28/8: [8][vsItem][2][0][0][0][0]
-// (subtype 2, khoang rong, doi chieu TestGoiCatalogItemSubtype2Rong trong
-// dongbo_test.go).
-func kiemCatalogItemSubtype2(t *testing.T, m *protocol.Message) {
+// doiChuoiCatalogItem doc DU BA message -28/8 ma may chu tra cho mot yeu cau
+// catalog vat pham va khang dinh chung den DUNG THU TU 0 -> 1 -> 2 (KH7 task 2).
+//
+// Thu tu la bat buoc: chi subtype 2 moi kich Service.clientOk() phia client
+// (Controller.cs:6517-6534). Truoc KH7 task 2 may chu chi gui MOT message
+// subtype 2 rong — moi cho goi doiGoi(-28, 8) trong bo test tich hop phai doc
+// du ba, khong thi hai message con lai nam lai trong duong ong.
+func doiChuoiCatalogItem(t *testing.T, cl *clientGia) {
 	t.Helper()
-	want := []byte{lenhConCatalogItem, vsItem, 2, 0, 0, 0, 0}
-	if !bytes.Equal(m.Data, want) {
-		t.Fatalf("than goi -28/8 (catalog item) = %v, mong doi %v", m.Data, want)
+	for i, wantSub := range []byte{0, 1, 2} {
+		m := cl.doiGoi(t, lenhKhongTrenBanDo, lenhConCatalogItem)
+		if len(m.Data) < 3 {
+			t.Fatalf("message catalog item thu %d qua ngan: %v", i, m.Data)
+		}
+		if m.Data[1] != vsItem {
+			t.Fatalf("message catalog item thu %d vsItem = %d, mong doi %d", i, m.Data[1], vsItem)
+		}
+		if m.Data[2] != wantSub {
+			t.Fatalf("message catalog item thu %d subtype = %d, mong doi %d", i, m.Data[2], wantSub)
+		}
+		if wantSub == 2 {
+			want := []byte{lenhConCatalogItem, vsItem, 2, 0, 0, 0, 0}
+			if !bytes.Equal(m.Data, want) {
+				t.Fatalf("goi dong dai -28/8 = %v, mong doi %v", m.Data, want)
+			}
+		}
 	}
 }
 
@@ -626,7 +644,7 @@ func TestVersionDanceDayDu(t *testing.T) {
 	kiemCatalogSkill5Lang(t, cl.doiGoi(t, lenhKhongTrenBanDo, lenhConCatalogSkill)) // KHANG DINH 5 lang, dung ten
 
 	cl.xinCatalog(lenhConCatalogItem)
-	kiemCatalogItemSubtype2(t, cl.doiGoi(t, lenhKhongTrenBanDo, lenhConCatalogItem))
+	doiChuoiCatalogItem(t, cl)
 
 	// Gui client ok -> Ke hoach 4: may chu gui NOT 3 goi vao the gioi theo thu tu
 	// -82 (tileset) -> -30/0 (ME_INFO) -> -24 (MAP INFO). Doc va khang dinh byte-dung.

@@ -139,9 +139,12 @@ func goiCatalogMap() *protocol.Message {
 	return protocol.NewMessage(lenhKhongTrenBanDo, w)
 }
 
-// goiCatalogItem dung goi -28/8 toi thieu: dung MOT message con subtype 2 rong.
-// Chi subtype 2 moi kich clientOk (khi du 4 phien ban khop). Nhan vat moi khong
-// do van ve duoc voi catalog item rong. Xem tai lieu §6.
+// goiCatalogItem dung message -28/8 subtype 2 khoang RONG — goi DONG DAI cua
+// chuoi catalog vat pham. Chi subtype 2 moi kich Service.clientOk() phia client
+// (Controller.cs:6517-6534), nen no PHAI la message -28/8 gui cuoi cung.
+//
+// Noi dung mau vat pham that nam o subtype 0 va 1 — xem mauvatpham.go,
+// goiCatalogItemDayDu(). Ham nay giu nguyen 7 byte da duoc ghim tu Ke hoach 3.
 func goiCatalogItem() *protocol.Message {
 	w := protocol.NewWriter()
 	w.Byte(lenhConCatalogItem) // 8

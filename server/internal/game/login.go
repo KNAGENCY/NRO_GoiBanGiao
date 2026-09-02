@@ -317,6 +317,10 @@ func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 		return b.xuLyDoiMap(s)
 	case lenhMua: // 6 — client xin mua hang NPC (xem muaban.go)
 		return b.xuLyMua(s, m)
+	case lenhNhatDuoc: // -20 — client xin NHAT do duoi dat (cung so voi goi XUONG -20
+		// "ban nhat duoc"; xem dovuong.go). Task 11 co y khong sua file nay de
+		// khong dung agent song song — dieu phoi noi dong nay luc gop (03/09).
+		return b.XuLyNhat(m)
 	default:
 		// Lenh chua ho tro: bo qua, khong ngat ket noi — client gui vai goi
 		// phu ngay sau khi noi (vi du setClientType), day la chuyen BINH

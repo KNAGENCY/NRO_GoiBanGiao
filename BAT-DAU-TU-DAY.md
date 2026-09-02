@@ -165,7 +165,7 @@ Xếp theo thứ tự nên làm:
 | ⏳ | **Vertical slice Task 10 — clean full + warm smoke** | Canonical oracle đã harden **24 case**, 4 mutation; stale lock owner=0 đã đi qua. Full ArtRoot Task 8 v22 đã được rebuild và publish immutable đúng lock `54a638...`/pair `afd03...`; Unity resource preflight có `RESOURCE-PREFLIGHT-OK`. `E2E-ASSET-006` đã được gỡ ở tầng provenance. **Clean full/warm gameplay vẫn NOT RUN và cần phê duyệt bước riêng**; không tự mở Task 11. |
 | 1a | **Map 1 Làng Lá — hoàn thiện mỹ thuật** | **6/7 chỉ số đạt** (đo bằng `tools/map-lang-la/do-map.py`, so với concept đã duyệt). Còn: *đất phẳng lì 91% (đích ≤40%)* — **phải vẽ**, đã thử 3 cách làm bằng code, cả 3 hỏng · 2 ảnh nền đúng cỡ **2976** (hiện 1536 nên núi lặp ~1,9 lần/khung). ~~8 ảnh bóng đổ chưa lắp được~~ **xong** (dòng G1 §4). Quy trình + bẫy: [`SO-TAY-LAM-MAP.md`](docs/my-thuat/SO-TAY-LAM-MAP.md) |
 | 1a′ | **Cổng rời map — mới làm nửa đường** | Cổng + đổi map đã chạy (dòng G1 §4), nhưng **chỉ map 1 ↔ map 2** có cổng. Map 3/4/5 vẫn là **ngõ cụt**: ai chọn làng Sương Mù/Đá/Mây thì sinh ra ở đó và không đi đâu được. Ba map ấy cũng chưa có mỹ thuật, chưa có `collision` riêng (đang dùng biên dự phòng 4096) và chưa có NPC/quái — làm cổng cho chúng chỉ có nghĩa sau khi có nội dung. Bảng cổng nằm ở `server/internal/game/banDo.go` (`diemDiMap1`/`diemDiMap2`) |
-| ✅ | ~~**KH6b — Boss**~~ | **Bản 1 đủ code 02/09 (`ea43237`)**: 15 task, tất cả trên `main`. Boss sinh theo lịch ngoài actor, xuất hiện `-5`, chào/đánh/thoại qua 44, người đánh boss qua `-60` id âm, boss đánh trả bằng chiêu KH6, chia thưởng theo đóng góp vào `KinhNghiem`, chết → xác 3s → biến hình giữ id hoặc `-6` rời hẳn, nổi giận theo %máu, chạy chữ 93 qua loa. **Đã soi** (28 đột biến, 0 lỗi code, 3 lỗ hổng test đã bịt — `1b57a55`). **Còn duy nhất: nghiệm thu tay client Unity** (chỉ chủ dự án) |
+| ✅ | ~~**KH6b — Boss**~~ | **Bản 1 đủ code 02/09 (`ea43237`)**: 15 task, tất cả trên `main`. Boss sinh theo lịch ngoài actor, xuất hiện `-5`, chào/đánh/thoại qua 44, người đánh boss qua `-60` id âm, boss đánh trả bằng chiêu KH6, chia thưởng theo đóng góp vào `KinhNghiem`, chết → xác 3s → biến hình giữ id hoặc `-6` rời hẳn, nổi giận theo %máu, chạy chữ 93 qua loa. **Đã soi** (28 đột biến, 0 lỗi code, 3 lỗ hổng test đã bịt — `1b57a55`). **NGHIỆM THU 03/09** — xem dòng ngay dưới bảng. |
 | ✅ | ~~KH6c — Stress test 20 client cùng khu vực~~ | **Xong, gộp `322b140`.** Actor không treo dưới ~5 triệu sự kiện/2s, giữ nhịp, gạch đúng client chậm; thêm đo trễ nhịp (`soNhipTre`/`treNhipLauNhatMs`). Dùng test in-process (`suKienDiChuyen` + `phienStress`), không cần TCP thật |
 | 2 | KH7 — Vật phẩm, hành trang, cửa hàng, giao dịch | 🧱 **Phải chốt căn cước vật phẩm + chống nhân bản trong đặc tả TRƯỚC khi viết code** ([BO-SUNG](docs/superpowers/plans/BO-SUNG-LO-TRINH.md) Khối 3). Tách rõ 4 thứ: cửa hàng NPC / giao dịch 2 người / ký gửi / kho |
 | 3 | KH8 — Kho nội dung YAML + nạp nóng | Để thêm chiêu/quái mà không phải sửa code. **Kèm cân bằng thực nghiệm** (đơn vị `SatThuong` phải chốt — TODO trong `satthuong.go`) |
@@ -174,6 +174,22 @@ Xếp theo thứ tự nên làm:
 | — | **W3 — Web:** cấu hình / nhật ký / nạp thẻ, phân trang, thu hồi phiên JWT | Một phần phụ thuộc hệ thống game chưa có |
 | — | **B — Bảo mật** (xem §7) | **Phải xong trước khi mở công khai** |
 | — | **V — Triển khai VPS**, giám sát, phát hành | |
+
+**Nghiệm thu KH6b Boss (03/09, qua Unity MCP + máy chủ tạm):**
+- **Chứng minh SỐNG trong client Unity thật:** máy chủ sinh boss đúng lịch (log `da gui lenh sinh boss`),
+  **chạy chữ toàn máy chủ** (log `phat thanh toan may chu noiDung="Boss Kẻ Lạ Mặt vừa xuất hiện!"`),
+  client **nhận và hiển thị** hai boss trong danh sách boss trên màn với ĐÚNG tên Naruto + máu khớp dữ
+  liệu (`Kẻ Lạ Mặt [2.400]`, `Học Viên Đào Tẩu [600]`), map Làng Lá + nhân vật Naruto vẽ đúng (ảnh chụp).
+- **Combat (đánh trúng / boss đánh trả / lột xác giữ id / nổi giận):** chứng minh **tất định bằng bộ test
+  tích hợp máy chủ** — `go test ./internal/game/` xanh, gồm `TestBossHoatDongDanhNguoiTrongTam` (boss đánh
+  người trong tầm), `TestNguoiMoiVaoThayBoss` (người vào SAU khi boss sinh vẫn nhận boss),
+  `TestBienHinhGiuNguyenIdVaGuiSauTruocNam` (lột xác giữ id), `TestMocNoiGian*` (nổi giận theo %máu),
+  `TestChiaThuongTheoDongGop*` (chia thưởng).
+- **Giới hạn công cụ (KHÔNG phải lỗi code):** chọc combat tương tác qua Unity MCP reflection không tái hiện
+  ổn định được vì (a) vị trí client em set qua reflection **desync** với vị trí authoritative của máy chủ,
+  (b) nước đi vượt `NguongBuoc=500` hoặc vướng va chạm bị máy chủ từ chối im lặng → đòn thành "vượt tầm"/
+  "miss", (c) gói gửi bất đồng bộ. Máy chủ chỉ tính sát thương theo vị trí THẬT của nó, nên poke tay không
+  tới tầm boss. Đây là ma sát của bộ công cụ; đường code combat đã được bộ test trên phủ.
 
 **Hai việc chỉ chủ dự án làm được (nghiệm thu tay):**
 1. Mở client Unity thật, đăng nhập → xem nhân vật có đứng trong làng không *(nghiệm thu KH4)*.
@@ -415,9 +431,15 @@ Gom lại thành **Kế hoạch B**, sửa lẻ từng cái là vô nghĩa:
   - Ba con số chỉnh được bằng biến môi trường (`NRO_CHONGDO_SUCCHUA`, `NRO_CHONGDO_HOIPHUC_GIAY`,
     `NRO_TOIDA_KETNOI_MOI_IP`) — nhà mạng VN dùng NAT lớn, ngày mở cửa có thể phải nới ngay.
 - ⚠️ **CÒN HỞ, đã biết:** (a) **tấn công phân tán** (botnet nhiều IP) vẫn lọt — muốn chặn cần captcha
-  hoặc xác minh email, game chưa có cả hai; (b) **rò rỉ thời gian phía `web/` còn nguyên** — mới vá phía
-  game; cách chữa giống hệt: băm giả ở nhánh không tìm thấy tài khoản; (c) chưa chạy được `go test -race`
+  hoặc xác minh email, game chưa có cả hai; (b) chưa chạy được `go test -race`
   (máy không có `gcc`), hai test đồng thời đã viết sẵn chờ máy có trình biên dịch C.
+- ~~**rò rỉ thời gian phía `web/`**~~ → **ĐÃ VÁ 03/09** (gộp `7184b95`). `web/lib/matkhau.ts`: thêm
+  `BAM_GIA` (băm PBKDF2 THẬT của một mật khẩu ngẫu nhiên, 100.000 vòng, dán cứng) + `canBangThoiGian()`;
+  `web/app/dang-nhap/actions.ts`: nhánh "không tìm thấy tài khoản" nay LUÔN chạy `canBangThoiGian()` thay
+  vì `||` đoản mạch trả ngay — y hệt `server/internal/auth/password.go`. Đo bằng `rothoigian.test.ts`:
+  **trước ~10,5 ms chênh lệch, sau ~0,06–0,10 ms**. Khác bên Go: ở tầng web+PostgreSQL tín hiệu sau vá
+  (~60–100 µs) SÁT nhiễu đo (~30–90 µs), không luôn dưới nhiễu như Go (106/478 µs); test dùng thêm
+  ngưỡng tuyệt đối 0,5 ms làm tiêu chí chính. Test đột biến (khôi phục `||`) giết được ngay (10,5 ms).
 - ~~Web: JWT **không thu hồi phiên** khi tài khoản bị khoá / hạ quyền; đổi mật khẩu chưa
   kiểm cờ `bi_khoa`~~ → **ĐÃ VÁ 27/08** (`9492315`). `docPhien()` nay hỏi CSDL ở **mọi**
   lần đọc phiên và trả dữ liệu **từ CSDL**, không từ payload token; thêm cột `the_he_phien`

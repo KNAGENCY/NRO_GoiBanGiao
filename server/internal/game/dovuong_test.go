@@ -15,6 +15,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"nroserver/internal/protocol"
 	"nroserver/internal/store"
@@ -137,6 +138,11 @@ type khoNhatGia struct {
 	tui     []store.VatPham
 	loiNhat error
 	soLan   int
+
+	// Duong DON DO HET GIO (bo sung KH7).
+	loiHuy   error
+	soLanHuy int
+	daHuy    []int64
 }
 
 func (k *khoNhatGia) LayTui(context.Context, int64, string) ([]store.VatPham, error) {
@@ -146,6 +152,12 @@ func (k *khoNhatGia) LayTui(context.Context, int64, string) ([]store.VatPham, er
 func (k *khoNhatGia) NhatLen(context.Context, int64, int64, int16) error {
 	k.soLan++
 	return k.loiNhat
+}
+
+func (k *khoNhatGia) HuyDoDuoiDatHetGio(_ context.Context, vatPhamID int64) error {
+	k.soLanHuy++
+	k.daHuy = append(k.daHuy, vatPhamID)
+	return k.loiHuy
 }
 
 // khuVucDoGia dung mot khu vuc CHUA BatDau() voi hai nguoi dung yen tai (0,0)
@@ -380,5 +392,218 @@ func TestXepKhiHangDayTraFalse(t *testing.T) {
 	}
 	if bo.Xep(yeuCauNhat{}) {
 		t.Fatalf("hang day thi Xep phai tra false, khong duoc chan")
+	}
+}
+
+// ---------------------------------------------------------------------------
+// C. HAN GIO TU DON do roi duoi dat (bo sung KH7)
+// ---------------------------------------------------------------------------
+
+// mocDonDo la moc thoi gian co dinh cho ca nhom test nay. Gia tri cu the khong
+// quan trong; cai quan trong la MOI moc deu do dong ho TIEM (khuVucHetGioGia)
+// sinh ra, khong mot cho nao goi time.Now().
+var mocDonDo = time.Date(2026, 9, 3, 12, 0, 0, 0, time.UTC)
+
+// khuVucHetGioGia dung khu vuc CHUA BatDau() voi dong ho tiem duoc, mot nguoi
+// choi (de bat goi -21) va mot bo nhat do gia. Tra ve con tro `luc` de test tu
+// BOM dong ho: `*luc = luc.Add(...)`.
+func khuVucHetGioGia(t *testing.T) (k *KhuVuc, p *phienGiaKhuVuc, kho *khoNhatGia,
+	bo *BoNhatDo, luc *time.Time) {
+	t.Helper()
+	moc := mocDonDo
+	luc = &moc
+
+	k = MoKhuVuc(TimBanDo(1))
+	k.dongHo = func() time.Time { return *luc }
+	p = &phienGiaKhuVuc{}
+	k.xuLy(suKienVao{nv: &store.NhanVat{ID: 1, Ten: "A", HpHienTai: 100, HpToiDa: 100}, phien: p})
+
+	kho = &khoNhatGia{}
+	bo = MoBoNhatDo(kho, 8)
+	k.GanBoNhat(bo)
+	return k, p, kho, bo, luc
+}
+
+// thaMonGia tha MOT mon xuong khu vuc va tra itemMapId (dong bo, khong BatDau).
+func thaMonGia(t *testing.T, k *KhuVuc, vatPhamID int64) int16 {
+	t.Helper()
+	tra := make(chan int16, 1)
+	k.xuLy(suKienThaDo{mon: doVuong{
+		vatPhamID: vatPhamID, mauID: 3, soLuong: 1, x: 0, y: 0, loai: 6, ten: "Kunai",
+	}, traLoi: tra})
+	return <-tra
+}
+
+// goi21 loc ra cac goi -21 trong ban tin cua mot phien.
+func goi21(p *phienGiaKhuVuc) []*protocol.Message {
+	var ra []*protocol.Message
+	for _, m := range p.banTin() {
+		if m != nil && m.Command == lenhDoBienMat {
+			ra = append(ra, m)
+		}
+	}
+	return ra
+}
+
+// ⚠️ CHOT BIEN. Chua toi han (thieu 100ms) thi KHONG don. Neu ai doi `>=` o
+// nhipDonDoHetGio thanh `>` thi test NAY van xanh — cap doi cua no
+// (TestDonDoDungHanThiDon) moi do. Hai test phai di CUNG NHAU.
+func TestDonDoChuaToiHanThiKhongDon(t *testing.T) {
+	k, p, kho, bo, luc := khuVucHetGioGia(t)
+	id := thaMonGia(t, k, 555)
+
+	*luc = luc.Add(hetGioDoRoi - 100*time.Millisecond)
+	k.nhipTim()
+
+	if _, con := k.doDuoiDat[id]; !con {
+		t.Fatalf("chua toi han ma mon da bi don")
+	}
+	if g := goi21(p); len(g) != 0 {
+		t.Fatalf("chua toi han thi khong duoc phat -21, phat %d goi", len(g))
+	}
+	if n := len(bo.hang); n != 0 {
+		t.Fatalf("chua toi han thi khong duoc xep yeu cau huy, xep %d", n)
+	}
+	if kho.soLanHuy != 0 {
+		t.Fatalf("actor khong duoc cham CSDL, goi %d lan", kho.soLanHuy)
+	}
+}
+
+// ⚠️ CHOT BIEN + CHOT DONG HO TIEM. DUNG han thi don: mon roi khoi map, phat
+// DUNG MOT goi -21 dung itemMapId, va xep DUNG MOT yeu cau huy CSDL.
+//
+// Test nay do neu:
+//   - don ma khong phat -21 (dot bien 1);
+//   - so `>` thay vi `>=` (dot bien 2 — dung han la bien);
+//   - dung time.Now() thay k.dongHo() (dot bien 3 — dong ho that moi nhich vai
+//     micro giay, mon khong bao gio toi han, mon van con trong map).
+func TestDonDoDungHanThiDon(t *testing.T) {
+	k, p, kho, bo, luc := khuVucHetGioGia(t)
+	id := thaMonGia(t, k, 555)
+
+	*luc = luc.Add(hetGioDoRoi)
+	k.nhipTim()
+
+	if _, con := k.doDuoiDat[id]; con {
+		t.Fatalf("dung han ma mon van con duoi dat")
+	}
+	g := goi21(p)
+	if len(g) != 1 {
+		t.Fatalf("phai phat dung MOT goi -21, phat %d", len(g))
+	}
+	than := protocol.NewWriter()
+	than.Short(id)
+	kiemGoi(t, g[0], lenhDoBienMat, than.Bytes())
+
+	if n := len(bo.hang); n != 1 {
+		t.Fatalf("phai xep dung MOT yeu cau huy, xep %d", n)
+	}
+	yc := <-bo.hang
+	if !yc.huyHetGio {
+		t.Fatalf("yeu cau phai duoc danh dau huyHetGio")
+	}
+	if yc.mon.vatPhamID != 555 {
+		t.Fatalf("yeu cau huy phai mang vatPhamID 555, mang %d", yc.mon.vatPhamID)
+	}
+	if kho.soLanHuy != 0 {
+		t.Fatalf("actor KHONG duoc tu goi CSDL (§6.10b), goi %d lan", kho.soLanHuy)
+	}
+}
+
+// Mon DA BI NHAT truoc do (khong con trong map) thi nhip don khong dung toi:
+// khong -21 lan hai, khong yeu cau huy. Neu khong the, nguoi vua nhat duoc mon
+// se bi may chu danh dau DA_HUY chinh mon dang nam trong tui ho.
+func TestDonDoKhongDungMonDaNhat(t *testing.T) {
+	k, p, _, bo, luc := khuVucHetGioGia(t)
+	id := thaMonGia(t, k, 555)
+
+	// Nguoi choi nhat mon (actor go khoi map ngay).
+	k.xuLy(suKienXinNhat{idNhanVat: 1, itemMapId: id})
+	if _, con := k.doDuoiDat[id]; con {
+		t.Fatalf("tien de sai: mon phai da bi go khi xin nhat")
+	}
+	<-bo.hang // rut yeu cau NHAT ra de dem cho sach
+
+	*luc = luc.Add(hetGioDoRoi * 10)
+	k.nhipTim()
+
+	if g := goi21(p); len(g) != 0 {
+		t.Fatalf("mon da bi nhat, khong duoc phat -21, phat %d", len(g))
+	}
+	if n := len(bo.hang); n != 0 {
+		t.Fatalf("mon da bi nhat, khong duoc xep yeu cau huy, xep %d", n)
+	}
+}
+
+// Hai mon tha o hai moc khac nhau: nhip chi don DUNG cai da toi han.
+func TestDonDoChiDonMonToiHan(t *testing.T) {
+	k, p, _, bo, luc := khuVucHetGioGia(t)
+	idCu := thaMonGia(t, k, 111)
+
+	*luc = luc.Add(30 * time.Second)
+	idMoi := thaMonGia(t, k, 222)
+
+	// Toi han cua mon CU (30s + 20s = 50s), mon MOI moi duoc 20s.
+	*luc = luc.Add(hetGioDoRoi - 30*time.Second)
+	k.nhipTim()
+
+	if _, con := k.doDuoiDat[idCu]; con {
+		t.Fatalf("mon cu da toi han, phai bi don")
+	}
+	if _, con := k.doDuoiDat[idMoi]; !con {
+		t.Fatalf("mon moi chua toi han, khong duoc don")
+	}
+	g := goi21(p)
+	if len(g) != 1 {
+		t.Fatalf("phai phat dung MOT goi -21, phat %d", len(g))
+	}
+	than := protocol.NewWriter()
+	than.Short(idCu)
+	kiemGoi(t, g[0], lenhDoBienMat, than.Bytes())
+
+	if n := len(bo.hang); n != 1 {
+		t.Fatalf("phai xep dung MOT yeu cau huy, xep %d", n)
+	}
+	if yc := <-bo.hang; yc.mon.vatPhamID != 111 {
+		t.Fatalf("phai huy mon cu (111), huy %d", yc.mon.vatPhamID)
+	}
+}
+
+// Bo nhat do xu ly yeu cau huyHetGio: goi DUNG HuyDoDuoiDatHetGio voi dung id,
+// KHONG goi NhatLen, va KHONG bao nguoc ve actor (mon da bien mat khoi game).
+func TestBoNhatDoXuLyYeuCauHuyHetGio(t *testing.T) {
+	k, _, kho, bo, _ := khuVucHetGioGia(t)
+
+	bo.lam(yeuCauNhat{khu: k, itemMapId: 7, huyHetGio: true,
+		mon: doVuong{vatPhamID: 999}})
+
+	if kho.soLanHuy != 1 || len(kho.daHuy) != 1 || kho.daHuy[0] != 999 {
+		t.Fatalf("phai goi HuyDoDuoiDatHetGio dung mot lan voi id 999, nhan %d lan %v",
+			kho.soLanHuy, kho.daHuy)
+	}
+	if kho.soLan != 0 {
+		t.Fatalf("duong huy khong duoc goi NhatLen, goi %d lan", kho.soLan)
+	}
+	if n := len(k.hopThu); n != 0 {
+		t.Fatalf("duong huy KHONG duoc bao nguoc ve actor, hop thu co %d su kien", n)
+	}
+}
+
+// Huy CSDL that bai thi chi log — mon KHONG quay lai mat dat (khac han duong
+// nhat). Neu ai do "sua cho dung" bang cach tra mon lai, test nay do.
+func TestHuyHetGioThatBaiThiMonKhongQuayLai(t *testing.T) {
+	k, _, kho, bo, luc := khuVucHetGioGia(t)
+	kho.loiHuy = errors.New("CSDL sap")
+	id := thaMonGia(t, k, 555)
+
+	*luc = luc.Add(hetGioDoRoi)
+	k.nhipTim()
+	bo.lam(<-bo.hang)
+
+	if _, con := k.doDuoiDat[id]; con {
+		t.Fatalf("huy CSDL loi thi mon van phai bien mat khoi game")
+	}
+	if n := len(k.hopThu); n != 0 {
+		t.Fatalf("loi huy khong duoc sinh su kien nao cho actor, co %d", n)
 	}
 }

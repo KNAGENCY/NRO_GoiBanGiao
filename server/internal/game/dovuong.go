@@ -111,6 +111,20 @@ const (
 	tamNhatBinhPhuong int64 = 120 * 120
 )
 
+// hetGioDoRoi la thoi gian MOT mon duoc nam duoi dat truoc khi may chu tu don
+// no di (phat -21 cho ca khu vuc + danh dau DA_HUY trong CSDL).
+//
+// NGUON: ban Java `1-MAY-CHU-GAME/src/map/ItemMap.java:133` — `Util
+// .canDoWithTime(createTime, 50000)` roi `removeItemMapAndSendClient(this)`.
+// Tuc la 50 GIAY cho mon thuong. (Ban Java con nhanh 180000ms cho mon "rong"
+// va mot ru cac ngoai le theo mapId/itemId — ngoc rong Namek, doanh trai, ban
+// do 21/22/23... Nhung deu la dac thu Dragon Ball, KHONG chep sang game
+// Naruto: ban Go don MOI mon theo dung mot han.)
+//
+// Con so 45000 ngay tren no (ItemMap.java:128) la luc mon "mat chu" — do uu
+// tien chu so huu, viec cua KH8, chua lam o day.
+const hetGioDoRoi = 50 * time.Second
+
 // Loai vat pham (Item.type) can GHI HAI SHORT o goi -20 — day chinh la loi L2
 // cua ban Java (client doc hai, Java ghi mot -> tien khong cong, im lang).
 const (
@@ -272,6 +286,15 @@ type doVuong struct {
 	loai int8
 	// ten dung cho loi nhan "Ban nhan duoc <ten>". Chup cung luc voi loai.
 	ten string
+	// luc la MOC THA MON xuong dat, do bang k.dongHo() (dong ho TIEM DUOC cua
+	// khu vuc — KHONG BAO GIO time.Now() trong logic, §6.9). Nhip don do het
+	// gio so `bayGio.Sub(luc)` voi hetGioDoRoi.
+	//
+	// Ghi trong thaDoXuongKhuVuc (chay trong actor) chu KHONG phai o
+	// ThaDoVaoKhuVuc/BoRoiDo: hai cho do chay NGOAI actor, doc k.dongHo tu do
+	// la doc mot truong cua actor tu goroutine khac (dua du lieu), va moc "luc
+	// mon that su nam xuong dat" dung ra phai la luc actor cam no vao map.
+	luc time.Time
 }
 
 // suKienThaDo bao actor: dat MOT mon (da co dong trong CSDL o DUOI_DAT) xuong
@@ -344,6 +367,7 @@ func (k *KhuVuc) thaDoXuongKhuVuc(mon doVuong) int16 {
 		return -1
 	}
 	ban := mon
+	ban.luc = k.dongHo() // moc bat dau dem gio — xem truong doVuong.luc
 	k.doDuoiDat[id] = &ban
 	if mon.mauID < 0 || mon.mauID > 32767 {
 		slog.Error("mau_id ngoai mien short, khong phat goi 68", "mauID", mon.mauID)
@@ -353,13 +377,63 @@ func (k *KhuVuc) thaDoXuongKhuVuc(mon doVuong) int16 {
 	return id
 }
 
-// donDoHetGio go mon khoi mat dat va bao ca khu vuc bang -21. CHAY TRONG ACTOR.
+// donDoHetGio go mon khoi mat dat, bao ca khu vuc bang -21, roi XEP yeu cau
+// danh dau DA_HUY trong CSDL. CHAY TRONG ACTOR.
+//
+// THU TU BA BUOC LA BAT BUOC, doi cho nao cung sinh loi:
+//  1. GO KHOI MAP TRUOC — tu giay phut nay khong yeu cau xin nhat nao lot qua
+//     duoc (xuLyXinNhat tra ve ngay khi khong thay mon). Neu phat -21 truoc roi
+//     moi go, mot suKienXinNhat xu ly xen vao van thay mon con day -> nguoi choi
+//     nhat duoc mot mon ma client cua ho vua xoa khoi man hinh.
+//  2. PHAT -21 — client xoa mon khoi man hinh (khong hoat anh bay).
+//  3. XEP YEU CAU CSDL — actor KHONG BAO GIO tu goi store (§6.10b).
+//
+// Huy CSDL that bai thi CHI LOG: mon da bien mat khoi game va KHONG quay lai
+// (khac hoan toan duong nhat — o do mon quay lai mat dat vi chua ai bao no bien
+// mat). Chap nhan mot dong `DUOI_DAT` mo coi trong CSDL con hon tra mon lai roi
+// de nguoi choi "nhat ma" mot mon ma moi client da xoa: dong rac chi ton cho
+// nguoi doc bao cao, con mon ma la loi choi thay duoc.
 func (k *KhuVuc) donDoHetGio(itemMapId int16) {
-	if _, co := k.doDuoiDat[itemMapId]; !co {
+	mon, co := k.doDuoiDat[itemMapId]
+	if !co {
 		return // da bi nhat truoc do — khong phat gi, khong loi
 	}
+	vatPhamID := mon.vatPhamID
 	delete(k.doDuoiDat, itemMapId)
 	k.phatChoCaKhuVuc(goiDoBienMat(itemMapId))
+
+	if bo := k.boNhat.Load(); bo != nil {
+		if !bo.Xep(yeuCauNhat{khu: k, itemMapId: itemMapId, huyHetGio: true,
+			mon: doVuong{vatPhamID: vatPhamID}}) {
+			slog.Warn("hang bo nhat do day, khong huy duoc do het gio trong CSDL",
+				"vatPhamID", vatPhamID)
+		}
+	}
+}
+
+// nhipDonDoHetGio duyet do duoi dat va don nhung mon qua han. CHAY TRONG ACTOR,
+// goi tu nhipTim (100ms) sau nhipBoss.
+//
+// bayGio nhan tu nhipTim (khong tu goi k.dongHo() lai) — cung ly do voi nhipBoss:
+// moi mon trong CUNG mot nhip phai duoc do bang CUNG mot moc, khong thi hai mon
+// tha cung luc co the roi vao hai phia cua nguong.
+//
+// So sanh la `>=` (khong phai `>`): dung han thi don. Bien nay co test rieng.
+//
+// Gom id can don vao mot slice TRUOC roi moi don: xoa khoi map ngay trong vong
+// `range` cua chinh map do la hop le trong Go, nhung donDoHetGio con phat goi
+// tin cho ca khu vuc, va giu vong lap "chi doc" lam cho ham nay khong the vo
+// khi ai do them logic vao donDoHetGio sau nay.
+func (k *KhuVuc) nhipDonDoHetGio(bayGio time.Time) {
+	var canDon []int16
+	for id, mon := range k.doDuoiDat {
+		if bayGio.Sub(mon.luc) >= hetGioDoRoi {
+			canDon = append(canDon, id)
+		}
+	}
+	for _, id := range canDon {
+		k.donDoHetGio(id)
+	}
 }
 
 // xuLyXinNhat la than cua case suKienXinNhat. CHAY TRONG ACTOR.
@@ -458,6 +532,11 @@ var errTuiDay = errors.New("tui da day")
 type KhoNhat interface {
 	LayTui(ctx context.Context, nvID int64, noiChua string) ([]store.VatPham, error)
 	NhatLen(ctx context.Context, nvID int64, vatPhamID int64, oSo int16) error
+	// HuyDoDuoiDatHetGio danh dau mon DA_HUY khi het gio khong ai nhat. Dat o
+	// CUNG interface nay (thay vi mot bo/goroutine rieng) vi no la CUNG mot
+	// duong: cung mot bang, cung kieu giao dich ngan, va hai viec khong bao gio
+	// chay tren cung mot mon (mon da bi don thi khong con de nhat).
+	HuyDoDuoiDatHetGio(ctx context.Context, vatPhamID int64) error
 }
 
 // yeuCauNhat la MOT yeu cau ghi CSDL do actor xep ra.
@@ -466,6 +545,11 @@ type yeuCauNhat struct {
 	nvID      int64
 	itemMapId int16
 	mon       doVuong
+	// huyHetGio = true doi y nghia ca yeu cau: KHONG phai "cho nguoi nvID nhat
+	// mon nay" ma la "danh dau mon nay DA_HUY vi het gio". Khi do nvID vo nghia
+	// va KHONG co suKienNhatXong nao di nguoc ve actor (mon da bien mat khoi
+	// game roi, actor khong con gi de lam voi ket qua).
+	huyHetGio bool
 }
 
 // BoNhatDo la goroutine ghi CSDL cho duong nhat do. Mot bo cho ca may chu la
@@ -531,6 +615,18 @@ func (b *BoNhatDo) Dung() { close(b.dung) }
 func (b *BoNhatDo) lam(yc yeuCauNhat) {
 	ctx, huy := context.WithTimeout(context.Background(), b.hetGio)
 	defer huy()
+
+	if yc.huyHetGio {
+		// Duong DON DO HET GIO: khong bao nguoc ve actor. Loi -> chi log (xem
+		// donDoHetGio: chap nhan mot dong CSDL mo coi hon la mot mon ma).
+		// ErrDaCoNguoiNhat o day nghia la mon vua kip duoc nhat trong khe hoi
+		// giua hai lop — CSDL da chan dung, khong phai su co.
+		if err := b.kho.HuyDoDuoiDatHetGio(ctx, yc.mon.vatPhamID); err != nil {
+			slog.Warn("huy do het gio trong CSDL that bai",
+				"vatPhamID", yc.mon.vatPhamID, "loi", err)
+		}
+		return
+	}
 
 	loi := b.ghi(ctx, yc)
 	yc.khu.Gui(suKienNhatXong{

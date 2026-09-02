@@ -57,11 +57,18 @@ const (
 	LyDoBo       = "BO"
 	LyDoGiaoDich = "GIAO_DICH"
 	LyDoAdmin    = "ADMIN"
+	// LyDoHetGio: mon nam duoi dat qua lau khong ai nhat -> may chu tu don
+	// (KH7, don do het gio). Tach RIENG khoi LyDoBo vi hai viec khac han nhau:
+	// BO la nguoi choi tu tay vut, HET_GIO la may chu doc so. Nham hai cai nay
+	// lam nhat ky doi chu noi doi (khieu nai "toi co vut dau" khong tra duoc).
+	// Cot `ly_do` khong co CHECK o CSDL (migration 0005), danh sach nay la CHOT
+	// DUY NHAT — them chu moi phai them CA O DAY va o lyDoHopLe ben duoi.
+	LyDoHetGio = "HET_GIO"
 )
 
 func lyDoHopLe(lyDo string) bool {
 	switch lyDo {
-	case LyDoSinhRa, LyDoMuaNPC, LyDoBanNPC, LyDoNhat, LyDoDung, LyDoBo, LyDoGiaoDich, LyDoAdmin:
+	case LyDoSinhRa, LyDoMuaNPC, LyDoBanNPC, LyDoNhat, LyDoDung, LyDoBo, LyDoGiaoDich, LyDoAdmin, LyDoHetGio:
 		return true
 	}
 	return false

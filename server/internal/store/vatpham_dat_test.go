@@ -236,3 +236,74 @@ func TestThaXuongDatLyDoKhongHopLe(t *testing.T) {
 		t.Fatalf("ly do sai phai ErrLyDoKhongHopLe, nhan %v", err)
 	}
 }
+
+// ------------------------------------------------- HuyDoDuoiDatHetGio (KH7)
+
+// lyDoLichSuCua doc ly_do cua dong lich su MOI NHAT cua mot mon.
+func lyDoLichSuCua(t *testing.T, s *Store, id int64) string {
+	t.Helper()
+	var lyDo string
+	if err := s.pool.QueryRow(context.Background(),
+		`SELECT ly_do FROM vat_pham_lich_su WHERE vat_pham_id = $1 ORDER BY id DESC LIMIT 1`,
+		id).Scan(&lyDo); err != nil {
+		t.Fatalf("doc ly_do that bai: %v", err)
+	}
+	return lyDo
+}
+
+// DUONG VUI: mon nam duoi dat het gio -> noi_chua thanh DA_HUY va co THEM dung
+// mot dong lich su ly do HET_GIO (tong 2: SINH_RA + HET_GIO).
+func TestHuyDoDuoiDatHetGioDoiDaHuyVaGhiLichSu(t *testing.T) {
+	s := moKhoVatPham(t)
+	ctx := context.Background()
+
+	id, err := s.SinhDoDuoiDat(ctx, 3, 5, khongOpt())
+	if err != nil {
+		t.Fatalf("sinh do duoi dat that bai: %v", err)
+	}
+	donDoDuoiDat(t, s, id)
+
+	if err := s.HuyDoDuoiDatHetGio(ctx, id); err != nil {
+		t.Fatalf("huy do het gio that bai: %v", err)
+	}
+	if noi := noiChuaCua(t, s, id); noi != NoiChuaDaHuy {
+		t.Fatalf("noi_chua = %q, mong doi %q", noi, NoiChuaDaHuy)
+	}
+	if n := demLichSu(t, s, id); n != 2 {
+		t.Fatalf("lich su phai co 2 dong (SINH_RA + HET_GIO), co %d", n)
+	}
+	if ly := lyDoLichSuCua(t, s, id); ly != LyDoHetGio {
+		t.Fatalf("ly do dong cuoi = %q, mong doi %q", ly, LyDoHetGio)
+	}
+}
+
+// ⚠️ CHOT CHAN DOT BIEN: goi len mon DA BI NHAT (dang o TUI) -> cham 0 dong ->
+// ErrDaCoNguoiNhat, mon VAN nam trong tui va KHONG co dong lich su nao them.
+// Neu ai bo `AND noi_chua='DUOI_DAT'` khoi cau UPDATE thi may chu se tieu huy
+// chinh mon dang nam trong tui nguoi choi — test nay do ngay.
+func TestHuyDoDuoiDatHetGioKhongDungMonDaNhat(t *testing.T) {
+	s := moKhoVatPham(t)
+	ctx := context.Background()
+	nv := taoNhanVatThu(t, s, 0)
+	donKhoCua(t, s, nv.ID)
+
+	id, err := s.SinhDoDuoiDat(ctx, 3, 1, khongOpt())
+	if err != nil {
+		t.Fatalf("sinh do duoi dat that bai: %v", err)
+	}
+	donDoDuoiDat(t, s, id)
+	if err := s.NhatLen(ctx, nv.ID, id, 0); err != nil {
+		t.Fatalf("nhat len that bai: %v", err)
+	}
+	truoc := demLichSu(t, s, id)
+
+	if err := s.HuyDoDuoiDatHetGio(ctx, id); !errors.Is(err, ErrDaCoNguoiNhat) {
+		t.Fatalf("huy mon da bi nhat phai ErrDaCoNguoiNhat, nhan %v", err)
+	}
+	if noi := noiChuaCua(t, s, id); noi != NoiChuaTui {
+		t.Fatalf("mon phai van o TUI, dang o %q", noi)
+	}
+	if n := demLichSu(t, s, id); n != truoc {
+		t.Fatalf("khong duoc ghi them dong lich su nao, %d -> %d", truoc, n)
+	}
+}

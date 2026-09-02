@@ -2032,6 +2032,13 @@ func (k *KhuVuc) nhipTim() {
 	// ban Java — bay #5 cua thiet ke §7: hai luong cung ghi viTri la tranh chap
 	// du lieu that.
 	k.nhipBoss(nguoi, bayGio)
+
+	// KH7 (bo sung): don do roi qua han khoi mat dat. Dat SAU nhipBoss vi boss
+	// chet co the lam roi do NGAY trong nhip nay — mon vua roi thi `luc` bang
+	// dung `bayGio`, hieu so 0 < hetGioDoRoi nen khong bi don oan; nhung dat
+	// truoc/sau van la mot quyet dinh co y: don do la viec cuoi cung cua nhip,
+	// khong anh huong toi gi phia sau no.
+	k.nhipDonDoHetGio(bayGio)
 }
 
 // hoiSinhQuai xu ly nhanh "quai dang cho hoi sinh" cua nhipTim — GOI KHI

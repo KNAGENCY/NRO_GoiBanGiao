@@ -117,6 +117,35 @@ type lichBossCoTheDung interface {
 	Dung()
 }
 
+// boDoCoTheDung la phan toi thieu ma trinh tu tat may chu can o hai bo ghi
+// CSDL cua he vat pham (KH7): BoNhatDo (task 11) va BoRoiDo (task 12) — CHI
+// Dung(), cung ly do voi loaCoTheDung/lichBossCoTheDung o tren.
+type boDoCoTheDung interface {
+	Dung()
+}
+
+// noiVatPham lap rap HAI goroutine ghi CSDL cua he vat pham va cam chung vao
+// ca 5 khu vuc, roi bat chung chay.
+//
+// TRUOC dong nay, khong noi nao trong ca du an goi MoBoNhatDo/MoBoRoiDo —
+// nghia la toan bo duong NHAT (task 11) nam do khong ai goi toi (nguoi choi
+// bam nhat thi mon quay lai mat dat, im lang), va quai/boss chet KHONG roi gi.
+// Day la "noi day that" cua ca hai task.
+//
+// GOI DUNG MOT LAN luc khoi dong, TRUOC khi mo cong nghe: mot nguoi choi vao
+// truoc luc noi day se khong nhat duoc do ma khong mot thong bao nao.
+//
+// Tra ve hai bo de donDepKhiTat dung chung — xem thu tu tat o ham do.
+func noiVatPham(kho *store.Store, soKhuVuc *game.SoKhuVuc) (*game.BoNhatDo, *game.BoRoiDo) {
+	boNhat := game.MoBoNhatDo(kho, 0)
+	boRoi := game.MoBoRoiDo(kho, 0)
+	soKhuVuc.GanBoNhatDo(boNhat)
+	soKhuVuc.GanBoRoiDo(boRoi)
+	go boNhat.Chay()
+	go boRoi.Chay()
+	return boNhat, boRoi
+}
+
 // noiLichBoss dung bo dieu phoi lich boss CHUNG cua may chu tu kho noi dung
 // boss (noidungboss.go, Task 15) roi BatDau() no ngay — day la "diem noi day"
 // cua KH6b Task 14 phan hai.
@@ -287,11 +316,28 @@ func noiBoPhatThanh(soKhuVuc *game.SoKhuVuc) *game.BoPhatThanh {
 // (khong co co che "rut het session dang mo" — se can them ha tang theo doi
 // TOAN BO session dang song, ngoai pham vi Task 6). Ghi lai o day de nguoi
 // sau khong tuong nham day la khe ho CHUA duoc xem xet.
-func donDepKhiTat(ctx context.Context, kho khoDong, soKhuVuc *game.SoKhuVuc, thoGhi *game.ThoGhi, boLuu *game.BoLuuDinhKy, lichBoss lichBossCoTheDung, loa loaCoTheDung) error {
+func donDepKhiTat(ctx context.Context, kho khoDong, soKhuVuc *game.SoKhuVuc, thoGhi *game.ThoGhi, boLuu *game.BoLuuDinhKy, lichBoss lichBossCoTheDung, loa loaCoTheDung, boNhat, boRoi boDoCoTheDung) error {
 	boLuu.Dung()
 	lichBoss.Dung()
 	loa.Dung()
 	err := game.TatMayChu(ctx, soKhuVuc, thoGhi)
+	// KH7: hai bo ghi CSDL cua he vat pham dung SAU game.TatMayChu, KHONG
+	// truoc — nguoc chieu voi loa/lichBoss, va co ly do:
+	//
+	// loa/lichBoss la NGUON sinh su kien: tat nguon truoc thi ong dan moi
+	// khong con gi de tai. boNhat/boRoi thi nguoc lai — chung la NOI NHAN,
+	// con NGUON chinh la cac actor khu vuc. Chung nao con mot actor song thi
+	// con co the co nguoi bam nhat hay mot con quai chet va xep them yeu cau.
+	// Dong hang doi truoc la vut di dung nhung yeu cau cuoi cung — dung tinh
+	// than voi rang buoc "DongSoNo phai chay SAU DungTatCa" da chot o
+	// sokhuvuc.go/tatmaychu.go.
+	//
+	// Rieng voi boNhat, "vut di" con dat hon mot bac: actor da GO MON khoi
+	// mat dat truoc khi xep yeu cau, nen mot yeu cau bi bo la mot mon bien
+	// mat khoi man hinh nguoi choi. Ke ca vay van KHONG NHAN BAN do: dong
+	// CSDL van o DUOI_DAT, khong ai duoc cap them gi.
+	boRoi.Dung()
+	boNhat.Dung()
 	kho.Close()
 	return err
 }
@@ -439,6 +485,11 @@ func main() {
 	// xung voi thu tu BAT o day).
 	lichBoss := noiLichBoss(soKhuVuc)
 
+	// KH7 Task 11 + 12 "NOI DAY THAT": hai goroutine ghi CSDL cua he vat pham
+	// (nhat do / roi do) — xem noiVatPham. Dat SAU khi da co 5 khu vuc va
+	// TRUOC khi mo cong nghe.
+	boNhat, boRoi := noiVatPham(kho, soKhuVuc)
+
 	// Ke hoach 11 Task 6 diem B "NOI DAY THAT": TRUOC dong nay, khong noi nao
 	// trong ca du an goi MoThoGhi / MoBoLuuDinhKy(...).BatDau() / DatThoGhi —
 	// toan bo ha tang luu tru cua Task 1-5 (da qua review) NAM DO KHONG AI
@@ -478,7 +529,7 @@ func main() {
 
 	yeuCauTatE2E := make(chan struct{}, 1)
 	donDep := func(ctx context.Context) error {
-		return donDepKhiTat(ctx, kho, soKhuVuc, thoGhi, boLuu, lichBoss, loa)
+		return donDepKhiTat(ctx, kho, soKhuVuc, thoGhi, boLuu, lichBoss, loa, boNhat, boRoi)
 	}
 	control, controlListener, err := moE2EControl(cauHinhControl, yeuCauTatE2E)
 	if err != nil {

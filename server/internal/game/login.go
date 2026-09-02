@@ -339,7 +339,19 @@ func (b *BoXuLy) xuLyKhongTrenBanDo(s *mynet.Session, m *protocol.Message) error
 		}
 		return b.phucVuCatalog(s, m)
 	case lenhConCatalogItem: // 8
-		return b.phucVuCatalog(s, goiCatalogItem())
+		// BA message theo dung thu tu 0 -> 1 -> 2. Subtype 2 PHAI cuoi cung:
+		// no la cai duy nhat kich Service.clientOk() phia client. Xem
+		// goiCatalogItemDayDu (mauvatpham.go).
+		ds, err := goiCatalogItemDayDu()
+		if err != nil {
+			return err
+		}
+		for _, m := range ds {
+			if err := b.phucVuCatalog(s, m); err != nil {
+				return err
+			}
+		}
+		return nil
 	case lenhConClientOk: // 13
 		return b.xuLyClientOk(s)
 	default:

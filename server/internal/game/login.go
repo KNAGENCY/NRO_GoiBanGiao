@@ -347,6 +347,10 @@ func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 		// "ban nhat duoc"; xem dovuong.go). Task 11 co y khong sua file nay de
 		// khong dung agent song song — dieu phoi noi dong nay luc gop (03/09).
 		return b.XuLyNhat(m)
+	case lenhDungBoDo: // -43 — client xin dung / bo do (xem dungvatpham.go)
+		return b.xuLyDungBoDo(s, m)
+	case lenhChuyenODo: // -40 — client xin chuyen o tui <-> ruong <-> mac
+		return b.xuLyChuyenO(s, m)
 	default:
 		// Lenh chua ho tro: bo qua, khong ngat ket noi — client gui vai goi
 		// phu ngay sau khi noi (vi du setClientType), day la chuyen BINH

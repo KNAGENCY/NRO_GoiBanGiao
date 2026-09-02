@@ -243,8 +243,30 @@ func (s *Store) CapNhatNhanVat(ctx context.Context, nv NhanVat) error {
 // Cong tren kieu numeric roi kep ve bigint de mot delta lon khong lam
 // PostgreSQL nem loi tran (22003) huy ca cau; chan duoi van la >= 0.
 func (s *Store) CongTruTien(ctx context.Context, nvID, dVang, dNgoc int64) error {
+	return congTruTien(ctx, s.pool, nvID, dVang, dNgoc)
+}
+
+// CongTruTienTx la CHINH CongTruTien nhung chay trong mot giao dich DANG MO
+// (KH7 Task 9). Sinh ra vi mua hang phai tru tien VA cap mon trong CUNG mot
+// giao dich: neu tru tien dung ban `s.pool` thi no tu commit ngay, va buoc cap
+// mon hong sau do se khong hoan tien lai duoc — dung dieu D2/§2.3 cam.
+//
+// Than cau lenh dung CHUNG mot ham `congTruTien` voi ban khong-tx: hai ban SQL
+// khac nhau la mot ngay nao do mot ban duoc va con ban kia thi khong.
+func (s *Store) CongTruTienTx(ctx context.Context, tx pgx.Tx, nvID, dVang, dNgoc int64) error {
+	return congTruTien(ctx, tx, nvID, dVang, dNgoc)
+}
+
+// nguoiHoi la phan chung giua *pgxpool.Pool va pgx.Tx ma cac cau mot-dong o day
+// can. Khai bao HEP dung mot phuong thuc — de khong ai nham tuong co the truyen
+// mot thu gi khac vao.
+type nguoiHoi interface {
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+}
+
+func congTruTien(ctx context.Context, q nguoiHoi, nvID, dVang, dNgoc int64) error {
 	var coNhanVat, daCapNhat bool
-	err := s.pool.QueryRow(ctx,
+	err := q.QueryRow(ctx,
 		`WITH ton_tai AS (
 		     SELECT id, vang, ngoc FROM nhan_vat WHERE id = $1 FOR UPDATE
 		 ),

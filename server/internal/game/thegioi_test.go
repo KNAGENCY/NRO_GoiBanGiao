@@ -50,7 +50,7 @@ func TestGoiMeInfoByteDung(t *testing.T) {
 		ViTriX:  100,
 		ViTriY:  384,
 	}
-	m, err := goiMeInfo(nv)
+	m, err := goiMeInfo(nv, nil)
 	if err != nil {
 		t.Fatalf("goiMeInfo loi: %v", err)
 	}
@@ -102,9 +102,23 @@ func TestGoiMeInfoByteDung(t *testing.T) {
 	lo("gold", 250) // LONG 8 byte = NhanVat.Vang
 	in("ruby", 0)
 	in("gem", 9) // = NhanVat.Ngoc
-	b("itemsBody.size", 0)
-	b("itemsBag.size", 0)
-	b("itemsBox.size", 0)
+	// KH7 Task 5: ba mang vat pham mang SO O that (suc chua), roi DU so o than
+	// o — nhan vat nay khong co mon nao nen moi o la mot short -1.
+	bangRong := func(ten string, soOMongDoi int) {
+		t.Helper()
+		soO, err := r.Byte()
+		if err != nil || int(soO) != soOMongDoi {
+			t.Fatalf("%s.size = %d (loi %v), mong doi %d (SO O, khong phai so mon)", ten, soO, err, soOMongDoi)
+		}
+		for i := 0; i < int(soO); i++ {
+			if id, err := r.Short(); err != nil || id != -1 {
+				t.Fatalf("%s o %d = %d (loi %v), mong doi -1 (o rong)", ten, i, id, err)
+			}
+		}
+	}
+	bangRong("itemsBody", SoOMacChuan)
+	bangRong("itemsBag", SoOTuiChuan)
+	bangRong("itemsBox", SoORuongChuan)
 	// Mot cap anh xa headId -> avatarId, de client biet ve anh nao vao o chan
 	// dung tren HUD. Gui 0 cap thi Char.getAvatar tra -1 va o do trong tron.
 	sh("headAvatar.size", 1)

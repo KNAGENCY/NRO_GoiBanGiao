@@ -863,6 +863,16 @@ func TestClientOkGuiVaoTheGioi(t *testing.T) {
 	if m42.Command != -42 {
 		t.Fatalf("goi sau -24 = lenh %d, mong doi -42 (chi so nhan vat)", m42.Command)
 	}
+
+	// KH7 Task 5: ba goi hanh trang -37/-36/-35 khep lai chuoi vao the gioi (gui
+	// SAU -42). Chung PHAI den SAU -30: ME_INFO cap lai ca ba mang vat pham ben
+	// client, goi nao den truoc no deu bi xoa sach khong bao.
+	for i, mong := range []int8{lenhDoDangMac, lenhTui, lenhRuong} {
+		m := docMotGoi(t, fClient)
+		if m.Command != mong {
+			t.Fatalf("goi hanh trang thu %d = lenh %d, mong doi %d", i+1, m.Command, mong)
+		}
+	}
 	// MAP INFO byte dau (sau khong co lenh con) = mapId = 1.
 	if len(m24.Data) == 0 || m24.Data[0] != 1 {
 		t.Errorf("MAP INFO mapId = %v, mong doi 1 (mapId cua nhan vat)", m24.Data)
@@ -959,6 +969,16 @@ func TestClientOkKhongChayLaiLanHai(t *testing.T) {
 		t.Fatalf("lan 1, goi 5 = lenh %d, mong doi -42 (chi so nhan vat)", m42.Command)
 	}
 
+	// KH7 Task 5: ba goi hanh trang -37/-36/-35 khep lai chuoi vao the gioi (gui
+	// SAU -42). Chung PHAI den SAU -30: ME_INFO cap lai ca ba mang vat pham ben
+	// client, goi nao den truoc no deu bi xoa sach khong bao.
+	for i, mong := range []int8{lenhDoDangMac, lenhTui, lenhRuong} {
+		m := docMotGoi(t, fClient)
+		if m.Command != mong {
+			t.Fatalf("goi hanh trang thu %d = lenh %d, mong doi %d", i+1, m.Command, mong)
+		}
+	}
+
 	// Lan 2: gui LAI -28/13 — PHAI khong nhan them goi nao (chot chong goi lai).
 	guiClientOk()
 	if !fClientHetHanNgan(t, fClient) {
@@ -997,6 +1017,9 @@ func TestVaoKhuVucLanHaiKhongPhatGoiTrung(t *testing.T) {
 	docMotGoi(t, fClient) // -30
 	docMotGoi(t, fClient) // -24
 	docMotGoi(t, fClient) // -42 chi so nhan vat
+	docMotGoi(t, fClient) // -37 do dang mac (KH7 task 5)
+	docMotGoi(t, fClient) // -36 tui
+	docMotGoi(t, fClient) // -35 ruong
 
 	// Gui -39 (vao khu vuc) HAI LAN LIEN TIEP — mo phong client gui trung.
 	if err := fClient.WriteMessage(&protocol.Message{Command: lenhVaoKhuVuc}); err != nil {

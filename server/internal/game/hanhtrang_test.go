@@ -195,7 +195,7 @@ func TestDungBangVaGoiKhongLech(t *testing.T) {
 	// mauTheoId: tra cuu nguoc de doi chieu.
 	mauTheoId := map[int64]int32{11: 0, 22: 1, 33: 4, 44: 2, 55: 3}
 
-	ht, err := DungBangVaGoi(ds, 100, 4, soOMacChuan, 6)
+	ht, err := DungBangVaGoi(ds, 100, 4, SoOMacChuan, 6)
 	if err != nil {
 		t.Fatalf("DungBangVaGoi loi: %v", err)
 	}
@@ -231,7 +231,7 @@ func TestDungBangVaGoiLoiThiKhongTraGiCa(t *testing.T) {
 		mon(11, 0, 2, store.NoiChuaTui, 1),
 		mon(12, 1, 2, store.NoiChuaTui, 1), // trung o
 	}
-	ht, err := DungBangVaGoi(ds, 0, 5, soOMacChuan, 5)
+	ht, err := DungBangVaGoi(ds, 0, 5, SoOMacChuan, 5)
 	if err == nil {
 		t.Fatal("trung o phai tra loi")
 	}

@@ -79,9 +79,32 @@ const (
 	// (ReadParamDQT = unsigned short) nen chi duoc co mot noi noi dieu do.
 )
 
-// soOMacChuan: so o do dang mac cua ban 1 — 0 ao, 1 quan, 2 gang, 3 giay,
-// 4 nhan (bo cuc goc, Player.java:878-882; client ve theo dung bo cuc nay).
-const soOMacChuan = 5
+// SoOMacChuan / SoOTuiChuan / SoORuongChuan: SUC CHUA ba bang hanh trang cua
+// ban 1. Day la HANG SO — la SO O, khong phai so mon, va khong doc tu CSDL.
+//
+// NGUON va vi sao la hang:
+//
+//   - Ban Java cu luu SO O trong CSDL cho tung nguoi: Inventory.java:36-38 khoi
+//     tao danh sach rong, roi NDVSqlFetcher.java:467/530 add MOT phan tu cho moi
+//     phan tu cua mang JSON — phan tu [-1,0,"[]",...] chinh la MOT O RONG
+//     (createItemNull, :466). Vat pham mo rong tui (InventoryService.java:
+//     789-800, mau 1627/517/518) add THEM mot o rong. Tuc size() la SUC CHUA,
+//     va no doi duoc vi co vat pham mo rong.
+//   - Ban Go (ban 1) CHUA co vat pham mo rong tui, nen suc chua khong the doi ->
+//     giu la hang, khong them cot CSDL cho mot con so chua bao gio khac nhau.
+//     Khi lam vat pham mo rong thi DAY la cho phai doi (them cot vao nhan_vat
+//     roi doc len day), va phai doi o CA HAI noi dung no: ME_INFO va -36/-35.
+//
+// Ca ba PHAI <= tranSoO = 127: client doc so o tui/ruong bang byte CO DAU
+// (Controller.cs:5907/:5942) va ngoai le tran o do khong duoc bat.
+//
+// SoOMacChuan = 5: 0 ao, 1 quan, 2 gang, 3 giay, 4 nhan (bo cuc goc,
+// Player.java:878-882; client ve theo dung bo cuc nay).
+const (
+	SoOMacChuan   = 5
+	SoOTuiChuan   = 20
+	SoORuongChuan = 30
+)
 
 // ---------------------------------------------------------------------------
 // 3. Bo dung — ba ham, mot khuon chung

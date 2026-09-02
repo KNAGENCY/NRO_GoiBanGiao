@@ -485,9 +485,22 @@ func kiemMeInfo(t *testing.T, m *protocol.Message, nv *store.NhanVat) {
 			t.Fatalf("%s = %d (loi %v), mong doi %d", ten, g, err, muon)
 		}
 	}
-	meByte("itemsBody.size", 0)
-	meByte("itemsBag.size", 0)
-	meByte("itemsBox.size", 0)
+	// KH7 Task 5: ba mang mang SO O that (suc chua), roi DU so o than o. Nhan
+	// vat vua tao khong co mon nao -> moi o la mot short -1.
+	meBangRong := func(ten string, soOMongDoi int) {
+		soO, err := r.Byte()
+		if err != nil || int(soO) != soOMongDoi {
+			t.Fatalf("%s.size = %d (loi %v), mong doi %d (SO O, khong phai so mon)", ten, soO, err, soOMongDoi)
+		}
+		for i := 0; i < int(soO); i++ {
+			if id, e := r.Short(); e != nil || id != -1 {
+				t.Fatalf("%s o %d = %d (loi %v), mong doi -1 (o rong)", ten, i, id, e)
+			}
+		}
+	}
+	meBangRong("itemsBody", SoOMacChuan)
+	meBangRong("itemsBag", SoOTuiChuan)
+	meBangRong("itemsBox", SoORuongChuan)
 	// headAvatar: may chu gui MOT cap (part dau -> sprite chan dung) de client ve
 	// duoc o chan dung tren HUD. Truoc day gui 0 cap nen o do trong tron.
 	// Ba so nay phai khop HeadNhanVat/AvatarNhanVat trong thegioi.go — lech la

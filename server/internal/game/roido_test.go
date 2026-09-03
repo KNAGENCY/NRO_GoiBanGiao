@@ -18,6 +18,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"nroserver/internal/noidung"
 	"nroserver/internal/store"
 )
 
@@ -81,39 +82,66 @@ func TestQuyetDinhRoiDoBoQuaSoLuongKhongDuong(t *testing.T) {
 }
 
 func TestQuyetDinhRoiDoBoChonNilThiKhongRoi(t *testing.T) {
-	if ra := quyetDinhRoiDo(roiDoQuaiMacDinh, nil); ra != nil {
+	if ra := quyetDinhRoiDo(bangRoiQuaiMacDinhChoTest(t), nil); ra != nil {
 		t.Fatalf("bo chon nil phai tra nil, nhan %+v", ra)
 	}
 }
 
+// bangRoiQuaiMacDinhChoTest trả bảng rơi MẶC ĐỊNH đọc từ kho nội dung NHÚNG —
+// thay cho biến gói `roiDoQuaiMacDinh` đã bị xoá ở KH8 task 9.
+func bangRoiQuaiMacDinhChoTest(t *testing.T) []MucRoiDo {
+	t.Helper()
+	// "ma-quai-khong-co-that" cố tình không tồn tại -> rơi về bảng mặc định.
+	return roiDoCuaQuai(khoChieuMacDinh(), "ma-quai-khong-co-that")
+}
+
 func TestRoiDoCuaQuaiCoBangMacDinh(t *testing.T) {
-	if len(roiDoCuaQuai(200)) == 0 {
+	ac := khoChieuMacDinh()
+	if len(roiDoCuaQuai(ac, "ma-quai-khong-co-that")) == 0 {
 		t.Fatalf("mau quai la -> phai roi ve bang mac dinh, khong duoc rong")
 	}
-	if len(roiDoCuaQuai(0)) != len(roiDoTheoQuai[0]) {
-		t.Fatalf("mau quai 0 phai dung bang rieng cua no")
+	if len(roiDoCuaQuai(ac, "")) == 0 {
+		t.Fatalf("ma rong (quai dung tay) -> cung phai roi ve bang mac dinh")
+	}
+	// soi-rung CÓ bảng riêng trong bang-roi.yaml, và bảng đó KHÁC mặc định.
+	rieng := roiDoCuaQuai(ac, "soi-rung")
+	if len(rieng) == 0 {
+		t.Fatalf("soi-rung phai co bang rieng")
+	}
+	macDinh := roiDoCuaQuai(ac, "ma-quai-khong-co-that")
+	if len(rieng) == len(macDinh) {
+		t.Fatalf("bang rieng cua soi-rung dang giong het bang mac dinh (%d muc) — "+
+			"test khong con phan biet duoc hai duong tra cuu", len(rieng))
 	}
 }
 
-// ⚠️ roiDoCuaBoss phải trả slice MỚI. Nếu đổi thành
-// `append(roiDoTheoBoss, roiDoTheoBossLon...)` thì bảng gói bị bẩn — test này
-// gọi hai lần và kiểm bảng gốc không đổi.
+// ⚠️ roiDoCuaBoss phải trả slice MỚI mỗi lần. Nếu ai đó tối ưu thành "trả thẳng
+// slice trong ảnh chụp" rồi `append` vào đó thì ảnh chụp đã công bố bị bẩn —
+// test này gọi hai lần và kiểm bảng thường không đổi số mục.
 func TestRoiDoCuaBossKhongLamBanBangGoc(t *testing.T) {
-	soGoc := len(roiDoTheoBoss)
+	ac := khoChieuMacDinh()
+	ma := noidung.MaBangRoiBossChung
+
+	soThuong := len(roiDoCuaBoss(ac, ma, &PhaBoss{}))
+	if soThuong == 0 {
+		t.Fatalf("boss thuong phai co bang roi")
+	}
+
 	lon := &PhaBoss{LaBossLon: true}
-	a := roiDoCuaBoss(lon)
-	b := roiDoCuaBoss(lon)
-	if len(a) != soGoc+len(roiDoTheoBossLon) || len(b) != len(a) {
-		t.Fatalf("boss lon phai co ca hai bang: %d / %d", len(a), len(b))
+	a := roiDoCuaBoss(ac, ma, lon)
+	b := roiDoCuaBoss(ac, ma, lon)
+	if len(a) <= soThuong || len(b) != len(a) {
+		t.Fatalf("boss lon phai co THEM muc so voi boss thuong: %d / %d (thuong %d)",
+			len(a), len(b), soThuong)
 	}
-	if len(roiDoTheoBoss) != soGoc {
-		t.Fatalf("bang goc bi ban: %d -> %d", soGoc, len(roiDoTheoBoss))
+	if n := len(roiDoCuaBoss(ac, ma, &PhaBoss{})); n != soThuong {
+		t.Fatalf("bang boss thuong bi ban: %d -> %d", soThuong, n)
 	}
-	if n := len(roiDoCuaBoss(&PhaBoss{})); n != soGoc {
-		t.Fatalf("boss thuong chi dung bang thuong, nhan %d muc", n)
-	}
-	if roiDoCuaBoss(nil) != nil {
+	if roiDoCuaBoss(ac, ma, nil) != nil {
 		t.Fatalf("pha nil -> khong roi gi")
+	}
+	if roiDoCuaBoss(ac, "ma-boss-khong-co-that", &PhaBoss{}) != nil {
+		t.Fatalf("ma boss la -> khong roi gi (khac quai: boss khong co bang mac dinh)")
 	}
 }
 
@@ -141,10 +169,11 @@ func TestActorKhongGoiCSDLKhiQuaiChet(t *testing.T) {
 	kho := &khoRoiGia{}
 	k, bo := khuVucRoiGia(t, kho, luonRoi)
 
-	n := k.roiDoKhiChet(100, 200, roiDoQuaiMacDinh)
+	bang := bangRoiQuaiMacDinhChoTest(t)
+	n := k.roiDoKhiChet(100, 200, bang)
 
-	if n != len(roiDoQuaiMacDinh) {
-		t.Fatalf("ep roi 100%% -> phai xep %d yeu cau, xep %d", len(roiDoQuaiMacDinh), n)
+	if n != len(bang) {
+		t.Fatalf("ep roi 100%% -> phai xep %d yeu cau, xep %d", len(bang), n)
 	}
 	if len(bo.hang) != n {
 		t.Fatalf("hang doi phai co %d yeu cau, co %d", n, len(bo.hang))
@@ -169,7 +198,7 @@ func TestQuaiChetTiLeKhongThiKhongXepGi(t *testing.T) {
 func TestChuaNoiBoRoiThiKhongPanicVaKhongRoiGi(t *testing.T) {
 	k := MoKhuVuc(TimBanDo(1))
 	k.roiDoNgauNhien = luonRoi
-	if n := k.roiDoKhiChet(0, 0, roiDoQuaiMacDinh); n != 0 {
+	if n := k.roiDoKhiChet(0, 0, bangRoiQuaiMacDinhChoTest(t)); n != 0 {
 		t.Fatalf("chua noi bo roi -> phai tra 0, tra %d", n)
 	}
 }
@@ -193,8 +222,9 @@ func TestBossChetChiRoiDoMotLan(t *testing.T) {
 	sauLanMot := len(bo.hang)
 	k.bossChet(b, 0, bayGio) // lần hai: phải bị chặn hoàn toàn
 
-	if sauLanMot != len(roiDoTheoBoss) {
-		t.Fatalf("boss thuong phai xep %d yeu cau, xep %d", len(roiDoTheoBoss), sauLanMot)
+	bangBossThuong := roiDoCuaBoss(k.anhChupNoiDung(), noidung.MaBangRoiBossChung, &pha)
+	if sauLanMot != len(bangBossThuong) {
+		t.Fatalf("boss thuong phai xep %d yeu cau, xep %d", len(bangBossThuong), sauLanMot)
 	}
 	if len(bo.hang) != sauLanMot {
 		t.Fatalf("bossChet lan hai KHONG duoc roi them: %d -> %d", sauLanMot, len(bo.hang))

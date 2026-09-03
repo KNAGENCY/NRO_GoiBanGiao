@@ -1169,7 +1169,12 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 			// KH6 chua co he vat pham (dac ta §0) -> doRoi luon rong.
 			// KH7 Task 12: XEP yeu cau sinh do roi (KHONG cham CSDL o day —
 			// roiDoKhiChet chi gieo ti le roi nem vao hang doi cua BoRoiDo).
-			k.roiDoKhiChet(mucTieu.X, mucTieu.Y, roiDoCuaQuai(mucTieu.MauId))
+			// KH8 task 9: bang roi doc tu ANH CHUP cua su kien nay
+			// (k.anhChupNoiDung() -> k.acNhip), KHONG goi AnhChup() them —
+			// hop dong "mot lan dau nhip" (noidung/kho.go). Tra bang `Ma`
+			// (can cuoc mau quai), KHONG bang MauId (tu task 8 truong do
+			// mang anh_id — hai mau chung anh se chung bang roi).
+			k.roiDoKhiChet(mucTieu.X, mucTieu.Y, roiDoCuaQuai(k.anhChupNoiDung(), mucTieu.Ma))
 			// doRoi trong goi -12 CO CHU DICH luon rong (soDoRoi = 0): do roi hien
 			// bang goi 68 rieng vai chuc ms sau. Ly do day du o dau file roido.go
 			// — DUNG "sua cho du" dong nay.
@@ -1882,7 +1887,12 @@ func (k *KhuVuc) bossChet(b *Boss, idNguoiHa int64, bayGio time.Time) {
 	// KH7 Task 12: roi do — DUNG MOT LAN, ngay canh cho chia thuong, vi cung
 	// mot ly do bat bien 1 o tren: goi hai lan la nhan doi do phat ra tu khong
 	// khi. Chot "da chet roi thi thoi" o dau ham la thu bao ve dong nay.
-	k.roiDoKhiChet(b.ViTriX, b.ViTriY, roiDoCuaBoss(pha))
+	//
+	// KH8 task 9: doc bang roi tu ANH CHUP cua nhip (khong goi AnhChup() them).
+	// Ma la noidung.MaBangRoiBossChung vi `Boss` chua mang ma con boss — doi
+	// DUNG mot dong nay khi lichboss.go nhet duoc `Ma` vao Boss (xem dau
+	// internal/noidung/bangroi.go).
+	k.roiDoKhiChet(b.ViTriX, b.ViTriY, roiDoCuaBoss(k.anhChupNoiDung(), noidung.MaBangRoiBossChung, pha))
 	// XOA NGAY sau khi chia — xem bat bien 1. Gan nil (khong phai xoa tung
 	// khoa) de tra luon bo nho map ve cho bo don rac: mot pha dong nguoi co
 	// the de lai hang tram o trong, ma pha sau se tu tao map moi khi can.

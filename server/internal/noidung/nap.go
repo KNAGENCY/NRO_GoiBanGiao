@@ -26,8 +26,9 @@ const (
 	TenFileChieu   = "chieu.yaml"
 	TenFileVatPham = "vat-pham.yaml"
 	TenFileCuaHang = "cua-hang.yaml"
-	TenFileQuai    = "quai.yaml" // KH8 task 8
-	TenFileLang    = "lang.yaml" // KH8 task 6
+	TenFileQuai    = "quai.yaml"     // KH8 task 8
+	TenFileLang    = "lang.yaml"     // KH8 task 6
+	TenFileBangRoi = "bang-roi.yaml" // KH8 task 9
 )
 
 // TenCacFile tra ve DANH SACH DAY DU cac file YAML ma Nap doc — NGUON DUY NHAT
@@ -37,7 +38,7 @@ const (
 // quai.yaml. Them file moi vao Nap thi PHAI them vao day — va chi vao day.
 // (Task 6 them lang.yaml: gop 03/09 dieu phoi them vao day, khong o fixture.)
 func TenCacFile() []string {
-	return []string{TenFileChieu, TenFileVatPham, TenFileCuaHang, TenFileKhoaId, TenFileQuai, TenFileLang}
+	return []string{TenFileChieu, TenFileVatPham, TenFileCuaHang, TenFileKhoaId, TenFileQuai, TenFileLang, TenFileBangRoi}
 }
 
 // NapNhung nap ban NHUNG trong file thuc thi — duong dung luc KHOI DONG. Khong
@@ -72,12 +73,18 @@ func Nap(fsys fs.FS) (*DuLieu, error) {
 		return nil, err
 	}
 
+	var fBangRoi fileBangRoi
+	if err := docYAML(fsys, TenFileBangRoi, &fBangRoi); err != nil {
+		return nil, err
+	}
+
 	du := &DuLieu{
 		MauOption:  fVatPham.MauOption,
 		MauVatPham: fVatPham.MauVatPham,
 		CuaHang:    fCuaHang.CuaHang,
 		MauQuai:    fQuai.MauQuai,
 		SinhQuai:   fQuai.Sinh,
+		BangRoi:    dungBangRoi(&fBangRoi),
 	}
 	if err := kiemChieu(fChieu.Lang); err != nil {
 		return nil, fmt.Errorf("%s: %w", TenFileChieu, err)
@@ -111,6 +118,13 @@ func Nap(fsys fs.FS) (*DuLieu, error) {
 	}
 	if err := kiemDayDu(du, &fKhoa); err != nil {
 		return nil, err
+	}
+	// KH8 task 9: bang roi kiem SAU CUNG vi no doi chieu CA BA — mau quai (ma),
+	// mau vat pham (mau_id + tran chong) va so khoa id (mau_id da khoa chua).
+	// Chay sau kiemDayDu la CO Y: neu danh muc vat pham lech so khoa thi loi
+	// DUNG la loi lech so, khong phai "bang roi tro vao khoang khong" (he qua).
+	if err := kiemBangRoi(&fBangRoi, du.MauQuai, du.MauVatPham, fKhoa.MauVatPham); err != nil {
+		return nil, fmt.Errorf("%s: %w", TenFileBangRoi, err)
 	}
 	return du, nil
 }

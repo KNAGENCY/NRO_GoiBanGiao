@@ -314,4 +314,8 @@ type DuLieu struct {
 	// SinhQuaiCuaMap() cua anh chup (kho.go), khong doc thang.
 	MauQuai  []MauQuai
 	SinhQuai []SinhQuaiTrenMap
+
+	// BangRoi — KH8 task 9 (bangroi.go). Tra cuu qua BangRoiCuaQuai(ma) /
+	// BangRoiCuaBoss(ma) cua anh chup, khong doc thang.
+	BangRoi BangRoi
 }

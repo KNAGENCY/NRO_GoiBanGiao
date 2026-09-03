@@ -28,7 +28,7 @@ const khoaTest = "khoa-test-123"
 func thuMucYAMLTest(t *testing.T) string {
 	t.Helper()
 	d := t.TempDir()
-	for _, ten := range []string{TenFileChieu, TenFileVatPham, TenFileCuaHang, TenFileKhoaId} {
+	for _, ten := range TenCacFile() { // nguon duy nhat — xem chu thich TenCacFile
 		b, err := fs.ReadFile(khonoidung.FS, ten)
 		if err != nil {
 			t.Fatalf("khong doc duoc %s: %v", ten, err)

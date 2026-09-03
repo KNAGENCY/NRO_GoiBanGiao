@@ -29,6 +29,15 @@ const (
 	TenFileQuai    = "quai.yaml" // KH8 task 8
 )
 
+// TenCacFile tra ve DANH SACH DAY DU cac file YAML ma Nap doc — NGUON DUY NHAT
+// cho moi fixture test "chep kho nhung ra thu muc tam". Truoc 03/09 co BA danh
+// sach cung o ba test khac nhau; task 8 them quai.yaml vao Nap thi nhanh cua no
+// xanh, nhanh task 10 xanh, GOP LAI thi test nap nong do vi thu muc tam thieu
+// quai.yaml. Them file moi vao Nap thi PHAI them vao day — va chi vao day.
+func TenCacFile() []string {
+	return []string{TenFileChieu, TenFileVatPham, TenFileCuaHang, TenFileKhoaId, TenFileQuai}
+}
+
 // NapNhung nap ban NHUNG trong file thuc thi — duong dung luc KHOI DONG. Khong
 // phu thuoc thu muc lam viec, khong the thieu file.
 func NapNhung() (*DuLieu, error) { return Nap(khonoidung.FS) }

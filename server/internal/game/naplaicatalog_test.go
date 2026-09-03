@@ -83,10 +83,7 @@ func chakraDauTienTuGoiSkill(t *testing.T, m *protocol.Message) int16 {
 func thuMucChieuDaSua(t *testing.T, chakraMoi string) string {
 	t.Helper()
 	d := t.TempDir()
-	for _, ten := range []string{
-		noidung.TenFileChieu, noidung.TenFileVatPham,
-		noidung.TenFileCuaHang, noidung.TenFileKhoaId,
-	} {
+	for _, ten := range noidung.TenCacFile() { // nguon duy nhat — xem chu thich noidung.TenCacFile
 		b, err := os.ReadFile(filepath.Join("..", "..", "kho-noi-dung", ten))
 		if err != nil {
 			t.Fatalf("doc %s: %v", ten, err)

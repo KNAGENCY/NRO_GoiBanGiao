@@ -20,9 +20,24 @@ type Quai struct {
 	// (dac ta §1.4).
 	Id byte
 
-	// MauId la id mau quai (mob template) — KHONG xuat hien trong than goi -24
-	// (dac ta §3.6 khong co truong nay), nhung can giu noi bo de cac Task sau
-	// (AI, loot, hien thi ten/hinh) tra bang du lieu mau quai.
+	// Ma la CAN CUOC cua mau quai — chuoi `ma` trong kho-noi-dung/quai.yaml
+	// (KH8 task 9). Moi tra cuu "con quai nay thuoc mau nao" di qua truong NAY.
+	//
+	// ⚠️ TACH VAI voi MauId ngay ben duoi. Truoc task 9 chi co MauId va no gong
+	// HAI vai: vua la id ANH (goi xuong client), vua la khoa BANG ROI. Tu task 8,
+	// MauId duoc gan bang `anh_id` cua mau — nen hai mau quai khac han nhau dung
+	// chung mot anh se dung chung mot bang roi, im lang. Task 9 cat doi:
+	//
+	//	Ma    — can cuoc mau quai (bang roi, va moi tra cuu noi dung sau nay)
+	//	MauId — CHI la id anh trong catalog, khong con lam khoa tra cuu gi nua
+	//
+	// Rong la hop le: quai dung trong test cu duoc dung tay khong qua
+	// taoQuaiTuAnhChup. Rong -> bang roi MAC DINH (noidung.BangRoiCuaQuai).
+	Ma string
+
+	// MauId la id ANH quai (mob template trong catalog anh da ky) — KHONG xuat
+	// hien trong than goi -24 (dac ta §3.6 khong co truong nay), nhung can giu
+	// noi bo cho duong hien thi hinh. KHONG dung lam khoa tra cuu (xem Ma).
 	MauId byte
 
 	// Cap la truong "level" trong dac ta §3.6 (thu tu 9, dung SAU hp, TRUOC

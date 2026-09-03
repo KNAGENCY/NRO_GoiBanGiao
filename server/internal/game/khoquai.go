@@ -108,7 +108,10 @@ func taoQuaiTuAnhChup(ac khoChieuAnhChup, bd *BanDo) []*Quai {
 			continue
 		}
 		quai = append(quai, &Quai{
-			Id:             d.Id,
+			Id: d.Id,
+			// KH8 task 9: Ma la can cuoc (khoa bang roi), MauId chi con la id
+			// ANH. Xem chu thich hai truong do o quai.go.
+			Ma:             m.Ma,
 			MauId:          byte(m.AnhId),
 			Cap:            m.Cap,
 			CapTinhAnh:     m.CapTinhAnh,

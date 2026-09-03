@@ -54,6 +54,7 @@ import (
 	"math/rand/v2"
 	"time"
 
+	"nroserver/internal/noidung"
 	"nroserver/internal/store"
 )
 
@@ -74,72 +75,92 @@ type MucRoiDo struct {
 	TiLe    int
 }
 
-// roiDoTheoQuai: bảng rơi theo MauId của quái (Quai.MauId).
+// ⚠️ BỐN BIẾN GÓI `roiDoTheoQuai` / `roiDoQuaiMacDinh` / `roiDoTheoBoss` /
+// `roiDoTheoBossLon` ĐÃ BỊ XOÁ Ở KH8 TASK 9.
 //
-// ⚠️ CÁC CON SỐ DƯỚI ĐÂY LÀ KHỞI ĐẦU DO NGƯỜI VIẾT ĐẶT, không trích từ bản
-// Java — bản Java là game Dragon Ball, đây là game Naruto. Cân bằng tỉ lệ thật
-// thuộc KH8. Chúng cố tình rộng rãi để nghiệm thu tay (task 13) không phải
-// đứng đánh quái nửa tiếng mới thấy một món.
+// Số của chúng nay nằm trong `kho-noi-dung/bang-roi.yaml`, tra cứu bằng MÃ
+// CHUỖI của mẫu quái (`Quai.Ma`) chứ không phải bằng `Quai.MauId` — từ task 8
+// trường đó mang `anh_id`, nên tra theo nó là hai mẫu quái dùng chung một ảnh
+// sẽ dùng chung một bảng rơi, im lặng. Chi tiết ở đầu `internal/noidung/bangroi.go`.
 //
-// Mẫu vật phẩm tra ở mauvatpham.go: 0 = thuốc hồi máu nhỏ, 1 = thuốc hồi
-// chakra nhỏ, 2 = áo, 3 = quần, 4 = kunai luyện tập.
-var roiDoTheoQuai = map[byte][]MucRoiDo{
-	// Quái mẫu 0 (loại yếu nhất) rơi ít hơn — nó chết nhanh và đông.
-	0: {
-		{MauID: 0, SoLuong: 1, TiLe: 1000}, // 10% thuốc máu
-		{MauID: 1, SoLuong: 1, TiLe: 500},  // 5% thuốc chakra
-	},
-}
+// Đột biến "actor đọc bảng Go cũ" KHÔNG THỂ viết được nữa — không còn bảng nào.
 
-// roiDoQuaiMacDinh dùng cho mọi MauId chưa có dòng riêng ở trên. Có mặc định
-// (thay vì "không có bảng thì không rơi gì") vì thêm một mẫu quái mới mà quên
-// bảng rơi là lỗi im lặng khó thấy nhất trong cả hệ thống này.
-var roiDoQuaiMacDinh = []MucRoiDo{
-	{MauID: 0, SoLuong: 1, TiLe: 1500}, // 15% thuốc máu
-	{MauID: 1, SoLuong: 1, TiLe: 1000}, // 10% thuốc chakra
-	{MauID: 4, SoLuong: 1, TiLe: 200},  // 2% kunai
-}
-
-// roiDoTheoBoss là bảng rơi của boss THƯỜNG (mỗi pha chết đều chạy qua đây).
-var roiDoTheoBoss = []MucRoiDo{
-	{MauID: 0, SoLuong: 1, TiLe: roiDoMauSo}, // chắc chắn
-	{MauID: 1, SoLuong: 1, TiLe: roiDoMauSo}, // chắc chắn
-	{MauID: 4, SoLuong: 1, TiLe: 3000},       // 30%
-}
-
-// roiDoTheoBossLon là phần THÊM cho pha `LaBossLon` — trang bị, thứ không bao
-// giờ rơi từ quái thường.
-var roiDoTheoBossLon = []MucRoiDo{
-	{MauID: 2, SoLuong: 1, TiLe: 5000}, // 50% áo
-	{MauID: 3, SoLuong: 1, TiLe: 5000}, // 50% quần
-}
-
-// roiDoCuaQuai tra bảng rơi cho một mẫu quái. Hàm THUẦN.
-func roiDoCuaQuai(mauId byte) []MucRoiDo {
-	if bang, co := roiDoTheoQuai[mauId]; co {
-		return bang
+// mucRoiTuNoiDung đổi các dòng bảng rơi của kho nội dung (tỉ lệ PHẦN TRĂM, cho
+// người đọc file) sang MucRoiDo của gói này (tỉ lệ PHẦN VẠN, cho phép so sánh
+// số nguyên chính xác tuyệt đối).
+//
+// `laBossLon` lọc: false (quái, và boss thường) = BỎ mọi dòng `chi_boss_lon`;
+// true = lấy hết (boss lớn hưởng cả bảng thường lẫn phần thêm).
+//
+// Hàm THUẦN. Luôn dựng slice MỚI — không bao giờ trả về slice nằm trong ảnh
+// chụp, kể cả khi lấy hết: người gọi `append` vào đó là sửa ảnh chụp đã công bố
+// cho mọi người chơi (bẫy đã dính hai lần trong dự án này, xem đầu kho.go).
+func mucRoiTuNoiDung(ds []noidung.MucRoi, laBossLon bool) []MucRoiDo {
+	ra := make([]MucRoiDo, 0, len(ds))
+	for _, m := range ds {
+		if m.ChiBossLon && !laBossLon {
+			continue
+		}
+		tiLe := int(m.TiLePhanTram / 100 * roiDoMauSo)
+		if m.ChacChan {
+			tiLe = roiDoMauSo
+		}
+		ra = append(ra, MucRoiDo{MauID: int32(m.MauId), SoLuong: int32(m.SoLuong), TiLe: tiLe})
 	}
-	return roiDoQuaiMacDinh
+	if len(ra) == 0 {
+		return nil
+	}
+	return ra
 }
 
-// roiDoCuaBoss tra bảng rơi cho MỘT PHA boss. Hàm THUẦN.
+// roiDoCuaQuai tra bảng rơi cho MỘT mẫu quái, đọc TỪ MỘT ẢNH CHỤP đã cầm sẵn.
+//
+// ⚠️ NHẬN ẢNH CHỤP LÀM THAM SỐ, KHÔNG TỰ GỌI AnhChup(). Trong actor phải truyền
+// `k.anhChupNoiDung()` (ảnh chụp của nhịp/sự kiện hiện tại). Gọi `AnhChup()`
+// hay `layAnhChupNhip()` thêm một lần ở đây là phá hợp đồng "một lần đầu nhịp"
+// (internal/noidung/kho.go) — có test giết được: TestKhoBangRoiMotLanKhiQuaiChet.
+//
+// Mã lạ (hoặc rỗng — quái dựng tay trong test) -> bảng MẶC ĐỊNH, không rỗng.
+func roiDoCuaQuai(ac khoChieuAnhChup, ma string) []MucRoiDo {
+	return mucRoiTuNoiDung(ac.BangRoiCuaQuai(ma), false)
+}
+
+// roiDoCuaBoss tra bảng rơi cho MỘT PHA của MỘT con boss, đọc TỪ MỘT ẢNH CHỤP.
 //
 // pha == nil (dữ liệu pha hỏng — bossChet chịu được nil ở mọi bước) -> không
 // rơi gì. Thà không rơi còn hơn rơi theo một pha không biết là pha nào.
-func roiDoCuaBoss(pha *PhaBoss) []MucRoiDo {
+//
+// `ma` hôm nay luôn là noidung.MaBangRoiBossChung tại chỗ gọi trong khuvuc.go:
+// `game.Boss` chưa mang mã con boss (lichboss.go thả trường đó khi dựng lịch).
+// Chữ ký vẫn nhận `ma` để ngày Boss mang được Ma thì chỉ phải đổi ĐÚNG một dòng
+// ở chỗ gọi. Lý do đầy đủ ở đầu internal/noidung/bangroi.go.
+func roiDoCuaBoss(ac khoChieuAnhChup, ma string, pha *PhaBoss) []MucRoiDo {
 	if pha == nil {
 		return nil
 	}
-	if !pha.LaBossLon {
-		return roiDoTheoBoss
+	return mucRoiTuNoiDung(ac.BangRoiCuaBoss(ma), pha.LaBossLon)
+}
+
+// MaBossHopLeChoBangRoi là danh sách mã của MỌI con boss có trong kho nội dung
+// boss của gói này — tham số cho `noidung.KiemMaBangRoiBoss`.
+//
+// VÌ SAO CHỈ CÓ HÀM NÀY MÀ CHƯA CÓ CHỖ GỌI TRONG ACTOR: bộ kiểm mã boss là hàm
+// THUẦN nhận `*noidung.DuLieu`, mà đường khởi động của gói này chỉ cầm
+// `*noidung.Kho` (ảnh chụp), không cầm `DuLieu`. Đường duy nhất có `DuLieu`
+// trong tay là bộ nạp nóng (KH8 task 10) và `main.go` — cả hai đều là file
+// người khác đang sở hữu ở nhịp này. Hàm để sẵn đây, có test riêng, chờ nối.
+//
+// Hậu quả của việc chưa nối: một mục `boss:` trỏ tới mã không có thật sẽ KHÔNG
+// bị bắt lúc nạp. Hậu quả thật của lỗi đó là "bảng đó không bao giờ được dùng
+// tới" — boss không rơi gì, chứ không phải máy chủ sai. Chấp nhận được cho tới
+// khi task 10 nối vào.
+func MaBossHopLeChoBangRoi() []string {
+	ds := DanhSachNoiDungBoss()
+	ma := make([]string, 0, len(ds))
+	for _, nd := range ds {
+		ma = append(ma, nd.Ma)
 	}
-	// Nối hai bảng thành slice MỚI — KHÔNG append thẳng vào roiDoTheoBoss:
-	// append lên một biến gói dùng chung là cách kinh điển để hai lần gọi liên
-	// tiếp ghi đè lẫn nhau (nếu cap dư) và bảng gói bị bẩn vĩnh viễn.
-	gop := make([]MucRoiDo, 0, len(roiDoTheoBoss)+len(roiDoTheoBossLon))
-	gop = append(gop, roiDoTheoBoss...)
-	gop = append(gop, roiDoTheoBossLon...)
-	return gop
+	return ma
 }
 
 // quyetDinhRoiDo gieo từng dòng của bảng và tra danh sách món THỰC SỰ rơi.

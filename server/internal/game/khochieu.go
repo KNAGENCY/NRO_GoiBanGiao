@@ -87,6 +87,12 @@ type khoChieuAnhChup interface {
 	DanhSachQuai() []noidung.MauQuai
 	SinhQuaiCuaMap(mapID int32) []noidung.DiemSinhQuai
 
+	// Hai cua BANG ROI (KH8 task 9, roido.go). Cung mot anh chup voi chieu/quai
+	// — quai chet la mot su kien, va no phai doc chi so quai VA bang roi tren
+	// CUNG mot the he so lieu.
+	BangRoiCuaQuai(ma string) []noidung.MucRoi
+	BangRoiCuaBoss(ma string) []noidung.MucRoi
+
 	// Phan MAU VAT PHAM / OPTION (KH8 task 4) — cung ly do nhu quai: MOT nguon
 	// tiem, MOT anh chup moi nhip. (Hai task lam song song cung mo rong interface
 	// nay -> xung dot gop 03/09, dieu phoi giu CA HAI.)

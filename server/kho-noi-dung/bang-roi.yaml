@@ -1,0 +1,96 @@
+# bang-roi.yaml — QUÁI / BOSS CHẾT THÌ RƠI RA CÁI GÌ.
+#
+# (KH8 task 9. Thiết kế: docs/superpowers/specs/2026-09-03-kh8-kho-noi-dung-design.md
+# hàng "9" bảng Task, §2.3 tham chiếu chéo bằng MÃ CHUỖI.)
+#
+# ============================================================================
+# ⚠️ TOÀN BỘ CON SỐ Ở ĐÂY LÀ SỐ KHỞI ĐẦU — KH8 VÒNG CÂN BẰNG SẼ CHỈNH
+# ============================================================================
+#
+# Chúng được chép NGUYÊN VĂN từ bảng Go cũ (`internal/game/roido.go` trước task
+# 9), và bảng Go đó do người viết KH7 đặt tay — KHÔNG trích từ bản Java (bản
+# Java là game Dragon Ball, đây là game Naruto). Chúng cố tình rộng rãi để
+# nghiệm thu tay không phải đứng đánh quái nửa tiếng mới thấy một món.
+#
+# Task 9 chỉ CHUYỂN CHỖ Ở của con số, không đổi hành vi. Muốn đổi cân bằng thì
+# sửa ở đây rồi khởi động lại máy chủ (hoặc nạp nóng) — không phải sửa code nữa.
+#
+# ============================================================================
+# TRA CỨU BẰNG `ma` CHUỖI, KHÔNG PHẢI BẰNG `anh_id`
+# ============================================================================
+#
+# `ma` dưới khối `quai:` phải khớp một `ma` trong `mau_quai` của `quai.yaml`.
+# Bộ kiểm TỪ CHỐI NẠP nếu trỏ sai — không có đường im lặng.
+#
+# ⚠️ ĐỪNG tra bằng `anh_id`. Hai mẫu quái hoàn toàn khác nhau ĐƯỢC PHÉP dùng
+# chung một `anh_id` (ảnh trong catalog có hạn), và nếu bảng rơi tra theo ảnh
+# thì hai con đó rơi giống hệt nhau — một lỗi im lặng không ai nhìn ra. Đó
+# chính là lý do task 9 tồn tại: trước nó, `Quai.MauId` vừa mang anh_id vừa làm
+# khoá bảng rơi.
+#
+# ============================================================================
+# TỪNG DÒNG GIEO ĐỘC LẬP
+# ============================================================================
+#
+# Một lần quái chết có thể rơi 0 món, 1 món, hay TẤT CẢ các dòng — mỗi dòng
+# gieo riêng. Đây không phải "chọn một trong các dòng theo trọng số".
+#
+#   mau_id           : id mẫu vật phẩm trong `vat-pham.yaml`. PHẢI đã ghi sổ
+#                      trong `khoa-id.yaml`.
+#   so_luong         : rơi mấy cái. Phải > 0 và <= `tran_chong` của mẫu.
+#   ti_le_phan_tram  : 0..100. 0 = tắt dòng này (giữ lại dòng + chú thích).
+#   chac_chan: true  : 100%. KHÔNG được khai kèm ti_le_phan_tram.
+#   chi_boss_lon:true: chỉ tính khi pha đang chết là pha "boss lớn". Chỉ có
+#                      nghĩa trong khối `boss:`.
+
+# ---------------------------------------------------------------------------
+# Bảng MẶC ĐỊNH của quái
+# ---------------------------------------------------------------------------
+#
+# Dùng cho MỌI mẫu quái chưa có khối riêng bên dưới. Có mặc định (thay vì
+# "không khai thì không rơi gì") vì thêm một mẫu quái mới mà quên bảng rơi là
+# lỗi im lặng khó thấy nhất trong cả hệ thống này.
+
+quai_mac_dinh:
+  - { mau_id: 0, so_luong: 1, ti_le_phan_tram: 15 } # thuốc hồi máu nhỏ
+  - { mau_id: 1, so_luong: 1, ti_le_phan_tram: 10 } # thuốc hồi chakra nhỏ
+  - { mau_id: 4, so_luong: 1, ti_le_phan_tram: 2 } # kunai luyện tập
+
+# ---------------------------------------------------------------------------
+# Bảng riêng theo từng mẫu quái
+# ---------------------------------------------------------------------------
+
+quai:
+  # Sói Rừng là loại yếu nhất — nó chết nhanh và đông, nên rơi ít hơn mặc định.
+  - ma: soi-rung
+    roi:
+      - { mau_id: 0, so_luong: 1, ti_le_phan_tram: 10 } # thuốc hồi máu nhỏ
+      - { mau_id: 1, so_luong: 1, ti_le_phan_tram: 5 } # thuốc hồi chakra nhỏ
+
+# ---------------------------------------------------------------------------
+# Bảng boss
+# ---------------------------------------------------------------------------
+#
+# ⚠️ HÔM NAY CHỈ CÓ MỘT MỤC, MÃ `boss-chung`, DÙNG CHO MỌI CON BOSS.
+#
+# Lý do đầy đủ ở đầu `internal/noidung/bangroi.go` (mục "VÌ SAO CÓ MỘT MỤC
+# `ma: boss-chung`"), tóm tắt: `game.Boss` hôm nay KHÔNG mang `ma` của con boss
+# — lúc boss chết, actor chỉ biết PHA hiện tại chứ không biết nó đang giết con
+# nào. Chỗ nhét `ma` vào Boss nằm trong `lichboss.go`, file một task khác đang
+# sở hữu. Bảng Go cũ cũng dùng đúng MỘT bảng cho mọi boss, nên đây là giữ
+# nguyên trạng, không phải mất mát.
+#
+# KHI `game.Boss` MANG ĐƯỢC `Ma`: thêm mục theo mã thật (`nhan-gia-mat-na`,
+# `hoc-vien-dao-tau`) vào đây và đổi chỗ gọi trong `khuvuc.go`. Bộ kiểm
+# `KiemMaBangRoiBoss` đã dọn sẵn: nó chấp nhận cả mã thật lẫn `boss-chung`.
+
+boss:
+  - ma: boss-chung
+    roi:
+      - { mau_id: 0, so_luong: 1, chac_chan: true } # thuốc hồi máu nhỏ — chắc chắn
+      - { mau_id: 1, so_luong: 1, chac_chan: true } # thuốc hồi chakra nhỏ — chắc chắn
+      - { mau_id: 4, so_luong: 1, ti_le_phan_tram: 30 } # kunai luyện tập
+      # Hai dòng dưới CHỈ rơi khi pha đang chết là pha "boss lớn" — trang bị,
+      # thứ không bao giờ rơi từ quái thường.
+      - { mau_id: 2, so_luong: 1, ti_le_phan_tram: 50, chi_boss_lon: true } # áo
+      - { mau_id: 3, so_luong: 1, ti_le_phan_tram: 50, chi_boss_lon: true } # quần

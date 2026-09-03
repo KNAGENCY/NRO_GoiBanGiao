@@ -27,6 +27,7 @@ package game
 import (
 	"fmt"
 
+	"nroserver/internal/noidung"
 	"nroserver/internal/protocol"
 )
 
@@ -70,21 +71,23 @@ type MauVatPham struct {
 // 2. Tran cung — lay tu PHA A, khong duoc noi
 // ---------------------------------------------------------------------------
 
+// ⚠️ KH8 task 0 da CHUYEN cac tran nay ve goi noidung (noidung.Tran*) — mot noi
+// duy nhat cho ca kho noi dung, vi bo kiem YAML cung phai dung dung nhung so
+// nay. O day chi con BI DANH cho ngan gon; KHONG duoc go so vao thay.
+// (03/09 hai task song song moi ben tu khai mot ban tranParamOption, gop vao
+// main la dut build — bai hoc §8. Mot noi khai, moi noi tro toi.)
 const (
 	// tranMauOption: client doc so mau bang MOT BYTE KHONG DAU.
-	tranMauOption = 255
+	tranMauOption = noidung.TranMauOption
 
 	// tranParamOption: gia tri LON NHAT cua param mot option. Client doc param
 	// bang ReadParamDQT = readUnsignedShort (ModFunc.isReadInt == true) -> 0..65535;
 	// ghi so am hoac lon hon la client hien sai ma khong bao loi (bay L3 spec KH7).
-	// Khai bao MOT LAN o day (danh muc option la goc chung) — goihanhtrang.go (tui/
-	// mac/ruong) va cuahang.go (-44) deu dung; hai task do lam song song tung moi
-	// ben tu khai mot ban, gop lai la "redeclared" (03/09) — bai hoc ghi §8.
-	tranParamOption = 65535
+	tranParamOption = noidung.TranParamOption
 	// tranMauVatPham: client doc so mau bang SHORT CO DAU (Controller.cs:6495).
-	tranMauVatPham = 32767
+	tranMauVatPham = noidung.TranMauVatPham
 	// tranThanGoiItem: client goi d.mark(100000) truoc khi doc (Controller.cs:6468).
-	tranThanGoiItem = 100000
+	tranThanGoiItem = noidung.TranThanGoiItem
 )
 
 // ---------------------------------------------------------------------------
@@ -182,8 +185,17 @@ func TimMauVatPham(id int16) *MauVatPham {
 // goiCatalogItemOption dung -28/8 subtype 0: bang mau option.
 //
 //	[8][vsItem][0][soMau: 1 byte KHONG DAU]( [ten UTF][loai byte] )*
+//
+// (KH8 task 0) Tach lam hai: goiCatalogItemOption() giu nguyen chu ky cu va van
+// doc du lieu Go; goiCatalogItemOptionTu(ds) nhan danh muc tu ngoai vao. Tach de
+// CONG TUONG DUONG BYTE cho DUNG bo dung goi nay chay tren du lieu nap tu YAML
+// — neu test tu viet lai mot ban ghi byte thu hai thi no chi chung minh ban sao
+// dung, khong chung minh du lieu dung.
 func goiCatalogItemOption() (*protocol.Message, error) {
-	ds := DanhSachMauOption()
+	return goiCatalogItemOptionTu(DanhSachMauOption())
+}
+
+func goiCatalogItemOptionTu(ds []MauOption) (*protocol.Message, error) {
 	if len(ds) > tranMauOption {
 		return nil, fmt.Errorf(
 			"bang mau option %d muc, client chi doc duoc %d (mot byte khong dau)",
@@ -211,7 +223,10 @@ func goiCatalogItemOption() (*protocol.Message, error) {
 // Client XOA SACH bang mau truoc khi doc (ItemTemplates.clear, Controller.cs:6494)
 // nen goi nay la anh chup DAY DU, khong phai ban vá.
 func goiCatalogItemMau() (*protocol.Message, error) {
-	ds := DanhSachMauVatPham()
+	return goiCatalogItemMauTu(DanhSachMauVatPham())
+}
+
+func goiCatalogItemMauTu(ds []MauVatPham) (*protocol.Message, error) {
 	if len(ds) > tranMauVatPham {
 		return nil, fmt.Errorf(
 			"danh muc %d mau, client chi doc duoc %d (short co dau)",

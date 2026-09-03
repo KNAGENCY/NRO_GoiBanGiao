@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"math"
 
+	"nroserver/internal/noidung"
 	"nroserver/internal/protocol"
 )
 
@@ -37,10 +38,11 @@ const (
 	// tranSoTab / tranSoMonMoiTab: client doc readUnsignedByte (<=255) nhung ban
 	// Java ghi writeByte CO DAU. Giu trong 127 de khong bao gio phai doan xem
 	// client xu ly 128..255 the nao.
-	tranSoTab       = 127
-	tranSoMonMoiTab = 127
+	// (KH8 task 0: so that nam o noidung.Tran* — day chi la bi danh.)
+	tranSoTab       = noidung.TranSoTab
+	tranSoMonMoiTab = noidung.TranSoMonMoiTab
 	// tranSoOptionMoiMon: soOption la mot byte khong dau.
-	tranSoOptionMoiMon = 255
+	tranSoOptionMoiMon = noidung.TranSoOptionMoiMon
 	// tranParamOption (0..65535): dung ban chung o mauvatpham.go — xem chu thich
 	// o do va o goihanhtrang.go ve ly do chi khai bao MOT lan.
 )

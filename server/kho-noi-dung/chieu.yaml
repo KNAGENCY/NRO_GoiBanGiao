@@ -1,0 +1,944 @@
+# chieu.yaml — CHIÊU THỨC: 5 làng × 4 chiêu × 3 cấp = 20 chiêu, 60 cấp.
+#
+# ============================================================================
+# ⚠️ THỨ TỰ TRONG FILE NÀY LÀ DỮ LIỆU, KHÔNG PHẢI CÁCH TRÌNH BÀY.
+#
+#   - Khối `lang:` phải theo đúng thứ tự id 0,1,2,3,4. Đảo hai khối = đổi chiêu
+#     của cả hai làng.
+#   - `diem:` của mỗi cấp phải bằng vị trí của nó trong `cac_cap` (1,2,3).
+#   - `template_id` KHÔNG BAO GIỜ được là 0: client có một nhánh nhồi hai cấp
+#     giả (105/106) khi templateId == 0. Bộ kiểm chặn.
+#   - `loai` chỉ được là 1 (đánh) / 2 (buff hồi máu) / 3 (tự thân) — ba kiểu máy
+#     chủ ĐÃ CÀI ĐẶT. Thêm một kiểu mới (choáng, đẩy lùi, độc, khiên, hút máu)
+#     là VIẾT CODE MÁY CHỦ MỚI, không phải thêm một dòng ở đây.
+# ============================================================================
+#
+# CON SỐ Ở ĐÂU RA: đây là bản chuyển NGUYÊN VĂN dữ liệu Go hôm nay
+# (game/chieuthuc.go, hàm xayDungChieuTheoLang + taoCapChieu) sang YAML, KHÔNG
+# đổi một số nào. Bên Go sinh chúng bằng công thức theo vị trí:
+#
+#     template_id  = slot + 1                (1..4)
+#     skill_id gốc = 1 + (lang*4 + slot)*3   (mỗi chiêu chiếm 3 số liên tiếp)
+#     icon_id      = 1 + lang*4 + slot
+#     chakra_dung  = (10 + slot*5)  + (cấp-1)*10
+#     sat_thuong   = (20 + slot*10) + (cấp-1)*20
+#     gia          = (50 + slot*20) + (cấp-1)*50
+#     nhan_luc_can = cấp * 1000
+#     hoi_chieu_ms = 1000 + (cấp-1)*300
+#
+# VÌ SAO GIỜ VIẾT TƯỜNG MINH TỪNG SỐ thay vì giữ công thức: chính chú thích
+# trong code đã nói "Gia tri chi la KHOI DAU can chinh o KH8". Với công thức,
+# muốn chỉnh sát thương của MỘT chiêu là phải sửa hàm sinh — tức sửa TẤT CẢ
+# chiêu. Viết tường minh là để chỉnh được từng chiêu một.
+#
+# VÌ SAO các con số hiện tại là như vậy (chú thích chuyển từ chieuthuc.go):
+#   - slot 0 cận chiến tầm 100 · slot 1 tầm xa 300 · slot 2 hồi máu tầm 300
+#     (BẮT BUỘC có: gói -60 báo hồi máu chỉ sinh ra từ chiêu loai=2) ·
+#     slot 3 tự thân, tầm 0 (không phát gói chiến đấu).
+#   - `dx` và `dy` cố tình bằng nhau: client đọc cả hai nhưng dùng chung một
+#     giá trị tầm.
+#   - `sat_thuong` với chiêu loai=2 KHÔNG phải sát thương mà là LƯỢNG HỒI MÁU —
+#     bản Java tái sử dụng cùng ô. Đừng đọc nhầm.
+#   - `icon_id` hiện sinh THEO VỊ TRÍ, chưa phải id icon thật của bộ mỹ thuật.
+#     Khi có bộ icon thật, THÊM Ở CUỐI bảng tra, tuyệt đối không chèn giữa.
+#   - `them_thong_tin` để rỗng: bản Java ghi tên thương hiệu cũ vào đây.
+#
+# `ten_lang` chỉ để người đọc định hướng — tên làng gửi xuống client lấy từ
+# game/lang.go, bộ nạp KHÔNG dùng trường này.
+
+lang:
+
+  # ==========================================================================
+  # Làng id 0 — Làng Lá (hệ Hoả)
+  # ==========================================================================
+  - id_lang: 0
+    ten_lang: "Làng Lá"
+    chieu:
+
+      # slot 0 — cận chiến
+      - template_id: 1
+        ten: "Cước Liên Hoàn"
+        cap_toi_da: 3
+        kieu_ton_chakra: 0   # 0 = số chakra cố định (1 = %% chakra tối đa)
+        loai: 1
+        icon_id: 1
+        mo_ta: "Đòn cận chiến gây sát thương vật lý"
+        cac_cap:
+          - skill_id: 1
+            diem: 1
+            nhan_luc_can: 1000
+            chakra_dung: 10
+            hoi_chieu_ms: 1000
+            dx: 100
+            dy: 100
+            max_fight: 1
+            sat_thuong: 20
+            gia: 50
+            them_thong_tin: ""
+          - skill_id: 2
+            diem: 2
+            nhan_luc_can: 2000
+            chakra_dung: 20
+            hoi_chieu_ms: 1300
+            dx: 100
+            dy: 100
+            max_fight: 1
+            sat_thuong: 40
+            gia: 100
+            them_thong_tin: ""
+          - skill_id: 3
+            diem: 3
+            nhan_luc_can: 3000
+            chakra_dung: 30
+            hoi_chieu_ms: 1600
+            dx: 100
+            dy: 100
+            max_fight: 1
+            sat_thuong: 60
+            gia: 150
+            them_thong_tin: ""
+
+      # slot 1 — tầm xa theo hệ
+      - template_id: 2
+        ten: "Hoả Độn: Hào Hoả Cầu"
+        cap_toi_da: 3
+        kieu_ton_chakra: 0   # 0 = số chakra cố định (1 = %% chakra tối đa)
+        loai: 1
+        icon_id: 2
+        mo_ta: "Đòn tấn công tầm xa theo hệ nguyên tố của làng"
+        cac_cap:
+          - skill_id: 4
+            diem: 1
+            nhan_luc_can: 1000
+            chakra_dung: 15
+            hoi_chieu_ms: 1000
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 30
+            gia: 70
+            them_thong_tin: ""
+          - skill_id: 5
+            diem: 2
+            nhan_luc_can: 2000
+            chakra_dung: 25
+            hoi_chieu_ms: 1300
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 50
+            gia: 120
+            them_thong_tin: ""
+          - skill_id: 6
+            diem: 3
+            nhan_luc_can: 3000
+            chakra_dung: 35
+            hoi_chieu_ms: 1600
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 70
+            gia: 170
+            them_thong_tin: ""
+
+      # slot 2 — hồi máu đồng đội
+      - template_id: 3
+        ten: "Y Liệu Nhẫn Thuật"
+        cap_toi_da: 3
+        kieu_ton_chakra: 0   # 0 = số chakra cố định (1 = %% chakra tối đa)
+        loai: 2
+        icon_id: 3
+        mo_ta: "Hồi máu cho đồng đội trong tầm"
+        cac_cap:
+          - skill_id: 7
+            diem: 1
+            nhan_luc_can: 1000
+            chakra_dung: 20
+            hoi_chieu_ms: 1000
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 40
+            gia: 90
+            them_thong_tin: ""
+          - skill_id: 8
+            diem: 2
+            nhan_luc_can: 2000
+            chakra_dung: 30
+            hoi_chieu_ms: 1300
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 60
+            gia: 140
+            them_thong_tin: ""
+          - skill_id: 9
+            diem: 3
+            nhan_luc_can: 3000
+            chakra_dung: 40
+            hoi_chieu_ms: 1600
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 80
+            gia: 190
+            them_thong_tin: ""
+
+      # slot 3 — tự thân
+      - template_id: 4
+        ten: "Tụ Chakra"
+        cap_toi_da: 3
+        kieu_ton_chakra: 0   # 0 = số chakra cố định (1 = %% chakra tối đa)
+        loai: 3
+        icon_id: 4
+        mo_ta: "Tự thân hồi chakra, không nhắm mục tiêu"
+        cac_cap:
+          - skill_id: 10
+            diem: 1
+            nhan_luc_can: 1000
+            chakra_dung: 25
+            hoi_chieu_ms: 1000
+            dx: 0
+            dy: 0
+            max_fight: 1
+            sat_thuong: 50
+            gia: 110
+            them_thong_tin: ""
+          - skill_id: 11
+            diem: 2
+            nhan_luc_can: 2000
+            chakra_dung: 35
+            hoi_chieu_ms: 1300
+            dx: 0
+            dy: 0
+            max_fight: 1
+            sat_thuong: 70
+            gia: 160
+            them_thong_tin: ""
+          - skill_id: 12
+            diem: 3
+            nhan_luc_can: 3000
+            chakra_dung: 45
+            hoi_chieu_ms: 1600
+            dx: 0
+            dy: 0
+            max_fight: 1
+            sat_thuong: 90
+            gia: 210
+            them_thong_tin: ""
+
+  # ==========================================================================
+  # Làng id 1 — Làng Cát (hệ Phong)
+  # ==========================================================================
+  - id_lang: 1
+    ten_lang: "Làng Cát"
+    chieu:
+
+      # slot 0 — cận chiến
+      - template_id: 1
+        ten: "Trảm Phong Cước"
+        cap_toi_da: 3
+        kieu_ton_chakra: 0   # 0 = số chakra cố định (1 = %% chakra tối đa)
+        loai: 1
+        icon_id: 5
+        mo_ta: "Đòn cận chiến gây sát thương vật lý"
+        cac_cap:
+          - skill_id: 13
+            diem: 1
+            nhan_luc_can: 1000
+            chakra_dung: 10
+            hoi_chieu_ms: 1000
+            dx: 100
+            dy: 100
+            max_fight: 1
+            sat_thuong: 20
+            gia: 50
+            them_thong_tin: ""
+          - skill_id: 14
+            diem: 2
+            nhan_luc_can: 2000
+            chakra_dung: 20
+            hoi_chieu_ms: 1300
+            dx: 100
+            dy: 100
+            max_fight: 1
+            sat_thuong: 40
+            gia: 100
+            them_thong_tin: ""
+          - skill_id: 15
+            diem: 3
+            nhan_luc_can: 3000
+            chakra_dung: 30
+            hoi_chieu_ms: 1600
+            dx: 100
+            dy: 100
+            max_fight: 1
+            sat_thuong: 60
+            gia: 150
+            them_thong_tin: ""
+
+      # slot 1 — tầm xa theo hệ
+      - template_id: 2
+        ten: "Phong Độn: Cuồng Phong Trảm"
+        cap_toi_da: 3
+        kieu_ton_chakra: 0   # 0 = số chakra cố định (1 = %% chakra tối đa)
+        loai: 1
+        icon_id: 6
+        mo_ta: "Đòn tấn công tầm xa theo hệ nguyên tố của làng"
+        cac_cap:
+          - skill_id: 16
+            diem: 1
+            nhan_luc_can: 1000
+            chakra_dung: 15
+            hoi_chieu_ms: 1000
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 30
+            gia: 70
+            them_thong_tin: ""
+          - skill_id: 17
+            diem: 2
+            nhan_luc_can: 2000
+            chakra_dung: 25
+            hoi_chieu_ms: 1300
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 50
+            gia: 120
+            them_thong_tin: ""
+          - skill_id: 18
+            diem: 3
+            nhan_luc_can: 3000
+            chakra_dung: 35
+            hoi_chieu_ms: 1600
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 70
+            gia: 170
+            them_thong_tin: ""
+
+      # slot 2 — hồi máu đồng đội
+      - template_id: 3
+        ten: "Sa Thổ Y Liệu Thuật"
+        cap_toi_da: 3
+        kieu_ton_chakra: 0   # 0 = số chakra cố định (1 = %% chakra tối đa)
+        loai: 2
+        icon_id: 7
+        mo_ta: "Hồi máu cho đồng đội trong tầm"
+        cac_cap:
+          - skill_id: 19
+            diem: 1
+            nhan_luc_can: 1000
+            chakra_dung: 20
+            hoi_chieu_ms: 1000
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 40
+            gia: 90
+            them_thong_tin: ""
+          - skill_id: 20
+            diem: 2
+            nhan_luc_can: 2000
+            chakra_dung: 30
+            hoi_chieu_ms: 1300
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 60
+            gia: 140
+            them_thong_tin: ""
+          - skill_id: 21
+            diem: 3
+            nhan_luc_can: 3000
+            chakra_dung: 40
+            hoi_chieu_ms: 1600
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 80
+            gia: 190
+            them_thong_tin: ""
+
+      # slot 3 — tự thân
+      - template_id: 4
+        ten: "Tụ Chakra Sa Mạc"
+        cap_toi_da: 3
+        kieu_ton_chakra: 0   # 0 = số chakra cố định (1 = %% chakra tối đa)
+        loai: 3
+        icon_id: 8
+        mo_ta: "Tự thân hồi chakra, không nhắm mục tiêu"
+        cac_cap:
+          - skill_id: 22
+            diem: 1
+            nhan_luc_can: 1000
+            chakra_dung: 25
+            hoi_chieu_ms: 1000
+            dx: 0
+            dy: 0
+            max_fight: 1
+            sat_thuong: 50
+            gia: 110
+            them_thong_tin: ""
+          - skill_id: 23
+            diem: 2
+            nhan_luc_can: 2000
+            chakra_dung: 35
+            hoi_chieu_ms: 1300
+            dx: 0
+            dy: 0
+            max_fight: 1
+            sat_thuong: 70
+            gia: 160
+            them_thong_tin: ""
+          - skill_id: 24
+            diem: 3
+            nhan_luc_can: 3000
+            chakra_dung: 45
+            hoi_chieu_ms: 1600
+            dx: 0
+            dy: 0
+            max_fight: 1
+            sat_thuong: 90
+            gia: 210
+            them_thong_tin: ""
+
+  # ==========================================================================
+  # Làng id 2 — Làng Sương Mù (hệ Thuỷ)
+  # ==========================================================================
+  - id_lang: 2
+    ten_lang: "Làng Sương Mù"
+    chieu:
+
+      # slot 0 — cận chiến
+      - template_id: 1
+        ten: "Thuỷ Ảnh Trảm"
+        cap_toi_da: 3
+        kieu_ton_chakra: 0   # 0 = số chakra cố định (1 = %% chakra tối đa)
+        loai: 1
+        icon_id: 9
+        mo_ta: "Đòn cận chiến gây sát thương vật lý"
+        cac_cap:
+          - skill_id: 25
+            diem: 1
+            nhan_luc_can: 1000
+            chakra_dung: 10
+            hoi_chieu_ms: 1000
+            dx: 100
+            dy: 100
+            max_fight: 1
+            sat_thuong: 20
+            gia: 50
+            them_thong_tin: ""
+          - skill_id: 26
+            diem: 2
+            nhan_luc_can: 2000
+            chakra_dung: 20
+            hoi_chieu_ms: 1300
+            dx: 100
+            dy: 100
+            max_fight: 1
+            sat_thuong: 40
+            gia: 100
+            them_thong_tin: ""
+          - skill_id: 27
+            diem: 3
+            nhan_luc_can: 3000
+            chakra_dung: 30
+            hoi_chieu_ms: 1600
+            dx: 100
+            dy: 100
+            max_fight: 1
+            sat_thuong: 60
+            gia: 150
+            them_thong_tin: ""
+
+      # slot 1 — tầm xa theo hệ
+      - template_id: 2
+        ten: "Thuỷ Độn: Đại Thuỷ Long Đạn"
+        cap_toi_da: 3
+        kieu_ton_chakra: 0   # 0 = số chakra cố định (1 = %% chakra tối đa)
+        loai: 1
+        icon_id: 10
+        mo_ta: "Đòn tấn công tầm xa theo hệ nguyên tố của làng"
+        cac_cap:
+          - skill_id: 28
+            diem: 1
+            nhan_luc_can: 1000
+            chakra_dung: 15
+            hoi_chieu_ms: 1000
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 30
+            gia: 70
+            them_thong_tin: ""
+          - skill_id: 29
+            diem: 2
+            nhan_luc_can: 2000
+            chakra_dung: 25
+            hoi_chieu_ms: 1300
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 50
+            gia: 120
+            them_thong_tin: ""
+          - skill_id: 30
+            diem: 3
+            nhan_luc_can: 3000
+            chakra_dung: 35
+            hoi_chieu_ms: 1600
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 70
+            gia: 170
+            them_thong_tin: ""
+
+      # slot 2 — hồi máu đồng đội
+      - template_id: 3
+        ten: "Sương Mù Y Liệu Thuật"
+        cap_toi_da: 3
+        kieu_ton_chakra: 0   # 0 = số chakra cố định (1 = %% chakra tối đa)
+        loai: 2
+        icon_id: 11
+        mo_ta: "Hồi máu cho đồng đội trong tầm"
+        cac_cap:
+          - skill_id: 31
+            diem: 1
+            nhan_luc_can: 1000
+            chakra_dung: 20
+            hoi_chieu_ms: 1000
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 40
+            gia: 90
+            them_thong_tin: ""
+          - skill_id: 32
+            diem: 2
+            nhan_luc_can: 2000
+            chakra_dung: 30
+            hoi_chieu_ms: 1300
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 60
+            gia: 140
+            them_thong_tin: ""
+          - skill_id: 33
+            diem: 3
+            nhan_luc_can: 3000
+            chakra_dung: 40
+            hoi_chieu_ms: 1600
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 80
+            gia: 190
+            them_thong_tin: ""
+
+      # slot 3 — tự thân
+      - template_id: 4
+        ten: "Tụ Chakra Sương Mù"
+        cap_toi_da: 3
+        kieu_ton_chakra: 0   # 0 = số chakra cố định (1 = %% chakra tối đa)
+        loai: 3
+        icon_id: 12
+        mo_ta: "Tự thân hồi chakra, không nhắm mục tiêu"
+        cac_cap:
+          - skill_id: 34
+            diem: 1
+            nhan_luc_can: 1000
+            chakra_dung: 25
+            hoi_chieu_ms: 1000
+            dx: 0
+            dy: 0
+            max_fight: 1
+            sat_thuong: 50
+            gia: 110
+            them_thong_tin: ""
+          - skill_id: 35
+            diem: 2
+            nhan_luc_can: 2000
+            chakra_dung: 35
+            hoi_chieu_ms: 1300
+            dx: 0
+            dy: 0
+            max_fight: 1
+            sat_thuong: 70
+            gia: 160
+            them_thong_tin: ""
+          - skill_id: 36
+            diem: 3
+            nhan_luc_can: 3000
+            chakra_dung: 45
+            hoi_chieu_ms: 1600
+            dx: 0
+            dy: 0
+            max_fight: 1
+            sat_thuong: 90
+            gia: 210
+            them_thong_tin: ""
+
+  # ==========================================================================
+  # Làng id 3 — Làng Đá (hệ Thổ)
+  # ==========================================================================
+  - id_lang: 3
+    ten_lang: "Làng Đá"
+    chieu:
+
+      # slot 0 — cận chiến
+      - template_id: 1
+        ten: "Nham Thạch Quyền"
+        cap_toi_da: 3
+        kieu_ton_chakra: 0   # 0 = số chakra cố định (1 = %% chakra tối đa)
+        loai: 1
+        icon_id: 13
+        mo_ta: "Đòn cận chiến gây sát thương vật lý"
+        cac_cap:
+          - skill_id: 37
+            diem: 1
+            nhan_luc_can: 1000
+            chakra_dung: 10
+            hoi_chieu_ms: 1000
+            dx: 100
+            dy: 100
+            max_fight: 1
+            sat_thuong: 20
+            gia: 50
+            them_thong_tin: ""
+          - skill_id: 38
+            diem: 2
+            nhan_luc_can: 2000
+            chakra_dung: 20
+            hoi_chieu_ms: 1300
+            dx: 100
+            dy: 100
+            max_fight: 1
+            sat_thuong: 40
+            gia: 100
+            them_thong_tin: ""
+          - skill_id: 39
+            diem: 3
+            nhan_luc_can: 3000
+            chakra_dung: 30
+            hoi_chieu_ms: 1600
+            dx: 100
+            dy: 100
+            max_fight: 1
+            sat_thuong: 60
+            gia: 150
+            them_thong_tin: ""
+
+      # slot 1 — tầm xa theo hệ
+      - template_id: 2
+        ten: "Thổ Độn: Nham Thạch Đạn"
+        cap_toi_da: 3
+        kieu_ton_chakra: 0   # 0 = số chakra cố định (1 = %% chakra tối đa)
+        loai: 1
+        icon_id: 14
+        mo_ta: "Đòn tấn công tầm xa theo hệ nguyên tố của làng"
+        cac_cap:
+          - skill_id: 40
+            diem: 1
+            nhan_luc_can: 1000
+            chakra_dung: 15
+            hoi_chieu_ms: 1000
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 30
+            gia: 70
+            them_thong_tin: ""
+          - skill_id: 41
+            diem: 2
+            nhan_luc_can: 2000
+            chakra_dung: 25
+            hoi_chieu_ms: 1300
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 50
+            gia: 120
+            them_thong_tin: ""
+          - skill_id: 42
+            diem: 3
+            nhan_luc_can: 3000
+            chakra_dung: 35
+            hoi_chieu_ms: 1600
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 70
+            gia: 170
+            them_thong_tin: ""
+
+      # slot 2 — hồi máu đồng đội
+      - template_id: 3
+        ten: "Nham Y Liệu Thuật"
+        cap_toi_da: 3
+        kieu_ton_chakra: 0   # 0 = số chakra cố định (1 = %% chakra tối đa)
+        loai: 2
+        icon_id: 15
+        mo_ta: "Hồi máu cho đồng đội trong tầm"
+        cac_cap:
+          - skill_id: 43
+            diem: 1
+            nhan_luc_can: 1000
+            chakra_dung: 20
+            hoi_chieu_ms: 1000
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 40
+            gia: 90
+            them_thong_tin: ""
+          - skill_id: 44
+            diem: 2
+            nhan_luc_can: 2000
+            chakra_dung: 30
+            hoi_chieu_ms: 1300
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 60
+            gia: 140
+            them_thong_tin: ""
+          - skill_id: 45
+            diem: 3
+            nhan_luc_can: 3000
+            chakra_dung: 40
+            hoi_chieu_ms: 1600
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 80
+            gia: 190
+            them_thong_tin: ""
+
+      # slot 3 — tự thân
+      - template_id: 4
+        ten: "Tụ Chakra Nham Thạch"
+        cap_toi_da: 3
+        kieu_ton_chakra: 0   # 0 = số chakra cố định (1 = %% chakra tối đa)
+        loai: 3
+        icon_id: 16
+        mo_ta: "Tự thân hồi chakra, không nhắm mục tiêu"
+        cac_cap:
+          - skill_id: 46
+            diem: 1
+            nhan_luc_can: 1000
+            chakra_dung: 25
+            hoi_chieu_ms: 1000
+            dx: 0
+            dy: 0
+            max_fight: 1
+            sat_thuong: 50
+            gia: 110
+            them_thong_tin: ""
+          - skill_id: 47
+            diem: 2
+            nhan_luc_can: 2000
+            chakra_dung: 35
+            hoi_chieu_ms: 1300
+            dx: 0
+            dy: 0
+            max_fight: 1
+            sat_thuong: 70
+            gia: 160
+            them_thong_tin: ""
+          - skill_id: 48
+            diem: 3
+            nhan_luc_can: 3000
+            chakra_dung: 45
+            hoi_chieu_ms: 1600
+            dx: 0
+            dy: 0
+            max_fight: 1
+            sat_thuong: 90
+            gia: 210
+            them_thong_tin: ""
+
+  # ==========================================================================
+  # Làng id 4 — Làng Mây (hệ Lôi)
+  # ==========================================================================
+  - id_lang: 4
+    ten_lang: "Làng Mây"
+    chieu:
+
+      # slot 0 — cận chiến
+      - template_id: 1
+        ten: "Lôi Ảnh Cước"
+        cap_toi_da: 3
+        kieu_ton_chakra: 0   # 0 = số chakra cố định (1 = %% chakra tối đa)
+        loai: 1
+        icon_id: 17
+        mo_ta: "Đòn cận chiến gây sát thương vật lý"
+        cac_cap:
+          - skill_id: 49
+            diem: 1
+            nhan_luc_can: 1000
+            chakra_dung: 10
+            hoi_chieu_ms: 1000
+            dx: 100
+            dy: 100
+            max_fight: 1
+            sat_thuong: 20
+            gia: 50
+            them_thong_tin: ""
+          - skill_id: 50
+            diem: 2
+            nhan_luc_can: 2000
+            chakra_dung: 20
+            hoi_chieu_ms: 1300
+            dx: 100
+            dy: 100
+            max_fight: 1
+            sat_thuong: 40
+            gia: 100
+            them_thong_tin: ""
+          - skill_id: 51
+            diem: 3
+            nhan_luc_can: 3000
+            chakra_dung: 30
+            hoi_chieu_ms: 1600
+            dx: 100
+            dy: 100
+            max_fight: 1
+            sat_thuong: 60
+            gia: 150
+            them_thong_tin: ""
+
+      # slot 1 — tầm xa theo hệ
+      - template_id: 2
+        ten: "Lôi Độn: Cầu Sét"
+        cap_toi_da: 3
+        kieu_ton_chakra: 0   # 0 = số chakra cố định (1 = %% chakra tối đa)
+        loai: 1
+        icon_id: 18
+        mo_ta: "Đòn tấn công tầm xa theo hệ nguyên tố của làng"
+        cac_cap:
+          - skill_id: 52
+            diem: 1
+            nhan_luc_can: 1000
+            chakra_dung: 15
+            hoi_chieu_ms: 1000
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 30
+            gia: 70
+            them_thong_tin: ""
+          - skill_id: 53
+            diem: 2
+            nhan_luc_can: 2000
+            chakra_dung: 25
+            hoi_chieu_ms: 1300
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 50
+            gia: 120
+            them_thong_tin: ""
+          - skill_id: 54
+            diem: 3
+            nhan_luc_can: 3000
+            chakra_dung: 35
+            hoi_chieu_ms: 1600
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 70
+            gia: 170
+            them_thong_tin: ""
+
+      # slot 2 — hồi máu đồng đội
+      - template_id: 3
+        ten: "Vân Y Liệu Thuật"
+        cap_toi_da: 3
+        kieu_ton_chakra: 0   # 0 = số chakra cố định (1 = %% chakra tối đa)
+        loai: 2
+        icon_id: 19
+        mo_ta: "Hồi máu cho đồng đội trong tầm"
+        cac_cap:
+          - skill_id: 55
+            diem: 1
+            nhan_luc_can: 1000
+            chakra_dung: 20
+            hoi_chieu_ms: 1000
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 40
+            gia: 90
+            them_thong_tin: ""
+          - skill_id: 56
+            diem: 2
+            nhan_luc_can: 2000
+            chakra_dung: 30
+            hoi_chieu_ms: 1300
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 60
+            gia: 140
+            them_thong_tin: ""
+          - skill_id: 57
+            diem: 3
+            nhan_luc_can: 3000
+            chakra_dung: 40
+            hoi_chieu_ms: 1600
+            dx: 300
+            dy: 300
+            max_fight: 1
+            sat_thuong: 80
+            gia: 190
+            them_thong_tin: ""
+
+      # slot 3 — tự thân
+      - template_id: 4
+        ten: "Tụ Chakra Vân"
+        cap_toi_da: 3
+        kieu_ton_chakra: 0   # 0 = số chakra cố định (1 = %% chakra tối đa)
+        loai: 3
+        icon_id: 20
+        mo_ta: "Tự thân hồi chakra, không nhắm mục tiêu"
+        cac_cap:
+          - skill_id: 58
+            diem: 1
+            nhan_luc_can: 1000
+            chakra_dung: 25
+            hoi_chieu_ms: 1000
+            dx: 0
+            dy: 0
+            max_fight: 1
+            sat_thuong: 50
+            gia: 110
+            them_thong_tin: ""
+          - skill_id: 59
+            diem: 2
+            nhan_luc_can: 2000
+            chakra_dung: 35
+            hoi_chieu_ms: 1300
+            dx: 0
+            dy: 0
+            max_fight: 1
+            sat_thuong: 70
+            gia: 160
+            them_thong_tin: ""
+          - skill_id: 60
+            diem: 3
+            nhan_luc_can: 3000
+            chakra_dung: 45
+            hoi_chieu_ms: 1600
+            dx: 0
+            dy: 0
+            max_fight: 1
+            sat_thuong: 90
+            gia: 210
+            them_thong_tin: ""

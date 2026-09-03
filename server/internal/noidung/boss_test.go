@@ -180,11 +180,11 @@ func TestBoss_NoiGianPhaiManhLenKhongYeuDi(t *testing.T) {
 }
 
 func TestBoss_HpChonPhaiDuongVaVuaInt32(t *testing.T) {
-	doiPhaiDo(t, "hp_chon: [2400, 3000, 3600]", "hp_chon: [2400, 0, 3600]",
+	doiPhaiDo(t, "hp_chon: [3600, 4500, 5400]", "hp_chon: [3600, 0, 5400]",
 		"hp 0 = boss sinh ra la chet ngay")
-	doiPhaiDo(t, "hp_chon: [2400, 3000, 3600]", "hp_chon: [2400, 3000000000, 3600]",
+	doiPhaiDo(t, "hp_chon: [3600, 4500, 5400]", "hp_chon: [3600, 3000000000, 5400]",
 		"vuot int32: KepHp cat xuong tran ma khong bao gi, con boss 3 ty mau am tham thanh 2,1 ty")
-	doiPhaiDo(t, "hp_chon: [2400, 3000, 3600]", "hp_chon: []",
+	doiPhaiDo(t, "hp_chon: [3600, 4500, 5400]", "hp_chon: []",
 		"hp_chon rong = luc sinh khong biet cho boss bao nhieu mau")
 }
 

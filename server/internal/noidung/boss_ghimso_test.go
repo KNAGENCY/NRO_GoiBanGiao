@@ -37,7 +37,14 @@ func TestBossNhung_GhimSoKhoiDauTheoBangGoCu(t *testing.T) {
 	}
 	muon := map[string][]khung{
 		"nhan-gia-mat-na": {
-			{"Kẻ Lạ Mặt", 50, 60, 1500, []int64{2400, 3000, 3600}, 1800, true, []MocNoiGianBoss{
+			// KH8 task 13 (vòng cân bằng), có chủ đích: dame 60 → 15 và
+			// hp_chon [2400,3000,3600] → [3600,4500,5400]. Lý do đầy đủ ghi cạnh
+			// hai số đó trong boss.yaml; tóm tắt: 5 người chỉ số khởi đầu có
+			// tổng 1000 máu và KHÔNG có đường hồi máu nào trong trận, nên dame
+			// 60 hạ sạch cả năm người trong 55 giây mà boss vẫn còn 2708/3000.
+			// Số mới: hạ được boss trong 2 phút 2,5 giây, còn 2/5 người sống,
+			// cả hai mốc nổi giận đều kịp chạy.
+			{"Kẻ Lạ Mặt", 50, 15, 1500, []int64{3600, 4500, 5400}, 1800, true, []MocNoiGianBoss{
 				{PhanTramHP: 50, HeSoDame: 1.30, HeSoDef: 0.85, HeSoNhip: 0.80},
 				{PhanTramHP: 20, HeSoDame: 1.60, HeSoDef: 0.70, HeSoNhip: 0.75},
 			}},

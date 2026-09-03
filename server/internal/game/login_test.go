@@ -232,7 +232,16 @@ func dungPhienThat(t *testing.T, b *BoXuLy) (fClient *protocol.Framer, dong func
 	t.Helper()
 
 	benClient, benServer := net.Pipe()
-	go mynet.PhucVu(benServer, func() mynet.XuLyGoiTin { return b })
+	// xong dong khi PhucVu THOAT — de dong() ben duoi co the DOI goroutine phien
+	// ket thuc. Khong co cai doi nay thi test doc mot truong cua BoXuLy (vi du
+	// b.clientSanSang) sau khi dong() la DUA DU LIEU voi goroutine phien: go
+	// test -race lan dau (03/09, w64devkit) bat dung TestNhanClientOk o cho do.
+	// Doi PhucVu thoat = happens-before that su, khong phai time.Sleep doan mo.
+	xong := make(chan struct{})
+	go func() {
+		defer close(xong)
+		mynet.PhucVu(benServer, func() mynet.XuLyGoiTin { return b })
+	}()
 
 	benClient.SetReadDeadline(time.Now().Add(5 * time.Second))
 
@@ -243,7 +252,18 @@ func dungPhienThat(t *testing.T, b *BoXuLy) (fClient *protocol.Framer, dong func
 	khoaTho := docGoiKhoaThuCong(t, benClient)
 	fClient.SetKey(protocol.DeriveKey(khoaTho))
 
-	return fClient, func() { benClient.Close() }
+	var mot sync.Once
+	dong = func() {
+		mot.Do(func() {
+			benClient.Close()
+			select {
+			case <-xong:
+			case <-time.After(5 * time.Second):
+				t.Errorf("phien XuLy khong thoat sau 5s ke tu khi client dong")
+			}
+		})
+	}
+	return fClient, dong
 }
 
 // docMotGoi doc DUNG MOT goi ma may chu gui ra qua fClient (framer client gia
@@ -906,7 +926,11 @@ func TestNhanClientOk(t *testing.T) {
 	if err := fClient.WriteMessage(protocol.NewMessage(-28, w)); err != nil {
 		t.Fatal(err)
 	}
-	time.Sleep(100 * time.Millisecond)
+	// net.Pipe la DONG BO: WriteMessage tra ve nghia la phia phien DA DOC du
+	// khung. Dong() roi DOI PhucVu thoat (xem dungPhienThat) — sau do doc
+	// b.clientSanSang moi khong dua du lieu voi goroutine phien (go test -race
+	// 03/09 bat dung cho time.Sleep(100ms) cu). KHONG doc truoc khi dong().
+	dong()
 	if !b.clientSanSang {
 		t.Error("gui -28/13 (clientOk) khong lam b.clientSanSang = true")
 	}

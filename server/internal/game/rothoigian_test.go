@@ -92,6 +92,12 @@ func triTuyetDoi(d time.Duration) time.Duration {
 //     ban ma van bat duoc ro ret lo hong that (~13 ms, tuc gap hon 13 lan
 //     nguong 1 ms).
 func TestKhongDoanDuocTaiKhoanNaoCoThatQuaThoiGian(t *testing.T) {
+	if raceEnabled {
+		// Duoi -race PBKDF2 cham ~10x va nhieu len toi vai ms (do 03/09: chenh
+		// 2,8ms, nguong 1ms) — dung cu do bi nhieu, khong phai ro ri that. Phep
+		// do nay chi co y nghia o ban build thuong; ban race co viec rieng cua no.
+		t.Skip("do thoi gian duoi -race vo nghia (xem race_bat.go)")
+	}
 	bam, err := auth.Hash("matkhaudung")
 	if err != nil {
 		t.Fatalf("khong bam duoc mat khau mau: %v", err)

@@ -1,0 +1,87 @@
+# khoa-id.yaml — SỔ CÁI ID ĐÃ CẤP PHÁT. Đây KHÔNG phải nội dung game.
+#
+# ============================================================================
+# ⚠️ FILE NÀY CHỈ ĐƯỢC THÊM DÒNG. Không xoá, không sửa, không đổi thứ tự.
+# ============================================================================
+#
+# VÌ SAO NÓ TỒN TẠI
+#
+# `vat-pham.yaml` đã có bộ kiểm "id phải bằng vị trí trong file". Bộ kiểm đó bắt
+# được hoán vị và bắt được id thủng lỗ. Nhưng nó KHÔNG bắt được hai việc:
+#
+#   1. XOÁ hẳn một mẫu ở cuối danh mục — id vẫn liên tục từ 0, mọi kiểm vẫn xanh.
+#   2. Đổi chỗ hai mẫu RỒI sửa luôn `id:` cho liên tục — cũng vẫn xanh.
+#
+# Cả hai đều là "áo ninja của mọi người biến thành thuốc hồi máu": id mẫu đang
+# nằm trong cột `vat_pham.mau_id` của cơ sở dữ liệu người chơi, và sự thật đó
+# KHÔNG có trong file YAML nào cả. File này chính là chỗ ghim sự thật ấy lại.
+#
+# Bộ kiểm (internal/noidung/kiemtra.go) đối chiếu danh mục hiện tại với sổ này và
+# TỪ CHỐI NẠP khi:
+#   - một id đã khoá biến mất khỏi danh mục;
+#   - id trong danh mục mang mã KHÁC mã đã khoá (đổi chỗ, hoặc đổi tên);
+#   - danh mục có mục mới mà sổ này chưa có dòng tương ứng.
+#
+# CÁCH DÙNG ĐÚNG
+#
+#   - Thêm một mẫu mới: thêm vào CUỐI `vat-pham.yaml` **và** thêm một dòng vào
+#     CUỐI bảng tương ứng ở đây. Hai việc, một commit.
+#   - Muốn ngừng bán một món: bỏ món đó khỏi `cua-hang.yaml`. KHÔNG xoá khỏi
+#     danh mục, KHÔNG xoá dòng ở đây. (Thiết kế §2.6 nói tới một cờ
+#     `ngung_dung: true` — cờ đó cần một trường mới trong kiểu dữ liệu, thuộc
+#     một bước sau; hôm nay bỏ khỏi cửa hàng là cách đúng.)
+#   - Đổi TÊN HIỂN THỊ của một mẫu đã phát hành: bộ kiểm sẽ ĐỎ, vì `ma` được
+#     sinh ra từ `ten`. Đó là cố ý — đổi tên một món người chơi đang cầm là việc
+#     có chủ đích. Sửa dòng khoá tương ứng và NÓI RÕ trong commit.
+#
+# CÁCH SOI FILE NÀY KHI REVIEW (thiết kế §2.6 — quan trọng)
+#
+# Sổ này là TỰ KHAI: hai file cùng sai vẫn "khớp" nhau. Vì vậy người review
+# KHÔNG đối chiếu sổ với danh mục (bộ kiểm đã làm việc đó), mà đối chiếu sổ với
+# `git log` của CHÍNH NÓ:
+#
+#     git log -p -- server/kho-noi-dung/khoa-id.yaml
+#
+# Trong lịch sử đó chỉ được có dòng THÊM (`+`). Một dòng bị xoá hay sửa (`-`) là
+# một câu hỏi phải trả lời, không phải một chi tiết bỏ qua.
+
+# ---------------------------------------------------------------------------
+# Mẫu option — id đi vào bảng option của từng món đồ trong CSDL người chơi
+# ---------------------------------------------------------------------------
+#
+# ⚠️ id 6 và 7 còn nặng hơn phần còn lại: client băm cứng option 22 -> 6 và
+# 23 -> 7 (param ×1000). Đổi ý nghĩa hai id này là món đồ hiện sai chỉ số.
+
+mau_option:
+  - id: 0
+    ma: "hoi-phuc-hp"
+  - id: 1
+    ma: "hoi-phuc-chakra"
+  - id: 2
+    ma: "tang-suc-danh"
+  - id: 3
+    ma: "tang-giap"
+  - id: 4
+    ma: "tang-chinh-xac"
+  - id: 5
+    ma: "tang-ne-don"
+  - id: 6
+    ma: "tang-hp"
+  - id: 7
+    ma: "tang-chakra"
+
+# ---------------------------------------------------------------------------
+# Mẫu vật phẩm — id nằm trong cột vat_pham.mau_id của CSDL người chơi
+# ---------------------------------------------------------------------------
+
+mau_vat_pham:
+  - id: 0
+    ma: "thuoc-hoi-mau-nho"
+  - id: 1
+    ma: "thuoc-hoi-chakra-nho"
+  - id: 2
+    ma: "ao-ninja-lang-la"
+  - id: 3
+    ma: "quan-ninja-lang-la"
+  - id: 4
+    ma: "kunai-luyen-tap"

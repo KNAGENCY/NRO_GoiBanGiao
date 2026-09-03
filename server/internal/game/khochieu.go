@@ -84,9 +84,13 @@ var (
 	khoChieuNhung  *noidung.Kho
 )
 
-// khoChieuMacDinh tra ve anh chup cua kho NHUNG — duong dung khi chua ai gan
-// kho (xem khoi chu thich dau tep). Nap mot lan, dung lai mai mai.
-func khoChieuMacDinh() khoChieuAnhChup {
+// khoNhungMotLan tra ve *noidung.Kho da nap kho-noi-dung NHUNG, dung MOT LAN
+// (sync.Once) roi dung lai mai mai — xem khoi chu thich dau tep ("MAC DINH KHI
+// CHUA AI GAN KHO"). DUNG CHUNG cho moi phan cua goi `game` doc anh chup mac
+// dinh (chieu: khoChieuMacDinh duoi day; lang: khoLangMacDinh trong lang.go,
+// KH8 task 6) — CHI MOT sync.Once cho ca kho, vi mot anh chup noi dung la MOT
+// khoi thong nhat (chieu + lang + ... cung nam trong *noidung.DuLieu).
+func khoNhungMotLan() *noidung.Kho {
 	khoChieuMotLan.Do(func() {
 		du, err := noidung.NapNhung()
 		if err != nil {
@@ -94,7 +98,13 @@ func khoChieuMacDinh() khoChieuAnhChup {
 		}
 		khoChieuNhung = noidung.MoKho(du)
 	})
-	return khoChieuNhung.AnhChup()
+	return khoChieuNhung
+}
+
+// khoChieuMacDinh tra ve anh chup cua kho NHUNG — duong dung khi chua ai gan
+// kho (xem khoi chu thich dau tep). Nap mot lan, dung lai mai mai.
+func khoChieuMacDinh() khoChieuAnhChup {
+	return khoNhungMotLan().AnhChup()
 }
 
 // ---------------------------------------------------------------------------

@@ -43,8 +43,9 @@
 #     Khi có bộ icon thật, THÊM Ở CUỐI bảng tra, tuyệt đối không chèn giữa.
 #   - `them_thong_tin` để rỗng: bản Java ghi tên thương hiệu cũ vào đây.
 #
-# `ten_lang` chỉ để người đọc định hướng — tên làng gửi xuống client lấy từ
-# game/lang.go, bộ nạp KHÔNG dùng trường này.
+# KH8 task 6: đã bỏ `ten_lang` (bản sao thứ hai của tên làng, chỉ để định
+# hướng, bộ nạp không dùng) — tên làng gửi xuống client giờ đọc TỪ MỘT NGUỒN
+# DUY NHẤT: kho-noi-dung/lang.yaml (qua game/lang.go), tra theo id_lang.
 
 lang:
 
@@ -52,7 +53,6 @@ lang:
   # Làng id 0 — Làng Lá (hệ Hoả)
   # ==========================================================================
   - id_lang: 0
-    ten_lang: "Làng Lá"
     chieu:
 
       # slot 0 — cận chiến
@@ -231,7 +231,6 @@ lang:
   # Làng id 1 — Làng Cát (hệ Phong)
   # ==========================================================================
   - id_lang: 1
-    ten_lang: "Làng Cát"
     chieu:
 
       # slot 0 — cận chiến
@@ -410,7 +409,6 @@ lang:
   # Làng id 2 — Làng Sương Mù (hệ Thuỷ)
   # ==========================================================================
   - id_lang: 2
-    ten_lang: "Làng Sương Mù"
     chieu:
 
       # slot 0 — cận chiến
@@ -589,7 +587,6 @@ lang:
   # Làng id 3 — Làng Đá (hệ Thổ)
   # ==========================================================================
   - id_lang: 3
-    ten_lang: "Làng Đá"
     chieu:
 
       # slot 0 — cận chiến
@@ -768,7 +765,6 @@ lang:
   # Làng id 4 — Làng Mây (hệ Lôi)
   # ==========================================================================
   - id_lang: 4
-    ten_lang: "Làng Mây"
     chieu:
 
       # slot 0 — cận chiến

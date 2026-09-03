@@ -1,0 +1,76 @@
+# lang.yaml — 5 LANG NARUTO (thay cho "chung toc" cua ban Dragon Ball cu).
+#
+# ============================================================================
+# ⚠️ THU TU TRONG FILE NAY LA DU LIEU, KHONG PHAI CACH TRINH BAY.
+#
+#   - `id:` PHAI khai tuong minh va bang dung VI TRI trong danh sach `lang:`
+#     (giong mau_vat_pham/mau_option) — id nay dang nam TRONG CSDL nguoi choi
+#     (cot nhan_vat.lang), hoan vi hai khoi la doi lang cua MOI nguoi choi da
+#     tao nhan vat.
+#   - Client cu CHI GUI DUOC id lang 0/1/2 (con dung mang toc 3x3) — KHONG
+#     duoc them lang thu 6 (thiet ke §2.2, bang "Lang").
+#   - Chi so KHOI DAU la GIA TRI DAU, se can bang lai o Ke hoach 13 (vong can
+#     bang that, sau khi Bo do can bang Ke hoach 11/12 xong) — dung sua tuy
+#     tien o day truoc do.
+# ============================================================================
+#
+# CON SO O DAU RA: chuyen NGUYEN VAN tu game/lang.go (bien danhSachLang, KH8
+# task 6) sang day, KHONG doi mot so nao. Chu thich "vi sao" ben duoi cung
+# chep nguyen tu do (thiet ke §7.2 — chi so phan anh tinh cach tung lang: Cat
+# chakra cao danh xa, Suong Mu can chien sat thuong, Da mau trau phong thu, May
+# toc do chi mang, La can bang).
+#
+# map_khoi_dau/vi_tri_x_khoi_dau/vi_tri_y_khoi_dau la CHO DAT TRUOC (nhu chu
+# thich goc da ghi): ban do that dung o Ke hoach 3/6 cua lo trinh game; o day
+# chi can mot toa do hop le de nhan vat ton tai luc tao moi.
+
+lang:
+  - id: 0
+    ten: "Làng Lá"
+    hp_khoi_dau: 150
+    chakra_khoi_dau: 150
+    sat_thuong_khoi_dau: 12
+    map_khoi_dau: 1
+    vi_tri_x_khoi_dau: 100
+    vi_tri_y_khoi_dau: 384
+    vang_khoi_dau: 1000
+
+  - id: 1
+    ten: "Làng Cát"
+    hp_khoi_dau: 100
+    chakra_khoi_dau: 250
+    sat_thuong_khoi_dau: 10
+    map_khoi_dau: 2
+    vi_tri_x_khoi_dau: 100
+    vi_tri_y_khoi_dau: 384
+    vang_khoi_dau: 1000
+
+  - id: 2
+    ten: "Làng Sương Mù"
+    hp_khoi_dau: 130
+    chakra_khoi_dau: 100
+    sat_thuong_khoi_dau: 16
+    map_khoi_dau: 3
+    vi_tri_x_khoi_dau: 100
+    vi_tri_y_khoi_dau: 384
+    vang_khoi_dau: 1000
+
+  - id: 3
+    ten: "Làng Đá"
+    hp_khoi_dau: 250
+    chakra_khoi_dau: 100
+    sat_thuong_khoi_dau: 10
+    map_khoi_dau: 4
+    vi_tri_x_khoi_dau: 100
+    vi_tri_y_khoi_dau: 384
+    vang_khoi_dau: 1000
+
+  - id: 4
+    ten: "Làng Mây"
+    hp_khoi_dau: 120
+    chakra_khoi_dau: 130
+    sat_thuong_khoi_dau: 13
+    map_khoi_dau: 5
+    vi_tri_x_khoi_dau: 100
+    vi_tri_y_khoi_dau: 384
+    vang_khoi_dau: 1000

@@ -14,6 +14,7 @@ import (
 	"nroserver/internal/auth"
 	"nroserver/internal/chanip"
 	mynet "nroserver/internal/net"
+	"nroserver/internal/noidung"
 	"nroserver/internal/protocol"
 	"nroserver/internal/store"
 )
@@ -167,6 +168,23 @@ type BoXuLy struct {
 	// sua theo, khong can thiet cho task nay.
 	thoGhi GhiKhiRoi
 
+	// khoNoiDung (KH8 task 10): kho noi dung DA TIEM cua may chu — cung mot
+	// *noidung.Kho ma main.go cam vao 5 khu vuc va ma kenh nap nong goi Thay()
+	// len. nil la gia tri mac dinh HOP LE: hang chuc test dung NewBoXuLy truc
+	// tiep khong biet gi ve kho noi dung, va chung phai tiep tuc chay tren ban
+	// NHUNG (xem anhChupNoiDung ben duoi).
+	//
+	// VI SAO PHAI CO TRUONG NAY, khong dung thang bangChieuMacDinh(): ban NHUNG
+	// duoc nap MOT LAN roi giu mai (sync.Once trong khochieu.go). Nap nong doi
+	// anh chup cua kho TIEM chu khong dong toi ban nhung — nen neu duong dang
+	// nhap con doc ban nhung, nguoi dang nhap MOI sau khi nap nong van nhan goi
+	// catalog -28/7 voi so CU, trong khi nguoi dang choi (actor doc kho tiem)
+	// da an so MOI. Hai su that cung luc — dung kieu hong am tham te nhat.
+	//
+	// Cam qua DatKhoNoiDung, cung khuon "thiet lap sau khoi tao" voi thoGhi/
+	// soDangNhap/gacDangNhap o tren.
+	khoNoiDung *noidung.Kho
+
 	// session (Ke hoach 11 Task 7, dac ta §7.2): luu lai *mynet.Session cua
 	// CHINH phien nay, gan MOT LAN trong xuLyDangNhap khi dang nhap thanh cong
 	// — TRUOC khi dang ky vao soDangNhap (xem xuLyDangNhap), de neu MOT dang
@@ -267,6 +285,33 @@ func (b *BoXuLy) DatSoDangNhap(s *SoDangNhap) {
 // KHONG goi ham nay (thoGhi giu nguyen nil) — KhiDong() tu bo qua buoc luu.
 func (b *BoXuLy) DatThoGhi(t GhiKhiRoi) {
 	b.thoGhi = t
+}
+
+// DatKhoNoiDung gan kho noi dung DA TIEM cho phien nay (KH8 task 10) — goi tu
+// main.go SAU taoXuLy(), cung khuon "thiet lap sau khoi tao" nhu ba ham tren.
+// An toan KHONG goi (khoNoiDung giu nguyen nil): phien se doc ban NHUNG.
+func (b *BoXuLy) DatKhoNoiDung(k *noidung.Kho) {
+	b.khoNoiDung = k
+}
+
+// anhChupNoiDung tra ve anh chup noi dung cho duong DANG NHAP (ngoai nhip
+// actor). Uu tien kho da tiem; chua tiem thi roi ve ban nhung.
+//
+// Goi MOT LAN cho moi lan dung goi catalog — dung tinh than hop dong "mot lan
+// dau nhip" cua actor: hai lan goi trong cung mot lan dung goi co the roi vao
+// hai the he khac nhau.
+// goiCatalogSkillPhien dung goi -28/7 CHO PHIEN NAY, tu anh chup noi dung HIEN
+// TAI cua kho da tiem. Day la duong THAT ma xuLyKhongTrenBanDo di — tach thanh
+// mot phuong thuc de test khoa duoc no ma khong can dung ca CSDL + socket.
+func (b *BoXuLy) goiCatalogSkillPhien() (*protocol.Message, error) {
+	return goiCatalogSkillTu(bangChieuTu(b.anhChupNoiDung()))
+}
+
+func (b *BoXuLy) anhChupNoiDung() khoChieuAnhChup {
+	if b.khoNoiDung != nil {
+		return b.khoNoiDung.AnhChup()
+	}
+	return khoChieuMacDinh()
 }
 
 // DatGacDangNhap gan gac chong do mat khau DUNG CHUNG cho phien nay — goi tu
@@ -382,7 +427,10 @@ func (b *BoXuLy) xuLyKhongTrenBanDo(s *mynet.Session, m *protocol.Message) error
 	case lenhConCatalogMap: // 6
 		return b.phucVuCatalog(s, goiCatalogMap())
 	case lenhConCatalogSkill: // 7
-		m, err := goiCatalogSkill()
+		// KH8 task 10 (no cua task 3): doc tu KHO DA TIEM, khong phai ban
+		// nhung — nguoi dang nhap MOI sau mot lan nap nong phai nhan so MOI.
+		// Xem BoXuLy.anhChupNoiDung.
+		m, err := b.goiCatalogSkillPhien()
 		if err != nil {
 			return err
 		}

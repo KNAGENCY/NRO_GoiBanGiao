@@ -102,7 +102,7 @@ func TestBoVatPhamDungSauTatMayChu(t *testing.T) {
 	boNhat := &boGiaDemDung{so: soKhuVuc}
 	boRoi := &boGiaDemDung{so: soKhuVuc}
 
-	if err := donDepKhiTat(context.Background(), kd, soKhuVuc, thoGhi, boLuu,
+	if err := donDepKhiTat(context.Background(), kd, soKhuVuc, thoGhi, boLuu, nil,
 		game.MoBoLichBoss(soKhuVuc, nil), game.MoBoPhatThanh(), boNhat, boRoi); err != nil {
 		t.Fatalf("donDepKhiTat loi: %v", err)
 	}
@@ -116,6 +116,57 @@ func TestBoVatPhamDungSauTatMayChu(t *testing.T) {
 	}
 	if !boRoi.actorDaDung {
 		t.Fatal("boRoi.Dung() chay TRUOC khi actor dung - sai thu tu, xem chu thich trong donDepKhiTat")
+	}
+}
+
+// kenhGiaDemDung la mot kenhCoTheDung gia (KH8 task 10): ghi lai no bi Dung()
+// bao nhieu lan va — quan trong hon — ACTOR DA DUNG CHUA vao dung luc do.
+// Doi xung voi boGiaDemDung o tren, nhung khang dinh dieu NGUOC LAI: kenh nap
+// nong phai dung TRUOC khi actor dung.
+type kenhGiaDemDung struct {
+	so *game.SoKhuVuc
+
+	soLan       int
+	actorDaDung bool
+}
+
+func (k *kenhGiaDemDung) Dung(context.Context) error {
+	k.soLan++
+	if k.so != nil {
+		if kv := k.so.Tra(1); kv != nil {
+			_, err := kv.AnhChupNguoiChoiCoLoi(1)
+			k.actorDaDung = err != nil
+		}
+	}
+	return nil
+}
+
+// ⚠️ CHOT THU TU TAT (KH8 task 10): kenh nap nong phai dung TRUOC
+// game.TatMayChu, khong sau.
+//
+// Ly do day du o chu thich trong donDepKhiTat. Tom lai: de sau thi mot lan nap
+// nong den dung luc do se tra ve "200, the he moi" cho mot may chu khong con
+// actor nao doc bo so lieu do — mot cau tra loi DOI TRA, dung loai hong ma ca
+// cai kenh HTTP nay sinh ra de tranh.
+//
+// Doi dong kenhNapLai.Dung() xuong duoi game.TatMayChu -> test nay do.
+func TestKenhNapLaiDungTruocTatMayChu(t *testing.T) {
+	soKhuVuc := soKhuVucGiaMain(t)
+	thoGhi := game.MoThoGhi(&khoLuuGiaMain{}, 2)
+	boLuu := game.MoBoLuuDinhKy(soKhuVuc, thoGhi)
+	boLuu.BatDau()
+
+	kenh := &kenhGiaDemDung{so: soKhuVuc}
+	if err := donDepKhiTat(context.Background(), &khoDongGia{}, soKhuVuc, thoGhi, boLuu,
+		kenh, game.MoBoLichBoss(soKhuVuc, nil), game.MoBoPhatThanh(),
+		&boGiaDemDung{}, &boGiaDemDung{}); err != nil {
+		t.Fatalf("donDepKhiTat loi: %v", err)
+	}
+	if kenh.soLan != 1 {
+		t.Fatalf("kenh nap nong phai duoc Dung() dung mot lan, nhan %d", kenh.soLan)
+	}
+	if kenh.actorDaDung {
+		t.Fatal("kenh nap nong bi dung SAU khi actor da dung — sai thu tu, xem chu thich trong donDepKhiTat")
 	}
 }
 
@@ -140,7 +191,7 @@ func TestDonDepKhiTatGoiDuBonBuoc(t *testing.T) {
 	ctx, huy := context.WithTimeout(context.Background(), 5*time.Second)
 	defer huy()
 
-	if err := donDepKhiTat(ctx, kd, soKhuVuc, thoGhi, boLuu, game.MoBoLichBoss(soKhuVuc, nil), game.MoBoPhatThanh(), &boGiaDemDung{}, &boGiaDemDung{}); err != nil {
+	if err := donDepKhiTat(ctx, kd, soKhuVuc, thoGhi, boLuu, nil, game.MoBoLichBoss(soKhuVuc, nil), game.MoBoPhatThanh(), &boGiaDemDung{}, &boGiaDemDung{}); err != nil {
 		t.Fatalf("donDepKhiTat loi trong dieu kien binh thuong: %v", err)
 	}
 
@@ -180,7 +231,7 @@ func TestDonDepKhiTatVanDongKhoKhiTatMayChuLoi(t *testing.T) {
 	defer huy()
 	time.Sleep(5 * time.Millisecond) // dam bao ctx CHAC CHAN da het gio truoc khi goi
 
-	err := donDepKhiTat(ctx, kd, soKhuVuc, thoGhi, boLuu, game.MoBoLichBoss(soKhuVuc, nil), game.MoBoPhatThanh(), &boGiaDemDung{}, &boGiaDemDung{})
+	err := donDepKhiTat(ctx, kd, soKhuVuc, thoGhi, boLuu, nil, game.MoBoLichBoss(soKhuVuc, nil), game.MoBoPhatThanh(), &boGiaDemDung{}, &boGiaDemDung{})
 	if err == nil {
 		t.Fatal("donDepKhiTat khong tra loi du ctx da het gio tu truoc khi goi — mong doi ctx.Err()")
 	}

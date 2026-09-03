@@ -170,7 +170,7 @@ func TestNap_ThieuLang3BiTuChoi(t *testing.T) {
 // TinhSatThuong nhan gia tri nay lam satThuongGoc).
 func TestNap_SatThuongKhoiDauBangKhongBiTuChoi(t *testing.T) {
 	van := khoThat(t)
-	doiMotLan(t, van, TenFileLang, "sat_thuong_khoi_dau: 12\n", "sat_thuong_khoi_dau: 0\n")
+	doiMotLan(t, van, TenFileLang, "sat_thuong_khoi_dau: 55\n", "sat_thuong_khoi_dau: 0\n")
 	err := mongDoiLoi(t, van)
 	if !strings.Contains(err.Error(), "sat_thuong_khoi_dau") {
 		t.Errorf("loi bao %q, mong doi noi ve sat_thuong_khoi_dau", err)
@@ -181,7 +181,7 @@ func TestNap_SatThuongKhoiDauBangKhongBiTuChoi(t *testing.T) {
 // luc tao.
 func TestNap_HpKhoiDauBangKhongBiTuChoi(t *testing.T) {
 	van := khoThat(t)
-	doiMotLan(t, van, TenFileLang, "hp_khoi_dau: 150\n", "hp_khoi_dau: 0\n")
+	doiMotLan(t, van, TenFileLang, "hp_khoi_dau: 200\n", "hp_khoi_dau: 0\n")
 	mongDoiLoi(t, van)
 }
 

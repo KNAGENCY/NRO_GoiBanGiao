@@ -121,10 +121,10 @@ func TestDanhBossTruMauVaPhatGoi60ChoCaKhuVuc(t *testing.T) {
 
 	k.xuLy(suKienDanhNguoiChoi{idNhanVat: nvA.ID, idMucTieu: b.Id})
 
-	if b.Hp != 998 {
-		t.Fatalf("Hp boss sau don = %d, mong doi 998 (1000 - satThuong 2)", b.Hp)
+	if b.Hp != 989 {
+		t.Fatalf("Hp boss sau don = %d, mong doi 989 (1000 - satThuong 11)", b.Hp)
 	}
-	muon := goi60DanhBoss(2, 0, 0)
+	muon := goi60DanhBoss(11, 0, 0)
 	for ten, p := range map[string]*phienGiaKhuVuc{"A (nguoi danh)": pA, "B (nguoi xem)": pB} {
 		if len(p.nhan) != 1 {
 			t.Fatalf("%s nhan %d goi, mong doi DUNG 1 (chi -60, KHONG co -30/9)", ten, len(p.nhan))
@@ -148,8 +148,8 @@ func TestDanhBossGhiSoDongGop(t *testing.T) {
 
 	k.xuLy(suKienDanhNguoiChoi{idNhanVat: nvA.ID, idMucTieu: b.Id})
 
-	if got := b.SatThuongTheoNguoi[nvA.ID]; got != 2 {
-		t.Fatalf("so dong gop cua A = %d, mong doi 2 — don danh PHAI di qua bossNhanSatThuong, khong duoc tu tru b.Hp",
+	if got := b.SatThuongTheoNguoi[nvA.ID]; got != 11 {
+		t.Fatalf("so dong gop cua A = %d, mong doi 11 — don danh PHAI di qua bossNhanSatThuong, khong duoc tu tru b.Hp",
 			got)
 	}
 }
@@ -208,13 +208,13 @@ func TestDanhBossSatThuongKhongVuotMauConLai(t *testing.T) {
 // nhieu hon an nhieu hon. Kiem ca duong dong gop nhieu nguoi lan viec don cua
 // nguoi thu hai khong xoa mat dong gop cua nguoi dau.
 func TestDanhBossHaiNguoiChiaThuongTheoDongGop(t *testing.T) {
-	b := bossDanhDuoc(BossHoatDong, 6, 300)
+	b := bossDanhDuoc(BossHoatDong, 33, 300)
 	k, _, _, nvA := khuVucDanhBoss(t, b)
 	// B cung phai co chieu moi danh duoc.
 	k.xuLy(suKienChonChieu{idNhanVat: 2, mauChieuId: 1})
 	nvB := k.nguoiTrong[2].nv
 
-	// A danh 2 don (2+2=4 mau), B danh 1 don (2 mau) -> 6 mau, boss chet.
+	// A danh 2 don (11+11=22 mau), B danh 1 don (11 mau) -> 33 mau, boss chet.
 	// Moi don cach nhau du xa de qua kiem hoi chieu (1000ms).
 	moc := mocDanhBoss
 	k.dongHo = func() time.Time { return moc }
@@ -227,7 +227,7 @@ func TestDanhBossHaiNguoiChiaThuongTheoDongGop(t *testing.T) {
 		t.Fatalf("Hp boss = %d, mong doi 0", b.Hp)
 	}
 	if nvA.KinhNghiem != 200 || nvB.KinhNghiem != 100 {
-		t.Fatalf("KinhNghiem A/B = %d/%d, mong doi 200/100 (dong gop 4/6 va 2/6 cua 300 diem)",
+		t.Fatalf("KinhNghiem A/B = %d/%d, mong doi 200/100 (dong gop 22/33 va 11/33 cua 300 diem)",
 			nvA.KinhNghiem, nvB.KinhNghiem)
 	}
 }
@@ -246,8 +246,8 @@ func TestDanhIdDuongVanDiDuongNguoiChoi(t *testing.T) {
 
 	k.xuLy(suKienDanhNguoiChoi{idNhanVat: nvA.ID, idMucTieu: nvB.ID})
 
-	if nvB.HpHienTai != 148 {
-		t.Fatalf("HpHienTai cua B = %d, mong doi 148 (150 - 2) — don vao id DUONG phai di duong nguoi choi", nvB.HpHienTai)
+	if nvB.HpHienTai != 139 {
+		t.Fatalf("HpHienTai cua B = %d, mong doi 139 (150 - 11) — don vao id DUONG phai di duong nguoi choi", nvB.HpHienTai)
 	}
 	if b.Hp != 1000 {
 		t.Fatalf("Hp boss = %d, mong doi 1000 (khong dinh dang gi toi don PvP)", b.Hp)
@@ -322,8 +322,8 @@ func TestDanhBossDangHienVaChaoVanDanhDuoc(t *testing.T) {
 
 			k.xuLy(suKienDanhNguoiChoi{idNhanVat: nvA.ID, idMucTieu: b.Id})
 
-			if b.Hp != 998 {
-				t.Fatalf("boss %s: Hp = %d, mong doi 998", tt, b.Hp)
+			if b.Hp != 989 {
+				t.Fatalf("boss %s: Hp = %d, mong doi 989", tt, b.Hp)
 			}
 			if len(pA.nhan) != 1 {
 				t.Fatalf("boss %s: A nhan %d goi, mong doi 1 (-60)", tt, len(pA.nhan))
@@ -449,8 +449,8 @@ func TestDanhBossHetBatTuThiDanhDuoc(t *testing.T) {
 
 	k.xuLy(suKienDanhNguoiChoi{idNhanVat: nvA.ID, idMucTieu: b.Id})
 
-	if b.Hp != 998 {
-		t.Fatalf("Hp boss = %d, mong doi 998 (da qua 1500ms bat tu)", b.Hp)
+	if b.Hp != 989 {
+		t.Fatalf("Hp boss = %d, mong doi 989 (da qua 1500ms bat tu)", b.Hp)
 	}
 	if len(pA.nhan) != 1 {
 		t.Fatalf("A nhan %d goi, mong doi 1", len(pA.nhan))
@@ -514,8 +514,8 @@ func TestDanhBossHoiChieuChuaXongBiTuChoi(t *testing.T) {
 	k.xuLy(suKienDanhNguoiChoi{idNhanVat: nvA.ID, idMucTieu: b.Id})
 	k.xuLy(suKienDanhNguoiChoi{idNhanVat: nvA.ID, idMucTieu: b.Id})
 
-	if b.Hp != 998 {
-		t.Fatalf("Hp boss = %d, mong doi 998 (chi don DAU trung, don sau bi hoi chieu chan)", b.Hp)
+	if b.Hp != 989 {
+		t.Fatalf("Hp boss = %d, mong doi 989 (chi don DAU trung, don sau bi hoi chieu chan)", b.Hp)
 	}
 	if len(pA.nhan) != 1 {
 		t.Fatalf("A nhan %d goi, mong doi 1 (don thu hai im lang)", len(pA.nhan))
@@ -550,16 +550,16 @@ func TestDanhBossKhongDuChakraBiTuChoi(t *testing.T) {
 // khoi tran boss.
 //
 // Nguoi danh: Lang 2 (Suong Mu = He Thuy), chieu tam xa cap 1 (SatThuong=30,
-// skillId=28) -> sat thuong tho = 16 x 30 / 100 = 4.
+// skillId=28) -> sat thuong tho = 60 x 30 / 100 = 18.
 func TestDanhBossApHeNguyenToCuaPha(t *testing.T) {
 	cac := []struct {
 		langBoss int16
 		mongDoi  int32
 		vaiTro   string
 	}{
-		{0, 5, "Thuy khac Hoa -> 125%"},  // 4 * 125 / 100 = 5
-		{3, 3, "Tho khac Thuy -> 80%"},   // 4 * 80 / 100 = 3
-		{1, 4, "khong khac che -> 100%"}, // 4 * 100 / 100 = 4
+		{0, 22, "Thuy khac Hoa -> 125%"},  // 18 * 125 / 100 = 22
+		{3, 14, "Tho khac Thuy -> 80%"},   // 18 * 80 / 100 = 14
+		{1, 18, "khong khac che -> 100%"}, // 18 * 100 / 100 = 18
 	}
 	for _, tt := range cac {
 		t.Run(tt.vaiTro, func(t *testing.T) {
@@ -591,7 +591,7 @@ func TestDanhBossPhaHongVanDanhDuocVaKhongPanic(t *testing.T) {
 
 	k.xuLy(suKienDanhNguoiChoi{idNhanVat: nvA.ID, idMucTieu: b.Id})
 
-	if b.Hp != 998 {
+	if b.Hp != 989 {
 		t.Fatalf("Hp boss = %d, mong doi 998 (he trung tinh 100%%: 12 x 20 / 100 = 2)", b.Hp)
 	}
 }
@@ -606,7 +606,7 @@ func TestDanhBossBoQuaOTrongTrongDanhSach(t *testing.T) {
 
 	k.xuLy(suKienDanhNguoiChoi{idNhanVat: nvA.ID, idMucTieu: b.Id})
 
-	if b.Hp != 998 {
-		t.Fatalf("Hp boss = %d, mong doi 998 (o nil trong danh sach khong duoc chan duong)", b.Hp)
+	if b.Hp != 989 {
+		t.Fatalf("Hp boss = %d, mong doi 989 (o nil trong danh sach khong duoc chan duong)", b.Hp)
 	}
 }

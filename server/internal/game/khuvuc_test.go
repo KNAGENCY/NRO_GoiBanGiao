@@ -644,8 +644,8 @@ func TestSuKienDanhNguoiChoiConSongPhatCaHaiGoi60VaCapNhatMauChoNguoiKhac(t *tes
 
 	k.xuLy(suKienDanhNguoiChoi{idNhanVat: nvA.ID, idMucTieu: nvB.ID})
 
-	if nvB.HpHienTai != 148 {
-		t.Fatalf("HpHienTai cua B sau don = %d, mong doi 148 (150 - satThuong 2)", nvB.HpHienTai)
+	if nvB.HpHienTai != 139 {
+		t.Fatalf("HpHienTai cua B sau don = %d, mong doi 139 (150 - satThuong 11)", nvB.HpHienTai)
 	}
 
 	muon60 := []byte{
@@ -653,16 +653,16 @@ func TestSuKienDanhNguoiChoiConSongPhatCaHaiGoi60VaCapNhatMauChoNguoiKhac(t *tes
 		1,          // skillId = 1 (lang0 slot0 cap1)
 		1,          // soMucTieu = 1
 		0, 0, 0, 2, // idNguoiTrung = 2 (B)
-		1,          // docTiep = 1 (dang don danh)
-		0,          // loaiChieu = 0
-		0, 0, 0, 2, // satThuong = 2
+		1,           // docTiep = 1 (dang don danh)
+		0,           // loaiChieu = 0
+		0, 0, 0, 11, // satThuong = 11
 		0, // daChet = false
 		0, // chiMang = false
 	}
 	muon309 := []byte{
 		9,          // byte lenh con = 9 (cap nhat mau)
 		0, 0, 0, 2, // idNguoiChoi = 2 (B)
-		0, 0, 0, 148, // hp = 148
+		0, 0, 0, 139, // hp = 139
 		0, 0, 0, 150, // hpMax = 150
 	}
 

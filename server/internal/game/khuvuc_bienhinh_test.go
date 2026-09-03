@@ -484,8 +484,8 @@ func TestHeSoDefApVaoDonBossNhanVao(t *testing.T) {
 
 	k.xuLy(suKienDanhNguoiChoi{idNhanVat: nvA.ID, idMucTieu: b.Id})
 
-	if b.Hp != 999 {
-		t.Errorf("Hp boss sau don = %d, mong doi 999 (don goc 2 x HeSoDef 0,5 = 1)", b.Hp)
+	if b.Hp != 995 {
+		t.Errorf("Hp boss sau don = %d, mong doi 995 (don goc 11 x HeSoDef 0,5 = 5)", b.Hp)
 	}
 }
 

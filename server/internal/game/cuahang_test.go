@@ -10,6 +10,8 @@ import (
 	"encoding/binary"
 	"strings"
 	"testing"
+
+	"nroserver/internal/noidung"
 )
 
 // --- do nghe ghim byte doc lap ------------------------------------------------
@@ -226,13 +228,12 @@ func TestDocNguocCuaHangMau(t *testing.T) {
 // de thu. Test tu them mot mau tam vao CUOI danh muc (dung luat "chi them vao
 // cuoi") roi tra lai nguyen trang — de nhanh coPart khong bao gio thanh code chet.
 func TestGoiCuaHangCoPart(t *testing.T) {
-	goc := danhSachMauVatPham
-	t.Cleanup(func() { danhSachMauVatPham = goc })
-	danhSachMauVatPham = append(append([]MauVatPham(nil), goc...), MauVatPham{
+	// KH8 task 4: khong con bang Go de sua. Ta nap kho NHUNG (van la YAML that),
+	// them mot mau tam vao CUOI danh muc roi cam kho do lam nguon mac dinh.
+	idMoi := int16(themMauVatPhamTam(t, noidung.MauVatPham{
 		Loai: 5, GioiTinh: 3, Ten: "bo do tam", MoTa: "chi dung trong test",
-		Cap: 1, IconID: 0, Phan: 42, TranChong: 1,
-	})
-	idMoi := int16(len(danhSachMauVatPham) - 1)
+		Cap: 1, IconId: 0, Phan: 42, TranChong: 1,
+	}))
 
 	ch := &CuaHang{ID: 3, Ten: "x", Tabs: []TabCuaHang{{
 		Ten: "A", Mon: []MonHang{{MauID: idMoi, Gia: 1, Tien: TienVang}},

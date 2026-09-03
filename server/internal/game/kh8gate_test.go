@@ -131,36 +131,58 @@ func TestKH8Gate_ChieuThuc_DungByteVoiBanVang(t *testing.T) {
 // GATE 2 — goi -28/8 subtype 0, 1 va 2 (mau option + mau vat pham)
 // ---------------------------------------------------------------------------
 
-func TestKH8Gate_MauOption_YAMLDungByteVoiGo(t *testing.T) {
-	tuGo, err := goiCatalogItemOption()
+// ⚠️ KH8 TASK 4 DA DOI CAU HOI CUA HAI GATE NAY — cung ly do task 3 doi gate
+// chieu. Bang Go (danhSachMauOption / danhSachMauVatPham) DA BI XOA, chi con
+// vat-pham.yaml. "Go vs YAML" bay gio la YAML so voi CHINH NO: mot phep so luon
+// dung, tuc rac. Da bo.
+//
+// Con lai MOT phep so, va no van la phep so co gia tri nhat: goi -28/8 phai KHOP
+// TUNG BYTE voi BAN VANG ghim tay (kh8gate_vang_test.go) — ban vang chot tu du
+// lieu Go hom truoc task 4, KHONG doi mot byte nao o task nay.
+//
+// Kiem CA HAI duong vao du lieu, vi tu task 4 chung la hai duong khac nhau toi
+// cung mot kho:
+//
+//	goiCatalogItemOption()/goiCatalogItemMau()  — duong THAT (qua anh chup nhung)
+//	goiCatalogItem…Tu(…TuYAML(napKhoYAML))      — duong doc thang file YAML
+//
+// Hai duong lech nhau = bo doi kieu (mauvatpham.go hoac noidungyaml.go) sai.
+func TestKH8Gate_MauOption_DungByteVoiBanVang(t *testing.T) {
+	vang := giaiVang(t, "-28/8 subtype 0", vangCatalogItemOption)
+
+	tuAnhChup, err := goiCatalogItemOption()
 	if err != nil {
-		t.Fatalf("dung goi -28/8 subtype 0 tu du lieu Go loi: %v", err)
+		t.Fatalf("dung goi -28/8 subtype 0 tu anh chup kho noi dung loi: %v", err)
 	}
+	soByte(t, "-28/8 subtype 0 (anh chup kho) vs BAN VANG", tuAnhChup.Data, vang)
+
 	tuYAML, err := goiCatalogItemOptionTu(mauOptionTuYAML(napKhoYAML(t)))
 	if err != nil {
 		t.Fatalf("dung goi -28/8 subtype 0 tu du lieu YAML loi: %v", err)
 	}
-	soByte(t, "-28/8 subtype 0 Go vs YAML", tuYAML.Data, tuGo.Data)
-
-	vang := giaiVang(t, "-28/8 subtype 0", vangCatalogItemOption)
-	soByte(t, "-28/8 subtype 0 Go vs BAN VANG", tuGo.Data, vang)
-	soByte(t, "-28/8 subtype 0 YAML vs BAN VANG", tuYAML.Data, vang)
+	if tuAnhChup.Command != tuYAML.Command {
+		t.Fatalf("ma lenh khac nhau: anh chup %d, YAML %d", tuAnhChup.Command, tuYAML.Command)
+	}
+	soByte(t, "-28/8 subtype 0 (doc thang YAML) vs BAN VANG", tuYAML.Data, vang)
 }
 
-func TestKH8Gate_MauVatPham_YAMLDungByteVoiGo(t *testing.T) {
-	tuGo, err := goiCatalogItemMau()
+func TestKH8Gate_MauVatPham_DungByteVoiBanVang(t *testing.T) {
+	vang := giaiVang(t, "-28/8 subtype 1", vangCatalogItemMau)
+
+	tuAnhChup, err := goiCatalogItemMau()
 	if err != nil {
-		t.Fatalf("dung goi -28/8 subtype 1 tu du lieu Go loi: %v", err)
+		t.Fatalf("dung goi -28/8 subtype 1 tu anh chup kho noi dung loi: %v", err)
 	}
+	soByte(t, "-28/8 subtype 1 (anh chup kho) vs BAN VANG", tuAnhChup.Data, vang)
+
 	tuYAML, err := goiCatalogItemMauTu(mauVatPhamTuYAML(napKhoYAML(t)))
 	if err != nil {
 		t.Fatalf("dung goi -28/8 subtype 1 tu du lieu YAML loi: %v", err)
 	}
-	soByte(t, "-28/8 subtype 1 Go vs YAML", tuYAML.Data, tuGo.Data)
-
-	vang := giaiVang(t, "-28/8 subtype 1", vangCatalogItemMau)
-	soByte(t, "-28/8 subtype 1 Go vs BAN VANG", tuGo.Data, vang)
-	soByte(t, "-28/8 subtype 1 YAML vs BAN VANG", tuYAML.Data, vang)
+	if tuAnhChup.Command != tuYAML.Command {
+		t.Fatalf("ma lenh khac nhau: anh chup %d, YAML %d", tuAnhChup.Command, tuYAML.Command)
+	}
+	soByte(t, "-28/8 subtype 1 (doc thang YAML) vs BAN VANG", tuYAML.Data, vang)
 }
 
 // TestKH8Gate_MauVatPhamSubtype2 ghim subtype 2. No khong mang du lieu noi dung
@@ -252,11 +274,14 @@ func TestKH8Gate_KhoYAMLKhongRong(t *testing.T) {
 	if soChieu != 20 {
 		t.Errorf("YAML co %d chieu, mong doi 20 (5 lang x 4 chieu — chu du an da CHOT giu 4 chieu/lang o KH8)", soChieu)
 	}
-	if len(du.MauOption) != len(DanhSachMauOption()) {
-		t.Errorf("YAML co %d mau option, du lieu Go co %d", len(du.MauOption), len(DanhSachMauOption()))
+	// KH8 task 4: bang Go da bi xoa, nen "YAML == Go" khong con y nghia (YAML so
+	// voi chinh no). Ghim SO LUONG bang tay — mot con so o day thay doi la mot
+	// viec CO CHU DINH phai ghi vao khoa-id.yaml cung luc.
+	if len(du.MauOption) != 8 {
+		t.Errorf("YAML co %d mau option, mong doi 8 (them mot mau = them mot dong khoa-id.yaml, va sua con so nay)", len(du.MauOption))
 	}
-	if len(du.MauVatPham) != len(DanhSachMauVatPham()) {
-		t.Errorf("YAML co %d mau vat pham, du lieu Go co %d", len(du.MauVatPham), len(DanhSachMauVatPham()))
+	if len(du.MauVatPham) != 5 {
+		t.Errorf("YAML co %d mau vat pham, mong doi 5 (them mot mau = them mot dong khoa-id.yaml, va sua con so nay)", len(du.MauVatPham))
 	}
 	if len(du.CuaHang) != len(DanhSachCuaHang()) {
 		t.Errorf("YAML co %d cua hang, du lieu Go co %d", len(du.CuaHang), len(DanhSachCuaHang()))

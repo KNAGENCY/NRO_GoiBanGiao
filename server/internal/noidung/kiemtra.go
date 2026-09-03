@@ -83,6 +83,13 @@ type fileKhoaId struct {
 // mau da phat hanh la mot viec CO CHU DINH — sua kem dong khoa tuong ung, va
 // nguoi review doi chieu git log cua file khoa (§2.6) se thay ro mot dong bi
 // SUA chu khong phai THEM, va hoi vi sao. Dung cai ta muon.
+//
+// KhoaIdMaTu la ban XUAT KHAU cua khoaIdMaTu (KH8 task 4). Goi `game` can no de
+// doi chieu danh muc DANG CHAY voi so khoa mot cach DOC LAP — neu test ben do
+// tu viet lai phep sinh ma thi no chi chung minh ban sao dung, va hai ban se roi
+// nhau ngay lan dau ai sua bang dau.
+func KhoaIdMaTu(ten string) string { return khoaIdMaTu(ten) }
+
 func khoaIdMaTu(ten string) string {
 	var b strings.Builder
 	truocLaGach := true

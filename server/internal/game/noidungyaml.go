@@ -63,29 +63,41 @@ func chieuTuYAML(du *noidung.DuLieu) [5][]MauChieu {
 func mauOptionTuYAML(du *noidung.DuLieu) []MauOption {
 	ds := make([]MauOption, 0, len(du.MauOption))
 	for _, o := range du.MauOption {
-		ds = append(ds, MauOption{Ten: o.Ten, Loai: o.Loai})
+		ds = append(ds, mauOptionTuNoiDung(o))
 	}
 	return ds
+}
+
+// mauOptionTuNoiDung doi MOT dong mau option. `Id` KHONG chep sang: kieu cua goi
+// `game` khong co truong id vi id = CHI SO trong slice (client tu dat the,
+// Controller.cs:6479) — giu mot ban thu hai la tao co hoi cho hai ban lech nhau.
+func mauOptionTuNoiDung(o noidung.MauOption) MauOption {
+	return MauOption{Ten: o.Ten, Loai: o.Loai}
 }
 
 // mauVatPhamTuYAML doi danh muc mau vat pham YAML sang []MauVatPham.
 func mauVatPhamTuYAML(du *noidung.DuLieu) []MauVatPham {
 	ds := make([]MauVatPham, 0, len(du.MauVatPham))
 	for _, m := range du.MauVatPham {
-		ds = append(ds, MauVatPham{
-			Loai:        m.Loai,
-			GioiTinh:    m.GioiTinh,
-			Ten:         m.Ten,
-			MoTa:        m.MoTa,
-			Cap:         m.Cap,
-			YeuCauSuc:   m.YeuCauSuc,
-			IconID:      m.IconId,
-			Phan:        m.Phan,
-			NangCapDuoc: m.NangCapDuoc,
-			TranChong:   m.TranChong,
-		})
+		ds = append(ds, mauVatPhamTuNoiDung(m))
 	}
 	return ds
+}
+
+// mauVatPhamTuNoiDung doi MOT mau vat pham. Cung ly do tren: `Id` khong chep.
+func mauVatPhamTuNoiDung(m noidung.MauVatPham) MauVatPham {
+	return MauVatPham{
+		Loai:        m.Loai,
+		GioiTinh:    m.GioiTinh,
+		Ten:         m.Ten,
+		MoTa:        m.MoTa,
+		Cap:         m.Cap,
+		YeuCauSuc:   m.YeuCauSuc,
+		IconID:      m.IconId,
+		Phan:        m.Phan,
+		NangCapDuoc: m.NangCapDuoc,
+		TranChong:   m.TranChong,
+	}
 }
 
 // cuaHangTuYAML doi danh sach cua hang YAML sang []CuaHang.

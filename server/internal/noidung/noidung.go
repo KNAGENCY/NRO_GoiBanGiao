@@ -174,12 +174,21 @@ type OptionMon struct {
 // MonHang la mot mon bay ban. `tien` la chuoi "vang" hoac "ngoc" — CO Y dung
 // chu chu khong dung so 0/1: mot con so go nham van tra ra mot loai tien hop le
 // va chay em; mot chuoi go nham thi bo kiem BAT DUOC ngay.
+//
+// GiaBanLai (KH8 task 5, thiet ke §5.4 diem 2) la gia NGUOI CHOI BAN LAI mon nay
+// cho NPC. Truoc task 5 no khong ton tai: duong ban tinh `Gia/4` trong code Go —
+// nghia la muon chinh gia thu lai cua MOT mon thi phai sua cong thuc cho MOI mon.
+// Nay no la mot con so TUONG MINH, sua duoc tung mon, nap nong duoc.
 type MonHang struct {
-	MauId   int16       `yaml:"mau_id"`
-	Gia     int32       `yaml:"gia"`
-	Tien    string      `yaml:"tien"`
-	Options []OptionMon `yaml:"options"`
-	LaMoi   bool        `yaml:"la_moi"`
+	MauId int16  `yaml:"mau_id"`
+	Gia   int32  `yaml:"gia"`
+	Tien  string `yaml:"tien"`
+	// GiaBanLai: 0 <= GiaBanLai <= Gia. Bo kiem chan ca hai dau — ban lai DAT HON
+	// gia mua la MAY IN TIEN (mua 100 ban 120, lap vo han), khong phai lua chon
+	// can bang.
+	GiaBanLai int32       `yaml:"gia_ban_lai"`
+	Options   []OptionMon `yaml:"options"`
+	LaMoi     bool        `yaml:"la_moi"`
 }
 
 // TabCuaHang la mot the trong cua so cua hang.

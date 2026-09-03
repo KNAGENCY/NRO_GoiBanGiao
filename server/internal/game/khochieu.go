@@ -91,6 +91,12 @@ type khoChieuAnhChup interface {
 	// tiem, MOT anh chup moi nhip. (Hai task lam song song cung mo rong interface
 	// nay -> xung dot gop 03/09, dieu phoi giu CA HAI.)
 	khoVatPhamAnhChup
+
+	// Hai cua CUA HANG (KH8 task 5, cuahang.go). Cung ly do nhu quai va vat
+	// pham: MOT nguon tiem, MOT anh chup — gia hang va mau vat pham ma lech the
+	// he thi cua hang ban mot mon khong con ton tai.
+	CuaHang(id int32) (noidung.CuaHang, bool)
+	DanhSachCuaHang() []noidung.CuaHang
 }
 
 // nguonNoiDung boc mot ham lay anh chup. La mot STRUCT (khong phai ham tran)

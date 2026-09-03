@@ -203,41 +203,48 @@ func TestKH8Gate_CuaHang_YAMLDungByteVoiGo(t *testing.T) {
 	if err != nil {
 		t.Fatalf("doi cua hang tu YAML loi: %v", err)
 	}
-	dsGo := DanhSachCuaHang()
-	if len(tuYAMLDS) != len(dsGo) {
-		t.Fatalf("YAML co %d cua hang, du lieu Go co %d", len(tuYAMLDS), len(dsGo))
+	// KH8 task 5: bang Go da bi XOA. "Doc thang DuLieu" (tuYAMLDS) va "doc qua
+	// anh chup" (dsAnhChup) gio la HAI DUONG khac nhau toi cung mot file YAML —
+	// so hai duong nay bat duoc loi o tang anh chup / chuyen doi, con BAN VANG
+	// duoi day moi la cai ghim byte that su.
+	dsAnhChup := DanhSachCuaHang()
+	if len(tuYAMLDS) != len(dsAnhChup) {
+		t.Fatalf("YAML co %d cua hang, anh chup co %d", len(tuYAMLDS), len(dsAnhChup))
 	}
-	if len(dsGo) == 0 {
+	if len(dsAnhChup) == 0 {
 		t.Fatal("khong co cua hang nao de so — cong nay se xanh oan")
 	}
 
-	for i := range dsGo {
-		if tuYAMLDS[i].ID != dsGo[i].ID {
-			t.Fatalf("cua hang thu %d: id YAML %d, id Go %d — id la khoa tra cuu, lech la ban nham bang gia",
-				i, tuYAMLDS[i].ID, dsGo[i].ID)
+	for i := range dsAnhChup {
+		if tuYAMLDS[i].ID != dsAnhChup[i].ID {
+			t.Fatalf("cua hang thu %d: id doc thang %d, id qua anh chup %d — id la khoa tra cuu, lech la ban nham bang gia",
+				i, tuYAMLDS[i].ID, dsAnhChup[i].ID)
 		}
-		tuGo, err := goiCuaHang(&dsGo[i])
+		tuAC, err := goiCuaHang(&dsAnhChup[i])
 		if err != nil {
-			t.Fatalf("dung goi -44 tu du lieu Go (cua hang %d) loi: %v", dsGo[i].ID, err)
+			t.Fatalf("dung goi -44 tu anh chup (cua hang %d) loi: %v", dsAnhChup[i].ID, err)
 		}
 		tuYAML, err := goiCuaHang(&tuYAMLDS[i])
 		if err != nil {
 			t.Fatalf("dung goi -44 tu du lieu YAML (cua hang %d) loi: %v", tuYAMLDS[i].ID, err)
 		}
-		soByte(t, "-44 Go vs YAML", tuYAML.Data, tuGo.Data)
+		soByte(t, "-44 anh chup vs doc thang YAML", tuYAML.Data, tuAC.Data)
 	}
 
-	// Ban vang ghim cua hang mau id 1 (Tap hoa Lang La).
-	chGo := TimCuaHang(1)
-	if chGo == nil {
+	// Ban vang ghim cua hang mau id 1 (Tap hoa Lang La). `gia_ban_lai` (task 5)
+	// KHONG duoc lam doi mot byte nao: goi -44 khong co o nao chua gia ban lai
+	// (docs/superpowers/research/2026-09-03-kh7-giai-ma-44.md) — client hoi gia
+	// ban bang goi `7` vong mot, khong phai bang bang gia.
+	chAC := TimCuaHang(1)
+	if chAC == nil {
 		t.Fatal("khong con cua hang id 1 — ban vang khong con doi tuong de so")
 	}
-	mGo, err := goiCuaHang(chGo)
+	mAC, err := goiCuaHang(chAC)
 	if err != nil {
 		t.Fatalf("dung goi -44 cua hang 1 loi: %v", err)
 	}
 	vang := giaiVang(t, "-44", vangCuaHangTapHoaLangLa)
-	soByte(t, "-44 Go vs BAN VANG", mGo.Data, vang)
+	soByte(t, "-44 anh chup vs BAN VANG", mAC.Data, vang)
 
 	var chYAML *CuaHang
 	for i := range tuYAMLDS {
@@ -283,7 +290,9 @@ func TestKH8Gate_KhoYAMLKhongRong(t *testing.T) {
 	if len(du.MauVatPham) != 5 {
 		t.Errorf("YAML co %d mau vat pham, mong doi 5 (them mot mau = them mot dong khoa-id.yaml, va sua con so nay)", len(du.MauVatPham))
 	}
-	if len(du.CuaHang) != len(DanhSachCuaHang()) {
-		t.Errorf("YAML co %d cua hang, du lieu Go co %d", len(du.CuaHang), len(DanhSachCuaHang()))
+	// KH8 task 5: bang Go cua hang cung da bi xoa -> ghim SO LUONG bang tay,
+	// cung ly do voi hai con so o tren.
+	if len(du.CuaHang) != 1 {
+		t.Errorf("YAML co %d cua hang, mong doi 1 (them mot cua hang = sua con so nay)", len(du.CuaHang))
 	}
 }

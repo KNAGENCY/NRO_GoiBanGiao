@@ -453,8 +453,9 @@ Gom lại thành **Kế hoạch B**, sửa lẻ từng cái là vô nghĩa:
 - ~~(b) chưa chạy được `go test -race` (máy không có `gcc`)~~ → **ĐÃ CÓ 03/09**: chủ dự án duyệt, điều phối cài
   **w64devkit v2.9.1** (gcc 16.2.0) tại `D:\w64devkit\bin` — giải nén, không đụng hệ thống, **không nằm trong PATH
   toàn máy**. Chạy race: `$env:PATH="D:\w64devkit\bin;"+$env:PATH; $env:CGO_ENABLED="1"; go test -race ./...`.
-  Lần chạy đầu 03/09: 7 gói ngoài `game` **0 data race** (store/net/antoan/auth/chanip/protocol/cmd); gói `game`
-  xem dòng nhật ký cùng ngày.
+  Lần chạy đầu 03/09: 7 gói ngoài `game` **0 data race**; gói `game` lần 1 có **1 race — ở phía test** (mã sản
+  xuất đúng, xem §8), sửa `afda280` → lần 2 **0 race, ok 176s**. **Toàn bộ 8 gói sạch race** tính đến `afda280`.
+  Hai test đồng thời viết sẵn từ 28/08 nay đã chạy thật dưới race.
 - ~~**rò rỉ thời gian phía `web/`**~~ → **ĐÃ VÁ 03/09** (gộp `7184b95`). `web/lib/matkhau.ts`: thêm
   `BAM_GIA` (băm PBKDF2 THẬT của một mật khẩu ngẫu nhiên, 100.000 vòng, dán cứng) + `canBangThoiGian()`;
   `web/app/dang-nhap/actions.ts`: nhánh "không tìm thấy tài khoản" nay LUÔN chạy `canBangThoiGian()` thay

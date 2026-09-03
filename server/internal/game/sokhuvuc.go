@@ -3,6 +3,8 @@ package game
 import (
 	"context"
 	"errors"
+
+	"nroserver/internal/noidung"
 )
 
 // SoKhuVuc giu 5 khu vuc actor co dinh (mapId 1-5) — tao san luc khoi dong may
@@ -151,6 +153,18 @@ func (s *SoKhuVuc) GanBoNhatDo(b *BoNhatDo) {
 func (s *SoKhuVuc) GanBoRoiDo(b *BoRoiDo) {
 	for _, k := range s.theoMap {
 		k.GanBoRoi(b)
+	}
+}
+
+// GanKhoNoiDung cam MOT kho noi dung (KH8 task 2/3) vao CA 5 khu vuc. Cung quy
+// uoc voi GanBoNhatDo/GanBoRoiDo o tren: goi tu goroutine main luc khoi dong.
+//
+// Chua goi -> moi khu vuc doc kho NHUNG trong file thuc thi (khochieu.go).
+// Cung file YAML, cung con so; khac biet DUY NHAT la nap nong (Kho.Thay) khong
+// toi duoc cac khu vuc do. Vi vay main.go PHAI goi ham nay, khong the bo qua.
+func (s *SoKhuVuc) GanKhoNoiDung(kho *noidung.Kho) {
+	for _, k := range s.theoMap {
+		k.GanKhoNoiDung(kho)
 	}
 }
 

@@ -93,7 +93,11 @@ func goiCatalogData() *protocol.Message {
 // cu. Moi lang gui ten + 4 MauChieu that (Ke hoach 6, Task 1) — xem chieuthuc.go
 // va tai lieu giao thuc chien dau §3.7/§4.3.
 func goiCatalogSkill() (*protocol.Message, error) {
-	return goiCatalogSkillTu(chieuTheoLang)
+	// KH8 task 3: bang chieu khong con la du lieu Go — no den tu anh chup kho
+	// noi dung (kho-noi-dung/chieu.yaml). Duong dang nhap nam NGOAI nhip actor
+	// nen lay anh chup ngay tai day la dung; trong actor thi phai dung k.acNhip
+	// (xem khochieu.go).
+	return goiCatalogSkillTu(bangChieuMacDinh())
 }
 
 // goiCatalogSkillTu la than that cua goiCatalogSkill, nhan bang chieu tu ngoai

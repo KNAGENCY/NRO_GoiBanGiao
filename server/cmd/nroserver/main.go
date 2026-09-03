@@ -19,6 +19,7 @@ import (
 	"nroserver/internal/chanip"
 	"nroserver/internal/game"
 	mynet "nroserver/internal/net"
+	"nroserver/internal/noidung"
 	"nroserver/internal/store"
 )
 
@@ -469,6 +470,27 @@ func main() {
 
 	// Ke hoach 5: tao 5 khu vuc actor (mapId 1-5) MOT lan, dung chung cho moi phien.
 	soKhuVuc := game.MoSoKhuVuc()
+
+	// KH8 task 3 "NOI DAY THAT": nap kho noi dung (kho-noi-dung/*.yaml, ban
+	// NHUNG trong file thuc thi) va cam MOT kho chung vao ca 5 khu vuc, NGAY
+	// SAU khi co khu vuc va TRUOC khi mo cong nghe.
+	//
+	// Nap that bai = DUNG HAN may chu (log.Fatal), khong chay tiep voi bang
+	// chieu rong: mot may chu ma khong ai danh duoc gi thi tot hon la khong
+	// khoi dong, va loi hien ra ngay dong dau tien cua log thay vi hien ra
+	// bang mot bao cao "chieu khong an" cua nguoi choi ba ngay sau.
+	//
+	// Bo qua dong nay thi may chu VAN CHAY (moi khu vuc tu doc ban nhung) —
+	// cai mat la NAP NONG khong toi duoc khu vuc nao. Do la ly do ham
+	// GanKhoNoiDung phai duoc goi o day chu khong an trong MoSoKhuVuc.
+	duNoiDung, loiNoiDung := noidung.NapNhung()
+	if loiNoiDung != nil {
+		slog.Error("nap kho noi dung that bai", "loi", loiNoiDung)
+		os.Exit(1)
+	}
+	khoNoiDung := noidung.MoKho(duNoiDung)
+	soKhuVuc.GanKhoNoiDung(khoNoiDung)
+	slog.Info("kho noi dung da nap", "theHe", khoNoiDung.TheHe())
 
 	// KH6b Task 14: bat bo phat thanh toan may chu (goi 93) NGAY SAU khi co 5
 	// khu vuc va TRUOC khi mo cong nghe — de khong co khoang thoi gian nao ma

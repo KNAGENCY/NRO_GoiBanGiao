@@ -27,6 +27,7 @@ const (
 	TenFileVatPham = "vat-pham.yaml"
 	TenFileCuaHang = "cua-hang.yaml"
 	TenFileQuai    = "quai.yaml" // KH8 task 8
+	TenFileLang    = "lang.yaml" // KH8 task 6
 )
 
 // TenCacFile tra ve DANH SACH DAY DU cac file YAML ma Nap doc — NGUON DUY NHAT
@@ -34,8 +35,9 @@ const (
 // sach cung o ba test khac nhau; task 8 them quai.yaml vao Nap thi nhanh cua no
 // xanh, nhanh task 10 xanh, GOP LAI thi test nap nong do vi thu muc tam thieu
 // quai.yaml. Them file moi vao Nap thi PHAI them vao day — va chi vao day.
+// (Task 6 them lang.yaml: gop 03/09 dieu phoi them vao day, khong o fixture.)
 func TenCacFile() []string {
-	return []string{TenFileChieu, TenFileVatPham, TenFileCuaHang, TenFileKhoaId, TenFileQuai}
+	return []string{TenFileChieu, TenFileVatPham, TenFileCuaHang, TenFileKhoaId, TenFileQuai, TenFileLang}
 }
 
 // NapNhung nap ban NHUNG trong file thuc thi — duong dung luc KHOI DONG. Khong
@@ -60,6 +62,10 @@ func Nap(fsys fs.FS) (*DuLieu, error) {
 	if err := docYAML(fsys, TenFileCuaHang, &fCuaHang); err != nil {
 		return nil, err
 	}
+	var fLang fileLang
+	if err := docYAML(fsys, TenFileLang, &fLang); err != nil {
+		return nil, err
+	}
 
 	var fQuai fileQuai
 	if err := docYAML(fsys, TenFileQuai, &fQuai); err != nil {
@@ -78,6 +84,12 @@ func Nap(fsys fs.FS) (*DuLieu, error) {
 	}
 	for _, l := range fChieu.Lang {
 		du.ChieuTheoLang[l.IdLang] = l.Chieu
+	}
+	if err := kiemLang(fLang.Lang); err != nil {
+		return nil, fmt.Errorf("%s: %w", TenFileLang, err)
+	}
+	for _, l := range fLang.Lang {
+		du.Lang[l.Id] = l
 	}
 	if err := kiemMauOption(du.MauOption); err != nil {
 		return nil, fmt.Errorf("%s: %w", TenFileVatPham, err)
@@ -175,6 +187,43 @@ func kiemChieu(langs []ChieuCuaLang) error {
 				}
 				skillDaThay[cap.SkillId] = true
 			}
+		}
+	}
+	return nil
+}
+
+// TranToaDoBanDo: toa do khoi dau cua mot lang cuoi cung duoc gan vao
+// BanDo.SpawnX/SpawnY (game/banDo.go), hai truong do la int16. Am hoac vuot
+// gia tri nay la tran khi gan — kiem O DAY, luc nap, dung tinh than K3.
+const TranToaDoBanDo = 32767
+
+// kiemLang la bo kiem TOI THIEU cua lang.yaml (KH8 task 6): 5 lang, id lien
+// tuc tu 0 (nhu mau_vat_pham/mau_option), ten khong rong, hai chi so chien
+// dau khac 0, va toa do khoi dau nam trong mien client/BanDo doc duoc.
+func kiemLang(ds []Lang) error {
+	if len(ds) != SoLangCoDinh {
+		return fmt.Errorf("co %d lang, phai dung %d (client cu chi gui duoc id 0..%d)",
+			len(ds), SoLangCoDinh, SoLangCoDinh-1)
+	}
+	for i, l := range ds {
+		if l.Id != i {
+			return fmt.Errorf("lang vi tri %d khai id = %d — thu tu trong file PHAI bang id (nhu mau vat pham/mau option)",
+				i, l.Id)
+		}
+		if l.Ten == "" {
+			return fmt.Errorf("lang %d: ten rong", i)
+		}
+		if l.HpKhoiDau <= 0 {
+			return fmt.Errorf("lang %d (%q): hp_khoi_dau = %d, phai > 0", i, l.Ten, l.HpKhoiDau)
+		}
+		if l.SatThuongKhoiDau <= 0 {
+			return fmt.Errorf("lang %d (%q): sat_thuong_khoi_dau = %d, phai > 0 — bang 0 lam MOI nhan vat "+
+				"lang nay gay 0 sat thuong vinh vien (game/khuvuc.go TinhSatThuong)", i, l.Ten, l.SatThuongKhoiDau)
+		}
+		if l.ViTriXKhoiDau < 0 || l.ViTriXKhoiDau > TranToaDoBanDo ||
+			l.ViTriYKhoiDau < 0 || l.ViTriYKhoiDau > TranToaDoBanDo {
+			return fmt.Errorf("lang %d (%q): vi tri khoi dau (%d,%d) ngoai bien [0,%d] — BanDo.SpawnX/SpawnY "+
+				"(game/banDo.go) la int16", i, l.Ten, l.ViTriXKhoiDau, l.ViTriYKhoiDau, TranToaDoBanDo)
 		}
 	}
 	return nil

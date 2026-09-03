@@ -117,14 +117,13 @@ type Chieu struct {
 	CacCap        []CapChieu `yaml:"cac_cap"`
 }
 
-// ChieuCuaLang la khoi chieu cua MOT lang. `ten_lang` co trong file chi de
-// NGUOI DOC dinh huong — no KHONG di xuong client (ten lang gui trong goi -28/7
-// lay tu game/lang.go, chuyen sang YAML la task 6). De o day mot ban thu hai co
-// the lech; vi vay bo nap KHONG dung truong nay vao dau ca.
+// ChieuCuaLang la khoi chieu cua MOT lang. Truoc KH8 task 6 file nay con giu
+// mot ban sao thu hai cua ten lang (`ten_lang`, chi de nguoi doc dinh huong,
+// bo nap khong dung) — da XOA: ten lang gui xuong client (goi -28/7) gio doc
+// TU MOT NGUON DUY NHAT la lang.yaml (qua game/lang.go), tra theo id_lang.
 type ChieuCuaLang struct {
-	IdLang  byte    `yaml:"id_lang"`
-	TenLang string  `yaml:"ten_lang"`
-	Chieu   []Chieu `yaml:"chieu"`
+	IdLang byte    `yaml:"id_lang"`
+	Chieu  []Chieu `yaml:"chieu"`
 }
 
 type fileChieu struct {
@@ -265,6 +264,36 @@ type fileQuai struct {
 const TranTempIdQuai = 127
 
 // ---------------------------------------------------------------------------
+// Kieu du lieu YAML — lang (KH8 task 6)
+// ---------------------------------------------------------------------------
+
+// Lang la mot lang nhan gia (thay cho "chung toc" cua ban Dragon Ball cu). Chi
+// so khoi dau la GIA TRI DAU — se can bang lai o Ke hoach 13 (vong can bang
+// that). `id` = CHI SO, KHAI TUONG MINH (nhu MauVatPham/MauOption) vi id nay
+// DANG NAM TRONG CSDL nguoi choi (cot nhan_vat.lang); client cu CHI GUI DUOC
+// lang 0/1/2 (con dung mang toc 3x3) nen KHONG duoc them lang thu 6 bang YAML
+// (thiet ke §2.2, bang "Lang").
+//
+// MapKhoiDau/ViTriXKhoiDau/ViTriYKhoiDau la CHO DAT TRUOC — ban do that dung o
+// Ke hoach 3/6 cua lo trinh game; o day chi can mot toa do hop le de nhan vat
+// ton tai luc tao moi.
+type Lang struct {
+	Id               int    `yaml:"id"`
+	Ten              string `yaml:"ten"`
+	HpKhoiDau        int32  `yaml:"hp_khoi_dau"`
+	ChakraKhoiDau    int32  `yaml:"chakra_khoi_dau"`
+	SatThuongKhoiDau int32  `yaml:"sat_thuong_khoi_dau"` // dung o game/khuvuc.go TinhSatThuong
+	MapKhoiDau       int32  `yaml:"map_khoi_dau"`
+	ViTriXKhoiDau    int32  `yaml:"vi_tri_x_khoi_dau"`
+	ViTriYKhoiDau    int32  `yaml:"vi_tri_y_khoi_dau"`
+	VangKhoiDau      int64  `yaml:"vang_khoi_dau"`
+}
+
+type fileLang struct {
+	Lang []Lang `yaml:"lang"`
+}
+
+// ---------------------------------------------------------------------------
 // Anh chup
 // ---------------------------------------------------------------------------
 
@@ -274,9 +303,12 @@ type DuLieu struct {
 	// ChieuTheoLang[i] = danh sach chieu cua lang i (0..4). Mang co dinh 5 phan
 	// tu de khong mot lan tra cuu nao phai lo "lang nay co trong map khong".
 	ChieuTheoLang [SoLangCoDinh][]Chieu
-	MauOption     []MauOption
-	MauVatPham    []MauVatPham
-	CuaHang       []CuaHang
+	// Lang[i] = hang so khoi dau cua lang i (0..4). Cung khuon mang co dinh voi
+	// ChieuTheoLang (KH8 task 6).
+	Lang       [SoLangCoDinh]Lang
+	MauOption  []MauOption
+	MauVatPham []MauVatPham
+	CuaHang    []CuaHang
 
 	// MauQuai / SinhQuai — KH8 task 8. Tra cuu qua cua Quai()/DanhSachQuai()/
 	// SinhQuaiCuaMap() cua anh chup (kho.go), khong doc thang.

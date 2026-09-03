@@ -170,6 +170,23 @@ func (a *anhChup) TraCapChieu(idLang, templateId, cap byte) (CapChieu, bool) {
 	return CapChieu{}, false
 }
 
+// Lang tra ve ban sao mot lang theo id (0..SoLangCoDinh-1). Lang chi co truong
+// vo huong + mot chuoi (chuoi Go bat bien) nen gan gia tri la du sao (KH8
+// task 6).
+func (a *anhChup) Lang(id int) (Lang, bool) {
+	if id < 0 || id >= SoLangCoDinh {
+		return Lang{}, false
+	}
+	return a.duLieu.Lang[id], true
+}
+
+// DanhSachLang tra ve ban sao toan bo 5 lang, dung thu tu id 0..4.
+func (a *anhChup) DanhSachLang() []Lang {
+	ds := make([]Lang, SoLangCoDinh)
+	copy(ds, a.duLieu.Lang[:])
+	return ds
+}
+
 // MauOption tra ve ban sao bang mau option. MauOption toan truong vo huong +
 // chuoi nen mot lan copy slice la du sau.
 func (a *anhChup) MauOption() []MauOption {

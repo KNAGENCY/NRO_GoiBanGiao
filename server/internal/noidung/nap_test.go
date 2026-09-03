@@ -18,7 +18,7 @@ import (
 func khoThat(t *testing.T) map[string]string {
 	t.Helper()
 	m := map[string]string{}
-	for _, ten := range TenCacFile() { // nguon duy nhat — xem chu thich TenCacFile
+	for _, ten := range TenCacFile() { // nguon duy nhat — xem chu thich TenCacFile (task 6: TenFileLang da them vao do)
 		b, err := fs.ReadFile(khonoidung.FS, ten)
 		if err != nil {
 			t.Fatalf("khong doc duoc %s: %v", ten, err)
@@ -146,6 +146,71 @@ func TestNap_ThieuMotLangBiTuChoi(t *testing.T) {
 	}
 	van[TenFileChieu] = van[TenFileChieu][:i]
 	mongDoiLoi(t, van)
+}
+
+// TestNap_ThieuLang3BiTuChoi (KH8 task 6): xoa khoi lang id 3 khoi lang.yaml.
+// Client cu chi gui duoc lang 0/1/2 nhung may chu van phai giu du 5, thieu mot
+// lang la vo hieu "id lien tuc tu 0" ma kiemLang dua vao.
+func TestNap_ThieuLang3BiTuChoi(t *testing.T) {
+	van := khoThat(t)
+	i := strings.Index(van[TenFileLang], "  - id: 3\n")
+	j := strings.Index(van[TenFileLang], "  - id: 4\n")
+	if i < 0 || j <= i {
+		t.Fatalf("khong dinh vi duoc khoi lang 3 (%d %d)", i, j)
+	}
+	van[TenFileLang] = van[TenFileLang][:i] + van[TenFileLang][j:]
+	err := mongDoiLoi(t, van)
+	if !strings.Contains(err.Error(), TenFileLang) {
+		t.Errorf("loi bao %q, mong doi noi ro %s", err, TenFileLang)
+	}
+}
+
+// TestNap_SatThuongKhoiDauBangKhongBiTuChoi (KH8 task 6): sat_thuong_khoi_dau
+// = 0 lam MOI nhan vat cua lang do gay 0 sat thuong vinh vien (khuvuc.go
+// TinhSatThuong nhan gia tri nay lam satThuongGoc).
+func TestNap_SatThuongKhoiDauBangKhongBiTuChoi(t *testing.T) {
+	van := khoThat(t)
+	doiMotLan(t, van, TenFileLang, "sat_thuong_khoi_dau: 12\n", "sat_thuong_khoi_dau: 0\n")
+	err := mongDoiLoi(t, van)
+	if !strings.Contains(err.Error(), "sat_thuong_khoi_dau") {
+		t.Errorf("loi bao %q, mong doi noi ve sat_thuong_khoi_dau", err)
+	}
+}
+
+// TestNap_HpKhoiDauBangKhongBiTuChoi: hp_khoi_dau <= 0 la nhan vat chet ngay
+// luc tao.
+func TestNap_HpKhoiDauBangKhongBiTuChoi(t *testing.T) {
+	van := khoThat(t)
+	doiMotLan(t, van, TenFileLang, "hp_khoi_dau: 150\n", "hp_khoi_dau: 0\n")
+	mongDoiLoi(t, van)
+}
+
+// TestNap_ViTriLangVuotBienBiTuChoi: toa do am hoac vuot TranToaDoBanDo se
+// tran khi gan vao BanDo.SpawnX/SpawnY (int16, game/banDo.go).
+func TestNap_ViTriLangVuotBienBiTuChoi(t *testing.T) {
+	van := khoThat(t)
+	doiMotLan(t, van, TenFileLang, "vi_tri_x_khoi_dau: 100\n", "vi_tri_x_khoi_dau: 99999\n")
+	err := mongDoiLoi(t, van)
+	if !strings.Contains(err.Error(), "vi tri khoi dau") {
+		t.Errorf("loi bao %q, mong doi noi ve vi tri khoi dau", err)
+	}
+}
+
+// TestNap_LangHoanViBiTuChoi: hoan vi hai khoi lang (giu id) — nhu dot bien M1
+// cua mau vat pham, nhung cho bang lang.
+func TestNap_LangHoanViBiTuChoi(t *testing.T) {
+	van := khoThat(t)
+	s := van[TenFileLang]
+	i0 := strings.Index(s, "  - id: 0\n")
+	i1 := strings.Index(s, "  - id: 1\n")
+	i2 := strings.Index(s, "  - id: 2\n")
+	if i0 < 0 || i1 <= i0 || i2 <= i1 {
+		t.Fatalf("khong dinh vi duoc ba khoi lang 0/1/2 (%d %d %d)", i0, i1, i2)
+	}
+	van[TenFileLang] = s[:i0] + s[i1:i2] + s[i0:i1] + s[i2:]
+	if _, err := napVan(van); err == nil {
+		t.Fatal("hoan vi hai khoi lang ma bo nap van chap nhan")
+	}
 }
 
 // TestNap_CuaHangTroToiMauKhongTonTai (dot bien M9): mau_id 9 khong co that.

@@ -327,4 +327,7 @@ type DuLieu struct {
 	// BangRoi — KH8 task 9 (bangroi.go). Tra cuu qua BangRoiCuaQuai(ma) /
 	// BangRoiCuaBoss(ma) cua anh chup, khong doc thang.
 	BangRoi BangRoi
+	// Boss — KH8 task 7. Kieu, bo kiem VA hai cua tra cuu Boss()/DanhSachBoss()
+	// deu nam trong boss.go (mot vung du lieu = mot tep, xem chu thich dau tep do).
+	Boss []Boss
 }

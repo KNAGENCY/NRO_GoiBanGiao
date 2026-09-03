@@ -18,6 +18,12 @@ type Catalog struct {
 	// doi chieu `anh_id` trong kho-noi-dung/quai.yaml voi danh sach nay
 	// (khoquai.go): file YAML sua duoc bang tay, danh sach nay thi khong.
 	MobIDs []int
+
+	// PartIDs la TOAN BO id "part" (dau/than/chan) ma goi asset DA KY co
+	// (asset-lock.json, closure.part_ids). KH8 task 7 doi chieu `outfit` trong
+	// kho-noi-dung/boss.yaml voi danh sach nay (noidungboss.go) — cung ly do voi
+	// MobIDs: dien mot id ngoai tap nay la con boss VO HINH, khong mot dong log.
+	PartIDs []int
 }
 type MapCatalog struct {
 	ID             byte
@@ -124,6 +130,7 @@ func NapCatalog(data, lockData []byte) (*Catalog, error) {
 		c.Mob.Spawns = append(c.Mob.Spawns, MobSpawnCatalog{ID: item.ID, X: item.X, Y: item.Y})
 	}
 	c.MobIDs = append([]int(nil), l.Closure.MobIDs...)
+	c.PartIDs = append([]int(nil), l.Closure.PartIDs...)
 	return c, nil
 }
 func coID(ids []int, want int) bool {

@@ -1,0 +1,242 @@
+# boss.yaml — KHO NỘI DUNG BOSS (KH8 task 7).
+#
+# Trước KH8 task 7, hai con boss mẫu nằm trong một bảng Go cứng
+# (`internal/game/noidungboss.go`, biến `danhSachNoiDungBoss`). Bảng đó ĐÃ XOÁ —
+# từ nay chỉ còn MỘT bản số liệu là file này. Kiểu dữ liệu + bộ kiểm ở
+# `internal/noidung/boss.go`; cửa tra cứu `TimNoiDungBoss` / `DanhSachNoiDungBoss`
+# (game/noidungboss.go) đọc từ ẢNH CHỤP kho nội dung, không đọc bảng Go nữa.
+#
+# ⚠️ MỌI CON SỐ Ở ĐÂY ĐỀU TRUY ĐƯỢC VỀ MỘT NGUỒN TRONG CODE. Khi sửa, sửa kèm
+# cái nguồn đó — đừng điền một con số "cho đẹp". Chú thích dưới đây được chép
+# nguyên từ noidungboss.go: đó chính là lý do KH8 chọn YAML (có chú thích) chứ
+# không chọn JSON.
+#
+# ---------------------------------------------------------------------------
+# NHỮNG CON SỐ DÙNG CHUNG — GHI RÕ LẤY TỪ ĐÂU
+# ---------------------------------------------------------------------------
+#
+# OUTFIT — ba miếng đồ đã có ẢNH NARUTO THẬT trong client. Nguồn:
+# `closure.part_ids` trong `server/internal/game/assets/asset-lock.json` =
+# [30, 57, 58, 2189, 2190, 2191]. Điền một id ngoài tập đó là con boss VÔ HÌNH —
+# client không tìm thấy ảnh thì không vẽ gì, và máy chủ không có một dòng log nào.
+# (Bộ kiểm: `noidung.KiemIdPartBoss`, gọi từ `game/noidungboss.go` với danh sách
+# id thật lấy từ asset-lock.)
+#
+#   bộ "học viên" : 30 / 57 / 58        (PHASE_ONE_REPLACEMENTS, assetpack/part.py)
+#   bộ "jounin"   : 2189 / 2190 / 2191  (bộ của NPC Iruka, assets/catalog.json)
+#
+#   NỢ KHÁCH: hai bộ trên là TẤT CẢ những gì client có. Chưa có bộ đồ riêng cho
+#   boss — một con boss mặc bộ jounin trông y hệt NPC Iruka. Đợi là chuyện của
+#   kho mỹ thuật, không phải chuyện của file này; ở đây chọn "nhìn thấy được"
+#   thay vì "đẹp mà vô hình".
+#
+# BỘ CHIÊU — mỗi làng có đúng 4 chiêu, template_id 1..4 theo slot (chieu.yaml):
+#
+#   1 = cận chiến (loại ĐÁNH, tầm 100)
+#   2 = tầm xa theo hệ (loại ĐÁNH, tầm 300)
+#   3 = hồi máu đồng đội (loại BUFF) -> boss KHÔNG dùng: không sinh gói tấn công
+#       nào, và đường hồi máu đang có ý hoãn (BAT-DAU-TU-DAY.md §8)
+#   4 = tự thân (loại TU_THAN)       -> boss KHÔNG dùng: tamTuThan = 0 nên mọi
+#       đòn đều vượt tầm, tức LUÔN trượt
+#
+#   Boss cầm chiêu 3 hoặc 4 sẽ "vung tay vào không khí": trông như đang đánh nhau
+#   mà không bao giờ gây một điểm sát thương nào. (Bộ kiểm chặn: chiêu của boss
+#   phải là loại ĐÁNH — `internal/noidung/boss.go`, kiemBossThamChieuChieu.)
+#
+# MAP 1 = LÀNG LÁ — map DUY NHẤT chọn làm sân khấu cho cả hai con boss mẫu:
+#
+#   1. Nó là map duy nhất có LƯỚI VA CHẠM THẬT (assets/map-1-collision.bin).
+#      Map 2-5 không có artifact va chạm nào, dichuyen.go phải dùng biến dự phòng
+#      cho chúng — đặt boss ở đó thì KHÔNG AI kiểm được nó có đứng trong vách đá
+#      không, và lỗi kiểu đó không bao giờ báo.
+#   2. Nó là map duy nhất đã có mỹ thuật Naruto thật; map 2-5 còn dùng tile
+#      Dragon Ball cũ, thả boss vào đó trông lạc chỗ.
+#   3. Nó là map khởi đầu của Làng Lá (lang.yaml), tức nơi đông người nhất —
+#      boss mẫu sinh ra để NGHIỆM THU, cần người nhìn thấy.
+#
+# CÂN BẰNG SỐ LIỆU — đây là GIÁ TRỊ KHỞI ĐẦU, không phải số đã chốt.
+#
+#   Ba con số gốc:
+#     máu người chơi lúc mới tạo : 100..250  (lang.yaml, hp_khoi_dau từng làng)
+#     sát thương gốc người chơi  : 10..16    (lang.yaml, sat_thuong_khoi_dau)
+#     máu con Sói Rừng           : 100       (quai.yaml)
+#
+#   Cách sát thương được tính (satthuong.go): satThuong = dame × cap.sat_thuong / 100.
+#   cap.sat_thuong = dameGốc + (cấp-1)×20, dameGốc = 20 cận chiến / 30 tầm xa:
+#     cận chiến cấp 1/2/3 -> 20% / 40% / 60% của dame
+#     tầm xa    cấp 1/2/3 -> 30% / 50% / 70% của dame
+#
+#   Từ đó suy ra:
+#     dame boss 35 -> đòn 10..21 : người chơi 150 máu chịu ~10 đòn. Boss lẻ.
+#     dame boss 60 -> đòn 24..30 : chịu ~5 đòn. Boss lớn pha 1.
+#     dame boss 90 -> đòn 54..63 : chịu ~3 đòn. Boss lớn pha 2 — phải đánh theo
+#                                  nhóm, đúng ý đồ.
+#
+#   MÁU BOSS suy ngược từ sức ra đòn của người chơi: sát thương gốc 10..16 ×
+#   chiêu cấp 3 (60-70%) ≈ 7..11 một đòn, hồi chiêu 1,6 giây -> ~5 máu/giây mỗi
+#   người. Vì vậy:
+#     400..800   ≈ 1,5..3 phút cho MỘT người  -> boss lẻ, đánh solo được
+#     2400..3600 ≈ 2..3 phút cho NĂM người    -> boss lớn pha 1
+#     4000..6000 ≈ 3..4 phút cho NĂM người    -> boss lớn pha 2
+#   Cả ba dãy máu đều nằm thoải mái trong miền int32 của Boss.Hp/HpToiDa.
+#
+# HAI CON BOSS, chọn có chủ đích để giữa chúng chạy HẾT ba đường đặc trưng của
+# hệ boss — nếu không thì buổi nghiệm thu bằng client thật không chứng minh
+# được gì:
+#   nhiều pha -> Nhân Gia Mặt Nạ có 2 pha (đường biến hình, giữ nguyên id)
+#   nổi giận  -> cả hai con đều có moc_noi_gian theo %máu
+#   boss lớn  -> Nhân Gia Mặt Nạ đặt la_boss_lon (đường thông báo chạy chữ, gói 93)
+
+boss:
+  # ── BOSS LỚN: Nhân Gia Mặt Nạ ──────────────────────────────────────────────
+  #
+  # Một kẻ đội lốt học viên trốn trong Làng Lá cả mùa; đánh gần chết thì mặt nạ
+  # vỡ, chân thân bước ra. Hai pha này chính là lý do con boss này tồn tại: nó
+  # là con DUY NHẤT chạy đường biến hình.
+  #
+  # VÌ SAO CÂU CHUYỆN LÀ "LỘT XÁC" chứ không phải một con quái vật biến hình:
+  # client chỉ có ĐÚNG HAI bộ đồ (học viên và jounin, xem trên). Với hai bộ đó,
+  # "học viên giả -> người lớn thật" là câu chuyện DUY NHẤT mà mỹ thuật hiện có
+  # kể được thật. Nếu viết một con hồ chín đuôi thì pha 2 sẽ hiện ra... một bậc
+  # thầy Iruka.
+  - ma: nhan-gia-mat-na
+    vi_tri:
+      # Giữa bể đá dưới cổng torii, ngay tim làng — chỗ ai cũng đi qua. Cột 23
+      # hàng 17 của lưới va chạm: đứng trên MẶT bể, hàng 18 ngay dưới là thân bể
+      # (đặc). Cùng mặt bể mà cổng Làng Lá đứng (banDo.go, diemDiMap1).
+      - {map: 1, x: 552, y: 408}
+      # Bãi đất phía đông, ngoài bể đá — cột 37 hàng 18, mặt đất thường, hàng 19
+      # bên dưới là lòng đất (đặc). Có hai chỗ để con boss không phải lần nào
+      # cũng hiện đúng một điểm.
+      - {map: 1, x: 888, y: 432}
+    pha:
+      - ten: "Kẻ Lạ Mặt"
+        lang: 0          # Làng Lá — hệ Hoả. Chiêu lấy từ catalog của làng 0.
+        cap: 50
+        # Bộ đồ học viên: dạng trá lốt của pha 1. Người chơi nhìn vào tưởng một
+        # học viên bình thường — đúng ý đồ.
+        outfit: [30, 57, 58, 0, 0, 0]
+        dame: 60         # -> đòn 24..30, người chơi 150 máu chịu ~5 đòn
+        type_pk: 5       # TypePkBoss (boss.go). 0 = người chơi KHÔNG thấy thanh máu boss.
+        # 1500ms = 15 nhịp actor. Bội số của 100 là BẮT BUỘC chứ không phải cho
+        # tròn: boss cập nhật trong nhịp 100ms của khu vực, nên 1450ms trên thực
+        # tế vẫn là 1500ms — phần lẻ là con số nói dối.
+        nhip_danh_ms: 1500
+        hp_chon: [2400, 3000, 3600]
+        map_vao: [1]
+        bo_chieu:
+          - {template_id: 1, cap: 2}   # cận chiến
+          - {template_id: 2, cap: 2}   # tầm xa
+        # 1800 giây = 30 phút giữa hai lần boss lớn xuất hiện. Đối chiếu: boss lẻ
+        # dưới kia là 10 phút.
+        giay_nghi: 1800
+        # Hai mốc, %HP GIẢM DẦN và không trùng ngưỡng — MocNoiGianDaQua (boss.go)
+        # là con trỏ chạy MỘT CHIỀU, sắp sai thứ tự thì mốc sau không bao giờ tới
+        # lượt.
+        #
+        # he_so_nhip nhân DỒN lên NhipDanhHienTai (cộng dồn):
+        # 1500 -> ×0,8 = 1200 -> ×0,75 = 900. Cả ba đều là bội số của 100ms, tức
+        # con số trong dữ liệu đúng bằng con số xảy ra thật.
+        moc_noi_gian:
+          - {phan_tram_hp: 50, he_so_dame: 1.30, he_so_def: 0.85, he_so_nhip: 0.80,
+             chat: "Đủ rồi. Thôi giấu tay."}
+          - {phan_tram_hp: 20, he_so_dame: 1.60, he_so_def: 0.70, he_so_nhip: 0.75,
+             chat: "Ngươi ép ta cởi lớp này ra..."}
+        # Boss lớn: phát gói 93 (chạy chữ toàn server) lúc hiện và lúc bị hạ. Đặt
+        # ở CẢ HAI pha vì người chơi đang ở map khác cũng nên biết con này đã lột xác.
+        la_boss_lon: true
+        thoai_hien:
+          - "Làng Lá... vẫn ngủ say như cái đêm đó."
+          - "Ta đứng giữa các ngươi suốt mùa này. Không ai ngoảnh lại nhìn."
+        thoai_danh:
+          - "Chakra của ngươi run rồi đấy."
+          - "Đừng nhắm mắt. Ta muốn ngươi nhìn cho rõ."
+          - "Học viện dạy các ngươi kết ấn, có ai dạy các ngươi chết đâu."
+        thoai_chet:
+          - "Đó mới chỉ là lớp áo... còn ta thì chưa."
+
+      - ten: "Mặt Nạ Vỡ"
+        lang: 0
+        cap: 70          # cao hơn pha 1 — người chơi thấy ngay con số trên đầu boss đổi
+        # Bộ jounin: chân thân sau khi mặt nạ vỡ.
+        outfit: [2189, 2190, 2191, 0, 0, 0]
+        dame: 90         # -> đòn 54..63: một người đơn độc không trụ nổi
+        type_pk: 5
+        nhip_danh_ms: 1000   # 10 nhịp actor — nhanh hơn pha 1 (15 nhịp)
+        hp_chon: [4000, 5000, 6000]
+        map_vao: [1]
+        bo_chieu:
+          - {template_id: 1, cap: 3}   # cấp 3 = cấp cao nhất catalog có
+          - {template_id: 2, cap: 3}
+        # 5 giây lặng giữa hai pha: mặt nạ rơi xuống đất, im một nhịp rồi chân
+        # thân bước ra. KHÔNG để 0 — 0 nghĩa là pha 2 nở ra ngay trong cùng một
+        # khoảnh khắc pha 1 chết, người chơi không kịp đọc gì.
+        giay_nghi: 5
+        # 1000 -> ×0,8 = 800 -> ×0,75 = 600. Vẫn bội số của 100ms.
+        moc_noi_gian:
+          - {phan_tram_hp: 50, he_so_dame: 1.35, he_so_def: 0.80, he_so_nhip: 0.80,
+             chat: "Chakra này ta để dành cho đúng hôm nay."}
+          - {phan_tram_hp: 25, he_so_dame: 1.75, he_so_def: 0.65, he_so_nhip: 0.75,
+             chat: "Cháy đi. Cả cái làng này cùng cháy."}
+        la_boss_lon: true
+        thoai_hien:
+          - "Mặt nạ rơi rồi. Giờ thì nhìn cho kỹ."
+          - "Ta từng đeo băng trán của làng này. Trước khi làng này bỏ ta lại."
+        thoai_danh:
+          - "Hoả Độn đâu phải của riêng Làng Lá."
+          - "Bao nhiêu người nữa thì các ngươi mới chịu tin?"
+          - "Đứng dậy đi. Ta chưa muốn xong sớm thế đâu."
+        thoai_chet:
+          - "Cuối cùng... cũng có người nhớ mặt ta."
+
+  # ── BOSS LẺ: Học Viên Đào Tẩu ──────────────────────────────────────────────
+  #
+  # Một con boss NHỎ, MỘT pha, KHÔNG chạy chữ toàn server — có ý để đối chiếu
+  # với con trên. Nó tồn tại để trả lời hai câu hỏi khác nhau: "đường nổi giận
+  # có chạy khi chỉ có MỘT mốc không" và "boss không phải boss lớn có im lặng
+  # đúng không" (la_boss_lon để mặc định false).
+  #
+  # Làng 2 (Sương Mù — hệ Thuỷ) nhưng đặt chân ở map 1 (Làng Lá): một kẻ đào tẩu
+  # khỏi kỳ thi của Sương Mù, trốn sang đất Làng Lá. Chọn làng khác làng của map
+  # là CÓ CHỦ ĐÍCH — nó bắt bộ chiêu phải tra cứu đúng catalog của làng 2 chứ
+  # không phải làng của map, và bộ kiểm khoá điều đó lại.
+  - ma: hoc-vien-dao-tau
+    vi_tri:
+      # Cột 13 hàng 18 — bãi đất phía tây, cách xa NPC Iruka (172,384) và hai con
+      # Sói Rừng để người mới không đâm thẳng vào boss.
+      - {map: 1, x: 312, y: 432}
+      # Cột 42 hàng 18 — bìa đông của map.
+      - {map: 1, x: 1008, y: 432}
+    pha:
+      - ten: "Học Viên Đào Tẩu"
+        lang: 2          # Làng Sương Mù — hệ Thuỷ
+        cap: 25
+        # Vẫn bộ đồ học viên: hắn bỏ trốn giữa kỳ thi, chưa kịp đổi đồ. Đây là
+        # lần DUY NHẤT bộ đồ học viên được dùng đúng nghĩa đen.
+        outfit: [30, 57, 58, 0, 0, 0]
+        dame: 35         # -> đòn 10..21: người chơi 150 máu chịu ~10 đòn
+        type_pk: 5
+        nhip_danh_ms: 1200   # 12 nhịp actor
+        hp_chon: [400, 600, 800]
+        map_vao: [1]
+        # Cận chiến cấp 2 + tầm xa cấp 1: yếu hơn hẳn bộ chiêu của boss lớn, đúng
+        # cho một con đánh solo được.
+        bo_chieu:
+          - {template_id: 1, cap: 2}
+          - {template_id: 2, cap: 1}
+        giay_nghi: 600   # 10 phút — boss lẻ nên ra thường xuyên hơn
+        # MỘT mốc duy nhất: 1200 -> ×0,75 = 900ms.
+        moc_noi_gian:
+          - {phan_tram_hp: 40, he_so_dame: 1.50, he_so_def: 0.80, he_so_nhip: 0.75,
+             chat: "Đừng ép ta nhớ lại kỳ thi đó."}
+        # la_boss_lon để mặc định false — con này ra vào im lặng, không làm ngập
+        # kênh chạy chữ toàn server.
+        thoai_hien:
+          - "Đừng gọi tên cũ của ta. Đứa đó chết trong kỳ thi rồi."
+          - "Ta bỏ Sương Mù để khỏi phải giết bạn học. Rồi ta vẫn giết."
+        thoai_danh:
+          - "Ngươi cũng đeo băng trán à? Tháo ra đi, đỡ đau."
+          - "Ở Sương Mù, ai ngã xuống là nằm lại đó."
+          - "Nước không cần mạnh. Nước chỉ cần lâu."
+        thoai_chet:
+          - "Vậy là... ta được về nhà theo cách này."

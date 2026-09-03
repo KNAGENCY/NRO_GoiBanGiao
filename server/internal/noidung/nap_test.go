@@ -18,7 +18,7 @@ import (
 func khoThat(t *testing.T) map[string]string {
 	t.Helper()
 	m := map[string]string{}
-	for _, ten := range []string{TenFileChieu, TenFileVatPham, TenFileCuaHang} {
+	for _, ten := range []string{TenFileChieu, TenFileVatPham, TenFileCuaHang, TenFileKhoaId} {
 		b, err := fs.ReadFile(khonoidung.FS, ten)
 		if err != nil {
 			t.Fatalf("khong doc duoc %s: %v", ten, err)

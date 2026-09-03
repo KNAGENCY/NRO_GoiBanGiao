@@ -71,6 +71,15 @@ func Nap(fsys fs.FS) (*DuLieu, error) {
 	if err := kiemCuaHang(du.CuaHang, len(du.MauOption), len(du.MauVatPham)); err != nil {
 		return nil, fmt.Errorf("%s: %w", TenFileCuaHang, err)
 	}
+	// Bo kiem DAY DU (K1/K2/K3 + so khoa id) — kiemtra.go, task 1. Chay SAU bo
+	// kiem toi thieu vi nhieu kiem o do dua vao viec "id = vi tri" da dung.
+	var fKhoa fileKhoaId
+	if err := docYAML(fsys, TenFileKhoaId, &fKhoa); err != nil {
+		return nil, err
+	}
+	if err := kiemDayDu(du, &fKhoa); err != nil {
+		return nil, err
+	}
 	return du, nil
 }
 

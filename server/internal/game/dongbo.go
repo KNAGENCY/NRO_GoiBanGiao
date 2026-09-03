@@ -93,6 +93,13 @@ func goiCatalogData() *protocol.Message {
 // cu. Moi lang gui ten + 4 MauChieu that (Ke hoach 6, Task 1) — xem chieuthuc.go
 // va tai lieu giao thuc chien dau §3.7/§4.3.
 func goiCatalogSkill() (*protocol.Message, error) {
+	return goiCatalogSkillTu(chieuTheoLang)
+}
+
+// goiCatalogSkillTu la than that cua goiCatalogSkill, nhan bang chieu tu ngoai
+// vao (KH8 task 0 — de cong tuong duong byte chay DUNG bo dung goi nay tren du
+// lieu nap tu YAML, xem noidungyaml.go).
+func goiCatalogSkillTu(bangChieu [5][]MauChieu) (*protocol.Message, error) {
 	w := protocol.NewWriter()
 	w.Byte(lenhConCatalogSkill) // 7
 	w.Byte(vsSkill)
@@ -103,7 +110,10 @@ func goiCatalogSkill() (*protocol.Message, error) {
 		if err := w.UTF(l.Ten); err != nil {
 			return nil, err
 		}
-		chieu := ChieuCuaLang(byte(l.ID))
+		var chieu []MauChieu
+		if int(l.ID) < len(bangChieu) {
+			chieu = bangChieu[l.ID]
+		}
 		w.Byte(byte(len(chieu))) // countTemplate = 4
 		for _, m := range chieu {
 			if err := ghiMauChieu(w, m); err != nil {

@@ -1,0 +1,149 @@
+# vat-pham.yaml — MẪU OPTION + MẪU VẬT PHẨM.
+#
+# ============================================================================
+# ⚠️ ĐÂY LÀ FILE NGUY HIỂM NHẤT CỦA CẢ KHO NỘI DUNG.
+#
+# `id` KHÔNG ĐI QUA MẠNG. Client tự đặt id = CHỈ SỐ vòng lặp khi nó đọc danh
+# sách (Controller.cs:6479 và :6498). Và cái id đó ĐANG NẰM TRONG CƠ SỞ DỮ LIỆU
+# của người chơi (cột vat_pham.mau_id).
+#
+# Nghĩa là: chèn một mẫu vào GIỮA danh sách, hay đổi chỗ hai mẫu cho "gọn", là
+# ÁO NINJA CỦA MỌI NGƯỜI BIẾN THÀNH THUỐC HỒI MÁU — không một dòng log, không
+# một thông báo lỗi.
+#
+#   CHỈ ĐƯỢC THÊM VÀO CUỐI. Không xoá, không đổi thứ tự, không đổi `id`.
+#   Muốn ngừng bán một món thì đổi cửa hàng, không đụng vào danh sách này.
+#
+# `id` được khai TƯỜNG MINH ở mọi mục chính là để chống việc đó: bộ kiểm bắt
+# buộc `id` phải bằng vị trí, nên một cú đảo dòng làm test ĐỎ ngay.
+# ============================================================================
+#
+# CON SỐ Ở ĐÂU RA: bản chuyển nguyên văn từ game/mauvatpham.go, KHÔNG đổi số
+# nào. Các số này do người viết đặt làm KHỞI ĐẦU, KHÔNG trích từ bản Java (bản
+# Java là game Dragon Ball, đây là game Naruto). Cân bằng đơn giá/chỉ số là việc
+# của bước sau, không phải của bước chuyển chỗ ở.
+
+# ---------------------------------------------------------------------------
+# Bảng mẫu option
+# ---------------------------------------------------------------------------
+#
+# ⚠️ id 6 và 7 KHÔNG ĐƯỢC ĐỔI Ý NGHĨA: client băm cứng option 22 -> 6 và 23 -> 7
+# với param nhân 1000 (ItemOption.cs:29-38, Panel.cs:9889-9911). Nếu 6/7 không
+# còn là "tăng HP" / "tăng chakra" thì một món đồ mang option 22/23 sẽ hiện sai
+# hoàn toàn mà không báo gì.
+#
+# `ten` phải chứa ký tự '#': client thay '#' bằng giá trị param khi vẽ
+# (ItemOption.getOptionString). Tên không có '#' thì người chơi thấy dòng chữ
+# tĩnh, không thấy con số — không lỗi, chỉ vô nghĩa.
+#
+# `loai` = ItemOptionTemplate.type. Ý nghĩa CHƯA giải mã được từ client nên để 0
+# cho tất cả — đó là một khoản NỢ, không phải một lựa chọn.
+
+mau_option:
+  - id: 0
+    ten: "Hồi phục # HP"
+    loai: 0
+  - id: 1
+    ten: "Hồi phục # chakra"
+    loai: 0
+  - id: 2
+    ten: "Tăng # sức đánh"
+    loai: 0
+  - id: 3
+    ten: "Tăng # giáp"
+    loai: 0
+  - id: 4
+    ten: "Tăng # chính xác"
+    loai: 0
+  - id: 5
+    ten: "Tăng # né đòn"
+    loai: 0
+  - id: 6                      # ⚠️ đích của option 22 phía client (param ×1000)
+    ten: "Tăng # HP"
+    loai: 0
+  - id: 7                      # ⚠️ đích của option 23 phía client (param ×1000)
+    ten: "Tăng # chakra"
+    loai: 0
+
+# ---------------------------------------------------------------------------
+# Danh mục mẫu vật phẩm
+# ---------------------------------------------------------------------------
+#
+# GIẢ ĐỊNH CÒN NỢ BẰNG CHỨNG (nghiệm thu tay sẽ trả lời):
+#
+#   - `loai` 0..5 = trang bị mặc trên người: SUY RA từ Item.isTypeBody
+#     (Item.cs:271-278). `loai: 6` chọn làm "đồ tiêu hao" vì nó NẰM NGOÀI dải
+#     đó — chưa đối chiếu được với chỗ nào trong client nói rõ "6 là thuốc".
+#   - `gioi_tinh: 3` nghĩa là "mọi giới": quy ước bản gốc, chưa xác minh ở client.
+#   - `icon_id: 0` cho TẤT CẢ: bảng SmallImage phía client hiện đang RỖNG (gói
+#     catalog gửi blob "image" count=0). Ô icon chỉ TRỐNG, không vỡ game —
+#     SmallImage.drawSmallImage không sập khi thiếu ảnh. Sửa khi có bộ icon đi
+#     qua quy trình mỹ thuật + asset lock.
+#   - `phan: -1` nghĩa là "không vẽ mảnh nào lên người". Ba món trang bị dưới
+#     đây để -1 vì bộ mảnh đồ vật phẩm CHƯA có trong part.bin đã khoá SHA; đặt
+#     một số bừa là vẽ nhầm mảnh người chơi lên người.
+#
+# `tran_chong` = tối đa bao nhiêu cái trong MỘT ô túi. KHÔNG đi xuống client —
+# đây là số của riêng máy chủ. Món có option BẮT BUỘC phải là 1 (đơn chiếc):
+# hai món khác option mà chồng chung một ô thì một trong hai mất option.
+
+mau_vat_pham:
+  - id: 0
+    loai: 6                    # đồ tiêu hao
+    gioi_tinh: 3
+    ten: "Thuốc hồi máu nhỏ"
+    mo_ta: "Hồi 200 HP. Dùng được khi đang di chuyển."
+    cap: 1
+    yeu_cau_suc: 0
+    icon_id: 0
+    phan: -1
+    nang_cap_duoc: false
+    tran_chong: 99
+
+  - id: 1
+    loai: 6
+    gioi_tinh: 3
+    ten: "Thuốc hồi chakra nhỏ"
+    mo_ta: "Hồi 200 chakra."
+    cap: 1
+    yeu_cau_suc: 0
+    icon_id: 0
+    phan: -1
+    nang_cap_duoc: false
+    tran_chong: 99
+
+  - id: 2
+    loai: 0                    # trang bị mặc trên người (áo)
+    gioi_tinh: 3
+    ten: "Áo ninja Làng Lá"
+    mo_ta: "Áo tập của học viện Làng Lá."
+    cap: 1
+    yeu_cau_suc: 0
+    icon_id: 0
+    phan: -1
+    nang_cap_duoc: true
+    tran_chong: 1              # có option -> BẮT BUỘC đơn chiếc
+
+  - id: 3
+    loai: 1                    # quần
+    gioi_tinh: 3
+    ten: "Quần ninja Làng Lá"
+    mo_ta: "Quần tập của học viện Làng Lá."
+    cap: 1
+    yeu_cau_suc: 0
+    icon_id: 0
+    phan: -1
+    nang_cap_duoc: true
+    tran_chong: 1
+
+  - id: 4
+    loai: 2                    # vũ khí
+    gioi_tinh: 3
+    ten: "Kunai luyện tập"
+    mo_ta: "Kunai cùn dùng để tập ném."
+    cap: 1
+    yeu_cau_suc: 0
+    icon_id: 0
+    phan: -1
+    nang_cap_duoc: true
+    tran_chong: 1

@@ -1,0 +1,61 @@
+# cua-hang.yaml — CỬA HÀNG NPC: danh mục hàng bày bán + đơn giá.
+#
+# VÌ SAO GIÁ Ở ĐÂY MÀ KHÔNG Ở CÙNG MẪU VẬT PHẨM: mẫu vật phẩm (tên, icon, chỉ
+# số) là dữ liệu CHUNG của cả game; đơn giá là dữ liệu RIÊNG của từng cửa hàng.
+# Cùng một cái áo có thể bán giá khác nhau ở hai làng. Gộp làm một là không thể.
+#
+# `mau_id` trỏ sang `vat-pham.yaml` bằng SỐ, vì đó chính là con số đi xuống
+# client. Bộ kiểm đối chiếu: mọi `mau_id` phải tồn tại trong danh mục mẫu — gửi
+# một mẫu không có thật thì client ném NullReference vào một catch RỖNG và nuốt
+# mất, cửa hàng hiện dở dang, không log, không dấu vết.
+#
+# `id` của cửa hàng KHÔNG đi xuống client (gói -44 không có ô nào chứa nó) —
+# nhưng máy chủ nhớ "người này đang mở cửa hàng nào" theo id, nên đổi id giữa
+# phiên là bán nhầm bảng giá.
+#
+# `tien` cố ý là CHỮ ("vang" / "ngoc") chứ không phải số 0/1: một con số gõ nhầm
+# vẫn ra một loại tiền hợp lệ và chạy êm; một chữ gõ nhầm thì bộ kiểm bắt ngay.
+# Bản 1 CHỈ hai loại tiền — bản Java nhét ngọc/hồng ngọc/phiếu chung một ô,
+# không chép lại cái đó.
+#
+# `ten` của tab được client tách bằng '\n' và CHỈ nhận 1 hoặc 2 dòng. Ba dòng
+# trở lên: tab hiện tên RỖNG, không báo lỗi.
+#
+# CON SỐ Ở ĐÂU RA: bản chuyển nguyên văn từ game/cuahang.go, KHÔNG đổi số nào.
+# Đơn giá 100 / 1000 / 5 là KHỞI ĐẦU do người viết đặt, KHÔNG trích từ bản Java.
+# Cân bằng kinh tế (đi bao lâu mới mua nổi cái áo) là việc của bước đo sau.
+
+cua_hang:
+  - id: 1
+    ten: "Tap hoa Lang La"
+    tabs:
+      - ten: "Thuoc"
+        mon:
+          - mau_id: 0          # Thuốc hồi máu nhỏ
+            gia: 100
+            tien: "vang"
+            options: []
+            la_moi: false
+          - mau_id: 1          # Thuốc hồi chakra nhỏ
+            gia: 100
+            tien: "vang"
+            options: []
+            la_moi: false
+
+      - ten: "Trang bi"
+        mon:
+          - mau_id: 2          # Áo ninja Làng Lá
+            gia: 1000
+            tien: "vang"
+            options: []
+            la_moi: true
+          - mau_id: 3          # Quần ninja Làng Lá
+            gia: 1000
+            tien: "vang"
+            options: []
+            la_moi: true
+          - mau_id: 4          # Kunai luyện tập — món duy nhất bán bằng ngọc
+            gia: 5
+            tien: "ngoc"
+            options: []
+            la_moi: false

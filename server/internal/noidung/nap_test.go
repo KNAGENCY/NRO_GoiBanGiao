@@ -228,11 +228,21 @@ func TestNap_LoaiTienLaBiTuChoi(t *testing.T) {
 	mongDoiLoi(t, van)
 }
 
-// TestNap_TruongGoNhamTenBiTuChoi: `sat_thuong` -> `sat_thuog`. Neu bo nap bo
-// qua truong la thi con so bi mat va thay bang 0 mot cach IM LANG.
+// TestNap_TruongGoNhamTenBiTuChoi: `he_so_phan_tram` -> `he_so_phan_tam`. Neu
+// bo nap bo qua truong la thi con so bi mat va thay bang 0 mot cach IM LANG.
 func TestNap_TruongGoNhamTenBiTuChoi(t *testing.T) {
 	van := khoThat(t)
-	doiMotLan(t, van, TenFileChieu, "            sat_thuong: 20\n", "            sat_thuog: 20\n")
+	doiMotLan(t, van, TenFileChieu, "            he_so_phan_tram: 20\n", "            he_so_phan_tam: 20\n")
+	mongDoiLoi(t, van)
+}
+
+// TestNap_TenTruongCuSatThuongBiTuChoi: KH8 §5.1 doi ten truong YAML tu
+// `sat_thuong` (nghe nhu so tuyet doi) sang `he_so_phan_tram` (noi ro la %).
+// Mot dong con dung ten cu phai bi KnownFields(true) tu choi voi thong diep
+// de hieu, khong duoc am tham doc thanh 0 (dot bien bat buoc #1, task 12).
+func TestNap_TenTruongCuSatThuongBiTuChoi(t *testing.T) {
+	van := khoThat(t)
+	doiMotLan(t, van, TenFileChieu, "            he_so_phan_tram: 20\n", "            sat_thuong: 20\n")
 	mongDoiLoi(t, van)
 }
 

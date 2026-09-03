@@ -31,6 +31,8 @@
 //	                              |                                          | hon la doc lech, KHONG bao loi.
 //	K3 hoi_chieu_ms boi 100ms     | Con so khong khop nhip actor              | Chieu hoi som/muon nua nhip mot cach ngau
 //	                              |                                          | nhien tuy luc bam — khong ai tai hien duoc.
+//	K3 he_so_phan_tram mien gia   | Trong (0), am, hoac go nham them so 0     | Chieu danh trung ma khong gay sat thuong
+//	tri (>0, <= 1000)             |                                          | (0/am) hoac sat thuong bat thuong (go nham).
 //	K3 ten tab <= 2 dong          | Ten tab ba dong                          | Tab hien ten RONG, khong bao loi.
 //	K3 ten option phai co '#'     | Ten option quen '#'                       | Nguoi choi thay dong chu tinh, khong thay con
 //	                              |                                          | so — khong loi, chi vo nghia.
@@ -442,6 +444,13 @@ func kiemK3TenTab(ds []CuaHang) error {
 // hien duoc.
 const NhipActorMs = 100
 
+// tranHeSoPhanTramChieu: tran tren cua he_so_phan_tram mot cap chieu. 1000 =
+// 10x sat thuong goc — du lieu hom nay cao nhat la 90 (10% pham vi tran nay),
+// nen tran khong lam bat cu YAML hien co nao do. Day la CHAN CHONG SO GO NHAM
+// (vd danh thua mot chu so 0: 900 thay vi 90), khong phai gioi han thiet ke
+// (viec chot muc can bang thuc su la task 13, khong phai task nay).
+const tranHeSoPhanTramChieu = 1000
+
 func kiemK3NhipChieu(du *DuLieu) error {
 	for iLang := range du.ChieuTheoLang {
 		for _, c := range du.ChieuTheoLang[iLang] {
@@ -460,6 +469,19 @@ func kiemK3NhipChieu(du *DuLieu) error {
 				if cap.ChakraDung < 0 {
 					return fmt.Errorf("lang %d chieu %q cap %d: chakra_dung am (%d)",
 						iLang, c.Ten, k+1, cap.ChakraDung)
+				}
+				if cap.HeSoPhanTram <= 0 {
+					return fmt.Errorf("lang %d chieu %q cap %d: he_so_phan_tram = %d, phai > 0 "+
+						"— day la PHAN TRAM cua sat thuong goc (satthuong.go, TinhSatThuong); bang 0 "+
+						"hoac am thi chieu danh trung ma khong bao gio gay duoc mot diem sat thuong nao, "+
+						"khong mot dong loi",
+						iLang, c.Ten, k+1, cap.HeSoPhanTram)
+				}
+				if cap.HeSoPhanTram > tranHeSoPhanTramChieu {
+					return fmt.Errorf("lang %d chieu %q cap %d: he_so_phan_tram = %d, vuot tran %d "+
+						"— tran nay la CHAN AN TOAN cho so lieu go nham (vd them thua mot so 0), khong phai "+
+						"y do can bang; %dx sat thuong goc la muc da qua bat thuong cho MOT chieu don le",
+						iLang, c.Ten, k+1, cap.HeSoPhanTram, tranHeSoPhanTramChieu, tranHeSoPhanTramChieu/100)
 				}
 				if cap.NhanLucCan < 0 {
 					return fmt.Errorf("lang %d chieu %q cap %d: nhan_luc_can am (%d)",

@@ -19,10 +19,10 @@ func khoDuLieuThuNghiem(g int) *DuLieu {
 			caps := make([]CapChieu, 0, 4)
 			for c := 0; c < 4; c++ {
 				caps = append(caps, CapChieu{
-					SkillId:   int16(g),
-					Diem:      byte(c + 1),
-					SatThuong: int16(g),
-					Gia:       int16(g),
+					SkillId:      int16(g),
+					Diem:         byte(c + 1),
+					HeSoPhanTram: int16(g),
+					Gia:          int16(g),
 				})
 			}
 			chieu = append(chieu, Chieu{
@@ -82,7 +82,7 @@ func theHeTrongDuLieu(a *anhChup) map[int]bool {
 		for _, c := range a.ChieuCuaLang(lang) {
 			thay[khoDuoiG(c.Ten)] = true
 			for _, cc := range c.CacCap {
-				thay[int(cc.SatThuong)] = true
+				thay[int(cc.HeSoPhanTram)] = true
 			}
 		}
 	}
@@ -221,14 +221,14 @@ func TestKhoNguoiGoiSuaKetQuaKhongLamBanAnhChup(t *testing.T) {
 	}
 	ds[0].Ten = "BI SUA"
 	ds[0].CapToiDa = 99
-	ds[0].CacCap[0].SatThuong = 12345
+	ds[0].CacCap[0].HeSoPhanTram = 12345
 	ds = append(ds, Chieu{TemplateId: 200})
 
 	lai := a.ChieuCuaLang(0)
 	if lai[0].Ten == "BI SUA" || lai[0].CapToiDa == 99 {
 		t.Error("ChieuCuaLang: sua lop ngoai lam ban anh chup")
 	}
-	if lai[0].CacCap[0].SatThuong == 12345 {
+	if lai[0].CacCap[0].HeSoPhanTram == 12345 {
 		t.Error("ChieuCuaLang: sua CacCap lam ban anh chup (sao chep NONG)")
 	}
 	if len(lai) != len(ds)-1 {

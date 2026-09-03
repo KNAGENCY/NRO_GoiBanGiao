@@ -274,6 +274,28 @@ func TestKiem_HoiChieuLechNhipActor(t *testing.T) {
 	}
 }
 
+// TestKiem_HeSoPhanTramBang0: mot cap chieu he_so_phan_tram = 0 -> chieu danh
+// trung ma khong bao gio gay sat thuong (dot bien bat buoc #2, task 12).
+func TestKiem_HeSoPhanTramBang0(t *testing.T) {
+	van := khoThat(t)
+	doiMotLan(t, van, TenFileChieu, "            he_so_phan_tram: 20\n", "            he_so_phan_tram: 0\n")
+	err := mongDoiLoi(t, van)
+	if !strings.Contains(err.Error(), "he_so_phan_tram") {
+		t.Errorf("loi bao %q — mong doi noi ve he_so_phan_tram", err)
+	}
+}
+
+// TestKiem_HeSoPhanTramVuotTran: go nham them mot chu so 0 (90 -> 900) phai bi
+// tu choi thay vi lang le nap mot chieu manh gap 10 lan du dinh.
+func TestKiem_HeSoPhanTramVuotTran(t *testing.T) {
+	van := khoThat(t)
+	doiMotLan(t, van, TenFileChieu, "            he_so_phan_tram: 90\n", "            he_so_phan_tram: 9000\n")
+	err := mongDoiLoi(t, van)
+	if !strings.Contains(err.Error(), "he_so_phan_tram") {
+		t.Errorf("loi bao %q — mong doi noi ve he_so_phan_tram", err)
+	}
+}
+
 // TestKiem_SkillIdTrungGiuaHaiLang: nap.go chi kiem trung TRONG mot lang. Client
 // tra cuu chieu bang skillId khong kem theo lang, nen trung giua hai lang cung
 // la mot chieu "an mat" chieu kia.

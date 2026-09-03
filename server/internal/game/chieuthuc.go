@@ -39,11 +39,19 @@ type CapChieu struct {
 	Diem       byte  // point: so thu tu cap (1, 2, 3, ...)
 	NhanLucCan int64 // powRequire — LONG 8 BYTE, truong duy nhat trong ca khuon
 	// dung 8 byte; nham thanh int (4 byte) se lech byte moi cap ve sau (bay §3.7.1).
-	ChakraDung   int16 // manaUse
-	HoiChieuMs   int32 // coolDown, mili-giay
-	Dx, Dy       int16 // tam danh (client doc ca hai, dung chung 1 gia tri tam)
-	MaxFight     byte
-	SatThuong    int16  // damage — cung truong nay ban Java tai su dung lam "luong hoi mau" cho chieu type=2
+	ChakraDung int16 // manaUse
+	HoiChieuMs int32 // coolDown, mili-giay
+	Dx, Dy     int16 // tam danh (client doc ca hai, dung chung 1 gia tri tam)
+	MaxFight   byte
+	// SatThuong: "damage" trong khuon goi -28/7 — ten Go giu nguyen vi khuon
+	// byte da ghim (w.Short(c.SatThuong), ghiMauChieu duoi day). Y NGHIA da
+	// CHOT o dac ta KH8 §5.1: day la PHAN TRAM cua sat thuong goc nguoi dung
+	// (100 = he so 1.0), KHONG PHAI so tuyet doi — xem satthuong.go
+	// (TinhSatThuong). Trong kho noi dung YAML truong tuong ung ten la
+	// `he_so_phan_tram` (noidung.go); anh xa hai ten nam o bo nap
+	// (khochieu.go, noidungyaml.go). Cung truong nay ban Java tai su dung lam
+	// "luong hoi mau" cho chieu type=2.
+	SatThuong    int16
 	Gia          int16  // price
 	ThemThongTin string // moreInfo
 }

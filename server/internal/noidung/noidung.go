@@ -92,15 +92,20 @@ const (
 // byte -28/7 (game/chieuthuc.go, ghiMauChieu) — nhung THU TU byte do goi `game`
 // quyet dinh, khong phai file YAML.
 type CapChieu struct {
-	SkillId      int16  `yaml:"skill_id"`
-	Diem         byte   `yaml:"diem"`
-	NhanLucCan   int64  `yaml:"nhan_luc_can"`
-	ChakraDung   int16  `yaml:"chakra_dung"`
-	HoiChieuMs   int32  `yaml:"hoi_chieu_ms"`
-	Dx           int16  `yaml:"dx"`
-	Dy           int16  `yaml:"dy"`
-	MaxFight     byte   `yaml:"max_fight"`
-	SatThuong    int16  `yaml:"sat_thuong"`
+	SkillId    int16 `yaml:"skill_id"`
+	Diem       byte  `yaml:"diem"`
+	NhanLucCan int64 `yaml:"nhan_luc_can"`
+	ChakraDung int16 `yaml:"chakra_dung"`
+	HoiChieuMs int32 `yaml:"hoi_chieu_ms"`
+	Dx         int16 `yaml:"dx"`
+	Dy         int16 `yaml:"dy"`
+	MaxFight   byte  `yaml:"max_fight"`
+	// HeSoPhanTram: don vi CHOT o dac ta KH8 §5.1 la PHAN TRAM cua sat thuong
+	// goc nguoi dung (100 = he so 1.0), KHONG PHAI so tuyet doi cong don — xem
+	// game/satthuong.go (TinhSatThuong) noi cong thuc dung no. Doi ten truong
+	// nay khoi YAML se lam bo nap (KnownFields(true)) tu choi ten cu
+	// `sat_thuong` voi thong bao ro rang, khong im lang doc thanh 0.
+	HeSoPhanTram int16  `yaml:"he_so_phan_tram"`
 	Gia          int16  `yaml:"gia"`
 	ThemThongTin string `yaml:"them_thong_tin"`
 }

@@ -156,15 +156,19 @@ func khoChieuMacDinh() khoChieuAnhChup {
 
 func capChieuTuNoiDung(c noidung.CapChieu) CapChieu {
 	return CapChieu{
-		SkillId:      c.SkillId,
-		Diem:         c.Diem,
-		NhanLucCan:   c.NhanLucCan,
-		ChakraDung:   c.ChakraDung,
-		HoiChieuMs:   c.HoiChieuMs,
-		Dx:           c.Dx,
-		Dy:           c.Dy,
-		MaxFight:     c.MaxFight,
-		SatThuong:    c.SatThuong,
+		SkillId:    c.SkillId,
+		Diem:       c.Diem,
+		NhanLucCan: c.NhanLucCan,
+		ChakraDung: c.ChakraDung,
+		HoiChieuMs: c.HoiChieuMs,
+		Dx:         c.Dx,
+		Dy:         c.Dy,
+		MaxFight:   c.MaxFight,
+		// SatThuong (truong Go, khuon goi -28/7 da ghim) <- HeSoPhanTram (truong
+		// noi dung, dac ta KH8 §5.1): cung mot con so, hai ten o hai tang khac
+		// nhau — tang goi tin giu ten cu vi doi se doi ca khuon byte, tang noi
+		// dung doi ten de noi dung la % chu khong phai sat thuong tuyet doi.
+		SatThuong:    c.HeSoPhanTram,
 		Gia:          c.Gia,
 		ThemThongTin: c.ThemThongTin,
 	}

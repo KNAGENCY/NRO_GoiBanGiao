@@ -7,11 +7,13 @@
 //
 // satThuongGoc tinh tu chi so nhan vat, truyen vao qua tham so goc (KHONG
 // phai viec cua file nay). heSoChieu doc tu du lieu chieu: truong
-// CapChieu.SatThuong duoc dung nhu PHAN TRAM cua sat thuong goc (100 = he so
-// 1.0), khong phai cong don — day la "damage trong catalog" ma dac ta noi
-// toi, moi thu dac thu tung chieu nam trong DU LIEU (chuan bi cho KH8), code
-// khong biet ten chieu nao ca. heSoChiMang la 2x neu chi mang, nguoc lai 1x.
-// heSoHeNguyenTo xem ham HeSoNguyenTo ben duoi.
+// CapChieu.SatThuong la PHAN TRAM cua sat thuong goc (100 = he so 1.0),
+// KHONG PHAI cong don — CHOT o dac ta KH8 §5.1, xem chu thich tai
+// TinhSatThuong ben duoi. Trong kho noi dung YAML truong nay ten la
+// `he_so_phan_tram` (noidung.go); truong Go o day giu ten `SatThuong` vi khop
+// khuon goi tin -28/7 da ghim (chieuthuc.go). Moi thu dac thu tung chieu nam
+// trong DU LIEU, code khong biet ten chieu nao ca. heSoChiMang la 2x neu chi
+// mang, nguoc lai 1x. heSoHeNguyenTo xem ham HeSoNguyenTo ben duoi.
 package game
 
 // Nam hang so he nguyen to — gia tri chinh la CHI SO trong VONG KHAC CHE
@@ -80,15 +82,19 @@ const (
 // chieu la con tro CapChieu (Task 1, chieuthuc.go) — ham nay CHI doc truong
 // SatThuong (du lieu), KHONG biet chieu ten gi, khong switch theo ten chieu.
 func TinhSatThuong(goc int64, chieu *CapChieu, heNguoiDanh, heMucTieu byte, chiMang bool) int32 {
-	// heSoChieu: SatThuong cua cap chieu la PHAN TRAM cua sat thuong goc.
+	// heSoChieu: DA CHOT (KH8 §5.1, dac ta
+	// docs/superpowers/specs/2026-09-03-kh8-kho-noi-dung-design.md) — SatThuong
+	// cua cap chieu (chieuthuc.go, truong Go giu ten cu vi khop khuon goi tin
+	// -28/7 da ghim; noi dung YAML goi no la `he_so_phan_tram`, xem noidung.go)
+	// la PHAN TRAM cua sat thuong goc, 100 = he so 1.0, KHONG PHAI cong don.
+	// Ket qua phep chia nguyen nay lam tron XUONG — cong thuc nay KHONG doi
+	// nua, sua no la sua LUAT choi.
 	//
-	// TODO(KH8 - can bang so lieu): day la DIEN GIAI TAM THOI, CHUA duoc chu
-	// du an chot. Du lieu Task 1 (chieuthuc.go, taoCapChieu: "dameGoc := 20 +
-	// slot*10") trong GIONG sat thuong TUYET DOI hon la phan tram — KH8 phai
-	// chot lai don vi that su cua truong nay voi chu du an. Neu chot la sat
-	// thuong tuyet doi (cong don, khong nhan phan tram), sua CONG THUC ngay
-	// tai day (dong duoi) — chu ky ham TinhSatThuong va phan he nguyen to
-	// (HeSoNguyenTo, heSoNguyenToPhanTram) KHONG doi.
+	// HE QUA DA DO (KH8 task 11, xem BAT-DAU-TU-DAY.md §5): voi so lieu KHOI
+	// DAU hom nay, sat thuong goc nguoi choi cap 1 chi 10..16 (lang.go,
+	// SatThuongKhoiDau) nhan he so % nho (vd 20) roi lam tron xuong -> mot don
+	// chi con 2-3 mau. Day la NO CAN BANG SO LIEU (KH8 task 13), khong phai
+	// loi cong thuc — dung chinh sua cong thuc de bit no nay, chinh CON SO.
 	ketQua := goc * int64(chieu.SatThuong) / 100
 
 	// heSoHeNguyenTo: nhan roi chia 100, van la so nguyen.

@@ -504,6 +504,13 @@ Gom lại thành **Kế hoạch B**, sửa lẻ từng cái là vô nghĩa:
   một bản byte vàng của danh mục hiện tại trước khi chuyển.
 - **Script Python gọi `subprocess` trên Windows phải đặt `encoding="utf-8"`** — mặc định GBK, output git có tiếng
   Việt làm sập luồng đọc (03/09, script nhật ký của điều phối). Đã xảy ra một lần, bỏ sót một dòng nhật ký phải bù.
+- **Test KHÔNG được `time.Sleep` rồi đọc thẳng trường của `BoXuLy`** — lần `go test -race` đầu tiên (03/09, sau khi
+  có w64devkit) bắt `TestNhanClientOk` đọc `b.clientSanSang` trong khi goroutine phiên đang ghi (`login.go:490`).
+  Mã sản xuất ĐÚNG (chỉ goroutine phiên ghi); lỗi ở test. Cách đúng: `dungPhienThat` nay trả `dong()` **đóng ống
+  rồi ĐỢI `PhucVu` thoát** (hạn 5s, `sync.Once`) — `net.Pipe` đồng bộ nên `WriteMessage` trả về là phiên đã đọc
+  xong khung; gọi `dong()` trước khi đọc trường = happens-before thật. Sửa ở `afda280`. Test đo thời gian
+  (`rothoigian_test.go`) **bỏ qua dưới race** qua cặp `race_bat.go`/`race_tat.go` (`raceEnabled`) — dưới race
+  PBKDF2 chậm ~10× nên nhiễu 2,8ms > ngưỡng 1ms, là dụng cụ đo bị nhiễu chứ không phải rò rỉ.
 
 - **Bộ chạy đột biến PHẢI có timeout từng con, và đừng chờ "mọi python.exe tắt".** 02/09 agent soi (Opus) chạy 28 đột biến bằng `subprocess.run` **không timeout** + vòng `until ! tasklist … python.exe` → kẹt **19 giờ** trong khi 8/28 kết quả đã nằm sẵn trong file output. Treo **không** do đột biến M9 (chạy lại xong 104s) mà nghi do PostgreSQL rớt lúc 21:50 + kết nối CSDL `context.Background()` không hạn giờ (nợ ngay dưới). Người điều phối: **đọc output tiến trình con trước khi kết luận agent kẹt**.
 - **Agent model rẻ (Sonnet / Explore) hay làm xong mà KHÔNG commit** — 02/09 hai lần liên tiếp: agent Explore không có quyền `git commit` (đúng vai chỉ-đọc), agent Sonnet task 14 thì quên. Việc không mất (nằm trong worktree) nhưng người điều phối phải **kiểm `git status` trong worktree** trước khi tin báo cáo, và commit thay. Brief cho model rẻ nên nói thẳng *"bước cuối: `git add -A && git commit`, báo lại hash"*.

@@ -1,10 +1,20 @@
-// mauvatpham.go — DANH MUC MAU vat pham + bo dung goi -28/8 subtype 0 va 1
-// (KH7 Task 2). Du lieu THUAN Go, cung cach noidungboss.go da lam voi boss.
+// mauvatpham.go — CUA cua goi `game` di vao MAU VAT PHAM + MAU OPTION cua kho
+// noi dung, va bo dung goi -28/8 subtype 0 va 1.
 //
-// VI SAO DU LIEU NAM TRONG Go CHU KHONG PHAI catalog.json: catalog.json bi ghim
-// SHA trong asset-lock.json (catalog.go, lockHashKhop). Them mau vat pham vao do
-// la lam do test khop artifact va phai ky lai mot artifact da ky. Bay §7.6 cua
-// dac ta khuyen nghi duong (a) — de trong file Go rieng. Day la duong da chon.
+// # CAI GI DOI O KH8 TASK 4
+//
+// Truoc task nay du lieu la THUAN Go: hai bien toan cuc danhSachMauOption /
+// danhSachMauVatPham, song song voi kho-noi-dung/vat-pham.yaml. Hai ban so lieu
+// cho cung mot su that.
+//
+// Tu task nay chi con MOT ban: vat-pham.yaml. Hai bang Go DA BI XOA. Ba cua tra
+// cuu (DanhSachMauOption, DanhSachMauVatPham, TimMauVatPham) doc tu ANH CHUP
+// kho noi dung — mac dinh la ban NHUNG (cung sync.Once cua task 3, khochieu.go),
+// hoac mot anh chup tiem vao khi nguoi goi dua san.
+//
+// VI SAO KHONG PHAI catalog.json: catalog.json bi ghim SHA trong asset-lock.json
+// (catalog.go, lockHashKhop). Do la ly do KH7 khong dat du lieu vao do; KH8 dat
+// vao kho noi dung YAML, mot cho khac han, khong dung toi asset lock.
 //
 // ⚠️ MOI CON SO O DAY DEU TRUY DUOC VE MOT NGUON. Nguon giai ma khuon byte:
 // docs/superpowers/research/2026-09-03-kh7-giai-ma-28-8.md (PHA A GATE).
@@ -91,91 +101,71 @@ const (
 )
 
 // ---------------------------------------------------------------------------
-// 3. Bang mau option — CHI THEM VAO CUOI
+// 3. Ba cua tra cuu — DOC TU ANH CHUP KHO NOI DUNG
 // ---------------------------------------------------------------------------
+//
+// ⚠️ KH8 TASK 4 DA XOA HAI BANG GO (`danhSachMauOption`, `danhSachMauVatPham`).
+// Nguon duy nhat bay gio la kho-noi-dung/vat-pham.yaml. Nghia la dot bien "sua
+// bang Go cho lech YAML" KHONG THE VIET DUOC NUA — khong con bang nao de sua.
+//
+// Ba cua duoi day co doi: mot ban KHONG THAM SO doc anh chup MAC DINH (ban
+// nhung, dung sync.Once cua task 3 — mot bo nap duy nhat cho ca goi), va mot
+// ban `…Tu(ac)` nhan MOT anh chup da cam san. Trong actor phai dung ban `…Tu`
+// voi `k.anhChupNoiDung()` de ca nhip chay tron mot the he (hop dong o
+// internal/noidung/kho.go). Hom nay KHONG co cho goi nao nam trong actor — moi
+// loi goi deu tren goroutine phien hoac goroutine tho — nen ban khong tham so
+// van dung; xem bang liet ke o dau §5.
 
-// Chi so 6 va 7 KHONG duoc doi y nghia: client bam cung 22->6 va 23->7 voi
-// param x1000 (ItemOption.cs:29-38). Neu 6/7 khong phai "tang HP"/"tang chakra"
-// thi mot mon do co option 22/23 se hien sai hoan toan ma khong bao gi.
-var danhSachMauOption = []MauOption{
-	0: {Ten: "Hồi phục # HP", Loai: 0},
-	1: {Ten: "Hồi phục # chakra", Loai: 0},
-	2: {Ten: "Tăng # sức đánh", Loai: 0},
-	3: {Ten: "Tăng # giáp", Loai: 0},
-	4: {Ten: "Tăng # chính xác", Loai: 0},
-	5: {Ten: "Tăng # né đòn", Loai: 0},
-	6: {Ten: "Tăng # HP", Loai: 0},     // ⚠️ dich cua option id 22 (param x1000)
-	7: {Ten: "Tăng # chakra", Loai: 0}, // ⚠️ dich cua option id 23 (param x1000)
-}
+// khoVatPhamMacDinh la CUA lay anh chup mac dinh. La mot BIEN chu khong phai ham
+// de test cam duoc mot kho khac (vi du them mot mau Loai == 5 de thu nhanh
+// coPart) MA KHONG dung lai mot bang Go thu hai — test van phai dung
+// noidung.NapNhung + noidung.MoKho, tuc van la du lieu YAML.
+var khoVatPhamMacDinh = func() khoVatPhamAnhChup { return khoChieuMacDinh() }
 
 // DanhSachMauOption tra bang mau option. Chi so = id option gui trong goi vat pham.
-func DanhSachMauOption() []MauOption { return danhSachMauOption }
+func DanhSachMauOption() []MauOption { return mauOptionTu(khoVatPhamMacDinh()) }
 
-// ---------------------------------------------------------------------------
-// 4. Danh muc mau vat pham — KHOI DAU, du de chay dau-cuoi
-// ---------------------------------------------------------------------------
-//
-// Day la "vai mau toi thieu de chay duoc dau-cuoi", dung tinh than §9 dac ta:
-// don gia / danh muc hang NPC / ti le roi / chi so option thuoc KH8. Cac con so
-// duoi day la KHOI DAU do nguoi viet dat, KHONG phai trich tu ban Java —
-// ban Java la game Dragon Ball, day la game Naruto.
-//
-// GIA DINH con no bang chung (task 13 nghiem thu tay se tra loi):
-//   - Loai 0..5 = trang bi mac tren nguoi: SUY RA tu Item.isTypeBody
-//     (Item.cs:271-278). Loai 6 chon lam "do tieu hao" vi no NAM NGOAI dai do —
-//     chua doi chieu duoc voi mot cho nao trong client noi ro "6 la thuoc".
-//   - GioiTinh = 3 nghia la "moi gioi": quy uoc ban goc, chua xac minh o client.
-//   - IconID = 0 cho TAT CA: bang SmallImage phia client hien dang RONG
-//     (goiCatalogData gui blob "image" count=0, dongbo.go:79-82). Bay §7.7.
-//     SmallImage.drawSmallImage KHONG sap khi thieu anh — no goi createImage(id)
-//     roi tra ve (SmallImage.cs:151-161) — nen o icon chi TRONG, khong vo game.
-//     Sua khi co bo icon di qua quy trinh my thuat + asset lock.
-//   - Phan = -1 nghia la "khong ve manh nao len nguoi". Ba mon trang bi duoi day
-//     de -1 vi bo manh do vat pham CHUA co trong part.bin da khoa SHA; dat mot
-//     so bua se ve nham manh nguoi choi len nguoi.
-var danhSachMauVatPham = []MauVatPham{
-	0: {
-		Loai: 6, GioiTinh: 3,
-		Ten: "Thuốc hồi máu nhỏ", MoTa: "Hồi 200 HP. Dùng được khi đang di chuyển.",
-		Cap: 1, YeuCauSuc: 0, IconID: 0, Phan: -1, NangCapDuoc: false,
-		TranChong: 99,
-	},
-	1: {
-		Loai: 6, GioiTinh: 3,
-		Ten: "Thuốc hồi chakra nhỏ", MoTa: "Hồi 200 chakra.",
-		Cap: 1, YeuCauSuc: 0, IconID: 0, Phan: -1, NangCapDuoc: false,
-		TranChong: 99,
-	},
-	2: {
-		Loai: 0, GioiTinh: 3,
-		Ten: "Áo ninja Làng Lá", MoTa: "Áo tập của học viện Làng Lá.",
-		Cap: 1, YeuCauSuc: 0, IconID: 0, Phan: -1, NangCapDuoc: true,
-		TranChong: 1, // co option -> BAT BUOC don chiec (rang buoc CSDL task 1)
-	},
-	3: {
-		Loai: 1, GioiTinh: 3,
-		Ten: "Quần ninja Làng Lá", MoTa: "Quần tập của học viện Làng Lá.",
-		Cap: 1, YeuCauSuc: 0, IconID: 0, Phan: -1, NangCapDuoc: true,
-		TranChong: 1,
-	},
-	4: {
-		Loai: 2, GioiTinh: 3,
-		Ten: "Kunai luyện tập", MoTa: "Kunai cùn dùng để tập ném.",
-		Cap: 1, YeuCauSuc: 0, IconID: 0, Phan: -1, NangCapDuoc: true,
-		TranChong: 1,
-	},
+// mauOptionTu doi bang mau option cua MOT anh chup sang kieu cua goi `game`.
+func mauOptionTu(ac khoVatPhamAnhChup) []MauOption {
+	ds := ac.MauOption()
+	ra := make([]MauOption, 0, len(ds))
+	for _, o := range ds {
+		ra = append(ra, mauOptionTuNoiDung(o))
+	}
+	return ra
 }
 
 // DanhSachMauVatPham tra ca danh muc. Chi so = templateId gui xuong client.
-func DanhSachMauVatPham() []MauVatPham { return danhSachMauVatPham }
+func DanhSachMauVatPham() []MauVatPham { return mauVatPhamTu(khoVatPhamMacDinh()) }
+
+// mauVatPhamTu doi danh muc mau vat pham cua MOT anh chup sang kieu goi `game`.
+func mauVatPhamTu(ac khoVatPhamAnhChup) []MauVatPham {
+	ds := ac.MauVatPham()
+	ra := make([]MauVatPham, 0, len(ds))
+	for _, m := range ds {
+		ra = append(ra, mauVatPhamTuNoiDung(m))
+	}
+	return ra
+}
 
 // TimMauVatPham tra mau theo id, nil neu ngoai mien. MOI cho tra cuu mau phai
 // di qua ham nay — id den tu client hoac tu CSDL deu co the ngoai mien (bay §7.11).
-func TimMauVatPham(id int16) *MauVatPham {
-	if id < 0 || int(id) >= len(danhSachMauVatPham) {
+func TimMauVatPham(id int16) *MauVatPham { return timMauVatPhamTu(khoVatPhamMacDinh(), id) }
+
+// timMauVatPhamTu tra ve CON TRO toi mot BAN SAO MOI (khong phai vao anh chup):
+// nguoi goi lo ghi vao ket qua cung khong lam ban so lieu dang cong bo. Truoc
+// task 4 ham nay tra con tro vao bang Go toan cuc — mot cu ghi la doi mon do cua
+// moi nguoi choi.
+func timMauVatPhamTu(ac khoVatPhamAnhChup, id int16) *MauVatPham {
+	if id < 0 {
 		return nil
 	}
-	return &danhSachMauVatPham[id]
+	m, co := ac.TimMauVatPham(int(id))
+	if !co {
+		return nil
+	}
+	ra := mauVatPhamTuNoiDung(m)
+	return &ra
 }
 
 // ---------------------------------------------------------------------------

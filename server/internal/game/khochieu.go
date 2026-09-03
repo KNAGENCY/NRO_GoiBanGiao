@@ -59,8 +59,22 @@ import (
 	"nroserver/internal/noidung"
 )
 
+// khoVatPhamAnhChup la phan MAU VAT PHAM / MAU OPTION cua mot anh chup noi dung
+// (KH8 task 4). Tach rieng khoi phan chieu vi hai vung so lieu doc lap nhau:
+// mot ham chi tra cuu vat pham thi nhan interface nay, doc chu ky la biet no
+// KHONG dung toi chieu.
+type khoVatPhamAnhChup interface {
+	MauOption() []noidung.MauOption
+	MauVatPham() []noidung.MauVatPham
+	TimMauVatPham(id int) (noidung.MauVatPham, bool)
+}
+
 // khoChieuAnhChup la phan cua mot anh chup noi dung ma goi `game` dung.
 // *noidung.anhChup (kieu khong xuat khau, tra ve boi Kho.AnhChup) thoa man no.
+//
+// KH8 task 4 NHUNG khoVatPhamAnhChup vao day thay vi tao mot nguon thu hai:
+// nguonNoiDung (va khuvuc.acNhip) da mang kieu nay roi, nen mot NGUON TIEM VAO
+// duy nhat phuc vu ca chieu lan vat pham — hai nguon la hai the he lech nhau.
 type khoChieuAnhChup interface {
 	ChieuCuaLang(idLang byte) []noidung.Chieu
 	TraCapChieu(idLang, templateId, cap byte) (noidung.CapChieu, bool)
@@ -72,6 +86,11 @@ type khoChieuAnhChup interface {
 	Quai(ma string) (noidung.MauQuai, bool)
 	DanhSachQuai() []noidung.MauQuai
 	SinhQuaiCuaMap(mapID int32) []noidung.DiemSinhQuai
+
+	// Phan MAU VAT PHAM / OPTION (KH8 task 4) — cung ly do nhu quai: MOT nguon
+	// tiem, MOT anh chup moi nhip. (Hai task lam song song cung mo rong interface
+	// nay -> xung dot gop 03/09, dieu phoi giu CA HAI.)
+	khoVatPhamAnhChup
 }
 
 // nguonNoiDung boc mot ham lay anh chup. La mot STRUCT (khong phai ham tran)

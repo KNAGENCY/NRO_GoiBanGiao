@@ -825,11 +825,17 @@ func TestCanBang_GoldenSoHienTai(t *testing.T) {
 		nguoiChet     bool
 		nhipThat      int
 	}{
-		{"Làng Lá", 2, 491, true, 191},
-		{"Làng Cát", 2, 491, true, 121},
-		{"Làng Sương Mù", 3, 331, true, 161},
-		{"Làng Đá", 2, 491, true, 321},
-		{"Làng Mây", 2, 491, true, 151},
+		// Cap nhat o KH8 task 13 (vong can bang). Truoc do: mot don 2-3 mau,
+		// giet thuan 33-49 giay, va CA NAM lang deu CHET o kich ban that. Sau
+		// khi nang sat_thuong_khoi_dau (10..16 -> 50..60, de phep lam tron
+		// xuong khong nuot het chenh lech lang) va hp_khoi_dau (100..250 ->
+		// 160..220): mot don 10-12 mau, giet thuan 8,1-9,1 giay, khong lang
+		// nao chet nua.
+		{"Làng Lá", 11, 91, false, 91},
+		{"Làng Cát", 10, 91, false, 91},
+		{"Làng Sương Mù", 12, 81, false, 81},
+		{"Làng Đá", 10, 91, false, 91},
+		{"Làng Mây", 11, 91, false, 91},
 	}
 	if len(kq.D1) != len(mongD1) {
 		t.Fatalf("co %d lang, golden ghim %d", len(kq.D1), len(mongD1))
@@ -854,16 +860,31 @@ func TestCanBang_GoldenSoHienTai(t *testing.T) {
 		}
 	}
 
-	if kq.D4.VangKyVongMoiCon != 3.75 {
-		t.Errorf("D4 ky vong vang moi con = %v, golden 3,75", kq.D4.VangKyVongMoiCon)
+	// 3,75 -> 5,00: ti le roi cua soi-rung nang 10%/5% -> 12%/8% (task 13, de
+	// moc "ao 1000 vang" roi tu 40 phut xuong ~30 phut, giua khung 20-40).
+	if kq.D4.VangKyVongMoiCon != 5.0 {
+		t.Errorf("D4 ky vong vang moi con = %v, golden 5,00", kq.D4.VangKyVongMoiCon)
 	}
 	if kq.D4.GiaAo != 1000 {
 		t.Errorf("D4 gia ao = %d, golden 1000", kq.D4.GiaAo)
 	}
-	if kq.D2.HpBoss != 3000 {
-		t.Errorf("D2 hp boss = %d, golden 3000", kq.D2.HpBoss)
+	// 3000 -> 4500 (hp_chon pha 1 nang len, task 13).
+	if kq.D2.HpBoss != 4500 {
+		t.Errorf("D2 hp boss = %d, golden 4500", kq.D2.HpBoss)
 	}
-	if kq.D2.BossChet {
-		t.Error("D2 golden hien tai: KHONG ha noi boss - nay lai ha duoc, hay cap nhat golden")
+	// DAO CHIEU o task 13: truoc day 5 nguoi KHONG ha noi boss (guc sau 51
+	// giay, boss con 2708/3000). Sau khi ha dame boss 60 -> 15, ho ha duoc
+	// trong 2 phut 2,5 giay, con 2/5 nguoi song, va CA HAI moc noi gian chay.
+	if !kq.D2.BossChet {
+		t.Error("D2 golden hien tai: HA DUOC boss - nay lai khong ha noi, hay cap nhat golden")
+	}
+	if kq.D2.Nhip != 1225 {
+		t.Errorf("D2 so nhip ha boss = %d, golden 1225 (2 phut 2,5 giay)", kq.D2.Nhip)
+	}
+	if kq.D2.SoNguoiSong != 2 {
+		t.Errorf("D2 con song = %d, golden 2/5", kq.D2.SoNguoiSong)
+	}
+	if kq.D2.SoLanNoiGian != 2 {
+		t.Errorf("D2 so lan noi gian = %d, golden 2", kq.D2.SoLanNoiGian)
 	}
 }

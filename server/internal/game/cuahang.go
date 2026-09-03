@@ -77,6 +77,12 @@ type MonHang struct {
 	MauID int16
 	// Gia >= 0 va <= math.MaxInt32 (o la int 4 byte co dau).
 	Gia int32
+	// GiaBanLai la gia NPC tra khi nguoi choi ban lai mon nay (KH8 task 5).
+	// TUONG MINH tung mon, khong con la cong thuc Gia/4 trong code. KHONG di
+	// xuong client: goi -44 khong co o nao chua gia ban (xem tai lieu giai ma
+	// 2026-09-03-kh7-giai-ma-44.md) — client hoi gia ban bang goi `7` vong mot.
+	// Bo kiem kho noi dung khang dinh 0 <= GiaBanLai <= Gia.
+	GiaBanLai int32
 	// Tien: vang hay ngoc. O con lai ghi 0.
 	Tien LoaiTien
 	// Options: option gan san. Rong = mon do tho.
@@ -106,50 +112,66 @@ type CuaHang struct {
 }
 
 // ---------------------------------------------------------------------------
-// Danh muc cua hang mau
+// Danh muc cua hang — DOC TU ANH CHUP KHO NOI DUNG (KH8 task 5)
 // ---------------------------------------------------------------------------
-
-// cuaHangTapHoaLangLa: cua hang mau toi thieu de chay dau-cuoi. Cac mon lay tu
-// danh muc mau task 2 (mauvatpham.go): 0/1 la thuoc, 2/3/4 la trang bi khoi dau.
 //
-// GIA DINH con no bang chung: don gia duoi day la KHOI DAU do nguoi viet dat,
-// KHONG trich tu ban Java (ban Java la game Dragon Ball). Can bang kinh te
-// thuoc KH8, khong phai task nay.
-var cuaHangTapHoaLangLa = CuaHang{
-	ID: 1, Ten: "Tap hoa Lang La",
-	Tabs: []TabCuaHang{
-		{
-			Ten: "Thuoc",
-			Mon: []MonHang{
-				{MauID: 0, Gia: 100, Tien: TienVang},
-				{MauID: 1, Gia: 100, Tien: TienVang},
-			},
-		},
-		{
-			Ten: "Trang bi",
-			Mon: []MonHang{
-				{MauID: 2, Gia: 1000, Tien: TienVang, LaMoi: true},
-				{MauID: 3, Gia: 1000, Tien: TienVang, LaMoi: true},
-				{MauID: 4, Gia: 5, Tien: TienNgoc},
-			},
-		},
-	},
+// ⚠️ HAI BANG GO (`cuaHangTapHoaLangLa`, `danhSachCuaHang`) DA BI XOA. Nguon duy
+// nhat bay gio la kho-noi-dung/cua-hang.yaml. Dot bien "sua bang Go cho lech
+// YAML" khong con viet duoc — khong con bang nao de sua.
+//
+// Doi cua, cung khuon voi mauvatpham.go (task 4) va lang.go (task 6): mot ban
+// KHONG THAM SO doc anh chup MAC DINH (ban nhung, dung chung sync.Once cua
+// task 3), mot ban `…Tu(ac)` nhan anh chup da cam san.
+//
+// KHONG co diem goi nao nam trong actor: ca hai duong goi (mo NPC tren goroutine
+// phien, va cong tu quan tri) deu ngoai nhip actor — nen ban khong tham so du
+// dung. Xem bang diem goi o dau muaban.go.
+
+// khoCuaHangMacDinh la CUA lay anh chup mac dinh. La mot BIEN chu khong phai ham
+// de test cam duoc mot kho khac MA VAN la du lieu YAML (noidung.Nap + MoKho),
+// khong dung lai mot bang Go thu hai.
+var khoCuaHangMacDinh = func() khoChieuAnhChup { return khoChieuMacDinh() }
+
+// DanhSachCuaHang tra toan bo cua hang NPC dang co, doc tu anh chup mac dinh.
+func DanhSachCuaHang() []CuaHang { return cuaHangTu(khoCuaHangMacDinh()) }
+
+// cuaHangTu doi toan bo cua hang cua MOT anh chup sang kieu cua goi `game`.
+//
+// Mon co `tien` la mot chuoi la thi BO QUA CA CUA HANG do (khong am tham doi
+// thanh vang): bo kiem kho noi dung da chan tu luc nap, nen den duoc day nghia
+// la ai do da lach cua nap — im lang bien mot cai gia bang ngoc thanh gia bang
+// vang la mat tien that cua nguoi choi.
+func cuaHangTu(ac khoChieuAnhChup) []CuaHang {
+	ds := ac.DanhSachCuaHang()
+	ra := make([]CuaHang, 0, len(ds))
+	for _, ch := range ds {
+		mot, err := cuaHangTuNoiDung(ch)
+		if err != nil {
+			continue
+		}
+		ra = append(ra, mot)
+	}
+	return ra
 }
-
-var danhSachCuaHang = []CuaHang{cuaHangTapHoaLangLa}
-
-// DanhSachCuaHang tra toan bo cua hang NPC dang co.
-func DanhSachCuaHang() []CuaHang { return danhSachCuaHang }
 
 // TimCuaHang tra cua hang theo ID, nil neu khong co. MOI cho tra cuu phai di qua
 // day — id den tu client la khong tin duoc.
-func TimCuaHang(id int32) *CuaHang {
-	for i := range danhSachCuaHang {
-		if danhSachCuaHang[i].ID == id {
-			return &danhSachCuaHang[i]
-		}
+func TimCuaHang(id int32) *CuaHang { return timCuaHangTu(khoCuaHangMacDinh(), id) }
+
+// timCuaHangTu tra ve CON TRO toi mot BAN SAO MOI (anh chup da tra ban sao sau,
+// roi ham nay dung slice moi): nguoi goi lo ghi vao ket qua — vi du
+// DatCuaHangDangMo giu con tro nay suot phien — cung khong lam ban bang gia cua
+// nguoi khac.
+func timCuaHangTu(ac khoChieuAnhChup, id int32) *CuaHang {
+	ch, co := ac.CuaHang(id)
+	if !co {
+		return nil
 	}
-	return nil
+	ra, err := cuaHangTuNoiDung(ch)
+	if err != nil {
+		return nil
+	}
+	return &ra
 }
 
 // ---------------------------------------------------------------------------
@@ -246,6 +268,16 @@ func kiemCuaHang(ch *CuaHang) error {
 			if mon.Gia < 0 {
 				return fmt.Errorf("tab %d mon %d: gia am (%d)", iTab, iMon, mon.Gia)
 			}
+			// GiaBanLai KHONG di xuong client — kiem o day la de mot cua hang
+			// dung TRONG CODE (test, cong cu) cung khong lot qua duoc luat
+			// "ban lai khong duoc dat hon gia mua" ma kho noi dung dat ra.
+			if mon.GiaBanLai < 0 {
+				return fmt.Errorf("tab %d mon %d: gia_ban_lai am (%d)", iTab, iMon, mon.GiaBanLai)
+			}
+			if mon.GiaBanLai > mon.Gia {
+				return fmt.Errorf("tab %d mon %d: gia_ban_lai %d > gia %d — may in tien",
+					iTab, iMon, mon.GiaBanLai, mon.Gia)
+			}
 			if mon.Tien != TienVang && mon.Tien != TienNgoc {
 				return fmt.Errorf("tab %d mon %d: loai tien %d khong hop le", iTab, iMon, mon.Tien)
 			}
@@ -290,10 +322,10 @@ func kiemTenTab(ten string) error {
 // kiemMoiCuaHang kiem toan bo danh muc cua hang. Goi trong test khoi dong de
 // mot MauID lac khong bao gio ra toi nguoi choi.
 func kiemMoiCuaHang() error {
-	for i := range danhSachCuaHang {
-		if err := kiemCuaHang(&danhSachCuaHang[i]); err != nil {
-			return fmt.Errorf("cua hang %d (%s): %w",
-				danhSachCuaHang[i].ID, danhSachCuaHang[i].Ten, err)
+	ds := DanhSachCuaHang()
+	for i := range ds {
+		if err := kiemCuaHang(&ds[i]); err != nil {
+			return fmt.Errorf("cua hang %d (%s): %w", ds[i].ID, ds[i].Ten, err)
 		}
 	}
 	return nil

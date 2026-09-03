@@ -110,38 +110,50 @@ func mauVatPhamTuNoiDung(m noidung.MauVatPham) MauVatPham {
 func cuaHangTuYAML(du *noidung.DuLieu) ([]CuaHang, error) {
 	ds := make([]CuaHang, 0, len(du.CuaHang))
 	for _, ch := range du.CuaHang {
-		tabs := make([]TabCuaHang, 0, len(ch.Tabs))
-		for iTab, tab := range ch.Tabs {
-			mon := make([]MonHang, 0, len(tab.Mon))
-			for iMon, m := range tab.Mon {
-				var tien LoaiTien
-				switch m.Tien {
-				case noidung.TienVang:
-					tien = TienVang
-				case noidung.TienNgoc:
-					tien = TienNgoc
-				default:
-					return nil, fmt.Errorf("cua hang %d tab %d mon %d: loai tien %q khong nhan ra",
-						ch.Id, iTab, iMon, m.Tien)
-				}
-				var opts []OptionMon
-				if len(m.Options) > 0 {
-					opts = make([]OptionMon, 0, len(m.Options))
-					for _, o := range m.Options {
-						opts = append(opts, OptionMon{OptionID: o.OptionId, Param: o.Param})
-					}
-				}
-				mon = append(mon, MonHang{
-					MauID:   m.MauId,
-					Gia:     m.Gia,
-					Tien:    tien,
-					Options: opts,
-					LaMoi:   m.LaMoi,
-				})
-			}
-			tabs = append(tabs, TabCuaHang{Ten: tab.Ten, Mon: mon})
+		mot, err := cuaHangTuNoiDung(ch)
+		if err != nil {
+			return nil, err
 		}
-		ds = append(ds, CuaHang{ID: ch.Id, Ten: ch.Ten, Tabs: tabs})
+		ds = append(ds, mot)
 	}
 	return ds, nil
+}
+
+// cuaHangTuNoiDung doi MOT cua hang. Dung chung cho duong "doc thang DuLieu"
+// (cong tuong duong byte) va duong "doc anh chup" (cuaHangTu/timCuaHangTu trong
+// cuahang.go, KH8 task 5) — mot bo chuyen doi duy nhat, khong hai ban lech nhau.
+func cuaHangTuNoiDung(ch noidung.CuaHang) (CuaHang, error) {
+	tabs := make([]TabCuaHang, 0, len(ch.Tabs))
+	for iTab, tab := range ch.Tabs {
+		mon := make([]MonHang, 0, len(tab.Mon))
+		for iMon, m := range tab.Mon {
+			var tien LoaiTien
+			switch m.Tien {
+			case noidung.TienVang:
+				tien = TienVang
+			case noidung.TienNgoc:
+				tien = TienNgoc
+			default:
+				return CuaHang{}, fmt.Errorf("cua hang %d tab %d mon %d: loai tien %q khong nhan ra",
+					ch.Id, iTab, iMon, m.Tien)
+			}
+			var opts []OptionMon
+			if len(m.Options) > 0 {
+				opts = make([]OptionMon, 0, len(m.Options))
+				for _, o := range m.Options {
+					opts = append(opts, OptionMon{OptionID: o.OptionId, Param: o.Param})
+				}
+			}
+			mon = append(mon, MonHang{
+				MauID:     m.MauId,
+				Gia:       m.Gia,
+				GiaBanLai: m.GiaBanLai,
+				Tien:      tien,
+				Options:   opts,
+				LaMoi:     m.LaMoi,
+			})
+		}
+		tabs = append(tabs, TabCuaHang{Ten: tab.Ten, Mon: mon})
+	}
+	return CuaHang{ID: ch.Id, Ten: ch.Ten, Tabs: tabs}, nil
 }

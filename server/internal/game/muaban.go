@@ -413,6 +413,25 @@ func (b *BoXuLy) muaBanGuiLoi(s *mynet.Session, cau string) error {
 //
 // Task mo NPC se goi ham nay. De o day (khong phai trong cuahang.go) vi no
 // cham truong cua BoXuLy.
+//
+// # NAP NONG KHONG DOI GIA GIUA MOT PHIEN MUA — CO Y (KH8 task 5)
+//
+// `ch` la mot BAN SAO lay luc mo cua hang (TimCuaHang -> timCuaHangTu tra con
+// tro toi ban sao moi). Phien giu no cho toi khi mo cua hang khac. Nen neu quan
+// tri nap nong cua-hang.yaml giua luc mot nguoi dang xem bang gia, NGUOI DO VAN
+// MUA/BAN THEO GIA CU cho den khi dong ra mo lai.
+//
+// Do la lua chon, khong phai thieu sot: client da ve xong bang gia tu goi -44:
+// doi gia phia may chu giua chung nghia la nguoi choi bam "mua" o gia 100 va bi
+// tru 200 — khong mot dong chu nao giai thich. "Khong nap nong duoc giua phien"
+// la cai gia phai tra de con so nguoi choi NHIN THAY va con so may chu TINH luon
+// la mot.
+//
+// BA DIEM GOI cua danh muc cua hang, tat ca NGOAI nhip actor (nen deu dung ban
+// cua khong tham so, doc anh chup mac dinh):
+//   - TimCuaHang(id) khi mo NPC        -> goroutine PHIEN
+//   - xuLyMua / xuLyBan                -> goroutine PHIEN, doc `ch` da cam san
+//   - kiemMoiCuaHang / DanhSachCuaHang -> test va cong cu, ngoai gio chay
 func (b *BoXuLy) DatCuaHangDangMo(ch *CuaHang) { b.muaBanCuaHangDangMo = ch }
 
 // ===========================================================================
@@ -445,9 +464,6 @@ const lenhBan int8 = 7
 // banWhereMac: gia tri o `where` nghia la "do dang MAC" (Java: itemsBody).
 // Moi gia tri khac deu la TUI. Ban 1 chi ban do trong TUI (PHA A muc 4 dong 1).
 const banWhereMac int8 = 0
-
-// banChiaGia: gia ban = gia mua chia cho con so nay (ban Java: cost /= 4), san 1.
-const banChiaGia int32 = 4
 
 var (
 	// ErrBanDoDangMac: xin ban do dang mac — ban 1 tu choi.
@@ -496,15 +512,22 @@ type KetQuaBanHang struct {
 	LaLapLai bool
 }
 
-// banDonGia doi gia mua thanh gia ban: chia banChiaGia, san 1 (ban Java:
-// `cost /= 4; if (cost == 0) cost = 1;`).
-func banDonGia(giaMua int32) int32 {
-	g := giaMua / banChiaGia
-	if g < 1 {
-		g = 1
-	}
-	return g
-}
+// banDonGia tra gia NPC mua lai mot mon: doc thang truong GiaBanLai cua mon
+// hang, KHONG tinh nua.
+//
+// # CAI GI DOI O KH8 TASK 5
+//
+// Truoc task nay ham la `giaMua / 4` (san 1) — chep cong thuc ban Java
+// (`cost /= 4; if (cost == 0) cost = 1;`). Nghia la muon ha gia thu lai cua
+// RIENG mot mon thi phai doi cong thuc cua CA GAME. Nay gia ban lai la mot con
+// so tuong minh trong kho-noi-dung/cua-hang.yaml, sua tung mon va nap nong duoc.
+//
+// Con so khoi dau trong YAML dung bang gia/4 cua cong thuc cu, nen ngay chuyen
+// doi khong mot dong tien nao trong game doi.
+//
+// Bo kiem kho noi dung (noidung/nap.go kiemCuaHang) da khang dinh
+// 0 <= GiaBanLai <= Gia truoc khi so lieu den duoc day.
+func banDonGia(mon MonHang) int32 { return mon.GiaBanLai }
 
 // banTinhToan lam TOAN BO phan kiem cua duong ban, KHONG cham CSDL de ghi.
 //
@@ -568,7 +591,7 @@ func banTinhToan(ch *CuaHang, tui []store.VatPham, oSo int16, soLuong int32) (ba
 		return banDuTinh{}, fmt.Errorf("mau vat pham %d khong ton tai", mauID)
 	}
 
-	donGia := banDonGia(mon.Gia)
+	donGia := banDonGia(*mon)
 	tong := int64(donGia) * int64(soLuong)
 	if tong < 0 {
 		return banDuTinh{}, fmt.Errorf("tong gia am (%d)", tong)

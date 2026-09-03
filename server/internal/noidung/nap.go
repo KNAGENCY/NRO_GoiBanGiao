@@ -367,6 +367,19 @@ func kiemCuaHang(ds []CuaHang, soMauOption, soMauVatPham int) error {
 				if mon.Gia < 0 {
 					return fmt.Errorf("cua hang %d tab %d mon %d: gia am (%d)", ch.Id, iTab, iMon, mon.Gia)
 				}
+				// gia_ban_lai (KH8 task 5): 0 <= gia_ban_lai <= gia.
+				// Tran tren KHONG phai kho tinh: ban lai dat hon gia mua la MAY IN
+				// TIEN — nguoi choi mua 100 ban 120 lap vo han, kinh te chet trong
+				// mot dem va khong mot dong log nao bao.
+				if mon.GiaBanLai < 0 {
+					return fmt.Errorf("cua hang %d tab %d mon %d: gia_ban_lai am (%d)",
+						ch.Id, iTab, iMon, mon.GiaBanLai)
+				}
+				if mon.GiaBanLai > mon.Gia {
+					return fmt.Errorf("cua hang %d tab %d mon %d: gia_ban_lai %d > gia %d "+
+						"— mua re ban dat la MAY IN TIEN, lap vo han duoc",
+						ch.Id, iTab, iMon, mon.GiaBanLai, mon.Gia)
+				}
 				if int(mon.MauId) < 0 || int(mon.MauId) >= soMauVatPham {
 					return fmt.Errorf("cua hang %d tab %d mon %d: mau_id %d khong ton tai (co %d mau) — client se nem NullReference roi NUOT, cua hang hien do dang",
 						ch.Id, iTab, iMon, mon.MauId, soMauVatPham)

@@ -25,6 +25,18 @@
 # Đơn giá 100 / 1000 / 5 là KHỞI ĐẦU do người viết đặt, KHÔNG trích từ bản Java.
 # Cân bằng kinh tế (đi bao lâu mới mua nổi cái áo) là việc của bước đo sau.
 
+# `gia_ban_lai` la gia NGUOI CHOI BAN LAI mon do cho NPC — mot con so TUONG
+# MINH cho TUNG mon, khong phai cong thuc. Truoc KH8 duong ban tinh `gia/4`
+# trong code Go: muon ha gia thu lai cua RIENG cai kunai thi phai doi cong thuc
+# cua ca game. Nay sua mot dong YAML la xong, va nap nong duoc.
+#
+# Bo kiem chan `gia_ban_lai > gia`: mua 100 ban 120 la MAY IN TIEN, lap vo han
+# duoc, kinh te chet trong mot dem ma khong mot dong log nao bao.
+#
+# CON SO KHOI DAU = dung `gia/4` (san 1) cua cong thuc cu, chep nguyen van de
+# ngay chuyen doi KHONG doi mot dong tien nao trong game. KH8 vong can bang se
+# chinh tung con so o day — do la ly do no ra khoi code.
+
 cua_hang:
   - id: 1
     ten: "Tap hoa Lang La"
@@ -33,11 +45,13 @@ cua_hang:
         mon:
           - mau_id: 0          # Thuốc hồi máu nhỏ
             gia: 100
+            gia_ban_lai: 25
             tien: "vang"
             options: []
             la_moi: false
           - mau_id: 1          # Thuốc hồi chakra nhỏ
             gia: 100
+            gia_ban_lai: 25
             tien: "vang"
             options: []
             la_moi: false
@@ -46,16 +60,19 @@ cua_hang:
         mon:
           - mau_id: 2          # Áo ninja Làng Lá
             gia: 1000
+            gia_ban_lai: 250
             tien: "vang"
             options: []
             la_moi: true
           - mau_id: 3          # Quần ninja Làng Lá
             gia: 1000
+            gia_ban_lai: 250
             tien: "vang"
             options: []
             la_moi: true
           - mau_id: 4          # Kunai luyện tập — món duy nhất bán bằng ngọc
             gia: 5
+            gia_ban_lai: 1
             tien: "ngoc"
             options: []
             la_moi: false

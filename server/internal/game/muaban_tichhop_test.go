@@ -124,8 +124,10 @@ func cuaHangThu() *CuaHang {
 		Tabs: []TabCuaHang{{
 			Ten: "Thu",
 			Mon: []MonHang{
-				{MauID: 0, Gia: 100, Tien: TienVang},
-				{MauID: 4, Gia: 5, Tien: TienNgoc},
+				// GiaBanLai dat DUNG bang gia/4 cua cong thuc cu (KH8 task 5) de
+				// moi con so mong doi trong cac test ban duoi day khong doi.
+				{MauID: 0, Gia: 100, GiaBanLai: 25, Tien: TienVang},
+				{MauID: 4, Gia: 5, GiaBanLai: 1, Tien: TienNgoc},
 			},
 		}},
 	}

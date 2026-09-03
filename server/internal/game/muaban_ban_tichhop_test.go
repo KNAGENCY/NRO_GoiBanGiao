@@ -24,10 +24,14 @@ import (
 	"context"
 	"errors"
 	"math"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"nroserver/internal/noidung"
 	"nroserver/internal/store"
 )
 
@@ -426,15 +430,156 @@ func TestBanMonCuaHangKhongBanBiTuChoi(t *testing.T) {
 // Gia ban — ham thuan, khong can CSDL
 // ---------------------------------------------------------------------------
 
-func TestBanDonGiaChiaBonVaSan1(t *testing.T) {
-	cac := []struct {
-		giaMua, mongDoi int32
-	}{
-		{100, 25}, {4, 1}, {3, 1}, {1, 1}, {0, 1}, {7, 1}, {8, 2},
+// TestBanDonGiaDocGiaBanLaiCuaKhoNoiDung ghim gia thu lai THAT cua cua hang 1,
+// doc tu kho-noi-dung/cua-hang.yaml.
+//
+// KH8 task 5 doi banDonGia tu cong thuc `gia/4` sang doc thang truong
+// `gia_ban_lai`. Test cu chi kiem phep chia — no van xanh du du lieu YAML noi
+// gi. Test nay kiem CAI DUNG: con so nguoi choi nhan khi ban lai la con so
+// trong YAML, khong phai mot phep tinh trong code.
+//
+// Con so mong doi duoi day = gia/4 cua bang gia hien tai (100/1000/5). Doi gia
+// trong YAML thi PHAI doi o day — do la muc dich.
+func TestBanDonGiaDocGiaBanLaiCuaKhoNoiDung(t *testing.T) {
+	ch := TimCuaHang(1)
+	if ch == nil {
+		t.Fatal("khong tim thay cua hang 1 trong kho noi dung")
 	}
-	for _, c := range cac {
-		if duoc := banDonGia(c.giaMua); duoc != c.mongDoi {
-			t.Errorf("banDonGia(%d) = %d, mong doi %d", c.giaMua, duoc, c.mongDoi)
+	mongDoi := map[int16]int32{0: 25, 1: 25, 2: 250, 3: 250, 4: 1}
+	daThay := 0
+	for _, tab := range ch.Tabs {
+		for _, mon := range tab.Mon {
+			can, co := mongDoi[mon.MauID]
+			if !co {
+				t.Errorf("cua hang 1 co mau %d ma test chua ghim gia ban lai", mon.MauID)
+				continue
+			}
+			if duoc := banDonGia(mon); duoc != can {
+				t.Errorf("banDonGia(mau %d) = %d, mong doi %d", mon.MauID, duoc, can)
+			}
+			daThay++
 		}
+	}
+	if daThay != len(mongDoi) {
+		t.Errorf("duyet duoc %d mon, cua hang 1 phai co %d", daThay, len(mongDoi))
+	}
+}
+
+// TestBanDonGiaDoiTheoYAML la DOT BIEN "banDonGia quay ve gia/4": nap mot ban
+// kho noi dung da sua gia_ban_lai cua mon dau tien thanh mot so KHAC gia/4, roi
+// khang dinh duong ban tra dung so MOI do. Neu ai do doi banDonGia ve cong thuc
+// cu thi test nay do (ma test tren van xanh, vi 25 tinh cờ == 100/4).
+func TestBanDonGiaDoiTheoYAML(t *testing.T) {
+	thuMuc := chepKhoNoiDungRaThuMucTam(t)
+	doiTrongFileCuaHang(t, thuMuc, "gia_ban_lai: 25", "gia_ban_lai: 7")
+
+	du, err := noidung.NapTuThuMuc(thuMuc)
+	if err != nil {
+		t.Fatalf("nap kho da sua that bai: %v", err)
+	}
+	ds, err := cuaHangTuYAML(du)
+	if err != nil {
+		t.Fatalf("doi cua hang: %v", err)
+	}
+	var mon *MonHang
+	for i := range ds {
+		if ds[i].ID != 1 {
+			continue
+		}
+		for j := range ds[i].Tabs[0].Mon {
+			if ds[i].Tabs[0].Mon[j].MauID == 0 {
+				mon = &ds[i].Tabs[0].Mon[j]
+			}
+		}
+	}
+	if mon == nil {
+		t.Fatal("khong tim thay mon mau 0 cua cua hang 1")
+	}
+	if mon.Gia != 100 {
+		t.Fatalf("gia mua = %d, mong doi 100 — dot bien da lam sai cai khac", mon.Gia)
+	}
+	if duoc := banDonGia(*mon); duoc != 7 {
+		t.Errorf("banDonGia = %d, mong doi 7 — duong ban dang KHONG doc gia_ban_lai "+
+			"(mot cong thuc gia/4 se tra 25)", duoc)
+	}
+}
+
+// TestKiemChanGiaBanLaiCaoHonGiaMua la DOT BIEN "bo tran tren cua gia_ban_lai":
+// mua 100 ban 120 la may in tien — bo kiem PHAI tu choi nap.
+func TestKiemChanGiaBanLaiCaoHonGiaMua(t *testing.T) {
+	thuMuc := chepKhoNoiDungRaThuMucTam(t)
+	doiTrongFileCuaHang(t, thuMuc, "gia_ban_lai: 25", "gia_ban_lai: 120")
+
+	if _, err := noidung.NapTuThuMuc(thuMuc); err == nil {
+		t.Fatal("gia_ban_lai (120) > gia (100) VAN NAP DUOC — nguoi choi mua 100 ban 120, " +
+			"lap vo han, kinh te chet ma khong mot dong log nao bao")
+	}
+}
+
+// TestXuLyMuaTuChoiKhiXoaCuaHangKhoiYAML la DOT BIEN "xoa cua hang id 1":
+// TimCuaHang phai tra nil (khong panic), va duong mua voi cua hang nil phai TU
+// CHOI chu khong no.
+func TestXuLyMuaTuChoiKhiXoaCuaHangKhoiYAML(t *testing.T) {
+	thuMuc := chepKhoNoiDungRaThuMucTam(t)
+	ghiFileCuaHang(t, thuMuc, "cua_hang: []\n")
+
+	du, err := noidung.NapTuThuMuc(thuMuc)
+	if err != nil {
+		t.Fatalf("kho khong con cua hang nao PHAI van nap duoc: %v", err)
+	}
+	ds, err := cuaHangTuYAML(du)
+	if err != nil {
+		t.Fatalf("doi cua hang: %v", err)
+	}
+	if len(ds) != 0 {
+		t.Fatalf("mong doi 0 cua hang, duoc %d", len(ds))
+	}
+
+	// Cua tra cuu THAT (doc anh chup) phai tra nil, khong panic.
+	ac := noidung.MoKho(du).AnhChup()
+	if ch := timCuaHangTu(ac, 1); ch != nil {
+		t.Fatalf("cua hang 1 da bi xoa khoi YAML ma timCuaHangTu van tra %+v", ch)
+	}
+	if n := len(cuaHangTu(ac)); n != 0 {
+		t.Fatalf("cuaHangTu tra %d cua hang tren mot kho khong con cua hang nao", n)
+	}
+
+	// Cua hang dang mo = nil (dung canh "chua mo cua hang"): ca hai duong phai
+	// tra loi, khong panic.
+	if _, err := banTinhToan(nil, nil, 0, 0); err == nil {
+		t.Error("banTinhToan voi cua hang nil khong bao loi")
+	}
+	// ch == nil bi chan o Kiem 1, TRUOC khi cham toi kho — nen kho nil o day la
+	// an toan va test nay khong can CSDL.
+	if _, err := MuaTuCuaHang(context.Background(), nil, 0, nil, 0, 0, 1, 1, soOTuiChuan); !errors.Is(err, ErrKhongMoCuaHang) {
+		t.Errorf("duong mua voi cua hang nil: mong doi ErrKhongMoCuaHang, duoc %v", err)
+	}
+}
+
+// doiTrongFileCuaHang doi lan xuat hien DAU TIEN cua `cu` trong cua-hang.yaml
+// cua mot ban chep kho noi dung. Fatal neu khong tim thay — mot dot bien khong
+// va vao dau la mot dot bien VO NGHIA.
+func doiTrongFileCuaHang(t *testing.T, thuMuc, cu, moi string) {
+	t.Helper()
+	duongDan := filepath.Join(thuMuc, noidung.TenFileCuaHang)
+	data, err := os.ReadFile(duongDan)
+	if err != nil {
+		t.Fatalf("doc %s: %v", duongDan, err)
+	}
+	s := string(data)
+	if !strings.Contains(s, cu) {
+		t.Fatalf("khong tim thay %q trong %s — dot bien khong va vao dau", cu, duongDan)
+	}
+	if err := os.WriteFile(duongDan, []byte(strings.Replace(s, cu, moi, 1)), 0o644); err != nil {
+		t.Fatalf("ghi %s: %v", duongDan, err)
+	}
+}
+
+// ghiFileCuaHang ghi de toan bo cua-hang.yaml cua mot ban chep kho noi dung.
+func ghiFileCuaHang(t *testing.T, thuMuc, noiDung string) {
+	t.Helper()
+	duongDan := filepath.Join(thuMuc, noidung.TenFileCuaHang)
+	if err := os.WriteFile(duongDan, []byte(noiDung), 0o644); err != nil {
+		t.Fatalf("ghi %s: %v", duongDan, err)
 	}
 }

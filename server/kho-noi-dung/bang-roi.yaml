@@ -64,8 +64,12 @@ quai:
   # Sói Rừng là loại yếu nhất — nó chết nhanh và đông, nên rơi ít hơn mặc định.
   - ma: soi-rung
     roi:
-      - { mau_id: 0, so_luong: 1, ti_le_phan_tram: 10 } # thuốc hồi máu nhỏ
-      - { mau_id: 1, so_luong: 1, ti_le_phan_tram: 5 } # thuốc hồi chakra nhỏ
+      # Vòng cân bằng KH8 task 13: 10%/5% (bán lại 25 vàng) cho 3,75 vàng mỗi
+      # con, tức đúng 40 phút mới mua nổi cái áo 1000 vàng — sát mép trên của
+      # khung 20-40 phút. 12%/8% cho 5,00 vàng/con -> khoảng 30 phút, nằm giữa
+      # khung thay vì đứng ngay lằn ranh.
+      - { mau_id: 0, so_luong: 1, ti_le_phan_tram: 12 } # thuốc hồi máu nhỏ
+      - { mau_id: 1, so_luong: 1, ti_le_phan_tram: 8 } # thuốc hồi chakra nhỏ
 
 # ---------------------------------------------------------------------------
 # Bảng boss

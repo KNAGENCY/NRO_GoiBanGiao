@@ -107,9 +107,11 @@ func TestTatMayChuVanDungKhuVucKhiHetGioLuu(t *testing.T) {
 	kg := &khoLuuGia{doTre: 2 * time.Second} // kho gia CHAM hon nhieu so voi han gio ctx duoi day
 	tg := MoThoGhi(kg, 1)
 
-	ctx, huy := context.WithTimeout(context.Background(), 1*time.Millisecond)
-	defer huy()
-	time.Sleep(5 * time.Millisecond) // dam bao ctx CHAC CHAN da het gio truoc khi goi TatMayChu
+	// Context HUY SAN — khong dung WithTimeout(1ms)+Sleep(5ms) nhu ban dau: doan
+	// do phu thuoc dong ho that va tung chop tat duoi tai (§8 BAT-DAU, 03/09).
+	// Huy truoc khi goi cho cung ket qua (ctx.Err() != nil) ma khong cho gi ca.
+	ctx, huy := context.WithCancel(context.Background())
+	huy()
 
 	err := TatMayChu(ctx, s, tg)
 	if err == nil {

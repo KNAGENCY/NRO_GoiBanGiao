@@ -231,6 +231,53 @@ func (a *anhChup) DanhSachCuaHang() []CuaHang {
 }
 
 // ---------------------------------------------------------------------------
+// Cua tra cuu — quai (KH8 task 8)
+// ---------------------------------------------------------------------------
+
+// Quai tra ve ban sao MOT mau quai theo ma. MauQuai toan truong vo huong + chuoi
+// (chuoi Go bat bien) nen mot phep gan la sao xong — 0 cap phat, dung duoc trong
+// nhip.
+func (a *anhChup) Quai(ma string) (MauQuai, bool) {
+	for _, m := range a.duLieu.MauQuai {
+		if m.Ma == ma {
+			return m, true
+		}
+	}
+	return MauQuai{}, false
+}
+
+// DanhSachQuai tra ve ban sao toan bo bang mau quai. Danh cho panel/cong cu do
+// can bang, KHONG danh cho vong lap moi nhip.
+func (a *anhChup) DanhSachQuai() []MauQuai {
+	if a.duLieu.MauQuai == nil {
+		return nil
+	}
+	ds := make([]MauQuai, len(a.duLieu.MauQuai))
+	copy(ds, a.duLieu.MauQuai)
+	return ds
+}
+
+// SinhQuaiCuaMap tra ve ban sao danh sach diem sinh cua MOT ban do. Map khong
+// khai khoi `sinh:` nao -> nil (ban do khong quai), KHONG phai loi: mot ban do
+// yen binh la mot lua chon noi dung hop le.
+//
+// Goi DUNG MOT LAN moi khu vuc, luc MoKhuVuc — khong phai moi nhip.
+func (a *anhChup) SinhQuaiCuaMap(mapID int32) []DiemSinhQuai {
+	for _, s := range a.duLieu.SinhQuai {
+		if s.Map != mapID {
+			continue
+		}
+		if s.Dat == nil {
+			return nil
+		}
+		ds := make([]DiemSinhQuai, len(s.Dat))
+		copy(ds, s.Dat)
+		return ds
+	}
+	return nil
+}
+
+// ---------------------------------------------------------------------------
 // Sao chep sau — dung chung
 // ---------------------------------------------------------------------------
 

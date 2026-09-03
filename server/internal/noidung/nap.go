@@ -26,6 +26,7 @@ const (
 	TenFileChieu   = "chieu.yaml"
 	TenFileVatPham = "vat-pham.yaml"
 	TenFileCuaHang = "cua-hang.yaml"
+	TenFileQuai    = "quai.yaml" // KH8 task 8
 )
 
 // NapNhung nap ban NHUNG trong file thuc thi — duong dung luc KHOI DONG. Khong
@@ -51,10 +52,17 @@ func Nap(fsys fs.FS) (*DuLieu, error) {
 		return nil, err
 	}
 
+	var fQuai fileQuai
+	if err := docYAML(fsys, TenFileQuai, &fQuai); err != nil {
+		return nil, err
+	}
+
 	du := &DuLieu{
 		MauOption:  fVatPham.MauOption,
 		MauVatPham: fVatPham.MauVatPham,
 		CuaHang:    fCuaHang.CuaHang,
+		MauQuai:    fQuai.MauQuai,
+		SinhQuai:   fQuai.Sinh,
 	}
 	if err := kiemChieu(fChieu.Lang); err != nil {
 		return nil, fmt.Errorf("%s: %w", TenFileChieu, err)
@@ -70,6 +78,9 @@ func Nap(fsys fs.FS) (*DuLieu, error) {
 	}
 	if err := kiemCuaHang(du.CuaHang, len(du.MauOption), len(du.MauVatPham)); err != nil {
 		return nil, fmt.Errorf("%s: %w", TenFileCuaHang, err)
+	}
+	if err := kiemQuai(du.MauQuai, du.SinhQuai); err != nil {
+		return nil, fmt.Errorf("%s: %w", TenFileQuai, err)
 	}
 	// Bo kiem DAY DU (K1/K2/K3 + so khoa id) — kiemtra.go, task 1. Chay SAU bo
 	// kiem toi thieu vi nhieu kiem o do dua vao viec "id = vi tri" da dung.
@@ -192,6 +203,81 @@ func kiemMauVatPham(ds []MauVatPham) error {
 		}
 		if m.TranChong < 1 {
 			return fmt.Errorf("mau vat pham %d (%q): tran_chong = %d, phai >= 1", i, m.Ten, m.TranChong)
+		}
+	}
+	return nil
+}
+
+// kiemQuai — bo kiem cua quai.yaml (KH8 task 8).
+//
+// KHONG kiem `anh_id` o day: gia tri hop le cua no nam trong catalog anh DA KY
+// (assets/asset-lock.json), ma goi nay khong duoc phep import goi `game`. Viec
+// do lam boi KiemIdAnhQuai (kiemtra.go), goi tu game/khoquai.go luc tiem.
+func kiemQuai(mau []MauQuai, sinh []SinhQuaiTrenMap) error {
+	if len(mau) == 0 {
+		return fmt.Errorf("khong co mau quai nao — mot ban do khong quai la mot ban do chet, "+
+			"neu that su muon vay thi de `%s` co mau nhung khong co diem sinh", TenFileQuai)
+	}
+	theoMa := map[string]bool{}
+	for i, m := range mau {
+		if m.Ma == "" {
+			return fmt.Errorf("mau quai thu %d: `ma` rong — `ma` la can cuoc, khoi `sinh:` tro toi mau bang chuoi nay", i)
+		}
+		if theoMa[m.Ma] {
+			return fmt.Errorf("ma quai %q khai hai lan — mot ma chi thuoc ve MOT mau, neu khong thi `sinh:` "+
+				"tro toi mau nao la chuyen may rui", m.Ma)
+		}
+		theoMa[m.Ma] = true
+		if m.Ten == "" {
+			return fmt.Errorf("mau quai %q: ten rong", m.Ma)
+		}
+		if m.Hp <= 0 {
+			return fmt.Errorf("mau quai %q: hp = %d, phai > 0 — quai sinh ra voi hp <= 0 la quai CHET SAN: "+
+				"nhipTim thay Hp<=0 la vao nhanh cho hoi sinh, nhung LucChet con la zero value nen no hoi sinh "+
+				"NGAY tick dau, roi lai chet, mai mai. Khong mot dong log", m.Ma, m.Hp)
+		}
+		if m.SatThuongCoBan <= 0 {
+			return fmt.Errorf("mau quai %q: sat_thuong_co_ban = %d, phai > 0 — quai danh 0 sat thuong van phat "+
+				"goi -11/-10 moi nhip AI: nguoi choi thay hieu ung bi danh ma mau khong doi, khong hieu chuyen gi",
+				m.Ma, m.SatThuongCoBan)
+		}
+		if m.Cap == 0 {
+			return fmt.Errorf("mau quai %q: cap = 0, phai >= 1", m.Ma)
+		}
+		if m.CapTinhAnh == 0 {
+			return fmt.Errorf("mau quai %q: cap_tinh_anh = 0, phai >= 1 (cap HIEN THI canh ten quai)", m.Ma)
+		}
+		if m.AnhId < 0 {
+			return fmt.Errorf("mau quai %q: anh_id am (%d)", m.Ma, m.AnhId)
+		}
+	}
+	daThayMap := map[int32]bool{}
+	for _, s := range sinh {
+		if daThayMap[s.Map] {
+			return fmt.Errorf("map %d khai hai khoi `sinh:` — khoi thu hai se bi bo qua im lang", s.Map)
+		}
+		daThayMap[s.Map] = true
+		if len(s.Dat) > TranTempIdQuai {
+			return fmt.Errorf("map %d: %d con quai, client doc soQuai bang byte CO DAU nen toi da %d",
+				s.Map, len(s.Dat), TranTempIdQuai)
+		}
+		daThayId := map[byte]string{}
+		for i, d := range s.Dat {
+			if !theoMa[d.Ma] {
+				return fmt.Errorf("map %d con quai thu %d: `ma` = %q khong co trong `mau_quai` — "+
+					"hoac go nham, hoac vua co nguoi doi `ma` cua mot mau ma quen sua khoi `sinh:`",
+					s.Map, i, d.Ma)
+			}
+			if int(d.Id) > TranTempIdQuai {
+				return fmt.Errorf("map %d con quai thu %d: id = %d, client doc tempId bang byte CO DAU nen phai <= %d",
+					s.Map, i, d.Id, TranTempIdQuai)
+			}
+			if cu, co := daThayId[d.Id]; co {
+				return fmt.Errorf("map %d: id %d dung cho ca %q va %q — tempId la can cuoc cua con quai "+
+					"TRONG mot khu vuc; hai con trung id thi goi 54 (xin danh) luon trung con dau, con kia bat tu",
+					s.Map, d.Id, cu, d.Ma)
+			}
+			daThayId[d.Id] = d.Ma
 		}
 	}
 	return nil

@@ -65,6 +65,13 @@ type khoChieuAnhChup interface {
 	ChieuCuaLang(idLang byte) []noidung.Chieu
 	TraCapChieu(idLang, templateId, cap byte) (noidung.CapChieu, bool)
 	TheHe() uint64
+
+	// Ba cua QUAI (KH8 task 8, khoquai.go). Nam CHUNG mot interface voi chieu
+	// — khong de ra interface thu hai — vi mot actor giu DUNG MOT anh chup cho
+	// ca nhip, va *noidung.anhChup thoa man ca hai nhom.
+	Quai(ma string) (noidung.MauQuai, bool)
+	DanhSachQuai() []noidung.MauQuai
+	SinhQuaiCuaMap(mapID int32) []noidung.DiemSinhQuai
 }
 
 // nguonNoiDung boc mot ham lay anh chup. La mot STRUCT (khong phai ham tran)

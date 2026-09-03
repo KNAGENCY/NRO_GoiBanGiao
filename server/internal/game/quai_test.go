@@ -21,10 +21,22 @@ func haiQuaiMau() []*Quai {
 	}
 }
 
+// TestTaoQuaiMacDinhDungCatalogKhongSuyDienSpawn giu NGUYEN VEN cac con so cua
+// ban truoc KH8 task 8 (khi chung con nam trong mot bang cung o quai.go). Task 8
+// chi CHUYEN CHO O cua so lieu sang kho-noi-dung/quai.yaml — mot con so nao lech
+// la task da lam sai viec, khong phai "gia tri moi".
+//
+// Them SatThuongCoBan vao phep so (ban cu khong so): do la chinh con so ma task
+// 8 lay ra khoi hang so 5 go cung trong quai.go.
 func TestTaoQuaiMacDinhDungCatalogKhongSuyDienSpawn(t *testing.T) {
-	quai := taoQuaiMacDinh(TimBanDo(1))
+	quai := taoQuaiTuAnhChup(khoChieuMacDinh(), TimBanDo(1))
 	if len(quai) != 2 || quai[0].MauId != 0 || quai[0].Hp != 100 || quai[0].HpToiDa != 100 || quai[0].X != 160 || quai[0].Y != 384 || quai[1].X != 40 || quai[1].Y != 384 {
-		t.Fatalf("quai mac dinh phai theo catalog, got=%+v", quai)
+		t.Fatalf("quai mac dinh phai theo kho noi dung, got=%+v", quai)
+	}
+	for i, q := range quai {
+		if q.Id != byte(i) || q.Cap != 1 || q.CapTinhAnh != 1 || q.SatThuongCoBan != 5 {
+			t.Fatalf("quai[%d] lech so cu: %+v", i, q)
+		}
 	}
 }
 

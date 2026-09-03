@@ -208,6 +208,63 @@ const (
 )
 
 // ---------------------------------------------------------------------------
+// Kieu du lieu YAML — quai (KH8 task 8)
+// ---------------------------------------------------------------------------
+
+// MauQuai la MOT mau quai. CAN CUOC la `Ma` (chuoi), KHONG phai so — khac han
+// MauVatPham o tren. Ly do: id mau quai KHONG di xuong client va KHONG nam
+// trong CSDL nguoi choi, no chi song trong bo nho may chu luc SINH quai. Vi vay
+// them/bo/sap xep lai mau quai la an toan, mien la `sinh:` van tro dung ma.
+//
+// TranChong/Phan/... khong co o day vi quai khong phai do vat. Cai duy nhat di
+// xuong client trong goi -24 la Hp/HpToiDa/Cap/CapTinhAnh/X/Y — khuon byte do
+// goi `game` so huu (ghiQuai, game/quai.go), KHONG phai file YAML.
+type MauQuai struct {
+	Ma  string `yaml:"ma"`
+	Ten string `yaml:"ten"`
+
+	// AnhId la id ANH quai trong catalog da ky (assets/catalog.json, ghim SHA
+	// trong asset-lock.json). Bo nap o goi nay KHONG tu kiem duoc no ton tai —
+	// `noidung` khong import `game`. Nguoi TIEM du lieu goi KiemIdAnhQuai voi
+	// danh sach id hop le lay tu catalog (game/khoquai.go).
+	AnhId int `yaml:"anh_id"`
+
+	Hp int32 `yaml:"hp"`
+
+	// SatThuongCoBan: sat thuong CO DINH quai gay ra moi don len nguoi choi.
+	// Truoc KH8 task 8 day la hang so 5 nam trong game/quai.go; tach ra tung
+	// mau chinh la de sau nay DO CAN BANG duoc (thiet ke §5.3).
+	SatThuongCoBan int32 `yaml:"sat_thuong_co_ban"`
+
+	Cap        byte `yaml:"cap"`
+	CapTinhAnh byte `yaml:"cap_tinh_anh"`
+}
+
+// DiemSinhQuai la MOT con quai duoc dat san tren mot ban do: mau nao, tempId
+// bao nhieu, dung o dau.
+type DiemSinhQuai struct {
+	Ma string `yaml:"ma"`
+	Id byte   `yaml:"id"`
+	X  int16  `yaml:"x"`
+	Y  int16  `yaml:"y"`
+}
+
+// SinhQuaiTrenMap la toan bo quai duoc dat san tren MOT ban do.
+type SinhQuaiTrenMap struct {
+	Map int32          `yaml:"map"`
+	Dat []DiemSinhQuai `yaml:"dat"`
+}
+
+type fileQuai struct {
+	MauQuai []MauQuai         `yaml:"mau_quai"`
+	Sinh    []SinhQuaiTrenMap `yaml:"sinh"`
+}
+
+// TranTempIdQuai: client doc tempId (va soQuai) bang BYTE CO DAU (dac ta §1.4),
+// nen moi id quai phai <= 127. Day la SUC DOC CUA CLIENT, khong phai lua chon.
+const TranTempIdQuai = 127
+
+// ---------------------------------------------------------------------------
 // Anh chup
 // ---------------------------------------------------------------------------
 
@@ -220,4 +277,9 @@ type DuLieu struct {
 	MauOption     []MauOption
 	MauVatPham    []MauVatPham
 	CuaHang       []CuaHang
+
+	// MauQuai / SinhQuai — KH8 task 8. Tra cuu qua cua Quai()/DanhSachQuai()/
+	// SinhQuaiCuaMap() cua anh chup (kho.go), khong doc thang.
+	MauQuai  []MauQuai
+	SinhQuai []SinhQuaiTrenMap
 }

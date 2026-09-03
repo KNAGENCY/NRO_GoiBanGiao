@@ -109,14 +109,18 @@ type Quai struct {
 	LanDanhCuoi time.Time
 
 	// SatThuongCoBan la sat thuong CO DINH quai gay ra MOI don len nguoi
-	// choi. Dac ta §5.3 dinh nghia cong thuc DAY DU ("dame rieng ±1%" hoac
-	// "hpMax×pDame%±theo cap") nhung can them truong "dame rieng"/"pDame%"
-	// MA QUAI (Task 5) CHUA CO — dinh nghia du lieu quai day du NGOAI pham vi
-	// Task 9 (task nay chi duoc giao chonMucTieu + goi -11/-10, KHONG duoc
-	// giao cong thuc sat thuong quai day du). Dung mot gia tri CO DINH don
-	// gian de AI co "duong chay THAT" (khong the phat goi -11/-10 ma khong
-	// co con so sat thuong nao) trong luc cho KH8 chot cong thuc that.
-	// TODO(KH8 - can bang so lieu): thay bang cong thuc §5.3 day du.
+	// choi. KH8 task 8: gia tri nay khong con la hang so 5 go trong code nua —
+	// no den TU MAU QUAI trong kho-noi-dung/quai.yaml, gan MOT LAN luc sinh
+	// (taoQuaiTuAnhChup, khoquai.go).
+	//
+	// Vi gan mot lan luc sinh, con quai nay GIU SO CUA THE HE LUC NO SINH RA:
+	// nap nong quai.yaml khong doi sat thuong cua no. Da chot, co ly do —
+	// xem khoi chu thich dau khoquai.go.
+	//
+	// Dac ta §5.3 con dinh nghia cong thuc DAY DU ("dame rieng ±1%" hoac
+	// "hpMax×pDame%±theo cap"); day moi la o "dame rieng" cua cong thuc do.
+	// Hai o con lai (pDame%, bien thien theo cap) chua co — chung la viec cua
+	// buoc DO CAN BANG, khong phai cua buoc chuyen cho o.
 	SatThuongCoBan int32
 }
 
@@ -169,25 +173,13 @@ func ghiDanhSachQuai(w *protocol.Writer, ds []*Quai) {
 	}
 }
 
-// taoQuaiMacDinh sinh danh sach quai KHOI TAO cho mot khu vuc moi mo (goi tu
-// MoKhuVuc). CHUA CO catalog quai theo lang/theo map (ngoai pham vi Task 5 —
-// khong task nao trong Ke hoach 6 giao viec do), nen tam thoi moi map mo ra
-// voi 2 con quai co so lieu CO DINH, quanh diem SpawnX/SpawnY cua ban do, de
-// Task 6-9/13/14 (chien dau, AI, hoi sinh, test dau-cuoi) co doi tuong that
-// de thao tac. Danh dau ro dat de coordinator biet can thay bang catalog that
-// khi thiet ke noi dung (spawn theo lang, do kho, vi tri ban do that) o mot
-// ke hoach sau.
-func taoQuaiMacDinh(bd *BanDo) []*Quai {
-	if bd == nil {
-		return nil
-	}
-	m := catalogLangLa.Mob
-	quai := make([]*Quai, 0, len(m.Spawns))
-	for _, spawn := range m.Spawns {
-		quai = append(quai, &Quai{Id: spawn.ID, MauId: m.ID, Cap: 1, CapTinhAnh: 1, Hp: m.HP, HpToiDa: m.HP, X: spawn.X, Y: spawn.Y, SatThuongCoBan: 5})
-	}
-	return quai
-}
+// KH8 task 8: BANG QUAI CUNG DA BI XOA KHOI TEP NAY.
+//
+// Truoc task 8, o day co ham taoQuaiMacDinh dung 2 con quai voi so lieu go
+// thang vao code (hp tu catalog.json, SatThuongCoBan la hang so 5, diem sinh
+// dung chung cho moi ban do). Ca ba thu do gio nam trong kho-noi-dung/quai.yaml
+// va duong sinh quai DUY NHAT la taoQuaiTuAnhChup (khoquai.go) — doc tu ANH CHUP
+// noi dung. Khong con bang nao trong Go de "roi ve" ca.
 
 // ---------------------------------------------------------------------------
 // Ke hoach 6 Task 9 — AI quai hai tang uu tien (dac ta §5.2), goi -11/-10.

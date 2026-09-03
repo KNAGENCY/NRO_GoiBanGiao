@@ -20,11 +20,21 @@
 #     template_id  = slot + 1                (1..4)
 #     skill_id gốc = 1 + (lang*4 + slot)*3   (mỗi chiêu chiếm 3 số liên tiếp)
 #     icon_id      = 1 + lang*4 + slot
-#     chakra_dung  = (10 + slot*5)  + (cấp-1)*10
-#     sat_thuong   = (20 + slot*10) + (cấp-1)*20
-#     gia          = (50 + slot*20) + (cấp-1)*50
+#     chakra_dung     = (10 + slot*5)  + (cấp-1)*10
+#     he_so_phan_tram = (20 + slot*10) + (cấp-1)*20
+#     gia             = (50 + slot*20) + (cấp-1)*50
 #     nhan_luc_can = cấp * 1000
 #     hoi_chieu_ms = 1000 + (cấp-1)*300
+#
+# ĐƠN VỊ `he_so_phan_tram` — CHỐT ở đặc tả KH8 §5.1
+# (docs/superpowers/specs/2026-09-03-kh8-kho-noi-dung-design.md):
+#
+#   100 = bằng đúng sát thương gốc của nhân vật ra đòn; 20 = 20% sát thương
+#   gốc. KHÔNG PHẢI số cộng dồn tuyệt đối. Kết quả phép nhân luôn LÀM TRÒN
+#   XUỐNG số nguyên (công thức đầy đủ ở game/satthuong.go, hàm TinhSatThuong).
+#   Đổi tên trường từ `sat_thuong` cũ sang tên này chính là để không ai đọc
+#   nhầm thành số tuyệt đối nữa — bộ nạp (KnownFields(true)) từ chối thẳng nếu
+#   ai đó lỡ gõ lại tên cũ.
 #
 # VÌ SAO GIỜ VIẾT TƯỜNG MINH TỪNG SỐ thay vì giữ công thức: chính chú thích
 # trong code đã nói "Gia tri chi la KHOI DAU can chinh o KH8". Với công thức,
@@ -37,8 +47,8 @@
 #     slot 3 tự thân, tầm 0 (không phát gói chiến đấu).
 #   - `dx` và `dy` cố tình bằng nhau: client đọc cả hai nhưng dùng chung một
 #     giá trị tầm.
-#   - `sat_thuong` với chiêu loai=2 KHÔNG phải sát thương mà là LƯỢNG HỒI MÁU —
-#     bản Java tái sử dụng cùng ô. Đừng đọc nhầm.
+#   - `he_so_phan_tram` với chiêu loai=2 KHÔNG phải sát thương mà là LƯỢNG HỒI
+#     MÁU — bản Java tái sử dụng cùng ô. Đừng đọc nhầm.
 #   - `icon_id` hiện sinh THEO VỊ TRÍ, chưa phải id icon thật của bộ mỹ thuật.
 #     Khi có bộ icon thật, THÊM Ở CUỐI bảng tra, tuyệt đối không chèn giữa.
 #   - `them_thong_tin` để rỗng: bản Java ghi tên thương hiệu cũ vào đây.
@@ -72,7 +82,7 @@ lang:
             dx: 100
             dy: 100
             max_fight: 1
-            sat_thuong: 20
+            he_so_phan_tram: 20
             gia: 50
             them_thong_tin: ""
           - skill_id: 2
@@ -83,7 +93,7 @@ lang:
             dx: 100
             dy: 100
             max_fight: 1
-            sat_thuong: 40
+            he_so_phan_tram: 40
             gia: 100
             them_thong_tin: ""
           - skill_id: 3
@@ -94,7 +104,7 @@ lang:
             dx: 100
             dy: 100
             max_fight: 1
-            sat_thuong: 60
+            he_so_phan_tram: 60
             gia: 150
             them_thong_tin: ""
 
@@ -115,7 +125,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 30
+            he_so_phan_tram: 30
             gia: 70
             them_thong_tin: ""
           - skill_id: 5
@@ -126,7 +136,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 50
+            he_so_phan_tram: 50
             gia: 120
             them_thong_tin: ""
           - skill_id: 6
@@ -137,7 +147,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 70
+            he_so_phan_tram: 70
             gia: 170
             them_thong_tin: ""
 
@@ -158,7 +168,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 40
+            he_so_phan_tram: 40
             gia: 90
             them_thong_tin: ""
           - skill_id: 8
@@ -169,7 +179,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 60
+            he_so_phan_tram: 60
             gia: 140
             them_thong_tin: ""
           - skill_id: 9
@@ -180,7 +190,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 80
+            he_so_phan_tram: 80
             gia: 190
             them_thong_tin: ""
 
@@ -201,7 +211,7 @@ lang:
             dx: 0
             dy: 0
             max_fight: 1
-            sat_thuong: 50
+            he_so_phan_tram: 50
             gia: 110
             them_thong_tin: ""
           - skill_id: 11
@@ -212,7 +222,7 @@ lang:
             dx: 0
             dy: 0
             max_fight: 1
-            sat_thuong: 70
+            he_so_phan_tram: 70
             gia: 160
             them_thong_tin: ""
           - skill_id: 12
@@ -223,7 +233,7 @@ lang:
             dx: 0
             dy: 0
             max_fight: 1
-            sat_thuong: 90
+            he_so_phan_tram: 90
             gia: 210
             them_thong_tin: ""
 
@@ -250,7 +260,7 @@ lang:
             dx: 100
             dy: 100
             max_fight: 1
-            sat_thuong: 20
+            he_so_phan_tram: 20
             gia: 50
             them_thong_tin: ""
           - skill_id: 14
@@ -261,7 +271,7 @@ lang:
             dx: 100
             dy: 100
             max_fight: 1
-            sat_thuong: 40
+            he_so_phan_tram: 40
             gia: 100
             them_thong_tin: ""
           - skill_id: 15
@@ -272,7 +282,7 @@ lang:
             dx: 100
             dy: 100
             max_fight: 1
-            sat_thuong: 60
+            he_so_phan_tram: 60
             gia: 150
             them_thong_tin: ""
 
@@ -293,7 +303,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 30
+            he_so_phan_tram: 30
             gia: 70
             them_thong_tin: ""
           - skill_id: 17
@@ -304,7 +314,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 50
+            he_so_phan_tram: 50
             gia: 120
             them_thong_tin: ""
           - skill_id: 18
@@ -315,7 +325,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 70
+            he_so_phan_tram: 70
             gia: 170
             them_thong_tin: ""
 
@@ -336,7 +346,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 40
+            he_so_phan_tram: 40
             gia: 90
             them_thong_tin: ""
           - skill_id: 20
@@ -347,7 +357,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 60
+            he_so_phan_tram: 60
             gia: 140
             them_thong_tin: ""
           - skill_id: 21
@@ -358,7 +368,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 80
+            he_so_phan_tram: 80
             gia: 190
             them_thong_tin: ""
 
@@ -379,7 +389,7 @@ lang:
             dx: 0
             dy: 0
             max_fight: 1
-            sat_thuong: 50
+            he_so_phan_tram: 50
             gia: 110
             them_thong_tin: ""
           - skill_id: 23
@@ -390,7 +400,7 @@ lang:
             dx: 0
             dy: 0
             max_fight: 1
-            sat_thuong: 70
+            he_so_phan_tram: 70
             gia: 160
             them_thong_tin: ""
           - skill_id: 24
@@ -401,7 +411,7 @@ lang:
             dx: 0
             dy: 0
             max_fight: 1
-            sat_thuong: 90
+            he_so_phan_tram: 90
             gia: 210
             them_thong_tin: ""
 
@@ -428,7 +438,7 @@ lang:
             dx: 100
             dy: 100
             max_fight: 1
-            sat_thuong: 20
+            he_so_phan_tram: 20
             gia: 50
             them_thong_tin: ""
           - skill_id: 26
@@ -439,7 +449,7 @@ lang:
             dx: 100
             dy: 100
             max_fight: 1
-            sat_thuong: 40
+            he_so_phan_tram: 40
             gia: 100
             them_thong_tin: ""
           - skill_id: 27
@@ -450,7 +460,7 @@ lang:
             dx: 100
             dy: 100
             max_fight: 1
-            sat_thuong: 60
+            he_so_phan_tram: 60
             gia: 150
             them_thong_tin: ""
 
@@ -471,7 +481,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 30
+            he_so_phan_tram: 30
             gia: 70
             them_thong_tin: ""
           - skill_id: 29
@@ -482,7 +492,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 50
+            he_so_phan_tram: 50
             gia: 120
             them_thong_tin: ""
           - skill_id: 30
@@ -493,7 +503,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 70
+            he_so_phan_tram: 70
             gia: 170
             them_thong_tin: ""
 
@@ -514,7 +524,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 40
+            he_so_phan_tram: 40
             gia: 90
             them_thong_tin: ""
           - skill_id: 32
@@ -525,7 +535,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 60
+            he_so_phan_tram: 60
             gia: 140
             them_thong_tin: ""
           - skill_id: 33
@@ -536,7 +546,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 80
+            he_so_phan_tram: 80
             gia: 190
             them_thong_tin: ""
 
@@ -557,7 +567,7 @@ lang:
             dx: 0
             dy: 0
             max_fight: 1
-            sat_thuong: 50
+            he_so_phan_tram: 50
             gia: 110
             them_thong_tin: ""
           - skill_id: 35
@@ -568,7 +578,7 @@ lang:
             dx: 0
             dy: 0
             max_fight: 1
-            sat_thuong: 70
+            he_so_phan_tram: 70
             gia: 160
             them_thong_tin: ""
           - skill_id: 36
@@ -579,7 +589,7 @@ lang:
             dx: 0
             dy: 0
             max_fight: 1
-            sat_thuong: 90
+            he_so_phan_tram: 90
             gia: 210
             them_thong_tin: ""
 
@@ -606,7 +616,7 @@ lang:
             dx: 100
             dy: 100
             max_fight: 1
-            sat_thuong: 20
+            he_so_phan_tram: 20
             gia: 50
             them_thong_tin: ""
           - skill_id: 38
@@ -617,7 +627,7 @@ lang:
             dx: 100
             dy: 100
             max_fight: 1
-            sat_thuong: 40
+            he_so_phan_tram: 40
             gia: 100
             them_thong_tin: ""
           - skill_id: 39
@@ -628,7 +638,7 @@ lang:
             dx: 100
             dy: 100
             max_fight: 1
-            sat_thuong: 60
+            he_so_phan_tram: 60
             gia: 150
             them_thong_tin: ""
 
@@ -649,7 +659,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 30
+            he_so_phan_tram: 30
             gia: 70
             them_thong_tin: ""
           - skill_id: 41
@@ -660,7 +670,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 50
+            he_so_phan_tram: 50
             gia: 120
             them_thong_tin: ""
           - skill_id: 42
@@ -671,7 +681,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 70
+            he_so_phan_tram: 70
             gia: 170
             them_thong_tin: ""
 
@@ -692,7 +702,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 40
+            he_so_phan_tram: 40
             gia: 90
             them_thong_tin: ""
           - skill_id: 44
@@ -703,7 +713,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 60
+            he_so_phan_tram: 60
             gia: 140
             them_thong_tin: ""
           - skill_id: 45
@@ -714,7 +724,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 80
+            he_so_phan_tram: 80
             gia: 190
             them_thong_tin: ""
 
@@ -735,7 +745,7 @@ lang:
             dx: 0
             dy: 0
             max_fight: 1
-            sat_thuong: 50
+            he_so_phan_tram: 50
             gia: 110
             them_thong_tin: ""
           - skill_id: 47
@@ -746,7 +756,7 @@ lang:
             dx: 0
             dy: 0
             max_fight: 1
-            sat_thuong: 70
+            he_so_phan_tram: 70
             gia: 160
             them_thong_tin: ""
           - skill_id: 48
@@ -757,7 +767,7 @@ lang:
             dx: 0
             dy: 0
             max_fight: 1
-            sat_thuong: 90
+            he_so_phan_tram: 90
             gia: 210
             them_thong_tin: ""
 
@@ -784,7 +794,7 @@ lang:
             dx: 100
             dy: 100
             max_fight: 1
-            sat_thuong: 20
+            he_so_phan_tram: 20
             gia: 50
             them_thong_tin: ""
           - skill_id: 50
@@ -795,7 +805,7 @@ lang:
             dx: 100
             dy: 100
             max_fight: 1
-            sat_thuong: 40
+            he_so_phan_tram: 40
             gia: 100
             them_thong_tin: ""
           - skill_id: 51
@@ -806,7 +816,7 @@ lang:
             dx: 100
             dy: 100
             max_fight: 1
-            sat_thuong: 60
+            he_so_phan_tram: 60
             gia: 150
             them_thong_tin: ""
 
@@ -827,7 +837,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 30
+            he_so_phan_tram: 30
             gia: 70
             them_thong_tin: ""
           - skill_id: 53
@@ -838,7 +848,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 50
+            he_so_phan_tram: 50
             gia: 120
             them_thong_tin: ""
           - skill_id: 54
@@ -849,7 +859,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 70
+            he_so_phan_tram: 70
             gia: 170
             them_thong_tin: ""
 
@@ -870,7 +880,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 40
+            he_so_phan_tram: 40
             gia: 90
             them_thong_tin: ""
           - skill_id: 56
@@ -881,7 +891,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 60
+            he_so_phan_tram: 60
             gia: 140
             them_thong_tin: ""
           - skill_id: 57
@@ -892,7 +902,7 @@ lang:
             dx: 300
             dy: 300
             max_fight: 1
-            sat_thuong: 80
+            he_so_phan_tram: 80
             gia: 190
             them_thong_tin: ""
 
@@ -913,7 +923,7 @@ lang:
             dx: 0
             dy: 0
             max_fight: 1
-            sat_thuong: 50
+            he_so_phan_tram: 50
             gia: 110
             them_thong_tin: ""
           - skill_id: 59
@@ -924,7 +934,7 @@ lang:
             dx: 0
             dy: 0
             max_fight: 1
-            sat_thuong: 70
+            he_so_phan_tram: 70
             gia: 160
             them_thong_tin: ""
           - skill_id: 60
@@ -935,6 +945,6 @@ lang:
             dx: 0
             dy: 0
             max_fight: 1
-            sat_thuong: 90
+            he_so_phan_tram: 90
             gia: 210
             them_thong_tin: ""

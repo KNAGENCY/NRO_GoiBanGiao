@@ -135,7 +135,7 @@ func TestKhoChieuThayGiuaNhipKhongDoiKetQuaTrongNhip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("nap lan hai: %v", err)
 	}
-	du2.ChieuTheoLang[0][0].CacCap[0].SatThuong = truoc.SatThuong + 999
+	du2.ChieuTheoLang[0][0].CacCap[0].HeSoPhanTram = truoc.SatThuong + 999
 	theHeMoi := d.kho.Thay(du2)
 	if theHeMoi <= theHeDau {
 		t.Fatalf("Thay khong tang the he: %d -> %d", theHeDau, theHeMoi)
@@ -184,8 +184,8 @@ func TestGanKhoNoiDungDoiDuocSoLieu(t *testing.T) {
 	if err != nil {
 		t.Fatalf("nap kho noi dung: %v", err)
 	}
-	goc := du.ChieuTheoLang[0][0].CacCap[0].SatThuong
-	du.ChieuTheoLang[0][0].CacCap[0].SatThuong = goc + 777
+	goc := du.ChieuTheoLang[0][0].CacCap[0].HeSoPhanTram
+	du.ChieuTheoLang[0][0].CacCap[0].HeSoPhanTram = goc + 777
 	kho := noidung.MoKho(du)
 
 	s := MoSoKhuVuc()

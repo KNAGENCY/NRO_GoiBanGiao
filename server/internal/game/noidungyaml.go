@@ -28,15 +28,17 @@ func chieuTuYAML(du *noidung.DuLieu) [5][]MauChieu {
 			cac := make([]CapChieu, 0, len(c.CacCap))
 			for _, cap := range c.CacCap {
 				cac = append(cac, CapChieu{
-					SkillId:      cap.SkillId,
-					Diem:         cap.Diem,
-					NhanLucCan:   cap.NhanLucCan,
-					ChakraDung:   cap.ChakraDung,
-					HoiChieuMs:   cap.HoiChieuMs,
-					Dx:           cap.Dx,
-					Dy:           cap.Dy,
-					MaxFight:     cap.MaxFight,
-					SatThuong:    cap.SatThuong,
+					SkillId:    cap.SkillId,
+					Diem:       cap.Diem,
+					NhanLucCan: cap.NhanLucCan,
+					ChakraDung: cap.ChakraDung,
+					HoiChieuMs: cap.HoiChieuMs,
+					Dx:         cap.Dx,
+					Dy:         cap.Dy,
+					MaxFight:   cap.MaxFight,
+					// SatThuong (truong Go goi tin) <- HeSoPhanTram (truong noi
+					// dung): xem chu thich cung ten trong khochieu.go.
+					SatThuong:    cap.HeSoPhanTram,
 					Gia:          cap.Gia,
 					ThemThongTin: cap.ThemThongTin,
 				})

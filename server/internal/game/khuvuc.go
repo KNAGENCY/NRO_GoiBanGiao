@@ -11,6 +11,7 @@ import (
 	"unicode/utf8"
 
 	"nroserver/internal/antoan"
+	"nroserver/internal/noidung"
 	"nroserver/internal/protocol"
 	"nroserver/internal/store"
 )
@@ -146,6 +147,32 @@ type KhuVuc struct {
 	// 100%" / "khong roi gi" ma khong phu thuoc may man. nil -> rand.IntN
 	// (roiDoKhiChet tu thay the), nen moi test cu dung MoKhuVuc van chay.
 	roiDoNgauNhien func(n int) int
+
+	// khoNoiDung la NGUON so lieu noi dung (chieu) cua khu vuc nay — KH8 task 3.
+	// Cung khuon atomic.Pointer + Gan… voi loa/soNo/boNhat/boRoi ngay tren, va
+	// cung mot ly do: GanKhoNoiDung chay tu goroutine main SAU khi cac actor da
+	// BatDau, con vongLap thi doc truong nay.
+	//
+	// KHAC mot diem quan trong voi loa/soNo: nil o day KHONG phai "im lang bo
+	// qua" ma la "dung kho NHUNG" (khoChieuMacDinh, khochieu.go) — mot khu vuc
+	// khong co chieu nao thi moi don danh deu tu choi, va moi test chien dau cu
+	// se do voi ly do hoan toan sai.
+	khoNoiDung atomic.Pointer[nguonNoiDung]
+
+	// acNhip la ANH CHUP noi dung dang dung cho NHIP/SU KIEN hien tai. Gan DUNG
+	// MOT LAN o dau nhipTim va o dau xuLy, roi moi thu trong nhip do doc no.
+	//
+	// VI SAO LA MOT TRUONG chu khong phai mot tham so chuyen tay: duong
+	// nhipTim -> nhipBoss -> mayTrangThaiBoss -> aiBoss -> bossThuDanh dai NAM
+	// TANG, ba trong so do khong dung gi den chieu. Them mot tham so `ac` vao
+	// ca nam se lam ban thay doi nay to gap ba lan va, quan trong hon, se de
+	// mo mot duong tat: ai do o tang duoi thay "phien qua" se goi thang
+	// AnhChup() lai. Mot truong cua actor thi CHI luong vongLap cham (dung ky
+	// luat §6.9, giong het k.quai/k.boss) va co MOT diem gan duy nhat de test
+	// dem duoc.
+	//
+	// nil khi actor chua chay nhip nao — layAnhChupNhip() tu vá (xem duoi).
+	acNhip khoChieuAnhChup
 
 	hopThu          chan suKienKhuVuc
 	hopThuDieuKhien chan suKienDieuKhien
@@ -862,6 +889,11 @@ func (k *KhuVuc) saoNguoiChoi(idNhanVat int64) []store.NhanVat {
 //   - suKienRa: xoa khoi map TRUOC, roi phat -6 cho nguoi con lai (nguoi da
 //     ra khong con trong map nen tu nhien khong nhan duoc goi cua chinh minh).
 func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
+	// KH8 task 3: MOT anh chup noi dung cho CA lan xu ly su kien nay (xem
+	// truong acNhip). Mot su kien la mot don vi cong viec khong the chia nho
+	// giong nhu mot nhip; no phai chay tron ven tren mot the he so lieu.
+	k.acNhip = k.layAnhChupNhip()
+
 	switch sk := sk.(type) {
 	case suKienChay:
 		// Diem chen test luoi panic (xem suKienChay o dau file): chay ham do
@@ -962,7 +994,9 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 		// le (ngoai 0..4) hoac templateId khong co trong 4 chieu cua lang do
 		// -> khong tim thay -> BO QUA, GIU NGUYEN chieuDangChon cu (dung dac
 		// ta: "chon chieu khong thuoc lang -> khong doi gi").
-		danhMuc := ChieuCuaLang(byte(nguoi.nv.Lang))
+		// KH8 task 3: doc tu ANH CHUP cua su kien nay (k.acNhip), KHONG goi
+		// ChieuCuaLang() toan cuc — ham do lay mot anh chup MOI moi lan.
+		danhMuc := chieuCuaLangTu(k.anhChupNoiDung(), byte(nguoi.nv.Lang))
 		for i := range danhMuc {
 			if danhMuc[i].Id == sk.mauChieuId && len(danhMuc[i].CacCap) > 0 {
 				// Luon lay cap 1 (CacCap[0]): Ke hoach 6 Task 2 chua co mo hinh
@@ -1552,6 +1586,40 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 // atomic.Pointer, xem chu thich truong boNhat.
 func (k *KhuVuc) GanBoNhat(b *BoNhatDo) { k.boNhat.Store(b) }
 
+// GanKhoNoiDung cam mot kho noi dung (KH8 task 2/3) vao khu vuc nay. Goi TU
+// goroutine main luc khoi dong (qua SoKhuVuc.GanKhoNoiDung); an toan nho
+// atomic.Pointer, cung ly do voi GanBoNhat/GanLoa.
+//
+// Chua goi -> khu vuc dung kho NHUNG (khoChieuMacDinh) — cung file YAML, nen
+// khac biet duy nhat la NAP NONG khong toi duoc khu vuc do.
+func (k *KhuVuc) GanKhoNoiDung(kho *noidung.Kho) { k.khoNoiDung.Store(nguonTuKho(kho)) }
+
+// ganNguonNoiDung cam mot NGUON tuy y — cua danh cho test cung goi (kho gia dem
+// so lan lay anh chup). Khong xuat khau: ben ngoai chi duoc cam mot *noidung.Kho
+// that qua GanKhoNoiDung.
+func (k *KhuVuc) ganNguonNoiDung(n *nguonNoiDung) { k.khoNoiDung.Store(n) }
+
+// layAnhChupNhip lay MOT anh chup noi dung cho nhip/su kien sap xu ly. GOI DUNG
+// MOT LAN o dau nhipTim va o dau xuLy — xem hop dong o truong acNhip va o dau
+// tep internal/noidung/kho.go.
+func (k *KhuVuc) layAnhChupNhip() khoChieuAnhChup {
+	if n := k.khoNoiDung.Load(); n != nil && n.lay != nil {
+		return n.lay()
+	}
+	return khoChieuMacDinh()
+}
+
+// anhChupNoiDung tra ve anh chup dang dung cho nhip hien tai. Neu chua co (mot
+// so test goi thang cac ham noi bo ma khong qua xuLy/nhipTim) thi lay mot cai
+// NGAY BAY GIO va nho lai — vá nay giu hop dong "trong mot nhip chi mot the he"
+// dung ca khi ai do vao giua chung.
+func (k *KhuVuc) anhChupNoiDung() khoChieuAnhChup {
+	if k.acNhip == nil {
+		k.acNhip = k.layAnhChupNhip()
+	}
+	return k.acNhip
+}
+
 // phatChoNguoiKhac gui goi tin `m` cho MOI nguoi trong khu vuc TRU nguoi co id `truId`.
 func (k *KhuVuc) phatChoNguoiKhac(truId int64, m *protocol.Message) {
 	var loi []int64
@@ -1995,6 +2063,12 @@ const (
 // thai (khong doi ky luat §1.6, chi doi cach to chuc code).
 func (k *KhuVuc) nhipTim() {
 	bayGio := k.dongHo()
+
+	// KH8 task 3: MOT anh chup noi dung cho CA nhip nay — dong nay va dong
+	// tuong ung o dau xuLy la HAI NOI DUY NHAT trong actor duoc lay anh chup.
+	// Cung ly do voi `bayGio` ngay tren: mot lan nap nong roi dung giua nhip se
+	// khong lam nua nhip tinh bang bang so cu va nua kia bang bang so moi.
+	k.acNhip = k.layAnhChupNhip()
 
 	// Task 9: snapshot nguoi choi thanh SLICE MOT LAN cho ca nhip nay, dung
 	// chung cho AI cua MOI con quai — tranh xay map->slice lai N lan (N = so
@@ -2516,7 +2590,7 @@ const (
 // chuyen: no dung yen thu the, khong bo di roi lai lan vao — dung nhu ban Java
 // (Boss.java chi di chuyen khi khong danh duoc vi KHOANG CACH).
 func (k *KhuVuc) aiBoss(b *Boss, pha *PhaBoss, nguoi []*nguoiTrongKhuVuc, bayGio time.Time) {
-	tamXaNhat := tamChieuXaNhatCuaPha(pha)
+	tamXaNhat := tamChieuXaNhatCuaPha(k.anhChupNoiDung(), pha)
 	if tamXaNhat <= 0 {
 		// Pha khong khai bao BoChieu (hoac du lieu chieu hong): FAIL-CLOSED.
 		// Khong co chieu thi khong co tam, khong co tam thi khong co muc tieu
@@ -2543,13 +2617,16 @@ func (k *KhuVuc) aiBoss(b *Boss, pha *PhaBoss, nguoi []*nguoiTrongKhuVuc, bayGio
 // Tra cuu qua TraCapChieu (chieuthuc.go) — cua DUY NHAT doi {templateId, cap}
 // thanh *CapChieu, dung chung voi nguoi choi. Tu doc catalog o day se tao ban
 // sao logic thu hai, va khac biet giua hai ban se hong IM LANG.
-func tamChieuXaNhatCuaPha(pha *PhaBoss) int64 {
+// KH8 task 3: nhan ANH CHUP tu ngoai (ac) thay vi tu tra bang toan cuc — de ca
+// mot nhip boss (tinh tam duoi -> chon muc tieu -> thu danh) dung DUNG MOT the
+// he so lieu.
+func tamChieuXaNhatCuaPha(ac khoChieuAnhChup, pha *PhaBoss) int64 {
 	if pha == nil {
 		return 0
 	}
 	var xaNhat int64
 	for _, bo := range pha.BoChieu {
-		cap := TraCapChieu(byte(pha.Lang), byte(bo[0]), byte(bo[1]))
+		cap := traCapChieuTu(ac, byte(pha.Lang), byte(bo[0]), byte(bo[1]))
 		if cap == nil {
 			continue
 		}
@@ -2663,8 +2740,9 @@ func (k *KhuVuc) bossThuDanh(b *Boss, pha *PhaBoss, mucTieu *nguoiTrongKhuVuc, b
 		return false // con trong nhip cua pha -> dung yen thu the, khong di
 	}
 
+	ac := k.anhChupNoiDung() // KH8 task 3: mot lan cho ca vong thu chieu
 	for _, bo := range pha.BoChieu {
-		cap := TraCapChieu(byte(pha.Lang), byte(bo[0]), byte(bo[1]))
+		cap := traCapChieuTu(ac, byte(pha.Lang), byte(bo[0]), byte(bo[1]))
 		if cap == nil {
 			continue
 		}

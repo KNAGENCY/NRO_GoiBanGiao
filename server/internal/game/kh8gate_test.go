@@ -89,23 +89,42 @@ func giaiVang(t *testing.T, ten, hexVang string) []byte {
 // GATE 1 — goi -28/7 (chieu thuc): 5 lang x 4 chieu x 3 cap
 // ---------------------------------------------------------------------------
 
-func TestKH8Gate_ChieuThuc_YAMLDungByteVoiGo(t *testing.T) {
-	tuGo, err := goiCatalogSkill()
+// ⚠️ KH8 TASK 3 DA DOI CAU HOI CUA GATE NAY.
+//
+// Truoc task 3, gate chieu so BA ban: Go vs YAML vs ban vang. Task 3 XOA bang
+// Go (chieuthuc.go khong con taoCapChieu/chieuTheoLang) — chi con MOT nguon.
+// "Go vs YAML" bay gio la YAML so voi CHINH NO: mot phep so luon dung, tuc mot
+// test khong bao gio do, tuc rac. Da bo.
+//
+// Con lai MOT phep so, va no van la phep so co gia tri nhat cua ca gate: goi
+// -28/7 dung tu kho noi dung phai KHOP TUNG BYTE voi BAN VANG ghim tay
+// (kh8gate_vang_test.go) — ban vang duoc chot tu du lieu Go hom truoc task 3.
+// Doi mot con so trong chieu.yaml -> test nay do ngay.
+//
+// Kiem CA HAI duong vao du lieu, vi tu task 3 chung la hai duong khac nhau toi
+// cung mot kho:
+//
+//	goiCatalogSkill()          — duong THAT cua may chu (qua anh chup kho nhung)
+//	goiCatalogSkillTu(chieuTuYAML(...)) — duong doc thang file YAML
+//
+// Hai duong nay lech nhau = bo doi kieu (khochieu.go hoac noidungyaml.go) sai.
+func TestKH8Gate_ChieuThuc_DungByteVoiBanVang(t *testing.T) {
+	vang := giaiVang(t, "-28/7", vangCatalogSkill)
+
+	tuAnhChup, err := goiCatalogSkill()
 	if err != nil {
-		t.Fatalf("dung goi -28/7 tu du lieu Go loi: %v", err)
+		t.Fatalf("dung goi -28/7 tu anh chup kho noi dung loi: %v", err)
 	}
+	soByte(t, "-28/7 (anh chup kho) vs BAN VANG", tuAnhChup.Data, vang)
+
 	tuYAML, err := goiCatalogSkillTu(chieuTuYAML(napKhoYAML(t)))
 	if err != nil {
 		t.Fatalf("dung goi -28/7 tu du lieu YAML loi: %v", err)
 	}
-	if tuGo.Command != tuYAML.Command {
-		t.Fatalf("ma lenh khac nhau: Go %d, YAML %d", tuGo.Command, tuYAML.Command)
+	if tuAnhChup.Command != tuYAML.Command {
+		t.Fatalf("ma lenh khac nhau: anh chup %d, YAML %d", tuAnhChup.Command, tuYAML.Command)
 	}
-	soByte(t, "-28/7 Go vs YAML", tuYAML.Data, tuGo.Data)
-
-	vang := giaiVang(t, "-28/7", vangCatalogSkill)
-	soByte(t, "-28/7 Go vs BAN VANG", tuGo.Data, vang)
-	soByte(t, "-28/7 YAML vs BAN VANG", tuYAML.Data, vang)
+	soByte(t, "-28/7 (doc thang YAML) vs BAN VANG", tuYAML.Data, vang)
 }
 
 // ---------------------------------------------------------------------------

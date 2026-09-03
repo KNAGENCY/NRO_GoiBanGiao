@@ -242,13 +242,22 @@ func TestTraCapChieuFailClosed(t *testing.T) {
 	mau := danhMuc[0]
 	soCap := byte(len(mau.CacCap))
 
-	// Hop le: cap 1 phai tra DUNG con tro toi CacCap[0] (khong phai ban sao).
-	if got := TraCapChieu(0, mau.Id, 1); got != &danhMuc[0].CacCap[0] {
-		t.Fatalf("TraCapChieu(0, %d, 1) khong tra dung con tro CacCap[0]", mau.Id)
+	// KH8 task 3: TraCapChieu tra ve con tro toi mot BAN SAO (anh chup kho noi
+	// dung la bat bien, khong ai duoc cam con tro vao ruot no) — nen o day so
+	// GIA TRI, khong so dia chi nhu truoc task 3.
+	if got := TraCapChieu(0, mau.Id, 1); got == nil || *got != mau.CacCap[0] {
+		t.Fatalf("TraCapChieu(0, %d, 1) = %+v, mong doi %+v", mau.Id, got, mau.CacCap[0])
 	}
 	// Hop le: cap cuoi cung.
-	if got := TraCapChieu(0, mau.Id, soCap); got != &danhMuc[0].CacCap[soCap-1] {
-		t.Fatalf("TraCapChieu(0, %d, %d) khong tra dung cap cuoi", mau.Id, soCap)
+	if got := TraCapChieu(0, mau.Id, soCap); got == nil || *got != mau.CacCap[soCap-1] {
+		t.Fatalf("TraCapChieu(0, %d, %d) = %+v, mong doi %+v", mau.Id, soCap, got, mau.CacCap[soCap-1])
+	}
+	// Va no PHAI la ban sao: sua ket qua tra ve khong duoc lam ban danh muc.
+	if got := TraCapChieu(0, mau.Id, 1); got != nil {
+		got.SatThuong += 12345
+		if lai := TraCapChieu(0, mau.Id, 1); lai == nil || lai.SatThuong != mau.CacCap[0].SatThuong {
+			t.Fatalf("sua ket qua TraCapChieu lam ban kho noi dung: %+v", lai)
+		}
 	}
 
 	xau := []struct {

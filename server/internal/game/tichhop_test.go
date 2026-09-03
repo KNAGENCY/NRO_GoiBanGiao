@@ -482,8 +482,8 @@ func TestTaoRoiDangNhapLai_ThayNhanVat(t *testing.T) {
 	if nv.Lang != 0 {
 		t.Errorf("lang = %d, mong doi 0", nv.Lang)
 	}
-	if nv.HpToiDa != 150 || nv.HpHienTai != 150 {
-		t.Errorf("hp toi da/hien tai = %d/%d, mong doi ca hai deu = 150 (HpKhoiDau ghim cua lang 0)",
+	if nv.HpToiDa != 200 || nv.HpHienTai != 200 {
+		t.Errorf("hp toi da/hien tai = %d/%d, mong doi ca hai deu = 200 (HpKhoiDau ghim cua lang 0)",
 			nv.HpToiDa, nv.HpHienTai)
 	}
 	if nv.ChakraToiDa != 150 || nv.ChakraHienTai != 150 {
@@ -963,7 +963,7 @@ func TestTichHop_TatBatMayChu_LuuDungViTriVaMau(t *testing.T) {
 	}
 	clB.guiDanhNguoiChoi(int32(nvA.ID))
 
-	hpMongDoi := nvA.HpToiDa - 2 // ghim cung: 150 - 2 = 148
+	hpMongDoi := nvA.HpToiDa - 11 // ghim cung: 200 - 11 = 189
 
 	loiA := make(chan error, 1)
 	loiB := make(chan error, 1)
@@ -978,8 +978,8 @@ func TestTichHop_TatBatMayChu_LuuDungViTriVaMau(t *testing.T) {
 			loiA <- fmt.Errorf("A: doc goi -60 loi: %w", errDoc)
 			return
 		}
-		if g.idDanh != int32(nvB.ID) || g.idTrung != int32(nvA.ID) || g.satThuong != 2 || g.daChet != 0 {
-			loiA <- fmt.Errorf("A: goi -60 noi dung sai: %+v (mong idDanh=%d idTrung=%d satThuong=2 daChet=0)", g, nvB.ID, nvA.ID)
+		if g.idDanh != int32(nvB.ID) || g.idTrung != int32(nvA.ID) || g.satThuong != 11 || g.daChet != 0 {
+			loiA <- fmt.Errorf("A: goi -60 noi dung sai: %+v (mong idDanh=%d idTrung=%d satThuong=11 daChet=0)", g, nvB.ID, nvA.ID)
 			return
 		}
 		loiA <- nil
@@ -1032,7 +1032,7 @@ func TestTichHop_TatBatMayChu_LuuDungViTriVaMau(t *testing.T) {
 			nvASauTat.ViTriX, nvASauTat.ViTriY, viTriGhimCungX, viTriGhimCungY)
 	}
 	if nvASauTat.HpHienTai != hpMongDoi {
-		t.Fatalf("sau tat-bat may chu, mau A = %d, mong doi MAU GHIM CUNG %d (150 - satThuong 2)",
+		t.Fatalf("sau tat-bat may chu, mau A = %d, mong doi MAU GHIM CUNG %d (200 - satThuong 11)",
 			nvASauTat.HpHienTai, hpMongDoi)
 	}
 }
@@ -1150,7 +1150,7 @@ func TestTichHop_NgatKetNoiThuong_LuuQuaDuongNoiDayDayDu(t *testing.T) {
 	}
 	clB.guiDanhNguoiChoi(int32(nvA.ID))
 
-	hpMongDoi := nvA.HpToiDa - 2 // ghim cung: 150 - 2 = 148
+	hpMongDoi := nvA.HpToiDa - 11 // ghim cung: 200 - 11 = 189
 
 	loiA := make(chan error, 1)
 	loiB := make(chan error, 1)
@@ -1165,8 +1165,8 @@ func TestTichHop_NgatKetNoiThuong_LuuQuaDuongNoiDayDayDu(t *testing.T) {
 			loiA <- fmt.Errorf("A: doc goi -60 loi: %w", errDoc)
 			return
 		}
-		if g.idDanh != int32(nvB.ID) || g.idTrung != int32(nvA.ID) || g.satThuong != 2 || g.daChet != 0 {
-			loiA <- fmt.Errorf("A: goi -60 noi dung sai: %+v (mong idDanh=%d idTrung=%d satThuong=2 daChet=0)", g, nvB.ID, nvA.ID)
+		if g.idDanh != int32(nvB.ID) || g.idTrung != int32(nvA.ID) || g.satThuong != 11 || g.daChet != 0 {
+			loiA <- fmt.Errorf("A: goi -60 noi dung sai: %+v (mong idDanh=%d idTrung=%d satThuong=11 daChet=0)", g, nvB.ID, nvA.ID)
 			return
 		}
 		loiA <- nil

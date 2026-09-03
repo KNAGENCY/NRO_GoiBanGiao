@@ -11,11 +11,11 @@ D4 - DI DANH QUAI BAO LAU MOI MUA NOI MOT MON?
 
 Lang                D1 giet thuan   moi don D1 kich ban that                     D3 PvP    D4 mua ao
 ---------------- ---------------- --------- ------------------------------ ------------ ------------
-Làng Lá                 49,1 giay     2 mau NGUOI CHOI CHET sau 19,1 giay      2T/2B/0H     218 phut
-Làng Cát                49,1 giay     2 mau NGUOI CHOI CHET sau 12,1 giay      1T/3B/0H     218 phut
-Làng Sương Mù           33,1 giay     3 mau NGUOI CHOI CHET sau 16,1 giay      3T/1B/0H     147 phut
-Làng Đá                 49,1 giay     2 mau NGUOI CHOI CHET sau 32,1 giay      4T/0B/0H     218 phut
-Làng Mây                49,1 giay     2 mau NGUOI CHOI CHET sau 15,1 giay      0T/4B/0H     218 phut
+Làng Lá                  9,1 giay    11 mau giet duoc sau 9,1 giay             2T/1B/1H      30 phut
+Làng Cát                 9,1 giay    10 mau giet duoc sau 9,1 giay             1T/2B/1H      30 phut
+Làng Sương Mù            8,1 giay    12 mau giet duoc sau 8,1 giay             1T/1B/2H      27 phut
+Làng Đá                  9,1 giay    10 mau giet duoc sau 9,1 giay             2T/1B/1H      30 phut
+Làng Mây                 9,1 giay    11 mau giet duoc sau 9,1 giay             1T/2B/1H      30 phut
 
   Cot "D1 giet thuan": nguoi do duoc cho mau rat lon de KHONG chet, quai van
   danh tra va van hoi mau - do la nhip giet THAT SU cua lang, dung lam goc cho
@@ -29,12 +29,11 @@ Làng Mây                49,1 giay     2 mau NGUOI CHOI CHET sau 15,1 giay     
 D2 - NAM NGUOI CHI SO KHOI DAU HA BOSS LON PHA 1 MAT BAO LAU?
 
   Boss:            nhan-gia-mat-na - pha 1 "Kẻ Lạ Mặt"
-  Mau boss:        3000 (phan tu giua cua hp_chon, khong gieo ngau nhien)
+  Mau boss:        4500 (phan tu giua cua hp_chon, khong gieo ngau nhien)
   Nguoi danh:      5 nguoi Lang La, chi so khoi dau, chieu can chien cap 1
-  KET QUA:         KHONG HA NOI - ca 5 nguoi guc sau 51,1 giay
-                   Boss con 2708 / 3000 mau khi nguoi cuoi cung guc.
-  Con song cuoi:   0 / 5 nguoi
-  Boss noi gian:   0 lan
+  KET QUA:         HA DUOC BOSS sau 2 phut 2,5 giay
+  Con song cuoi:   2 / 5 nguoi
+  Boss noi gian:   2 lan
 
 D4 - GIA DINH CUA PHEP DO KINH TE (doc ky truoc khi tin cot "D4 mua ao")
 
@@ -42,9 +41,9 @@ D4 - GIA DINH CUA PHEP DO KINH TE (doc ky truoc khi tin cot "D4 mua ao")
   "vang kiem duoc" o day la tien BAN LAI cho NPC (gia_ban_lai) cua nhung mon
   roi ra, gia su nguoi choi ban lai het sach.
 
-  - Thuốc hồi máu nhỏ: roi 10,0% x 1 cai x ban lai 25 vang = 2,50 vang/con
-  - Thuốc hồi chakra nhỏ: roi 5,0% x 1 cai x ban lai 25 vang = 1,25 vang/con
-  => Ky vong: 3,75 vang moi con Soi Rung.
+  - Thuốc hồi máu nhỏ: roi 12,0% x 1 cai x ban lai 25 vang = 3,00 vang/con
+  - Thuốc hồi chakra nhỏ: roi 8,0% x 1 cai x ban lai 25 vang = 2,00 vang/con
+  => Ky vong: 5,00 vang moi con Soi Rung.
   => Mon do lam moc: "Ao ninja Lang La", gia 1000 vang.
 
 ==============================================================================

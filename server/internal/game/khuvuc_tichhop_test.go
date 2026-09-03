@@ -664,8 +664,8 @@ func TestTichHop_DanhQuaiConSong(t *testing.T) {
 		}
 		muon := []byte{
 			0,           // mobId
-			0, 0, 0, 98, // hpConLai = 100 - 2 = 98
-			0, 0, 0, 2, // satThuong = 2 (12 * 20 / 100, xem chu thich dau nhom test)
+			0, 0, 0, 89, // hpConLai = 100 - 11 = 89
+			0, 0, 0, 11, // satThuong = 11 (55 * 20 / 100, xem chu thich dau nhom test)
 			0,   // chiMang = false
 			255, // hieuUngId = -1 (khong hieu ung, dac ta §3.3)
 		}
@@ -911,8 +911,8 @@ func TestTichHop_DanhQuaiThuCungDocDu5ByteKhongLechDong(t *testing.T) {
 	goi9 := clA.doiGoiLenh(t, -9)
 	muon := []byte{
 		1,           // mobId
-		0, 0, 0, 98, // hpConLai = 100 - 2 = 98
-		0, 0, 0, 2, // satThuong = 2
+		0, 0, 0, 89, // hpConLai = 100 - 11 = 89
+		0, 0, 0, 11, // satThuong = 11
 		0,   // chiMang = false
 		255, // hieuUngId = -1
 	}
@@ -1392,8 +1392,8 @@ func TestTichHop_DanhNguoiChoiConSong(t *testing.T) {
 		}
 		if g.idDanh != int32(nvA.ID) || g.skillId != 1 || g.soMucTieu != 1 ||
 			g.idTrung != int32(nvB.ID) || g.docTiep != 1 || g.loaiChieu != 0 ||
-			g.satThuong != 2 || g.daChet != 0 || g.chiMang != 0 {
-			return fmt.Errorf("A: goi -60 noi dung sai: %+v (mong idDanh=%d idTrung=%d skillId=1 soMucTieu=1 docTiep=1 loaiChieu=0 satThuong=2 daChet=0 chiMang=0)",
+			g.satThuong != 11 || g.daChet != 0 || g.chiMang != 0 {
+			return fmt.Errorf("A: goi -60 noi dung sai: %+v (mong idDanh=%d idTrung=%d skillId=1 soMucTieu=1 docTiep=1 loaiChieu=0 satThuong=11 daChet=0 chiMang=0)",
 				g, nvA.ID, nvB.ID)
 		}
 
@@ -1415,8 +1415,8 @@ func TestTichHop_DanhNguoiChoiConSong(t *testing.T) {
 		if id != int32(nvB.ID) {
 			return fmt.Errorf("A: idNguoiChoi trong -30/9 = %d, mong doi %d (B)", id, nvB.ID)
 		}
-		if hp != nvB.HpToiDa-2 {
-			return fmt.Errorf("A: hp trong -30/9 = %d, mong doi %d (150-2)", hp, nvB.HpToiDa-2)
+		if hp != nvB.HpToiDa-11 {
+			return fmt.Errorf("A: hp trong -30/9 = %d, mong doi %d (200-11)", hp, nvB.HpToiDa-11)
 		}
 		if hpMax != nvB.HpToiDa {
 			return fmt.Errorf("A: hpMax trong -30/9 = %d, mong doi %d", hpMax, nvB.HpToiDa)
@@ -1432,7 +1432,7 @@ func TestTichHop_DanhNguoiChoiConSong(t *testing.T) {
 		if err != nil {
 			return fmt.Errorf("B: doc goi -60 loi: %w", err)
 		}
-		if g.idDanh != int32(nvA.ID) || g.idTrung != int32(nvB.ID) || g.satThuong != 2 || g.daChet != 0 || g.chiMang != 0 {
+		if g.idDanh != int32(nvA.ID) || g.idTrung != int32(nvB.ID) || g.satThuong != 11 || g.daChet != 0 || g.chiMang != 0 {
 			return fmt.Errorf("B: goi -60 noi dung sai: %+v", g)
 		}
 		return nil
@@ -1532,7 +1532,7 @@ func moKhuVucDauCuoiMotQuai(t *testing.T, dh *dongHoDauCuoi) (*KhuVuc, *SoKhuVuc
 	k.dongHo = dh.bayGio
 	k.quai = []*Quai{{
 		Id: 0, MauId: 1, Cap: 1, CapTinhAnh: 1,
-		Hp: 3, HpToiDa: 3,
+		Hp: 12, HpToiDa: 12, // 12 - 11 (mot don cap 1 lang 0 sau vong can bang KH8 task 13) = 1
 		X: bd.SpawnX + 30, Y: bd.SpawnY,
 		SatThuongCoBan: 7,
 	}}
@@ -1770,8 +1770,8 @@ func TestTichHop_DauCuoiHaiNguoiChoiChienDauVaQuai(t *testing.T) {
 		if e1 != nil || e2 != nil || e3 != nil || e4 != nil || e5 != nil {
 			return fmt.Errorf("doc -9 loi: %v/%v/%v/%v/%v", e1, e2, e3, e4, e5)
 		}
-		if mobId != 0 || hpConLai != 1 || satThuong != 2 || chiMang != 0 || hieuUngId != 255 {
-			return fmt.Errorf("-9 sai: mobId=%d hpConLai=%d satThuong=%d chiMang=%d hieuUngId=%d, mong mobId=0 hpConLai=1 satThuong=2 chiMang=0 hieuUngId=255",
+		if mobId != 0 || hpConLai != 1 || satThuong != 11 || chiMang != 0 || hieuUngId != 255 {
+			return fmt.Errorf("-9 sai: mobId=%d hpConLai=%d satThuong=%d chiMang=%d hieuUngId=%d, mong mobId=0 hpConLai=1 satThuong=11 chiMang=0 hieuUngId=255",
 				mobId, hpConLai, satThuong, chiMang, hieuUngId)
 		}
 		return nil
@@ -1829,8 +1829,8 @@ func TestTichHop_DauCuoiHaiNguoiChoiChienDauVaQuai(t *testing.T) {
 		if e1 != nil || e2 != nil || e3 != nil || e4 != nil {
 			return fmt.Errorf("doc -13 loi: %v/%v/%v/%v", e1, e2, e3, e4)
 		}
-		if mobId != 0 || sys != 0 || levelBoss != 0 || hp != 3 {
-			return fmt.Errorf("-13 sai: mobId=%d sys=%d levelBoss=%d hp=%d, mong mobId=0 sys=0 levelBoss=0 hp=3 (HpToiDa)",
+		if mobId != 0 || sys != 0 || levelBoss != 0 || hp != 12 {
+			return fmt.Errorf("-13 sai: mobId=%d sys=%d levelBoss=%d hp=%d, mong mobId=0 sys=0 levelBoss=0 hp=12 (HpToiDa)",
 				mobId, sys, levelBoss, hp)
 		}
 		return nil
@@ -1904,7 +1904,7 @@ func TestTichHop_DauCuoiHaiNguoiChoiChienDauVaQuai(t *testing.T) {
 	// (TestTichHop_DanhQuaiChet) va k.nguoiTrong[nvB.ID].nv.ViTriX (o tren) —
 	// KHONG vi pham ky luat actor vi KHONG co goroutine nao khac dang chay tai
 	// thoi diem nay.
-	k.nguoiTrong[nvB.ID].nv.HpHienTai = 2
+	k.nguoiTrong[nvB.ID].nv.HpHienTai = 11 // = dung mot don cap 1 (KH8 task 13): don ket lieu bao dung 11, khong bi kep
 
 	// --- Brief buoc (4): A danh B TOI CHET -> ca hai thay -60, A thay -8 (bao
 	// "nguoi khac" B da chet) — B KHONG nhan -8 cua chinh minh, thay vao do
@@ -1920,8 +1920,8 @@ func TestTichHop_DauCuoiHaiNguoiChoiChienDauVaQuai(t *testing.T) {
 			if err != nil {
 				return fmt.Errorf("A: doc than -60 loi: %w", err)
 			}
-			if g.idDanh != int32(nvA.ID) || g.idTrung != int32(nvB.ID) || g.satThuong != 2 || g.daChet != 1 {
-				return fmt.Errorf("A: -60 sai: %+v, mong idDanh=%d idTrung=%d satThuong=2 daChet=1", g, nvA.ID, nvB.ID)
+			if g.idDanh != int32(nvA.ID) || g.idTrung != int32(nvB.ID) || g.satThuong != 11 || g.daChet != 1 {
+				return fmt.Errorf("A: -60 sai: %+v, mong idDanh=%d idTrung=%d satThuong=11 daChet=1", g, nvA.ID, nvB.ID)
 			}
 			// A la "nguoi khac" cua B (khong phai chinh B) -> nhan THEM -8 bao
 			// B da chet (dac ta §3.4, brief "A thay -8 cua B"). doiGoiLenhKhongFatal
@@ -1948,8 +1948,8 @@ func TestTichHop_DauCuoiHaiNguoiChoiChienDauVaQuai(t *testing.T) {
 			if err != nil {
 				return fmt.Errorf("B: doc than -60 loi: %w", err)
 			}
-			if g.idDanh != int32(nvA.ID) || g.idTrung != int32(nvB.ID) || g.satThuong != 2 || g.daChet != 1 {
-				return fmt.Errorf("B: -60 sai: %+v, mong idDanh=%d idTrung=%d satThuong=2 daChet=1", g, nvA.ID, nvB.ID)
+			if g.idDanh != int32(nvA.ID) || g.idTrung != int32(nvB.ID) || g.satThuong != 11 || g.daChet != 1 {
+				return fmt.Errorf("B: -60 sai: %+v, mong idDanh=%d idTrung=%d satThuong=11 daChet=1", g, nvA.ID, nvB.ID)
 			}
 			// B la CHINH CHU vua chet -> nhan -17 (RIENG, KHONG phai -8, xem
 			// dac ta §3.4/§7.2) — kiem them de chac chan hai chieu khong lan.

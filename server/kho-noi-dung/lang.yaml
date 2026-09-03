@@ -27,9 +27,12 @@
 lang:
   - id: 0
     ten: "Làng Lá"
-    hp_khoi_dau: 150
+    hp_khoi_dau: 200
     chakra_khoi_dau: 150
-    sat_thuong_khoi_dau: 12
+    # 55 -> mot don can chien cap 1 (20%) = 11 mau. Vong can bang KH8 task 13:
+    # goc cu 12 x 20% lam tron xuong con 2 mau, phep lam tron nuot sach chenh
+    # lech giua cac lang; nang goc len tam 50-60 de 10% chenh lech con thay duoc.
+    sat_thuong_khoi_dau: 55
     map_khoi_dau: 1
     vi_tri_x_khoi_dau: 100
     vi_tri_y_khoi_dau: 384
@@ -37,9 +40,11 @@ lang:
 
   - id: 1
     ten: "Làng Cát"
-    hp_khoi_dau: 100
+    hp_khoi_dau: 190
     chakra_khoi_dau: 250
-    sat_thuong_khoi_dau: 10
+    # 50 -> don can chien cap 1 = 10 mau (thap nhat cung Lang Da): Cat manh o
+    # chakra/danh xa, khong phai o sat thuong.
+    sat_thuong_khoi_dau: 50
     map_khoi_dau: 2
     vi_tri_x_khoi_dau: 100
     vi_tri_y_khoi_dau: 384
@@ -47,9 +52,11 @@ lang:
 
   - id: 2
     ten: "Làng Sương Mù"
-    hp_khoi_dau: 130
+    # Gion nhat (160) nhung danh dau nhat (60 -> 12 mau moi don): dung tinh cach
+    # "can chien sat thuong" cua Suong Mu.
+    hp_khoi_dau: 160
     chakra_khoi_dau: 100
-    sat_thuong_khoi_dau: 16
+    sat_thuong_khoi_dau: 60
     map_khoi_dau: 3
     vi_tri_x_khoi_dau: 100
     vi_tri_y_khoi_dau: 384
@@ -57,9 +64,11 @@ lang:
 
   - id: 3
     ten: "Làng Đá"
-    hp_khoi_dau: 250
+    # Trau nhat (220) nhung don nhe (50 -> 10 mau): lang phong thu.
+    # 250 cu lam Lang Da THANG CA 4 doi thu o D3 - 220 dua no ve 2 thang/1 thua.
+    hp_khoi_dau: 220
     chakra_khoi_dau: 100
-    sat_thuong_khoi_dau: 10
+    sat_thuong_khoi_dau: 50
     map_khoi_dau: 4
     vi_tri_x_khoi_dau: 100
     vi_tri_y_khoi_dau: 384
@@ -67,9 +76,10 @@ lang:
 
   - id: 4
     ten: "Làng Mây"
-    hp_khoi_dau: 120
+    # 180/55: nhanh nhen, mau vua, don 11 mau - cu 120 mau lam May THUA CA 4.
+    hp_khoi_dau: 180
     chakra_khoi_dau: 130
-    sat_thuong_khoi_dau: 13
+    sat_thuong_khoi_dau: 55
     map_khoi_dau: 5
     vi_tri_x_khoi_dau: 100
     vi_tri_y_khoi_dau: 384

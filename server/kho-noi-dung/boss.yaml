@@ -117,13 +117,21 @@ boss:
         # Bộ đồ học viên: dạng trá lốt của pha 1. Người chơi nhìn vào tưởng một
         # học viên bình thường — đúng ý đồ.
         outfit: [30, 57, 58, 0, 0, 0]
-        dame: 60         # -> đòn 24..30, người chơi 150 máu chịu ~5 đòn
+        # 60 -> 15 (vòng cân bằng KH8 task 13). Số học ép: 5 người chỉ số khởi
+        # đầu có TỔNG 1000 máu và KHÔNG có đường hồi máu nào trong trận. Muốn
+        # trận kéo 2-3 phút thì tổng sát thương boss gây ra trong 2-3 phút phải
+        # nhỏ hơn 1000 — nghĩa là dưới ~6 máu/giây, kể cả sau hai mốc nổi giận
+        # (nhân dồn ×1,63 rồi ×2,13). dame 60 giết sạch 5 người trong 55 giây.
+        dame: 15
         type_pk: 5       # TypePkBoss (boss.go). 0 = người chơi KHÔNG thấy thanh máu boss.
         # 1500ms = 15 nhịp actor. Bội số của 100 là BẮT BUỘC chứ không phải cho
         # tròn: boss cập nhật trong nhịp 100ms của khu vực, nên 1450ms trên thực
         # tế vẫn là 1500ms — phần lẻ là con số nói dối.
         nhip_danh_ms: 1500
-        hp_chon: [2400, 3000, 3600]
+        # 3000 -> 4500 (giữa). 5 người cấp 1 gây ~33 máu/giây, nên 4500 máu là
+        # khoảng 2 phút 15 — đúng khung 2-3 phút, và đủ dài để CẢ HAI mốc nổi
+        # giận (50% và 20%) kịp chạy.
+        hp_chon: [3600, 4500, 5400]
         map_vao: [1]
         bo_chieu:
           - {template_id: 1, cap: 2}   # cận chiến

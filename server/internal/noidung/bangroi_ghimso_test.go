@@ -22,9 +22,14 @@ func TestBangRoiNhung_GhimSoKhoiDauTheoBangGoCu(t *testing.T) {
 			{MauId: 4, SoLuong: 1, TiLePhanTram: 2},
 		},
 		Quai: map[string][]MucRoi{
+			// KH8 task 13 (vòng cân bằng): 10/5 → 12/8. Có chủ đích, không phải
+			// trượt tay. Với 10%/5% và giá bán lại 25 vàng, mỗi con Sói Rừng đáng
+			// 3,75 vàng, tức đúng 40 phút mới mua nổi cái áo 1000 vàng — sát mép
+			// trên của khung 20-40 phút (§5.3). 12%/8% cho 5,00 vàng/con, khoảng
+			// 30 phút. Đo lại bằng server/DO-CAN-BANG.bat.
 			"soi-rung": {
-				{MauId: 0, SoLuong: 1, TiLePhanTram: 10},
-				{MauId: 1, SoLuong: 1, TiLePhanTram: 5},
+				{MauId: 0, SoLuong: 1, TiLePhanTram: 12},
+				{MauId: 1, SoLuong: 1, TiLePhanTram: 8},
 			},
 		},
 		Boss: map[string][]MucRoi{

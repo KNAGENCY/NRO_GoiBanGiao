@@ -1,0 +1,117 @@
+# quai.yaml — MẪU QUÁI và ĐIỂM SINH QUÁI.
+#
+# (KH8 task 8. Thiết kế: docs/superpowers/specs/2026-09-03-kh8-kho-noi-dung-design.md
+# hàng "8" bảng Task, §2 căn cước, §4 nạp nóng, §5.3 đo cân bằng.)
+#
+# ============================================================================
+# CĂN CƯỚC QUÁI LÀ MỘT MÃ CHUỖI (`ma`), KHÔNG PHẢI SỐ.
+# ============================================================================
+#
+# Khác hẳn `vat-pham.yaml` (ở đó `id` là chỉ số mảng và ĐANG NẰM TRONG CSDL người
+# chơi, nên không được đổi thứ tự). Mẫu quái KHÔNG đi xuống client và KHÔNG được
+# lưu vào CSDL người chơi ở đâu cả — server chỉ dùng nó lúc SINH quái. Vì vậy ở
+# đây được phép sắp xếp lại, thêm, đổi tên thoải mái: cái duy nhất phải giữ là
+# `ma`, vì `sinh:` bên dưới trỏ tới mẫu bằng chính chuỗi đó.
+#
+# Đổi `ma` của một mẫu mà quên sửa `sinh:` → bộ kiểm TỪ CHỐI NẠP ngay (không có
+# đường im lặng ra một bản đồ trống quái).
+#
+# ============================================================================
+# `anh_id` PHẢI CÓ TRONG CATALOG ẢNH ĐÃ KÝ.
+# ============================================================================
+#
+# Ảnh quái nằm trong `internal/game/assets/catalog.json`, và file đó bị GHIM SHA
+# trong `asset-lock.json` — nghĩa là danh sách id ảnh quái hợp lệ là một sự thật
+# ĐÃ KÝ, không sửa được bằng file này. `anh_id` ở đây chỉ được TRỎ TỚI một id đã
+# có trong `closure.mob_ids` của asset-lock. Trỏ sai = client không có ảnh để vẽ
+# và không báo một dòng lỗi nào.
+#
+# Việc đối chiếu id ảnh nằm ở `internal/game/khoquai.go` (gói `noidung` không
+# import gói `game`, nên nó nhận danh sách id hợp lệ làm THAM SỐ — xem
+# noidung.KiemIdAnhQuai).
+#
+# ============================================================================
+# CÁI GÌ KHÔNG NẠP NÓNG ĐƯỢC: QUÁI ĐANG SỐNG.
+# ============================================================================
+#
+# Một con quái nhận `hp` / `sat_thuong_co_ban` / `cap` MỘT LẦN, lúc nó được SINH
+# ra (MoKhuVuc). Nạp nóng file này KHÔNG sửa những con quái đang đứng sẵn trên
+# bản đồ — chúng giữ số của THẾ HỆ LÚC SINH cho tới khi máy chủ khởi động lại.
+#
+# Đây là lựa chọn CÓ CHỦ ĐÍCH, không phải thiếu sót: sửa `hp` của một con quái
+# đang bị đánh dở là làm máu nó nhảy giữa trận, và sửa `hp` mà không sửa `hpMax`
+# đã gửi xuống client trong gói -24 là làm thanh máu client vẽ sai vĩnh viễn.
+# Muốn số mới có hiệu lực: khởi động lại máy chủ.
+#
+# (Hồi sinh 5 giây / hồi máu 30 giây thì KHÔNG nằm trong file này — chúng là hằng
+# hành vi dùng chung cho mọi quái, nguồn Mob.java:347, và phải là bội số của nhịp
+# actor 100ms. Chúng ở `internal/game/khuvuc.go` cùng chỗ với tầm/nhịp AI. Chuyển
+# chúng sang YAML là một việc cân bằng riêng, không phải việc của task này —
+# xem báo cáo task 8.)
+#
+# ============================================================================
+# CON SỐ Ở ĐÂU RA
+# ============================================================================
+#
+# `ten`, `anh_id`, `hp`, và toàn bộ khối `sinh:` chép NGUYÊN VĂN từ
+# `internal/game/assets/catalog.json` (khối `mobs[0]`: id 0, "Sói Rừng", hp 100,
+# hai điểm sinh 160/384 và 40/384).
+#
+# `sat_thuong_co_ban: 5` chép từ hằng số cứng cũ ở `game/quai.go` (taoQuaiMacDinh,
+# dòng 187 trước task 8) — con số đó do người viết KH6 đặt tạm để AI quái có một
+# đường chạy thật, KHÔNG trích từ bản Java. Đây chính là số mà §5.3 nói cần tách
+# ra từng mẫu để sau này ĐO CÂN BẰNG được: sửa nó ở đây rồi khởi động lại là đủ.
+#
+# `cap` / `cap_tinh_anh` = 1: chép từ cùng dòng quai.go đó.
+
+mau_quai:
+  - ma: soi-rung
+    ten: Sói Rừng
+    anh_id: 0 # catalog.json mobs[0].id — phải có trong asset-lock closure.mob_ids
+    hp: 100 # catalog.json mobs[0].hp
+    sat_thuong_co_ban: 5 # game/quai.go cũ (hằng 5)
+    cap: 1 # game/quai.go cũ
+    cap_tinh_anh: 1 # game/quai.go cũ — cấp HIỂN THỊ cạnh tên, ô riêng trong gói -24
+
+# ---------------------------------------------------------------------------
+# Điểm sinh, theo từng bản đồ
+# ---------------------------------------------------------------------------
+#
+# ⚠️ SÁU KHỐI DƯỚI ĐÂY GIỐNG HỆT NHAU. Đó KHÔNG phải lỗi chép dán: bản cũ
+# (taoQuaiMacDinh) dùng CHUNG một danh sách điểm sinh cho MỌI bản đồ, nên cả sáu
+# làng đều có đúng hai con Sói Rừng ở cùng toạ độ. Task 8 chỉ CHUYỂN CHỖ Ở của
+# con số, không đổi hành vi — nên phải khai đủ sáu khối để giữ nguyên trạng.
+#
+# Khai TƯỜNG MINH từng map (thay vì một cờ "áp dụng mọi map") là có chủ đích:
+# thiết kế nội dung thật sẽ cho mỗi làng một đàn quái khác nhau, và khuôn này
+# đón sẵn việc đó — sửa một khối không đụng vào khối khác. Một cờ "mọi map" thì
+# ngày đầu tiên có người muốn map 3 khác đi là phải viết lại cả khuôn.
+#
+# `id` là tempId — id TẠM THỜI trong phạm vi một khu vực, client đọc bằng byte
+# CÓ DẤU nên phải nằm trong 0..127, và không được trùng trong cùng một map.
+
+sinh:
+  - map: 1 # Làng Lá
+    dat:
+      - { ma: soi-rung, id: 0, x: 160, y: 384 }
+      - { ma: soi-rung, id: 1, x: 40, y: 384 }
+  - map: 2 # Làng Cát
+    dat:
+      - { ma: soi-rung, id: 0, x: 160, y: 384 }
+      - { ma: soi-rung, id: 1, x: 40, y: 384 }
+  - map: 3 # Làng Sương Mù
+    dat:
+      - { ma: soi-rung, id: 0, x: 160, y: 384 }
+      - { ma: soi-rung, id: 1, x: 40, y: 384 }
+  - map: 4 # Làng Đá
+    dat:
+      - { ma: soi-rung, id: 0, x: 160, y: 384 }
+      - { ma: soi-rung, id: 1, x: 40, y: 384 }
+  - map: 5 # Làng Mây
+    dat:
+      - { ma: soi-rung, id: 0, x: 160, y: 384 }
+      - { ma: soi-rung, id: 1, x: 40, y: 384 }
+  - map: 6 # Khu rừng
+    dat:
+      - { ma: soi-rung, id: 0, x: 160, y: 384 }
+      - { ma: soi-rung, id: 1, x: 40, y: 384 }

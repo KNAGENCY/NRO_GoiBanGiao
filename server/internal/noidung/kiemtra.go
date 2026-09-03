@@ -294,6 +294,34 @@ func kiemK1SkillIdToanCuc(du *DuLieu) error {
 	return nil
 }
 
+// KiemIdAnhQuai doi chieu `anh_id` cua MOI mau quai voi danh sach id anh quai
+// HOP LE (KH8 task 8, thiet ke §6).
+//
+// VI SAO HAM NAY XUAT KHAU va nhan danh sach lam THAM SO, thay vi nam trong Nap
+// nhu moi bo kiem khac: nguon su that cua id anh la `internal/game/assets/
+// catalog.json`, mot file bi GHIM SHA trong `asset-lock.json`, va no duoc doc
+// boi goi `game`. Huong import da chot cua du an la game -> noidung, TUYET DOI
+// khong nguoc lai (noidung.go, dau tep) — nen goi nay khong the tu di lay danh
+// sach do. Nguoi TIEM du lieu (game/khoquai.go) goi ham nay ngay sau khi nap.
+//
+// Ham THUAN, khong doc file, khong doc dong ho — nen test duoc bang mot danh
+// sach id gia, khong can dung toi catalog that.
+func KiemIdAnhQuai(mau []MauQuai, idHopLe []int) error {
+	co := make(map[int]bool, len(idHopLe))
+	for _, id := range idHopLe {
+		co[id] = true
+	}
+	for _, m := range mau {
+		if !co[m.AnhId] {
+			return fmt.Errorf("mau quai %q: anh_id = %d KHONG co trong catalog anh da ky "+
+				"(asset-lock.json, closure.mob_ids) — client khong co anh de ve con quai nay va "+
+				"KHONG bao mot dong loi nao. Muon them anh quai moi thi phai lam lai goi asset va "+
+				"ky lai lock, khong sua duoc bang %s", m.Ma, m.AnhId, TenFileQuai)
+		}
+	}
+	return nil
+}
+
 // ---------------------------------------------------------------------------
 // K2 — tham chieu cheo (dot bien M9)
 // ---------------------------------------------------------------------------

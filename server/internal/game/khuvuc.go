@@ -515,15 +515,24 @@ var (
 const thoiGianChoControl = 100 * time.Millisecond
 
 // MoKhuVuc tao mot khu vuc giu ban do da cho, chua co nguoi choi nao. Quai
-// (Ke hoach 6 Task 5) duoc sinh MOT LAN o day bang taoQuaiMacDinh — day la
-// diem duy nhat gan quai vao mot khu vuc, giu dung nguyen tac "quai thuoc
-// actor, sinh luc MoKhuVuc" cua brief Task 5.
+// (Ke hoach 6 Task 5) duoc sinh MOT LAN o day — day la diem duy nhat gan quai
+// vao mot khu vuc, giu dung nguyen tac "quai thuoc actor, sinh luc MoKhuVuc"
+// cua brief Task 5.
+//
+// KH8 task 8: so lieu quai doc tu ANH CHUP KHO NOI DUNG (taoQuaiTuAnhChup,
+// khoquai.go) thay vi tu mot bang cung. Anh chup dung o day BAT BUOC la ban
+// NHUNG mac dinh (khoChieuMacDinh): ham nay chay TRUOC khi bat ky ai kip goi
+// GanKhoNoiDung — main.go tao SoKhuVuc roi moi gan kho (sokhuvuc.go). Do la
+// mot he qua CHAP NHAN DUOC chu khong phai lo hong: ban nhung va ban tren dia
+// la CUNG file YAML, cung con so; khac biet duy nhat la mot lan nap nong
+// (Kho.Thay) khong hoi to duoc vao dan quai da sinh — dung y voi quyet dinh
+// "quai dang song giu so cua the he luc sinh" (khoi chu thich dau khoquai.go).
 func MoKhuVuc(bd *BanDo) *KhuVuc {
 	k := &KhuVuc{
 		banDo:        bd,
 		nguoiTrong:   make(map[int64]*nguoiTrongKhuVuc),
 		anhChupDaRoi: make(map[int64]store.NhanVat),
-		quai:         taoQuaiMacDinh(bd),
+		quai:         taoQuaiTuAnhChup(khoChieuMacDinh(), bd),
 		doDuoiDat:    make(map[int16]*doVuong),
 		dongHo:       time.Now,
 	}

@@ -2,6 +2,26 @@
 //
 // Doc cau hinh tu bien moi truong, mo CSDL, roi lang nghe ket noi TCP cho
 // toi khi nhan tin hieu dung (Ctrl+C) hoac loi khong the phuc hoi.
+//
+// # BIEN MOI TRUONG
+//
+//	NRO_DSN                  chuoi ket noi PostgreSQL (BAT BUOC)
+//	NRO_DIA_CHI              dia chi nghe cua cong game (mac dinh ":14445")
+//	NRO_MUC_NHAT_KY          debug|info|warn|error (mac dinh info)
+//	NRO_CHONGDO_SUCCHUA      suc chua gau chong do mat khau theo IP
+//	NRO_CHONGDO_HOIPHUC_GIAY nhip hoi phuc cua gau do, tinh bang giay
+//	NRO_TOIDA_KETNOI_MOI_IP  so ket noi cung luc toi da tren mot dia chi IP
+//	NRO_E2E / NRO_E2E_CONTROL_ADDR / NRO_E2E_CONTROL_TOKEN  cong dieu khien E2E
+//
+// KH8 task 10 — nap nong noi dung (ca hai deu KHONG bat buoc):
+//
+//	NRO_KHO_NOI_DUNG   thu muc YAML tren dia. RONG = chi dung ban NHUNG trong
+//	                   file thuc thi, va moi yeu cau nap nong bi tu choi 501.
+//	NRO_NAP_LAI_DIA_CHI dia chi kenh nap nong, VD "127.0.0.1:9099". RONG = TAT
+//	                   han kenh (mac dinh). PHAI la loopback — dat 0.0.0.0 la
+//	                   may chu TU CHOI KHOI DONG (§4.3 rui ro 1).
+//	NRO_NAP_LAI_KHOA   khoa dung chung gui trong header X-Nro-Khoa. BAT BUOC
+//	                   khi da dat NRO_NAP_LAI_DIA_CHI.
 package main
 
 import (
@@ -202,6 +222,43 @@ func noiBoPhatThanh(soKhuVuc *game.SoKhuVuc) *game.BoPhatThanh {
 	return loa
 }
 
+// nguonNoiDungMoTa cho mot dong log doc duoc: kho noi dung dang chay den tu
+// dau. "nhung (trong file thuc thi)" hay mot duong dan cu the.
+func nguonNoiDungMoTa(thuMuc string) string {
+	if thuMuc == "" {
+		return "nhung (trong file thuc thi)"
+	}
+	return thuMuc
+}
+
+// kenhCoTheDung la phan toi thieu *noidung.KenhNapLai ma trinh tu tat may chu
+// can — CHI Dung(ctx), tach thanh interface HEP cung ly do voi loaCoTheDung/
+// khoDong: de test tiem duoc mot kenh gia BIET GHI LAI no bi dung vao luc nao
+// trong day don dep. *noidung.KenhNapLai thoa man tu nhien. nil la HOP LE (kenh
+// tat) — donDepKhiTat kiem nil truoc khi goi.
+type kenhCoTheDung interface {
+	Dung(context.Context) error
+}
+
+// moKenhNapLaiTuMoiTruong doc NRO_NAP_LAI_DIA_CHI + NRO_NAP_LAI_KHOA roi mo
+// kenh nap nong. Tra nil khi bien dia chi rong (kenh TAT — mac dinh). Loi cau
+// hinh thi os.Exit(1) ngay, KHONG chay tiep: xem chu thich noi goi.
+func moKenhNapLaiTuMoiTruong(kho *noidung.Kho, thuMuc string) *noidung.KenhNapLai {
+	diaChi := strings.TrimSpace(os.Getenv("NRO_NAP_LAI_DIA_CHI"))
+	if diaChi == "" {
+		slog.Info("kenh nap nong noi dung: TAT (chua dat NRO_NAP_LAI_DIA_CHI)")
+		return nil
+	}
+	kenh, err := noidung.MoKenhNapLai(diaChi, kho, thuMuc, os.Getenv("NRO_NAP_LAI_KHOA"), slog.Default())
+	if err != nil {
+		slog.Error("KHONG THE KHOI DONG: kenh nap nong noi dung sai cau hinh.", "loi", err)
+		slog.Error(`Vi du dung: $env:NRO_NAP_LAI_DIA_CHI = "127.0.0.1:9099"; $env:NRO_NAP_LAI_KHOA = "<chuoi bi mat>"`)
+		slog.Error("Kenh nay CHI duoc bind 127.0.0.1. Muon kich tu xa thi di qua SSH tunnel.")
+		os.Exit(1)
+	}
+	return kenh
+}
+
 // donDepKhiTat gom TOAN BO trinh tu tat may chu an toan (Ke hoach 11 Task 6,
 // dac ta §4 diem C) thanh MOT ham GOI DUOC TU TEST — tach khoi main() va
 // KHONG dinh chat os.Exit (brief Task 6: "Tách phần dọn dẹp khi tắt thành
@@ -317,8 +374,36 @@ func noiBoPhatThanh(soKhuVuc *game.SoKhuVuc) *game.BoPhatThanh {
 // (khong co co che "rut het session dang mo" — se can them ha tang theo doi
 // TOAN BO session dang song, ngoai pham vi Task 6). Ghi lai o day de nguoi
 // sau khong tuong nham day la khe ho CHUA duoc xem xet.
-func donDepKhiTat(ctx context.Context, kho khoDong, soKhuVuc *game.SoKhuVuc, thoGhi *game.ThoGhi, boLuu *game.BoLuuDinhKy, lichBoss lichBossCoTheDung, loa loaCoTheDung, boNhat, boRoi boDoCoTheDung) error {
+func donDepKhiTat(ctx context.Context, kho khoDong, soKhuVuc *game.SoKhuVuc, thoGhi *game.ThoGhi, boLuu *game.BoLuuDinhKy, kenhNapLai kenhCoTheDung, lichBoss lichBossCoTheDung, loa loaCoTheDung, boNhat, boRoi boDoCoTheDung) error {
 	boLuu.Dung()
+	// KH8 task 10 — VI SAO kenh nap nong dung O DAY (ngay sau boLuu, TRUOC
+	// lichBoss/loa/TatMayChu) chu khong phai sau game.TatMayChu:
+	//
+	// Kenh nay la mot NGUON THAY DOI den tu ben ngoai, cung ho voi lichBoss/loa
+	// — va quy tac da chot cho ca hai la "tat nguon truoc". Cu the:
+	//
+	// (a) De sau TatMayChu thi mot lan nap nong den dung luc do se trao mot the
+	//     he moi cho mot may chu KHONG CON ACTOR NAO doc no. Nguoi kich nhan
+	//     "200, the he 8" va tin la so moi da an — trong khi thuc te no chua
+	//     bao gio duoc dung mot lan nao. Do la mot cau tra loi DOI TRA, dung
+	//     loai hong ma §4.2 lap ra ca kenh HTTP nay de tranh.
+	//
+	// (b) Shutdown(ctx) cua kenh CHO cac request dang do xong. Mot lan nap nong
+	//     la doc dia + kiem toan bo — vai chuc mili-giay. Tieu no o day, TRUOC
+	//     khi buoc 3 bat dau, la tieu vao khoang thoi gian khong ai canh tranh;
+	//     tieu no SAU buoc 3 la an vao dung han gio 30 giay danh cho viec LUU
+	//     BAN GHI NGUOI CHOI — thu dat nhat trong ca trinh tu nay.
+	//
+	// (c) Nguoc lai, KHONG co ly do nao doi phia ben kia: Kho.Thay la mot lenh
+	//     may nguyen tu, khong khoa ai, nen dung kenh som KHONG the lam ket hay
+	//     lam hong lan luu cuoi.
+	//
+	// nil la hop le (kenh tat theo mac dinh, hoac test khong quan tam).
+	if kenhNapLai != nil {
+		if err := kenhNapLai.Dung(ctx); err != nil {
+			slog.Warn("dung kenh nap nong gap loi (bo qua, tiep tuc tat may chu)", "loi", err)
+		}
+	}
 	lichBoss.Dung()
 	loa.Dung()
 	err := game.TatMayChu(ctx, soKhuVuc, thoGhi)
@@ -483,14 +568,34 @@ func main() {
 	// Bo qua dong nay thi may chu VAN CHAY (moi khu vuc tu doc ban nhung) —
 	// cai mat la NAP NONG khong toi duoc khu vuc nao. Do la ly do ham
 	// GanKhoNoiDung phai duoc goi o day chu khong an trong MoSoKhuVuc.
-	duNoiDung, loiNoiDung := noidung.NapNhung()
+	//
+	// KH8 task 10: neu NRO_KHO_NOI_DUNG duoc dat, nap tu THU MUC DO ngay tu
+	// luc khoi dong — khong phai tu ban nhung. Neu khong lam vay se co mot cai
+	// bay am tham: nguoi van hanh sua YAML tren dia, nap nong thay so moi, roi
+	// lan KHOI DONG LAI ke tiep may chu lang le quay ve ban nhung — mat het
+	// thay doi ma khong mot dong log nao bao.
+	thuMucNoiDung := strings.TrimSpace(os.Getenv("NRO_KHO_NOI_DUNG"))
+	var duNoiDung *noidung.DuLieu
+	var loiNoiDung error
+	if thuMucNoiDung != "" {
+		duNoiDung, loiNoiDung = noidung.NapTuThuMuc(thuMucNoiDung)
+	} else {
+		duNoiDung, loiNoiDung = noidung.NapNhung()
+	}
 	if loiNoiDung != nil {
-		slog.Error("nap kho noi dung that bai", "loi", loiNoiDung)
+		slog.Error("nap kho noi dung that bai", "loi", loiNoiDung, "thu_muc", thuMucNoiDung)
 		os.Exit(1)
 	}
 	khoNoiDung := noidung.MoKho(duNoiDung)
 	soKhuVuc.GanKhoNoiDung(khoNoiDung)
-	slog.Info("kho noi dung da nap", "theHe", khoNoiDung.TheHe())
+	slog.Info("kho noi dung da nap", "theHe", khoNoiDung.TheHe(),
+		"nguon", nguonNoiDungMoTa(thuMucNoiDung))
+
+	// KH8 task 10: kenh nap nong. TAT theo mac dinh — chi bat khi nguoi van
+	// hanh dat NRO_NAP_LAI_DIA_CHI. Loi cau hinh (dia chi khong loopback,
+	// thieu khoa) la DUNG HAN may chu, khong chay tiep im lang: mot cai cong
+	// "tuong la co ma khong co" con te hon khong co.
+	kenhNapLai := moKenhNapLaiTuMoiTruong(khoNoiDung, thuMucNoiDung)
 
 	// KH6b Task 14: bat bo phat thanh toan may chu (goi 93) NGAY SAU khi co 5
 	// khu vuc va TRUOC khi mo cong nghe — de khong co khoang thoi gian nao ma
@@ -545,13 +650,19 @@ func main() {
 	loiMayChu := make(chan error, 1)
 	go func() {
 		loiMayChu <- mynet.LangNghe(diaChi, gacKetNoi, func() mynet.XuLyGoiTin {
-			return taoXuLy()
+			b := taoXuLy()
+			// KH8 task 10 (no cua task 3): cam kho noi dung DA TIEM vao moi
+			// phien, de goi catalog -28/7 luc dang nhap doc anh chup HIEN
+			// TAI thay vi ban nhung. Lam o day chu khong trong MoLuuTru de
+			// khong doi chu ky ham do (hang chuc test dang goi no).
+			b.DatKhoNoiDung(khoNoiDung)
+			return b
 		})
 	}()
 
 	yeuCauTatE2E := make(chan struct{}, 1)
 	donDep := func(ctx context.Context) error {
-		return donDepKhiTat(ctx, kho, soKhuVuc, thoGhi, boLuu, lichBoss, loa, boNhat, boRoi)
+		return donDepKhiTat(ctx, kho, soKhuVuc, thoGhi, boLuu, kenhNapLai, lichBoss, loa, boNhat, boRoi)
 	}
 	control, controlListener, err := moE2EControl(cauHinhControl, yeuCauTatE2E)
 	if err != nil {

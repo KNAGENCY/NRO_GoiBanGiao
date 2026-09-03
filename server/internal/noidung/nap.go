@@ -28,6 +28,7 @@ const (
 	TenFileCuaHang = "cua-hang.yaml"
 	TenFileQuai    = "quai.yaml" // KH8 task 8
 	TenFileLang    = "lang.yaml" // KH8 task 6
+	TenFileBoss    = "boss.yaml" // KH8 task 7
 )
 
 // TenCacFile tra ve DANH SACH DAY DU cac file YAML ma Nap doc — NGUON DUY NHAT
@@ -37,7 +38,7 @@ const (
 // quai.yaml. Them file moi vao Nap thi PHAI them vao day — va chi vao day.
 // (Task 6 them lang.yaml: gop 03/09 dieu phoi them vao day, khong o fixture.)
 func TenCacFile() []string {
-	return []string{TenFileChieu, TenFileVatPham, TenFileCuaHang, TenFileKhoaId, TenFileQuai, TenFileLang}
+	return []string{TenFileChieu, TenFileVatPham, TenFileCuaHang, TenFileKhoaId, TenFileQuai, TenFileLang, TenFileBoss}
 }
 
 // NapNhung nap ban NHUNG trong file thuc thi — duong dung luc KHOI DONG. Khong
@@ -71,6 +72,10 @@ func Nap(fsys fs.FS) (*DuLieu, error) {
 	if err := docYAML(fsys, TenFileQuai, &fQuai); err != nil {
 		return nil, err
 	}
+	var fBoss fileBoss
+	if err := docYAML(fsys, TenFileBoss, &fBoss); err != nil {
+		return nil, err
+	}
 
 	du := &DuLieu{
 		MauOption:  fVatPham.MauOption,
@@ -78,6 +83,7 @@ func Nap(fsys fs.FS) (*DuLieu, error) {
 		CuaHang:    fCuaHang.CuaHang,
 		MauQuai:    fQuai.MauQuai,
 		SinhQuai:   fQuai.Sinh,
+		Boss:       fBoss.Boss,
 	}
 	if err := kiemChieu(fChieu.Lang); err != nil {
 		return nil, fmt.Errorf("%s: %w", TenFileChieu, err)
@@ -102,6 +108,9 @@ func Nap(fsys fs.FS) (*DuLieu, error) {
 	}
 	if err := kiemQuai(du.MauQuai, du.SinhQuai); err != nil {
 		return nil, fmt.Errorf("%s: %w", TenFileQuai, err)
+	}
+	if err := kiemBoss(du.Boss); err != nil {
+		return nil, fmt.Errorf("%s: %w", TenFileBoss, err)
 	}
 	// Bo kiem DAY DU (K1/K2/K3 + so khoa id) — kiemtra.go, task 1. Chay SAU bo
 	// kiem toi thieu vi nhieu kiem o do dua vao viec "id = vi tri" da dung.

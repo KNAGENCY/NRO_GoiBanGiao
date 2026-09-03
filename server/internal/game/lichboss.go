@@ -111,6 +111,17 @@ func (t *TheSongBoss) ConSong() bool {
 // boss da o trong the gioi (bien hinh), luc do bo dieu phoi khong con quyen gi
 // voi no nua. "Khi nao va o dau" chi duoc hoi MOT LAN, luc con boss ra doi.
 type MucLichBoss struct {
+	// Ma la khoa tra cuu con boss trong KHO NOI DUNG (kho-noi-dung/boss.yaml,
+	// qua game/noidungboss.go). Co no thi bo dieu phoi doc lai du lieu boss TU
+	// ANH CHUP DANG CO HIEU LUC ngay truoc moi lan sinh — day la cach "nap nong
+	// boss.yaml" co hieu luc voi boss SINH SAU ma khong dung toi boss dang song
+	// (KH8 task 7, thiet ke §4).
+	//
+	// RONG = muc lich TU CAM du lieu, khong tra cuu gi ca. Hang chuc test cua
+	// KH6b dung dang do (mucMau trong lichboss_test.go) va chung phai giu nguyen
+	// hanh vi: mot muc khong co ma thi DuLieu duoi day la nguon duy nhat.
+	Ma string
+
 	DuLieu []PhaBoss
 }
 
@@ -167,6 +178,15 @@ type BoLichBoss struct {
 	// nay" ma khong phu thuoc may man. Mac dinh rand.IntN.
 	chon func(n int) int
 
+	// nguonBoss doc lai du lieu mot con boss tu KHO NOI DUNG theo ma, NGAY
+	// TRUOC moi lan sinh. Tiem duoc (cung ly do voi dongHo/chon): test phai dung
+	// duoc kich ban "nap nong giua chung" ma khong phai dong vao kho nhung toan
+	// cuc. Mac dinh TimNoiDungBoss — anh chup dang co hieu luc cua kho NHUNG.
+	//
+	// nil hoac tra nil -> GIU du lieu muc dang cam (fail-safe: mot lan doc hong
+	// khong duoc lam bo dieu phoi ngung sinh boss).
+	nguonBoss func(ma string) *NoiDungBoss
+
 	dung       chan struct{}
 	xong       chan struct{}
 	dungMotLan sync.Once
@@ -201,11 +221,12 @@ type BoLichBoss struct {
 // luon an toan ke ca khi khong ai goi BatDau(): close(nil chan) la panic.
 func MoBoLichBoss(soKhuVuc *SoKhuVuc, lich []MucLichBoss) *BoLichBoss {
 	l := &BoLichBoss{
-		soKhuVuc: soKhuVuc,
-		dongHo:   time.Now,
-		chon:     rand.IntN,
-		dung:     make(chan struct{}),
-		xong:     make(chan struct{}),
+		soKhuVuc:  soKhuVuc,
+		dongHo:    time.Now,
+		chon:      rand.IntN,
+		nguonBoss: TimNoiDungBoss,
+		dung:      make(chan struct{}),
+		xong:      make(chan struct{}),
 	}
 	bayGio := l.dongHo()
 	l.muc = make([]*mucDangChay, 0, len(lich))
@@ -244,7 +265,11 @@ func MoBoLichBoss(soKhuVuc *SoKhuVuc, lich []MucLichBoss) *BoLichBoss {
 func MucLichTuNoiDungBoss(ds []NoiDungBoss) []MucLichBoss {
 	muc := make([]MucLichBoss, 0, len(ds))
 	for _, nd := range ds {
-		muc = append(muc, MucLichBoss{DuLieu: nd.Pha})
+		// Mang theo Ma: tu KH8 task 7 do la cach bo dieu phoi doc LAI du lieu
+		// boss tu anh chup dang co hieu luc ngay truoc moi lan sinh (xem chu
+		// thich truong MucLichBoss.Ma). DuLieu van duoc cam san de mot lan doc
+		// hong khong lam ngung ca muc lich.
+		muc = append(muc, MucLichBoss{Ma: nd.Ma, DuLieu: nd.Pha})
 	}
 	return muc
 }
@@ -340,6 +365,24 @@ func (l *BoLichBoss) thuSinh(m *mucDangChay, bayGio time.Time) {
 		return
 	}
 
+	// ĐẾN GIỜ SINH — day la KHOANH KHAC duy nhat kho noi dung duoc doc lai
+	// (KH8 task 7, thiet ke §4). Doc o day chu khong o moi nhip vi hai le:
+	//   - moi lan doc la mot ban sao sau, khong dang tra 10 lan mot giay;
+	//   - va quan trong hon: con boss SAP ra doi phai mang so cua the he TAI
+	//     LUC NO RA DOI, khong phai the he luc bo dieu phoi duoc mo.
+	// Con boss DANG SONG khong bi anh huong: taoBoss sao sau du lieu vao rieng
+	// no ngay duoi day, va bo dieu phoi khong bao gio cham lai con tro do nua.
+	if moi := l.docLaiDuLieu(m); moi != nil {
+		m.DuLieu = moi
+		pha = m.phaDau()
+		if lyDo := kiemPhaDauHopLe(pha); lyDo != "" {
+			m.ngungHan = true
+			slog.Error("du lieu boss vua doc lai tu kho noi dung bi hong — ngung han muc nay",
+				"ma", m.Ma, "lyDo", lyDo)
+			return
+		}
+	}
+
 	// Chon map TRUOC, chon mau SAU — thu tu nay la HOP DONG voi bo chon tiem
 	// duoc (test kich ban dua vao no). Doi thu tu la doi y nghia cua moi test
 	// tiem bo chon.
@@ -381,6 +424,24 @@ func (l *BoLichBoss) thuSinh(m *mucDangChay, bayGio time.Time) {
 		slog.Warn("gui lenh sinh boss that bai — hoan lai roi thu tiep",
 			"ten", pha.Ten, "mapId", mapId, "loi", err, "hoanToi", m.hoanToi)
 	}
+}
+
+// docLaiDuLieu doc lai cac pha cua muc nay tu KHO NOI DUNG, hoac nil khi muc
+// khong co ma / chua tiem nguon / kho khong con con boss do.
+//
+// nil nghia la "giu nguyen du lieu dang cam" — FAIL-SAFE co chu dich: mot lan
+// doc hong (ai do vua xoa con boss khoi boss.yaml roi nap nong) khong duoc bien
+// thanh "muc lich ngung han". Boss van ra voi so cu, va nguoi sua du lieu se
+// thay no van ra — de chan doan hon han mot muc lich im lang bien mat.
+func (l *BoLichBoss) docLaiDuLieu(m *mucDangChay) []PhaBoss {
+	if m.Ma == "" || l.nguonBoss == nil {
+		return nil
+	}
+	nd := l.nguonBoss(m.Ma)
+	if nd == nil || len(nd.Pha) == 0 {
+		return nil
+	}
+	return nd.Pha
 }
 
 // phaDau tra con tro toi pha DAU TIEN cua muc (nil neu muc khong co pha nao).

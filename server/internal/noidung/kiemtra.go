@@ -177,6 +177,11 @@ func kiemDayDu(du *DuLieu, khoa *fileKhoaId) error {
 	if err := kiemK3NhipChieu(du); err != nil {
 		return fmt.Errorf("%s: %w", TenFileChieu, err)
 	}
+	// Boss cam chieu -> can CA boss.yaml lan chieu.yaml, nen chay o day (KH8
+	// task 7, bo kiem o noidung/boss.go).
+	if err := kiemBossThamChieuChieu(du); err != nil {
+		return fmt.Errorf("%s: %w", TenFileBoss, err)
+	}
 	return nil
 }
 

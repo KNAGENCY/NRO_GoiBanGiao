@@ -314,4 +314,8 @@ type DuLieu struct {
 	// SinhQuaiCuaMap() cua anh chup (kho.go), khong doc thang.
 	MauQuai  []MauQuai
 	SinhQuai []SinhQuaiTrenMap
+
+	// Boss — KH8 task 7. Kieu, bo kiem VA hai cua tra cuu Boss()/DanhSachBoss()
+	// deu nam trong boss.go (mot vung du lieu = mot tep, xem chu thich dau tep do).
+	Boss []Boss
 }

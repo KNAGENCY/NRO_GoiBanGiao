@@ -87,6 +87,12 @@ type khoChieuAnhChup interface {
 	DanhSachQuai() []noidung.MauQuai
 	SinhQuaiCuaMap(mapID int32) []noidung.DiemSinhQuai
 
+	// Hai cua BOSS (KH8 task 7, noidungboss.go). Cung ly do nhu quai/vat pham:
+	// MOT nguon tiem, MOT anh chup — de lich boss va actor khong bao gio doc hai
+	// the he lech nhau.
+	Boss(ma string) (noidung.Boss, bool)
+	DanhSachBoss() []noidung.Boss
+
 	// Phan MAU VAT PHAM / OPTION (KH8 task 4) — cung ly do nhu quai: MOT nguon
 	// tiem, MOT anh chup moi nhip. (Hai task lam song song cung mo rong interface
 	// nay -> xung dot gop 03/09, dieu phoi giu CA HAI.)

@@ -146,7 +146,9 @@ func TestTichHop_VaoTheGioiNapHanhTrangThat(t *testing.T) {
 	// (Controller.cs:5860/:5907/:5942), nen -36/-37/-35 den TRUOC no la bi xoa
 	// sach khong bao. Doc TUNG goi mot theo dung thu tu de dot bien "gui -36
 	// truoc ME_INFO" lam test do.
-	thuTu := []int8{-82, lenhMeInfo, -24, lenhChiSoNhanVat, lenhDoDangMac, lenhTui, lenhRuong}
+	// 05/09: goi 40 (nhiem vu giu cho, nhiemvu.go) chen giua ME_INFO va -24 —
+	// client doc NPC trong -24 can taskMaint != null.
+	thuTu := []int8{-82, lenhMeInfo, lenhNhiemVuChinh, -24, lenhChiSoNhanVat, lenhDoDangMac, lenhTui, lenhRuong}
 	goiTheoLenh := make(map[int8]*protocol.Message, len(thuTu))
 	for i, mong := range thuTu {
 		m, errDoc := cl.doiGoiLenhKhongFatal(mong)

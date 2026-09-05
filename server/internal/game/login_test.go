@@ -872,9 +872,15 @@ func TestClientOkGuiVaoTheGioi(t *testing.T) {
 	if m30.Command != -30 {
 		t.Fatalf("goi 3 = lenh %d, mong doi -30 (ME_INFO)", m30.Command)
 	}
+	// 05/09: goi 40 (nhiem vu giu cho, nhiemvu.go) PHAI nam giua ME_INFO va -24 —
+	// client doc NPC trong -24 bang bieu thuc deref taskMaint.
+	m40 := docMotGoi(t, fClient)
+	if m40.Command != lenhNhiemVuChinh {
+		t.Fatalf("goi 4 = lenh %d, mong doi 40 (nhiem vu giu cho, truoc -24)", m40.Command)
+	}
 	m24 := docMotGoi(t, fClient)
 	if m24.Command != -24 {
-		t.Fatalf("goi 4 = lenh %d, mong doi -24 (MAP INFO)", m24.Command)
+		t.Fatalf("goi 5 = lenh %d, mong doi -24 (MAP INFO)", m24.Command)
 	}
 
 	// -42 CHI SO gui ngay sau MAP INFO. Khong doc thi ong pipe day va may chu
@@ -984,13 +990,17 @@ func TestClientOkKhongChayLaiLanHai(t *testing.T) {
 	if m30.Command != -30 {
 		t.Fatalf("lan 1, goi 3 = lenh %d, mong doi -30", m30.Command)
 	}
+	m40 := docMotGoi(t, fClient) // 05/09: nhiem vu giu cho, truoc -24 (nhiemvu.go)
+	if m40.Command != lenhNhiemVuChinh {
+		t.Fatalf("lan 1, goi 4 = lenh %d, mong doi 40", m40.Command)
+	}
 	m24 := docMotGoi(t, fClient)
 	if m24.Command != -24 {
-		t.Fatalf("lan 1, goi 4 = lenh %d, mong doi -24", m24.Command)
+		t.Fatalf("lan 1, goi 5 = lenh %d, mong doi -24", m24.Command)
 	}
 	m42 := docMotGoi(t, fClient)
 	if m42.Command != -42 {
-		t.Fatalf("lan 1, goi 5 = lenh %d, mong doi -42 (chi so nhan vat)", m42.Command)
+		t.Fatalf("lan 1, goi 6 = lenh %d, mong doi -42 (chi so nhan vat)", m42.Command)
 	}
 
 	// KH7 Task 5: ba goi hanh trang -37/-36/-35 khep lai chuoi vao the gioi (gui
@@ -1039,6 +1049,7 @@ func TestVaoKhuVucLanHaiKhongPhatGoiTrung(t *testing.T) {
 	docMotGoi(t, fClient) // -31 bang mau bong do
 	docMotGoi(t, fClient) // -82
 	docMotGoi(t, fClient) // -30
+	docMotGoi(t, fClient) // 40 nhiem vu giu cho (05/09, nhiemvu.go)
 	docMotGoi(t, fClient) // -24
 	docMotGoi(t, fClient) // -42 chi so nhan vat
 	docMotGoi(t, fClient) // -37 do dang mac (KH7 task 5)

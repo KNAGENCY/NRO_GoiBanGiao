@@ -384,6 +384,8 @@ func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 		return b.xuLyHoiSinh()
 	case lenhMoNPC: // 33 — client mo hoi thoai NPC
 		return b.xuLyMoNPC(s, m)
+	case lenhChonMenuNPC: // 32 — client chon mot dong trong menu NPC (xem npc.go)
+		return b.xuLyChonMenuNPC(s, m)
 	case lenhDoiMap: // -23 — client bam cong roi map (xem doimap.go)
 		return b.xuLyDoiMap(s)
 	case lenhMua: // 6 — client xin mua hang NPC (xem muaban.go)
@@ -612,6 +614,17 @@ func (b *BoXuLy) xuLyClientOk(s *mynet.Session) error {
 		return err
 	}
 	if err := s.Gui(meInfo); err != nil {
+		return err
+	}
+
+	// 40 NHIEM VU CHINH giu cho — PHAI TRUOC -24: client doc NPC trong -24 bang
+	// mot bieu thuc deref taskMaint (Controller.cs:5145); chua co goi 40 thi
+	// taskMaint null -> NPC bi bo im lang. Xem nhiemvu.go.
+	nhiemVu, err := goiNhiemVuChinh()
+	if err != nil {
+		return err
+	}
+	if err := s.Gui(nhiemVu); err != nil {
 		return err
 	}
 

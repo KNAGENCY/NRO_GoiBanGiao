@@ -437,7 +437,7 @@ func tatMayChuChung(
 	donDep func(context.Context) error,
 ) error {
 	var loiControl error
-	if control != nil {
+	if coControlThat(control) {
 		ctxControl, huyControl := context.WithTimeout(context.Background(), 2*time.Second)
 		loiControl = control.Shutdown(ctxControl)
 		huyControl()
@@ -446,6 +446,26 @@ func tatMayChuChung(
 	loiDonDep := donDep(ctxTat)
 	huyTat()
 	return errors.Join(loiControl, loiDonDep)
+}
+
+// coControlThat tra true khi control la mot may chu HTTP THAT, khong phai
+// interface dang boc mot con tro nil.
+//
+// Bai hoc 05/09/2026 (phat hien luc choi thu that): moE2EControl tra ve
+// (*http.Server)(nil) khi E2E control TAT — la MAC DINH tren may chu game.
+// Gan con tro nil do vao interface mayChuCoTheTat thi `control != nil` van
+// TRUE (interface mang kieu + con tro nil), va control.Shutdown(...) panic
+// "nil pointer dereference" ngay dong dau cua trinh tu tat may chu — moi
+// buoc phia sau (TatMayChu: LUU NGUOI CHOI, dong kho) KHONG BAO GIO CHAY.
+// Tuc la moi lan bam Ctrl+C la mat bo phan luu cuoi cung, im lang.
+func coControlThat(control mayChuCoTheTat) bool {
+	if control == nil {
+		return false
+	}
+	if s, la := control.(*http.Server); la && s == nil {
+		return false
+	}
+	return true
 }
 
 func choVaTatMayChu(
@@ -673,7 +693,13 @@ func main() {
 		os.Exit(1)
 	}
 	loiControl := make(chan error, 1)
+	// controlTat: interface CHI khac nil khi co may chu control that. KHONG gan
+	// thang `control` (*http.Server co the nil) vao tham so interface — xem
+	// coControlThat. Hai lop chan (o day + coControlThat) vi ca hai deu re va
+	// panic o buoc tat la mat luu nguoi choi.
+	var controlTat mayChuCoTheTat
 	if control != nil {
+		controlTat = control
 		go func() {
 			loiControl <- control.Serve(controlListener)
 		}()
@@ -687,7 +713,7 @@ func main() {
 		yeuCauTatE2E,
 		loiMayChu,
 		loiControl,
-		control,
+		controlTat,
 		donDep,
 	)
 	if errTat != nil {

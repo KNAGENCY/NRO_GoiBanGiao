@@ -506,11 +506,13 @@ func TestTaoRoiDangNhapLai_ThayNhanVat(t *testing.T) {
 	if nv.ViTriY != 384 {
 		t.Errorf("vi tri y = %d, mong doi 384 (ViTriYKhoiDau ghim cua lang 0)", nv.ViTriY)
 	}
-	// 5 la byte kieu toc that su gui trong goi tao nhan vat o tren
-	// (cl.taoNhanVat(tenNV, 0, 5)) — khong lien quan TimLang, khong co van de
-	// "cung nguon" nhu tren.
-	if nv.KieuToc != int16(5) {
-		t.Errorf("kieu toc = %d, mong doi 5 (byte kieu toc da gui trong goi tao nhan vat)", nv.KieuToc)
+	// Goi tao nhan vat o tren gui byte kieu toc 5 (cl.taoNhanVat(tenNV, 0, 5)) —
+	// day la id toc Dragon Ball ma client Unity van gui (CreateCharScr.hairIDOld).
+	// 05/09: may chu KHONG luu con so do nua ma luu dau Naruto co that qua
+	// dauHopLe (hinhdang.go) — bo hinh chi co dau 30. Khang dinh o day la
+	// "luu dau hop le", khong con la "luu nguyen byte client".
+	if nv.KieuToc != dauHopLe(5) || nv.KieuToc != HeadNhanVat {
+		t.Errorf("kieu toc = %d, mong doi %d (dauHopLe cua byte 5 client gui — bo Naruto chi co dau 30)", nv.KieuToc, HeadNhanVat)
 	}
 
 	// Lan 2: NGAT phien cu (defer cl.dong() o tren da chay), mo PHIEN MOI,

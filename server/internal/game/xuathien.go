@@ -36,13 +36,19 @@ type HinhDangHien struct {
 // truong hop duy nhat khong dung duoc goi. Nguoi goi tu quyet xu ly.
 func goiXuatHienDayDu(id int64, ten string, cap byte, hp, hpToiDa int32, x, y int16, hd HinhDangHien) *protocol.Message {
 	w := protocol.NewWriter()
-	w.Int(int32(id))                   // 1  playerId
-	w.Int(-1)                          // 2  clanId (chua co bang hoi)
-	w.Byte(cap)                        // 3  level (= cap nhan vat)
-	w.Bool(false)                      // 4  co co dinh (writeBoolean false)
-	w.Byte(hd.TypePk)                  // 5  typePk
-	w.Byte(byte(hd.Lang))              // 6  gender (= id lang)
-	w.Byte(byte(hd.Lang))              // 7  gender ghi LAN 2
+	w.Int(int32(id))  // 1  playerId
+	w.Int(-1)         // 2  clanId (chua co bang hoi)
+	w.Byte(cap)       // 3  level (= cap nhan vat)
+	w.Bool(false)     // 4  co co dinh (writeBoolean false)
+	w.Byte(hd.TypePk) // 5  typePk
+	// Client doc HAI byte "gender" khac vai (Controller.readCharInfo:6376-6377):
+	//   6 -> nClass = nClasss[byte]  : LOP/LANG (ten lang, bo chieu) = id lang
+	//   7 -> cgender                  : than/chan mac dinh, hieu ung theo hanh tinh
+	// Byte 7 luon 0 — xem gioiTinhClient (hinhdang.go): client chi biet 3 hanh
+	// tinh, bo do Naruto nam o slot mac dinh cua gender 0, lang 3/4 lam client
+	// tra bang 3 o roi vo.
+	w.Byte(byte(hd.Lang))              // 6  lop/lang (chi so nClasss[])
+	w.Byte(gioiTinhClient(hd.Lang))    // 7  cgender phia client
 	w.Short(hd.Outfit[0])              // 8  head
 	if err := w.UTF(ten); err != nil { // 9 name
 		return nil
@@ -70,18 +76,15 @@ func goiXuatHienDayDu(id int64, ten string, cap byte, hp, hpToiDa int32, x, y in
 }
 
 // goiXuatHien la VO BOC MONG cua goiXuatHienDayDu cho NGUOI CHOI: chi dien
-// tham so tu *store.NhanVat, khong them logic nao. Nguoi choi chua co he trang
-// bi nen outfit ngoai kieu toc va typePk deu la 0 — Y HET ban KH5.
+// tham so tu *store.NhanVat. Hinh dang (dau/than/chan) lay tu hinhDangNguoiChoi
+// (hinhdang.go) — truoc 05/09 than/chan ghi 0 ("chua co he trang bi") va client
+// khac ve part 0 (mot part DAU 3 khung) lam than -> vo khi ve.
 func goiXuatHien(nv *store.NhanVat) (*protocol.Message, error) {
 	m := goiXuatHienDayDu(
 		nv.ID, nv.Ten, byte(nv.Cap),
 		nv.HpToiDa, nv.HpToiDa,
 		int16(nv.ViTriX), int16(nv.ViTriY),
-		HinhDangHien{
-			Lang:   nv.Lang,
-			Outfit: [6]int16{nv.KieuToc, 0, 0, 0, 0, 0}, // head, body, leg, flagBag, aura, effFront
-			TypePk: 0,
-		},
+		hinhDangNguoiChoi(nv),
 	)
 	if m == nil {
 		return nil, fmt.Errorf("dung goi -5 that bai: ten nhan vat %d dai %d byte, vuot gioi han writeUTF", nv.ID, len(nv.Ten))

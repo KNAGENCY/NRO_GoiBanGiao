@@ -55,16 +55,16 @@ func TestGoiXuatHien(t *testing.T) {
 	if v, err := r.Byte(); err != nil || v != 0 {
 		t.Fatalf("5 typePk: got %d, err=%v", v, err)
 	}
-	// 6 gender
+	// 6 lop/lang (client: nClass = nClasss[byte])
 	if v, err := r.Byte(); err != nil || v != 0 {
-		t.Fatalf("6 gender: got %d, err=%v", v, err)
+		t.Fatalf("6 lop/lang: got %d, err=%v", v, err)
 	}
-	// 7 gender lan 2
+	// 7 cgender phia client — luon 0 (hinhdang.go gioiTinhClient)
 	if v, err := r.Byte(); err != nil || v != 0 {
-		t.Fatalf("7 gender lan 2: got %d, err=%v", v, err)
+		t.Fatalf("7 cgender: got %d, err=%v", v, err)
 	}
-	// 8 head
-	if v, err := r.Short(); err != nil || v != 7 {
+	// 8 head — KieuToc 7 la toc Dragon Ball -> dauHopLe quy ve 30 (05/09)
+	if v, err := r.Short(); err != nil || v != 30 {
 		t.Fatalf("8 head: got %d, err=%v", v, err)
 	}
 	// 9 name
@@ -79,12 +79,13 @@ func TestGoiXuatHien(t *testing.T) {
 	if v, err := r.Int(); err != nil || v != 1000 {
 		t.Fatalf("11 hpMax: got %d, err=%v", v, err)
 	}
-	// 12 body
-	if v, err := r.Short(); err != nil || v != 0 {
+	// 12 body — 57 (bo hoc vien, hinhdang.go ThanNhanVat); truoc 05/09 ghi 0 ->
+	// client khac ve part 0 (part DAU 3 khung) lam than -> IndexOutOfRange
+	if v, err := r.Short(); err != nil || v != ThanNhanVat {
 		t.Fatalf("12 body: got %d, err=%v", v, err)
 	}
-	// 13 leg
-	if v, err := r.Short(); err != nil || v != 0 {
+	// 13 leg — 58 (ChanNhanVat)
+	if v, err := r.Short(); err != nil || v != ChanNhanVat {
 		t.Fatalf("13 leg: got %d, err=%v", v, err)
 	}
 	// 14 flagbag
@@ -169,27 +170,31 @@ var nvVang = []struct {
 	{
 		"co ban",
 		&store.NhanVat{ID: 42, Ten: "Naruto", Lang: 0, KieuToc: 7, Cap: 5, HpToiDa: 1000, HpHienTai: 300, ViTriX: 100, ViTriY: 384},
-		"0000002affffffff0500000000000700064e617275746f000003e8000003e80000000000ff0064018000000000000000000000000000000000",
+		"0000002affffffff0500000000001e00064e617275746f000003e8000003e80039003a00ff0064018000000000000000000000000000000000",
 	},
 	{
 		"ten tieng Viet co dau, hp 0, x/y am, cap 1",
 		&store.NhanVat{ID: 1, Ten: "Hắc Ảnh Đệ Nhất", Lang: 2, KieuToc: 300, Cap: 1, HpToiDa: 0, HpHienTai: 0, ViTriX: -1, ViTriY: -32768},
-		"00000001ffffffff0100000202012c001848e1baaf6320e1baa26e6820c490e1bb87204e68e1baa57400000000000000000000000000ffffff800000000000000000000000000000000000",
+		"00000001ffffffff0100000200001e001848e1baaf6320e1baa26e6820c490e1bb87204e68e1baa57400000000000000000039003a00ffffff800000000000000000000000000000000000",
 	},
 	{
 		"cap 255, hp MaxInt32",
 		&store.NhanVat{ID: 2147483647, Ten: "Z", Lang: 4, KieuToc: -1, Cap: 255, HpToiDa: math.MaxInt32, HpHienTai: 7, ViTriX: 32767, ViTriY: -1},
-		"7fffffffffffffffff00000404ffff00015a7fffffff7fffffff0000000000ff7fffffff00000000000000000000000000000000",
+		"7fffffffffffffffff00000400001e00015a7fffffff7fffffff0039003a00ff7fffffff00000000000000000000000000000000",
 	},
 	{
 		"id vuot int32, ten rong, cap 256 (tran byte)",
 		&store.NhanVat{ID: 9000000000, Ten: "", Lang: 255, KieuToc: 0, Cap: 256, HpToiDa: -1, HpHienTai: -1, ViTriX: 70000, ViTriY: 70000},
-		"18711a00ffffffff000000ffff00000000ffffffffffffffff0000000000ff1170117000000000000000000000000000000000",
+		"18711a00ffffffff000000ff00001e0000ffffffffffffffff0039003a00ff1170117000000000000000000000000000000000",
 	},
 }
 
 // TestGoiXuatHienByteVang chot rang goi -5 gui cho NGUOI CHOI khong doi mot bit
 // nao sau khi tach ham: so sanh BYTE-BY-BYTE voi vang chup truoc refactor.
+//
+// VANG CAP NHAT 05/09/2026 (co chu dich, xem hinhdang.go): byte 7 (cgender) ->
+// 0, head -> dauHopLe (30), body/leg 0/0 -> 57/58. Moi truong khac giu nguyen
+// tung byte; vang duoc va bang script doc theo cau truc truong (khong sua tay).
 func TestGoiXuatHienByteVang(t *testing.T) {
 	for _, c := range nvVang {
 		t.Run(c.ten, func(t *testing.T) {
@@ -217,7 +222,7 @@ func TestGoiXuatHienDayDuKhopVoBoc(t *testing.T) {
 				c.nv.ID, c.nv.Ten, byte(c.nv.Cap),
 				c.nv.HpToiDa, c.nv.HpToiDa,
 				int16(c.nv.ViTriX), int16(c.nv.ViTriY),
-				HinhDangHien{Lang: c.nv.Lang, Outfit: [6]int16{c.nv.KieuToc, 0, 0, 0, 0, 0}},
+				hinhDangNguoiChoi(c.nv), // 05/09: vo boc di qua hinhdang.go (dau hop le + than/chan 57/58)
 			)
 			if m == nil {
 				t.Fatal("goiXuatHienDayDu tra nil")
@@ -278,8 +283,8 @@ func TestGoiXuatHienDayDuOutfitThat(t *testing.T) {
 	docByte(3, "level", 90)
 	docByte(4, "co co dinh", 0)
 	docByte(5, "typePk", 3)
-	docByte(6, "gender", 4)
-	docByte(7, "gender lan 2", 4)
+	docByte(6, "lop/lang (nClasss[])", 4)
+	docByte(7, "cgender phia client", 0) // 05/09: luon 0 (hinhdang.go gioiTinhClient), ke ca boss
 	docShort(8, "head", 11)
 	if v, err := r.UTF(); err != nil || v != "Cửu Vĩ" {
 		t.Fatalf("9 name: got %q, err=%v", v, err)

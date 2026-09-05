@@ -96,9 +96,13 @@ func goiMeInfoDaXep(nv *store.NhanVat, oMac, oTui, oRuong []*store.VatPham) (*pr
 	w.Byte(0) // (a) byte lenh con 0
 
 	w.Int(int32(nv.ID))
-	w.Byte(0)             // taskMain.id — chua co nhiem vu
-	w.Byte(byte(nv.Lang)) // (c) gender = id lang
-	w.Short(nv.KieuToc)   // head
+	w.Byte(0) // taskMain.id — chua co nhiem vu
+	// (c) byte "gender" thu nhat -> Char.cgender (Controller.cs:5832): client dung
+	// de chon than/chan MAC DINH (setDefaultPart, :5863) va hieu ung theo hanh
+	// tinh — luon 0, xem gioiTinhClient (hinhdang.go). Byte "gender lan 2" o duoi
+	// moi la chi so lop/lang (nClasss[]) va VAN = nv.Lang.
+	w.Byte(gioiTinhClient(nv.Lang))
+	w.Short(dauHopLe(nv.KieuToc)) // head — quy ve dau Naruto co that (hinhdang.go)
 	if err := w.UTF(nv.Ten); err != nil {
 		return nil, err
 	}

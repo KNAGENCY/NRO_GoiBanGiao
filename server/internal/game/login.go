@@ -554,6 +554,11 @@ func (b *BoXuLy) xuLyClientOk(s *mynet.Session) error {
 		b.khuVuc = b.soKhuVuc.Tra(b.nhanVat.MapID)
 	}
 
+	// Nhan vat chet trong CSDL -> song lai ngay o day, TRUOC khi dung bat ky goi
+	// nao (ME_INFO/-42 doc HpHienTai) va TRUOC khi -39 giao nv cho actor. Ly do
+	// va hanh vi: hinhdang.go hoiSinhLucVao.
+	hoiSinhLucVao(b.nhanVat)
+
 	// KH7 Task 5 — HANH TRANG. Nap TRUOC goi dau tien cua chuoi vao the gioi,
 	// vi hai le:
 	//
@@ -576,7 +581,10 @@ func (b *BoXuLy) xuLyClientOk(s *mynet.Session) error {
 	}
 	// MOT lat cat -> bang tra VA ba goi. Khong co duong nao dung bang tu lat cat
 	// nay roi dung goi tu lat cat khac (xem hanhtrang.go).
-	ht, errBG := DungBangVaGoi(dsMon, b.nhanVat.KieuToc, SoOTuiChuan, SoOMacChuan, SoORuongChuan)
+	// head trong -37 (do dang mac) cung di qua dauHopLe: client doc head o do roi
+	// setDefaultPart() (Controller.cs:2011-2012), dau la phai cung mot con so voi
+	// ME_INFO va -5.
+	ht, errBG := DungBangVaGoi(dsMon, dauHopLe(b.nhanVat.KieuToc), SoOTuiChuan, SoOMacChuan, SoORuongChuan)
 	if errBG != nil {
 		slog.Error("hanh trang khong dung duoc goi, dong phien",
 			"loi", errBG, "ten", b.nhanVat.Ten, "id", b.nhanVat.ID)

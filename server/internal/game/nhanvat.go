@@ -78,10 +78,14 @@ func (b *BoXuLy) xuLyTaoNhanVat(s *mynet.Session, r *protocol.Reader) error {
 	}
 
 	nv, err := b.kho.TaoNhanVat(ctx, store.NhanVatMoi{
-		TaiKhoanID:  b.taiKhoan.ID,
-		Ten:         ten,
-		Lang:        lang.ID,
-		KieuToc:     int16(kieuTocByte),
+		TaiKhoanID: b.taiKhoan.ID,
+		Ten:        ten,
+		Lang:       lang.ID,
+		// Client Unity gui id TOC Dragon Ball (CreateCharScr.hairIDOld); bo hinh
+		// Naruto chi co dau 30 -> luu dau co that, khong luu con so client chon
+		// (hinhdang.go dauHopLe). Con so client chon van vao log ben duoi
+		// ("toc_client") de biet nguoi choi thich gi khi sau nay co them dau.
+		KieuToc:     dauHopLe(int16(kieuTocByte)),
 		MapID:       lang.MapKhoiDau,
 		ViTriX:      lang.ViTriXKhoiDau,
 		ViTriY:      lang.ViTriYKhoiDau,
@@ -102,7 +106,8 @@ func (b *BoXuLy) xuLyTaoNhanVat(s *mynet.Session, r *protocol.Reader) error {
 	}
 
 	slog.Info("tao nhan vat thanh cong",
-		"ip", s.DiaChiIP, "ten", nv.Ten, "lang", nv.Lang, "tai_khoan", b.taiKhoan.ID)
+		"ip", s.DiaChiIP, "ten", nv.Ten, "lang", nv.Lang, "tai_khoan", b.taiKhoan.ID,
+		"toc_client", kieuTocByte, "dau_luu", nv.KieuToc)
 	return b.vaoTheGioi(s, nv)
 }
 

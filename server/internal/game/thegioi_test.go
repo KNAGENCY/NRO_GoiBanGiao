@@ -87,8 +87,11 @@ func TestGoiMeInfoByteDung(t *testing.T) {
 	b("byte lenh con", 0) // §8 bo sot — messageSubCommand((byte)0)
 	in("id", 12345)
 	b("taskMain.id", 0)
-	b("gender", 3) // = NhanVat.Lang
-	sh("head", 7)  // = NhanVat.KieuToc
+	// 05/09: byte cgender luon 0 (gioiTinhClient, hinhdang.go) — client chi biet
+	// 3 hanh tinh; lang 3 ma ghi 3 thi setDefaultPart() khong dat than/chan.
+	b("gender (cgender phia client)", 0)
+	// 05/09: head qua dauHopLe — KieuToc 7 la toc Dragon Ball, bo Naruto chi co dau 30.
+	sh("head", 30)
 	if ten, err := r.UTF(); err != nil || ten != "Naruto" {
 		t.Fatalf("name = %q (loi %v), mong doi \"Naruto\"", ten, err)
 	}

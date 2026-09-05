@@ -317,8 +317,16 @@ trường rất dễ chép sai** — `hp` đứng trước `level`, rồi mới 
 | 0 | `soQuai` | byte |
 | | *lặp `soQuai` lần:* | |
 | 1–5 | `isDisable`, `isDontMove`, `isFire`, `isIce`, `isWind` | bool ×5 (KH6 ghi `false` cả 5) |
-| 6 | `tempId` | byte |
+| 6 | **`templateId`** — mẫu quái (`MauId`/`anh_id`), **KHÔNG phải `tempId`** | byte |
 | 7 | `sys` | byte = 0 |
+
+> ⚠️ **Đính chính 05/09/2026:** bảng cũ ghi ô 6 là `tempId` và máy chủ đã ghi `Quai.Id` vào đó suốt từ KH6.
+> Client (`Controller.cs:5068`) đọc ô 6 vào tham số `templateId` của `Mob(...)` rồi tra
+> `Mob.arrMobTemplate[templateId]`; còn `mobId` (id tạm) client **tự lấy bằng chỉ số vòng lặp**. Với hai con
+> sói cùng mẫu 0, con thứ hai (`Id=1`) làm client tra mẫu 1 không có → ngoại lệ → **bỏ nốt NPC, đồ rơi và 11
+> bóng đổ** phía sau trong cùng gói. Hệ quả kéo theo: danh sách quái mỗi khu vực phải xếp đúng `Id = 0,1,2…`
+> (client dùng chỉ số làm `mobId` cho `-9/-10/-11/-12`). Tìm ra bằng cách ghi hex `-24` thật ở mức Debug rồi
+> giải mã đúng theo code client (`scratchpad/giai-ma-24.py`), không đoán.
 | 8 | **`hp`** | int |
 | 9 | **`level`** | byte |
 | 10 | **`hpMax`** | int |

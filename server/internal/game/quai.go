@@ -156,8 +156,20 @@ func ghiQuai(w *protocol.Writer, q *Quai) {
 	w.Bool(false) // 4 isIce
 	w.Bool(false) // 5 isWind
 
-	w.Byte(q.Id) // 6 tempId
-	w.Byte(0)    // 7 sys = 0
+	// 6 = MAU QUAI (templateId), KHONG PHAI tempId. Client (Controller.cs:5068)
+	// doc o nay vao tham so `templateId` cua Mob(...) roi tra
+	// Mob.arrMobTemplate[templateId]; con mobId (id tam) client LAY BANG CHI SO
+	// vong lap `b` — tuc la thu tu con quai trong danh sach nay. Truoc 05/09/2026
+	// o day ghi q.Id: con soi thu hai (Id=1) bi client hieu la mau 1 trong khi
+	// catalog chi co 1 mau -> IndexOutOfRange -> client bo NGUYEN phan con lai cua
+	// -24 (NPC, do roi, 11 bong do) — NPC "khong hien" suot tu KH4 la vi day.
+	// Phat hien bang cach giai ma hex -24 that theo dung code client (giai-ma-24).
+	//
+	// He qua: danh sach quai ghi ra PHAI theo dung thu tu Id 0,1,2... (client
+	// dung chi so lam mobId cho cac goi -9/-10/-11/-12 sau nay) — xem
+	// TestGhiDanhSachQuaiThuTuIdLaChiSo.
+	w.Byte(q.MauId) // 6 templateId (id anh quai, catalog mobs[].id)
+	w.Byte(0)       // 7 sys = 0
 
 	w.Int(q.Hp)      // 8  hp    — TRUOC level, DUNG doi cho hpMax
 	w.Byte(q.Cap)    // 9  level — GIUA hp va hpMax

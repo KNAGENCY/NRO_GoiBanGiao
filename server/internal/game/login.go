@@ -3,6 +3,7 @@ package game
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -645,6 +646,11 @@ func (b *BoXuLy) xuLyClientOk(s *mynet.Session) error {
 	if err != nil {
 		return err
 	}
+	// Debug (tat mac dinh, NRO_MUC_NHAT_KY=debug moi in): hex than -24 — MOT dong
+	// moi lan vao map, khong phai moi goi tin, nen khong vi pham luat chong ngap
+	// nhat ky. Dung de giai ma lai dung nhu client doc khi client "im lang bo
+	// qua" mot phan goi (05/09: NPC khong hien).
+	slog.Debug("MAP INFO -24 hex", "id", b.nhanVat.ID, "soQuai", len(quai), "hex", hex.EncodeToString(mapInfo.Data))
 	if err := s.Gui(mapInfo); err != nil {
 		return err
 	}

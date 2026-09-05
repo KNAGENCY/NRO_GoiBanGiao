@@ -49,9 +49,9 @@ func TestGhiDanhSachQuaiByteDung(t *testing.T) {
 	muon := []byte{
 		2, // soQuai
 
-		// --- quai 1: Id=0, Cap=3, Hp=80, HpToiDa=100, X=120, Y=200 ---
+		// --- quai 1: Id=0, MauId=5, Cap=3, Hp=80, HpToiDa=100, X=120, Y=200 ---
 		0, 0, 0, 0, 0, // isDisable/isDontMove/isFire/isIce/isWind = false
-		0,           // tempId = 0
+		5,           // o 6 = MauId (templateId phia client) — KHONG phai Id (05/09, xem ghiQuai)
 		0,           // sys = 0
 		0, 0, 0, 80, // hp = 80 (int32, TRUOC level)
 		3,            // level = 3 (GIUA hp va hpMax)
@@ -62,9 +62,9 @@ func TestGhiDanhSachQuaiByteDung(t *testing.T) {
 		3, // lvMob = 3
 		0, // isBigBoss = false
 
-		// --- quai 2: Id=1, Cap=10, Hp=500, HpToiDa=500, X=300, Y=150 ---
+		// --- quai 2: Id=1, MauId=7, Cap=10, Hp=500, HpToiDa=500, X=300, Y=150 ---
 		0, 0, 0, 0, 0,
-		1,            // tempId = 1
+		7,            // o 6 = MauId = 7 (client: Mob.arrMobTemplate[7]); Id=1 chi la vi tri trong danh sach
 		0,            // sys = 0
 		0, 0, 1, 244, // hp = 500
 		10,           // level = 10
@@ -94,14 +94,14 @@ func TestGhiQuaiThuTuHpCapHpToiDa(t *testing.T) {
 	ghiQuai(w, q)
 	r := protocol.NewReader(w.Bytes())
 
-	// 5 co bool + tempId + sys.
+	// 5 co bool + templateId (MauId) + sys.
 	for i := 0; i < 5; i++ {
 		if _, err := r.Byte(); err != nil {
 			t.Fatalf("doc co bool thu %d loi: %v", i+1, err)
 		}
 	}
-	if _, err := r.Byte(); err != nil { // tempId
-		t.Fatalf("doc tempId loi: %v", err)
+	if _, err := r.Byte(); err != nil { // templateId = MauId
+		t.Fatalf("doc templateId loi: %v", err)
 	}
 	if _, err := r.Byte(); err != nil { // sys
 		t.Fatalf("doc sys loi: %v", err)
@@ -189,7 +189,7 @@ func TestGoiMapInfoVoiQuaiByteDung(t *testing.T) {
 	b("q1.isFire", 0)
 	b("q1.isIce", 0)
 	b("q1.isWind", 0)
-	b("q1.tempId", 0)
+	b("q1.templateId(MauId)", 5) // 05/09: o 6 la MAU quai, khong phai Id — xem ghiQuai
 	b("q1.sys", 0)
 	in("q1.hp", 80)
 	b("q1.level", 3)
@@ -206,7 +206,7 @@ func TestGoiMapInfoVoiQuaiByteDung(t *testing.T) {
 	b("q2.isFire", 0)
 	b("q2.isIce", 0)
 	b("q2.isWind", 0)
-	b("q2.tempId", 1)
+	b("q2.templateId(MauId)", 7)
 	b("q2.sys", 0)
 	in("q2.hp", 500)
 	b("q2.level", 10)

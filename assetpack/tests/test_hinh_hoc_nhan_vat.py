@@ -155,6 +155,30 @@ class ToanHinhHocTests(unittest.TestCase):
         self.assertEqual(sorted(leg), list(range(14)))
 
 
+class HangNeoBanChanTests(unittest.TestCase):
+    """Ghim hằng neo bàn chân vào DỮ LIỆU đã sinh.
+
+    Điều phối áp đột biến `PLAYER_FEET_OFFSET_X1 = -5` (05/09/2026): 25 test trên
+    vẫn xanh — vì chúng đo artifact đã sinh, còn hằng số chỉ tác dụng lúc SINH LẠI.
+    Đổi hằng này là dời cả nhân vật lên/xuống so với mặt đất mà không test nào kêu.
+    Ba chốt dưới đây buộc ba nơi (hằng trong code, mapping, số đo trên ảnh+part.bin)
+    phải cùng nói -11; muốn dời nhân vật thì đổi cả ba, có chủ đích.
+    """
+
+    def test_hang_trong_code_bang_mapping_bang_so_do(self):
+        from tools.artqa.task6b_closure import PLAYER_FEET_OFFSET_X1
+
+        self.assertEqual(PLAYER_FEET_OFFSET_X1, -11, "cf 0 bản đang chạy đứng ở cy-11")
+        mapping = json.loads(MAPPING.read_text(encoding="utf-8"))
+        geometry = mapping["build_inputs"]["player_component_geometry"]
+        self.assertEqual(geometry["feet_offset_x1"], PLAYER_FEET_OFFSET_X1)
+        rows = _do_bang()
+        self.assertEqual(
+            rows[0]["chan_so_cy"], PLAYER_FEET_OFFSET_X1,
+            "bàn chân cf 0 đo trên part.bin + ảnh phải bằng hằng neo — lệch = artifact chưa sinh lại",
+        )
+
+
 class CongCuDoTests(unittest.TestCase):
     def test_ghep_khung_doc_duoc_ca_hai_bo_cuc_thu_muc_sprite(self):
         """Thư mục client phẳng và thư mục closure phải cùng đo được."""

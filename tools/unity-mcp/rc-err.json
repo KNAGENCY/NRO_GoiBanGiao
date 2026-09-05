@@ -1,0 +1,1 @@
+{"name":"read_console","arguments":{"action":"get","count":"25","types":["error"],"include_stacktrace":false,"format":"plain"}}

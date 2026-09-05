@@ -46,6 +46,9 @@ if errorlevel 1 (
 )
 
 echo [3/3] Chay may chu (cong 14445). Ctrl+C de tat.
+REM Neu con mot may chu cu dang chay (vi du ban an do agent bat de kiem thu),
+REM tat no truoc - hai ban cung nghe 14445 thi ban moi thoat ngay voi "address in use".
+taskkill /IM nroserver.exe /F >nul 2>&1
 echo ---------------------------------------------------------------------------
 nroserver.exe
 echo ---------------------------------------------------------------------------

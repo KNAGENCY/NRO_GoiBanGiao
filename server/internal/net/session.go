@@ -27,7 +27,17 @@ const (
 	thoiGianChoBatTay = 5 * time.Second
 
 	// thoiGianChoGoiTin: ket noi im lang qua lau coi nhu da chet.
-	thoiGianChoGoiTin = 120 * time.Second
+	//
+	// 05/09/2026: nang 120s -> 10 phut. Client Unity KHONG co goi "ping"
+	// dinh ky nao (Session_ME.cs khong gui gi khi nguoi choi khong thao tac),
+	// nen han 120s dong nghia "dung yen 2 phut la bi da" — do that qua Unity
+	// MCP: dang nhap 17:13:59, log "ket noi ket thuc ... i/o timeout" 17:15:59,
+	// client roi ve man chon may chu, ba lan lien tiep. Ket noi CHET THAT
+	// (rut day, treo may) da co TCP keep-alive cua Go bat mac dinh cho ket noi
+	// accept (15s) lo; han doc nay chi con vai tro chan ket noi DA BAT TAY roi
+	// nam im chiem cho, nen 10 phut la du chat: gioi han 32 ket noi/IP
+	// (chanip) van la lop chan chinh.
+	thoiGianChoGoiTin = 10 * time.Minute
 
 	// thoiGianChoGui: han gio cho MOI LAN GHI xuong client.
 	//

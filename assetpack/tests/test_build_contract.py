@@ -184,7 +184,9 @@ class BuildContractTests(unittest.TestCase):
         mob_bytes = binary("mob.bytes", mob_payload)
         mob_data = binary("mob.data", mob_payload)
         mob = {"id": 0, "bytes_path": mob_bytes, "data_path": mob_data, "bytes_sha256": hashlib.sha256(mob_payload).hexdigest(), "data_sha256": hashlib.sha256(mob_payload).hexdigest(), "images": GOLDEN_IMAGES, "arr_frames": [], "trailer": GOLDEN_TRAILER, "frames": mob_frames, "img": {zoom: png(f"mob-{zoom}.png") for zoom in ("x1", "x2", "x3", "x4")}}
-        animation_specs = (("hoc-vien-head", 3, (128, 128)), ("hoc-vien-body", 17, (128, 160)), ("hoc-vien-leg", 14, (128, 128)), ("quai-soi-rung", 10, (96, 96)))
+        # cell_size = O TOI DA cua contact sheet (xem REQUIRED_ANIMATION_SHEETS):
+        # sprite nguoi choi khong con bi nhoi vao hop co dinh nen moi cell mot co.
+        animation_specs = (("hoc-vien-head", 3, (128, 128)), ("hoc-vien-body", 17, (256, 160)), ("hoc-vien-leg", 14, (160, 128)), ("quai-soi-rung", 10, (96, 96)))
         animation_sheets = []
         for name, count, cell_size in animation_specs:
             animation_sheets.append({"name": name, "slot_count": count, "cell_size": list(cell_size), "cells": [{"slot_index": index, "path": png(f"{name}-{index}.png", size=cell_size)} for index in range(count)]})

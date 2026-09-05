@@ -7,10 +7,19 @@ class AnimationError(ValueError):
     pass
 
 
+# `cell_size` là Ô TỐI ĐA của contact sheet bằng chứng, KHÔNG phải kích thước bắt
+# buộc của từng cell.
+#
+# Vì sao đổi (05/09/2026): sprite người chơi từng bị nhồi vào hộp cố định
+# 128×128/128×160 nên mỗi khung có một tỉ lệ riêng — nhân vật phình/teo theo pose,
+# đầu rời khỏi thân. Bản mới giữ MỘT tỉ lệ chung cho mọi khung, nên cell có kích
+# thước khác nhau (khung nằm rộng gấp đôi khung đứng). Client `SmallImage` vẽ ảnh
+# mọi kích cỡ, chỉ contact sheet mới cần ô. Ô phải bao được cell rộng nhất; cell
+# vượt ô vẫn là lỗi (fail-closed) chứ không bị cắt im lặng.
 REQUIRED_ANIMATION_SHEETS = {
     "hoc-vien-head": {"slot_count": 3, "cell_size": (128, 128)},
-    "hoc-vien-body": {"slot_count": 17, "cell_size": (128, 160)},
-    "hoc-vien-leg": {"slot_count": 14, "cell_size": (128, 128)},
+    "hoc-vien-body": {"slot_count": 17, "cell_size": (256, 160)},
+    "hoc-vien-leg": {"slot_count": 14, "cell_size": (160, 128)},
     "quai-soi-rung": {"slot_count": 10, "cell_size": (96, 96)},
 }
 
@@ -92,6 +101,7 @@ def validate_animation_closure(sheets, animations, *, check_paths=None, check_ce
 
 
 def compose_action_sheet(cells, slot_count: int, cell_size: tuple[int, int]) -> Image.Image:
+    """Dán cell vào ô, căn giữa-dưới. Cell nhỏ hơn ô là bình thường; vượt ô là lỗi."""
     if slot_count not in {3, 10, 14, 17}:
         raise AnimationError("ASSET-ANIMATION-008: slot count phải là 3/17/14/10")
     if len(cells) != slot_count or {slot for slot, _ in cells} != set(range(slot_count)):
@@ -99,7 +109,10 @@ def compose_action_sheet(cells, slot_count: int, cell_size: tuple[int, int]) -> 
     width, height = cell_size
     sheet = Image.new("RGBA", (width * slot_count, height))
     for slot, cell in cells:
-        if cell.size != cell_size:
+        if cell.width > width or cell.height > height:
             raise AnimationError("ASSET-ANIMATION-008: canvas cell không đúng")
-        sheet.alpha_composite(cell.convert("RGBA"), (slot * width, 0))
+        sheet.alpha_composite(
+            cell.convert("RGBA"),
+            (slot * width + (width - cell.width) // 2, height - cell.height),
+        )
     return sheet

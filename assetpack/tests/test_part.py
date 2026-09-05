@@ -14,15 +14,30 @@ LEGACY_PART = ROOT / "server" / "internal" / "game" / "part.bin"
 MANIFEST = ROOT / "docs" / "my-thuat" / "mapping-id.json"
 FRAME_COUNTS = {0: 3, 1: 17, 2: 14}
 
-# Do doi DOC cua ba manh nhan vat, don vi game. Ghim CUNG o day (khong doc tu
-# manifest) de oracle van doc lap: sua nham manifest la test nay do.
+# Do doi cua tung KHUNG ba manh nhan vat, don vi game (x1). Ghim CUNG o day
+# (khong doc tu manifest) de oracle van doc lap: sua nham manifest la test nay do.
 #
-# Vi sao khong phai 0: anh than chi ve NUA DUOI cua dau, nen ba manh phai chong
-# len nhau dung cho hai ban tay trung nhau. Ba so nay do trong game that (dot lam
-# map 1 Lang La) - lech mot o la nhan vat cut co hoac lun toi that lung.
-DY_DAU, DY_THAN, DY_CHAN = -41, -50, -33
+# Truoc 05/09/2026 o day chi co ba hang so (-41/-50/-33) vi moi khung bi nhoi vao
+# cung mot hop 128x128/128x160, nen moi khung chung mot do doi. Nay moi khung giu
+# ti le CHUNG va duoc neo theo ban chan cua chinh no, nen dx/dy khac nhau tung
+# khung. Doi mot cap so o day nghia la nhan vat dich cho khi ve - phai co y.
+DX_DY = {
+    # dau (part 30) - ba khung idle
+    27041: (-3, -39), 27042: (-6, -39), 27043: (-7, -36),
+    # than (part 57)
+    27044: (-11, -30), 27045: (-7, -39), 27046: (-8, -39), 27047: (-5, -32),
+    27048: (-10, -25), 27049: (-6, -27), 27050: (-8, -29), 27051: (-3, -20),
+    27052: (-2, -17), 27053: (-14, -14), 27054: (-12, -26), 27055: (-6, -34),
+    27056: (-6, -25), 27057: (-8, -34), 27058: (-18, -29), 27059: (-25, -8),
+    27060: (-4, -16),
+    # chan (part 58)
+    27061: (4, -10), 27062: (-6, -22), 27063: (-4, -21), 27064: (-5, -18),
+    27065: (-9, -15), 27066: (-6, -16), 27067: (-6, -17), 27068: (-8, -10),
+    27069: (-16, -13), 27070: (-4, -18), 27071: (-6, -2), 27072: (-9, -6),
+    27073: (-8, -9), 27074: (-16, -12),
+}
 LEGACY_SHA256 = "09349f28a95b46469b691abf87d6b341f3395f53ca8d6d704b48ab706992826b"
-BUILT_SHA256 = "4fba8a7038b0687bac5d49bbd5499a43b0d3955d693f30ea573672d140dfd618"
+BUILT_SHA256 = "49205db30bd642f9bf705394ed830bdf107499cbeadebf5eb2619b826a7a41a8"
 
 
 def scan_legacy_records(data: bytes):
@@ -75,25 +90,16 @@ class PartBinaryTest(unittest.TestCase):
             if record_id not in {30, 57, 58}:
                 self.assertEqual(legacy_records[record_id], actual_records[record_id])
 
+        def khung(part_type: int, ids) -> bytes:
+            return bytes([part_type]) + b"".join(
+                struct.pack(">hbb", sprite_id, *DX_DY[sprite_id])
+                for sprite_id in ids
+            )
+
         expected = list(legacy_records)
-        expected[30] = b"\x00" + b"".join(
-            struct.pack(">hbb", sprite_id, 0, DY_DAU)
-            for sprite_id in (27041, 27042, 27043)
-        )
-        expected[57] = b"\x01" + b"".join(
-            struct.pack(">hbb", sprite_id, 0, DY_THAN)
-            for sprite_id in (
-                27044, 27045, 27046, 27047, 27048, 27049, 27050, 27051, 27052,
-                27053, 27054, 27055, 27056, 27057, 27058, 27059, 27060,
-            )
-        )
-        expected[58] = b"\x02" + b"".join(
-            struct.pack(">hbb", sprite_id, 0, DY_CHAN)
-            for sprite_id in (
-                27061, 27062, 27063, 27064, 27065, 27066, 27067,
-                27068, 27069, 27070, 27071, 27072, 27073, 27074,
-            )
-        )
+        expected[30] = khung(0, (27041, 27042, 27043))
+        expected[57] = khung(1, range(27044, 27061))
+        expected[58] = khung(2, range(27061, 27075))
         expected.extend((
             record_bytes(0, 27075, 3),
             record_bytes(1, 27076, 17),

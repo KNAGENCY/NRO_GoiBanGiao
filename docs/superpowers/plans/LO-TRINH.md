@@ -5,8 +5,10 @@
 Mỗi kế hoạch là một tài liệu riêng, viết theo skill `superpowers:writing-plans`,
 thi công theo skill `superpowers:subagent-driven-development`.
 
-**Mức độ chắc chắn của lộ trình này:** Kế hoạch 1, 2, 3 đã xong và gộp. Kế hoạch
-4, 5, 10 đã chốt phạm vi. Các kế hoạch còn lại là bản phác.
+**Mức độ chắc chắn của lộ trình này (soát 05/09/2026):** Kế hoạch 1, 2, 3, 4, 5, 6, 6b, 6c,
+11, 7, 8 đã xong và gộp `main` (code); còn nghiệm thu tay Unity cho 4, 6, 6b, 7, 11. Kế hoạch
+9, 10, W3, B, V chưa bắt đầu — 9 và 10 là bản phác. Tình trạng chi tiết từng kế hoạch: bảng §5
+`BAT-DAU-TU-DAY.md` (nguồn sự thật); bảng dưới đây chỉ là tóm tắt.
 
 **Kế hoạch 4 tiếp theo — nhắc trước khi bắt tay:** byte-table đã có đủ ở
 [`../specs/2026-07-24-giao-thuc-vao-the-gioi.md`](../specs/2026-07-24-giao-thuc-vao-the-gioi.md)
@@ -51,11 +53,11 @@ kết nối theo IP (Kế hoạch bảo mật B, là bước lùi so với bản
 | 4 | **Vào thế giới** (ME_INFO + MAP INFO + tileset + khu vực) | ✅ **Xong** (gộp `aef5f71`) — còn B9: bạn tự kiểm bằng client Unity thật | 3 |
 | 5 | Di chuyển + mô hình actor cho khu vực | ✅ **Xong** (gộp `e1ddc44`) — actor 100ms, chống gian lận vừa phải, thấy nhau + di chuyển | 4 |
 | 6 | Chiến đấu, chiêu thức, quái | ✅ **Xong** (gộp `162bbe9`) — 20 chiêu, sát thương ngũ hành, đánh quái/quái đánh lại/hồi sinh, PvP, chết & hồi sinh. Task 1–14 qua review đối kháng + đột biến + 2 canary + soi opus. Còn **Task 15** (nghiệm thu tay Unity). Hồi máu PvP hoãn (§8 BAT-DAU) | 5 |
-| 6b | **Boss** — hệ riêng tách khỏi KH6 (bản Java là 12 file, phức tạp hơn quái thường nhiều; xem đặc tả KH6 §0) | Chưa bắt đầu — thiết kế sau KH6 | 6 |
-| 6c | **Stress test đông người**: 20 client giả cùng khu vực cùng xả chiêu — đo gói rơi ở hộp thư actor (trần 256, `Gui()` rơi im lặng khi đầy) + độ trễ nhịp 100ms; dựng trên `thuclient`/`clientGia` sẵn có | Chưa bắt đầu | 6 |
+| 6b | **Boss** — hệ riêng tách khỏi KH6 (bản Java là 12 file, phức tạp hơn quái thường nhiều; xem đặc tả KH6 §0) | ✅ **Xong** (bản 1 `ea43237`, soi đối kháng `1b57a55`) — 15 task; boss sinh theo lịch, đánh trả, nổi giận, biến hình, chia thưởng, sổ nợ thưởng. Còn nghiệm thu tay Unity | 6 |
+| 6c | **Stress test đông người**: 20 client giả cùng khu vực cùng xả chiêu — đo gói rơi ở hộp thư actor (trần 256, `Gui()` rơi im lặng khi đầy) + độ trễ nhịp 100ms; dựng trên `thuclient`/`clientGia` sẵn có | ✅ **Xong** (gộp `322b140`) | 6 |
 | 11 | **Lưu trạng thái sống** | ✅ **Xong** (gộp `6ea467f`) — lưu 3 thời điểm (định kỳ 60s · khi rời · khi tắt máy), actor không bao giờ chờ ổ đĩa; kèm một-tài-khoản-một-phiên. [đặc tả](../specs/2026-07-27-luu-trang-thai-song.md) · [kế hoạch](2026-07-27-ke-hoach-11-luu-trang-thai.md). Còn Task 9 nghiệm thu tay | 6 |
-| 7 | Vật phẩm, hành trang, cửa hàng, giao dịch | Chưa bắt đầu — 🧱 chốt căn cước vật phẩm + chống nhân bản TRƯỚC khi viết code ([BO-SUNG](BO-SUNG-LO-TRINH.md) Khối 3) | 5, 11 |
-| 8 | Kho nội dung YAML + nạp nóng — **kèm cân bằng thực nghiệm**: đổ số liệu chiêu thật (đơn vị `SatThuong` phải chốt — TODO trong `satthuong.go`), chơi thử rồi đo làng nào thắng nhiều, chỉnh số trong YAML không sửa code. **⚠️ PHẢI CHỐT TRƯỚC KHI BẮT ĐẦU: số chiêu và số KIỂU chiêu** — xem ghi chú dưới bảng | Chưa bắt đầu | 6, 7 |
+| 7 | Vật phẩm, hành trang, cửa hàng, giao dịch | ✅ **Code xong** (task 0–12 + hạn giờ dọn đồ rơi `b269e9c`; [spec](../specs/2026-09-03-kh7-vat-pham-design.md)) — căn cước `id BIGSERIAL`, 4 bất biến chống nhân bản, tiền chỉ qua `CongTruTien`. Còn **task 13 nghiệm thu tay Unity**. Hoãn bản 2: dùng thuốc, mặc đè, đổi hình khi mặc, giao dịch 2 người | 5, 11 |
+| 8 | Kho nội dung YAML + nạp nóng — **kèm cân bằng thực nghiệm** | ✅ **Xong 14 task 0–13** (mốc cuối `f3235f8`; [spec](../specs/2026-09-03-kh8-kho-noi-dung-design.md)) — 7 file YAML `server/kho-noi-dung/`, nạp nóng HTTP loopback, đơn vị sát thương chiêu chốt = phần trăm (`he_so_phan_tram`), bộ đo Đ1–Đ4 (`DO-CAN-BANG.bat`), vòng chỉnh số đạt 4 ngưỡng đề xuất. Chủ dự án đã chốt **4 chiêu/làng** (03/09) — ghi chú dưới bảng đã giải quyết. Chờ chủ dự án: chốt ngưỡng, boss pha 1 nhẹ đòn vì chưa hồi máu trong trận, "trừ chakra" | 6, 7 |
 | 9 | Nhiệm vụ, cốt truyện, NPC | Chưa bắt đầu | 8 |
 | 10 | **Cảm giác chơi** — hoạt ảnh, chuyển màn, hướng dẫn người mới | Chưa bắt đầu | 5, 6 |
 | W | Web + Panel quản trị (Next.js) | 🔨 **Đang làm** — W1 (đăng ký/đăng nhập) + W2 (trang cá nhân, đổi mật khẩu, bảng xếp hạng, panel admin) đã lên main. Còn W3 (cấu hình/nhật ký/nạp thẻ, phân trang, thu hồi phiên) | 2 |
@@ -65,7 +67,7 @@ kết nối theo IP (Kế hoạch bảo mật B, là bước lùi so với bản
 Kế hoạch **W** (web), **B** (bảo mật) và **V** (triển khai) đánh chữ vì chúng
 cắt ngang mọi kế hoạch khác, không nằm gọn ở một chỗ trong thứ tự.
 
-> ### ⚠️ Phải chốt trước KH8: bao nhiêu chiêu, và bao nhiêu KIỂU chiêu
+> ### ~~⚠️ Phải chốt trước KH8: bao nhiêu chiêu, và bao nhiêu KIỂU chiêu~~ → **ĐÃ CHỐT 03/09/2026: giữ 4 chiêu/làng, 3 kiểu, không mở rộng kiểu trong KH8.** Thêm chiêu cùng kiểu sau này = thêm dữ liệu YAML (`chieu.yaml` + `khoa-id.yaml`), không cần code.
 >
 > **KH6 mới có 20 chiêu (4 mỗi làng) — ít, và đó là cố ý.** Bốn chiêu đó không
 > phải nội dung game mà là **bộ xương tối thiểu** để chứng minh mọi kiểu chiêu

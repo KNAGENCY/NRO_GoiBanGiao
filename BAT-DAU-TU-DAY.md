@@ -80,6 +80,21 @@ D:\PostgreSQL\bin\pg_ctl.exe -D D:\PostgreSQL\data start
 
 Dưới đây viết `CONG` — thay bằng số vừa tìm được. Chi tiết: `server/README.md` mục 0.
 
+### 🎮 Chơi thử thật bằng client Unity — đường ngắn nhất (05/09/2026)
+
+1. **Bấm đúp `server\CHOI-THU.bat`** — nó bật PostgreSQL nếu chưa chạy, build lại `nroserver.exe`,
+   chạy máy chủ (cổng 14445) và **tự áp migration còn thiếu** vào CSDL `nro` lúc khởi động
+   (05/09 điều phối kiểm: `nro` đang thiếu 0004/0005, máy chủ tự áp xong trong 0,2 giây). **Để cửa sổ đó mở.**
+2. Mở Unity **`D:\Unity\2022.3.62f2\Editor\Unity.exe`** → project `D:\NRO_Project` → bấm **Play**.
+   Client đã trỏ sẵn `127.0.0.1:14445`. Nếu báo *connect fail* là máy chủ chưa chạy, không phải lỗi code.
+3. Đăng nhập **`naruto` / `1`** (đã có nhân vật "narruto", Làng Lá, map 1) hoặc **`thutest` / `1`** (chưa có
+   nhân vật → sẽ qua màn tạo). Tạo thêm tài khoản: web `npm run dev` → `http://localhost:3000/dang-ky`,
+   hoặc SQL ở `server/README.md` mục 2.
+4. Tắt: **Ctrl+C** trong cửa sổ máy chủ (lưu nhân vật rồi mới tắt — đó chính là bài nghiệm thu KH11).
+5. Có gì lạ → chép nguyên dòng log trong cửa sổ máy chủ cho agent; log cũng in ra màn hình, không ghi file.
+
+Danh sách việc phải thử tay (KH4/6/6b/7/11) ở §5 mục A của lần soát 05/09 trong `NHAT-KY-AGENT.md`.
+
 ```powershell
 # --- Máy chủ game ---
 cd D:\NRO_GoiBanGiao\server

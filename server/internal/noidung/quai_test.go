@@ -32,7 +32,10 @@ func TestQuai_VanThatNapDuoc(t *testing.T) {
 	if m.Ma != "soi-rung" || m.Hp != 100 || m.SatThuongCoBan != 5 || m.Cap != 1 || m.CapTinhAnh != 1 || m.AnhId != 0 {
 		t.Fatalf("mau quai lech so cu: %+v", m)
 	}
-	// Sau ban do, moi ban 2 con — y het taoQuaiMacDinh cu.
+	// Sau ban do, moi ban 2 con — y het taoQuaiMacDinh cu, TRU y cua map 1:
+	// 05/09/2026 dua ve 432 = mat co hang 18 (map-1-collision.bin); 384 la hang
+	// 16 giua troi va client khong cho quai roi -> soi lo lung 2 o (SOI-LAN-3 #26).
+	// Map 2-6 chua co luoi va cham rieng nen giu 384 tam.
 	for mapID := int32(1); mapID <= 6; mapID++ {
 		var dat []DiemSinhQuai
 		for _, s := range du.SinhQuai {
@@ -40,9 +43,13 @@ func TestQuai_VanThatNapDuoc(t *testing.T) {
 				dat = s.Dat
 			}
 		}
-		if len(dat) != 2 || dat[0].Id != 0 || dat[0].X != 160 || dat[0].Y != 384 ||
-			dat[1].Id != 1 || dat[1].X != 40 || dat[1].Y != 384 {
-			t.Fatalf("map %d: diem sinh lech ban cu: %+v", mapID, dat)
+		yMong := int16(384)
+		if mapID == 1 {
+			yMong = 432
+		}
+		if len(dat) != 2 || dat[0].Id != 0 || dat[0].X != 160 || dat[0].Y != yMong ||
+			dat[1].Id != 1 || dat[1].X != 40 || dat[1].Y != yMong {
+			t.Fatalf("map %d: diem sinh lech (mong y=%d): %+v", mapID, yMong, dat)
 		}
 	}
 }

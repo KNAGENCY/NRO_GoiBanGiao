@@ -91,10 +91,14 @@ mau_quai:
 # CÓ DẤU nên phải nằm trong 0..127, và không được trùng trong cùng một map.
 
 sinh:
+  # Map 1: y = 432 = mặt cỏ HÀNG 18 của map-1-collision.bin (hàng 18 để RỖNG cho nhân vật
+  # đứng, từ hàng 19 mới đặc — tools/map-lang-la/sinh-va-cham.py). Trước 05/09/2026 để 384
+  # (hàng 16, giữa trời): client KHÔNG cho quái rơi (Mob.cs kéo y về yFirst) nên hai con sói
+  # lơ lửng đúng 2 ô. Map 2–6 chưa có lưới va chạm riêng nên giữ 384 tạm.
   - map: 1 # Làng Lá
     dat:
-      - { ma: soi-rung, id: 0, x: 160, y: 384 }
-      - { ma: soi-rung, id: 1, x: 40, y: 384 }
+      - { ma: soi-rung, id: 0, x: 160, y: 432 }
+      - { ma: soi-rung, id: 1, x: 40, y: 432 }
   - map: 2 # Làng Cát
     dat:
       - { ma: soi-rung, id: 0, x: 160, y: 384 }

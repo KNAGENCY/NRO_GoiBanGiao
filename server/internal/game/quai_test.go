@@ -30,7 +30,9 @@ func haiQuaiMau() []*Quai {
 // 8 lay ra khoi hang so 5 go cung trong quai.go.
 func TestTaoQuaiMacDinhDungCatalogKhongSuyDienSpawn(t *testing.T) {
 	quai := taoQuaiTuAnhChup(khoChieuMacDinh(), TimBanDo(1))
-	if len(quai) != 2 || quai[0].MauId != 0 || quai[0].Hp != 100 || quai[0].HpToiDa != 100 || quai[0].X != 160 || quai[0].Y != 384 || quai[1].X != 40 || quai[1].Y != 384 {
+	// 05/09: y 384 -> 432 (mat co hang 18; 384 la giua troi, client khong cho quai
+	// roi nen soi lo lung 2 o) — doi co chu dich, xem quai.yaml.
+	if len(quai) != 2 || quai[0].MauId != 0 || quai[0].Hp != 100 || quai[0].HpToiDa != 100 || quai[0].X != 160 || quai[0].Y != 432 || quai[1].X != 40 || quai[1].Y != 432 {
 		t.Fatalf("quai mac dinh phai theo kho noi dung, got=%+v", quai)
 	}
 	for i, q := range quai {
@@ -221,7 +223,7 @@ func TestGoiMapInfoVoiQuaiByteDung(t *testing.T) {
 	b("npcCount", 1)
 	b("npc.status", 0)
 	sh("npc.x", 172)
-	sh("npc.y", 384)
+	sh("npc.y", 429) // 05/09: +3 phia client = 432 mat co (truoc 384 lo lung)
 	b("npc.template", 0)
 	sh("npc.portrait", 27078)
 	b("itemCount", 0)

@@ -263,7 +263,7 @@ func TestGoiMapInfoMap1CoBongDo(t *testing.T) {
 	d.b("npcCount", 1)
 	d.b("npc.status", 0)
 	d.sh("npc.x", 172)
-	d.sh("npc.y", 384)
+	d.sh("npc.y", 429) // 05/09: client dung NPC o y+3 -> 432 = mat co hang 18 (truoc 384 = lo lung 2 o)
 	d.b("npc.template", 0)
 	d.sh("npc.portrait", 27078)
 	d.b("itemCount", 0)

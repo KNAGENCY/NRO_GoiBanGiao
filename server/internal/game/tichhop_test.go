@@ -503,8 +503,9 @@ func TestTaoRoiDangNhapLai_ThayNhanVat(t *testing.T) {
 	if nv.ViTriX != 100 {
 		t.Errorf("vi tri x = %d, mong doi 100 (ViTriXKhoiDau ghim cua lang 0)", nv.ViTriX)
 	}
-	if nv.ViTriY != 384 {
-		t.Errorf("vi tri y = %d, mong doi 384 (ViTriYKhoiDau ghim cua lang 0)", nv.ViTriY)
+	if nv.ViTriY != 432 {
+		// 05/09: 432 = mat co hang 18 cua map 1 (truoc 384 = hang 16 giua troi, vao game roi 2 o).
+		t.Errorf("vi tri y = %d, mong doi 432 (ViTriYKhoiDau ghim cua lang 0, lang.yaml)", nv.ViTriY)
 	}
 	// Goi tao nhan vat o tren gui byte kieu toc 5 (cl.taoNhanVat(tenNV, 0, 5)) —
 	// day la id toc Dragon Ball ma client Unity van gui (CreateCharScr.hairIDOld).

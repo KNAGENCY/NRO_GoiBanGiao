@@ -35,7 +35,9 @@ lang:
     sat_thuong_khoi_dau: 55
     map_khoi_dau: 1
     vi_tri_x_khoi_dau: 100
-    vi_tri_y_khoi_dau: 384
+    # 432 = mặt cỏ hàng 18 của map 1 (map-1-collision.bin). Trước 05/09/2026 để 384 (hàng 16,
+    # giữa trời): vào game rơi 2 ô. Làng 2–5 chưa có map riêng nên vẫn 384 tạm.
+    vi_tri_y_khoi_dau: 432
     vang_khoi_dau: 1000
 
   - id: 1

@@ -162,14 +162,15 @@ func TestTichHop_DoiMapKhiKhongDungTrongCongVanMoKhoaClient(t *testing.T) {
 	dangNhapTaoNhanVatVaoTheGioi(t, cl, tenTK, matKhau, tenNV)
 	cl.baoVaoKhuVuc()
 
-	// Dung yen o diem xuat phat (100,384) — cach cong torii rat xa — roi gui
+	// Dung yen o diem xuat phat (100,432) — cach cong torii rat xa — roi gui
 	// -23 (mot client bi sua doi, hoac bam dung luc goi di chuyen chua toi).
+	// (05/09: diem xuat phat map 1 tu 384 ve 432 = mat co hang 18, lang.yaml.)
 	cl.guiDoiMap()
 
 	m46 := cl.doiGoiLenh(t, lenhDatLaiViTri)
 	d := moDocGoi(t, m46)
 	d.sh("x", 100) // dung vi tri hien tai -> client an hop thoai cho, khong truot di dau
-	d.sh("y", 384)
+	d.sh("y", 432)
 	d.hetGoi("goi 46")
 
 	// Va TUYET DOI khong duoc doi map: khong co -24 nao theo sau.
@@ -381,7 +382,7 @@ func TestTichHop_DoiMapKhiMapHienTaiKhongCoDanhMucVanMoKhoaClient(t *testing.T) 
 	m46 := cl.doiGoiLenh(t, lenhDatLaiViTri)
 	d := moDocGoi(t, m46)
 	d.sh("x", 100)
-	d.sh("y", 384)
+	d.sh("y", 432) // 05/09: diem xuat phat map 1 = mat co 432
 	d.hetGoi("goi 46")
 	if !cl.khongConGoiGi(t) {
 		t.Fatal("sau goi 46 con goi nua — nhan vat o mapId la khong duoc doi map di dau ca")
@@ -433,7 +434,7 @@ func TestTichHop_DoiMapKhiActorDaDungVanMoKhoaClient(t *testing.T) {
 	// trong phien — lech mot chut con hon treo (client tu chinh qua nhanh
 	// `cy - y != 0` cua Char.setResetPoint).
 	d.sh("x", 100)
-	d.sh("y", 384)
+	d.sh("y", 432) // 05/09: diem xuat phat map 1 = mat co 432
 	d.hetGoi("goi 46")
 	if !cl.khongConGoiGi(t) {
 		t.Fatal("sau goi 46 con goi nua — khong chup duoc trang thai thi TUYET DOI khong duoc doi map")

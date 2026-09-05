@@ -19,7 +19,7 @@ func TestNapCatalogArtifactLangLa(t *testing.T) {
 	if c.NPC.Portrait != 27078 || c.NPC.Head != 2189 || c.NPC.Body != 2190 || c.NPC.Leg != 2191 {
 		t.Fatalf("binding Iruka trong lock sai: %+v", c.NPC)
 	}
-	if c.NPC.Dialog != "Chào mừng em đến Làng Lá. Hãy vững tin trên con đường ninja của mình." || len(c.NPC.Menu) != 1 || c.NPC.Menu[0] != "Đóng" || c.NPC.X != 172 || c.NPC.Y != 384 {
+	if c.NPC.Dialog != "Chào mừng em đến Làng Lá. Hãy vững tin trên con đường ninja của mình." || len(c.NPC.Menu) != 1 || c.NPC.Menu[0] != "Đóng" || c.NPC.X != 172 || c.NPC.Y != 429 { // 05/09: NPC y 429 (+3 client = 432 mat co), xem tools/map-lang-la/sua-y-sinh-432.py
 		t.Fatalf("NPC phai dung fixture catalog: %+v", c.NPC)
 	}
 	if c.Mob.HP != 100 || len(c.Mob.Spawns) != 2 || c.Mob.Spawns[0].X != 160 || c.Mob.Spawns[1].X != 40 {

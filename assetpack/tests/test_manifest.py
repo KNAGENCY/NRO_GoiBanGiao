@@ -74,10 +74,15 @@ class ManifestValidationTests(unittest.TestCase):
                 command.extend(["--version-ledger", str(version_path)])
             if art_root is not None:
                 command.extend(["--art-root", str(art_root)])
+            # encoding UTF-8 tường minh: máy Windows đặt bảng mã hệ thống GBK (cp936)
+            # thì text=True mặc định giải mã stderr tiếng Việt của validator hỏng
+            # ("'gbk' codec can't decode") → 10 test đỏ sẵn suốt nhiều ngày (05/09/2026).
             return subprocess.run(
                 command,
                 cwd=ROOT,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 capture_output=True,
                 check=False,
             )
@@ -102,6 +107,8 @@ class ManifestValidationTests(unittest.TestCase):
             [sys.executable, "-m", "assetpack", "verify-legacy-inputs", "--ledger", str(ledger)],
             cwd=ROOT,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             capture_output=True,
             check=False,
         )

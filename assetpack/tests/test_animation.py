@@ -2,10 +2,12 @@ import unittest
 
 
 def _closure():
+    # Ô contact sheet = giới hạn trên (xem REQUIRED_ANIMATION_SHEETS): sprite
+    # người chơi không còn bị nhồi vào hộp cố định nên mỗi cell một kích cỡ.
     specs = (
         ("hoc-vien-head", 3, (128, 128)),
-        ("hoc-vien-body", 17, (128, 160)),
-        ("hoc-vien-leg", 14, (128, 128)),
+        ("hoc-vien-body", 17, (256, 160)),
+        ("hoc-vien-leg", 14, (160, 128)),
         ("quai-soi-rung", 10, (96, 96)),
     )
     expected_cf = {
@@ -32,6 +34,22 @@ class AnimationContractTests(unittest.TestCase):
         sheet = compose_action_sheet([(1, blue), (0, red), (2, green)], 3, (1, 1))
         self.assertEqual(sheet.getpixel((0, 0)), (255, 0, 0, 255))
         self.assertEqual(sheet.getpixel((1, 0)), (0, 0, 255, 255))
+
+    def test_cell_nho_hon_o_duoc_dan_giua_duoi_va_cell_vuot_o_bi_tu_choi(self):
+        """Ô là giới hạn trên: mỗi khung một kích cỡ nên cell không còn bằng ô."""
+        from assetpack.animation import AnimationError, compose_action_sheet
+        from PIL import Image
+
+        nho = Image.new("RGBA", (2, 1), (255, 0, 0, 255))
+        sheet = compose_action_sheet([(0, nho), (1, nho), (2, nho)], 3, (4, 2))
+        self.assertEqual(sheet.size, (12, 2))
+        # dán giữa-dưới: x = 0*4 + (4-2)//2 = 1, y = 2-1 = 1
+        self.assertEqual(sheet.getpixel((1, 1)), (255, 0, 0, 255))
+        self.assertEqual(sheet.getpixel((1, 0)), (0, 0, 0, 0))
+
+        to = Image.new("RGBA", (5, 1), (255, 0, 0, 255))
+        with self.assertRaisesRegex(AnimationError, "ASSET-ANIMATION-008"):
+            compose_action_sheet([(0, to), (1, to), (2, to)], 3, (4, 2))
 
     def test_charinfo_cf_is_an_independent_golden_contract(self):
         from assetpack.animation import AnimationError, validate_animation_closure

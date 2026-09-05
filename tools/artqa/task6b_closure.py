@@ -44,6 +44,38 @@ PLAYER_ACTIONS = (
     ("cast", "player_cast_3f_chroma.png", 3),
     ("hit_death_getup", "player_hit_death_getup_3f_chroma.png", 3),
 )
+
+# --- Hình học nhân vật người chơi (part 30 đầu / 57 thân / 58 chân) ------------
+#
+# Client vẽ ba mảnh rời theo Char.paintCharBody (Char.cs ~6057-6084), neo TOP|LEFT
+# khi quay phải:
+#     x = cx + CharInfo[cf][k][1] + part.pi[idx].dx
+#     y = cy - CharInfo[cf][k][2] + part.pi[idx].dy      (y là MÉP TRÊN ảnh)
+# Nên ba thứ phải cùng kể một câu chuyện: tỉ lệ ảnh, gốc toạ độ ảnh, và dx/dy.
+#
+# Bản trước dùng ``fit_to_canvas`` co TỪNG khung cho vừa hộp 128×160/128×128 nên
+# mỗi khung có một tỉ lệ khác nhau (khung nằm rộng 665 px co còn 1/5 khung đứng
+# rộng 340 px) → nhân vật phình/teo theo pose, bàn chân trôi -10..-26 px so với
+# cy, đầu hở +7 px ở cf 20/31. Bản này:
+#   * MỘT tỉ lệ ``s`` cho mọi khung, mọi mảnh (giữ khung idle 0 đúng 128 px ở x4,
+#     tức nhân vật trong game không đổi cỡ);
+#   * gốc toạ độ của mỗi khung = giữa-dưới bbox nội dung CẢ KHUNG ("bàn chân"),
+#     nên mọi mảnh của cùng khung nằm trong CÙNG hệ toạ độ như Iruka;
+#   * canvas = đúng vùng đã scale sau khi trim alpha (không nhồi vào hộp cố định),
+#     vì SmallImage của client vẽ ảnh mọi kích cỡ, và trim làm ảnh đối xứng khi
+#     client lật ngang (hướng trái neo TOP|RIGHT);
+#   * dx/dy của từng frame part bù đúng CharInfo của cf neo.
+PLAYER_REFERENCE_SOURCE = "player_idle_3f_chroma.png"
+PLAYER_REFERENCE_FRAME = 0
+PLAYER_REFERENCE_X4_WIDTH = 128
+# Bàn chân (mép dưới vùng đục của chân) so với cy, đơn vị x1. -11 là đúng giá trị
+# của cf 0 trong bản đang chạy: giữ nguyên để nhân vật không đột ngột đổi độ cao
+# so với mặt đất; đổi MỘT hằng số này là dời cả nhân vật lên/xuống đều nhau.
+PLAYER_FEET_OFFSET_X1 = -11
+COMPONENT_CHARINFO_SLOT = {"head": 0, "leg": 1, "body": 2}
+CHARINFO_PATH = (
+    Path(__file__).resolve().parents[1] / "nhan-vat" / "charinfo.json"
+)
 WOLF_ACTIONS = (
     ("idle", "wolf_idle_2f_chroma.png", 2),
     ("run", "wolf_run_4f_chroma.png", 4),
@@ -171,6 +203,7 @@ def derive_player_slot_specs(review: dict[str, Any]) -> list[dict[str, Any]]:
                     "slot_index": slot_index,
                     "action": frame["action"],
                     "action_slot": frame["action_slot"],
+                    "frame_index": frame["frame_index"],
                     "source_path": frame["source_path"],
                     "source_sha256": record["source_sha256"],
                     "source_rect": _component_rect(
@@ -188,6 +221,215 @@ def derive_player_slot_specs(review: dict[str, Any]) -> list[dict[str, Any]]:
                 }
             )
     return slots
+
+
+def load_charinfo(path: Path | None = None) -> list[list[list[int]]]:
+    """Bảng khung xương 33 cf trích từ ``Char.cs`` (nguồn sự thật của client)."""
+
+    payload = json.loads(Path(path or CHARINFO_PATH).read_text(encoding="utf-8"))
+    if not isinstance(payload, list) or len(payload) != 33:
+        raise ClosureError("ASSET-CLOSURE-015: charinfo phải có đúng 33 cf")
+    return payload
+
+
+def charinfo_slot_to_cf(
+    charinfo: list[list[list[int]]], component: str
+) -> dict[int, list[int]]:
+    """Slot (chỉ số frame trong part) → các cf THẬT dùng nó, theo CharInfo.
+
+    Không dùng ``REQUIRED_CLIENT_CF`` cho việc này: bảng đó lệch một bậc so với
+    ``CharInfo`` ở thân và chân (ví dụ nó nói slot thân 0 phục vụ cf 0/1, còn
+    ``CharInfo[0][2][0]`` = 1 nên cf 0 thật sự lấy slot thân 1). Bù dx/dy phải
+    dựa trên cái client THẬT SỰ tra, nếu không mọi phép bù đều lệch một khung.
+    """
+
+    if component not in COMPONENT_CHARINFO_SLOT:
+        raise ClosureError(f"ASSET-CLOSURE-015: component lạ: {component}")
+    slot = COMPONENT_CHARINFO_SLOT[component]
+    result: dict[int, list[int]] = {}
+    for cf, entry in enumerate(charinfo):
+        result.setdefault(entry[slot][0], []).append(cf)
+    return result
+
+
+def player_uniform_scale(
+    reference_frame_width: int,
+    target_x4_width: int = PLAYER_REFERENCE_X4_WIDTH,
+) -> float:
+    """Một tỉ lệ chung cho MỌI khung, chốt bởi khung tham chiếu (idle 0)."""
+
+    if reference_frame_width <= 0 or target_x4_width <= 0:
+        raise ClosureError("ASSET-CLOSURE-015: bề rộng khung tham chiếu phải > 0")
+    return target_x4_width / reference_frame_width
+
+
+def component_placement(
+    *,
+    component_left_x4: float,
+    component_top_x4: float,
+    frame_center_x4: float,
+    frame_feet_x4: float,
+    charinfo_row: list[int],
+    feet_offset_x1: int = PLAYER_FEET_OFFSET_X1,
+) -> dict[str, int]:
+    """dx/dy (đơn vị x1) cho một frame part, bù đúng CharInfo của cf neo.
+
+    ``*_x4`` là toạ độ trong ảnh x4 đã scale; chia 4 để về đơn vị x1 mà part.bin
+    dùng. ``left_rel``/``top_rel`` là vị trí mong muốn của góc trên-trái ảnh so
+    với (cx, cy); âm là sang trái / lên trên.
+    """
+
+    left_rel = round((component_left_x4 - frame_center_x4) / 4)
+    top_rel = round((component_top_x4 - frame_feet_x4) / 4) + feet_offset_x1
+    dx = left_rel - charinfo_row[1]
+    dy = top_rel + charinfo_row[2]
+    if not -128 <= dx <= 127 or not -128 <= dy <= 127:
+        raise ClosureError(
+            f"ASSET-CLOSURE-015: dx/dy ngoài signed byte: dx={dx} dy={dy}"
+        )
+    return {"left_rel": left_rel, "top_rel": top_rel, "dx": dx, "dy": dy}
+
+
+def zoom_variants(x4: Image.Image) -> dict[str, Image.Image]:
+    """x4 → bốn mức zoom; x1 đúng bằng 1/4 nên đo trên x1 khớp part.bin."""
+
+    result = {}
+    for zoom_index, zoom in enumerate(ZOOMS, start=1):
+        if zoom == "x4":
+            result[zoom] = x4
+            continue
+        size = (
+            max(1, round(x4.width * zoom_index / 4)),
+            max(1, round(x4.height * zoom_index / 4)),
+        )
+        result[zoom] = x4.resize(size, Image.Resampling.NEAREST)
+    return result
+
+
+def player_component_images(
+    review: dict[str, Any],
+    *,
+    art_root: Path,
+    records: dict[str, dict[str, Any]] | None = None,
+    alpha_cache: dict[str, Image.Image] | None = None,
+    charinfo: list[list[list[int]]] | None = None,
+    feet_offset_x1: int = PLAYER_FEET_OFFSET_X1,
+) -> list[dict[str, Any]]:
+    """34 mảnh người chơi: ảnh x4 + hình học, tất cả trong một hệ toạ độ.
+
+    Trả về thứ tự slot 27041..27074. Mỗi phần tử là spec của
+    ``derive_player_slot_specs`` cộng thêm ``image_x4``, ``placement``,
+    ``charinfo_cf`` (cf thật dùng slot), ``charinfo_anchor_cf`` (cf neo = cf nhỏ
+    nhất), ``charinfo_residual`` (sai số dư px cho các cf còn lại) và
+    ``shared_transform``.
+    """
+
+    records = records if records is not None else _review_by_name(review)
+    alpha_cache = alpha_cache if alpha_cache is not None else {}
+    charinfo = charinfo if charinfo is not None else load_charinfo()
+    reference = _frame_rect(
+        records[PLAYER_REFERENCE_SOURCE], PLAYER_REFERENCE_FRAME
+    )
+    scale = player_uniform_scale(reference[2])
+    cf_by_slot = {
+        component: charinfo_slot_to_cf(charinfo, component)
+        for component in COMPONENT_CHARINFO_SLOT
+    }
+
+    frames: dict[tuple[str, int], tuple[Image.Image, tuple[int, int, int, int], float, float]] = {}
+
+    def frame_at(source_name: str, frame_index: int):
+        key = (source_name, frame_index)
+        if key not in frames:
+            alpha = _load_reviewed_alpha(
+                art_root, records, source_name, alpha_cache
+            )
+            x, y, width, height = _frame_rect(records[source_name], frame_index)
+            resized = alpha.crop((x, y, x + width, y + height)).resize(
+                (max(1, round(width * scale)), max(1, round(height * scale))),
+                Image.Resampling.NEAREST,
+            )
+            bbox = resized.getchannel("A").getbbox()
+            if bbox is None:
+                raise ClosureError(
+                    f"ASSET-CLOSURE-015: khung nguồn rỗng: {source_name}#{frame_index}"
+                )
+            frames[key] = (
+                resized,
+                (x, y, width, height),
+                (bbox[0] + bbox[2]) / 2.0,
+                float(bbox[3]),
+            )
+        return frames[key]
+
+    result = []
+    for spec in derive_player_slot_specs(review):
+        component = spec["component"]
+        source_name = spec["source_path"]
+        frame_index = spec["frame_index"]
+        resized, frame_rect, center_x, feet_y = frame_at(source_name, frame_index)
+        frame_x, frame_y = frame_rect[0], frame_rect[1]
+        rect_x, rect_y, rect_width, rect_height = spec["source_rect"]
+        left = max(0, round((rect_x - frame_x) * scale))
+        top = max(0, round((rect_y - frame_y) * scale))
+        right = min(resized.width, round((rect_x - frame_x + rect_width) * scale))
+        bottom = min(resized.height, round((rect_y - frame_y + rect_height) * scale))
+        if right <= left or bottom <= top:
+            raise ClosureError(
+                f"ASSET-CLOSURE-015: vùng mảnh rỗng sau scale: {spec['id']}"
+            )
+        piece = resized.crop((left, top, right, bottom))
+        bbox = piece.getchannel("A").getbbox()
+        if bbox is None:
+            raise ClosureError(
+                f"ASSET-CLOSURE-015: sprite alpha rỗng: {spec['id']}"
+            )
+        piece = piece.crop(bbox)
+        component_left = left + bbox[0]
+        component_top = top + bbox[1]
+        cf_list = cf_by_slot[component].get(spec["slot_index"], [])
+        if not cf_list:
+            raise ClosureError(
+                f"ASSET-CLOSURE-015: slot {spec['id']} không cf nào dùng"
+            )
+        anchor_cf = cf_list[0]
+        charinfo_index = COMPONENT_CHARINFO_SLOT[component]
+        placement = component_placement(
+            component_left_x4=component_left,
+            component_top_x4=component_top,
+            frame_center_x4=center_x,
+            frame_feet_x4=feet_y,
+            charinfo_row=charinfo[anchor_cf][charinfo_index],
+            feet_offset_x1=feet_offset_x1,
+        )
+        anchor_row = charinfo[anchor_cf][charinfo_index]
+        residual = {
+            str(cf): [
+                charinfo[cf][charinfo_index][1] - anchor_row[1],
+                anchor_row[2] - charinfo[cf][charinfo_index][2],
+            ]
+            for cf in cf_list
+            if charinfo[cf][charinfo_index][1:] != anchor_row[1:]
+        }
+        result.append(
+            {
+                **spec,
+                "image_x4": piece,
+                "placement": placement,
+                "charinfo_cf": cf_list,
+                "charinfo_anchor_cf": anchor_cf,
+                "charinfo_residual": residual,
+                "shared_transform": {
+                    "source_frame": list(frame_rect),
+                    "scale": scale,
+                    "frame_center_x4": center_x,
+                    "frame_feet_x4": feet_y,
+                    "component_origin_x4": [component_left, component_top],
+                    "feet_offset_x1": feet_offset_x1,
+                },
+            }
+        )
+    return result
 
 
 def fit_to_canvas(image: Image.Image, size: tuple[int, int]) -> Image.Image:
@@ -265,16 +507,7 @@ def _save_zooms(
 ) -> tuple[dict[str, str], dict[str, str]]:
     paths = {}
     hashes = {}
-    for zoom_index, zoom in enumerate(ZOOMS, start=1):
-        size = (
-            max(1, round(x4.width * zoom_index / 4)),
-            max(1, round(x4.height * zoom_index / 4)),
-        )
-        image = (
-            x4
-            if zoom == "x4"
-            else x4.resize(size, Image.Resampling.NEAREST)
-        )
+    for zoom, image in zoom_variants(x4).items():
         destination = temporary / relative_stem / zoom / "sprite.png"
         destination.parent.mkdir(parents=True, exist_ok=True)
         image.save(destination, format="PNG", optimize=False, compress_level=9)
@@ -361,6 +594,63 @@ def _sprite_record(
     ):
         if key in spec:
             record[key] = spec[key]
+    return record
+
+
+def player_sprite_record(
+    component: dict[str, Any],
+    *,
+    art_root: Path,
+    records: dict[str, dict[str, Any]],
+    temporary: Path,
+) -> dict[str, Any]:
+    """Record manifest cho một mảnh người chơi đã đặt trong hệ toạ độ chung."""
+
+    source_name = component["source_path"]
+    source = art_root / source_name
+    x4 = component["image_x4"]
+    with Image.open(source) as image:
+        source_dimensions = list(image.size)
+    zooms, zoom_hashes = _save_zooms(
+        x4, temporary, Path("sprites") / str(component["id"])
+    )
+    record = {
+        "id": component["id"],
+        "name": f"{component['component']}-{component['id']}",
+        "crop": {
+            "asset_id": component["id"],
+            "source_rect": component["source_rect"],
+        },
+        "zooms": zooms,
+        "source_path": (ART_PREFIX / source_name).as_posix(),
+        "source_sha256": _sha(source),
+        "x4_sha256": zoom_hashes["x4"],
+        "source_dimensions": source_dimensions,
+        "source_alpha": False,
+        "target_x4": list(x4.size),
+        "zoom_sha256": zoom_hashes,
+        # Gốc toạ độ là bàn chân của CẢ KHUNG, không phải đáy canvas.
+        "anchor": "feet-bottom-center",
+        "layer": component["layer"],
+        "overlap_ratio": component["overlap_ratio"],
+        "component": component["component"],
+        "slot_index": component["slot_index"],
+        "action": component["action"],
+        "action_slot": component["action_slot"],
+        "client_cf": component["client_cf"],
+        "client_cf_charinfo": component["charinfo_cf"],
+        "charinfo_anchor_cf": component["charinfo_anchor_cf"],
+        "charinfo_residual": component["charinfo_residual"],
+        "part_offset": {
+            "dx": component["placement"]["dx"],
+            "dy": component["placement"]["dy"],
+        },
+        "placement_x1": {
+            "left_rel": component["placement"]["left_rel"],
+            "top_rel": component["placement"]["top_rel"],
+        },
+        "shared_transform": component["shared_transform"],
+    }
     return record
 
 
@@ -493,16 +783,15 @@ def _generate_sprites(
     records = _review_by_name(review)
     cache: dict[str, Image.Image] = {}
     sprites = []
-    targets = {"head": (128, 128), "body": (128, 160), "leg": (128, 128)}
-    for spec in derive_player_slot_specs(review):
+    for component in player_component_images(
+        review, art_root=art_root, records=records, alpha_cache=cache
+    ):
         sprites.append(
-            _sprite_record(
-                spec,
+            player_sprite_record(
+                component,
                 art_root=art_root,
                 records=records,
-                alpha_cache=cache,
                 temporary=temporary,
-                target_size=targets[spec["component"]],
             )
         )
 
@@ -940,17 +1229,36 @@ def _tile_art(
     return rows, hashes
 
 
-def _parts() -> list[dict[str, Any]]:
-    def frames(ids: list[int], dy: int) -> list[dict[str, int]]:
-        return [{"sprite_id": sprite_id, "dx": 0, "dy": dy} for sprite_id in ids]
+def _parts(sprites: list[dict[str, Any]]) -> list[dict[str, int]]:
+    """dx/dy lấy từ chính hình học đã sinh, không còn là hằng số chép tay.
+
+    Trước đây hàm này trả dy cố định 0 rồi có người sửa tay trong mapping
+    (dy -41/-50/-33) — nghĩa là lần sinh closure kế tiếp sẽ âm thầm lùi lại số 0.
+    Giờ mỗi frame lấy đúng ``part_offset`` mà ``player_component_images`` tính.
+    """
+
+    by_id = {sprite["id"]: sprite for sprite in sprites}
+
+    def frames(ids: list[int]) -> list[dict[str, int]]:
+        rows = []
+        for sprite_id in ids:
+            offset = by_id.get(sprite_id, {}).get("part_offset", {"dx": 0, "dy": 0})
+            rows.append(
+                {
+                    "sprite_id": sprite_id,
+                    "dx": offset["dx"],
+                    "dy": offset["dy"],
+                }
+            )
+        return rows
 
     return [
-        {"id": 30, "type": 0, "frames": frames(list(range(27041, 27044)), 0)},
-        {"id": 57, "type": 1, "frames": frames(list(range(27044, 27061)), 0)},
-        {"id": 58, "type": 2, "frames": frames(list(range(27061, 27075)), 0)},
-        {"id": 2189, "type": 0, "frames": frames([27075] * 3, 0)},
-        {"id": 2190, "type": 1, "frames": frames([27076] * 17, 0)},
-        {"id": 2191, "type": 2, "frames": frames([27077] * 14, 0)},
+        {"id": 30, "type": 0, "frames": frames(list(range(27041, 27044)))},
+        {"id": 57, "type": 1, "frames": frames(list(range(27044, 27061)))},
+        {"id": 58, "type": 2, "frames": frames(list(range(27061, 27075)))},
+        {"id": 2189, "type": 0, "frames": frames([27075] * 3)},
+        {"id": 2190, "type": 1, "frames": frames([27076] * 17)},
+        {"id": 2191, "type": 2, "frames": frames([27077] * 14)},
     ]
 
 
@@ -1104,7 +1412,7 @@ def generate_production_closure(
                 "forbidden_poc_ids": [9000, 9001, 9002],
             },
             "sprites": sprites,
-            "parts": _parts(),
+            "parts": _parts(sprites),
             "animations": animations,
             "maps": [{"id": 1, "tile_id": 1, "background_id": 0}],
             "tiles": [

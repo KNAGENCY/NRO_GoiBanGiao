@@ -961,7 +961,12 @@ def _build_into(manifest: dict[str, Any], base_dir: Path, root: Path) -> dict[st
             inputs["animation_sheets"],
             manifest["animations"],
             check_paths=lambda relative: _path(base_dir, relative, "ASSET-ANIMATION-008"),
-            check_cell_size=lambda relative, expected: _load_png(base_dir, relative).size == expected,
+            # Ô là giới hạn trên: cell nhỏ hơn ô hợp lệ (mỗi khung một kích cỡ
+            # sau khi bỏ nhồi-vào-hộp), cell vượt ô là lỗi.
+            check_cell_size=lambda relative, expected: all(
+                actual <= limit
+                for actual, limit in zip(_load_png(base_dir, relative).size, expected)
+            ),
         )
     except MapError as error:
         message = str(error)

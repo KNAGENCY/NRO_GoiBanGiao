@@ -15,8 +15,10 @@ Thứ tự vẽ trong client: đầu → chân → thân (Char.cs 6081, 6083, 60
 Dùng:
   python tools/nhan-vat/ghep-khung.py --out ket-qua.png
   Tuỳ chọn: --part-bin, --sprites (thư mục Small<id>.png x1), --charinfo (JSON 33 khung),
+            --sprites-closure (thư mục closure kiểu sprites/<id>/x1/sprite.png),
             --head/--body/--leg (id part, mặc định 30/57/58), --zoom (mặc định 1 = ảnh x1).
-In ra bảng đo mỗi khung: khe đầu–thân (px), khe thân–chân, chân so với cy.
+In ra bảng đo mỗi khung: khe đầu–thân (px), khe thân–chân, chân so với cy, chiều cao tổng
+(đỉnh đầu → bàn chân).
 Khe = mép trên vùng ĐỤC của mảnh dưới trừ mép dưới vùng đục của mảnh trên; >0 = HỞ, <0 = chồng.
 """
 import argparse
@@ -50,7 +52,19 @@ def bbox_duc(im):
     return im.split()[3].getbbox()  # (l, t, r, b) hoặc None
 
 
-def ghep(cf, charinfo, parts, sprites, ids, zoom, cx, cy):
+def duong_sprite(thu_muc, sid, kieu_closure, zoom):
+    """Đường tới ảnh của sprite `sid`.
+
+    Hai bố cục cùng tồn tại: thư mục client phẳng (`Small<id>.png`) và thư mục
+    closure (`sprites/<id>/x<zoom>/sprite.png`). Nhận cả hai để đo được đầu ra
+    closure mà không phải chép/đổi tên tay.
+    """
+    if kieu_closure:
+        return os.path.join(thu_muc, str(sid), "x%d" % zoom, "sprite.png")
+    return os.path.join(thu_muc, "Small%d.png" % sid)
+
+
+def ghep(cf, charinfo, parts, sprites, ids, zoom, cx, cy, kieu_closure=False):
     """Trả (ảnh ghép, số đo) cho một khung."""
     o = Image.new("RGBA", (cx * 2, cy + 16 * zoom), (0, 0, 0, 0))
     vung = {}
@@ -64,9 +78,9 @@ def ghep(cf, charinfo, parts, sprites, ids, zoom, cx, cy):
             vung[ten] = ("IDX %d/%d" % (idx, len(fr)), None)
             continue
         sid, dx, dy = fr[idx]
-        duong = os.path.join(sprites, "Small%d.png" % sid)
+        duong = duong_sprite(sprites, sid, kieu_closure, zoom)
         if not os.path.isfile(duong):
-            vung[ten] = ("THIEU Small%d" % sid, None)
+            vung[ten] = ("THIEU %d" % sid, None)
             continue
         im = Image.open(duong).convert("RGBA")
         x = cx + (dx_ci + dx) * zoom
@@ -81,6 +95,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--part-bin", default=MAC_DINH_PART_BIN)
     ap.add_argument("--sprites", default=MAC_DINH_SPRITES)
+    ap.add_argument(
+        "--sprites-closure",
+        default=None,
+        help="thu muc closure kieu sprites/<id>/x<zoom>/sprite.png (thay cho --sprites)",
+    )
     ap.add_argument("--charinfo", default=MAC_DINH_CHARINFO)
     ap.add_argument("--head", type=int, default=30)
     ap.add_argument("--body", type=int, default=57)
@@ -92,6 +111,8 @@ def main():
     charinfo = json.load(open(a.charinfo))
     parts = doc_part_bin(a.part_bin)
     ids = (a.head, a.body, a.leg)
+    kieu_closure = a.sprites_closure is not None
+    thu_muc_sprite = a.sprites_closure if kieu_closure else a.sprites
     z = a.zoom
     cx, cy = 48 * z, 96 * z
     o_w, o_h = cx * 2, cy + 16 * z
@@ -99,9 +120,9 @@ def main():
     hang = (len(charinfo) + cot - 1) // cot
     sheet = Image.new("RGBA", (o_w * cot, (o_h + 12) * hang), (40, 40, 40, 255))
     ve = ImageDraw.Draw(sheet)
-    print("cf | dau(sid) than(sid) chan(sid) | khe dau-than | khe than-chan | chan so voi cy | rong than")
+    print("cf | dau(sid) than(sid) chan(sid) | khe dau-than | khe than-chan | chan so voi cy | rong than | cao tong")
     for cf in range(len(charinfo)):
-        o, vung = ghep(cf, charinfo, parts, a.sprites, ids, z, cx, cy)
+        o, vung = ghep(cf, charinfo, parts, thu_muc_sprite, ids, z, cx, cy, kieu_closure)
         r, c = divmod(cf, cot)
         ox, oy = c * o_w, r * (o_h + 12)
         # vạch cy (mặt đất) và cx
@@ -114,11 +135,13 @@ def main():
         khe_tc = ch[1][1] - th[1][3] if th[1] and ch[1] else None
         chan_cy = ch[1][3] - cy if ch[1] else None
         rong_than = th[1][2] - th[1][0] if th[1] else None
-        print("%2d | %s %s %s | %s | %s | %s | %s" % (cf, d[0], th[0], ch[0],
+        cao_tong = ch[1][3] - d[1][1] if d[1] and ch[1] else None
+        print("%2d | %s %s %s | %s | %s | %s | %s | %s" % (cf, d[0], th[0], ch[0],
               "%+d" % khe_dt if khe_dt is not None else "?",
               "%+d" % khe_tc if khe_tc is not None else "?",
               "%+d" % chan_cy if chan_cy is not None else "?",
-              rong_than if rong_than is not None else "?"))
+              rong_than if rong_than is not None else "?",
+              cao_tong if cao_tong is not None else "?"))
     sheet.save(a.out)
     print("da ghi", a.out)
 

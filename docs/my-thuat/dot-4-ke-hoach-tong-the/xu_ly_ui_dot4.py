@@ -8,6 +8,7 @@ Mọi đầu vào lạ bị từ chối trước khi ghi bất kỳ file nào.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import shutil
 from collections import deque
 from dataclasses import dataclass
@@ -24,6 +25,8 @@ SPECS = {
 TROUGH_COLOR = (27, 20, 16, 255)  # #1B1410, vùng game tự vẽ máu/chakra.
 TROUGH_SHADOW = (18, 15, 13, 255)
 TROUGHS = ((332, 20, 596, 60), (332, 80, 568, 104))
+HUD_TEXT_PLATE = (58, 36, 24, 255)
+POPUP_CREAM = (255, 229, 199, 255)
 
 
 class ValidationError(ValueError):
@@ -90,6 +93,14 @@ def _validate_opaque_checkerboard(path: Path, image: Image.Image) -> None:
     neutral_border = sum(is_border_checkerboard(pixel) for pixel in border)
     if neutral_border * 100 < len(border) * 70:
         raise ValidationError(f"{path.name} khong co du nen checkerboard trung tinh noi tu bien")
+    # Nền preview thật có ít nhất hai dải sáng/xám. Một tấm trắng đặc hoặc
+    # highlight trắng chạm biên không phải checkerboard và không được xoá.
+    brightness = [sum(pixel[:3]) // 3 for pixel in border if is_border_checkerboard(pixel)]
+    bright = sum(value >= 250 for value in brightness)
+    gray = sum(230 <= value <= 248 for value in brightness)
+    required_band = max(4, len(border) // 100)
+    if bright < required_band or gray < required_band:
+        raise ValidationError(f"{path.name} khong co signature checkerboard sang/xam")
 
 
 def _same_column(image: Image.Image, left: int, right: int) -> bool:
@@ -101,18 +112,41 @@ def _same_row(image: Image.Image, top: int, bottom: int) -> bool:
 
 
 def _lock_popup_seams(image: Image.Image) -> None:
-    # Cells 2/7 tile ngang; 4/5 tile dọc. Chỉ sao đúng đường biên lặp 1 px.
+    # Cells 2/7 tile ngang; 4/5 tile dọc. Chuẩn hoá cả trục lặp để không
+    # đẩy vết gãy từ pixel biên vào pixel áp chót.
     for top in (40, 240):
         for y in range(top, top + 40):
-            image.putpixel((39, y), image.getpixel((0, y)))
+            sample = image.getpixel((20, y))
+            for x in range(40):
+                image.putpixel((x, y), sample)
     for top in (120, 160):
         for x in range(40):
-            image.putpixel((x, top + 39), image.getpixel((x, top)))
+            sample = image.getpixel((x, top + 20))
+            for y in range(top, top + 40):
+                image.putpixel((x, y), sample)
+
+    # Mặt trong của đủ tám cell phải nối trực tiếp với ruột #FFE5C7.
+    for x in range(40):
+        image.putpixel((x, 39), POPUP_CREAM)   # cell 1, cạnh trong dưới
+        image.putpixel((x, 79), POPUP_CREAM)   # cell 2, cạnh trong dưới
+        image.putpixel((x, 119), POPUP_CREAM)  # cell 3, cạnh trong dưới
+        image.putpixel((x, 200), POPUP_CREAM)  # cell 6, cạnh trong trên
+        image.putpixel((x, 240), POPUP_CREAM)  # cell 7, cạnh trong trên
+        image.putpixel((x, 280), POPUP_CREAM)  # cell 8, cạnh trong trên
+    for y in range(40):
+        image.putpixel((39, y), POPUP_CREAM)         # cell 1, cạnh trong phải
+        image.putpixel((0, 80 + y), POPUP_CREAM)     # cell 3, cạnh trong trái
+        image.putpixel((39, 120 + y), POPUP_CREAM)   # cell 4, cạnh trong phải
+        image.putpixel((0, 160 + y), POPUP_CREAM)    # cell 5, cạnh trong trái
+        image.putpixel((39, 200 + y), POPUP_CREAM)   # cell 6, cạnh trong phải
+        image.putpixel((0, 280 + y), POPUP_CREAM)    # cell 8, cạnh trong trái
 
 
 def _lock_button_middle_seam(image: Image.Image) -> None:
     for y in range(96):
-        image.putpixel((79, y), image.getpixel((40, y)))
+        sample = image.getpixel((60, y))
+        for x in range(40, 80):
+            image.putpixel((x, y), sample)
 
 
 def _normalize_hud_troughs(image: Image.Image) -> None:
@@ -123,12 +157,23 @@ def _normalize_hud_troughs(image: Image.Image) -> None:
                 image.putpixel((x, y), TROUGH_SHADOW if shadow else TROUGH_COLOR)
 
 
+def _normalize_hud_text_plate(image: Image.Image) -> None:
+    # Client đè chân dung/tên/sức mạnh lên vùng này; nền một màu đục giúp chữ
+    # đọc được và tránh alpha/carô lọt vào ô chân dung 24..128.
+    for y in range(16, 132):
+        for x in range(20, 300):
+            image.putpixel((x, y), HUD_TEXT_PLATE)
+
+
 def _verify_processed(path: Path, image: Image.Image) -> None:
     _check_name_and_size(path, image)
     alpha = image.getchannel("A")
     if alpha.getextrema()[0] != 0:
         raise ValidationError(f"{path.name} khong co alpha 0 sau xu ly")
     if path.name == "ui_hud_khung_trai_x4.png":
+        plate = image.crop((20, 16, 300, 132))
+        if plate.getchannel("A").getextrema() != (255, 255) or set(plate.get_flattened_data()) != {HUD_TEXT_PLATE}:
+            raise ValidationError("vung chu/chan dung HUD khong plain opaque")
         for left, top, right, bottom in TROUGHS:
             if any(image.getpixel((x, y)) != TROUGH_COLOR for y in range(top + 4, bottom - 4) for x in range(left + 4, right - 4)):
                 raise ValidationError("ranh HUD khong flat #1B1410")
@@ -141,8 +186,23 @@ def _verify_processed(path: Path, image: Image.Image) -> None:
             raise ValidationError("popup right edge khong tile doc")
         if not _same_column(image.crop((0, 240, 40, 280)), 0, 39):
             raise ValidationError("popup bottom edge khong tile ngang")
+        horizontal_inner = (39, 79, 119, 200, 240, 280)
+        vertical_inner = ((39, 0, 40), (0, 80, 120), (39, 120, 160), (0, 160, 200), (39, 200, 240), (0, 280, 320))
+        if any(image.getpixel((x, y)) != POPUP_CREAM for y in horizontal_inner for x in range(40)):
+            raise ValidationError("popup inner ngang khong ket thuc #FFE5C7")
+        if any(image.getpixel((x, y)) != POPUP_CREAM for x, top, bottom in vertical_inner for y in range(top, bottom)):
+            raise ValidationError("popup inner doc khong ket thuc #FFE5C7")
     elif path.name == "ui_nut_thuong_3manh_x4.png" and not _same_column(image, 40, 79):
         raise ValidationError("manh giua nut khong tile ngang")
+
+
+def _validate_processed_lineage(path: Path, backup_dir: Path) -> None:
+    """Ảnh đã alpha chỉ được nâng cấp nếu truy được backup caro cùng tên."""
+    backup = backup_dir / path.name
+    if not backup.is_file():
+        raise ValidationError(f"{path.name} da xu ly nhung thieu backup de kiem chung nguon")
+    with Image.open(backup) as backup_image:
+        _validate_opaque_checkerboard(path, backup_image.convert("RGBA"))
 
 
 def process_files(source_dir: Path, backup_dir: Path) -> list[ProcessResult]:
@@ -158,32 +218,38 @@ def process_files(source_dir: Path, backup_dir: Path) -> list[ProcessResult]:
     already_processed = {path: images[path].getchannel("A").getextrema()[0] == 0 for path in paths}
     for path in paths:
         if already_processed[path]:
-            _verify_processed(path, images[path])
+            _validate_processed_lineage(path, backup_dir)
         else:
             _validate_opaque_checkerboard(path, images[path])
+            backup = backup_dir / path.name
+            if backup.is_file() and hashlib.sha256(backup.read_bytes()).digest() != hashlib.sha256(path.read_bytes()).digest():
+                raise ValidationError(f"{path.name} backup hash khac input opaque moi")
 
     backup_dir.mkdir(parents=True, exist_ok=True)
     results: list[ProcessResult] = []
     for path in paths:
-        if already_processed[path]:
-            results.append(ProcessResult(path.name, False, 0))
-            continue
-        backup = backup_dir / path.name
-        if not backup.exists():
-            shutil.copy2(path, backup)
         image = images[path]
-        cleared = mask_edge_connected_checkerboard(image)
-        if cleared == 0:
-            raise ValidationError(f"{path.name} khong tim thay pixel checkerboard de xoa")
+        before = image.tobytes()
+        cleared = 0
+        if not already_processed[path]:
+            backup = backup_dir / path.name
+            if not backup.exists():
+                shutil.copy2(path, backup)
+            cleared = mask_edge_connected_checkerboard(image)
+            if cleared == 0:
+                raise ValidationError(f"{path.name} khong tim thay pixel checkerboard de xoa")
         if path.name == "ui_hud_khung_trai_x4.png":
+            _normalize_hud_text_plate(image)
             _normalize_hud_troughs(image)
         elif path.name == "ui_khung_popup_9o_x4.png":
             _lock_popup_seams(image)
         else:
             _lock_button_middle_seam(image)
         _verify_processed(path, image)
-        image.save(path, "PNG", optimize=True)
-        results.append(ProcessResult(path.name, True, cleared))
+        changed = image.tobytes() != before
+        if changed:
+            image.save(path, "PNG", optimize=True)
+        results.append(ProcessResult(path.name, changed, cleared))
     return results
 
 

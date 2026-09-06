@@ -1,0 +1,1064 @@
+{
+  "meta": {
+    "du_an": "Game Naruto (loi NRO)",
+    "dot": 4,
+    "hang_muc": "01-nhan-vat",
+    "ngay": "2026-09-06",
+    "brief_md": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\01-nhan-vat.md",
+    "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+    "mo_ta": "Manifest may doc cho hang muc NHAN VAT NGUOI CHOI dot 4. Moi phan tu anh[] la MOT dai chroma (nen tim RGB 246,4,242, mot o mot khung, o 724x724; chan dung 1 o 1254x1254). Doc tung phan tu: gui prompt_day_du + cac anh trong dung_tham_chieu (duong dan trong anh_tham_chieu) toi AI tao anh, luu ket qua dung ten_file vao luu_vao. trang_thai da_co = KHONG ve (file v1 giu nguyen, chep sang khi lap). Sau khi ve: python docs/my-thuat/dot-4-ke-hoach-tong-the/kiem-dai-nhan-vat.py <luu_vao>, roi python -m tools.artqa.artqa review --art-root <luu_vao> ...",
+    "tong_anh": 32,
+    "theo_uu_tien": {
+      "P1": 3,
+      "P2": 25,
+      "P3": 2,
+      "da_co": 2
+    },
+    "quy_tac_ten": "dai: <doi_tuong>_<hanh_dong>_<n>f_chroma.png (Lang La giu ten v1 de thay dung cho: player_*; 4 lang con lai: player_<la|cat|smu|da|may>_*); chan dung: <ten>_portrait_chroma.png; so <n> trong ten = so o may cat (tools/artqa/artqa.py:450-452)",
+    "thu_tu_khung": "idle 3 -> run 5 (de xuat, v1 la 4) -> melee 4 -> cast 3 -> hit 3 = 18 khung nguon; client chi co 17 slot than / 14 slot chan / 3 slot dau (run 0 vao slot 2 thay idle 2; than idle 2 khong dung)"
+  },
+  "phong_cach_khoa": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground",
+  "mau_lang": {
+    "la": "Leaf Village / Fire palette: warm orange-red accents on dark navy and olive green",
+    "cat": "Sand Village / Wind palette: sand-yellow, sun-bleached tan, earth brown, pale-green accents",
+    "smu": "Mist Village / Water palette: deep blue, lake-blue, slate grey, a cool damp look",
+    "da": "Stone Village / Earth palette: earth brown, rock grey, beige",
+    "may": "Cloud Village / Lightning palette: deep blue-leaning indigo-violet (never hot pink or magenta), blue-white, lightning-yellow accents"
+  },
+  "anh_tham_chieu": {
+    "THUOC-NHAN-VAT": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\anh-tham-chieu\\THUOC-NHAN-VAT.png",
+    "GOC-player-idle-v1": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\player_idle_3f_chroma.png",
+    "GOC-player-cast-v1": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\player_cast_3f_chroma.png",
+    "GOC-master-hoc-vien": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\master_hoc_vien_x4_chroma.png",
+    "GOC-iruka-portrait": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\iruka_portrait_chroma.png",
+    "TOT-chitiet-nhanvat": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-3-toan-bo\\anh-tham-chieu\\TOT-chitiet-nhanvat.png",
+    "TOT-naruto-logo": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-3-toan-bo\\anh-tham-chieu\\TOT-naruto-logo.png",
+    "XAU-run-v1-nho-va-khom": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\player_run_4f_chroma.png",
+    "XAU-hit-v1-khung-nam": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\player_hit_death_getup_3f_chroma.png",
+    "XAU-hai-khuon-mat": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\review\\khe-dau-than-2026-09-05\\so-sanh-ghep.png",
+    "XAU-boss-zabuza": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-3-toan-bo\\anh-tham-chieu\\XAU-boss-zabuza.png"
+  },
+  "anh": [
+    {
+      "ten_file": "player_run_5f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "la",
+      "kieu": "dai_chroma",
+      "so_khung": 5,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        3620,
+        724
+      ],
+      "noi_dung": "Học viên Làng Lá CHẠY — 5 khung đúng 5 cf 2→6 của client (contact · recoil · passing · contact ngược · recoil ngược), cùng cỡ đầu idle_0, lưng thẳng (nghiêng ≤ 10°), bàn chân chạm đáy ô. Thay dải run_4f v1 vẽ nhỏ 12 % + khom 13 %.",
+      "khung": [
+        "run 0 → thân/chân slot 2 → cf 2 (đề xuất; hiện slot 2 = idle 2)",
+        "run 1 → thân/chân slot 3 → cf 3",
+        "run 2 → slot 4 → cf 4",
+        "run 3 → slot 5 → cf 5",
+        "run 4 → slot 6 → cf 6 (vòng lặp `cf = gameTick % 5 + 2`, Char.cs:2537)"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat",
+        "XAU-run-v1-nho-va-khom"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P1",
+      "trang_thai": "ve_lai",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Leaf Village / Fire palette: warm orange-red accents on dark navy and olive green.\nSUBJECT: the SAME character as the reference idle strip player_idle_3f_chroma.png: a young Leaf Village academy-student ninja, chibi-heroic proportions (head about 40% of total height), spiky dark-brown hair, tan skin, brown eyes, navy-blue forehead protector with a steel plate engraved with the Leaf swirl and two tails trailing behind the head, dark-navy long-sleeve shirt, olive-green flak-style vest with two chest pockets and a center zipper, orange cloth sash knotted at the waist with two loose ends, dark-navy trousers, orange bandage wraps at both ankles, dark-navy open-toe ninja sandals, dark fingerless gloves.\nLAYOUT: one horizontal sprite strip of 5 equal cells, each cell exactly 724×724 px, total image exactly 3620×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) run frame 0 (client cf 2 — first frame of the 5-frame run loop `cf = gameTick % 5 + 2`): CONTACT — right leg forward with the heel touching the bottom edge, left leg extended back with the toes touching the bottom edge, left arm swung forward bent at the elbow, right arm swung back, torso leaning forward no more than 10 degrees, head at full standing height (chin-to-feet at least 360 px). 2) run frame 1 (client cf 3): RECOIL — weight over the front (right) foot flat on the bottom edge, rear (left) foot just lifting, knees slightly bent, arms passing the hips; the lowest point of the cycle but still upright, chin-to-feet no less than 350 px, hair-top to chin still 266–271 px. 3) run frame 2 (client cf 4): PASSING — right foot planted on the bottom edge, left knee driven forward and up, right arm swinging forward, left arm back, body rising back to full height. 4) run frame 3 (client cf 5): OPPOSITE CONTACT — left leg forward with the heel touching the bottom edge, right leg extended back with the toes on the bottom edge, right arm forward, left arm back. 5) run frame 4 (client cf 6): OPPOSITE RECOIL — weight over the front (left) foot flat on the bottom edge, rear (right) foot just lifting, arm swing mirrored from frame 2; flows seamlessly back into frame 0.\nHeadband tails and sash ends stream backward (to the left) but stay inside the cell. The five frames form a seamless loop. Every frame keeps the same head size as the reference idle frame — do NOT draw the runner smaller or more hunched than the standing reference (that was the v1 mistake).\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume.",
+      "thay_the": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\player_run_4f_chroma.png",
+      "ghi_chu": "Đổi 4→5 khung là ĐỀ XUẤT: cần nới PLAYER_ACTIONS (task6b_closure.py:41-47) và gán slot thân/chân 2..6 = run 0..4. Nếu dự án giữ 4 khung: dùng khung 2–5 làm run 0–3, bỏ khung 1 (cf 2 lại lấy idle 2)."
+    },
+    {
+      "ten_file": "player_hit_death_getup_3f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "la",
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2172,
+        724
+      ],
+      "noi_dung": "Học viên Làng Lá TRÚNG ĐÒN — 3 khung ĐỨNG: ngả nhẹ · đỡ/gồng (client dùng làm thế bắt đầu chiêu cf 20/31) · khuỵu gối tiếp đất (cf 25 sau dịch chuyển). Thay dải v1 có khung NẰM (client không bao giờ vẽ nằm). Giữ tên cũ để thay đúng chỗ trong pipeline.",
+      "khung": [
+        "hit 0 → thân slot 14 (cf 19, 30) — trúng đòn ngả nhẹ, ĐỨNG",
+        "hit 1 → thân slot 15 (cf 20, 31 = THẾ BẮT ĐẦU CHIÊU) — đỡ / khoanh tay gồng, ĐỨNG",
+        "hit 2 → thân slot 16 (cf 25 = sau dịch chuyển) — khuỵu gối tiếp đất, KHÔNG nằm; chân không lấy khung hit"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat",
+        "XAU-hit-v1-khung-nam"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P1",
+      "trang_thai": "ve_lai",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Leaf Village / Fire palette: warm orange-red accents on dark navy and olive green.\nSUBJECT: the SAME character as the reference idle strip player_idle_3f_chroma.png: a young Leaf Village academy-student ninja, chibi-heroic proportions (head about 40% of total height), spiky dark-brown hair, tan skin, brown eyes, navy-blue forehead protector with a steel plate engraved with the Leaf swirl and two tails trailing behind the head, dark-navy long-sleeve shirt, olive-green flak-style vest with two chest pockets and a center zipper, orange cloth sash knotted at the waist with two loose ends, dark-navy trousers, orange bandage wraps at both ankles, dark-navy open-toe ninja sandals, dark fingerless gloves.\nLAYOUT: one horizontal sprite strip of 3 equal cells, each cell exactly 724×724 px, total image exactly 2172×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) hit frame 0 (client body slot 14: cf 19 and 30 = taking a hit): STANDING, torso tilted back about 15 degrees from the impact, right arm raised in a loose guard in front of the face, left arm back, eyes squeezed shut, teeth gritted, both feet planted on the bottom edge (front foot flat, back foot on its toes), head still 3/4 facing RIGHT and at the same head size. 2) hit frame 1 (client body slot 15: cf 20 and 31 — this frame is ALSO shown as the START POSE of every skill): braced guard — feet in a wide stable stance both on the bottom edge, knees slightly bent, both forearms crossed tightly in front of the chest with fists clenched, chin tucked slightly, eyes open and focused; must read both as blocking a blow and as gathering chakra. 3) hit frame 2 (client body slot 16: cf 25 — shown right after a teleport as a landing): a LOW HALF-KNEEL landing — front (right) knee bent deep with the foot flat on the bottom edge, back (left) leg braced with the knee near the ground but NOT resting on it, left fingertips touching the bottom edge in front, right arm out for balance, torso upright, chin at least 320 px above the feet (height loss no more than 15%).\nNo frame lies down and the character never falls over: the game engine never draws a lying pose (death is drawn as the standing frame plus a light ring). Frames 1 and 2 are shown by the client as the skill start pose and the post-teleport pose, so they must look composed, not defeated.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume.",
+      "thay_the": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\player_hit_death_getup_3f_chroma.png",
+      "ghi_chu": "Phương án V1 (chưa tích hợp) hiện gán thân slot 14/15/16 = cast2/cast0/idle2 (bỏ hit). Lắp dải này = gán lại 14–16 = hit 0–2."
+    },
+    {
+      "ten_file": "player_la_portrait_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "la",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung học viên Làng Lá (đầu + vai, nhìn 3/4 quay phải) cho ô avatar HUD và khung hội thoại → máy nhồi 200×200. Hiện avatar 27084 chỉ là đầu cắt từ sprite, chưa phải chân dung vẽ.",
+      "khung": [
+        "1 ô → Small<id mới ≥ 27083> 200×200 x4 (như iruka_portrait → 27078)"
+      ],
+      "dung_tham_chieu": [
+        "GOC-player-idle-v1",
+        "GOC-iruka-portrait",
+        "TOT-chitiet-nhanvat",
+        "TOT-naruto-logo"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Leaf Village / Fire palette: warm orange-red accents on dark navy and olive green.\nSUBJECT: the SAME character as the reference idle strip player_idle_3f_chroma.png: a young Leaf Village academy-student ninja, chibi-heroic proportions (head about 40% of total height), spiky dark-brown hair, tan skin, brown eyes, navy-blue forehead protector with a steel plate engraved with the Leaf swirl and two tails trailing behind the head, dark-navy long-sleeve shirt, olive-green flak-style vest with two chest pockets and a center zipper, orange cloth sash knotted at the waist with two loose ends, dark-navy trousers, orange bandage wraps at both ankles, dark-navy open-toe ninja sandals, dark fingerless gloves.\nLAYOUT: one single square image exactly 1254×1254 px (one cell) — a bust portrait for the dialogue box and HUD avatar: head and shoulders only, 3/4 view facing RIGHT, the face occupying about 45–55% of the image height, top of the hair at least 60 px below the top edge, shoulders cut off by the bottom edge, everything centered so that a square crop of the content box keeps the whole head; drawn larger than the strips because it is a close-up.\nIDENTITY LOCK: exactly the same face, eyes, hair, skin tone, headband plate and collar as the idle strip of this character; neutral-confident expression, mouth closed; eyes open and looking to the right; no full body, no hands.\nSame head size logic as reference idle frame does not apply to pixel counts here — this is a close-up — but the face shape and features must be identical to that idle frame; uniform magenta background RGB(246,4,242), perfectly flat, no gradient, no shadow, no glow.\nDO NOT DRAW: full body, hands or weapons; back or left-facing views; a frame, border, vignette or circle around the portrait; text or labels; a shadow; any background scenery; magenta or pink on the character."
+    },
+    {
+      "ten_file": "player_idle_3f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "la",
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2172,
+        724
+      ],
+      "noi_dung": "Học viên Làng Lá ĐỨNG THỞ 3 khung — ĐÃ CÓ (v1), là THƯỚC CHUẨN của cả hạng mục; 3 mảnh ĐẦU duy nhất của nhân vật lấy từ đây. Không vẽ lại; khi lắp chép file v1 sang thư mục dot-4 để 5 dải nằm cùng một chỗ. Prompt ghi để tái tạo nếu cần.",
+      "khung": [
+        "idle 0 → đầu slot 0 (cf 0,1,7,8,11,12,17–24,30–32) · thân slot 0 (cf 23,24 chết đứng) · chân slot 0 (cf 8)",
+        "idle 1 → đầu slot 1 'đầu ngang' khi chạy/nhảy (cf 2–6, 9,10, 13–16, 26–29) · thân slot 1 (cf 0,1) · chân slot 1 (cf 0,1,22)",
+        "idle 2 → đầu slot 2 (cf 25) · thân slot 2 (cf 2,15,28) · chân slot 2 (cf 2)"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P1",
+      "trang_thai": "da_co",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Leaf Village / Fire palette: warm orange-red accents on dark navy and olive green.\nSUBJECT: the SAME character as the reference idle strip player_idle_3f_chroma.png: a young Leaf Village academy-student ninja, chibi-heroic proportions (head about 40% of total height), spiky dark-brown hair, tan skin, brown eyes, navy-blue forehead protector with a steel plate engraved with the Leaf swirl and two tails trailing behind the head, dark-navy long-sleeve shirt, olive-green flak-style vest with two chest pockets and a center zipper, orange cloth sash knotted at the waist with two loose ends, dark-navy trousers, orange bandage wraps at both ankles, dark-navy open-toe ninja sandals, dark fingerless gloves.\nLAYOUT: one horizontal sprite strip of 3 equal cells, each cell exactly 724×724 px, total image exactly 2172×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) idle frame 0 (client: head slot 0 — the MAIN head shown at cf 0,1,7,8,11,12,17–24,30–32; body slot 0 shown at cf 23/24 = standing 'death'/hit; leg slot 0 at cf 8): relaxed upright stand, feet shoulder-width apart both flat on the bottom edge, arms hanging at the sides with fists lightly closed, neutral focused expression, chest at rest. 2) idle frame 1 (client: head slot 1 — the head shown while RUNNING and jumping, cf 2–6, 9,10, 13–16, 26–29; body slot 1 at cf 0/1 standing; leg slot 1 at cf 0,1,22): the same stance on an inhale — shoulders and chest raised 3–5 px, head exactly the same size and turned a touch more toward the right so it also reads well over a running body. 3) idle frame 2 (client: head slot 2 at cf 25 after teleport; body slot 2 at cf 2,15,28; leg slot 2 at cf 2): exhale — shoulders back down, a slight weight shift to the front foot, fists relaxed; must differ visibly from frame 1 (no duplicate adjacent frames) and loop back to frame 0.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume.",
+      "ghi_chu": "Nguồn: D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\player_idle_3f_chroma.png (2172×724, đo idle_0: cao mặt 99, tóc→cằm 271, cằm→chân 384)."
+    },
+    {
+      "ten_file": "player_cast_3f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "la",
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2172,
+        724
+      ],
+      "noi_dung": "Học viên Làng Lá KẾT ẤN 3 khung — ĐÃ CÓ (v1), tỉ lệ 1,00–1,07 so idle nên giữ được. Không vẽ lại; chép sang khi lắp.",
+      "khung": [
+        "cast 0 → thân slot 11 (cf 14,27) · chân slot 11 (cf 10)",
+        "cast 1 → thân slot 12 (cf 9,10 nhảy) · chân slot 12 (cf 11)",
+        "cast 2 → thân slot 13 (cf 16,29 tung chiêu) · chân slot 13 (cf 25)"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat",
+        "GOC-player-cast-v1"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P1",
+      "trang_thai": "da_co",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Leaf Village / Fire palette: warm orange-red accents on dark navy and olive green.\nSUBJECT: the SAME character as the reference idle strip player_idle_3f_chroma.png: a young Leaf Village academy-student ninja, chibi-heroic proportions (head about 40% of total height), spiky dark-brown hair, tan skin, brown eyes, navy-blue forehead protector with a steel plate engraved with the Leaf swirl and two tails trailing behind the head, dark-navy long-sleeve shirt, olive-green flak-style vest with two chest pockets and a center zipper, orange cloth sash knotted at the waist with two loose ends, dark-navy trousers, orange bandage wraps at both ankles, dark-navy open-toe ninja sandals, dark fingerless gloves.\nLAYOUT: one horizontal sprite strip of 3 equal cells, each cell exactly 724×724 px, total image exactly 2172×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) cast frame 0 (client body slot 11: cf 14,27; leg slot 11: cf 10 jump): standing, both hands pressed together in a hand seal in front of the chest, elbows out, feet apart both flat on the bottom edge, focused expression. 2) cast frame 1 (client body slot 12: cf 9,10 = jump; leg slot 12: cf 11): wide low stance with knees bent (height loss no more than 10%), hands still in the seal pulled tight to the chest, both feet on the bottom edge. 3) cast frame 2 (client body slot 13: cf 16,29 = technique release; leg slot 13: cf 25): right palm thrust forward to the right releasing the technique, left fist pulled back at the hip, lunging stance with both feet on the bottom edge; palm at least 40 px from the right cell edge.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume.",
+      "ghi_chu": "Nguồn: D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\player_cast_3f_chroma.png (2172×724)."
+    },
+    {
+      "ten_file": "player_melee_4f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "la",
+      "kieu": "dai_chroma",
+      "so_khung": 4,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2896,
+        724
+      ],
+      "noi_dung": "Học viên Làng Lá ĐÁNH CẬN CHIẾN 4 khung (thủ · đấm thẳng · đá vòng cao · quét thấp) cùng cỡ đầu idle_0. Dải v1 vẽ nhỏ 17 % nhưng chỉ khom 6 % nên V1 bù được bằng tỉ lệ → P2 (vẽ lại để cả 17 khung một tỉ lệ, bỏ hẳn phép bù).",
+      "khung": [
+        "melee 0 → thân slot 7 (cf 7,8,17 đánh/đà/nạp) · chân slot 7 (cf 7 và cf 23 = chết đứng)",
+        "melee 1 → thân slot 8 (cf 12,18,22 nạp trên đất) · chân slot 8 (cf 12, 26–32)",
+        "melee 2 → thân slot 9 (cf 11,21,32 đỉnh nhảy/thế chiêu) · chân slot 9 (cf 13–21, 24)",
+        "melee 3 → thân slot 10 (cf 13,26) · chân slot 10 (cf 9 nhảy)"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat",
+        "XAU-run-v1-nho-va-khom"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "ve_lai",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Leaf Village / Fire palette: warm orange-red accents on dark navy and olive green.\nSUBJECT: the SAME character as the reference idle strip player_idle_3f_chroma.png: a young Leaf Village academy-student ninja, chibi-heroic proportions (head about 40% of total height), spiky dark-brown hair, tan skin, brown eyes, navy-blue forehead protector with a steel plate engraved with the Leaf swirl and two tails trailing behind the head, dark-navy long-sleeve shirt, olive-green flak-style vest with two chest pockets and a center zipper, orange cloth sash knotted at the waist with two loose ends, dark-navy trousers, orange bandage wraps at both ankles, dark-navy open-toe ninja sandals, dark fingerless gloves.\nLAYOUT: one horizontal sprite strip of 4 equal cells, each cell exactly 724×724 px, total image exactly 2896×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) melee frame 0 (client body slot 7: cf 7,8,17 = attack wind-up, dash, charging; leg slot 7 is ALSO shown at cf 23 = standing death, so the legs must be a calm stable stance): compact fighting guard, both fists raised in front of the chest, elbows in, feet apart both flat on the bottom edge, weight centered. 2) melee frame 1 (client body slot 8: cf 12,18,22 = charging on the ground; leg slot 8: cf 12, 26–32): straight right punch fully extended toward the right at shoulder height, left fist chambered at the hip, front (right) foot forward, back foot pushing on its toes; shift the body left inside the cell so the fist stays at least 40 px from the right cell edge. 3) melee frame 2 (client body slot 9: cf 11,21,32 = jump apex / technique pose; leg slot 9: cf 13–21, 24): high right roundhouse kick, kicking leg horizontal at chest height toward the right, standing left foot flat on the bottom edge, arms counterbalancing, torso upright (not bent over). 4) melee frame 3 (client body slot 10: cf 13,26; leg slot 10: cf 9 jump): low sweeping right back-fist at waist height with the body dropped into a deep forward lunge, left arm guarding — clearly different from frames 0 and 1 so the loop never shows the same pose twice in a row.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume.",
+      "thay_the": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\player_melee_4f_chroma.png"
+    },
+    {
+      "ten_file": "player_cat_idle_3f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "cat",
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2172,
+        724
+      ],
+      "noi_dung": "Tân binh Làng Cát (hệ Phong) ĐỨNG THỞ 3 khung — khung 0 là THƯỚC CHUẨN của bộ này (phải trùng cỡ đầu học viên Lá). Cho 3 mảnh đầu + thân slot 0–2 + chân slot 0–2. VẼ ĐẦU TIÊN, duyệt rồi mới làm 4 dải còn lại của làng.",
+      "khung": [
+        "idle 0 → đầu slot 0 (cf 0,1,7,8,11,12,17–24,30–32) · thân slot 0 (cf 23,24 chết đứng) · chân slot 0 (cf 8)",
+        "idle 1 → đầu slot 1 'đầu ngang' khi chạy/nhảy (cf 2–6, 9,10, 13–16, 26–29) · thân slot 1 (cf 0,1) · chân slot 1 (cf 0,1,22)",
+        "idle 2 → đầu slot 2 (cf 25) · thân slot 2 (cf 2,15,28) · chân slot 2 (cf 2)"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Sand Village / Wind palette: sand-yellow, sun-bleached tan, earth brown, pale-green accents.\nSUBJECT: a young Sand Village (Suna) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): slightly darker tan skin, short dusty-brown hair partly covered by a light sand-colored head cloth whose top sits where the hair top would be, forehead-protector steel plate engraved with an hourglass symbol on a pale-tan band with two tails, sleeveless sand-yellow high-collar tunic over a dark-brown long-sleeve undershirt, pale-green cloth sash at the waist with two loose ends, earth-brown trousers gathered below the knee, beige bandage wraps at both ankles, dark-brown open-toe ninja sandals, brown fingerless gloves.\nLAYOUT: one horizontal sprite strip of 3 equal cells, each cell exactly 724×724 px, total image exactly 2172×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) idle frame 0 (client: head slot 0 — the MAIN head shown at cf 0,1,7,8,11,12,17–24,30–32; body slot 0 shown at cf 23/24 = standing 'death'/hit; leg slot 0 at cf 8): relaxed upright stand, feet shoulder-width apart both flat on the bottom edge, arms hanging at the sides with fists lightly closed, neutral focused expression, chest at rest. 2) idle frame 1 (client: head slot 1 — the head shown while RUNNING and jumping, cf 2–6, 9,10, 13–16, 26–29; body slot 1 at cf 0/1 standing; leg slot 1 at cf 0,1,22): the same stance on an inhale — shoulders and chest raised 3–5 px, head exactly the same size and turned a touch more toward the right so it also reads well over a running body. 3) idle frame 2 (client: head slot 2 at cf 25 after teleport; body slot 2 at cf 2,15,28; leg slot 2 at cf 2): exhale — shoulders back down, a slight weight shift to the front foot, fists relaxed; must differ visibly from frame 1 (no duplicate adjacent frames) and loop back to frame 0.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume.",
+      "ghi_chu": "Trang phục là ĐỀ XUẤT theo dot-3-toan-bo/lang-*/nhan-vat.md (bộ tân binh); máy chủ chưa chốt bộ đồ theo làng (hinhdang.go:57 `_ = lang`, mọi làng dùng 30/57/58)."
+    },
+    {
+      "ten_file": "player_cat_run_5f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "cat",
+      "kieu": "dai_chroma",
+      "so_khung": 5,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        3620,
+        724
+      ],
+      "noi_dung": "Tân binh Làng Cát CHẠY 5 khung (cf 2→6), cùng nhân vật với dải idle của làng, cùng cỡ đầu, lưng thẳng, chân chạm đáy ô.",
+      "khung": [
+        "run 0 → thân/chân slot 2 → cf 2 (đề xuất; hiện slot 2 = idle 2)",
+        "run 1 → thân/chân slot 3 → cf 3",
+        "run 2 → slot 4 → cf 4",
+        "run 3 → slot 5 → cf 5",
+        "run 4 → slot 6 → cf 6 (vòng lặp `cf = gameTick % 5 + 2`, Char.cs:2537)"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat",
+        "XAU-run-v1-nho-va-khom"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Sand Village / Wind palette: sand-yellow, sun-bleached tan, earth brown, pale-green accents.\nSUBJECT: a young Sand Village (Suna) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): slightly darker tan skin, short dusty-brown hair partly covered by a light sand-colored head cloth whose top sits where the hair top would be, forehead-protector steel plate engraved with an hourglass symbol on a pale-tan band with two tails, sleeveless sand-yellow high-collar tunic over a dark-brown long-sleeve undershirt, pale-green cloth sash at the waist with two loose ends, earth-brown trousers gathered below the knee, beige bandage wraps at both ankles, dark-brown open-toe ninja sandals, brown fingerless gloves.\nLAYOUT: one horizontal sprite strip of 5 equal cells, each cell exactly 724×724 px, total image exactly 3620×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) run frame 0 (client cf 2 — first frame of the 5-frame run loop `cf = gameTick % 5 + 2`): CONTACT — right leg forward with the heel touching the bottom edge, left leg extended back with the toes touching the bottom edge, left arm swung forward bent at the elbow, right arm swung back, torso leaning forward no more than 10 degrees, head at full standing height (chin-to-feet at least 360 px). 2) run frame 1 (client cf 3): RECOIL — weight over the front (right) foot flat on the bottom edge, rear (left) foot just lifting, knees slightly bent, arms passing the hips; the lowest point of the cycle but still upright, chin-to-feet no less than 350 px, hair-top to chin still 266–271 px. 3) run frame 2 (client cf 4): PASSING — right foot planted on the bottom edge, left knee driven forward and up, right arm swinging forward, left arm back, body rising back to full height. 4) run frame 3 (client cf 5): OPPOSITE CONTACT — left leg forward with the heel touching the bottom edge, right leg extended back with the toes on the bottom edge, right arm forward, left arm back. 5) run frame 4 (client cf 6): OPPOSITE RECOIL — weight over the front (left) foot flat on the bottom edge, rear (right) foot just lifting, arm swing mirrored from frame 2; flows seamlessly back into frame 0.\nHeadband tails and sash ends stream backward (to the left) but stay inside the cell. The five frames form a seamless loop. Every frame keeps the same head size as the reference idle frame — do NOT draw the runner smaller or more hunched than the standing reference (that was the v1 mistake).\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume."
+    },
+    {
+      "ten_file": "player_cat_melee_4f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "cat",
+      "kieu": "dai_chroma",
+      "so_khung": 4,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2896,
+        724
+      ],
+      "noi_dung": "Tân binh Làng Cát ĐÁNH CẬN CHIẾN 4 khung (thủ · đấm thẳng · đá vòng cao · quét thấp).",
+      "khung": [
+        "melee 0 → thân slot 7 (cf 7,8,17 đánh/đà/nạp) · chân slot 7 (cf 7 và cf 23 = chết đứng)",
+        "melee 1 → thân slot 8 (cf 12,18,22 nạp trên đất) · chân slot 8 (cf 12, 26–32)",
+        "melee 2 → thân slot 9 (cf 11,21,32 đỉnh nhảy/thế chiêu) · chân slot 9 (cf 13–21, 24)",
+        "melee 3 → thân slot 10 (cf 13,26) · chân slot 10 (cf 9 nhảy)"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Sand Village / Wind palette: sand-yellow, sun-bleached tan, earth brown, pale-green accents.\nSUBJECT: a young Sand Village (Suna) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): slightly darker tan skin, short dusty-brown hair partly covered by a light sand-colored head cloth whose top sits where the hair top would be, forehead-protector steel plate engraved with an hourglass symbol on a pale-tan band with two tails, sleeveless sand-yellow high-collar tunic over a dark-brown long-sleeve undershirt, pale-green cloth sash at the waist with two loose ends, earth-brown trousers gathered below the knee, beige bandage wraps at both ankles, dark-brown open-toe ninja sandals, brown fingerless gloves.\nLAYOUT: one horizontal sprite strip of 4 equal cells, each cell exactly 724×724 px, total image exactly 2896×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) melee frame 0 (client body slot 7: cf 7,8,17 = attack wind-up, dash, charging; leg slot 7 is ALSO shown at cf 23 = standing death, so the legs must be a calm stable stance): compact fighting guard, both fists raised in front of the chest, elbows in, feet apart both flat on the bottom edge, weight centered. 2) melee frame 1 (client body slot 8: cf 12,18,22 = charging on the ground; leg slot 8: cf 12, 26–32): straight right punch fully extended toward the right at shoulder height, left fist chambered at the hip, front (right) foot forward, back foot pushing on its toes; shift the body left inside the cell so the fist stays at least 40 px from the right cell edge. 3) melee frame 2 (client body slot 9: cf 11,21,32 = jump apex / technique pose; leg slot 9: cf 13–21, 24): high right roundhouse kick, kicking leg horizontal at chest height toward the right, standing left foot flat on the bottom edge, arms counterbalancing, torso upright (not bent over). 4) melee frame 3 (client body slot 10: cf 13,26; leg slot 10: cf 9 jump): low sweeping right back-fist at waist height with the body dropped into a deep forward lunge, left arm guarding — clearly different from frames 0 and 1 so the loop never shows the same pose twice in a row.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume."
+    },
+    {
+      "ten_file": "player_cat_cast_3f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "cat",
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2172,
+        724
+      ],
+      "noi_dung": "Tân binh Làng Cát KẾT ẤN 3 khung (ấn trước ngực · hạ tấn giữ ấn · đẩy lòng bàn tay tung chiêu).",
+      "khung": [
+        "cast 0 → thân slot 11 (cf 14,27) · chân slot 11 (cf 10)",
+        "cast 1 → thân slot 12 (cf 9,10 nhảy) · chân slot 12 (cf 11)",
+        "cast 2 → thân slot 13 (cf 16,29 tung chiêu) · chân slot 13 (cf 25)"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat",
+        "GOC-player-cast-v1"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Sand Village / Wind palette: sand-yellow, sun-bleached tan, earth brown, pale-green accents.\nSUBJECT: a young Sand Village (Suna) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): slightly darker tan skin, short dusty-brown hair partly covered by a light sand-colored head cloth whose top sits where the hair top would be, forehead-protector steel plate engraved with an hourglass symbol on a pale-tan band with two tails, sleeveless sand-yellow high-collar tunic over a dark-brown long-sleeve undershirt, pale-green cloth sash at the waist with two loose ends, earth-brown trousers gathered below the knee, beige bandage wraps at both ankles, dark-brown open-toe ninja sandals, brown fingerless gloves.\nLAYOUT: one horizontal sprite strip of 3 equal cells, each cell exactly 724×724 px, total image exactly 2172×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) cast frame 0 (client body slot 11: cf 14,27; leg slot 11: cf 10 jump): standing, both hands pressed together in a hand seal in front of the chest, elbows out, feet apart both flat on the bottom edge, focused expression. 2) cast frame 1 (client body slot 12: cf 9,10 = jump; leg slot 12: cf 11): wide low stance with knees bent (height loss no more than 10%), hands still in the seal pulled tight to the chest, both feet on the bottom edge. 3) cast frame 2 (client body slot 13: cf 16,29 = technique release; leg slot 13: cf 25): right palm thrust forward to the right releasing the technique, left fist pulled back at the hip, lunging stance with both feet on the bottom edge; palm at least 40 px from the right cell edge.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume."
+    },
+    {
+      "ten_file": "player_cat_hit_death_getup_3f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "cat",
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2172,
+        724
+      ],
+      "noi_dung": "Tân binh Làng Cát TRÚNG ĐÒN 3 khung ĐỨNG (ngả nhẹ · đỡ/gồng · khuỵu gối tiếp đất) — không có khung nằm.",
+      "khung": [
+        "hit 0 → thân slot 14 (cf 19, 30) — trúng đòn ngả nhẹ, ĐỨNG",
+        "hit 1 → thân slot 15 (cf 20, 31 = THẾ BẮT ĐẦU CHIÊU) — đỡ / khoanh tay gồng, ĐỨNG",
+        "hit 2 → thân slot 16 (cf 25 = sau dịch chuyển) — khuỵu gối tiếp đất, KHÔNG nằm; chân không lấy khung hit"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat",
+        "XAU-hit-v1-khung-nam"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Sand Village / Wind palette: sand-yellow, sun-bleached tan, earth brown, pale-green accents.\nSUBJECT: a young Sand Village (Suna) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): slightly darker tan skin, short dusty-brown hair partly covered by a light sand-colored head cloth whose top sits where the hair top would be, forehead-protector steel plate engraved with an hourglass symbol on a pale-tan band with two tails, sleeveless sand-yellow high-collar tunic over a dark-brown long-sleeve undershirt, pale-green cloth sash at the waist with two loose ends, earth-brown trousers gathered below the knee, beige bandage wraps at both ankles, dark-brown open-toe ninja sandals, brown fingerless gloves.\nLAYOUT: one horizontal sprite strip of 3 equal cells, each cell exactly 724×724 px, total image exactly 2172×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) hit frame 0 (client body slot 14: cf 19 and 30 = taking a hit): STANDING, torso tilted back about 15 degrees from the impact, right arm raised in a loose guard in front of the face, left arm back, eyes squeezed shut, teeth gritted, both feet planted on the bottom edge (front foot flat, back foot on its toes), head still 3/4 facing RIGHT and at the same head size. 2) hit frame 1 (client body slot 15: cf 20 and 31 — this frame is ALSO shown as the START POSE of every skill): braced guard — feet in a wide stable stance both on the bottom edge, knees slightly bent, both forearms crossed tightly in front of the chest with fists clenched, chin tucked slightly, eyes open and focused; must read both as blocking a blow and as gathering chakra. 3) hit frame 2 (client body slot 16: cf 25 — shown right after a teleport as a landing): a LOW HALF-KNEEL landing — front (right) knee bent deep with the foot flat on the bottom edge, back (left) leg braced with the knee near the ground but NOT resting on it, left fingertips touching the bottom edge in front, right arm out for balance, torso upright, chin at least 320 px above the feet (height loss no more than 15%).\nNo frame lies down and the character never falls over: the game engine never draws a lying pose (death is drawn as the standing frame plus a light ring). Frames 1 and 2 are shown by the client as the skill start pose and the post-teleport pose, so they must look composed, not defeated.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume."
+    },
+    {
+      "ten_file": "player_smu_idle_3f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "smu",
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2172,
+        724
+      ],
+      "noi_dung": "Tân binh Làng Sương Mù (hệ Thuỷ) ĐỨNG THỞ 3 khung — khung 0 là THƯỚC CHUẨN của bộ này (phải trùng cỡ đầu học viên Lá). Cho 3 mảnh đầu + thân slot 0–2 + chân slot 0–2. VẼ ĐẦU TIÊN, duyệt rồi mới làm 4 dải còn lại của làng.",
+      "khung": [
+        "idle 0 → đầu slot 0 (cf 0,1,7,8,11,12,17–24,30–32) · thân slot 0 (cf 23,24 chết đứng) · chân slot 0 (cf 8)",
+        "idle 1 → đầu slot 1 'đầu ngang' khi chạy/nhảy (cf 2–6, 9,10, 13–16, 26–29) · thân slot 1 (cf 0,1) · chân slot 1 (cf 0,1,22)",
+        "idle 2 → đầu slot 2 (cf 25) · thân slot 2 (cf 2,15,28) · chân slot 2 (cf 2)"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Mist Village / Water palette: deep blue, lake-blue, slate grey, a cool damp look.\nSUBJECT: a young Mist Village (Kiri) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): pale cool-toned skin, damp-looking dark-teal hair swept to one side, forehead-protector steel plate engraved with four wavy mist lines on a blue-grey band with two tails, deep-blue high-collar jacket with thin grey-blue pinstripes, slate-grey trousers, dark-blue bandage wraps at both ankles, dark-blue open-toe ninja sandals, grey fingerless gloves, a small grey face-cloth hanging loosely around the neck (the whole face stays visible).\nLAYOUT: one horizontal sprite strip of 3 equal cells, each cell exactly 724×724 px, total image exactly 2172×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) idle frame 0 (client: head slot 0 — the MAIN head shown at cf 0,1,7,8,11,12,17–24,30–32; body slot 0 shown at cf 23/24 = standing 'death'/hit; leg slot 0 at cf 8): relaxed upright stand, feet shoulder-width apart both flat on the bottom edge, arms hanging at the sides with fists lightly closed, neutral focused expression, chest at rest. 2) idle frame 1 (client: head slot 1 — the head shown while RUNNING and jumping, cf 2–6, 9,10, 13–16, 26–29; body slot 1 at cf 0/1 standing; leg slot 1 at cf 0,1,22): the same stance on an inhale — shoulders and chest raised 3–5 px, head exactly the same size and turned a touch more toward the right so it also reads well over a running body. 3) idle frame 2 (client: head slot 2 at cf 25 after teleport; body slot 2 at cf 2,15,28; leg slot 2 at cf 2): exhale — shoulders back down, a slight weight shift to the front foot, fists relaxed; must differ visibly from frame 1 (no duplicate adjacent frames) and loop back to frame 0.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume.",
+      "ghi_chu": "Trang phục là ĐỀ XUẤT theo dot-3-toan-bo/lang-*/nhan-vat.md (bộ tân binh); máy chủ chưa chốt bộ đồ theo làng (hinhdang.go:57 `_ = lang`, mọi làng dùng 30/57/58)."
+    },
+    {
+      "ten_file": "player_smu_run_5f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "smu",
+      "kieu": "dai_chroma",
+      "so_khung": 5,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        3620,
+        724
+      ],
+      "noi_dung": "Tân binh Làng Sương Mù CHẠY 5 khung (cf 2→6), cùng nhân vật với dải idle của làng, cùng cỡ đầu, lưng thẳng, chân chạm đáy ô.",
+      "khung": [
+        "run 0 → thân/chân slot 2 → cf 2 (đề xuất; hiện slot 2 = idle 2)",
+        "run 1 → thân/chân slot 3 → cf 3",
+        "run 2 → slot 4 → cf 4",
+        "run 3 → slot 5 → cf 5",
+        "run 4 → slot 6 → cf 6 (vòng lặp `cf = gameTick % 5 + 2`, Char.cs:2537)"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat",
+        "XAU-run-v1-nho-va-khom"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Mist Village / Water palette: deep blue, lake-blue, slate grey, a cool damp look.\nSUBJECT: a young Mist Village (Kiri) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): pale cool-toned skin, damp-looking dark-teal hair swept to one side, forehead-protector steel plate engraved with four wavy mist lines on a blue-grey band with two tails, deep-blue high-collar jacket with thin grey-blue pinstripes, slate-grey trousers, dark-blue bandage wraps at both ankles, dark-blue open-toe ninja sandals, grey fingerless gloves, a small grey face-cloth hanging loosely around the neck (the whole face stays visible).\nLAYOUT: one horizontal sprite strip of 5 equal cells, each cell exactly 724×724 px, total image exactly 3620×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) run frame 0 (client cf 2 — first frame of the 5-frame run loop `cf = gameTick % 5 + 2`): CONTACT — right leg forward with the heel touching the bottom edge, left leg extended back with the toes touching the bottom edge, left arm swung forward bent at the elbow, right arm swung back, torso leaning forward no more than 10 degrees, head at full standing height (chin-to-feet at least 360 px). 2) run frame 1 (client cf 3): RECOIL — weight over the front (right) foot flat on the bottom edge, rear (left) foot just lifting, knees slightly bent, arms passing the hips; the lowest point of the cycle but still upright, chin-to-feet no less than 350 px, hair-top to chin still 266–271 px. 3) run frame 2 (client cf 4): PASSING — right foot planted on the bottom edge, left knee driven forward and up, right arm swinging forward, left arm back, body rising back to full height. 4) run frame 3 (client cf 5): OPPOSITE CONTACT — left leg forward with the heel touching the bottom edge, right leg extended back with the toes on the bottom edge, right arm forward, left arm back. 5) run frame 4 (client cf 6): OPPOSITE RECOIL — weight over the front (left) foot flat on the bottom edge, rear (right) foot just lifting, arm swing mirrored from frame 2; flows seamlessly back into frame 0.\nHeadband tails and sash ends stream backward (to the left) but stay inside the cell. The five frames form a seamless loop. Every frame keeps the same head size as the reference idle frame — do NOT draw the runner smaller or more hunched than the standing reference (that was the v1 mistake).\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume."
+    },
+    {
+      "ten_file": "player_smu_melee_4f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "smu",
+      "kieu": "dai_chroma",
+      "so_khung": 4,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2896,
+        724
+      ],
+      "noi_dung": "Tân binh Làng Sương Mù ĐÁNH CẬN CHIẾN 4 khung (thủ · đấm thẳng · đá vòng cao · quét thấp).",
+      "khung": [
+        "melee 0 → thân slot 7 (cf 7,8,17 đánh/đà/nạp) · chân slot 7 (cf 7 và cf 23 = chết đứng)",
+        "melee 1 → thân slot 8 (cf 12,18,22 nạp trên đất) · chân slot 8 (cf 12, 26–32)",
+        "melee 2 → thân slot 9 (cf 11,21,32 đỉnh nhảy/thế chiêu) · chân slot 9 (cf 13–21, 24)",
+        "melee 3 → thân slot 10 (cf 13,26) · chân slot 10 (cf 9 nhảy)"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Mist Village / Water palette: deep blue, lake-blue, slate grey, a cool damp look.\nSUBJECT: a young Mist Village (Kiri) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): pale cool-toned skin, damp-looking dark-teal hair swept to one side, forehead-protector steel plate engraved with four wavy mist lines on a blue-grey band with two tails, deep-blue high-collar jacket with thin grey-blue pinstripes, slate-grey trousers, dark-blue bandage wraps at both ankles, dark-blue open-toe ninja sandals, grey fingerless gloves, a small grey face-cloth hanging loosely around the neck (the whole face stays visible).\nLAYOUT: one horizontal sprite strip of 4 equal cells, each cell exactly 724×724 px, total image exactly 2896×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) melee frame 0 (client body slot 7: cf 7,8,17 = attack wind-up, dash, charging; leg slot 7 is ALSO shown at cf 23 = standing death, so the legs must be a calm stable stance): compact fighting guard, both fists raised in front of the chest, elbows in, feet apart both flat on the bottom edge, weight centered. 2) melee frame 1 (client body slot 8: cf 12,18,22 = charging on the ground; leg slot 8: cf 12, 26–32): straight right punch fully extended toward the right at shoulder height, left fist chambered at the hip, front (right) foot forward, back foot pushing on its toes; shift the body left inside the cell so the fist stays at least 40 px from the right cell edge. 3) melee frame 2 (client body slot 9: cf 11,21,32 = jump apex / technique pose; leg slot 9: cf 13–21, 24): high right roundhouse kick, kicking leg horizontal at chest height toward the right, standing left foot flat on the bottom edge, arms counterbalancing, torso upright (not bent over). 4) melee frame 3 (client body slot 10: cf 13,26; leg slot 10: cf 9 jump): low sweeping right back-fist at waist height with the body dropped into a deep forward lunge, left arm guarding — clearly different from frames 0 and 1 so the loop never shows the same pose twice in a row.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume."
+    },
+    {
+      "ten_file": "player_smu_cast_3f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "smu",
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2172,
+        724
+      ],
+      "noi_dung": "Tân binh Làng Sương Mù KẾT ẤN 3 khung (ấn trước ngực · hạ tấn giữ ấn · đẩy lòng bàn tay tung chiêu).",
+      "khung": [
+        "cast 0 → thân slot 11 (cf 14,27) · chân slot 11 (cf 10)",
+        "cast 1 → thân slot 12 (cf 9,10 nhảy) · chân slot 12 (cf 11)",
+        "cast 2 → thân slot 13 (cf 16,29 tung chiêu) · chân slot 13 (cf 25)"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat",
+        "GOC-player-cast-v1"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Mist Village / Water palette: deep blue, lake-blue, slate grey, a cool damp look.\nSUBJECT: a young Mist Village (Kiri) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): pale cool-toned skin, damp-looking dark-teal hair swept to one side, forehead-protector steel plate engraved with four wavy mist lines on a blue-grey band with two tails, deep-blue high-collar jacket with thin grey-blue pinstripes, slate-grey trousers, dark-blue bandage wraps at both ankles, dark-blue open-toe ninja sandals, grey fingerless gloves, a small grey face-cloth hanging loosely around the neck (the whole face stays visible).\nLAYOUT: one horizontal sprite strip of 3 equal cells, each cell exactly 724×724 px, total image exactly 2172×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) cast frame 0 (client body slot 11: cf 14,27; leg slot 11: cf 10 jump): standing, both hands pressed together in a hand seal in front of the chest, elbows out, feet apart both flat on the bottom edge, focused expression. 2) cast frame 1 (client body slot 12: cf 9,10 = jump; leg slot 12: cf 11): wide low stance with knees bent (height loss no more than 10%), hands still in the seal pulled tight to the chest, both feet on the bottom edge. 3) cast frame 2 (client body slot 13: cf 16,29 = technique release; leg slot 13: cf 25): right palm thrust forward to the right releasing the technique, left fist pulled back at the hip, lunging stance with both feet on the bottom edge; palm at least 40 px from the right cell edge.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume."
+    },
+    {
+      "ten_file": "player_smu_hit_death_getup_3f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "smu",
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2172,
+        724
+      ],
+      "noi_dung": "Tân binh Làng Sương Mù TRÚNG ĐÒN 3 khung ĐỨNG (ngả nhẹ · đỡ/gồng · khuỵu gối tiếp đất) — không có khung nằm.",
+      "khung": [
+        "hit 0 → thân slot 14 (cf 19, 30) — trúng đòn ngả nhẹ, ĐỨNG",
+        "hit 1 → thân slot 15 (cf 20, 31 = THẾ BẮT ĐẦU CHIÊU) — đỡ / khoanh tay gồng, ĐỨNG",
+        "hit 2 → thân slot 16 (cf 25 = sau dịch chuyển) — khuỵu gối tiếp đất, KHÔNG nằm; chân không lấy khung hit"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat",
+        "XAU-hit-v1-khung-nam"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Mist Village / Water palette: deep blue, lake-blue, slate grey, a cool damp look.\nSUBJECT: a young Mist Village (Kiri) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): pale cool-toned skin, damp-looking dark-teal hair swept to one side, forehead-protector steel plate engraved with four wavy mist lines on a blue-grey band with two tails, deep-blue high-collar jacket with thin grey-blue pinstripes, slate-grey trousers, dark-blue bandage wraps at both ankles, dark-blue open-toe ninja sandals, grey fingerless gloves, a small grey face-cloth hanging loosely around the neck (the whole face stays visible).\nLAYOUT: one horizontal sprite strip of 3 equal cells, each cell exactly 724×724 px, total image exactly 2172×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) hit frame 0 (client body slot 14: cf 19 and 30 = taking a hit): STANDING, torso tilted back about 15 degrees from the impact, right arm raised in a loose guard in front of the face, left arm back, eyes squeezed shut, teeth gritted, both feet planted on the bottom edge (front foot flat, back foot on its toes), head still 3/4 facing RIGHT and at the same head size. 2) hit frame 1 (client body slot 15: cf 20 and 31 — this frame is ALSO shown as the START POSE of every skill): braced guard — feet in a wide stable stance both on the bottom edge, knees slightly bent, both forearms crossed tightly in front of the chest with fists clenched, chin tucked slightly, eyes open and focused; must read both as blocking a blow and as gathering chakra. 3) hit frame 2 (client body slot 16: cf 25 — shown right after a teleport as a landing): a LOW HALF-KNEEL landing — front (right) knee bent deep with the foot flat on the bottom edge, back (left) leg braced with the knee near the ground but NOT resting on it, left fingertips touching the bottom edge in front, right arm out for balance, torso upright, chin at least 320 px above the feet (height loss no more than 15%).\nNo frame lies down and the character never falls over: the game engine never draws a lying pose (death is drawn as the standing frame plus a light ring). Frames 1 and 2 are shown by the client as the skill start pose and the post-teleport pose, so they must look composed, not defeated.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume."
+    },
+    {
+      "ten_file": "player_da_idle_3f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "da",
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2172,
+        724
+      ],
+      "noi_dung": "Tân binh Làng Đá (hệ Thổ) ĐỨNG THỞ 3 khung — khung 0 là THƯỚC CHUẨN của bộ này (phải trùng cỡ đầu học viên Lá). Cho 3 mảnh đầu + thân slot 0–2 + chân slot 0–2. VẼ ĐẦU TIÊN, duyệt rồi mới làm 4 dải còn lại của làng.",
+      "khung": [
+        "idle 0 → đầu slot 0 (cf 0,1,7,8,11,12,17–24,30–32) · thân slot 0 (cf 23,24 chết đứng) · chân slot 0 (cf 8)",
+        "idle 1 → đầu slot 1 'đầu ngang' khi chạy/nhảy (cf 2–6, 9,10, 13–16, 26–29) · thân slot 1 (cf 0,1) · chân slot 1 (cf 0,1,22)",
+        "idle 2 → đầu slot 2 (cf 25) · thân slot 2 (cf 2,15,28) · chân slot 2 (cf 2)"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Stone Village / Earth palette: earth brown, rock grey, beige.\nSUBJECT: a young Stone Village (Iwa) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): sun-weathered tan skin, short cropped dark-brown hair, forehead-protector steel plate engraved with two stacked rock slabs on an earth-brown band with two tails, dark-brown high-collar shirt under an ochre sleeveless vest with one rock-grey shoulder plate on the right shoulder, beige cloth sash at the waist with two loose ends, rock-grey trousers, brown bandage wraps at both ankles, dark-brown open-toe ninja sandals, brown fingerless gloves.\nLAYOUT: one horizontal sprite strip of 3 equal cells, each cell exactly 724×724 px, total image exactly 2172×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) idle frame 0 (client: head slot 0 — the MAIN head shown at cf 0,1,7,8,11,12,17–24,30–32; body slot 0 shown at cf 23/24 = standing 'death'/hit; leg slot 0 at cf 8): relaxed upright stand, feet shoulder-width apart both flat on the bottom edge, arms hanging at the sides with fists lightly closed, neutral focused expression, chest at rest. 2) idle frame 1 (client: head slot 1 — the head shown while RUNNING and jumping, cf 2–6, 9,10, 13–16, 26–29; body slot 1 at cf 0/1 standing; leg slot 1 at cf 0,1,22): the same stance on an inhale — shoulders and chest raised 3–5 px, head exactly the same size and turned a touch more toward the right so it also reads well over a running body. 3) idle frame 2 (client: head slot 2 at cf 25 after teleport; body slot 2 at cf 2,15,28; leg slot 2 at cf 2): exhale — shoulders back down, a slight weight shift to the front foot, fists relaxed; must differ visibly from frame 1 (no duplicate adjacent frames) and loop back to frame 0.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume.",
+      "ghi_chu": "Trang phục là ĐỀ XUẤT theo dot-3-toan-bo/lang-*/nhan-vat.md (bộ tân binh); máy chủ chưa chốt bộ đồ theo làng (hinhdang.go:57 `_ = lang`, mọi làng dùng 30/57/58)."
+    },
+    {
+      "ten_file": "player_da_run_5f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "da",
+      "kieu": "dai_chroma",
+      "so_khung": 5,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        3620,
+        724
+      ],
+      "noi_dung": "Tân binh Làng Đá CHẠY 5 khung (cf 2→6), cùng nhân vật với dải idle của làng, cùng cỡ đầu, lưng thẳng, chân chạm đáy ô.",
+      "khung": [
+        "run 0 → thân/chân slot 2 → cf 2 (đề xuất; hiện slot 2 = idle 2)",
+        "run 1 → thân/chân slot 3 → cf 3",
+        "run 2 → slot 4 → cf 4",
+        "run 3 → slot 5 → cf 5",
+        "run 4 → slot 6 → cf 6 (vòng lặp `cf = gameTick % 5 + 2`, Char.cs:2537)"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat",
+        "XAU-run-v1-nho-va-khom"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Stone Village / Earth palette: earth brown, rock grey, beige.\nSUBJECT: a young Stone Village (Iwa) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): sun-weathered tan skin, short cropped dark-brown hair, forehead-protector steel plate engraved with two stacked rock slabs on an earth-brown band with two tails, dark-brown high-collar shirt under an ochre sleeveless vest with one rock-grey shoulder plate on the right shoulder, beige cloth sash at the waist with two loose ends, rock-grey trousers, brown bandage wraps at both ankles, dark-brown open-toe ninja sandals, brown fingerless gloves.\nLAYOUT: one horizontal sprite strip of 5 equal cells, each cell exactly 724×724 px, total image exactly 3620×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) run frame 0 (client cf 2 — first frame of the 5-frame run loop `cf = gameTick % 5 + 2`): CONTACT — right leg forward with the heel touching the bottom edge, left leg extended back with the toes touching the bottom edge, left arm swung forward bent at the elbow, right arm swung back, torso leaning forward no more than 10 degrees, head at full standing height (chin-to-feet at least 360 px). 2) run frame 1 (client cf 3): RECOIL — weight over the front (right) foot flat on the bottom edge, rear (left) foot just lifting, knees slightly bent, arms passing the hips; the lowest point of the cycle but still upright, chin-to-feet no less than 350 px, hair-top to chin still 266–271 px. 3) run frame 2 (client cf 4): PASSING — right foot planted on the bottom edge, left knee driven forward and up, right arm swinging forward, left arm back, body rising back to full height. 4) run frame 3 (client cf 5): OPPOSITE CONTACT — left leg forward with the heel touching the bottom edge, right leg extended back with the toes on the bottom edge, right arm forward, left arm back. 5) run frame 4 (client cf 6): OPPOSITE RECOIL — weight over the front (left) foot flat on the bottom edge, rear (right) foot just lifting, arm swing mirrored from frame 2; flows seamlessly back into frame 0.\nHeadband tails and sash ends stream backward (to the left) but stay inside the cell. The five frames form a seamless loop. Every frame keeps the same head size as the reference idle frame — do NOT draw the runner smaller or more hunched than the standing reference (that was the v1 mistake).\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume."
+    },
+    {
+      "ten_file": "player_da_melee_4f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "da",
+      "kieu": "dai_chroma",
+      "so_khung": 4,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2896,
+        724
+      ],
+      "noi_dung": "Tân binh Làng Đá ĐÁNH CẬN CHIẾN 4 khung (thủ · đấm thẳng · đá vòng cao · quét thấp).",
+      "khung": [
+        "melee 0 → thân slot 7 (cf 7,8,17 đánh/đà/nạp) · chân slot 7 (cf 7 và cf 23 = chết đứng)",
+        "melee 1 → thân slot 8 (cf 12,18,22 nạp trên đất) · chân slot 8 (cf 12, 26–32)",
+        "melee 2 → thân slot 9 (cf 11,21,32 đỉnh nhảy/thế chiêu) · chân slot 9 (cf 13–21, 24)",
+        "melee 3 → thân slot 10 (cf 13,26) · chân slot 10 (cf 9 nhảy)"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Stone Village / Earth palette: earth brown, rock grey, beige.\nSUBJECT: a young Stone Village (Iwa) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): sun-weathered tan skin, short cropped dark-brown hair, forehead-protector steel plate engraved with two stacked rock slabs on an earth-brown band with two tails, dark-brown high-collar shirt under an ochre sleeveless vest with one rock-grey shoulder plate on the right shoulder, beige cloth sash at the waist with two loose ends, rock-grey trousers, brown bandage wraps at both ankles, dark-brown open-toe ninja sandals, brown fingerless gloves.\nLAYOUT: one horizontal sprite strip of 4 equal cells, each cell exactly 724×724 px, total image exactly 2896×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) melee frame 0 (client body slot 7: cf 7,8,17 = attack wind-up, dash, charging; leg slot 7 is ALSO shown at cf 23 = standing death, so the legs must be a calm stable stance): compact fighting guard, both fists raised in front of the chest, elbows in, feet apart both flat on the bottom edge, weight centered. 2) melee frame 1 (client body slot 8: cf 12,18,22 = charging on the ground; leg slot 8: cf 12, 26–32): straight right punch fully extended toward the right at shoulder height, left fist chambered at the hip, front (right) foot forward, back foot pushing on its toes; shift the body left inside the cell so the fist stays at least 40 px from the right cell edge. 3) melee frame 2 (client body slot 9: cf 11,21,32 = jump apex / technique pose; leg slot 9: cf 13–21, 24): high right roundhouse kick, kicking leg horizontal at chest height toward the right, standing left foot flat on the bottom edge, arms counterbalancing, torso upright (not bent over). 4) melee frame 3 (client body slot 10: cf 13,26; leg slot 10: cf 9 jump): low sweeping right back-fist at waist height with the body dropped into a deep forward lunge, left arm guarding — clearly different from frames 0 and 1 so the loop never shows the same pose twice in a row.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume."
+    },
+    {
+      "ten_file": "player_da_cast_3f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "da",
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2172,
+        724
+      ],
+      "noi_dung": "Tân binh Làng Đá KẾT ẤN 3 khung (ấn trước ngực · hạ tấn giữ ấn · đẩy lòng bàn tay tung chiêu).",
+      "khung": [
+        "cast 0 → thân slot 11 (cf 14,27) · chân slot 11 (cf 10)",
+        "cast 1 → thân slot 12 (cf 9,10 nhảy) · chân slot 12 (cf 11)",
+        "cast 2 → thân slot 13 (cf 16,29 tung chiêu) · chân slot 13 (cf 25)"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat",
+        "GOC-player-cast-v1"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Stone Village / Earth palette: earth brown, rock grey, beige.\nSUBJECT: a young Stone Village (Iwa) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): sun-weathered tan skin, short cropped dark-brown hair, forehead-protector steel plate engraved with two stacked rock slabs on an earth-brown band with two tails, dark-brown high-collar shirt under an ochre sleeveless vest with one rock-grey shoulder plate on the right shoulder, beige cloth sash at the waist with two loose ends, rock-grey trousers, brown bandage wraps at both ankles, dark-brown open-toe ninja sandals, brown fingerless gloves.\nLAYOUT: one horizontal sprite strip of 3 equal cells, each cell exactly 724×724 px, total image exactly 2172×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) cast frame 0 (client body slot 11: cf 14,27; leg slot 11: cf 10 jump): standing, both hands pressed together in a hand seal in front of the chest, elbows out, feet apart both flat on the bottom edge, focused expression. 2) cast frame 1 (client body slot 12: cf 9,10 = jump; leg slot 12: cf 11): wide low stance with knees bent (height loss no more than 10%), hands still in the seal pulled tight to the chest, both feet on the bottom edge. 3) cast frame 2 (client body slot 13: cf 16,29 = technique release; leg slot 13: cf 25): right palm thrust forward to the right releasing the technique, left fist pulled back at the hip, lunging stance with both feet on the bottom edge; palm at least 40 px from the right cell edge.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume."
+    },
+    {
+      "ten_file": "player_da_hit_death_getup_3f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "da",
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2172,
+        724
+      ],
+      "noi_dung": "Tân binh Làng Đá TRÚNG ĐÒN 3 khung ĐỨNG (ngả nhẹ · đỡ/gồng · khuỵu gối tiếp đất) — không có khung nằm.",
+      "khung": [
+        "hit 0 → thân slot 14 (cf 19, 30) — trúng đòn ngả nhẹ, ĐỨNG",
+        "hit 1 → thân slot 15 (cf 20, 31 = THẾ BẮT ĐẦU CHIÊU) — đỡ / khoanh tay gồng, ĐỨNG",
+        "hit 2 → thân slot 16 (cf 25 = sau dịch chuyển) — khuỵu gối tiếp đất, KHÔNG nằm; chân không lấy khung hit"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat",
+        "XAU-hit-v1-khung-nam"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Stone Village / Earth palette: earth brown, rock grey, beige.\nSUBJECT: a young Stone Village (Iwa) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): sun-weathered tan skin, short cropped dark-brown hair, forehead-protector steel plate engraved with two stacked rock slabs on an earth-brown band with two tails, dark-brown high-collar shirt under an ochre sleeveless vest with one rock-grey shoulder plate on the right shoulder, beige cloth sash at the waist with two loose ends, rock-grey trousers, brown bandage wraps at both ankles, dark-brown open-toe ninja sandals, brown fingerless gloves.\nLAYOUT: one horizontal sprite strip of 3 equal cells, each cell exactly 724×724 px, total image exactly 2172×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) hit frame 0 (client body slot 14: cf 19 and 30 = taking a hit): STANDING, torso tilted back about 15 degrees from the impact, right arm raised in a loose guard in front of the face, left arm back, eyes squeezed shut, teeth gritted, both feet planted on the bottom edge (front foot flat, back foot on its toes), head still 3/4 facing RIGHT and at the same head size. 2) hit frame 1 (client body slot 15: cf 20 and 31 — this frame is ALSO shown as the START POSE of every skill): braced guard — feet in a wide stable stance both on the bottom edge, knees slightly bent, both forearms crossed tightly in front of the chest with fists clenched, chin tucked slightly, eyes open and focused; must read both as blocking a blow and as gathering chakra. 3) hit frame 2 (client body slot 16: cf 25 — shown right after a teleport as a landing): a LOW HALF-KNEEL landing — front (right) knee bent deep with the foot flat on the bottom edge, back (left) leg braced with the knee near the ground but NOT resting on it, left fingertips touching the bottom edge in front, right arm out for balance, torso upright, chin at least 320 px above the feet (height loss no more than 15%).\nNo frame lies down and the character never falls over: the game engine never draws a lying pose (death is drawn as the standing frame plus a light ring). Frames 1 and 2 are shown by the client as the skill start pose and the post-teleport pose, so they must look composed, not defeated.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume."
+    },
+    {
+      "ten_file": "player_may_idle_3f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "may",
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2172,
+        724
+      ],
+      "noi_dung": "Tân binh Làng Mây (hệ Lôi) ĐỨNG THỞ 3 khung — khung 0 là THƯỚC CHUẨN của bộ này (phải trùng cỡ đầu học viên Lá). Cho 3 mảnh đầu + thân slot 0–2 + chân slot 0–2. VẼ ĐẦU TIÊN, duyệt rồi mới làm 4 dải còn lại của làng.",
+      "khung": [
+        "idle 0 → đầu slot 0 (cf 0,1,7,8,11,12,17–24,30–32) · thân slot 0 (cf 23,24 chết đứng) · chân slot 0 (cf 8)",
+        "idle 1 → đầu slot 1 'đầu ngang' khi chạy/nhảy (cf 2–6, 9,10, 13–16, 26–29) · thân slot 1 (cf 0,1) · chân slot 1 (cf 0,1,22)",
+        "idle 2 → đầu slot 2 (cf 25) · thân slot 2 (cf 2,15,28) · chân slot 2 (cf 2)"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Cloud Village / Lightning palette: deep blue-leaning indigo-violet (never hot pink or magenta), blue-white, lightning-yellow accents.\nSUBJECT: a young Cloud Village (Kumo) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): dark-brown skin, spiky ash-white hair, forehead-protector steel plate engraved with a cloud symbol on a blue-leaning indigo band with two tails, white-grey high-collar shirt under an indigo-violet one-strap flak-style vest (single strap over the left shoulder), lightning-yellow cloth sash at the waist with two loose ends, dark-indigo trousers, white bandage wraps at both ankles, dark-indigo open-toe ninja sandals, white fingerless gloves.\nLAYOUT: one horizontal sprite strip of 3 equal cells, each cell exactly 724×724 px, total image exactly 2172×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) idle frame 0 (client: head slot 0 — the MAIN head shown at cf 0,1,7,8,11,12,17–24,30–32; body slot 0 shown at cf 23/24 = standing 'death'/hit; leg slot 0 at cf 8): relaxed upright stand, feet shoulder-width apart both flat on the bottom edge, arms hanging at the sides with fists lightly closed, neutral focused expression, chest at rest. 2) idle frame 1 (client: head slot 1 — the head shown while RUNNING and jumping, cf 2–6, 9,10, 13–16, 26–29; body slot 1 at cf 0/1 standing; leg slot 1 at cf 0,1,22): the same stance on an inhale — shoulders and chest raised 3–5 px, head exactly the same size and turned a touch more toward the right so it also reads well over a running body. 3) idle frame 2 (client: head slot 2 at cf 25 after teleport; body slot 2 at cf 2,15,28; leg slot 2 at cf 2): exhale — shoulders back down, a slight weight shift to the front foot, fists relaxed; must differ visibly from frame 1 (no duplicate adjacent frames) and loop back to frame 0.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume.",
+      "ghi_chu": "Trang phục là ĐỀ XUẤT theo dot-3-toan-bo/lang-*/nhan-vat.md (bộ tân binh); máy chủ chưa chốt bộ đồ theo làng (hinhdang.go:57 `_ = lang`, mọi làng dùng 30/57/58)."
+    },
+    {
+      "ten_file": "player_may_run_5f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "may",
+      "kieu": "dai_chroma",
+      "so_khung": 5,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        3620,
+        724
+      ],
+      "noi_dung": "Tân binh Làng Mây CHẠY 5 khung (cf 2→6), cùng nhân vật với dải idle của làng, cùng cỡ đầu, lưng thẳng, chân chạm đáy ô.",
+      "khung": [
+        "run 0 → thân/chân slot 2 → cf 2 (đề xuất; hiện slot 2 = idle 2)",
+        "run 1 → thân/chân slot 3 → cf 3",
+        "run 2 → slot 4 → cf 4",
+        "run 3 → slot 5 → cf 5",
+        "run 4 → slot 6 → cf 6 (vòng lặp `cf = gameTick % 5 + 2`, Char.cs:2537)"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat",
+        "XAU-run-v1-nho-va-khom"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Cloud Village / Lightning palette: deep blue-leaning indigo-violet (never hot pink or magenta), blue-white, lightning-yellow accents.\nSUBJECT: a young Cloud Village (Kumo) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): dark-brown skin, spiky ash-white hair, forehead-protector steel plate engraved with a cloud symbol on a blue-leaning indigo band with two tails, white-grey high-collar shirt under an indigo-violet one-strap flak-style vest (single strap over the left shoulder), lightning-yellow cloth sash at the waist with two loose ends, dark-indigo trousers, white bandage wraps at both ankles, dark-indigo open-toe ninja sandals, white fingerless gloves.\nLAYOUT: one horizontal sprite strip of 5 equal cells, each cell exactly 724×724 px, total image exactly 3620×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) run frame 0 (client cf 2 — first frame of the 5-frame run loop `cf = gameTick % 5 + 2`): CONTACT — right leg forward with the heel touching the bottom edge, left leg extended back with the toes touching the bottom edge, left arm swung forward bent at the elbow, right arm swung back, torso leaning forward no more than 10 degrees, head at full standing height (chin-to-feet at least 360 px). 2) run frame 1 (client cf 3): RECOIL — weight over the front (right) foot flat on the bottom edge, rear (left) foot just lifting, knees slightly bent, arms passing the hips; the lowest point of the cycle but still upright, chin-to-feet no less than 350 px, hair-top to chin still 266–271 px. 3) run frame 2 (client cf 4): PASSING — right foot planted on the bottom edge, left knee driven forward and up, right arm swinging forward, left arm back, body rising back to full height. 4) run frame 3 (client cf 5): OPPOSITE CONTACT — left leg forward with the heel touching the bottom edge, right leg extended back with the toes on the bottom edge, right arm forward, left arm back. 5) run frame 4 (client cf 6): OPPOSITE RECOIL — weight over the front (left) foot flat on the bottom edge, rear (right) foot just lifting, arm swing mirrored from frame 2; flows seamlessly back into frame 0.\nHeadband tails and sash ends stream backward (to the left) but stay inside the cell. The five frames form a seamless loop. Every frame keeps the same head size as the reference idle frame — do NOT draw the runner smaller or more hunched than the standing reference (that was the v1 mistake).\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume."
+    },
+    {
+      "ten_file": "player_may_melee_4f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "may",
+      "kieu": "dai_chroma",
+      "so_khung": 4,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2896,
+        724
+      ],
+      "noi_dung": "Tân binh Làng Mây ĐÁNH CẬN CHIẾN 4 khung (thủ · đấm thẳng · đá vòng cao · quét thấp).",
+      "khung": [
+        "melee 0 → thân slot 7 (cf 7,8,17 đánh/đà/nạp) · chân slot 7 (cf 7 và cf 23 = chết đứng)",
+        "melee 1 → thân slot 8 (cf 12,18,22 nạp trên đất) · chân slot 8 (cf 12, 26–32)",
+        "melee 2 → thân slot 9 (cf 11,21,32 đỉnh nhảy/thế chiêu) · chân slot 9 (cf 13–21, 24)",
+        "melee 3 → thân slot 10 (cf 13,26) · chân slot 10 (cf 9 nhảy)"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Cloud Village / Lightning palette: deep blue-leaning indigo-violet (never hot pink or magenta), blue-white, lightning-yellow accents.\nSUBJECT: a young Cloud Village (Kumo) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): dark-brown skin, spiky ash-white hair, forehead-protector steel plate engraved with a cloud symbol on a blue-leaning indigo band with two tails, white-grey high-collar shirt under an indigo-violet one-strap flak-style vest (single strap over the left shoulder), lightning-yellow cloth sash at the waist with two loose ends, dark-indigo trousers, white bandage wraps at both ankles, dark-indigo open-toe ninja sandals, white fingerless gloves.\nLAYOUT: one horizontal sprite strip of 4 equal cells, each cell exactly 724×724 px, total image exactly 2896×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) melee frame 0 (client body slot 7: cf 7,8,17 = attack wind-up, dash, charging; leg slot 7 is ALSO shown at cf 23 = standing death, so the legs must be a calm stable stance): compact fighting guard, both fists raised in front of the chest, elbows in, feet apart both flat on the bottom edge, weight centered. 2) melee frame 1 (client body slot 8: cf 12,18,22 = charging on the ground; leg slot 8: cf 12, 26–32): straight right punch fully extended toward the right at shoulder height, left fist chambered at the hip, front (right) foot forward, back foot pushing on its toes; shift the body left inside the cell so the fist stays at least 40 px from the right cell edge. 3) melee frame 2 (client body slot 9: cf 11,21,32 = jump apex / technique pose; leg slot 9: cf 13–21, 24): high right roundhouse kick, kicking leg horizontal at chest height toward the right, standing left foot flat on the bottom edge, arms counterbalancing, torso upright (not bent over). 4) melee frame 3 (client body slot 10: cf 13,26; leg slot 10: cf 9 jump): low sweeping right back-fist at waist height with the body dropped into a deep forward lunge, left arm guarding — clearly different from frames 0 and 1 so the loop never shows the same pose twice in a row.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume."
+    },
+    {
+      "ten_file": "player_may_cast_3f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "may",
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2172,
+        724
+      ],
+      "noi_dung": "Tân binh Làng Mây KẾT ẤN 3 khung (ấn trước ngực · hạ tấn giữ ấn · đẩy lòng bàn tay tung chiêu).",
+      "khung": [
+        "cast 0 → thân slot 11 (cf 14,27) · chân slot 11 (cf 10)",
+        "cast 1 → thân slot 12 (cf 9,10 nhảy) · chân slot 12 (cf 11)",
+        "cast 2 → thân slot 13 (cf 16,29 tung chiêu) · chân slot 13 (cf 25)"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat",
+        "GOC-player-cast-v1"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Cloud Village / Lightning palette: deep blue-leaning indigo-violet (never hot pink or magenta), blue-white, lightning-yellow accents.\nSUBJECT: a young Cloud Village (Kumo) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): dark-brown skin, spiky ash-white hair, forehead-protector steel plate engraved with a cloud symbol on a blue-leaning indigo band with two tails, white-grey high-collar shirt under an indigo-violet one-strap flak-style vest (single strap over the left shoulder), lightning-yellow cloth sash at the waist with two loose ends, dark-indigo trousers, white bandage wraps at both ankles, dark-indigo open-toe ninja sandals, white fingerless gloves.\nLAYOUT: one horizontal sprite strip of 3 equal cells, each cell exactly 724×724 px, total image exactly 2172×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) cast frame 0 (client body slot 11: cf 14,27; leg slot 11: cf 10 jump): standing, both hands pressed together in a hand seal in front of the chest, elbows out, feet apart both flat on the bottom edge, focused expression. 2) cast frame 1 (client body slot 12: cf 9,10 = jump; leg slot 12: cf 11): wide low stance with knees bent (height loss no more than 10%), hands still in the seal pulled tight to the chest, both feet on the bottom edge. 3) cast frame 2 (client body slot 13: cf 16,29 = technique release; leg slot 13: cf 25): right palm thrust forward to the right releasing the technique, left fist pulled back at the hip, lunging stance with both feet on the bottom edge; palm at least 40 px from the right cell edge.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume."
+    },
+    {
+      "ten_file": "player_may_hit_death_getup_3f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "may",
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2172,
+        724
+      ],
+      "noi_dung": "Tân binh Làng Mây TRÚNG ĐÒN 3 khung ĐỨNG (ngả nhẹ · đỡ/gồng · khuỵu gối tiếp đất) — không có khung nằm.",
+      "khung": [
+        "hit 0 → thân slot 14 (cf 19, 30) — trúng đòn ngả nhẹ, ĐỨNG",
+        "hit 1 → thân slot 15 (cf 20, 31 = THẾ BẮT ĐẦU CHIÊU) — đỡ / khoanh tay gồng, ĐỨNG",
+        "hit 2 → thân slot 16 (cf 25 = sau dịch chuyển) — khuỵu gối tiếp đất, KHÔNG nằm; chân không lấy khung hit"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat",
+        "XAU-hit-v1-khung-nam"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Cloud Village / Lightning palette: deep blue-leaning indigo-violet (never hot pink or magenta), blue-white, lightning-yellow accents.\nSUBJECT: a young Cloud Village (Kumo) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): dark-brown skin, spiky ash-white hair, forehead-protector steel plate engraved with a cloud symbol on a blue-leaning indigo band with two tails, white-grey high-collar shirt under an indigo-violet one-strap flak-style vest (single strap over the left shoulder), lightning-yellow cloth sash at the waist with two loose ends, dark-indigo trousers, white bandage wraps at both ankles, dark-indigo open-toe ninja sandals, white fingerless gloves.\nLAYOUT: one horizontal sprite strip of 3 equal cells, each cell exactly 724×724 px, total image exactly 2172×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) hit frame 0 (client body slot 14: cf 19 and 30 = taking a hit): STANDING, torso tilted back about 15 degrees from the impact, right arm raised in a loose guard in front of the face, left arm back, eyes squeezed shut, teeth gritted, both feet planted on the bottom edge (front foot flat, back foot on its toes), head still 3/4 facing RIGHT and at the same head size. 2) hit frame 1 (client body slot 15: cf 20 and 31 — this frame is ALSO shown as the START POSE of every skill): braced guard — feet in a wide stable stance both on the bottom edge, knees slightly bent, both forearms crossed tightly in front of the chest with fists clenched, chin tucked slightly, eyes open and focused; must read both as blocking a blow and as gathering chakra. 3) hit frame 2 (client body slot 16: cf 25 — shown right after a teleport as a landing): a LOW HALF-KNEEL landing — front (right) knee bent deep with the foot flat on the bottom edge, back (left) leg braced with the knee near the ground but NOT resting on it, left fingertips touching the bottom edge in front, right arm out for balance, torso upright, chin at least 320 px above the feet (height loss no more than 15%).\nNo frame lies down and the character never falls over: the game engine never draws a lying pose (death is drawn as the standing frame plus a light ring). Frames 1 and 2 are shown by the client as the skill start pose and the post-teleport pose, so they must look composed, not defeated.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume."
+    },
+    {
+      "ten_file": "player_cat_portrait_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "cat",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung tân binh Làng Cát (đầu + vai, 3/4 quay phải) → 200×200, cùng mặt với dải idle của làng.",
+      "khung": [
+        "1 ô → Small<id mới> 200×200 x4"
+      ],
+      "dung_tham_chieu": [
+        "GOC-player-idle-v1",
+        "GOC-iruka-portrait",
+        "TOT-chitiet-nhanvat",
+        "TOT-naruto-logo"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Sand Village / Wind palette: sand-yellow, sun-bleached tan, earth brown, pale-green accents.\nSUBJECT: a young Sand Village (Suna) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): slightly darker tan skin, short dusty-brown hair partly covered by a light sand-colored head cloth whose top sits where the hair top would be, forehead-protector steel plate engraved with an hourglass symbol on a pale-tan band with two tails, sleeveless sand-yellow high-collar tunic over a dark-brown long-sleeve undershirt, pale-green cloth sash at the waist with two loose ends, earth-brown trousers gathered below the knee, beige bandage wraps at both ankles, dark-brown open-toe ninja sandals, brown fingerless gloves.\nLAYOUT: one single square image exactly 1254×1254 px (one cell) — a bust portrait for the dialogue box and HUD avatar: head and shoulders only, 3/4 view facing RIGHT, the face occupying about 45–55% of the image height, top of the hair at least 60 px below the top edge, shoulders cut off by the bottom edge, everything centered so that a square crop of the content box keeps the whole head; drawn larger than the strips because it is a close-up.\nIDENTITY LOCK: exactly the same face, eyes, hair, skin tone, headband plate and collar as the idle strip of this character; neutral-confident expression, mouth closed; eyes open and looking to the right; no full body, no hands.\nSame head size logic as reference idle frame does not apply to pixel counts here — this is a close-up — but the face shape and features must be identical to that idle frame; uniform magenta background RGB(246,4,242), perfectly flat, no gradient, no shadow, no glow.\nDO NOT DRAW: full body, hands or weapons; back or left-facing views; a frame, border, vignette or circle around the portrait; text or labels; a shadow; any background scenery; magenta or pink on the character."
+    },
+    {
+      "ten_file": "player_smu_portrait_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "smu",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung tân binh Làng Sương Mù (đầu + vai, 3/4 quay phải) → 200×200, cùng mặt với dải idle của làng.",
+      "khung": [
+        "1 ô → Small<id mới> 200×200 x4"
+      ],
+      "dung_tham_chieu": [
+        "GOC-player-idle-v1",
+        "GOC-iruka-portrait",
+        "TOT-chitiet-nhanvat",
+        "TOT-naruto-logo"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Mist Village / Water palette: deep blue, lake-blue, slate grey, a cool damp look.\nSUBJECT: a young Mist Village (Kiri) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): pale cool-toned skin, damp-looking dark-teal hair swept to one side, forehead-protector steel plate engraved with four wavy mist lines on a blue-grey band with two tails, deep-blue high-collar jacket with thin grey-blue pinstripes, slate-grey trousers, dark-blue bandage wraps at both ankles, dark-blue open-toe ninja sandals, grey fingerless gloves, a small grey face-cloth hanging loosely around the neck (the whole face stays visible).\nLAYOUT: one single square image exactly 1254×1254 px (one cell) — a bust portrait for the dialogue box and HUD avatar: head and shoulders only, 3/4 view facing RIGHT, the face occupying about 45–55% of the image height, top of the hair at least 60 px below the top edge, shoulders cut off by the bottom edge, everything centered so that a square crop of the content box keeps the whole head; drawn larger than the strips because it is a close-up.\nIDENTITY LOCK: exactly the same face, eyes, hair, skin tone, headband plate and collar as the idle strip of this character; neutral-confident expression, mouth closed; eyes open and looking to the right; no full body, no hands.\nSame head size logic as reference idle frame does not apply to pixel counts here — this is a close-up — but the face shape and features must be identical to that idle frame; uniform magenta background RGB(246,4,242), perfectly flat, no gradient, no shadow, no glow.\nDO NOT DRAW: full body, hands or weapons; back or left-facing views; a frame, border, vignette or circle around the portrait; text or labels; a shadow; any background scenery; magenta or pink on the character."
+    },
+    {
+      "ten_file": "player_da_portrait_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "da",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung tân binh Làng Đá (đầu + vai, 3/4 quay phải) → 200×200, cùng mặt với dải idle của làng.",
+      "khung": [
+        "1 ô → Small<id mới> 200×200 x4"
+      ],
+      "dung_tham_chieu": [
+        "GOC-player-idle-v1",
+        "GOC-iruka-portrait",
+        "TOT-chitiet-nhanvat",
+        "TOT-naruto-logo"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Stone Village / Earth palette: earth brown, rock grey, beige.\nSUBJECT: a young Stone Village (Iwa) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): sun-weathered tan skin, short cropped dark-brown hair, forehead-protector steel plate engraved with two stacked rock slabs on an earth-brown band with two tails, dark-brown high-collar shirt under an ochre sleeveless vest with one rock-grey shoulder plate on the right shoulder, beige cloth sash at the waist with two loose ends, rock-grey trousers, brown bandage wraps at both ankles, dark-brown open-toe ninja sandals, brown fingerless gloves.\nLAYOUT: one single square image exactly 1254×1254 px (one cell) — a bust portrait for the dialogue box and HUD avatar: head and shoulders only, 3/4 view facing RIGHT, the face occupying about 45–55% of the image height, top of the hair at least 60 px below the top edge, shoulders cut off by the bottom edge, everything centered so that a square crop of the content box keeps the whole head; drawn larger than the strips because it is a close-up.\nIDENTITY LOCK: exactly the same face, eyes, hair, skin tone, headband plate and collar as the idle strip of this character; neutral-confident expression, mouth closed; eyes open and looking to the right; no full body, no hands.\nSame head size logic as reference idle frame does not apply to pixel counts here — this is a close-up — but the face shape and features must be identical to that idle frame; uniform magenta background RGB(246,4,242), perfectly flat, no gradient, no shadow, no glow.\nDO NOT DRAW: full body, hands or weapons; back or left-facing views; a frame, border, vignette or circle around the portrait; text or labels; a shadow; any background scenery; magenta or pink on the character."
+    },
+    {
+      "ten_file": "player_may_portrait_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "may",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung tân binh Làng Mây (đầu + vai, 3/4 quay phải) → 200×200, cùng mặt với dải idle của làng.",
+      "khung": [
+        "1 ô → Small<id mới> 200×200 x4"
+      ],
+      "dung_tham_chieu": [
+        "GOC-player-idle-v1",
+        "GOC-iruka-portrait",
+        "TOT-chitiet-nhanvat",
+        "TOT-naruto-logo"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Cloud Village / Lightning palette: deep blue-leaning indigo-violet (never hot pink or magenta), blue-white, lightning-yellow accents.\nSUBJECT: a young Cloud Village (Kumo) starter ninja with EXACTLY the same body proportions and head size as the Leaf academy-student reference (chibi-heroic, head about 40% of total height): dark-brown skin, spiky ash-white hair, forehead-protector steel plate engraved with a cloud symbol on a blue-leaning indigo band with two tails, white-grey high-collar shirt under an indigo-violet one-strap flak-style vest (single strap over the left shoulder), lightning-yellow cloth sash at the waist with two loose ends, dark-indigo trousers, white bandage wraps at both ankles, dark-indigo open-toe ninja sandals, white fingerless gloves.\nLAYOUT: one single square image exactly 1254×1254 px (one cell) — a bust portrait for the dialogue box and HUD avatar: head and shoulders only, 3/4 view facing RIGHT, the face occupying about 45–55% of the image height, top of the hair at least 60 px below the top edge, shoulders cut off by the bottom edge, everything centered so that a square crop of the content box keeps the whole head; drawn larger than the strips because it is a close-up.\nIDENTITY LOCK: exactly the same face, eyes, hair, skin tone, headband plate and collar as the idle strip of this character; neutral-confident expression, mouth closed; eyes open and looking to the right; no full body, no hands.\nSame head size logic as reference idle frame does not apply to pixel counts here — this is a close-up — but the face shape and features must be identical to that idle frame; uniform magenta background RGB(246,4,242), perfectly flat, no gradient, no shadow, no glow.\nDO NOT DRAW: full body, hands or weapons; back or left-facing views; a frame, border, vignette or circle around the portrait; text or labels; a shadow; any background scenery; magenta or pink on the character."
+    },
+    {
+      "ten_file": "player_la_nu_idle_3f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "la",
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2172,
+        724
+      ],
+      "noi_dung": "Học viên Làng Lá NỮ — 3 khung đứng thở, thân/chân/đồ Y HỆT bản nam (máy chỉ lấy 3 mảnh ĐẦU làm part đầu thứ 2). Client không có 'giới tính nữ' (cgender cố định 0) — nữ = kiểu đầu khác, chọn qua KieuToc.",
+      "khung": [
+        "idle 0/1/2 → đầu slot 0/1/2 của part ĐẦU mới (id ≥ 2192); thân/chân KHÔNG dùng"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P3",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Leaf Village / Fire palette: warm orange-red accents on dark navy and olive green.\nSUBJECT: the SAME character as the reference idle strip player_idle_3f_chroma.png: a young Leaf Village academy-student ninja, chibi-heroic proportions (head about 40% of total height), spiky dark-brown hair, tan skin, brown eyes, navy-blue forehead protector with a steel plate engraved with the Leaf swirl and two tails trailing behind the head, dark-navy long-sleeve shirt, olive-green flak-style vest with two chest pockets and a center zipper, orange cloth sash knotted at the waist with two loose ends, dark-navy trousers, orange bandage wraps at both ankles, dark-navy open-toe ninja sandals, dark fingerless gloves HEAD VARIANT: a FEMALE academy student — the body, outfit, stance and proportions are IDENTICAL to the male reference (only the head is used by the game): long dark-brown hair tied in a high ponytail falling behind the shoulders with side bangs framing the face, softer jawline, slightly larger eyes, same navy Leaf headband worn on the forehead; hair-top to chin still 266–271 px, face height 96–99 px..\nLAYOUT: one horizontal sprite strip of 3 equal cells, each cell exactly 724×724 px, total image exactly 2172×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) idle frame 0 (client: head slot 0 — the MAIN head shown at cf 0,1,7,8,11,12,17–24,30–32; body slot 0 shown at cf 23/24 = standing 'death'/hit; leg slot 0 at cf 8): relaxed upright stand, feet shoulder-width apart both flat on the bottom edge, arms hanging at the sides with fists lightly closed, neutral focused expression, chest at rest. 2) idle frame 1 (client: head slot 1 — the head shown while RUNNING and jumping, cf 2–6, 9,10, 13–16, 26–29; body slot 1 at cf 0/1 standing; leg slot 1 at cf 0,1,22): the same stance on an inhale — shoulders and chest raised 3–5 px, head exactly the same size and turned a touch more toward the right so it also reads well over a running body. 3) idle frame 2 (client: head slot 2 at cf 25 after teleport; body slot 2 at cf 2,15,28; leg slot 2 at cf 2): exhale — shoulders back down, a slight weight shift to the front foot, fists relaxed; must differ visibly from frame 1 (no duplicate adjacent frames) and loop back to frame 0.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume.",
+      "ghi_chu": "Cần: part đầu mới trong part.bin (nới PHASE_ONE_ADDITIONS, assetpack/part.py:8-9), máy chủ mở dauHopLe (hinhdang.go), màn tạo nhân vật gửi đúng id. Chưa làm."
+    },
+    {
+      "ten_file": "player_la_toc2_idle_3f_chroma.png",
+      "nhom": "nhan-vat",
+      "lang": "la",
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "kich_thuoc": [
+        2172,
+        724
+      ],
+      "noi_dung": "Học viên Làng Lá kiểu TÓC 2 (nam, tóc chải phẳng có búi nhỏ) — 3 khung đứng thở, dưới cổ y hệt bản gốc; chỉ lấy 3 mảnh đầu.",
+      "khung": [
+        "idle 0/1/2 → đầu slot 0/1/2 của part ĐẦU mới; thân/chân KHÔNG dùng"
+      ],
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "GOC-player-idle-v1",
+        "TOT-chitiet-nhanvat",
+        "XAU-hai-khuon-mat"
+      ],
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat",
+      "uu_tien": "P3",
+      "trang_thai": "can_ve",
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nVillage palette: Leaf Village / Fire palette: warm orange-red accents on dark navy and olive green.\nSUBJECT: the SAME character as the reference idle strip player_idle_3f_chroma.png: a young Leaf Village academy-student ninja, chibi-heroic proportions (head about 40% of total height), spiky dark-brown hair, tan skin, brown eyes, navy-blue forehead protector with a steel plate engraved with the Leaf swirl and two tails trailing behind the head, dark-navy long-sleeve shirt, olive-green flak-style vest with two chest pockets and a center zipper, orange cloth sash knotted at the waist with two loose ends, dark-navy trousers, orange bandage wraps at both ankles, dark-navy open-toe ninja sandals, dark fingerless gloves HEAD VARIANT: the same male academy student with a different hairstyle — short black hair combed flat with a small topknot on the crown and straight bangs under the headband; everything below the neck IDENTICAL to the reference; hair-top to chin still 266–271 px, face height 96–99 px..\nLAYOUT: one horizontal sprite strip of 3 equal cells, each cell exactly 724×724 px, total image exactly 2172×724 px, one frame per cell, frames in the fixed order given below (left to right), the character horizontally centered in its cell with at least 40 px clear of the cell's left and right edges, nothing crossing a cell boundary.\nFRAMES (left to right): 1) idle frame 0 (client: head slot 0 — the MAIN head shown at cf 0,1,7,8,11,12,17–24,30–32; body slot 0 shown at cf 23/24 = standing 'death'/hit; leg slot 0 at cf 8): relaxed upright stand, feet shoulder-width apart both flat on the bottom edge, arms hanging at the sides with fists lightly closed, neutral focused expression, chest at rest. 2) idle frame 1 (client: head slot 1 — the head shown while RUNNING and jumping, cf 2–6, 9,10, 13–16, 26–29; body slot 1 at cf 0/1 standing; leg slot 1 at cf 0,1,22): the same stance on an inhale — shoulders and chest raised 3–5 px, head exactly the same size and turned a touch more toward the right so it also reads well over a running body. 3) idle frame 2 (client: head slot 2 at cf 25 after teleport; body slot 2 at cf 2,15,28; leg slot 2 at cf 2): exhale — shoulders back down, a slight weight shift to the front foot, fists relaxed; must differ visibly from frame 1 (no duplicate adjacent frames) and loop back to frame 0.\nSCALE LOCK (mandatory, measured inside the 724-px cell, see THUOC-NHAN-VAT.png): same head size as reference idle frame — face height 96–99 px, hair-top to chin 266–271 px, face width about 168 px, headband about 25 px thick; in upright standing frames chin-to-feet 375–395 px and hair-top-to-feet about 640–670 px; feet touching bottom edge of the cell in EVERY frame (at least one sole flat on the bottom edge, no gap, no floating); upright posture like a classic Dragon Ball sprite — a running lean of at most 10 degrees, never hunched or crouched; head in 3/4 view facing RIGHT in every frame.\nBACKGROUND: uniform magenta background RGB(246,4,242) filling the whole image edge to edge, perfectly flat — no gradient, no vignette, no floor line, no shadow, no glow or soft haze around the character; crisp hard edges; no magenta, pink or purple-magenta tones anywhere on the character (they would be keyed out with the background).\nDO NOT DRAW: lying, prone or fallen poses; back views or left-facing frames; motion blur, speed lines or dust clouds; weapons or props not listed; text, labels, numbers, grid lines or cell borders; a ground shadow; any background scenery; a second character; magenta or pink on the costume."
+    }
+  ]
+}

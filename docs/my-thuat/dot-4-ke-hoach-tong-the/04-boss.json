@@ -1,0 +1,1106 @@
+{
+  "meta": {
+    "du_an": "Game Naruto (loi NRO) — Đợt 4, hạng mục 04-boss",
+    "brief": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\04-boss.md",
+    "ngay": "2026-09-06",
+    "mo_ta": "Manifest máy đọc cho agent tạo ảnh: đọc từng phần tử anh[], gửi prompt_day_du + các ảnh tham chiếu trong dung_tham_chieu (đường dẫn ở anh_tham_chieu) tới AI tạo ảnh, lưu kết quả đúng ten_file vào luu_vao. Làm 3 ảnh mẫu (mau_truoc) trước, dừng chờ duyệt, rồi làm loạt. Prompt trùng từng chữ với mục 6 của 04-boss.md.",
+    "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+    "tong_anh": 34,
+    "theo_uu_tien": {
+      "P1": 10,
+      "P2": 24,
+      "P3": 0,
+      "da_co": 0
+    },
+    "mau_truoc": [
+      "boss_la_mat_na_vo_idle_3f_chroma.png",
+      "boss_la_ke_la_mat_idle_3f_chroma.png",
+      "boss_la_mat_na_vo_melee_4f_chroma.png"
+    ],
+    "kiem_tra": "python -m tools.artqa.artqa review --art-root D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss --review D:\\NRO_GoiBanGiao\\docs\\my-thuat\\review\\dot-4-boss.json --reviewer <ten>",
+    "ten_moi_can_them_kich_thuoc": [
+      {
+        "ten_file": "boss_la_ke_la_mat_x4.png",
+        "kich_thuoc": [
+          160,
+          160
+        ],
+        "ghi_chu": "mã tra cứu boss pha 1 (KHÔNG vẽ tĩnh — ảnh thật là dải chroma)"
+      },
+      {
+        "ten_file": "boss_la_mat_na_vo_x4.png",
+        "kich_thuoc": [
+          160,
+          160
+        ],
+        "ghi_chu": "mã tra cứu boss pha 2 (KHÔNG vẽ tĩnh)"
+      },
+      {
+        "ten_file": "boss_smu_hoc_vien_dao_tau_x4.png",
+        "kich_thuoc": [
+          160,
+          160
+        ],
+        "ghi_chu": "mã tra cứu boss lẻ (KHÔNG vẽ tĩnh)"
+      }
+    ],
+    "bay_luat_05_09": [
+      "1. Mọi khung của một nhân vật cùng CỠ ĐẦU theo THUOC-NHAN-VAT.png (mặt 96-99 px, tóc->cằm 266-271 px, ô 724 hoặc 880 cùng thước).",
+      "2. Bàn chân chạm mép dưới ô ở MỌI khung; không bụi/bóng/sàn dưới chân.",
+      "3. Đứng thẳng; chạy nghiêng <= 10 độ, không khom.",
+      "4. Nền tím RGB(246,4,242) phẳng tuyệt đối; không bóng đổ, viền, gradient.",
+      "5. Một ô một khung, ô đều nhau, thứ tự khung cố định (idle 3, run 4, melee 4, cast 3, hit 3); số trong tên = số ô.",
+      "6. Đầu nhìn 3/4 quay PHẢI ở mọi khung.",
+      "7. Dải hit KHÔNG vẽ nằm: 3 khung đứng (ngả nhẹ, đỡ, khuỵu gối)."
+    ],
+    "ghi_chu_chan_dung": "D1 chốt 06/09 theo 09-chan-dung-thuong-hieu: mã tra cứu chân dung boss dùng cd_boss_<mã>_x4.png của 09 (không dùng cd_la_*/cd_smu_* của brief này) để kich-thuoc-anh.json (append-only) không có hai bộ mã cho cùng một mặt.",
+    "ten_du_phong_neu_doi_D1": {
+      "ghi_chu": "D1 chốt 06/09 THEO 09-chan-dung-thuong-hieu: chân dung boss dùng mã cd_boss_<mã>_x4.png của 09. Các mã cd_ dưới đây là bản dự phòng của brief 04 — CHƯA nối vào kich-thuoc-anh.json (bảng append-only, tránh hai bộ mã cho cùng một mặt). Chỉ dùng nếu chủ dự án đổi D1 sang đường cd_ của 04.",
+      "danh_sach": [
+        {
+          "ten_file": "cd_la_ke_la_mat_x4.png",
+          "kich_thuoc": [
+            200,
+            200
+          ],
+          "ghi_chu": "chân dung tĩnh dự phòng cho `boss_la_ke_la_mat_portrait_chroma.png` nếu dự án đi đường cd_"
+        },
+        {
+          "ten_file": "cd_la_mat_na_vo_x4.png",
+          "kich_thuoc": [
+            200,
+            200
+          ],
+          "ghi_chu": "chân dung tĩnh dự phòng (pha 2)"
+        },
+        {
+          "ten_file": "cd_smu_hoc_vien_dao_tau_x4.png",
+          "kich_thuoc": [
+            200,
+            200
+          ],
+          "ghi_chu": "chân dung tĩnh dự phòng (boss lẻ)"
+        },
+        {
+          "ten_file": "cd_cat_kiemphong_x4.png",
+          "kich_thuoc": [
+            200,
+            200
+          ],
+          "ghi_chu": "chân dung tĩnh dự phòng (P2 Cát)"
+        },
+        {
+          "ten_file": "cd_smu_thatdao_x4.png",
+          "kich_thuoc": [
+            200,
+            200
+          ],
+          "ghi_chu": "chân dung tĩnh dự phòng (P2 Sương Mù)"
+        },
+        {
+          "ten_file": "cd_da_golem_lon_x4.png",
+          "kich_thuoc": [
+            200,
+            200
+          ],
+          "ghi_chu": "chân dung tĩnh dự phòng (P2 Đá)"
+        },
+        {
+          "ten_file": "cd_may_songdao_x4.png",
+          "kich_thuoc": [
+            200,
+            200
+          ],
+          "ghi_chu": "chân dung tĩnh dự phòng (P2 Mây)"
+        }
+      ]
+    }
+  },
+  "phong_cach_khoa": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground",
+  "mau_lang": {
+    "la": "Hoả: đỏ thẫm - cam than - đen (boss Lá phản bội: tối hơn màu làng)",
+    "cat": "Phong: vàng cát - nâu đất - lục nhạt",
+    "smu": "Thuỷ: xanh thép - lam sâu - bạc lạnh - xám sương",
+    "da": "Thổ: nâu đất - xám sa thạch - cam nham (mạch khoáng)",
+    "may": "Lôi: CHÀM / tím-xanh (B rõ hơn R, KHÔNG hồng tím vì trùng nền chroma) - trắng - vàng chớp"
+  },
+  "anh_tham_chieu": {
+    "THUOC-NHAN-VAT": {
+      "file": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\anh-tham-chieu\\THUOC-NHAN-VAT.png",
+      "mo_ta": "THƯỚC nhân vật (bắt buộc mọi lần gen): idle_0 cao mặt 96-99 px, tóc->cằm 266-271 px, cằm->bàn chân 375-395 px trong ô 724. Mọi khung của một nhân vật cùng cỡ đầu."
+    },
+    "player_idle_3f": {
+      "file": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\player_idle_3f_chroma.png",
+      "mo_ta": "Nhân vật gốc đang lắp (học viên Làng Lá, 3 khung đứng, ô 724, nền chroma). Đồng bộ phong cách + cỡ đầu; boss 'đổi đầu' phải chép y hệt thân/chân của ảnh này."
+    },
+    "master_iruka": {
+      "file": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\master_iruka_x4_chroma.png",
+      "mo_ta": "NPC người lớn cùng cỡ đầu người chơi — tham chiếu tỉ lệ 'người lớn = đầu bằng, thân chân dài hơn'."
+    },
+    "iruka_portrait": {
+      "file": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\iruka_portrait_chroma.png",
+      "mo_ta": "Mẫu ĐỊNH DẠNG chân dung 1 ô chroma (đầu + vai, 3/4 quay phải) mà máy đã nhồi được về 200x200."
+    },
+    "TOT-chitiet-nhanvat": {
+      "file": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-3-toan-bo\\anh-tham-chieu\\TOT-chitiet-nhanvat.png",
+      "mo_ta": "Mức chi tiết nhân vật cần đạt (vải có khối, đổ bóng, viền sạch)."
+    },
+    "TOT-boss-mau": {
+      "file": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-3-toan-bo\\anh-tham-chieu\\TOT-boss-mau.png",
+      "mo_ta": "Mẫu tốt về độ chi tiết boss (ảnh nhỏ 160x160 — chỉ lấy mức chi tiết, không lấy tư thế/cỡ)."
+    },
+    "XAU-boss-zabuza": {
+      "file": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-3-toan-bo\\anh-tham-chieu\\XAU-boss-zabuza.png",
+      "mo_ta": "PHẢN DIỆN: boss phẳng, chân que, vài màu — tuyệt đối tránh."
+    },
+    "XAU-npc": {
+      "file": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-3-toan-bo\\anh-tham-chieu\\XAU-npc.png",
+      "mo_ta": "PHẢN DIỆN: nhân vật vẽ nhỏ, phẳng, không khối."
+    }
+  },
+  "anh": [
+    {
+      "ten_file": "boss_la_ke_la_mat_idle_3f_chroma.png",
+      "nhom": "boss",
+      "lang": "la",
+      "kich_thuoc": [
+        2172,
+        724
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "noi_dung": "Kẻ Lạ Mặt (nhan-gia-mat-na, pha 1) — DẢI ĐỨNG 3 KHUNG, CHỈ DÙNG ĐẦU. Pha 1 của Nhân Gia Mặt Nạ (boss.yaml:114-119, outfit hiện [30,57,58] y hệt người chơi). Học viên đội lốt: thân/chân Y HỆT người chơi, chỉ đổi ĐẦU — mặt nạ sứ trắng trơn kiểu ANBU/noh che cả mặt, hai khe mắt đen hẹp, một vết nứt đỏ sẫm mảnh từ trán xuống má phải; tóc đen rối nhô trên và sau mặt nạ; băng trán vải xám trơn KHÔNG có ký hiệu Lá. Máy chỉ lấy 3 đầu từ 3 khung idle -> 1 part id đầu mới. Ô 724 y hệt người chơi.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "TOT-chitiet-nhanvat",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. HEAD SWAP ON THE REFERENCE PLAYER STRIP: reproduce the reference academy-student body EXACTLY as in player_idle_3f_chroma.png: olive-green flak vest with two chest pockets and a front zipper, dark navy long-sleeve shirt, dark fingerless gloves, orange waist sash with a trailing end, dark navy pants, orange shin wraps, dark navy open-toe sandals; the same three standing poses, the same 653 px total height, the same position inside each 724x724 cell, and change ONLY the head. NEW HEAD: a smooth white porcelain mask covering the whole face, blank like an ANBU / noh mask, with only two narrow black eye slits and one thin dark-red crack line running from the forehead down across the right cheek; short unruly black hair sticking out above and behind the mask; a plain dark-grey cloth headband WITHOUT any village symbol tied over the upper edge of the mask; no hood, no scarf, nothing hanging below the chin. The new head must have exactly the reference head size (face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px) and sit on the neck exactly where the reference head sits, because the game will cut only these three heads and mount them on the existing student body pieces. SPRITE STRIP: exactly 3 cells in one horizontal row, each cell 724x724 px, total image 2172x724 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — the same three standing idle frames as player_idle_3f_chroma.png: cell 1 relaxed guard stance, cell 2 subtle breathing shift, cell 3 slight weight shift onto the front foot; body, arms, sash and feet identical to the reference; nothing but the head may appear above the chin line. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Máy lấy 3 mảnh ĐẦU (slot 0/1/2) từ 3 khung; thân/chân dùng part 57/58 sẵn có; cần 1 part id đầu mới (≥ 2192, nới PHASE_ONE_ADDITIONS). Chiều cao: y hệt người chơi (653 px trong ô 724) — chỉ đổi đầu, thân/chân dùng lại part 57/58"
+    },
+    {
+      "ten_file": "boss_la_ke_la_mat_portrait_chroma.png",
+      "nhom": "boss",
+      "lang": "la",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung Kẻ Lạ Mặt cho khung hội thoại: đầu + vai, 3/4 quay phải, cùng thiết kế/màu với dải idle; máy nhồi về 200x200. Lắp phụ thuộc C7 (chưa kiểm client có vẽ avatar khi boss thoại qua gói 44).",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "iruka_portrait",
+        "player_idle_3f",
+        "XAU-npc"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, NO flat vector shapes, NO background scenery, NO drop shadow on ground. PORTRAIT: one single image 1254x1254 px, head and shoulders of the masked stranger: the blank white porcelain mask with two black eye slits and the thin dark-red crack, black unruly hair, plain dark-grey headband, the olive-green flak vest collar and dark navy shirt at the shoulders; 3/4 view facing RIGHT, same face, hair, headgear and colors as this character's sprite strip; subject centered and filling about 75% of the frame; the game will shrink it to a 200x200 dialogue avatar, so keep shapes bold and readable; uniform magenta background RGB(246,4,242), perfectly flat, no gradient. Same head size as reference idle frame and the same head design as this character's idle strip (this is a head-and-shoulders crop, so the feet-on-bottom-edge rule of the strips does not apply here); uniform magenta background RGB(246,4,242). Do not draw: background scenery, frame, border, text, glow, gradient, shadow, a second character, a head turned left, magenta / pink on the character.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Sprite id mới nối tiếp 27083+; tên tĩnh tương ứng (nếu đi đường cd_) ghi ở §5.1 / ten_moi_can_them_kich_thuoc."
+    },
+    {
+      "ten_file": "boss_la_mat_na_vo_idle_3f_chroma.png",
+      "nhom": "boss",
+      "lang": "la",
+      "kich_thuoc": [
+        2640,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Mặt Nạ Vỡ (nhan-gia-mat-na, pha 2) — 3 khung ĐỨNG (đầu lấy từ 3 khung này; thân idle 0 còn là thân lúc trúng đòn/chết cf 23/24). Pha 2 của Nhân Gia Mặt Nạ (boss.yaml:167-171, outfit hiện [2189,2190,2191] y hệt NPC Iruka) — chân thân sau khi mặt nạ vỡ: ninja Lá phản bội trưởng thành, tóc đen dài buộc cao có vệt bạc, MẢNH MẶT NẠ VỠ còn bám phía xa che trán + mắt xa, mắt gần (đỏ nâu, lạnh) và miệng lộ ra, sẹo cũ ngang mũi; băng trán Lá bị vạch ngang buộc ở BẮP TAY phải (không đội đầu để khỏi đè lên mặt nạ); áo giáp đen ôm viền đỏ thẫm cổ thấp, áo tay dài đen, găng hở ngón, khăn lưng đỏ rách, quần xám than quấn ống đen, sandal đen. Hệ Hoả: đen - đỏ thẫm - cam than. Đánh tay không + hoả thuật (lửa vẽ ĐẶC có viền, không glow). Đủ 5 dải -> 34 mảnh, 3 part id mới.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: an adult male rogue Leaf ninja, about 1.15x the height of the reference academy student (about 750 px tall inside an 880 px cell) with the SAME head size as the reference — longer torso and legs give him adult proportions; long dark hair tied high in a loose topknot with strands falling beside the face and one grey streak; the jagged upper-left fragment of a broken white porcelain mask still clings to the far side of his face, covering the forehead and the far eye and carrying a thin dark-red crack line, while the near eye (narrow, cold, red-brown iris) and the mouth are exposed; a thin old scar across the bridge of the nose; a scratched Leaf forehead protector (a horizontal gouge through the leaf symbol) tied around the RIGHT upper arm, not on the head; fitted black flak-style vest with dark-crimson trim and a low collar, black long-sleeve shirt, black fingerless gloves, tattered dark-red waist sash, charcoal-grey pants with black shin wraps, black open-toe ninja sandals; he fights bare-handed with fire chakra; palette black, charcoal, deep crimson and ember-orange accents only. SPRITE STRIP: exactly 3 cells in one horizontal row, each cell 880x880 px, total image 2640x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 750 px = 1.15x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — three standing idle frames: cell 1 relaxed guard stance, weight even, arms relaxed at the sides, fists loosely closed; cell 2 the same stance with a subtle breathing shift (chest and arms move 4-6 px); cell 3 the same stance with the weight shifted slightly onto the front foot. Head size, foot line and total height identical in all three cells. In these idle frames nothing but the head (hair, mask, headband) may appear above the chin line — no weapon or cape rising beside the head, because the game cuts its three heads from exactly these cells. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,15× người chơi = ~750 px trong ô 880 (cùng cỡ đầu; thân + chân dài hơn) ≈ 282 px x4 ≈ 70 px x1 ≈ 2,9 ô. Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_la_mat_na_vo_run_4f_chroma.png",
+      "nhom": "boss",
+      "lang": "la",
+      "kich_thuoc": [
+        3520,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 4,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Mặt Nạ Vỡ (nhan-gia-mat-na, pha 2) — 4 khung CHẠY (cf 3-6), nghiêng người ≤ 10°, không khom, chân luôn chạm đáy ô. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: an adult male rogue Leaf ninja, about 1.15x the height of the reference academy student (about 750 px tall inside an 880 px cell) with the SAME head size as the reference — longer torso and legs give him adult proportions; long dark hair tied high in a loose topknot with strands falling beside the face and one grey streak; the jagged upper-left fragment of a broken white porcelain mask still clings to the far side of his face, covering the forehead and the far eye and carrying a thin dark-red crack line, while the near eye (narrow, cold, red-brown iris) and the mouth are exposed; a thin old scar across the bridge of the nose; a scratched Leaf forehead protector (a horizontal gouge through the leaf symbol) tied around the RIGHT upper arm, not on the head; fitted black flak-style vest with dark-crimson trim and a low collar, black long-sleeve shirt, black fingerless gloves, tattered dark-red waist sash, charcoal-grey pants with black shin wraps, black open-toe ninja sandals; he fights bare-handed with fire chakra; palette black, charcoal, deep crimson and ember-orange accents only. SPRITE STRIP: exactly 4 cells in one horizontal row, each cell 880x880 px, total image 3520x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 750 px = 1.15x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — four-frame run cycle facing right: cell 1 contact (front foot forward, back foot lifting), cell 2 passing (legs crossing, body slightly forward), cell 3 contact mirrored (other foot forward), cell 4 passing mirrored. Torso leans forward at most 10 degrees, never crouched; the head stays the same size and at the same height in all four cells; at least one foot touches the bottom edge in every cell. Hands and weapon while running: arms relaxed at the sides, fists loosely closed, always kept below shoulder height. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,15× người chơi = ~750 px trong ô 880 (cùng cỡ đầu; thân + chân dài hơn) ≈ 282 px x4 ≈ 70 px x1 ≈ 2,9 ô. Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_la_mat_na_vo_melee_4f_chroma.png",
+      "nhom": "boss",
+      "lang": "la",
+      "kich_thuoc": [
+        3520,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 4,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Mặt Nạ Vỡ (nhan-gia-mat-na, pha 2) — 4 khung ĐÁNH CẬN CHIẾN ngang tầm thân (lấy đà - ra đòn - quét theo - thu về); tay/vũ khí KHÔNG vượt lên trên vai. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: an adult male rogue Leaf ninja, about 1.15x the height of the reference academy student (about 750 px tall inside an 880 px cell) with the SAME head size as the reference — longer torso and legs give him adult proportions; long dark hair tied high in a loose topknot with strands falling beside the face and one grey streak; the jagged upper-left fragment of a broken white porcelain mask still clings to the far side of his face, covering the forehead and the far eye and carrying a thin dark-red crack line, while the near eye (narrow, cold, red-brown iris) and the mouth are exposed; a thin old scar across the bridge of the nose; a scratched Leaf forehead protector (a horizontal gouge through the leaf symbol) tied around the RIGHT upper arm, not on the head; fitted black flak-style vest with dark-crimson trim and a low collar, black long-sleeve shirt, black fingerless gloves, tattered dark-red waist sash, charcoal-grey pants with black shin wraps, black open-toe ninja sandals; he fights bare-handed with fire chakra; palette black, charcoal, deep crimson and ember-orange accents only. SPRITE STRIP: exactly 4 cells in one horizontal row, each cell 880x880 px, total image 3520x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 750 px = 1.15x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — four-frame melee attack facing right, everything at torso height: cell 1 wind-up (a bare-fisted strike pulled back at the waist), cell 2 the strike fully extended forward to the right, cell 3 follow-through sweep, cell 4 recovery back to guard. Arms and weapon stay BELOW the shoulder line in every cell — nothing raised above the head, because the game reuses the standing head for these frames and discards anything drawn above the chin. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,15× người chơi = ~750 px trong ô 880 (cùng cỡ đầu; thân + chân dài hơn) ≈ 282 px x4 ≈ 70 px x1 ≈ 2,9 ô. Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_la_mat_na_vo_cast_3f_chroma.png",
+      "nhom": "boss",
+      "lang": "la",
+      "kich_thuoc": [
+        2640,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Mặt Nạ Vỡ (nhan-gia-mat-na, pha 2) — 3 khung KẾT ẤN / RA CHIÊU (ấn tay ngang ngực - đẩy tay ra có khối chakra đặc - thu về); không gì trên đầu. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: an adult male rogue Leaf ninja, about 1.15x the height of the reference academy student (about 750 px tall inside an 880 px cell) with the SAME head size as the reference — longer torso and legs give him adult proportions; long dark hair tied high in a loose topknot with strands falling beside the face and one grey streak; the jagged upper-left fragment of a broken white porcelain mask still clings to the far side of his face, covering the forehead and the far eye and carrying a thin dark-red crack line, while the near eye (narrow, cold, red-brown iris) and the mouth are exposed; a thin old scar across the bridge of the nose; a scratched Leaf forehead protector (a horizontal gouge through the leaf symbol) tied around the RIGHT upper arm, not on the head; fitted black flak-style vest with dark-crimson trim and a low collar, black long-sleeve shirt, black fingerless gloves, tattered dark-red waist sash, charcoal-grey pants with black shin wraps, black open-toe ninja sandals; he fights bare-handed with fire chakra; palette black, charcoal, deep crimson and ember-orange accents only. SPRITE STRIP: exactly 3 cells in one horizontal row, each cell 880x880 px, total image 2640x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 750 px = 1.15x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — three-frame fire jutsu cast facing right: cell 1 both hands forming a hand seal at chest height; cell 2 hands pushed forward with a compact fire chakra shape at chest height, painted as compact orange-red flame shapes with dark outlines (fully opaque, dark outlined, no transparency, no glow); cell 3 release stance with the effect breaking apart. Nothing above the head; the effect must stay inside the cell and never touch the cell edges. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,15× người chơi = ~750 px trong ô 880 (cùng cỡ đầu; thân + chân dài hơn) ≈ 282 px x4 ≈ 70 px x1 ≈ 2,9 ô. Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_la_mat_na_vo_hit_death_getup_3f_chroma.png",
+      "nhom": "boss",
+      "lang": "la",
+      "kich_thuoc": [
+        2640,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Mặt Nạ Vỡ (nhan-gia-mat-na, pha 2) — 3 khung TRÚNG ĐÒN, cả 3 ĐỨNG: ngả nhẹ - đỡ/loạng choạng - khuỵu một gối; KHÔNG vẽ nằm. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: an adult male rogue Leaf ninja, about 1.15x the height of the reference academy student (about 750 px tall inside an 880 px cell) with the SAME head size as the reference — longer torso and legs give him adult proportions; long dark hair tied high in a loose topknot with strands falling beside the face and one grey streak; the jagged upper-left fragment of a broken white porcelain mask still clings to the far side of his face, covering the forehead and the far eye and carrying a thin dark-red crack line, while the near eye (narrow, cold, red-brown iris) and the mouth are exposed; a thin old scar across the bridge of the nose; a scratched Leaf forehead protector (a horizontal gouge through the leaf symbol) tied around the RIGHT upper arm, not on the head; fitted black flak-style vest with dark-crimson trim and a low collar, black long-sleeve shirt, black fingerless gloves, tattered dark-red waist sash, charcoal-grey pants with black shin wraps, black open-toe ninja sandals; he fights bare-handed with fire chakra; palette black, charcoal, deep crimson and ember-orange accents only. SPRITE STRIP: exactly 3 cells in one horizontal row, each cell 880x880 px, total image 2640x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 750 px = 1.15x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — three-frame hit reaction, ALL THREE STANDING, never lying down: cell 1 struck — torso recoils slightly backward (to the left), one foot sliding back; cell 2 guarding / staggering, arms raised only to chest height; cell 3 dropping to one knee with the other knee up, head still upright and the same size, knee and foot touching the bottom edge. No lying pose, no death pose on the ground — the game never draws a lying character (death is a standing frame plus a light ring drawn by the client). Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,15× người chơi = ~750 px trong ô 880 (cùng cỡ đầu; thân + chân dài hơn) ≈ 282 px x4 ≈ 70 px x1 ≈ 2,9 ô. Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_la_mat_na_vo_portrait_chroma.png",
+      "nhom": "boss",
+      "lang": "la",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung Mặt Nạ Vỡ cho khung hội thoại: đầu + vai, 3/4 quay phải, cùng thiết kế/màu với dải idle; máy nhồi về 200x200. Lắp phụ thuộc C7 (chưa kiểm client có vẽ avatar khi boss thoại qua gói 44).",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "iruka_portrait",
+        "player_idle_3f",
+        "XAU-npc"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, NO flat vector shapes, NO background scenery, NO drop shadow on ground. PORTRAIT: one single image 1254x1254 px, head and shoulders of the unmasked rogue ninja: long dark topknot hair with a grey streak, the jagged white mask fragment covering the forehead and far eye with its thin dark-red crack, the exposed near eye with a red-brown iris, the scar across the nose, black vest with dark-crimson trim at the shoulders; 3/4 view facing RIGHT, same face, hair, headgear and colors as this character's sprite strip; subject centered and filling about 75% of the frame; the game will shrink it to a 200x200 dialogue avatar, so keep shapes bold and readable; uniform magenta background RGB(246,4,242), perfectly flat, no gradient. Same head size as reference idle frame and the same head design as this character's idle strip (this is a head-and-shoulders crop, so the feet-on-bottom-edge rule of the strips does not apply here); uniform magenta background RGB(246,4,242). Do not draw: background scenery, frame, border, text, glow, gradient, shadow, a second character, a head turned left, magenta / pink on the character.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Sprite id mới nối tiếp 27083+; tên tĩnh tương ứng (nếu đi đường cd_) ghi ở §5.1 / ten_moi_can_them_kich_thuoc."
+    },
+    {
+      "ten_file": "boss_smu_hoc_vien_dao_tau_idle_3f_chroma.png",
+      "nhom": "boss",
+      "lang": "smu",
+      "kich_thuoc": [
+        2172,
+        724
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        724,
+        724
+      ],
+      "noi_dung": "Học Viên Đào Tẩu (hoc-vien-dao-tau, 1 pha) — DẢI ĐỨNG 3 KHUNG, CHỈ DÙNG ĐẦU. Boss lẻ hệ Thuỷ đứng ở map 1 (boss.yaml:212-225, outfit hiện [30,57,58]). Hắn 'bỏ trốn giữa kỳ thi, chưa kịp đổi đồ' -> thân/chân Y HỆT người chơi (giữ đúng ý boss.yaml), chỉ đổi ĐẦU: băng trán Sương Mù (tấm kim loại khắc 4 vạch sóng ngắn) đeo lệch trên dải vải xanh xám, nửa mặt dưới (mũi->cằm) quấn băng trắng ngà kiểu Kiri, tóc xanh xám nhạt dựng ngắn, mắt nhạt sắc lạnh có quầng thâm. Máy chỉ lấy 3 đầu -> 1 part id đầu mới. Ô 724 y hệt người chơi.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "TOT-chitiet-nhanvat",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. HEAD SWAP ON THE REFERENCE PLAYER STRIP: reproduce the reference academy-student body EXACTLY as in player_idle_3f_chroma.png: olive-green flak vest with two chest pockets and a front zipper, dark navy long-sleeve shirt, dark fingerless gloves, orange waist sash with a trailing end, dark navy pants, orange shin wraps, dark navy open-toe sandals; the same three standing poses, the same 653 px total height, the same position inside each 724x724 cell, and change ONLY the head. NEW HEAD: a Hidden Mist (Kiri) forehead protector — a metal plate engraved with four short wavy horizontal lines — worn slightly askew on a grey-blue cloth band; the lower half of the face (nose to chin) wrapped in off-white bandage strips in Mist style; short pale blue-grey spiky hair; tired, sharp pale eyes with dark shadows under them; nothing hanging below the chin. The new head must have exactly the reference head size (face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px) and sit on the neck exactly where the reference head sits, because the game will cut only these three heads and mount them on the existing student body pieces. SPRITE STRIP: exactly 3 cells in one horizontal row, each cell 724x724 px, total image 2172x724 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — the same three standing idle frames as player_idle_3f_chroma.png: cell 1 relaxed guard stance, cell 2 subtle breathing shift, cell 3 slight weight shift onto the front foot; body, arms, sash and feet identical to the reference; nothing but the head may appear above the chin line. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Máy lấy 3 mảnh ĐẦU (slot 0/1/2) từ 3 khung; thân/chân dùng part 57/58 sẵn có; cần 1 part id đầu mới (≥ 2192, nới PHASE_ONE_ADDITIONS). Chiều cao: y hệt người chơi (653 px trong ô 724) — chỉ đổi đầu, thân/chân dùng lại part 57/58"
+    },
+    {
+      "ten_file": "boss_smu_hoc_vien_dao_tau_portrait_chroma.png",
+      "nhom": "boss",
+      "lang": "smu",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung Học Viên Đào Tẩu cho khung hội thoại: đầu + vai, 3/4 quay phải, cùng thiết kế/màu với dải idle; máy nhồi về 200x200. Lắp phụ thuộc C7 (chưa kiểm client có vẽ avatar khi boss thoại qua gói 44).",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "iruka_portrait",
+        "player_idle_3f",
+        "XAU-npc"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, NO flat vector shapes, NO background scenery, NO drop shadow on ground. PORTRAIT: one single image 1254x1254 px, head and shoulders of the runaway Mist student: the askew Mist forehead protector with four wavy lines, off-white bandages over nose and mouth, pale blue-grey spiky hair, tired sharp eyes with dark shadows, the olive-green flak vest collar and dark navy shirt at the shoulders; 3/4 view facing RIGHT, same face, hair, headgear and colors as this character's sprite strip; subject centered and filling about 75% of the frame; the game will shrink it to a 200x200 dialogue avatar, so keep shapes bold and readable; uniform magenta background RGB(246,4,242), perfectly flat, no gradient. Same head size as reference idle frame and the same head design as this character's idle strip (this is a head-and-shoulders crop, so the feet-on-bottom-edge rule of the strips does not apply here); uniform magenta background RGB(246,4,242). Do not draw: background scenery, frame, border, text, glow, gradient, shadow, a second character, a head turned left, magenta / pink on the character.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Sprite id mới nối tiếp 27083+; tên tĩnh tương ứng (nếu đi đường cd_) ghi ở §5.1 / ten_moi_can_them_kich_thuoc."
+    },
+    {
+      "ten_file": "boss_cat_kiemphong_idle_3f_chroma.png",
+      "nhom": "boss",
+      "lang": "cat",
+      "kich_thuoc": [
+        2640,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Kiếm Khách Gió (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 3 khung ĐỨNG (đầu lấy từ 3 khung này; thân idle 0 còn là thân lúc trúng đòn/chết cf 23/24). ĐỀ XUẤT boss người Làng Cát (dot-3-toan-bo/lang-cat/boss.md `boss_cat_kiemphong`): kiếm khách hệ Phong trưởng thành, khăn trùm đầu vàng cát kiểu turban thấp gắn băng trán đồng hồ cát, mạng che mũi miệng, mắt kẻ viền sắc, da sạm nắng; áo quấn nâu đất không tay có dây da chéo, khăn lưng vàng cát, quấn cẳng tay be, quần nâu sẫm rộng bó vào quấn ống màu cát, sandal nâu; áo choàng vai NGẮN tới eo (không dài hơn); đại đao cong lưỡi thép nhạt cầm NGANG hông, mũi hướng trước, luôn dưới vai. Vàng cát - nâu - lục nhạt. Không bụi cát dưới chân.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: an adult Sand-village (Suna) swordsman, about 1.15x the height of the reference academy student (about 750 px tall inside an 880 px cell) with the SAME head size as the reference, adult proportions; a sand-tan cloth headwrap covering the hair like a low turban with a Suna forehead protector (hourglass symbol) fixed on it, a loose tan face veil covering nose and mouth, sharp dark-lined eyes, sun-darkened skin; sleeveless earth-brown wrap tunic crossed with leather straps, sand-yellow waist sash, beige forearm wraps, loose dark-brown trousers tucked into sand-colored shin wraps, brown open-toe sandals, a short shoulder cape that ends at the waist and never lower; he wields one large curved scimitar with a pale-steel blade held horizontally at hip height, blade pointing forward-right, tip always below shoulder height; palette sand yellow, earth brown, dusty beige and pale sage-green accents. SPRITE STRIP: exactly 3 cells in one horizontal row, each cell 880x880 px, total image 2640x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 750 px = 1.15x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — three standing idle frames: cell 1 relaxed guard stance, weight even, the curved scimitar held low at the hip, blade forward; cell 2 the same stance with a subtle breathing shift (chest and arms move 4-6 px); cell 3 the same stance with the weight shifted slightly onto the front foot. Head size, foot line and total height identical in all three cells. In these idle frames nothing but the head (hair, mask, headband) may appear above the chin line — no weapon or cape rising beside the head, because the game cuts its three heads from exactly these cells. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,15× người chơi = ~750 px trong ô 880 ≈ 2,9 ô. Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_cat_kiemphong_run_4f_chroma.png",
+      "nhom": "boss",
+      "lang": "cat",
+      "kich_thuoc": [
+        3520,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 4,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Kiếm Khách Gió (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 4 khung CHẠY (cf 3-6), nghiêng người ≤ 10°, không khom, chân luôn chạm đáy ô. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: an adult Sand-village (Suna) swordsman, about 1.15x the height of the reference academy student (about 750 px tall inside an 880 px cell) with the SAME head size as the reference, adult proportions; a sand-tan cloth headwrap covering the hair like a low turban with a Suna forehead protector (hourglass symbol) fixed on it, a loose tan face veil covering nose and mouth, sharp dark-lined eyes, sun-darkened skin; sleeveless earth-brown wrap tunic crossed with leather straps, sand-yellow waist sash, beige forearm wraps, loose dark-brown trousers tucked into sand-colored shin wraps, brown open-toe sandals, a short shoulder cape that ends at the waist and never lower; he wields one large curved scimitar with a pale-steel blade held horizontally at hip height, blade pointing forward-right, tip always below shoulder height; palette sand yellow, earth brown, dusty beige and pale sage-green accents. SPRITE STRIP: exactly 4 cells in one horizontal row, each cell 880x880 px, total image 3520x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 750 px = 1.15x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — four-frame run cycle facing right: cell 1 contact (front foot forward, back foot lifting), cell 2 passing (legs crossing, body slightly forward), cell 3 contact mirrored (other foot forward), cell 4 passing mirrored. Torso leans forward at most 10 degrees, never crouched; the head stays the same size and at the same height in all four cells; at least one foot touches the bottom edge in every cell. Hands and weapon while running: the curved scimitar held low at the hip, blade forward, always kept below shoulder height. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,15× người chơi = ~750 px trong ô 880 ≈ 2,9 ô. Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_cat_kiemphong_melee_4f_chroma.png",
+      "nhom": "boss",
+      "lang": "cat",
+      "kich_thuoc": [
+        3520,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 4,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Kiếm Khách Gió (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 4 khung ĐÁNH CẬN CHIẾN ngang tầm thân (lấy đà - ra đòn - quét theo - thu về); tay/vũ khí KHÔNG vượt lên trên vai. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: an adult Sand-village (Suna) swordsman, about 1.15x the height of the reference academy student (about 750 px tall inside an 880 px cell) with the SAME head size as the reference, adult proportions; a sand-tan cloth headwrap covering the hair like a low turban with a Suna forehead protector (hourglass symbol) fixed on it, a loose tan face veil covering nose and mouth, sharp dark-lined eyes, sun-darkened skin; sleeveless earth-brown wrap tunic crossed with leather straps, sand-yellow waist sash, beige forearm wraps, loose dark-brown trousers tucked into sand-colored shin wraps, brown open-toe sandals, a short shoulder cape that ends at the waist and never lower; he wields one large curved scimitar with a pale-steel blade held horizontally at hip height, blade pointing forward-right, tip always below shoulder height; palette sand yellow, earth brown, dusty beige and pale sage-green accents. SPRITE STRIP: exactly 4 cells in one horizontal row, each cell 880x880 px, total image 3520x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 750 px = 1.15x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — four-frame melee attack facing right, everything at torso height: cell 1 wind-up (a horizontal sweeping cut with the curved scimitar pulled back at the waist), cell 2 the strike fully extended forward to the right, cell 3 follow-through sweep, cell 4 recovery back to guard. Arms and weapon stay BELOW the shoulder line in every cell — nothing raised above the head, because the game reuses the standing head for these frames and discards anything drawn above the chin. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,15× người chơi = ~750 px trong ô 880 ≈ 2,9 ô. Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_cat_kiemphong_cast_3f_chroma.png",
+      "nhom": "boss",
+      "lang": "cat",
+      "kich_thuoc": [
+        2640,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Kiếm Khách Gió (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 3 khung KẾT ẤN / RA CHIÊU (ấn tay ngang ngực - đẩy tay ra có khối chakra đặc - thu về); không gì trên đầu. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: an adult Sand-village (Suna) swordsman, about 1.15x the height of the reference academy student (about 750 px tall inside an 880 px cell) with the SAME head size as the reference, adult proportions; a sand-tan cloth headwrap covering the hair like a low turban with a Suna forehead protector (hourglass symbol) fixed on it, a loose tan face veil covering nose and mouth, sharp dark-lined eyes, sun-darkened skin; sleeveless earth-brown wrap tunic crossed with leather straps, sand-yellow waist sash, beige forearm wraps, loose dark-brown trousers tucked into sand-colored shin wraps, brown open-toe sandals, a short shoulder cape that ends at the waist and never lower; he wields one large curved scimitar with a pale-steel blade held horizontally at hip height, blade pointing forward-right, tip always below shoulder height; palette sand yellow, earth brown, dusty beige and pale sage-green accents. SPRITE STRIP: exactly 3 cells in one horizontal row, each cell 880x880 px, total image 2640x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 750 px = 1.15x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — three-frame wind jutsu cast facing right: cell 1 both hands forming a hand seal at chest height; cell 2 hands pushed forward with a compact wind chakra shape at chest height, painted as pale sage-green crescent wind blades with dark outlines (fully opaque, dark outlined, no transparency, no glow); cell 3 release stance with the effect breaking apart. Nothing above the head; the effect must stay inside the cell and never touch the cell edges. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,15× người chơi = ~750 px trong ô 880 ≈ 2,9 ô. Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_cat_kiemphong_hit_death_getup_3f_chroma.png",
+      "nhom": "boss",
+      "lang": "cat",
+      "kich_thuoc": [
+        2640,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Kiếm Khách Gió (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 3 khung TRÚNG ĐÒN, cả 3 ĐỨNG: ngả nhẹ - đỡ/loạng choạng - khuỵu một gối; KHÔNG vẽ nằm. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: an adult Sand-village (Suna) swordsman, about 1.15x the height of the reference academy student (about 750 px tall inside an 880 px cell) with the SAME head size as the reference, adult proportions; a sand-tan cloth headwrap covering the hair like a low turban with a Suna forehead protector (hourglass symbol) fixed on it, a loose tan face veil covering nose and mouth, sharp dark-lined eyes, sun-darkened skin; sleeveless earth-brown wrap tunic crossed with leather straps, sand-yellow waist sash, beige forearm wraps, loose dark-brown trousers tucked into sand-colored shin wraps, brown open-toe sandals, a short shoulder cape that ends at the waist and never lower; he wields one large curved scimitar with a pale-steel blade held horizontally at hip height, blade pointing forward-right, tip always below shoulder height; palette sand yellow, earth brown, dusty beige and pale sage-green accents. SPRITE STRIP: exactly 3 cells in one horizontal row, each cell 880x880 px, total image 2640x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 750 px = 1.15x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — three-frame hit reaction, ALL THREE STANDING, never lying down: cell 1 struck — torso recoils slightly backward (to the left), one foot sliding back; cell 2 guarding / staggering, arms raised only to chest height; cell 3 dropping to one knee with the other knee up, head still upright and the same size, knee and foot touching the bottom edge. No lying pose, no death pose on the ground — the game never draws a lying character (death is a standing frame plus a light ring drawn by the client). Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,15× người chơi = ~750 px trong ô 880 ≈ 2,9 ô. Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_cat_kiemphong_portrait_chroma.png",
+      "nhom": "boss",
+      "lang": "cat",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung Kiếm Khách Gió cho khung hội thoại: đầu + vai, 3/4 quay phải, cùng thiết kế/màu với dải idle; máy nhồi về 200x200. Lắp phụ thuộc C7 (chưa kiểm client có vẽ avatar khi boss thoại qua gói 44).",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "iruka_portrait",
+        "player_idle_3f",
+        "XAU-npc"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, NO flat vector shapes, NO background scenery, NO drop shadow on ground. PORTRAIT: one single image 1254x1254 px, head and shoulders of the Sand swordsman: sand-tan turban-like headwrap with the hourglass forehead protector, tan face veil over nose and mouth, sharp dark-lined eyes, sun-darkened skin, leather straps and the short cape at the shoulders; 3/4 view facing RIGHT, same face, hair, headgear and colors as this character's sprite strip; subject centered and filling about 75% of the frame; the game will shrink it to a 200x200 dialogue avatar, so keep shapes bold and readable; uniform magenta background RGB(246,4,242), perfectly flat, no gradient. Same head size as reference idle frame and the same head design as this character's idle strip (this is a head-and-shoulders crop, so the feet-on-bottom-edge rule of the strips does not apply here); uniform magenta background RGB(246,4,242). Do not draw: background scenery, frame, border, text, glow, gradient, shadow, a second character, a head turned left, magenta / pink on the character.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Sprite id mới nối tiếp 27083+; tên tĩnh tương ứng (nếu đi đường cd_) ghi ở §5.1 / ten_moi_can_them_kich_thuoc."
+    },
+    {
+      "ten_file": "boss_smu_thatdao_idle_3f_chroma.png",
+      "nhom": "boss",
+      "lang": "smu",
+      "kich_thuoc": [
+        2640,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Kiếm Sĩ Thất Đao (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 3 khung ĐỨNG (đầu lấy từ 3 khung này; thân idle 0 còn là thân lúc trúng đòn/chết cf 23/24). ĐỀ XUẤT boss người Làng Sương Mù (dot-3 `boss_smu_thatdao`): kiếm sĩ Thất Đao hệ Thuỷ, to con ≈1,2× người chơi, tóc đen dựng ngắn, băng trán Kiri buộc lệch bên đầu, nửa mặt dưới quấn băng xám trắng, mắt nhạt lạnh; áo giáp xanh thép không tay có MỘT tấm vai thép đinh tán bên trái, băng tay sọc xanh xám từ khuỷu tới cổ tay, quần rằn ri xanh xám, băng ống trắng ngà, sandal xanh đậm; đại kiếm dao phay (lưỡi chữ nhật to có khuyết tròn gần mũi) cầm NGANG hông hai tay, lưỡi hướng trước — KHÔNG vác sau lưng (lưỡi nhô lên cạnh đầu sẽ dính vào mảnh đầu). Xám thép - lam - bạc.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: a hulking adult Hidden-Mist swordsman, about 1.20x the height of the reference academy student (about 780 px tall inside an 880 px cell) with the SAME head size as the reference, broad shoulders and long legs; short dark spiky hair, a Mist forehead protector (four wavy lines) tied sideways on the head, the lower face wrapped in grey-white bandages, pale cold eyes; sleeveless steel-blue armored vest with one riveted steel shoulder plate on the left shoulder, blue-grey striped arm warmers from elbow to wrist, mottled blue-grey camouflage pants, off-white shin bandages, dark-blue open-toe sandals; he carries a massive cleaver-style great sword (broad rectangular blade with a round notch near the tip) held horizontally at hip height with both hands, blade forward, never carried on the back and never raised above the shoulders; palette steel blue, deep sea blue, cold silver and misty grey. SPRITE STRIP: exactly 3 cells in one horizontal row, each cell 880x880 px, total image 2640x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 780 px = 1.20x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — three standing idle frames: cell 1 relaxed guard stance, weight even, the huge cleaver sword held low and horizontal at the hip with both hands, blade forward; cell 2 the same stance with a subtle breathing shift (chest and arms move 4-6 px); cell 3 the same stance with the weight shifted slightly onto the front foot. Head size, foot line and total height identical in all three cells. In these idle frames nothing but the head (hair, mask, headband) may appear above the chin line — no weapon or cape rising beside the head, because the game cuts its three heads from exactly these cells. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,20× người chơi = ~780 px trong ô 880 ≈ 3,1 ô (kịch trần đợt này). Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_smu_thatdao_run_4f_chroma.png",
+      "nhom": "boss",
+      "lang": "smu",
+      "kich_thuoc": [
+        3520,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 4,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Kiếm Sĩ Thất Đao (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 4 khung CHẠY (cf 3-6), nghiêng người ≤ 10°, không khom, chân luôn chạm đáy ô. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: a hulking adult Hidden-Mist swordsman, about 1.20x the height of the reference academy student (about 780 px tall inside an 880 px cell) with the SAME head size as the reference, broad shoulders and long legs; short dark spiky hair, a Mist forehead protector (four wavy lines) tied sideways on the head, the lower face wrapped in grey-white bandages, pale cold eyes; sleeveless steel-blue armored vest with one riveted steel shoulder plate on the left shoulder, blue-grey striped arm warmers from elbow to wrist, mottled blue-grey camouflage pants, off-white shin bandages, dark-blue open-toe sandals; he carries a massive cleaver-style great sword (broad rectangular blade with a round notch near the tip) held horizontally at hip height with both hands, blade forward, never carried on the back and never raised above the shoulders; palette steel blue, deep sea blue, cold silver and misty grey. SPRITE STRIP: exactly 4 cells in one horizontal row, each cell 880x880 px, total image 3520x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 780 px = 1.20x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — four-frame run cycle facing right: cell 1 contact (front foot forward, back foot lifting), cell 2 passing (legs crossing, body slightly forward), cell 3 contact mirrored (other foot forward), cell 4 passing mirrored. Torso leans forward at most 10 degrees, never crouched; the head stays the same size and at the same height in all four cells; at least one foot touches the bottom edge in every cell. Hands and weapon while running: the huge cleaver sword held low and horizontal at the hip with both hands, blade forward, always kept below shoulder height. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,20× người chơi = ~780 px trong ô 880 ≈ 3,1 ô (kịch trần đợt này). Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_smu_thatdao_melee_4f_chroma.png",
+      "nhom": "boss",
+      "lang": "smu",
+      "kich_thuoc": [
+        3520,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 4,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Kiếm Sĩ Thất Đao (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 4 khung ĐÁNH CẬN CHIẾN ngang tầm thân (lấy đà - ra đòn - quét theo - thu về); tay/vũ khí KHÔNG vượt lên trên vai. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: a hulking adult Hidden-Mist swordsman, about 1.20x the height of the reference academy student (about 780 px tall inside an 880 px cell) with the SAME head size as the reference, broad shoulders and long legs; short dark spiky hair, a Mist forehead protector (four wavy lines) tied sideways on the head, the lower face wrapped in grey-white bandages, pale cold eyes; sleeveless steel-blue armored vest with one riveted steel shoulder plate on the left shoulder, blue-grey striped arm warmers from elbow to wrist, mottled blue-grey camouflage pants, off-white shin bandages, dark-blue open-toe sandals; he carries a massive cleaver-style great sword (broad rectangular blade with a round notch near the tip) held horizontally at hip height with both hands, blade forward, never carried on the back and never raised above the shoulders; palette steel blue, deep sea blue, cold silver and misty grey. SPRITE STRIP: exactly 4 cells in one horizontal row, each cell 880x880 px, total image 3520x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 780 px = 1.20x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — four-frame melee attack facing right, everything at torso height: cell 1 wind-up (a heavy horizontal chop with the cleaver sword pulled back at the waist), cell 2 the strike fully extended forward to the right, cell 3 follow-through sweep, cell 4 recovery back to guard. Arms and weapon stay BELOW the shoulder line in every cell — nothing raised above the head, because the game reuses the standing head for these frames and discards anything drawn above the chin. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,20× người chơi = ~780 px trong ô 880 ≈ 3,1 ô (kịch trần đợt này). Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_smu_thatdao_cast_3f_chroma.png",
+      "nhom": "boss",
+      "lang": "smu",
+      "kich_thuoc": [
+        2640,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Kiếm Sĩ Thất Đao (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 3 khung KẾT ẤN / RA CHIÊU (ấn tay ngang ngực - đẩy tay ra có khối chakra đặc - thu về); không gì trên đầu. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: a hulking adult Hidden-Mist swordsman, about 1.20x the height of the reference academy student (about 780 px tall inside an 880 px cell) with the SAME head size as the reference, broad shoulders and long legs; short dark spiky hair, a Mist forehead protector (four wavy lines) tied sideways on the head, the lower face wrapped in grey-white bandages, pale cold eyes; sleeveless steel-blue armored vest with one riveted steel shoulder plate on the left shoulder, blue-grey striped arm warmers from elbow to wrist, mottled blue-grey camouflage pants, off-white shin bandages, dark-blue open-toe sandals; he carries a massive cleaver-style great sword (broad rectangular blade with a round notch near the tip) held horizontally at hip height with both hands, blade forward, never carried on the back and never raised above the shoulders; palette steel blue, deep sea blue, cold silver and misty grey. SPRITE STRIP: exactly 3 cells in one horizontal row, each cell 880x880 px, total image 2640x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 780 px = 1.20x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — three-frame water jutsu cast facing right: cell 1 both hands forming a hand seal at chest height; cell 2 hands pushed forward with a compact water chakra shape at chest height, painted as deep-blue water ribbons with white foam edges, solid painted (fully opaque, dark outlined, no transparency, no glow); cell 3 release stance with the effect breaking apart. Nothing above the head; the effect must stay inside the cell and never touch the cell edges. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,20× người chơi = ~780 px trong ô 880 ≈ 3,1 ô (kịch trần đợt này). Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_smu_thatdao_hit_death_getup_3f_chroma.png",
+      "nhom": "boss",
+      "lang": "smu",
+      "kich_thuoc": [
+        2640,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Kiếm Sĩ Thất Đao (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 3 khung TRÚNG ĐÒN, cả 3 ĐỨNG: ngả nhẹ - đỡ/loạng choạng - khuỵu một gối; KHÔNG vẽ nằm. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: a hulking adult Hidden-Mist swordsman, about 1.20x the height of the reference academy student (about 780 px tall inside an 880 px cell) with the SAME head size as the reference, broad shoulders and long legs; short dark spiky hair, a Mist forehead protector (four wavy lines) tied sideways on the head, the lower face wrapped in grey-white bandages, pale cold eyes; sleeveless steel-blue armored vest with one riveted steel shoulder plate on the left shoulder, blue-grey striped arm warmers from elbow to wrist, mottled blue-grey camouflage pants, off-white shin bandages, dark-blue open-toe sandals; he carries a massive cleaver-style great sword (broad rectangular blade with a round notch near the tip) held horizontally at hip height with both hands, blade forward, never carried on the back and never raised above the shoulders; palette steel blue, deep sea blue, cold silver and misty grey. SPRITE STRIP: exactly 3 cells in one horizontal row, each cell 880x880 px, total image 2640x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 780 px = 1.20x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — three-frame hit reaction, ALL THREE STANDING, never lying down: cell 1 struck — torso recoils slightly backward (to the left), one foot sliding back; cell 2 guarding / staggering, arms raised only to chest height; cell 3 dropping to one knee with the other knee up, head still upright and the same size, knee and foot touching the bottom edge. No lying pose, no death pose on the ground — the game never draws a lying character (death is a standing frame plus a light ring drawn by the client). Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,20× người chơi = ~780 px trong ô 880 ≈ 3,1 ô (kịch trần đợt này). Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_smu_thatdao_portrait_chroma.png",
+      "nhom": "boss",
+      "lang": "smu",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung Kiếm Sĩ Thất Đao cho khung hội thoại: đầu + vai, 3/4 quay phải, cùng thiết kế/màu với dải idle; máy nhồi về 200x200. Lắp phụ thuộc C7 (chưa kiểm client có vẽ avatar khi boss thoại qua gói 44).",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "iruka_portrait",
+        "player_idle_3f",
+        "XAU-npc"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, NO flat vector shapes, NO background scenery, NO drop shadow on ground. PORTRAIT: one single image 1254x1254 px, head and shoulders of the Mist swordsman: short dark spiky hair, the Mist forehead protector tied sideways, grey-white bandages over the lower face, pale cold eyes, the steel shoulder plate and steel-blue vest at the shoulders; 3/4 view facing RIGHT, same face, hair, headgear and colors as this character's sprite strip; subject centered and filling about 75% of the frame; the game will shrink it to a 200x200 dialogue avatar, so keep shapes bold and readable; uniform magenta background RGB(246,4,242), perfectly flat, no gradient. Same head size as reference idle frame and the same head design as this character's idle strip (this is a head-and-shoulders crop, so the feet-on-bottom-edge rule of the strips does not apply here); uniform magenta background RGB(246,4,242). Do not draw: background scenery, frame, border, text, glow, gradient, shadow, a second character, a head turned left, magenta / pink on the character.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Sprite id mới nối tiếp 27083+; tên tĩnh tương ứng (nếu đi đường cd_) ghi ở §5.1 / ten_moi_can_them_kich_thuoc."
+    },
+    {
+      "ten_file": "boss_da_golem_lon_idle_3f_chroma.png",
+      "nhom": "boss",
+      "lang": "da",
+      "kich_thuoc": [
+        2640,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Golem Đá (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 3 khung ĐỨNG (đầu lấy từ 3 khung này; thân idle 0 còn là thân lúc trúng đòn/chết cf 23/24). ĐỀ XUẤT boss Làng Đá dạng NGƯỜI ĐÁ (dot-3 `boss_da_golem_lon`) — chọn vì golem hình người vẽ được bằng bộ xương 3 mảnh, còn Thổ Ảnh 'bay lơ lửng' vi phạm luật chân chạm đất và vĩ thú cần code khác. Thân khối sa thạch nâu-xám nứt nẻ, mạch khoáng cam hổ phách trong khe nứt vẽ ĐẶC (không glow lan), rêu trên vai, nắm tay quá khổ, cổ ngắn dày, đầu tảng đá vuông hai hốc mắt sáng hổ phách + khe miệng răng cưa, bàn chân phiến đá bẹt. Khối ĐẦU vẫn phải đúng cỡ thước (266-271 px từ đỉnh tới hàm). Nâu đất - xám sa thạch - cam nham - rêu.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: a humanoid stone golem, about 1.20x the height of the reference academy student (about 780 px tall inside an 880 px cell); its head block must still match the reference head size (head block about 266-271 px from top to jaw line); the body is built from blocky cracked sandstone in warm brown and grey with thin amber-orange mineral veins painted as solid bright lines inside the cracks (no glow bleed), small moss patches on the shoulders, oversized fists, a thick short neck, a squarish boulder head with two deep eye sockets lit amber and a jagged mouth crack, flat stone-slab feet; it stands upright on two legs like a man; palette earth brown, sandstone grey, amber-orange veins and moss-green accents. SPRITE STRIP: exactly 3 cells in one horizontal row, each cell 880x880 px, total image 2640x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 780 px = 1.20x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — three standing idle frames: cell 1 relaxed guard stance, weight even, heavy stone fists hanging at the sides; cell 2 the same stance with a subtle breathing shift (chest and arms move 4-6 px); cell 3 the same stance with the weight shifted slightly onto the front foot. Head size, foot line and total height identical in all three cells. In these idle frames nothing but the head (hair, mask, headband) may appear above the chin line — no weapon or cape rising beside the head, because the game cuts its three heads from exactly these cells. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,20× người chơi = ~780 px trong ô 880 ≈ 3,1 ô (kịch trần đợt này; khối đầu vẫn 266-271 px). Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_da_golem_lon_run_4f_chroma.png",
+      "nhom": "boss",
+      "lang": "da",
+      "kich_thuoc": [
+        3520,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 4,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Golem Đá (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 4 khung CHẠY (cf 3-6), nghiêng người ≤ 10°, không khom, chân luôn chạm đáy ô. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: a humanoid stone golem, about 1.20x the height of the reference academy student (about 780 px tall inside an 880 px cell); its head block must still match the reference head size (head block about 266-271 px from top to jaw line); the body is built from blocky cracked sandstone in warm brown and grey with thin amber-orange mineral veins painted as solid bright lines inside the cracks (no glow bleed), small moss patches on the shoulders, oversized fists, a thick short neck, a squarish boulder head with two deep eye sockets lit amber and a jagged mouth crack, flat stone-slab feet; it stands upright on two legs like a man; palette earth brown, sandstone grey, amber-orange veins and moss-green accents. SPRITE STRIP: exactly 4 cells in one horizontal row, each cell 880x880 px, total image 3520x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 780 px = 1.20x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — four-frame run cycle facing right: cell 1 contact (front foot forward, back foot lifting), cell 2 passing (legs crossing, body slightly forward), cell 3 contact mirrored (other foot forward), cell 4 passing mirrored. Torso leans forward at most 10 degrees, never crouched; the head stays the same size and at the same height in all four cells; at least one foot touches the bottom edge in every cell. Hands and weapon while running: heavy stone fists hanging at the sides, always kept below shoulder height. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,20× người chơi = ~780 px trong ô 880 ≈ 3,1 ô (kịch trần đợt này; khối đầu vẫn 266-271 px). Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_da_golem_lon_melee_4f_chroma.png",
+      "nhom": "boss",
+      "lang": "da",
+      "kich_thuoc": [
+        3520,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 4,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Golem Đá (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 4 khung ĐÁNH CẬN CHIẾN ngang tầm thân (lấy đà - ra đòn - quét theo - thu về); tay/vũ khí KHÔNG vượt lên trên vai. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: a humanoid stone golem, about 1.20x the height of the reference academy student (about 780 px tall inside an 880 px cell); its head block must still match the reference head size (head block about 266-271 px from top to jaw line); the body is built from blocky cracked sandstone in warm brown and grey with thin amber-orange mineral veins painted as solid bright lines inside the cracks (no glow bleed), small moss patches on the shoulders, oversized fists, a thick short neck, a squarish boulder head with two deep eye sockets lit amber and a jagged mouth crack, flat stone-slab feet; it stands upright on two legs like a man; palette earth brown, sandstone grey, amber-orange veins and moss-green accents. SPRITE STRIP: exactly 4 cells in one horizontal row, each cell 880x880 px, total image 3520x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 780 px = 1.20x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — four-frame melee attack facing right, everything at torso height: cell 1 wind-up (a straight forward punch with an oversized stone fist pulled back at the waist), cell 2 the strike fully extended forward to the right, cell 3 follow-through sweep, cell 4 recovery back to guard. Arms and weapon stay BELOW the shoulder line in every cell — nothing raised above the head, because the game reuses the standing head for these frames and discards anything drawn above the chin. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,20× người chơi = ~780 px trong ô 880 ≈ 3,1 ô (kịch trần đợt này; khối đầu vẫn 266-271 px). Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_da_golem_lon_cast_3f_chroma.png",
+      "nhom": "boss",
+      "lang": "da",
+      "kich_thuoc": [
+        2640,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Golem Đá (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 3 khung KẾT ẤN / RA CHIÊU (ấn tay ngang ngực - đẩy tay ra có khối chakra đặc - thu về); không gì trên đầu. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: a humanoid stone golem, about 1.20x the height of the reference academy student (about 780 px tall inside an 880 px cell); its head block must still match the reference head size (head block about 266-271 px from top to jaw line); the body is built from blocky cracked sandstone in warm brown and grey with thin amber-orange mineral veins painted as solid bright lines inside the cracks (no glow bleed), small moss patches on the shoulders, oversized fists, a thick short neck, a squarish boulder head with two deep eye sockets lit amber and a jagged mouth crack, flat stone-slab feet; it stands upright on two legs like a man; palette earth brown, sandstone grey, amber-orange veins and moss-green accents. SPRITE STRIP: exactly 3 cells in one horizontal row, each cell 880x880 px, total image 2640x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 780 px = 1.20x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — three-frame earth jutsu cast facing right: cell 1 both hands forming a hand seal at chest height; cell 2 hands pushed forward with a compact earth chakra shape at chest height, painted as chunks of rock and small stone cubes orbiting at chest height, solid painted (fully opaque, dark outlined, no transparency, no glow); cell 3 release stance with the effect breaking apart. Nothing above the head; the effect must stay inside the cell and never touch the cell edges. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,20× người chơi = ~780 px trong ô 880 ≈ 3,1 ô (kịch trần đợt này; khối đầu vẫn 266-271 px). Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_da_golem_lon_hit_death_getup_3f_chroma.png",
+      "nhom": "boss",
+      "lang": "da",
+      "kich_thuoc": [
+        2640,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Golem Đá (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 3 khung TRÚNG ĐÒN, cả 3 ĐỨNG: ngả nhẹ - đỡ/loạng choạng - khuỵu một gối; KHÔNG vẽ nằm. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: a humanoid stone golem, about 1.20x the height of the reference academy student (about 780 px tall inside an 880 px cell); its head block must still match the reference head size (head block about 266-271 px from top to jaw line); the body is built from blocky cracked sandstone in warm brown and grey with thin amber-orange mineral veins painted as solid bright lines inside the cracks (no glow bleed), small moss patches on the shoulders, oversized fists, a thick short neck, a squarish boulder head with two deep eye sockets lit amber and a jagged mouth crack, flat stone-slab feet; it stands upright on two legs like a man; palette earth brown, sandstone grey, amber-orange veins and moss-green accents. SPRITE STRIP: exactly 3 cells in one horizontal row, each cell 880x880 px, total image 2640x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 780 px = 1.20x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — three-frame hit reaction, ALL THREE STANDING, never lying down: cell 1 struck — torso recoils slightly backward (to the left), one foot sliding back; cell 2 guarding / staggering, arms raised only to chest height; cell 3 dropping to one knee with the other knee up, head still upright and the same size, knee and foot touching the bottom edge. No lying pose, no death pose on the ground — the game never draws a lying character (death is a standing frame plus a light ring drawn by the client). Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,20× người chơi = ~780 px trong ô 880 ≈ 3,1 ô (kịch trần đợt này; khối đầu vẫn 266-271 px). Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_da_golem_lon_portrait_chroma.png",
+      "nhom": "boss",
+      "lang": "da",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung Golem Đá cho khung hội thoại: đầu + vai, 3/4 quay phải, cùng thiết kế/màu với dải idle; máy nhồi về 200x200. Lắp phụ thuộc C7 (chưa kiểm client có vẽ avatar khi boss thoại qua gói 44).",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "iruka_portrait",
+        "player_idle_3f",
+        "XAU-npc"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, NO flat vector shapes, NO background scenery, NO drop shadow on ground. PORTRAIT: one single image 1254x1254 px, head and shoulders of the stone golem: the squarish cracked boulder head with two deep amber-lit eye sockets and a jagged mouth crack, amber mineral veins in the cracks, moss patches on the massive stone shoulders; 3/4 view facing RIGHT, same face, hair, headgear and colors as this character's sprite strip; subject centered and filling about 75% of the frame; the game will shrink it to a 200x200 dialogue avatar, so keep shapes bold and readable; uniform magenta background RGB(246,4,242), perfectly flat, no gradient. Same head size as reference idle frame and the same head design as this character's idle strip (this is a head-and-shoulders crop, so the feet-on-bottom-edge rule of the strips does not apply here); uniform magenta background RGB(246,4,242). Do not draw: background scenery, frame, border, text, glow, gradient, shadow, a second character, a head turned left, magenta / pink on the character.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Sprite id mới nối tiếp 27083+; tên tĩnh tương ứng (nếu đi đường cd_) ghi ở §5.1 / ten_moi_can_them_kich_thuoc."
+    },
+    {
+      "ten_file": "boss_may_songdao_idle_3f_chroma.png",
+      "nhom": "boss",
+      "lang": "may",
+      "kich_thuoc": [
+        2640,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Kiếm Sĩ Song Đao Lôi (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 3 khung ĐỨNG (đầu lấy từ 3 khung này; thân idle 0 còn là thân lúc trúng đòn/chết cf 23/24). ĐỀ XUẤT boss người Làng Mây (dot-3 `boss_may_songdao`): kiếm sĩ song đao hệ Lôi ≈1,15× người chơi, da nâu sẫm, tóc vàng trắng ngắn vuốt ngược, sẹo mảnh qua chân mày trái, băng trán ký hiệu mây; áo giáp trắng không tay viền CHÀM cổ THẤP, áo lót chàm, bảo hộ cẳng tay trắng, quần chàm quấn chân trắng, sandal tối; hai ninjato thẳng cầm NGƯỢC ở ngang hông, lưỡi chếch xuống trước, tia sét vàng trắng răng cưa vẽ ĐẶC bám dọc lưỡi (không glow). Màu chàm / tím-xanh (xanh rõ hơn đỏ — KHÔNG hồng tím, KHÔNG magenta vì trùng màu nền chroma) - trắng - vàng chớp.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: an adult Hidden-Cloud (Kumo) dual-sword ninja, about 1.15x the height of the reference academy student (about 750 px tall inside an 880 px cell) with the SAME head size as the reference, adult proportions; dark brown skin, short white-blond hair swept back, a thin scar through the left eyebrow, a Kumo forehead protector (cloud symbol) on the forehead, confident narrowed eyes; white sleeveless flak vest with indigo trim and a LOW collar, indigo undershirt, white forearm guards, indigo pants with white leg wraps, dark sandals; he holds two straight short swords (ninjato) in reverse grip, one in each hand at waist height with the blades angled forward-down, both blades wrapped in jagged yellow-white lightning painted as solid outlined shapes hugging the blades (no glow); palette indigo / blue-violet with blue clearly stronger than red (never pink, never magenta), white and lightning yellow. SPRITE STRIP: exactly 3 cells in one horizontal row, each cell 880x880 px, total image 2640x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 750 px = 1.15x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — three standing idle frames: cell 1 relaxed guard stance, weight even, the two ninjato held reversed at waist height, blades angled down-forward; cell 2 the same stance with a subtle breathing shift (chest and arms move 4-6 px); cell 3 the same stance with the weight shifted slightly onto the front foot. Head size, foot line and total height identical in all three cells. In these idle frames nothing but the head (hair, mask, headband) may appear above the chin line — no weapon or cape rising beside the head, because the game cuts its three heads from exactly these cells. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,15× người chơi = ~750 px trong ô 880 ≈ 2,9 ô. Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_may_songdao_run_4f_chroma.png",
+      "nhom": "boss",
+      "lang": "may",
+      "kich_thuoc": [
+        3520,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 4,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Kiếm Sĩ Song Đao Lôi (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 4 khung CHẠY (cf 3-6), nghiêng người ≤ 10°, không khom, chân luôn chạm đáy ô. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: an adult Hidden-Cloud (Kumo) dual-sword ninja, about 1.15x the height of the reference academy student (about 750 px tall inside an 880 px cell) with the SAME head size as the reference, adult proportions; dark brown skin, short white-blond hair swept back, a thin scar through the left eyebrow, a Kumo forehead protector (cloud symbol) on the forehead, confident narrowed eyes; white sleeveless flak vest with indigo trim and a LOW collar, indigo undershirt, white forearm guards, indigo pants with white leg wraps, dark sandals; he holds two straight short swords (ninjato) in reverse grip, one in each hand at waist height with the blades angled forward-down, both blades wrapped in jagged yellow-white lightning painted as solid outlined shapes hugging the blades (no glow); palette indigo / blue-violet with blue clearly stronger than red (never pink, never magenta), white and lightning yellow. SPRITE STRIP: exactly 4 cells in one horizontal row, each cell 880x880 px, total image 3520x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 750 px = 1.15x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — four-frame run cycle facing right: cell 1 contact (front foot forward, back foot lifting), cell 2 passing (legs crossing, body slightly forward), cell 3 contact mirrored (other foot forward), cell 4 passing mirrored. Torso leans forward at most 10 degrees, never crouched; the head stays the same size and at the same height in all four cells; at least one foot touches the bottom edge in every cell. Hands and weapon while running: the two ninjato held reversed at waist height, blades angled down-forward, always kept below shoulder height. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,15× người chơi = ~750 px trong ô 880 ≈ 2,9 ô. Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_may_songdao_melee_4f_chroma.png",
+      "nhom": "boss",
+      "lang": "may",
+      "kich_thuoc": [
+        3520,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 4,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Kiếm Sĩ Song Đao Lôi (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 4 khung ĐÁNH CẬN CHIẾN ngang tầm thân (lấy đà - ra đòn - quét theo - thu về); tay/vũ khí KHÔNG vượt lên trên vai. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: an adult Hidden-Cloud (Kumo) dual-sword ninja, about 1.15x the height of the reference academy student (about 750 px tall inside an 880 px cell) with the SAME head size as the reference, adult proportions; dark brown skin, short white-blond hair swept back, a thin scar through the left eyebrow, a Kumo forehead protector (cloud symbol) on the forehead, confident narrowed eyes; white sleeveless flak vest with indigo trim and a LOW collar, indigo undershirt, white forearm guards, indigo pants with white leg wraps, dark sandals; he holds two straight short swords (ninjato) in reverse grip, one in each hand at waist height with the blades angled forward-down, both blades wrapped in jagged yellow-white lightning painted as solid outlined shapes hugging the blades (no glow); palette indigo / blue-violet with blue clearly stronger than red (never pink, never magenta), white and lightning yellow. SPRITE STRIP: exactly 4 cells in one horizontal row, each cell 880x880 px, total image 3520x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 750 px = 1.15x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — four-frame melee attack facing right, everything at torso height: cell 1 wind-up (a crossed double slash with both ninjato pulled back at the waist), cell 2 the strike fully extended forward to the right, cell 3 follow-through sweep, cell 4 recovery back to guard. Arms and weapon stay BELOW the shoulder line in every cell — nothing raised above the head, because the game reuses the standing head for these frames and discards anything drawn above the chin. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,15× người chơi = ~750 px trong ô 880 ≈ 2,9 ô. Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_may_songdao_cast_3f_chroma.png",
+      "nhom": "boss",
+      "lang": "may",
+      "kich_thuoc": [
+        2640,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Kiếm Sĩ Song Đao Lôi (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 3 khung KẾT ẤN / RA CHIÊU (ấn tay ngang ngực - đẩy tay ra có khối chakra đặc - thu về); không gì trên đầu. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: an adult Hidden-Cloud (Kumo) dual-sword ninja, about 1.15x the height of the reference academy student (about 750 px tall inside an 880 px cell) with the SAME head size as the reference, adult proportions; dark brown skin, short white-blond hair swept back, a thin scar through the left eyebrow, a Kumo forehead protector (cloud symbol) on the forehead, confident narrowed eyes; white sleeveless flak vest with indigo trim and a LOW collar, indigo undershirt, white forearm guards, indigo pants with white leg wraps, dark sandals; he holds two straight short swords (ninjato) in reverse grip, one in each hand at waist height with the blades angled forward-down, both blades wrapped in jagged yellow-white lightning painted as solid outlined shapes hugging the blades (no glow); palette indigo / blue-violet with blue clearly stronger than red (never pink, never magenta), white and lightning yellow. SPRITE STRIP: exactly 3 cells in one horizontal row, each cell 880x880 px, total image 2640x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 750 px = 1.15x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — three-frame lightning jutsu cast facing right: cell 1 both hands forming a hand seal at chest height; cell 2 hands pushed forward with a compact lightning chakra shape at chest height, painted as jagged yellow-white lightning arcs between the two blades at chest height, solid painted (fully opaque, dark outlined, no transparency, no glow); cell 3 release stance with the effect breaking apart. Nothing above the head; the effect must stay inside the cell and never touch the cell edges. Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,15× người chơi = ~750 px trong ô 880 ≈ 2,9 ô. Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_may_songdao_hit_death_getup_3f_chroma.png",
+      "nhom": "boss",
+      "lang": "may",
+      "kich_thuoc": [
+        2640,
+        880
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 3,
+      "o_kich_thuoc": [
+        880,
+        880
+      ],
+      "noi_dung": "Kiếm Sĩ Song Đao Lôi (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 3 khung TRÚNG ĐÒN, cả 3 ĐỨNG: ngả nhẹ - đỡ/loạng choạng - khuỵu một gối; KHÔNG vẽ nằm. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này.",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "player_idle_3f",
+        "master_iruka",
+        "TOT-boss-mau",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. CHARACTER: an adult Hidden-Cloud (Kumo) dual-sword ninja, about 1.15x the height of the reference academy student (about 750 px tall inside an 880 px cell) with the SAME head size as the reference, adult proportions; dark brown skin, short white-blond hair swept back, a thin scar through the left eyebrow, a Kumo forehead protector (cloud symbol) on the forehead, confident narrowed eyes; white sleeveless flak vest with indigo trim and a LOW collar, indigo undershirt, white forearm guards, indigo pants with white leg wraps, dark sandals; he holds two straight short swords (ninjato) in reverse grip, one in each hand at waist height with the blades angled forward-down, both blades wrapped in jagged yellow-white lightning painted as solid outlined shapes hugging the blades (no glow); palette indigo / blue-violet with blue clearly stronger than red (never pink, never magenta), white and lightning yellow. SPRITE STRIP: exactly 3 cells in one horizontal row, each cell 880x880 px, total image 2640x880 px; one pose per cell, cells evenly spaced, nothing crossing into a neighbouring cell (keep at least 24 px of clear background inside each cell's left and right edges). Total standing height about 750 px = 1.15x the reference academy student (653 px) — SAME head size, longer torso and legs. Same head size as reference idle frame in EVERY cell (THUOC-NHAN-VAT.png: face height 96-99 px, hair-top to chin 266-271 px, face width about 168 px at the reference scale); feet touching bottom edge in every cell (no airborne frame, no empty space under the feet); character stands upright, never crouched; head in 3/4 view turned to the RIGHT in every cell; uniform magenta background RGB(246,4,242), perfectly flat — no gradient, no ground, no shadow, no outer glow, no soft haze. Do not use magenta, pink-purple or violet-pink anywhere on the character. POSES — three-frame hit reaction, ALL THREE STANDING, never lying down: cell 1 struck — torso recoils slightly backward (to the left), one foot sliding back; cell 2 guarding / staggering, arms raised only to chest height; cell 3 dropping to one knee with the other knee up, head still upright and the same size, knee and foot touching the bottom edge. No lying pose, no death pose on the ground — the game never draws a lying character (death is a standing frame plus a light ring drawn by the client). Same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). Do not draw: background, ground line, shadow, glow, gradient, text, cell borders, extra characters, a head turned left, a lying pose, weapons or arms above the shoulder line, magenta / pink on the character, anything crossing into the next cell.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Một trong 5 dải -> 34 mảnh (3 đầu/17 thân/14 chân), 3 part id mới. Chiều cao: ≈ 1,15× người chơi = ~750 px trong ô 880 ≈ 2,9 ô. Ô 880 là ĐỀ XUẤT (xem §3.2)."
+    },
+    {
+      "ten_file": "boss_may_songdao_portrait_chroma.png",
+      "nhom": "boss",
+      "lang": "may",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung Kiếm Sĩ Song Đao Lôi cho khung hội thoại: đầu + vai, 3/4 quay phải, cùng thiết kế/màu với dải idle; máy nhồi về 200x200. Lắp phụ thuộc C7 (chưa kiểm client có vẽ avatar khi boss thoại qua gói 44).",
+      "dung_tham_chieu": [
+        "THUOC-NHAN-VAT",
+        "iruka_portrait",
+        "player_idle_3f",
+        "XAU-npc"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, NO flat vector shapes, NO background scenery, NO drop shadow on ground. PORTRAIT: one single image 1254x1254 px, head and shoulders of the Cloud swordsman: dark brown skin, short white-blond hair swept back, the scar through the left eyebrow, the Kumo cloud forehead protector, confident narrowed eyes, the white vest with indigo trim and low collar at the shoulders; 3/4 view facing RIGHT, same face, hair, headgear and colors as this character's sprite strip; subject centered and filling about 75% of the frame; the game will shrink it to a 200x200 dialogue avatar, so keep shapes bold and readable; uniform magenta background RGB(246,4,242), perfectly flat, no gradient. Same head size as reference idle frame and the same head design as this character's idle strip (this is a head-and-shoulders crop, so the feet-on-bottom-edge rule of the strips does not apply here); uniform magenta background RGB(246,4,242). Do not draw: background scenery, frame, border, text, glow, gradient, shadow, a second character, a head turned left, magenta / pink on the character.",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Sprite id mới nối tiếp 27083+; tên tĩnh tương ứng (nếu đi đường cd_) ghi ở §5.1 / ten_moi_can_them_kich_thuoc."
+    }
+  ]
+}

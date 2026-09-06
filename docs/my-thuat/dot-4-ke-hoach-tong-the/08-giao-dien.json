@@ -1,0 +1,1240 @@
+{
+  "meta": {
+    "du_an": "Game Naruto (lõi NRO) — Đợt 4, hạng mục 08 GIAO DIỆN (UI/HUD)",
+    "ngay": "2026-09-06",
+    "mo_ta": "Manifest máy đọc cho brief 08-giao-dien.md. Đọc từng phần tử anh[]: gửi prompt_day_du + các ảnh trong dung_tham_chieu (đường dẫn ở anh_tham_chieu) tới AI tạo ảnh; với che_do_lap=direct gửi thêm anh_cu_x2_chi_doc để giữ hình học; lưu kết quả đúng ten_file vào luu_vao. Làm 3 ảnh mẫu (stt 1, 4, 5) trước rồi dừng chờ duyệt. Sau đó phía dự án: nối ten_moi_kich_thuoc vào kich-thuoc-anh.json → KIEM-TRA-ANH.py → TAO-4-MUC-ZOOM.py → chép vào client theo thay_cho_client.",
+    "tong_anh_can_ve": 30,
+    "theo_uu_tien": {
+      "P1": 10,
+      "P2": 15,
+      "P3": 5
+    },
+    "kieu": "tinh_alpha (toàn bộ) — cỡ x4 phải giao ĐÚNG số, không vẽ to hơn (ảnh thay trực tiếp file client)",
+    "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+    "brief_md": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\08-giao-dien.md",
+    "khuon": [
+      "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\_KHUON-DOT-4.md",
+      "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-3-toan-bo\\_KHUON.md"
+    ],
+    "client_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage"
+  },
+  "phong_cach_khoa": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape.",
+  "duoi_prompt_chung": "Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+  "mau_lang": {
+    "chung_ui": "gỗ sơn mài tối #3A2418–#5A3A22 · dây/viền cam ấm #E8722A–#F2A445 · giấy da #F1E2C0 · viền tối #1B1410 (UI dùng chung 5 làng, không đổi theo làng)",
+    "la": "Hoả: cam–đỏ #E8722A",
+    "cat": "Phong: vàng cát #E3C36B / xanh lục nhạt #B7D9A0",
+    "smu": "Thuỷ: xanh lam #4A90D9",
+    "da": "Thổ: nâu đất #8B5A2B / xám đá #7D7D78",
+    "may": "Lôi: tím #8E6BC1 / trắng xanh"
+  },
+  "mau_ruot_client_tu_do": {
+    "hop_thoai_popup_kem": "#FFE5C7 (PopUp.cs:198, color != 1)",
+    "hop_thoai_popup_xanh": "#B7E8B0 (PopUp.cs:198, color == 1)",
+    "cuon_giay_ten_map": "#F0E6C3 ruột, #8E855B viền, #DFD08F vạch sáng (Paint.cs:6,119,127)",
+    "hop_thoai_npc": "#FFFFFF (ChatPopup.cs:311)"
+  },
+  "anh_tham_chieu": {
+    "TOT-naruto-khung": {
+      "file": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-3-toan-bo\\anh-tham-chieu\\TOT-naruto-khung.png",
+      "mo_ta": "Mẫu TỐT: khung avatar gỗ/kim loại có độ dày, bo góc, hoạ tiết — mức chi tiết cần đạt cho khung UI"
+    },
+    "TOT-naruto-thanh-chakra": {
+      "file": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-3-toan-bo\\anh-tham-chieu\\TOT-naruto-thanh-chakra.png",
+      "mo_ta": "Mẫu TỐT: thanh có rãnh + phần đầy phát sáng"
+    },
+    "TOT-naruto-logo": {
+      "file": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-3-toan-bo\\anh-tham-chieu\\TOT-naruto-logo.png",
+      "mo_ta": "Mẫu TỐT: bảng màu cam–xanh–đen đã duyệt (phong cách chung)"
+    },
+    "DUYET-khung-hoithoai": {
+      "file": "D:\\NRO_GoiBanGiao\\my thuat\\dot1-nhom1-duyet\\dot1-nhom1-duyet\\01-giao-dien\\ui_khung_hoithoai_x4.png",
+      "mo_ta": "UI ĐÃ DUYỆT (input asset-lock): khung hội thoại gỗ sơn mài tối viền cam, ruột giấy cũ — chất liệu chuẩn của cả bộ UI"
+    },
+    "DUYET-nut-thuong": {
+      "file": "D:\\NRO_GoiBanGiao\\my thuat\\dot1-nhom1-duyet\\dot1-nhom1-duyet\\01-giao-dien\\ui_nut_thuong_x4.png",
+      "mo_ta": "UI ĐÃ DUYỆT: nút thường — màu/độ vát của nút bấm"
+    },
+    "HIEN-TRANG-hud-cu-ingame": {
+      "file": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\map-1-lang-la\\anh-tham-chieu\\HIEN-TRANG-map1-trong-game.png",
+      "mo_ta": "Ảnh chụp game hiện tại: HUD Ngọc Rồng cũ (bảng xanh lá góc trên trái + hai rãnh máu/chakra) — cái cần thay"
+    },
+    "HIEN-TRANG-hud-cu-x2": {
+      "file": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\anh-tham-chieu\\HIEN-TRANG-hud-cu-x2.png",
+      "mo_ta": "Bảng ghép 34 file mainImage cũ của client (bản x2, phóng 2 lần, có nhãn tên file; 29 file sẽ thay + 5 file không vẽ đợt này để đối chiếu) — GIỮ ĐÚNG HÌNH HỌC (cửa sổ, mảnh, ô) của từng file này"
+    },
+    "XAU-thanh-gop": {
+      "file": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-3-toan-bo\\anh-tham-chieu\\XAU-thanh-gop-san-khong-dung-duoc.png",
+      "mo_ta": "Mẫu XẤU: thanh gộp nền+đầy vào một ảnh — game không cắt được; đừng gộp phần game tự vẽ vào ảnh"
+    }
+  },
+  "anh": [
+    {
+      "stt": 1,
+      "ten_file": "ui_hud_khung_trai_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        620,
+        164
+      ],
+      "noi_dung": "Khung HUD góc trên-trái (bảng tên + chân dung + hai rãnh máu/chakra). Client vẽ chân dung tại ô x1 (6,6) 26×26, tên và sức mạnh trong bảng trái, rồi đè thanh máu vào rãnh x1 (83,5) 66×10 và thanh chakra vào rãnh x1 (83,20) 59×6. Hai rãnh phải là vùng ĐẶC màu tối (không trong suốt, không vẽ thanh). File cũ 618×164 x4 → vẽ 620×164 cho chia hết 4.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the top-left HUD frame of the player status panel. Canvas exactly 620 x 164 px (the game shows it at half size, 310 x 82). The game paints the portrait, the name text and the HP/chakra fills ON TOP of this image, so the layout is fixed: (a) LEFT PLATE, x 0-316: a rounded lacquered-wood plate with an orange rope rim; inside it a flat, plain, opaque dark-parchment area from x 20 to 300 and y 16 to 132 where the game writes the player's name and power number and draws a 104 x 104 face at x 24-128, y 24-128 -- keep this whole inner area free of ornaments and texture so text stays readable; (b) RIGHT BLOCK, x 316-620: a darker wood block holding two recessed troughs: HP trough inner opening exactly x 332-596, y 20-60, and chakra trough inner opening exactly x 332-568, y 80-104; both trough interiors are flat opaque near-black #1B1410 with a 4 px inner shadow line, because the game paints a red HP bar and a blue chakra bar inside them from left to right -- do NOT paint any bar or fill. Add a small carved leaf-swirl emblem on the wood between the two plates (x 300-330), a thin highlight along the top edge, rounded outer corners; the right end of the block may taper. Everything outside the panel silhouette transparent. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dpanel.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dpanel.png",
+      "cat_manh": null
+    },
+    {
+      "stt": 2,
+      "ten_file": "ui_hud_o_kynang_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        112,
+        112
+      ],
+      "noi_dung": "Ô khung chiêu trên thanh kỹ năng, trạng thái thường. Client vẽ icon chiêu 64×64 x4 vào giữa → lòng ô x 20–92 phải là mảng tối phẳng, ĐẶC (không trong suốt), không hoạ tiết. Cũ: ô vuông cam Ngọc Rồng 112×112.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw one skill-slot frame for the bottom skill bar, normal (idle) state. Canvas exactly 112 x 112 px (shown at 56 x 56). The game draws a 64 x 64 skill icon centered on this frame, so the center area x 20-92, y 20-92 must be a flat opaque very dark plate #1B1410 with no detail; the frame around it is a 16-20 px thick square rim of dark lacquered wood with a thin orange rope inlay running along the middle of the rim, slightly rounded outer corners, small bevel and top highlight, a tiny leaf notch at the top edge center. Outside the square transparent. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dskill.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dskill.png",
+      "cat_manh": null
+    },
+    {
+      "stt": 3,
+      "ten_file": "ui_hud_o_kynang_chon_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        112,
+        112
+      ],
+      "noi_dung": "Ô khung chiêu ĐANG CHỌN (chiêu đang dùng). Cùng hình học với ô thường (lòng ô tối phẳng x 20–92), chỉ khác: viền sáng cam-vàng rực để nhận ra ngay ở cỡ nhỏ. Cũ: ô xanh lá.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the SELECTED / pressed state of the skill-slot frame, same geometry as ui_hud_o_kynang_x4.png: canvas exactly 112 x 112 px, flat opaque very dark center plate x 20-92, y 20-92 kept free for the 64 x 64 icon. Difference: the rim glows warm -- the rope inlay becomes bright gold-orange #FFB347, the wood rim is lit from inside with an orange rim light, the corners get a small spark highlight, and a 4 px bright outer edge that stays inside the canvas makes it read as 'active' even at half size. Same silhouette and size as the normal frame so the two swap without shifting. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dskill2.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dskill2.png",
+      "cat_manh": null
+    },
+    {
+      "stt": 4,
+      "ten_file": "ui_khung_popup_9o_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        40,
+        320
+      ],
+      "noi_dung": "Dải 9-slice cho MỌI hộp thoại bật lên (hộp đăng nhập LoginScr.cs:664, hộp tạo nhân vật CreateCharScr.cs:396, hộp xác nhận…). Client lấy 8 ô 10×10 x1 xếp dọc rồi tự đổ ruột màu kem #FFE5C7 → mặt trong mỗi ô phải kết thúc đúng màu kem đó, ô mép phải lặp liền mạch, góc bo tròn ngoài trong suốt.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw a 9-slice frame strip for pop-up dialogs (login box, character-creation box, confirm boxes). Canvas exactly 40 x 320 px = 8 cells of 40 x 40 stacked vertically in this fixed order from top to bottom: 1 top-left corner, 2 top edge, 3 top-right corner, 4 left edge, 5 right edge, 6 bottom-left corner, 7 bottom edge, 8 bottom-right corner. The game tiles cells 2/4/5/7 and fills the interior of the box with a flat cream color #FFE5C7, so: every cell's inner side must end in exactly #FFE5C7 (no seam), edge cells must tile seamlessly along their edge direction, corner cells have a rounded outer corner with transparent pixels outside the curve. Frame design per cell, from the outside in: 3 px dark outline #1B1410, an 8 px band of dark lacquered wood, a 6 px warm orange rope band #E8722A, a 2 px highlight, then cream #FFE5C7 to the inner side. Keep the design continuous so the eight pieces assemble into one frame. No text. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dimgPopup.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dimgPopup.png",
+      "cat_manh": "8 ô 40×40 xếp DỌC, thứ tự: góc trên-trái · mép trên · góc trên-phải · mép trái · mép phải · góc dưới-trái · mép dưới · góc dưới-phải (PopUp.cs:176-197)"
+    },
+    {
+      "stt": 5,
+      "ten_file": "ui_nut_thuong_3manh_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        120,
+        96
+      ],
+      "noi_dung": "Nút chữ co giãn, trạng thái THƯỜNG — mọi nút có chữ trong game (Đăng nhập, Đồng ý, Mua…) đều ghép từ 3 mảnh này; client kéo mảnh giữa ra bất kỳ độ rộng rồi in chữ TỐI lên → mặt nút phải cam sáng vừa để chữ tối đọc được. Thay 3 file btn0* đang là 3 bản chép của một ảnh 96×48 (lock).",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw a 3-piece stretchable text button, NORMAL state, as one strip. Canvas exactly 120 x 96 px = three pieces of 40 x 96 side by side: piece 1 (x 0-40) left rounded cap, piece 2 (x 40-80) middle segment that must tile seamlessly horizontally (its left and right pixel columns identical), piece 3 (x 80-120) right rounded cap. The game stretches the middle to any width and prints a dark caption on top, so the button face must be a mid-warm orange #E8722A to #F2A445 vertical gradient with a light highlight in the upper third, wrapped in a 4 px dark lacquered wood rim and a 3 px dark outline #1B1410, pill shape with fully rounded left and right caps (radius = half height). No emblem, no text, no glow. Outside the pill transparent. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/btn0left.png",
+        "/mainImage/btn0mid.png",
+        "/mainImage/btn0right.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\btn0left.png",
+      "cat_manh": "3 mảnh ngang 40×96: [0–40] nắp trái · [40–80] đoạn giữa lặp liền mạch · [80–120] nắp phải (Command.cs:225-238)"
+    },
+    {
+      "stt": 6,
+      "ten_file": "ui_nut_nhan_3manh_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        120,
+        96
+      ],
+      "noi_dung": "Nút chữ trạng thái NHẤN/đang trỏ — client in chữ XANH LÁ lên → mặt nút tối hơn (nâu sơn mài), bóng lõm mép trên, nhìn là biết đang bị ấn. Cùng hình học 3 mảnh với nút thường.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the PRESSED / focused state of the 3-piece text button, same geometry as ui_nut_thuong_3manh_x4.png: canvas exactly 120 x 96 px, pieces of 40 x 96 (left cap, seamless middle, right cap), pill shape. Difference: the face darkens to deep lacquer brown-orange #7A3A14 to #A4501C with an inset shadow along the top edge and the rim highlight moved to the bottom, so the game's green caption text stays readable and the button visibly looks pushed in. No text. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/btn1left.png",
+        "/mainImage/btn1mid.png",
+        "/mainImage/btn1right.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\btn1left.png",
+      "cat_manh": "3 mảnh ngang 40×96 như nút thường"
+    },
+    {
+      "stt": 7,
+      "ten_file": "ui_menu_o_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        230,
+        230
+      ],
+      "noi_dung": "Ô lựa chọn trong menu NPC (các ô 'Cửa hàng' / 'Nói chuyện' bật lên khi chạm Iruka — Menu.cs:458-479), trạng thái thường. Client in chữ ĐỎ vào giữa → tâm ô phải là giấy da phẳng, sáng, không hoạ tiết.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw one option tile for the NPC talk menu (the boxes that show 'Shop' / 'Talk' when the player taps an NPC), NORMAL state. Canvas exactly 230 x 230 px (shown at 115 x 115). Rounded square, fully opaque inside: 8 px dark outline, an 18 px dark lacquered wood rim with a thin orange rope inlay, and a flat plain aged-parchment center #F1E2C0 covering x 34-196, y 34-196 where the game prints one or two lines of red text -- keep the center free of ornament. A small leaf-swirl seal may sit at the top edge center of the rim only. Outside the rounded square transparent. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dbtMenu1.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dbtMenu1.png",
+      "cat_manh": null,
+      "ghi_chu_co": "GIỮ 230×230 (không nâng lên 232 như tiền lệ 618→620): ảnh này THAY THẲNG file client myTexture2dbtMenu1/2.png ở x2 = 115×115, không đi qua TAO-4-MUC-ZOOM nên không có mức x1 để lệch nửa pixel; đổi cỡ là lệch neo menu NPC. Chốt 06/09."
+    },
+    {
+      "stt": 8,
+      "ten_file": "ui_menu_o_chon_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        230,
+        230
+      ],
+      "noi_dung": "Ô menu NPC ĐANG CHỌN — client in chữ XANH LÁ; cùng hình học, viền sáng cam-vàng, giấy sáng hơn. Cũ: ô xanh lá Ngọc Rồng.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the SELECTED state of the NPC menu tile, same geometry as ui_menu_o_x4.png: canvas exactly 230 x 230 px, rounded square, flat parchment center x 34-196, y 34-196 kept plain (the game prints green text there). Difference: the rope inlay turns bright gold-orange #FFB347, the wood rim is lit with a warm rim light, the parchment brightens to #FFF2D6, and a 4 px bright outer edge glow that stays INSIDE the canvas makes it read as chosen. Same silhouette so the two swap without shifting. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dbtMenu2.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dbtMenu2.png",
+      "cat_manh": null,
+      "ghi_chu_co": "GIỮ 230×230 (không nâng lên 232 như tiền lệ 618→620): ảnh này THAY THẲNG file client myTexture2dbtMenu1/2.png ở x2 = 115×115, không đi qua TAO-4-MUC-ZOOM nên không có mức x1 để lệch nửa pixel; đổi cỡ là lệch neo menu NPC. Chốt 06/09."
+    },
+    {
+      "stt": 9,
+      "ten_file": "ui_hud_nut_chat_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        124,
+        124
+      ],
+      "noi_dung": "Nút CHAT tròn trên HUD cảm ứng (GameScr.cs:5469-5473, vẽ neo tâm; chỉ hiện trên bản cảm ứng/Android). Cũ: nút cam có bong bóng thoại.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the round CHAT button for the touch HUD, NORMAL state. Canvas exactly 124 x 124 px, a circle of diameter 118 centered on the canvas. Dark lacquered wood ring 14 px thick with a thin orange rope inlay, a warm orange #E8722A face inside, and in the center a cream #F1E2C0 speech-bubble emblem (rounded bubble with a small tail at lower left, about 60 x 48 px) with a dark outline; soft top-left highlight on the face. Outside the circle transparent. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dchat.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dchat.png",
+      "cat_manh": null
+    },
+    {
+      "stt": 10,
+      "ten_file": "ui_hud_nut_chat_nhan_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        124,
+        124
+      ],
+      "noi_dung": "Nút CHAT trạng thái đang ấn — cùng hình, mặt tối hơn, bóng lõm.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the PRESSED state of the round chat button, same geometry as ui_hud_nut_chat_x4.png: canvas exactly 124 x 124 px, circle of diameter 118 centered, same cream speech-bubble emblem about 60 x 48 px. Difference: the face darkens to #A4501C, the highlight moves to the bottom, an inset shadow appears along the top inner edge, the rope inlay dims -- clearly pushed in. Outside the circle transparent. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dchat2.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dchat2.png",
+      "cat_manh": null
+    },
+    {
+      "stt": 11,
+      "ten_file": "ui_khung_popup_9o_sang_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        40,
+        320
+      ],
+      "noi_dung": "Biến thể XANH của dải 9-slice hộp thoại (PopUp.cs:175: dùng khi color==1, ruột client đổ #B7E8B0 xanh nhạt — hộp xác nhận/đồng ý). Dây cói xanh ngọc thay dây cam.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the light-green variant of the pop-up 9-slice frame strip, same geometry and cell order as ui_khung_popup_9o_x4.png: canvas exactly 40 x 320 px = 8 cells of 40 x 40 stacked top to bottom (top-left corner, top edge, top-right corner, left edge, right edge, bottom-left corner, bottom edge, bottom-right corner); edge cells tile seamlessly, corners rounded with transparent outside. The game fills the interior with light green #B7E8B0, so every cell's inner side must end in exactly #B7E8B0. Same dark outline and lacquered wood band as the cream version, but the rope band is jade-green bamboo cord #6FBF73 instead of orange, to read as a 'confirm / positive' box. No text. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dimgPopup2.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dimgPopup2.png",
+      "cat_manh": "8 ô 40×40 xếp dọc, cùng thứ tự với ui_khung_popup_9o"
+    },
+    {
+      "stt": 12,
+      "ten_file": "ui_hud_nut_menu_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        56,
+        120
+      ],
+      "noi_dung": "Tab MENU dọc bám mép màn hình (cmdMenu.img, GameScr.cs:823; neo góc trên-trái). Cũ: tam giác tối trỏ phải. Chưa chắc hiện ở bản PC → P2.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the vertical MENU tab attached to the screen edge, replacing a plain dark right-pointing tab. Canvas exactly 56 x 120 px (shown at 28 x 60), anchored at its top-left by the game. Shape: a right-pointing chevron tab -- a vertical rounded wooden plank occupying x 0-40 with a pointed tip reaching x 56 at mid height, dark lacquered wood with a 3 px dark outline, a thin orange rope inlay along the left edge and a bright orange chevron arrow (pointing right) painted in the middle. Outside the shape transparent. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dmenu.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dmenu.png",
+      "cat_manh": null
+    },
+    {
+      "stt": 13,
+      "ten_file": "ui_hud_muiten_chi_duong_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        52,
+        64
+      ],
+      "noi_dung": "Mũi tên chỉ đường tới NPC/nhiệm vụ (GameScr.cs:5444, Hint.cs:239) và mũi tên chọn trong màn tạo nhân vật (CreateCharScr.cs:398). Client vẽ vùng 13×16 x1 và TỰ XOAY sang 8 hướng → chỉ vẽ MỘT mũi tên gốc trỏ PHẢI, đối xứng trên-dưới. 4 file ui_muiten_* 48×48 trong lô 343 không dùng cho chỗ này.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the quest / NPC direction arrow. Canvas exactly 52 x 64 px (shown at 13 x 16). The arrow points RIGHT: tip touching the right edge at mid height, tail flat against the left edge, shape vertically symmetric because the game rotates this one image into 8 directions. Body warm orange #F2A445 with a bright top-facing bevel, 3 px dark outline #1B1410, a small kunai-tip shape (slightly concave sides) so it reads as ninja rather than a plain triangle. Fill the canvas as much as possible; outside the arrow transparent. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2darrow3.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2darrow3.png",
+      "cat_manh": null
+    },
+    {
+      "stt": 14,
+      "ten_file": "ui_khung_goc_1_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        256,
+        216
+      ],
+      "noi_dung": "Hoạ tiết GÓC TRÊN-TRÁI của cuộn giấy thông tin (bảng hiện TÊN MAP khi vào map — InfoDlg.cs:38 → Paint.cs:117-140; cả MsgDlg). Client tự vẽ tấm giấy #F0E6C3 viền kaki #8E855B rồi đặt ảnh này neo góc trên-trái lệch (−3,−2) x1. Cũ: giấy rách + dây tua đỏ kiểu Trung Hoa. Mới: đầu cuộn gỗ + dây cam + dấu lá.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the TOP-LEFT ornament of the parchment info scroll (the box that shows the map name when the player enters a map). Canvas exactly 256 x 216 px (shown at 128 x 108). The game draws a flat parchment rectangle #F0E6C3 with a khaki border #8E855B and light-khaki edge lines #DFD08F BEHIND this ornament and anchors this image with its top-left corner 6 px left and 4 px above the rectangle's top-left corner, so: the ornament is a rolled scroll end -- a vertical wooden roller with dark lacquer and orange rope wound around it running down the left side (x 0-70), a torn parchment flap in exactly #F0E6C3 spreading right from the roller (x 70-256) that fades to full transparency toward the right and bottom edges, and one hanging orange rope tassel with a small leaf-swirl seal near the top-left. Only the roller, rope, tassel and torn flap are visible; the rest transparent. No text. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dgoc1.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dgoc1.png",
+      "cat_manh": null
+    },
+    {
+      "stt": 15,
+      "ten_file": "ui_khung_goc_2_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        132,
+        52
+      ],
+      "noi_dung": "Hoạ tiết GÓC DƯỚI-TRÁI cuộn giấy (Paint.cs:136, neo góc dưới-trái lệch (−3,+3) x1). Giấy rách cuộn nhẹ, nút dây cam ở góc.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the BOTTOM-LEFT torn-edge ornament of the parchment info scroll. Canvas exactly 132 x 52 px (shown at 66 x 26); the game anchors its bottom-left corner 6 px left and 6 px below the parchment rectangle's bottom-left corner (rectangle color #F0E6C3, border #8E855B). Content: a torn, slightly curled parchment corner in exactly #F0E6C3 with a thin khaki edge #8E855B and a small orange rope knot at the very corner; the flap fades to transparency toward the right and top. Same style as ui_khung_goc_1_x4.png. No text. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dgoc2.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dgoc2.png",
+      "cat_manh": null
+    },
+    {
+      "stt": 16,
+      "ten_file": "ui_khung_goc_3_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        244,
+        72
+      ],
+      "noi_dung": "Hoạ tiết GÓC TRÊN-PHẢI cuộn giấy (Paint.cs:135, neo góc trên-phải lệch (+3,−2) x1). Mép giấy rách chạy ngang, góc gập có dấu lá.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the TOP-RIGHT torn-edge ornament of the parchment info scroll. Canvas exactly 244 x 72 px (shown at 122 x 36); the game anchors its top-right corner 6 px right and 4 px above the parchment rectangle's top-right corner (rectangle #F0E6C3, border #8E855B). Content: a torn parchment top edge in exactly #F0E6C3 running along the top with a thin khaki edge #8E855B, a small folded corner at the right end with a carved leaf-swirl seal in orange, fading to transparency toward the left and bottom. Same style as ui_khung_goc_1_x4.png. No text. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dgoc3.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dgoc3.png",
+      "cat_manh": null
+    },
+    {
+      "stt": 17,
+      "ten_file": "ui_khung_goc_4_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        204,
+        88
+      ],
+      "noi_dung": "Hoạ tiết GÓC DƯỚI-PHẢI cuộn giấy (Paint.cs:137, neo góc dưới-phải lệch (+4,+2) x1). Góc giấy cuộn, vòng dây cam thòng xuống.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the BOTTOM-RIGHT torn-edge ornament of the parchment info scroll. Canvas exactly 204 x 88 px (shown at 102 x 44); the game anchors its bottom-right corner 8 px right and 4 px below the parchment rectangle's bottom-right corner (rectangle #F0E6C3, border #8E855B). Content: a torn, curled parchment corner in exactly #F0E6C3 with a thin khaki edge #8E855B and a short orange rope loop hanging off the corner, fading to transparency toward the left and top. Same style as ui_khung_goc_1_x4.png. No text. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dgoc4.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dgoc4.png",
+      "cat_manh": null
+    },
+    {
+      "stt": 18,
+      "ten_file": "ui_khung_goc_5_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        256,
+        32
+      ],
+      "noi_dung": "Hoạ tiết MÉP TRÊN GIỮA cuộn giấy (Paint.cs:138, neo tâm-trên). Dải giấy rách đối xứng, dấu lá nhỏ ở tâm.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the TOP-CENTER edge ornament of the parchment info scroll. Canvas exactly 256 x 32 px (shown at 128 x 16); the game anchors its top-center point on the rectangle's top edge midpoint (rectangle #F0E6C3, border #8E855B). Content: a torn parchment top edge strip in exactly #F0E6C3 with a thin khaki line #8E855B, horizontally symmetric, with a tiny orange leaf-swirl seal at the center; fading to transparency at both ends and toward the bottom. Same style as ui_khung_goc_1_x4.png. No text. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dgoc5.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dgoc5.png",
+      "cat_manh": null
+    },
+    {
+      "stt": 19,
+      "ten_file": "ui_khung_goc_6_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        256,
+        40
+      ],
+      "noi_dung": "Hoạ tiết MÉP DƯỚI GIỮA cuộn giấy (Paint.cs:139, neo tâm-dưới lệch +1 x1). Dải giấy rách, nút buộc dây cam ở tâm.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the BOTTOM-CENTER edge ornament of the parchment info scroll. Canvas exactly 256 x 40 px (shown at 128 x 20); the game anchors its bottom-center point 2 px below the rectangle's bottom edge midpoint (rectangle #F0E6C3, border #8E855B). Content: a torn parchment bottom edge strip in exactly #F0E6C3 with a thin khaki line #8E855B and a small orange rope binding at the center, horizontally symmetric, fading to transparency at both ends and toward the top. Same style as ui_khung_goc_1_x4.png. No text. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dgoc6.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dgoc6.png",
+      "cat_manh": null
+    },
+    {
+      "stt": 20,
+      "ten_file": "ui_khung_thoai_goc_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        28,
+        24
+      ],
+      "noi_dung": "Nắp góc bo tròn 7×6 x1 cho hộp thoại NPC / bong bóng chat (PopUp.cs:169-172 vẽ hộp trắng viền đen rồi đặt mảnh này ở 4 góc, lật gương 3 góc kia). Chỉ vẽ góc TRÊN-TRÁI: ngoài cung trong suốt, viền tối theo cung, trong trắng #FFFFFF, một chấm cam.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw a tiny rounded corner cap for the white speech / NPC dialogue box. Canvas exactly 28 x 24 px (shown at 7 x 6). This is the TOP-LEFT corner only; the game mirrors it for the other three corners and draws a white #FFFFFF box with a 1 px (at half size) black outline behind it. Content: a quarter-round corner -- outside the curve fully transparent, a 4 px dark outline #1B1410 following the curve, inside the curve solid white #FFFFFF, plus one 4 px orange #E8722A leaf-notch dot on the outline at the diagonal. Pixel-crisp, no anti-alias halo outside. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dbd3.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dbd3.png",
+      "cat_manh": null
+    },
+    {
+      "stt": 21,
+      "ten_file": "ui_nen_nhanvat_tuido_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        800,
+        824
+      ],
+      "noi_dung": "Phông nền sau nhân vật trong bảng túi đồ / trang bị (Panel.cs:995-1026 chọn theo 'giới tính' Trái Đất/Namek/Xayda; :8897-8913 vẽ neo tâm nhân vật). Naruto chỉ cần MỘT ảnh, chép cho cả 3 tên. Sân tập Làng Lá dịu màu, nhân vật đứng giữa (chân ≈ y 700) nên vùng giữa phải êm.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the backdrop shown behind the player's character in the bag / equipment panel. Canvas exactly 800 x 824 px (shown at 400 x 412); the character stands centered with feet at about y 700, so keep x 250-550, y 150-720 calm and low-contrast. Scene: a quiet Leaf-village training yard -- a low wooden fence and a training post at the sides, one big leafy tree behind, warm late-afternoon sky, soft distant rooftops with orange tiles; painterly, muted (about 40 percent saturation), no characters, no text. The edges of the whole image fade to full transparency in a soft rounded vignette about 60 px wide so it floats on the panel. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/inventd.png",
+        "/mainImage/invennm.png",
+        "/mainImage/invenxd.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\inventd.png",
+      "cat_manh": null
+    },
+    {
+      "stt": 22,
+      "ten_file": "ui_nut_phim_mem_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        272,
+        100
+      ],
+      "noi_dung": "Nút mềm rộng ở thanh đáy trên PC / máy không cảm ứng (Paint.cs:75-108 vẽ 3 nút trái–giữa–phải, chữ TỐI in đè). Dạng viên thuốc dài.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the wide soft-key button used at the bottom bar on PC / non-touch (three of them: left, center, right), NORMAL state. Canvas exactly 272 x 100 px (shown at 136 x 50), pill shape filling the canvas, top-left anchored by the game which prints a dark caption centered on it. Face: mid-warm orange #E8722A to #F2A445 gradient with a light highlight in the upper third, a 4 px dark lacquered wood rim, a 3 px dark outline #1B1410, fully rounded ends. No emblem, no text. Outside the pill transparent. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dbtnl.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dbtnl.png",
+      "cat_manh": null
+    },
+    {
+      "stt": 23,
+      "ten_file": "ui_nut_phim_mem_nhan_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        272,
+        100
+      ],
+      "noi_dung": "Nút mềm rộng trạng thái NHẤN (chữ xanh lá in đè) — tối hơn, bóng lõm.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the PRESSED state of the wide soft-key button, same geometry as ui_nut_phim_mem_x4.png: canvas exactly 272 x 100 px, pill shape. Difference: the face darkens to #7A3A14 to #A4501C with an inset shadow along the top edge so the game's green caption stays readable and the button reads as pushed in. No text. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dbtnlf.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dbtnlf.png",
+      "cat_manh": null
+    },
+    {
+      "stt": 24,
+      "ten_file": "ui_hud_nut_thuoc_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        160,
+        160
+      ],
+      "noi_dung": "Nút uống thuốc hồi máu nhanh trên HUD cảm ứng (GameScr.cs:5802-5807, 5824-5829: client vẽ ô đồng hồ hồi chiêu BÊN DƯỚI tại x1 (9,10) 22×20 rồi đè ảnh này, in số thuốc ở tâm). Vùng x4 (36..124, 40..120) phải TRONG SUỐT hoàn toàn → chỉ vẽ vành tròn + lọ thuốc nhỏ trên vành. Cũ: nút cam có hình trái tim/đậu thần.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the quick-heal potion button for the touch HUD, NORMAL state. Canvas exactly 160 x 160 px (shown at 80 x 80). The game paints a cooldown gauge UNDER this image inside the rectangle x 36-124, y 40-120 and prints the potion count at the center, so that rectangle must stay fully transparent (alpha 0) and the center free. Content: a ring only -- outer diameter 156 centered, 22 px thick, dark lacquered wood with an orange rope inlay and a 3 px dark outline on both edges; a small red medicine bottle glyph with a white label (about 30 x 40 px) sits on the ring at the bottom-right (around x 100-134, y 108-150), overlapping the ring, not the transparent window. Outside the ring transparent. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dPea0.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dPea0.png",
+      "cat_manh": null
+    },
+    {
+      "stt": 25,
+      "ten_file": "ui_hud_nut_thuoc_nhan_x4.png",
+      "nhom": "giao-dien",
+      "lang": null,
+      "kich_thuoc": [
+        160,
+        160
+      ],
+      "noi_dung": "Nút thuốc trạng thái NHẤN — cùng vành, tối hơn; cửa sổ giữa vẫn trong suốt.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the PRESSED state of the quick-heal potion button, same geometry as ui_hud_nut_thuoc_x4.png: canvas exactly 160 x 160 px, ring outer diameter 156, 22 px thick, transparent interior with x 36-124, y 40-120 fully transparent, small red medicine bottle glyph on the ring at the bottom-right. Difference: the wood darkens to #2A1A10, the rope dims to #A4501C, an inset shadow sits on the top of the ring. Outside the ring transparent. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "che_do_lap": "direct",
+      "thay_cho_client": [
+        "/mainImage/myTexture2dPea1.png"
+      ],
+      "anh_cu_x2_chi_doc": "D:\\NRO_Project\\Assets\\Resources\\res\\x2\\mainimage\\myTexture2dPea1.png",
+      "cat_manh": null
+    },
+    {
+      "stt": 26,
+      "ten_file": "ui_lang_la_lon_x4.png",
+      "nhom": "giao-dien",
+      "lang": "la",
+      "kich_thuoc": [
+        192,
+        192
+      ],
+      "noi_dung": "ĐỀ XUẤT — huy hiệu Làng Lá cỡ lớn cho màn chọn làng 5 ô (client hiện chỉ có 3 ô chọn bằng chữ + mũi tên, CreateCharScr.cs:397-399, mResources.MENUGENDER rỗng; lang.yaml:10-11 ghi client chỉ gửi được id 0/1/2). Chỉ vẽ SAU khi có code màn chọn làng. Nội dung như ui_lang_la 64×64 đã có: lá xoáy trên tấm kim loại băng trán.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the large emblem of the Hidden Leaf Village (Konoha) for the village-selection screen. Canvas exactly 192 x 192 px. A round forged-metal plate (diameter 180, brushed steel #8A8F96 with a dark rim) riveted onto a short strip of dark navy cloth headband visible at left and right; engraved into the plate the Leaf symbol: a stylized leaf whose stem curls into a spiral, cut with dark shadow and a warm orange-red #E8722A rim light (Fire nature color). Hand-painted metal shading with 40+ colors. Outside the plate and cloth transparent. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P3",
+      "trang_thai": "can_ve",
+      "che_do_lap": "de_xuat_cho_code",
+      "thay_cho_client": [],
+      "anh_cu_x2_chi_doc": null,
+      "cat_manh": null
+    },
+    {
+      "stt": 27,
+      "ten_file": "ui_lang_cat_lon_x4.png",
+      "nhom": "giao-dien",
+      "lang": "cat",
+      "kich_thuoc": [
+        192,
+        192
+      ],
+      "noi_dung": "ĐỀ XUẤT — huy hiệu Làng Cát cỡ lớn (đồng hồ cát nối xoáy), màu vàng cát/xanh lục nhạt hệ Phong. Điều kiện như trên.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the large emblem of the Hidden Sand Village (Suna) for the village-selection screen. Canvas exactly 192 x 192 px. A round forged-metal plate (diameter 180, brushed steel #8A8F96 with a dark rim) riveted onto a short strip of dark cloth headband visible at left and right; engraved into the plate the Sand symbol: an hourglass shape whose middle stroke continues into a small swirl, cut with dark shadow and a sandy yellow #E3C36B plus pale green #B7D9A0 rim light (Wind nature colors). Hand-painted metal shading with 40+ colors. Outside the plate and cloth transparent. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P3",
+      "trang_thai": "can_ve",
+      "che_do_lap": "de_xuat_cho_code",
+      "thay_cho_client": [],
+      "anh_cu_x2_chi_doc": null,
+      "cat_manh": null
+    },
+    {
+      "stt": 28,
+      "ten_file": "ui_lang_suong_lon_x4.png",
+      "nhom": "giao-dien",
+      "lang": "smu",
+      "kich_thuoc": [
+        192,
+        192
+      ],
+      "noi_dung": "ĐỀ XUẤT — huy hiệu Làng Sương Mù cỡ lớn (bốn vạch sóng), màu xanh lam hệ Thuỷ. Điều kiện như trên.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the large emblem of the Hidden Mist Village (Kiri) for the village-selection screen. Canvas exactly 192 x 192 px. A round forged-metal plate (diameter 180, brushed steel #8A8F96 with a dark rim) riveted onto a short strip of dark cloth headband visible at left and right; engraved into the plate the Mist symbol: four short wavy horizontal lines stacked, cut with dark shadow and a blue #4A90D9 to steel-blue rim light (Water nature colors). Hand-painted metal shading with 40+ colors. Outside the plate and cloth transparent. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P3",
+      "trang_thai": "can_ve",
+      "che_do_lap": "de_xuat_cho_code",
+      "thay_cho_client": [],
+      "anh_cu_x2_chi_doc": null,
+      "cat_manh": null
+    },
+    {
+      "stt": 29,
+      "ten_file": "ui_lang_da_lon_x4.png",
+      "nhom": "giao-dien",
+      "lang": "da",
+      "kich_thuoc": [
+        192,
+        192
+      ],
+      "noi_dung": "ĐỀ XUẤT — huy hiệu Làng Đá cỡ lớn (hai phiến đá), màu nâu đất/xám đá hệ Thổ. Điều kiện như trên.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the large emblem of the Hidden Stone Village (Iwa) for the village-selection screen. Canvas exactly 192 x 192 px. A round forged-metal plate (diameter 180, brushed steel #8A8F96 with a dark rim) riveted onto a short strip of dark cloth headband visible at left and right; engraved into the plate the Stone symbol: two stacked rock slabs, cut with dark shadow and an earth-brown #8B5A2B plus stone-grey #7D7D78 rim light (Earth nature colors). Hand-painted metal shading with 40+ colors. Outside the plate and cloth transparent. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P3",
+      "trang_thai": "can_ve",
+      "che_do_lap": "de_xuat_cho_code",
+      "thay_cho_client": [],
+      "anh_cu_x2_chi_doc": null,
+      "cat_manh": null
+    },
+    {
+      "stt": 30,
+      "ten_file": "ui_lang_may_lon_x4.png",
+      "nhom": "giao-dien",
+      "lang": "may",
+      "kich_thuoc": [
+        192,
+        192
+      ],
+      "noi_dung": "ĐỀ XUẤT — huy hiệu Làng Mây cỡ lớn (khối mây), màu tím/trắng xanh hệ Lôi. Điều kiện như trên.",
+      "dung_tham_chieu": [
+        "DUYET-khung-hoithoai",
+        "DUYET-nut-thuong",
+        "TOT-naruto-khung",
+        "HIEN-TRANG-hud-cu-x2"
+      ],
+      "prompt_day_du": "Style lock (paste unchanged): detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground. This is a UI element, not a character, so the facing-right / full-body clause does not apply; every other rule applies. UI material palette shared by all five villages (Leaf-village warm tone): dark lacquered wood #3A2418 to #5A3A22, warm orange rope and trim #E8722A to #F2A445, aged parchment #F1E2C0, thin dark outline #1B1410, one small carved leaf-swirl emblem allowed as accent. Match the approved dialog frame ui_khung_hoithoai_x4.png and button ui_nut_thuong_x4.png. Real painted bevels, highlights and wood grain; never a flat three-color vector shape. Draw the large emblem of the Hidden Cloud Village (Kumo) for the village-selection screen. Canvas exactly 192 x 192 px. A round forged-metal plate (diameter 180, brushed steel #8A8F96 with a dark rim) riveted onto a short strip of dark cloth headband visible at left and right; engraved into the plate the Cloud symbol: a rounded cumulus cloud shape, cut with dark shadow and a violet #8E6BC1 plus pale electric-white rim light (Lightning nature colors). Hand-painted metal shading with 40+ colors. Outside the plate and cloth transparent. Deliver a PNG with a true alpha channel at exactly the stated pixel size: every pixel outside the element is fully transparent (alpha 0), edges are hard and clean, no glow halo or soft shadow bleeding outside the silhouette, no drop shadow, no background scenery, no text, no watermark, no border around the canvas.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien\\",
+      "uu_tien": "P3",
+      "trang_thai": "can_ve",
+      "che_do_lap": "de_xuat_cho_code",
+      "thay_cho_client": [],
+      "anh_cu_x2_chi_doc": null,
+      "cat_manh": null
+    }
+  ],
+  "anh_da_co": [
+    {
+      "ten_file": "ui_logo_game_x4.png",
+      "kich_thuoc": [
+        512,
+        256
+      ],
+      "noi_luu": "D:\\NRO_GoiBanGiao\\my thuat\\dot1-nhom1-duyet\\dot1-nhom1-duyet\\01-giao-dien",
+      "trang_thai": "da_co",
+      "ghi_chu": "lock direct → /Logo/1.png; client đang chạy wordmark 599×136 — chốt một trong hai"
+    },
+    {
+      "ten_file": "ui_nut_thuong_x4.png",
+      "kich_thuoc": [
+        96,
+        48
+      ],
+      "noi_luu": "D:\\NRO_GoiBanGiao\\my thuat\\dot1-nhom1-duyet\\dot1-nhom1-duyet\\01-giao-dien",
+      "trang_thai": "da_co",
+      "ghi_chu": "lock slice_group nhưng hình học sai (3 mảnh 10×24 x1) → thay bằng ui_nut_thuong_3manh; giữ làm mẫu màu"
+    },
+    {
+      "ten_file": "ui_nut_nhan_x4.png",
+      "kich_thuoc": [
+        96,
+        48
+      ],
+      "noi_luu": "D:\\NRO_GoiBanGiao\\my thuat\\dot1-nhom1-duyet\\dot1-nhom1-duyet\\01-giao-dien",
+      "trang_thai": "da_co",
+      "ghi_chu": "như trên → ui_nut_nhan_3manh"
+    },
+    {
+      "ten_file": "ui_khung_avatar_x4.png",
+      "kich_thuoc": [
+        96,
+        96
+      ],
+      "noi_luu": "D:\\NRO_GoiBanGiao\\my thuat\\dot1-nhom1-duyet\\dot1-nhom1-duyet\\01-giao-dien",
+      "trang_thai": "da_co",
+      "ghi_chu": "overlay /naruto/ui/avatar-frame.png — chờ code"
+    },
+    {
+      "ten_file": "ui_khung_hoithoai_x4.png",
+      "kich_thuoc": [
+        480,
+        160
+      ],
+      "noi_luu": "D:\\NRO_GoiBanGiao\\my thuat\\dot1-nhom1-duyet\\dot1-nhom1-duyet\\01-giao-dien",
+      "trang_thai": "da_co",
+      "ghi_chu": "overlay /naruto/ui/dialog-frame.png — chờ code; là ảnh gốc đồng bộ chất liệu"
+    },
+    {
+      "ten_file": "ui_nut_khoa_x4.png",
+      "kich_thuoc": [
+        96,
+        48
+      ],
+      "noi_luu": "D:\\NRO_GoiBanGiao\\my thuat\\dot1-nhom1-duyet\\dot1-nhom1-duyet\\01-giao-dien",
+      "trang_thai": "da_co",
+      "ghi_chu": "overlay /naruto/ui/button-disabled.png — chờ code"
+    },
+    {
+      "ten_file": "ui_o_vatpham_x4.png",
+      "kich_thuoc": [
+        64,
+        64
+      ],
+      "noi_luu": "D:\\NRO_GoiBanGiao\\my thuat\\dot1-nhom1-duyet\\dot1-nhom1-duyet\\01-giao-dien",
+      "trang_thai": "da_co",
+      "ghi_chu": "overlay /naruto/ui/item-slot.png — chờ code"
+    },
+    {
+      "ten_file": "ui_o_dangchon_x4.png",
+      "kich_thuoc": [
+        64,
+        64
+      ],
+      "noi_luu": "D:\\NRO_GoiBanGiao\\my thuat\\dot1-nhom1-duyet\\dot1-nhom1-duyet\\01-giao-dien",
+      "trang_thai": "da_co",
+      "ghi_chu": "overlay /naruto/ui/item-slot-selected.png — chờ code"
+    },
+    {
+      "ten_file": "ui_thanh_theluc_nen_x4.png",
+      "kich_thuoc": [
+        240,
+        32
+      ],
+      "noi_luu": "D:\\NRO_GoiBanGiao\\my thuat\\_v2-bung\\01-giao-dien",
+      "trang_thai": "da_co",
+      "ghi_chu": "bị hud_hp_chakra_4_chroma thay — không dùng"
+    },
+    {
+      "ten_file": "ui_thanh_theluc_fill_x4.png",
+      "kich_thuoc": [
+        240,
+        32
+      ],
+      "noi_luu": "D:\\NRO_GoiBanGiao\\my thuat\\_v2-bung\\01-giao-dien",
+      "trang_thai": "da_co",
+      "ghi_chu": "không dùng"
+    },
+    {
+      "ten_file": "ui_thanh_chakra_nen_x4.png",
+      "kich_thuoc": [
+        240,
+        32
+      ],
+      "noi_luu": "D:\\NRO_GoiBanGiao\\my thuat\\_v2-bung\\01-giao-dien",
+      "trang_thai": "da_co",
+      "ghi_chu": "không dùng"
+    },
+    {
+      "ten_file": "ui_thanh_chakra_fill_x4.png",
+      "kich_thuoc": [
+        240,
+        32
+      ],
+      "noi_luu": "D:\\NRO_GoiBanGiao\\my thuat\\_v2-bung\\01-giao-dien",
+      "trang_thai": "da_co",
+      "ghi_chu": "không dùng"
+    },
+    {
+      "ten_file": "hud_hp_chakra_4_chroma.png",
+      "kich_thuoc": [
+        1774,
+        887
+      ],
+      "noi_luu": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1",
+      "trang_thai": "da_co",
+      "ghi_chu": "lock output mainImage/naruto-hp-bg|fill, naruto-chakra-bg|fill 240×32 — chưa vào client, việc lắp theo spec §6.3"
+    },
+    {
+      "ten_file": "ui_nut_dong_x4.png",
+      "kich_thuoc": [
+        64,
+        64
+      ],
+      "noi_luu": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\01-giao-dien",
+      "trang_thai": "da_co",
+      "ghi_chu": "dùng được ngay: thay /mainImage/myTexture2dbtX.png (68×68 x4) sau soi phong cách"
+    }
+  ],
+  "ten_moi_kich_thuoc": {
+    "ui_hud_khung_trai_x4.png": [
+      620,
+      164
+    ],
+    "ui_hud_o_kynang_x4.png": [
+      112,
+      112
+    ],
+    "ui_hud_o_kynang_chon_x4.png": [
+      112,
+      112
+    ],
+    "ui_khung_popup_9o_x4.png": [
+      40,
+      320
+    ],
+    "ui_nut_thuong_3manh_x4.png": [
+      120,
+      96
+    ],
+    "ui_nut_nhan_3manh_x4.png": [
+      120,
+      96
+    ],
+    "ui_menu_o_x4.png": [
+      230,
+      230
+    ],
+    "ui_menu_o_chon_x4.png": [
+      230,
+      230
+    ],
+    "ui_hud_nut_chat_x4.png": [
+      124,
+      124
+    ],
+    "ui_hud_nut_chat_nhan_x4.png": [
+      124,
+      124
+    ],
+    "ui_khung_popup_9o_sang_x4.png": [
+      40,
+      320
+    ],
+    "ui_hud_nut_menu_x4.png": [
+      56,
+      120
+    ],
+    "ui_hud_muiten_chi_duong_x4.png": [
+      52,
+      64
+    ],
+    "ui_khung_goc_1_x4.png": [
+      256,
+      216
+    ],
+    "ui_khung_goc_2_x4.png": [
+      132,
+      52
+    ],
+    "ui_khung_goc_3_x4.png": [
+      244,
+      72
+    ],
+    "ui_khung_goc_4_x4.png": [
+      204,
+      88
+    ],
+    "ui_khung_goc_5_x4.png": [
+      256,
+      32
+    ],
+    "ui_khung_goc_6_x4.png": [
+      256,
+      40
+    ],
+    "ui_khung_thoai_goc_x4.png": [
+      28,
+      24
+    ],
+    "ui_nen_nhanvat_tuido_x4.png": [
+      800,
+      824
+    ],
+    "ui_nut_phim_mem_x4.png": [
+      272,
+      100
+    ],
+    "ui_nut_phim_mem_nhan_x4.png": [
+      272,
+      100
+    ],
+    "ui_hud_nut_thuoc_x4.png": [
+      160,
+      160
+    ],
+    "ui_hud_nut_thuoc_nhan_x4.png": [
+      160,
+      160
+    ],
+    "ui_lang_la_lon_x4.png": [
+      192,
+      192
+    ],
+    "ui_lang_cat_lon_x4.png": [
+      192,
+      192
+    ],
+    "ui_lang_suong_lon_x4.png": [
+      192,
+      192
+    ],
+    "ui_lang_da_lon_x4.png": [
+      192,
+      192
+    ],
+    "ui_lang_may_lon_x4.png": [
+      192,
+      192
+    ]
+  },
+  "cong_cu_chua_co": [
+    "script cắt dải 9 ô (40×320) thành 8 file và nút 3 mảnh (120×96) thành left/mid/right trước khi chép vào client",
+    "nới khoá assetpack/build.py:879-884 (đúng 8 ui_bindings 1/2/5) nếu muốn lắp qua mapping-id thay vì chép tay",
+    "kiểm vùng đặc/trong suốt theo toạ độ (cửa sổ chân dung, rãnh máu, cửa sổ nút thuốc) — hiện soi bằng mắt trên nền đen/trắng"
+  ]
+}

@@ -1,0 +1,1710 @@
+{
+  "meta": {
+    "du_an": "Game Naruto (lõi NRO) — Đợt 4, hạng mục 09 Chân dung · Thương hiệu",
+    "brief_md": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\09-chan-dung-thuong-hieu.md",
+    "ngay": "2026-09-06",
+    "mo_ta": "Manifest máy đọc, schema mở rộng từ ../manifest-tao-anh.json: mỗi phần tử anh[] có kieu (tinh_alpha|dai_chroma), so_khung, o_kich_thuoc (dải), luu_vao, uu_tien (P1|P2|P3), trang_thai (can_ve|da_co|ve_lai). prompt_day_du trùng nguyên văn khối ở mục 6 của file MD. Ảnh tham chiếu là ĐƯỜNG DẪN tuyệt đối (không nhúng base64). Công cụ tự động: đọc từng anh[], gửi prompt_day_du + các ảnh dung_tham_chieu tới AI vẽ, lưu kết quả đúng ten_file vào luu_vao.",
+    "tong_anh": 44,
+    "so_anh": {
+      "P1": 2,
+      "P2": 36,
+      "P3": 5,
+      "da_co": 1
+    },
+    "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+    "ten_moi_can_them_kich_thuoc": [
+      "cd_nguoi_choi_la_x4.png = 200 200",
+      "cd_nguoi_choi_cat_x4.png = 200 200",
+      "cd_nguoi_choi_smu_x4.png = 200 200",
+      "cd_nguoi_choi_da_x4.png = 200 200",
+      "cd_nguoi_choi_may_x4.png = 200 200",
+      "cd_boss_nhan_gia_mat_na_p1_x4.png = 200 200",
+      "cd_boss_nhan_gia_mat_na_p2_x4.png = 200 200",
+      "cd_boss_hoc_vien_dao_tau_x4.png = 200 200",
+      "ui_icon_app_x4.png = 512 512",
+      "ui_icon_app_hinh_x4.png = 432 432",
+      "ui_icon_app_nen_x4.png = 432 432",
+      "ui_splash_doc_x4.png = 1080 1920",
+      "ui_splash_ngang_x4.png = 1920 1080",
+      "ui_bia_cuahang_x4.png = 1024 500",
+      "ui_nen_dangnhap_tet_x4.png = 1024 576",
+      "ui_nen_dangnhap_he_x4.png = 1024 576",
+      "ui_nen_dangnhap_trungthu_x4.png = 1024 576"
+    ],
+    "quy_uoc": {
+      "dai_chroma": "1 ô 1254×1254, nền tím RGB(246,4,242) phẳng; tên <tên>_portrait_chroma.png; máy nhồi về 200×200 (kich_thuoc_dich); ma_tra_cuu là tên cd_ trong kich-thuoc-anh.json",
+      "tinh_alpha (thương hiệu)": "PNG RGBA đục (alpha 255) — trừ ui_icon_app_hinh_x4 alpha thật; không qua TAO-4-MUC-ZOOM; ve_o_co là cỡ nên vẽ nếu khác kich_thuoc"
+    }
+  },
+  "phong_cach_khoa": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground",
+  "phong_cach_khoa_chan_dung": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground",
+  "phong_cach_khoa_thuong_hieu": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, NO flat vector shapes, NO background scenery, NO drop shadow on ground",
+  "mau_lang": {
+    "la": "Hoả: cam–đỏ, ánh lửa ấm",
+    "cat": "Phong: vàng cát–lục nhạt",
+    "smu": "Thuỷ: xanh dương–lam",
+    "da": "Thổ: nâu đất–xám đá",
+    "may": "Lôi: tím XANH (indigo/lavender, R−G < 100)–trắng–vàng chớp; cấm tím hồng/magenta"
+  },
+  "anh_tham_chieu": {
+    "TOT-naruto-logo": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-3-toan-bo\\anh-tham-chieu\\TOT-naruto-logo.png",
+    "TOT-chitiet-nhanvat": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-3-toan-bo\\anh-tham-chieu\\TOT-chitiet-nhanvat.png",
+    "XAU-boss-zabuza": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-3-toan-bo\\anh-tham-chieu\\XAU-boss-zabuza.png",
+    "XAU-npc": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-3-toan-bo\\anh-tham-chieu\\XAU-npc.png",
+    "TOT-npc-ong-tazuna": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-3-toan-bo\\anh-tham-chieu\\TOT-npc-ong-tazuna.png",
+    "THUOC-NHAN-VAT": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\anh-tham-chieu\\THUOC-NHAN-VAT.png",
+    "iruka_portrait_chroma": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\iruka_portrait_chroma.png",
+    "iruka_portrait_contact": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\qa\\contact-sheets\\iruka_portrait_light-dark.png",
+    "player_idle_3f_chroma": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\player_idle_3f_chroma.png",
+    "master_hoc_vien_x4_chroma": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\master_hoc_vien_x4_chroma.png",
+    "master_iruka_x4_chroma": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\master_iruka_x4_chroma.png",
+    "logo_wordmark_client": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\lang-la-client-assets\\Logo\\1.png",
+    "appicon_cu_dragonball": "D:\\NRO_Project\\Assets\\Resources\\appicon.png",
+    "concept-map1-langla": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\map-1-lang-la\\concept-map1-langla.png",
+    "ui_nen_dangnhap_343": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\01-giao-dien\\ui_nen_dangnhap_x4.png",
+    "wolf_idle_2f_chroma": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1\\wolf_idle_2f_chroma.png",
+    "npc343_ba_vukhi": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\npc_ba_vukhi_x4.png",
+    "cd343_ba_vukhi": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\cd_ba_vukhi_x4.png",
+    "npc343_chu_ramen": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\npc_chu_ramen_x4.png",
+    "cd343_chu_ramen": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\cd_chu_ramen_x4.png",
+    "npc343_co_be_hoa": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\npc_co_be_hoa_x4.png",
+    "cd343_co_be_hoa": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\cd_co_be_hoa_x4.png",
+    "npc343_hokage3": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\npc_hokage3_x4.png",
+    "cd343_hokage3": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\cd_hokage3_x4.png",
+    "npc343_iruka": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\npc_iruka_x4.png",
+    "cd343_iruka": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\cd_iruka_x4.png",
+    "npc343_kakashi": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\npc_kakashi_x4.png",
+    "cd343_kakashi": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\cd_kakashi_x4.png",
+    "npc343_linh_gac": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\npc_linh_gac_x4.png",
+    "cd343_linh_gac": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\cd_linh_gac_x4.png",
+    "npc343_nguoi_dua_thu": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\npc_nguoi_dua_thu_x4.png",
+    "cd343_nguoi_dua_thu": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\cd_nguoi_dua_thu_x4.png",
+    "npc343_nguoi_giao_nv": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\npc_nguoi_giao_nv_x4.png",
+    "cd343_nguoi_giao_nv": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\cd_nguoi_giao_nv_x4.png",
+    "npc343_nha_chep_cuon": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\npc_nha_chep_cuon_x4.png",
+    "cd343_nha_chep_cuon": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\cd_nha_chep_cuon_x4.png",
+    "npc343_ong_tazuna": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\npc_ong_tazuna_x4.png",
+    "cd343_ong_tazuna": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\cd_ong_tazuna_x4.png",
+    "npc343_thay_hocvien": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\npc_thay_hocvien_x4.png",
+    "cd343_thay_hocvien": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\cd_thay_hocvien_x4.png",
+    "npc343_tho_ren": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\npc_tho_ren_x4.png",
+    "cd343_tho_ren": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\cd_tho_ren_x4.png",
+    "npc343_trongtai_thi": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\npc_trongtai_thi_x4.png",
+    "cd343_trongtai_thi": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\cd_trongtai_thi_x4.png",
+    "npc343_y_ta": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\npc_y_ta_x4.png",
+    "cd343_y_ta": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\343-anh\\07-npc\\cd_y_ta_x4.png"
+  },
+  "anh_tham_chieu_ghi_chu": {
+    "TOT-naruto-logo": "Emblem la-lua xoay 512x256 da duyet — bang mau thuong hieu (cam-do, xanh ngoc, navy). Gan kem MOI lan gen.",
+    "TOT-chitiet-nhanvat": "Muc chi tiet va do bong can dat (chi tham chieu KIEU VE, khong phai noi dung).",
+    "XAU-boss-zabuza": "Mau XAU: hinh khoi phang vai mau — tuyet doi tranh.",
+    "XAU-npc": "Mau XAU: chan dung NPC phang 200x200 lo cu — tranh.",
+    "TOT-npc-ong-tazuna": "Mau TOT ve vai co nep gap, phu kien, da nguoi gia.",
+    "THUOC-NHAN-VAT": "Thuoc ti le nhan vat 05/09: cao mat 96-99 px, toc->cam 266-271 px trong o 724. Chan dung phai cung khuon mat/ti le dau nay.",
+    "iruka_portrait_chroma": "CHAN DUNG MAU DA LAP TRONG GAME (Small27078): ban than, 3/4 quay PHAI, vai cat phang cham day o, nen tim. Moi chan dung moi phai cung khuon nay.",
+    "iruka_portrait_contact": "Ban da tach nen cua chan dung Iruka tren nen sang/toi — de nhin ro khung hinh.",
+    "player_idle_3f_chroma": "Nhan vat nguoi choi Lang La goc (idle) — chan dung nguoi choi phai cung mat/toc/bang tran/ao voi khung idle_0 nay.",
+    "master_hoc_vien_x4_chroma": "Ban dung nguyen con cua nguoi choi hoc vien — dong bo trang phuc.",
+    "master_iruka_x4_chroma": "Master Iruka dang lap — de boss pha 2 KHONG bi giong Iruka.",
+    "logo_wordmark_client": "Wordmark NARUTO 599x136 dang chay trong client (res/x4/Logo/1.png). Splash/bia chua vung trong de DAN wordmark nay, KHONG ve chu.",
+    "appicon_cu_dragonball": "Icon app HIEN TAI cua client (479x480): rong xanh quan ngoc 4 sao — game cu Dragon Ball. La thu PHAI THAY, khong phai mau.",
+    "concept-map1-langla": "Concept Lang La da duyet — tong mau/net ve cho phong nen splash va bia cua hang.",
+    "ui_nen_dangnhap_343": "Nen dang nhap 1024x576 lo 343 (lang ninja hoang hon, trang lon) — bo cuc goc cho banner theo mua; ve lai theo phong cach hand-painted.",
+    "wolf_idle_2f_chroma": "Soi Rung dang lap — neu dua vao bia cua hang thi lay dang nay.",
+    "npc343_ba_vukhi": "Lo 343 (pixel-art, dung nguyen con) — chi lay NOI DUNG nhan vat (toc, do, phu kien).",
+    "cd343_ba_vukhi": "Chan dung cu lo 343 (800x800, quay TRAI, pixel-art) — chi lay noi dung; huong quay va phong cach KHONG theo.",
+    "npc343_chu_ramen": "Lo 343 (pixel-art, dung nguyen con) — chi lay NOI DUNG nhan vat (toc, do, phu kien).",
+    "cd343_chu_ramen": "Chan dung cu lo 343 (800x800, quay TRAI, pixel-art) — chi lay noi dung; huong quay va phong cach KHONG theo.",
+    "npc343_co_be_hoa": "Lo 343 (pixel-art, dung nguyen con) — chi lay NOI DUNG nhan vat (toc, do, phu kien).",
+    "cd343_co_be_hoa": "Chan dung cu lo 343 (800x800, quay TRAI, pixel-art) — chi lay noi dung; huong quay va phong cach KHONG theo.",
+    "npc343_hokage3": "Lo 343 (pixel-art, dung nguyen con) — chi lay NOI DUNG nhan vat (toc, do, phu kien).",
+    "cd343_hokage3": "Chan dung cu lo 343 (800x800, quay TRAI, pixel-art) — chi lay noi dung; huong quay va phong cach KHONG theo.",
+    "npc343_iruka": "Lo 343 (pixel-art, dung nguyen con) — chi lay NOI DUNG nhan vat (toc, do, phu kien).",
+    "cd343_iruka": "Chan dung cu lo 343 (800x800, quay TRAI, pixel-art) — chi lay noi dung; huong quay va phong cach KHONG theo.",
+    "npc343_kakashi": "Lo 343 (pixel-art, dung nguyen con) — chi lay NOI DUNG nhan vat (toc, do, phu kien).",
+    "cd343_kakashi": "Chan dung cu lo 343 (800x800, quay TRAI, pixel-art) — chi lay noi dung; huong quay va phong cach KHONG theo.",
+    "npc343_linh_gac": "Lo 343 (pixel-art, dung nguyen con) — chi lay NOI DUNG nhan vat (toc, do, phu kien).",
+    "cd343_linh_gac": "Chan dung cu lo 343 (800x800, quay TRAI, pixel-art) — chi lay noi dung; huong quay va phong cach KHONG theo.",
+    "npc343_nguoi_dua_thu": "Lo 343 (pixel-art, dung nguyen con) — chi lay NOI DUNG nhan vat (toc, do, phu kien).",
+    "cd343_nguoi_dua_thu": "Chan dung cu lo 343 (800x800, quay TRAI, pixel-art) — chi lay noi dung; huong quay va phong cach KHONG theo.",
+    "npc343_nguoi_giao_nv": "Lo 343 (pixel-art, dung nguyen con) — chi lay NOI DUNG nhan vat (toc, do, phu kien).",
+    "cd343_nguoi_giao_nv": "Chan dung cu lo 343 (800x800, quay TRAI, pixel-art) — chi lay noi dung; huong quay va phong cach KHONG theo.",
+    "npc343_nha_chep_cuon": "Lo 343 (pixel-art, dung nguyen con) — chi lay NOI DUNG nhan vat (toc, do, phu kien).",
+    "cd343_nha_chep_cuon": "Chan dung cu lo 343 (800x800, quay TRAI, pixel-art) — chi lay noi dung; huong quay va phong cach KHONG theo.",
+    "npc343_ong_tazuna": "Lo 343 (pixel-art, dung nguyen con) — chi lay NOI DUNG nhan vat (toc, do, phu kien).",
+    "cd343_ong_tazuna": "Chan dung cu lo 343 (800x800, quay TRAI, pixel-art) — chi lay noi dung; huong quay va phong cach KHONG theo.",
+    "npc343_thay_hocvien": "Lo 343 (pixel-art, dung nguyen con) — chi lay NOI DUNG nhan vat (toc, do, phu kien).",
+    "cd343_thay_hocvien": "Chan dung cu lo 343 (800x800, quay TRAI, pixel-art) — chi lay noi dung; huong quay va phong cach KHONG theo.",
+    "npc343_tho_ren": "Lo 343 (pixel-art, dung nguyen con) — chi lay NOI DUNG nhan vat (toc, do, phu kien).",
+    "cd343_tho_ren": "Chan dung cu lo 343 (800x800, quay TRAI, pixel-art) — chi lay noi dung; huong quay va phong cach KHONG theo.",
+    "npc343_trongtai_thi": "Lo 343 (pixel-art, dung nguyen con) — chi lay NOI DUNG nhan vat (toc, do, phu kien).",
+    "cd343_trongtai_thi": "Chan dung cu lo 343 (800x800, quay TRAI, pixel-art) — chi lay noi dung; huong quay va phong cach KHONG theo.",
+    "npc343_y_ta": "Lo 343 (pixel-art, dung nguyen con) — chi lay NOI DUNG nhan vat (toc, do, phu kien).",
+    "cd343_y_ta": "Chan dung cu lo 343 (800x800, quay TRAI, pixel-art) — chi lay noi dung; huong quay va phong cach KHONG theo."
+  },
+  "anh": [
+    {
+      "ten_file": "nguoi_choi_la_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "la",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung người chơi Làng Lá (học viên) — CÙNG KHUÔN MẶT với dải `player_idle_3f_chroma.png` đang chạy trong game: tóc đen-nâu dựng, mắt nâu, băng trán vải navy gắn tấm thép khắc lá xoáy, áo giáp vest xanh ô-liu, cổ áo navy, thoáng nút khăn cam ở mép dưới. Máy sẽ cắt ra HAI bản: 104×104 (26 đơn vị) thay nội dung `Small27084` cho ô xanh HUD và bảng cửa hàng; 200×200 (id mới) cho khung thoại khi máy chủ cần. Hiện 27084 chỉ là cái đầu cắt từ sprite, không phải chân dung vẽ.",
+      "dung_tham_chieu": [
+        "player_idle_3f_chroma",
+        "master_hoc_vien_x4_chroma",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the Leaf Village academy-student PLAYER character exactly as in the reference idle frame (player_idle_3f_chroma.png, frame 0): a boy about 12 years old, tan skin, large brown eyes with a determined brow, dark brown-black spiky hair swept back and up, dark navy cloth forehead protector with a silver metal plate engraved with the Leaf spiral symbol (plate centered above the eyes), olive-green flak vest with two chest pockets over a dark navy high-collar shirt, the knot of an orange sash just visible at the bottom cut-line. Calm, friendly, slightly stubborn expression, mouth closed. Leaf Village / Fire nature palette: warm orange-red with olive green and dark navy.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: this face will sit next to the running sprite of the same boy — copy hair shape, eye shape, skin tone and headband from the reference; do not restyle him, do not age him, do not add a scar.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_nguoi_choi_la_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Đích: (1) 104×104 x4 = 26 x1 → thay nội dung Small27084 (HUD GameScr.cs:5588-5590, bảng Panel.cs:10072-10270 vẽ cỡ gốc); (2) 200×200 → Small id mới ≥ 27085 cho khung thoại. Tên mới cần thêm kich-thuoc-anh.json: cd_nguoi_choi_la_x4 200×200."
+    },
+    {
+      "ten_file": "nguoi_choi_cat_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "cat",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung người chơi mặc định Làng Cát (đề xuất). Cùng tuổi, cùng tỉ lệ đầu với học viên Làng Lá, đổi tóc/da/băng trán/màu cổ áo theo làng. CHỜ: brief `01-nhan-vat-nguoi-choi.md` chốt dải đầu theo làng và máy chủ gửi đầu/chân dung theo làng (`hinhdang.go:56-58` hiện bỏ qua `lang`; `thegioi.go:165-168` hằng `AvatarNhanVat` = 27084 dùng cho mọi làng). Vẽ SAU khi 01 chốt, dùng đúng mô tả đầu của 01.",
+      "dung_tham_chieu": [
+        "player_idle_3f_chroma",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the default PLAYER character of the Sand Village: a ninja academy student about 12 years old with the SAME head size, face proportions and body build as the Leaf student in the reference (player_idle_3f_chroma.png) but a different look: sandy-blond short hair with a cream desert head-wrap, tan sun-weathered skin, amber eyes, forehead protector plate engraved with the Sand hourglass symbol stitched onto the head-wrap, a sand-yellow scarf bunched at the neck over a khaki high-collar shirt with an ochre shoulder strap. Calm, friendly, slightly stubborn expression, mouth closed. Sand Village / Wind nature palette: sand-yellow, ochre, cream and pale desert green.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: keep the child-like proportions (big eyes, short nose, round cheek) identical to the Leaf student so all five starting characters read as the same age; only hair, skin, headband symbol and clothing colors change.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_nguoi_choi_cat_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Đề xuất — chờ 01-nhan-vat-nguoi-choi.md và máy chủ (hinhdang.go, thegioi.go) gửi theo làng. Tên mới: cd_nguoi_choi_cat_x4 200×200."
+    },
+    {
+      "ten_file": "nguoi_choi_smu_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "smu",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung người chơi mặc định Làng Sương Mù (đề xuất). Cùng tuổi, cùng tỉ lệ đầu với học viên Làng Lá, đổi tóc/da/băng trán/màu cổ áo theo làng. CHỜ: brief `01-nhan-vat-nguoi-choi.md` chốt dải đầu theo làng và máy chủ gửi đầu/chân dung theo làng (`hinhdang.go:56-58` hiện bỏ qua `lang`; `thegioi.go:165-168` hằng `AvatarNhanVat` = 27084 dùng cho mọi làng). Vẽ SAU khi 01 chốt, dùng đúng mô tả đầu của 01.",
+      "dung_tham_chieu": [
+        "player_idle_3f_chroma",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the default PLAYER character of the Mist Village: a ninja academy student about 12 years old with the SAME head size, face proportions and body build as the Leaf student in the reference (player_idle_3f_chroma.png) but a different look: dark blue-black straight hair hanging over one eyebrow with a damp look, pale cool skin, grey-blue eyes, forehead protector plate engraved with the four wavy Mist lines on a slate-blue band, a deep-blue high collar with a teal striped inner lining, a thin strip of bandage on one cheek. Calm, friendly, slightly stubborn expression, mouth closed. Mist Village / Water nature palette: deep blue, teal and slate grey.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: keep the child-like proportions (big eyes, short nose, round cheek) identical to the Leaf student so all five starting characters read as the same age; only hair, skin, headband symbol and clothing colors change.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_nguoi_choi_smu_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Đề xuất — chờ 01-nhan-vat-nguoi-choi.md và máy chủ (hinhdang.go, thegioi.go) gửi theo làng. Tên mới: cd_nguoi_choi_smu_x4 200×200."
+    },
+    {
+      "ten_file": "nguoi_choi_da_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "da",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung người chơi mặc định Làng Đá (đề xuất). Cùng tuổi, cùng tỉ lệ đầu với học viên Làng Lá, đổi tóc/da/băng trán/màu cổ áo theo làng. CHỜ: brief `01-nhan-vat-nguoi-choi.md` chốt dải đầu theo làng và máy chủ gửi đầu/chân dung theo làng (`hinhdang.go:56-58` hiện bỏ qua `lang`; `thegioi.go:165-168` hằng `AvatarNhanVat` = 27084 dùng cho mọi làng). Vẽ SAU khi 01 chốt, dùng đúng mô tả đầu của 01.",
+      "dung_tham_chieu": [
+        "player_idle_3f_chroma",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the default PLAYER character of the Stone Village: a ninja academy student about 12 years old with the SAME head size, face proportions and body build as the Leaf student in the reference (player_idle_3f_chroma.png) but a different look: dark brown cropped hair, sturdy square jaw, earth-tan skin, dark brown eyes, forehead protector plate engraved with the two Stone slabs on a rust-red band, a heavy earth-brown scarf over a rock-grey padded collar with brown leather trim. Calm, friendly, slightly stubborn expression, mouth closed. Stone Village / Earth nature palette: earth brown, rust and rock grey.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: keep the child-like proportions (big eyes, short nose, round cheek) identical to the Leaf student so all five starting characters read as the same age; only hair, skin, headband symbol and clothing colors change.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_nguoi_choi_da_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Đề xuất — chờ 01-nhan-vat-nguoi-choi.md và máy chủ (hinhdang.go, thegioi.go) gửi theo làng. Tên mới: cd_nguoi_choi_da_x4 200×200."
+    },
+    {
+      "ten_file": "nguoi_choi_may_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "may",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung người chơi mặc định Làng Mây (đề xuất). Cùng tuổi, cùng tỉ lệ đầu với học viên Làng Lá, đổi tóc/da/băng trán/màu cổ áo theo làng. CHỜ: brief `01-nhan-vat-nguoi-choi.md` chốt dải đầu theo làng và máy chủ gửi đầu/chân dung theo làng (`hinhdang.go:56-58` hiện bỏ qua `lang`; `thegioi.go:165-168` hằng `AvatarNhanVat` = 27084 dùng cho mọi làng). Vẽ SAU khi 01 chốt, dùng đúng mô tả đầu của 01.",
+      "dung_tham_chieu": [
+        "player_idle_3f_chroma",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the default PLAYER character of the Cloud Village: a ninja academy student about 12 years old with the SAME head size, face proportions and body build as the Leaf student in the reference (player_idle_3f_chroma.png) but a different look: short white-silver hair swept to one side, darker brown skin, sharp gold eyes, forehead protector plate engraved with the Cloud symbol on a bluish indigo band, a white high collar with indigo-violet shoulders and a thin lightning-yellow trim. Calm, friendly, slightly stubborn expression, mouth closed. Cloud Village / Lightning nature palette: BLUISH indigo-violet, white and lightning yellow (keep every purple bluish: R-G below 100 — no magenta, no hot pink, no red-violet).\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: keep the child-like proportions (big eyes, short nose, round cheek) identical to the Leaf student so all five starting characters read as the same age; only hair, skin, headband symbol and clothing colors change.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_nguoi_choi_may_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Đề xuất — chờ 01-nhan-vat-nguoi-choi.md và máy chủ (hinhdang.go, thegioi.go) gửi theo làng. Tên mới: cd_nguoi_choi_may_x4 200×200."
+    },
+    {
+      "ten_file": "nhan_gia_mat_na_p1_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "la",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung boss lớn **Nhân Gia Mặt Nạ — pha 1 \"Kẻ Lạ Mặt\"** (`boss.yaml` ma `nhan-gia-mat-na`, pha 1, outfit học viên 30/57/58): mặc đúng bộ học viên như người chơi (vest ô-liu, cổ navy) nhưng mặt che sau mặt nạ sứ trắng trơn, hai khe mắt hẹp, một vết nứt đỏ mảnh chéo má, tóc đen dài rối lòi ra sau mặt nạ. Cảm giác \"đứng giữa đám học viên mà không ai ngoảnh lại\". Boss thoại qua gói 44 = bong bóng trên đầu (server/internal/game/chat.go:1-2,70-87; Controller.cs:4567-4572) — KHÔNG có trường chân dung. Chân dung boss chỉ hiện khi máy chủ dùng gói 38/32 (Controller.cs:3618, 3659) hoặc -70 (Controller.cs:3562-3568) có `avatar`. Đề xuất; đồng bộ với dải ĐẦU boss trong 02-boss.md (chưa viết) — bên nào vẽ trước, bên sau theo.",
+      "dung_tham_chieu": [
+        "player_idle_3f_chroma",
+        "master_hoc_vien_x4_chroma",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the boss \"The Stranger\" (Masked Impostor, phase 1) disguised as a Leaf academy student: wears EXACTLY the student uniform of the player reference (olive-green flak vest with chest pockets, dark navy high-collar shirt) but the face is completely hidden behind a smooth matte off-white ceramic mask with two narrow dark eye slits and a single thin red crack running diagonally across the left cheek of the mask; long unkempt black hair escapes behind and below the mask; no forehead protector; shoulders slightly hunched, still, menacing. Adult-sized head and shoulders (about 15% larger than the student player, this is a grown man in a student's clothes). Leaf Village / Fire nature palette: warm orange-red with olive green and dark navy, with the red crack as the only red accent.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: no eyes visible through the slits (pure dark), no glow, no fire effect; the mask is painted ceramic with soft shading, not flat white.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_boss_nhan_gia_mat_na_p1_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Boss thoại qua gói 44 = bong bóng trên đầu (server/internal/game/chat.go:1-2,70-87; Controller.cs:4567-4572) — KHÔNG có trường chân dung. Chân dung boss chỉ hiện khi máy chủ dùng gói 38/32 (Controller.cs:3618, 3659) hoặc -70 (Controller.cs:3562-3568) có `avatar`. Đề xuất; đồng bộ với dải ĐẦU boss trong 02-boss.md (chưa viết) — bên nào vẽ trước, bên sau theo. Tên mới: cd_boss_nhan_gia_mat_na_p1_x4 200×200."
+    },
+    {
+      "ten_file": "nhan_gia_mat_na_p2_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "la",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung boss lớn **Nhân Gia Mặt Nạ — pha 2 \"Mặt Nạ Vỡ\"** (chân thân, hôm nay đang mặc bộ Iruka 2189/2190/2191 nên KHÔNG được giống Iruka): đàn ông ~30, mặt gầy sắc, tóc đen dài có vệt bạc, sẹo chéo má trái, băng trán Làng Lá bị **gạch ngang xoá biểu tượng lá** (kẻ đào tẩu), nửa mặt nạ vỡ còn treo bên hàm, cổ áo choàng đỏ thẫm-đen lót cam than hồng (hệ Hoả). Thoại pha 2: \"Ta từng đeo băng trán của làng này\". Boss thoại qua gói 44 = bong bóng trên đầu (server/internal/game/chat.go:1-2,70-87; Controller.cs:4567-4572) — KHÔNG có trường chân dung. Chân dung boss chỉ hiện khi máy chủ dùng gói 38/32 (Controller.cs:3618, 3659) hoặc -70 (Controller.cs:3562-3568) có `avatar`. Đề xuất; đồng bộ với dải ĐẦU boss trong 02-boss.md (chưa viết) — bên nào vẽ trước, bên sau theo.",
+      "dung_tham_chieu": [
+        "master_iruka_x4_chroma",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the boss \"Broken Mask\" (Masked Impostor, phase 2, true form revealed): a gaunt sharp-featured man about 30 years old, pale-tan skin, long straight black hair with one grey streak falling past the shoulders, narrow cold dark-red eyes, a diagonal old scar across the left cheek (NOT across the nose), a Leaf Village forehead protector whose metal plate has the Leaf symbol SCRATCHED THROUGH by one deep horizontal gash (rogue ninja), the broken lower half of a white ceramic mask still hanging from a cord at the side of his jaw, a high dark-crimson-black cloak collar with an ember-orange inner lining. Expression: bitter, contemptuous half-smile. Leaf Village / Fire nature palette: warm orange-red with olive green and dark navy.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: he must NOT resemble the NPC Iruka (reference master_iruka_x4_chroma.png): no ponytail, no scar across the nose, no olive vest, different face shape. No fire effect, no glow.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_boss_nhan_gia_mat_na_p2_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Boss thoại qua gói 44 = bong bóng trên đầu (server/internal/game/chat.go:1-2,70-87; Controller.cs:4567-4572) — KHÔNG có trường chân dung. Chân dung boss chỉ hiện khi máy chủ dùng gói 38/32 (Controller.cs:3618, 3659) hoặc -70 (Controller.cs:3562-3568) có `avatar`. Đề xuất; đồng bộ với dải ĐẦU boss trong 02-boss.md (chưa viết) — bên nào vẽ trước, bên sau theo. Tên mới: cd_boss_nhan_gia_mat_na_p2_x4 200×200."
+    },
+    {
+      "ten_file": "hoc_vien_dao_tau_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "smu",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung boss lẻ **Học Viên Đào Tẩu** (`boss.yaml` ma `hoc-vien-dao-tau`, làng 2 Sương Mù, đứng ở map 1, outfit học viên 30/57/58): thiếu niên ~14 bỏ trốn giữa kỳ thi Sương Mù — da tái, tóc xanh đen ướt rũ che một mắt, quầng mắt thâm, băng trán Sương Mù (4 vạch sóng) đeo lệch lỏng ở cổ, bộ học viên (vest ô-liu, cổ navy) bẩn sờn, miếng băng dán trên má. Boss thoại qua gói 44 = bong bóng trên đầu (server/internal/game/chat.go:1-2,70-87; Controller.cs:4567-4572) — KHÔNG có trường chân dung. Chân dung boss chỉ hiện khi máy chủ dùng gói 38/32 (Controller.cs:3618, 3659) hoặc -70 (Controller.cs:3562-3568) có `avatar`. Đề xuất; đồng bộ với dải ĐẦU boss trong 02-boss.md (chưa viết) — bên nào vẽ trước, bên sau theo.",
+      "dung_tham_chieu": [
+        "player_idle_3f_chroma",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the boss \"Runaway Student\" (Mist Village academy defector hiding in Leaf territory): a thin teenage boy about 14, pale cool skin, wet-looking dark teal-black hair hanging over his right eye, tired eyes with dark circles, a Mist Village forehead protector (metal plate with four wavy lines on a slate-blue band) worn loose and crooked around the NECK instead of the forehead, the same academy student uniform as the player reference (olive-green flak vest, dark navy high collar) but dirty, frayed and darkened by rain, a small strip of bandage on his left cheek. Expression: haunted, defensive. Mist Village / Water nature palette: deep blue, teal and slate grey for hair, headband and shadows.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: no water droplets or glow effects, no scar across the nose (that belongs to Iruka).",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_boss_hoc_vien_dao_tau_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Boss thoại qua gói 44 = bong bóng trên đầu (server/internal/game/chat.go:1-2,70-87; Controller.cs:4567-4572) — KHÔNG có trường chân dung. Chân dung boss chỉ hiện khi máy chủ dùng gói 38/32 (Controller.cs:3618, 3659) hoặc -70 (Controller.cs:3562-3568) có `avatar`. Đề xuất; đồng bộ với dải ĐẦU boss trong 02-boss.md (chưa viết) — bên nào vẽ trước, bên sau theo. Tên mới: cd_boss_hoc_vien_dao_tau_x4 200×200."
+    },
+    {
+      "ten_file": "iruka_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "la",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "NPC Iruka — **ĐÃ CÓ, KHÔNG VẼ**: `anh-nguon\\vertical-slice-v1\\iruka_portrait_chroma.png` đã QA PASS, đang lắp là `Small27078` (catalog.json npcs[0].portrait). Đây là CHUẨN cho mọi chân dung mới. Prompt dưới chỉ để dùng nếu chủ dự án muốn vẽ lại đồng bộ sau.",
+      "dung_tham_chieu": [
+        "master_iruka_x4_chroma",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the NPC Iruka, Leaf Village academy teacher: brown hair pulled up into a short spiky ponytail, tan skin, warm brown eyes, a horizontal scar across the bridge of the nose, dark navy forehead protector with the Leaf plate, olive-green flak vest over a dark navy high-collar shirt, small goatee. Kind, encouraging smile. Leaf Village / Fire nature palette: warm orange-red with olive green and dark navy.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: only redraw if the project owner explicitly asks — the current iruka_portrait_chroma.png is the approved standard.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_iruka_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P3",
+      "trang_thai": "da_co",
+      "ghi_chu": "Đã lắp Small27078. Không vẽ đợt này."
+    },
+    {
+      "ten_file": "hokage3_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "la",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Hokage đệ Tam** (đề xuất Làng Lá, chờ KH9 chốt danh sách NPC — máy chủ hôm nay chỉ có Iruka). Ông già thủ lĩnh làng: mặt nhăn hiền, râu cằm bạc, nón chóp Kage đỏ-trắng (KHÔNG chữ), áo choàng trắng viền đỏ, tẩu dài, sợi khói mảnh. Bản cũ `cd_hokage3_x4.png` trong lô 343 là pixel-art 800×800 và **quay TRÁI** — lệch với Iruka đang lắp, nên vẽ lại theo khuôn chroma; ảnh cũ chỉ dùng làm tham chiếu nội dung. Vẽ CÙNG LÚC với `master_hokage3_x4_chroma.png` ở brief 03-npc (chưa viết) để cùng một khuôn mặt.",
+      "dung_tham_chieu": [
+        "npc343_hokage3",
+        "cd343_hokage3",
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the Third Hokage, the elderly village leader: deeply wrinkled kind face, white goatee and thin white moustache, heavy-lidded wise eyes, a red-and-white conical Kage hat with a white cloth veil at the sides (no writing on the hat), a white robe collar with red trim over a dark inner robe, a long thin wooden pipe held at the corner of the mouth with one short opaque wisp of painted grey smoke. Expression: tired but warm. Leaf Village / Fire nature palette: warm orange-red with olive green and dark navy.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: use the two reference images of this NPC from the old batch (npc_hokage3_x4.png, cd_hokage3_x4.png) ONLY for who the character is (hair, clothes, accessories); ignore their pixel-art style and ignore that they face left — this portrait faces RIGHT like iruka_portrait_chroma.png.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_hokage3_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "ve_lai",
+      "ghi_chu": "Đề xuất, chờ KH9. Thay bản cd_hokage3_x4 lô 343 (quay trái, pixel-art). Tên đã có trong kich-thuoc-anh.json (200×200)."
+    },
+    {
+      "ten_file": "kakashi_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "la",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Kakashi** (đề xuất Làng Lá, chờ KH9 chốt danh sách NPC — máy chủ hôm nay chỉ có Iruka). Jonin tóc bạc dựng lệch, băng trán navy kéo xuống che một mắt, khẩu trang vải navy che mũi-miệng, một mắt đen lười biếng, vest ô-liu. Bản cũ `cd_kakashi_x4.png` trong lô 343 là pixel-art 800×800 và **quay TRÁI** — lệch với Iruka đang lắp, nên vẽ lại theo khuôn chroma; ảnh cũ chỉ dùng làm tham chiếu nội dung. Vẽ CÙNG LÚC với `master_kakashi_x4_chroma.png` ở brief 03-npc (chưa viết) để cùng một khuôn mặt.",
+      "dung_tham_chieu": [
+        "npc343_kakashi",
+        "cd343_kakashi",
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the jonin Kakashi: silver-white spiky hair leaning to one side, a dark navy forehead protector pulled down slanted to cover the left eye, a dark navy cloth mask covering the nose and mouth, one visible half-lidded dark eye with a relaxed bored expression, olive-green flak vest with a high dark navy collar. Leaf Village / Fire nature palette: warm orange-red with olive green and dark navy.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: use the two reference images of this NPC from the old batch (npc_kakashi_x4.png, cd_kakashi_x4.png) ONLY for who the character is (hair, clothes, accessories); ignore their pixel-art style and ignore that they face left — this portrait faces RIGHT like iruka_portrait_chroma.png.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_kakashi_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "ve_lai",
+      "ghi_chu": "Đề xuất, chờ KH9. Thay bản cd_kakashi_x4 lô 343 (quay trái, pixel-art). Tên đã có trong kich-thuoc-anh.json (200×200)."
+    },
+    {
+      "ten_file": "chu_ramen_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "la",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Chú bán mì** (đề xuất Làng Lá, chờ KH9 chốt danh sách NPC — máy chủ hôm nay chỉ có Iruka). Chú bếp quán mì trung niên: mặt tròn phúc hậu, khăn trắng buộc trán, cười tít mắt, cổ áo bếp trắng, tạp dề trắng. Bản cũ `cd_chu_ramen_x4.png` trong lô 343 là pixel-art 800×800 và **quay TRÁI** — lệch với Iruka đang lắp, nên vẽ lại theo khuôn chroma; ảnh cũ chỉ dùng làm tham chiếu nội dung. Vẽ CÙNG LÚC với `master_chu_ramen_x4_chroma.png` ở brief 03-npc (chưa viết) để cùng một khuôn mặt.",
+      "dung_tham_chieu": [
+        "npc343_chu_ramen",
+        "cd343_chu_ramen",
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the ramen-stand cook: a round-faced cheerful middle-aged man, ruddy cheeks, eyes squeezed shut by a big warm smile, a white cloth headband tied around the forehead, short brown hair, a white chef's tunic collar and the top of a white apron strap. Leaf Village / Fire nature palette: warm orange-red with olive green and dark navy.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: use the two reference images of this NPC from the old batch (npc_chu_ramen_x4.png, cd_chu_ramen_x4.png) ONLY for who the character is (hair, clothes, accessories); ignore their pixel-art style and ignore that they face left — this portrait faces RIGHT like iruka_portrait_chroma.png.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_chu_ramen_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "ve_lai",
+      "ghi_chu": "Đề xuất, chờ KH9. Thay bản cd_chu_ramen_x4 lô 343 (quay trái, pixel-art). Tên đã có trong kich-thuoc-anh.json (200×200)."
+    },
+    {
+      "ten_file": "ba_vukhi_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "la",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Bà chủ tiệm vũ khí** (đề xuất Làng Lá, chờ KH9 chốt danh sách NPC — máy chủ hôm nay chỉ có Iruka). Bà lão chủ tiệm vũ khí: tóc bạc búi cao, mắt sắc, nếp nhăn sâu, cổ kimono tím mận tối. Bản cũ `cd_ba_vukhi_x4.png` trong lô 343 là pixel-art 800×800 và **quay TRÁI** — lệch với Iruka đang lắp, nên vẽ lại theo khuôn chroma; ảnh cũ chỉ dùng làm tham chiếu nội dung. Vẽ CÙNG LÚC với `master_ba_vukhi_x4_chroma.png` ở brief 03-npc (chưa viết) để cùng một khuôn mặt.",
+      "dung_tham_chieu": [
+        "npc343_ba_vukhi",
+        "cd343_ba_vukhi",
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the weapon-shop owner, an old woman: silver-grey hair pulled into a tight high bun with a plain wooden hairpin, sharp narrow appraising eyes, deep wrinkles, thin pressed lips, a dark plum kimono collar layered over a charcoal under-robe. Leaf Village / Fire nature palette: warm orange-red with olive green and dark navy.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: use the two reference images of this NPC from the old batch (npc_ba_vukhi_x4.png, cd_ba_vukhi_x4.png) ONLY for who the character is (hair, clothes, accessories); ignore their pixel-art style and ignore that they face left — this portrait faces RIGHT like iruka_portrait_chroma.png.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_ba_vukhi_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "ve_lai",
+      "ghi_chu": "Đề xuất, chờ KH9. Thay bản cd_ba_vukhi_x4 lô 343 (quay trái, pixel-art). Tên đã có trong kich-thuoc-anh.json (200×200)."
+    },
+    {
+      "ten_file": "thay_hocvien_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "la",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Thầy học viện** (đề xuất Làng Lá, chờ KH9 chốt danh sách NPC — máy chủ hôm nay chỉ có Iruka). Giáo viên học viện nghiêm khắc: kính vuông có chấm phản sáng nhỏ, mày nhíu, tóc đen buộc, băng trán navy, vest ô-liu. Bản cũ `cd_thay_hocvien_x4.png` trong lô 343 là pixel-art 800×800 và **quay TRÁI** — lệch với Iruka đang lắp, nên vẽ lại theo khuôn chroma; ảnh cũ chỉ dùng làm tham chiếu nội dung. Vẽ CÙNG LÚC với `master_thay_hocvien_x4_chroma.png` ở brief 03-npc (chưa viết) để cùng một khuôn mặt.",
+      "dung_tham_chieu": [
+        "npc343_thay_hocvien",
+        "cd343_thay_hocvien",
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the strict academy instructor: a man in his thirties with black hair tied back, square-framed glasses with one small painted highlight dot on each lens (not a glowing rim), furrowed brows, thin stern mouth, dark navy forehead protector with the Leaf plate, olive-green flak vest over a dark navy collar. Leaf Village / Fire nature palette: warm orange-red with olive green and dark navy.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: use the two reference images of this NPC from the old batch (npc_thay_hocvien_x4.png, cd_thay_hocvien_x4.png) ONLY for who the character is (hair, clothes, accessories); ignore their pixel-art style and ignore that they face left — this portrait faces RIGHT like iruka_portrait_chroma.png.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_thay_hocvien_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "ve_lai",
+      "ghi_chu": "Đề xuất, chờ KH9. Thay bản cd_thay_hocvien_x4 lô 343 (quay trái, pixel-art). Tên đã có trong kich-thuoc-anh.json (200×200)."
+    },
+    {
+      "ten_file": "linh_gac_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "la",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Lính gác cổng** (đề xuất Làng Lá, chờ KH9 chốt danh sách NPC — máy chủ hôm nay chỉ có Iruka). Lính gác cổng chán chường đang ngáp: mắt lim dim, râu lún phún, miếng băng nhỏ trên má, băng trán navy, vest ô-liu. Bản cũ `cd_linh_gac_x4.png` trong lô 343 là pixel-art 800×800 và **quay TRÁI** — lệch với Iruka đang lắp, nên vẽ lại theo khuôn chroma; ảnh cũ chỉ dùng làm tham chiếu nội dung. Vẽ CÙNG LÚC với `master_linh_gac_x4_chroma.png` ở brief 03-npc (chưa viết) để cùng một khuôn mặt.",
+      "dung_tham_chieu": [
+        "npc343_linh_gac",
+        "cd343_linh_gac",
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the bored gate guard mid-yawn: half-closed drowsy eyes, mouth slightly open in a yawn, light stubble on the chin, a small bandage strip on the cheek (NOT across the nose), messy dark hair under a dark navy forehead protector with the Leaf plate, olive-green flak vest with a slouched collar. Leaf Village / Fire nature palette: warm orange-red with olive green and dark navy.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: use the two reference images of this NPC from the old batch (npc_linh_gac_x4.png, cd_linh_gac_x4.png) ONLY for who the character is (hair, clothes, accessories); ignore their pixel-art style and ignore that they face left — this portrait faces RIGHT like iruka_portrait_chroma.png.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_linh_gac_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "ve_lai",
+      "ghi_chu": "Đề xuất, chờ KH9. Thay bản cd_linh_gac_x4 lô 343 (quay trái, pixel-art). Tên đã có trong kich-thuoc-anh.json (200×200)."
+    },
+    {
+      "ten_file": "nguoi_giao_nv_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "la",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Người giao nhiệm vụ** (đề xuất Làng Lá, chờ KH9 chốt danh sách NPC — máy chủ hôm nay chỉ có Iruka). Nhân viên bàn giao nhiệm vụ điềm đạm: tóc đen chải gọn, băng trán navy, vest ô-liu, đầu hai cuộn giấy nhô sau vai. Bản cũ `cd_nguoi_giao_nv_x4.png` trong lô 343 là pixel-art 800×800 và **quay TRÁI** — lệch với Iruka đang lắp, nên vẽ lại theo khuôn chroma; ảnh cũ chỉ dùng làm tham chiếu nội dung. Vẽ CÙNG LÚC với `master_nguoi_giao_nv_x4_chroma.png` ở brief 03-npc (chưa viết) để cùng một khuôn mặt.",
+      "dung_tham_chieu": [
+        "npc343_nguoi_giao_nv",
+        "cd343_nguoi_giao_nv",
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the mission-desk clerk: a calm composed man with neatly combed short black hair, even brows, a polite closed-mouth expression, dark navy forehead protector with the Leaf plate, olive-green flak vest over a dark navy collar, the tips of two rolled paper scrolls peeking above his far shoulder. Leaf Village / Fire nature palette: warm orange-red with olive green and dark navy.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: use the two reference images of this NPC from the old batch (npc_nguoi_giao_nv_x4.png, cd_nguoi_giao_nv_x4.png) ONLY for who the character is (hair, clothes, accessories); ignore their pixel-art style and ignore that they face left — this portrait faces RIGHT like iruka_portrait_chroma.png.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_nguoi_giao_nv_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "ve_lai",
+      "ghi_chu": "Đề xuất, chờ KH9. Thay bản cd_nguoi_giao_nv_x4 lô 343 (quay trái, pixel-art). Tên đã có trong kich-thuoc-anh.json (200×200)."
+    },
+    {
+      "ten_file": "y_ta_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "la",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Y tá** (đề xuất Làng Lá, chờ KH9 chốt danh sách NPC — máy chủ hôm nay chỉ có Iruka). Y tá bệnh viện dịu dàng: mũ y tá trắng có dấu lá xanh nhỏ, tóc đen búi thấp, cổ áo đồng phục hồng nhạt. Bản cũ `cd_y_ta_x4.png` trong lô 343 là pixel-art 800×800 và **quay TRÁI** — lệch với Iruka đang lắp, nên vẽ lại theo khuôn chroma; ảnh cũ chỉ dùng làm tham chiếu nội dung. Vẽ CÙNG LÚC với `master_y_ta_x4_chroma.png` ở brief 03-npc (chưa viết) để cùng một khuôn mặt.",
+      "dung_tham_chieu": [
+        "npc343_y_ta",
+        "cd343_y_ta",
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the hospital nurse: a gentle young woman with black hair in a low bun, soft eyes and a small reassuring smile, a white nurse's cap with a small green leaf mark (no red cross), a pale pink uniform collar with a white trim. Leaf Village / Fire nature palette: warm orange-red with olive green and dark navy.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: use the two reference images of this NPC from the old batch (npc_y_ta_x4.png, cd_y_ta_x4.png) ONLY for who the character is (hair, clothes, accessories); ignore their pixel-art style and ignore that they face left — this portrait faces RIGHT like iruka_portrait_chroma.png.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_y_ta_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "ve_lai",
+      "ghi_chu": "Đề xuất, chờ KH9. Thay bản cd_y_ta_x4 lô 343 (quay trái, pixel-art). Tên đã có trong kich-thuoc-anh.json (200×200)."
+    },
+    {
+      "ten_file": "ong_tazuna_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "chung",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Ông Tazuna** (đề xuất Làng Lá, chờ KH9 chốt danh sách NPC — máy chủ hôm nay chỉ có Iruka). Ông già dựng cầu dày dạn: râu ria lởm chởm bạc, vành nón rơm, kính tròn, khăn quàng cổ, da rám nắng. Bản cũ `cd_ong_tazuna_x4.png` trong lô 343 là pixel-art 800×800 và **quay TRÁI** — lệch với Iruka đang lắp, nên vẽ lại theo khuôn chroma; ảnh cũ chỉ dùng làm tham chiếu nội dung. Vẽ CÙNG LÚC với `master_ong_tazuna_x4_chroma.png` ở brief 03-npc (chưa viết) để cùng một khuôn mặt.",
+      "dung_tham_chieu": [
+        "npc343_ong_tazuna",
+        "cd343_ong_tazuna",
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the old bridge builder Tazuna: a weathered sun-tanned old man with grey stubble beard, round wire glasses, a wide straw hat brim shading the brow, a rough cotton towel-scarf wrapped around the neck, a faded grey work jacket collar. Expression: gruff, squinting. neutral warm palette, no village accent.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: use the two reference images of this NPC from the old batch (npc_ong_tazuna_x4.png, cd_ong_tazuna_x4.png) ONLY for who the character is (hair, clothes, accessories); ignore their pixel-art style and ignore that they face left — this portrait faces RIGHT like iruka_portrait_chroma.png.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_ong_tazuna_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "ve_lai",
+      "ghi_chu": "Đề xuất, chờ KH9. Thay bản cd_ong_tazuna_x4 lô 343 (quay trái, pixel-art). Tên đã có trong kich-thuoc-anh.json (200×200)."
+    },
+    {
+      "ten_file": "co_be_hoa_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "la",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Cô bé bán hoa** (đề xuất Làng Lá, chờ KH9 chốt danh sách NPC — máy chủ hôm nay chỉ có Iruka). Bé gái bán hoa: má bầu, mắt to, tóc búi hai bên buộc ruy-băng, vài bông hoa từ giỏ nhô lên ở mép dưới. Bản cũ `cd_co_be_hoa_x4.png` trong lô 343 là pixel-art 800×800 và **quay TRÁI** — lệch với Iruka đang lắp, nên vẽ lại theo khuôn chroma; ảnh cũ chỉ dùng làm tham chiếu nội dung. Vẽ CÙNG LÚC với `master_co_be_hoa_x4_chroma.png` ở brief 03-npc (chưa viết) để cùng một khuôn mặt.",
+      "dung_tham_chieu": [
+        "npc343_co_be_hoa",
+        "cd343_co_be_hoa",
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the little flower girl: a small child about 7 years old with chubby cheeks, huge bright eyes, hair in two side buns tied with pale yellow ribbons, a pastel green kimono collar, and three or four painted flowers (pink, yellow, white) rising from a woven basket just above the bottom cut-line. Sweet cheerful expression. Leaf Village / Fire nature palette: warm orange-red with olive green and dark navy.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: use the two reference images of this NPC from the old batch (npc_co_be_hoa_x4.png, cd_co_be_hoa_x4.png) ONLY for who the character is (hair, clothes, accessories); ignore their pixel-art style and ignore that they face left — this portrait faces RIGHT like iruka_portrait_chroma.png.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_co_be_hoa_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "ve_lai",
+      "ghi_chu": "Đề xuất, chờ KH9. Thay bản cd_co_be_hoa_x4 lô 343 (quay trái, pixel-art). Tên đã có trong kich-thuoc-anh.json (200×200)."
+    },
+    {
+      "ten_file": "tho_ren_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "la",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Thợ rèn** (đề xuất Làng Lá, chờ KH9 chốt danh sách NPC — máy chủ hôm nay chỉ có Iruka). Thợ rèn vạm vỡ: mặt vuông rắn rỏi, vài chấm mồ hôi, khăn vải quấn đầu, vai trần với dây tạp dề da, vết bụi than. Bản cũ `cd_tho_ren_x4.png` trong lô 343 là pixel-art 800×800 và **quay TRÁI** — lệch với Iruka đang lắp, nên vẽ lại theo khuôn chroma; ảnh cũ chỉ dùng làm tham chiếu nội dung. Vẽ CÙNG LÚC với `master_tho_ren_x4_chroma.png` ở brief 03-npc (chưa viết) để cùng một khuôn mặt.",
+      "dung_tham_chieu": [
+        "npc343_tho_ren",
+        "cd343_tho_ren",
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the blacksmith: a burly man with a square rugged face, thick neck and shoulders, a few small painted sweat highlight dots on the brow, a dark cloth wrapped around the head, bare tanned shoulders with a brown leather apron strap over one shoulder, soot smudges on the cheek. Expression: focused, brows down. Leaf Village / Fire nature palette: warm orange-red with olive green and dark navy.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: use the two reference images of this NPC from the old batch (npc_tho_ren_x4.png, cd_tho_ren_x4.png) ONLY for who the character is (hair, clothes, accessories); ignore their pixel-art style and ignore that they face left — this portrait faces RIGHT like iruka_portrait_chroma.png.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_tho_ren_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "ve_lai",
+      "ghi_chu": "Đề xuất, chờ KH9. Thay bản cd_tho_ren_x4 lô 343 (quay trái, pixel-art). Tên đã có trong kich-thuoc-anh.json (200×200)."
+    },
+    {
+      "ten_file": "nguoi_dua_thu_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "la",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Người đưa thư** (đề xuất Làng Lá, chờ KH9 chốt danh sách NPC — máy chủ hôm nay chỉ có Iruka). Giao liên nhanh nhẹn: mắt sắc tỉnh, tóc ngắn rối vì gió, băng trán navy, quai túi da vắt chéo vai. Bản cũ `cd_nguoi_dua_thu_x4.png` trong lô 343 là pixel-art 800×800 và **quay TRÁI** — lệch với Iruka đang lắp, nên vẽ lại theo khuôn chroma; ảnh cũ chỉ dùng làm tham chiếu nội dung. Vẽ CÙNG LÚC với `master_nguoi_dua_thu_x4_chroma.png` ở brief 03-npc (chưa viết) để cùng một khuôn mặt.",
+      "dung_tham_chieu": [
+        "npc343_nguoi_dua_thu",
+        "cd343_nguoi_dua_thu",
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the courier: a lean quick young man with wind-tousled short dark hair, sharp alert eyes, a light smirk, dark navy forehead protector with the Leaf plate, a brown leather messenger-bag strap crossing the chest over a dark navy jacket collar. Leaf Village / Fire nature palette: warm orange-red with olive green and dark navy.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: use the two reference images of this NPC from the old batch (npc_nguoi_dua_thu_x4.png, cd_nguoi_dua_thu_x4.png) ONLY for who the character is (hair, clothes, accessories); ignore their pixel-art style and ignore that they face left — this portrait faces RIGHT like iruka_portrait_chroma.png.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_nguoi_dua_thu_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "ve_lai",
+      "ghi_chu": "Đề xuất, chờ KH9. Thay bản cd_nguoi_dua_thu_x4 lô 343 (quay trái, pixel-art). Tên đã có trong kich-thuoc-anh.json (200×200)."
+    },
+    {
+      "ten_file": "trongtai_thi_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "la",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Trọng tài kỳ thi** (đề xuất Làng Lá, chờ KH9 chốt danh sách NPC — máy chủ hôm nay chỉ có Iruka). Trọng tài kỳ thi Chunin nghiêm nghị mệt mỏi: băng trán navy đội kiểu bandana, một cây kim senbon ngậm bên mép, cổ áo đồng phục đen-xanh than. Bản cũ `cd_trongtai_thi_x4.png` trong lô 343 là pixel-art 800×800 và **quay TRÁI** — lệch với Iruka đang lắp, nên vẽ lại theo khuôn chroma; ảnh cũ chỉ dùng làm tham chiếu nội dung. Vẽ CÙNG LÚC với `master_trongtai_thi_x4_chroma.png` ở brief 03-npc (chưa viết) để cùng một khuôn mặt.",
+      "dung_tham_chieu": [
+        "npc343_trongtai_thi",
+        "cd343_trongtai_thi",
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the chunin-exam proctor: a serious tired-looking man with a dark navy forehead protector worn bandana-style over shoulder-length brown hair, a thin steel senbon needle held between his lips at the corner of the mouth, heavy eyelids, a black and dark-teal uniform collar. Leaf Village / Fire nature palette: warm orange-red with olive green and dark navy.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: use the two reference images of this NPC from the old batch (npc_trongtai_thi_x4.png, cd_trongtai_thi_x4.png) ONLY for who the character is (hair, clothes, accessories); ignore their pixel-art style and ignore that they face left — this portrait faces RIGHT like iruka_portrait_chroma.png.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_trongtai_thi_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "ve_lai",
+      "ghi_chu": "Đề xuất, chờ KH9. Thay bản cd_trongtai_thi_x4 lô 343 (quay trái, pixel-art). Tên đã có trong kich-thuoc-anh.json (200×200)."
+    },
+    {
+      "ten_file": "nha_chep_cuon_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "la",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Nhà chép cuộn** (đề xuất Làng Lá, chờ KH9 chốt danh sách NPC — máy chủ hôm nay chỉ có Iruka). Thư lại gầy trầm ngâm: má hõm, bút lông gài sau tai, vệt mực nhỏ trên má, cổ áo học giả xám-be. Bản cũ `cd_nha_chep_cuon_x4.png` trong lô 343 là pixel-art 800×800 và **quay TRÁI** — lệch với Iruka đang lắp, nên vẽ lại theo khuôn chroma; ảnh cũ chỉ dùng làm tham chiếu nội dung. Vẽ CÙNG LÚC với `master_nha_chep_cuon_x4_chroma.png` ở brief 03-npc (chưa viết) để cùng một khuôn mặt.",
+      "dung_tham_chieu": [
+        "npc343_nha_chep_cuon",
+        "cd343_nha_chep_cuon",
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the scroll scribe: a thin scholarly man with hollow cheeks, thoughtful downcast eyes, a bamboo writing brush tucked behind his ear, a small black ink smudge on the cheekbone, a grey-beige scholar's robe collar with a darker inner layer. Leaf Village / Fire nature palette: warm orange-red with olive green and dark navy.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: use the two reference images of this NPC from the old batch (npc_nha_chep_cuon_x4.png, cd_nha_chep_cuon_x4.png) ONLY for who the character is (hair, clothes, accessories); ignore their pixel-art style and ignore that they face left — this portrait faces RIGHT like iruka_portrait_chroma.png.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_nha_chep_cuon_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "ve_lai",
+      "ghi_chu": "Đề xuất, chờ KH9. Thay bản cd_nha_chep_cuon_x4 lô 343 (quay trái, pixel-art). Tên đã có trong kich-thuoc-anh.json (200×200)."
+    },
+    {
+      "ten_file": "cat_kazekage_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "cat",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Phong Ảnh (Kazekage)** (đề xuất đợt 3 `dot-3-toan-bo\\lang-*\\npc.md`, chờ KH9 và máy chủ chốt NPC 4 làng — hôm nay chưa có làng nào ngoài Lá có NPC). Lãnh đạo Làng Cát lớn tuổi, râu, mũ Kage chóp trắng-vàng cát (KHÔNG chữ), khăn choàng xanh nhạt, áo choàng trắng-vàng cát, mắt sắc nghiêm. Vẽ CÙNG LÚC với master của NPC đó ở brief 03-npc để cùng khuôn mặt. Tên tra cứu `cd_cat_kazekage_x4` đã có trong kich-thuoc-anh.json (200×200) nhưng chưa có ảnh.",
+      "dung_tham_chieu": [
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the Kazekage, elderly leader of the Sand Village: a stern lined face with a short grey beard, sharp narrow eyes, a white-and-sand-yellow conical Kage hat with a pale cream veil at the sides (no writing), a pale desert-green shawl over a white-and-ochre robe collar. Sand Village / Wind nature palette: sand-yellow, ochre, cream and pale desert green.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: no writing or kanji on any hat or plate — village identity comes only from the engraved symbol and the palette.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_cat_kazekage_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Đề xuất đợt 3, chờ KH9. Tên đã có trong kich-thuoc-anh.json (200×200), chưa có ảnh."
+    },
+    {
+      "ten_file": "cat_thay_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "cat",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Thầy huấn luyện Suna** (đề xuất đợt 3 `dot-3-toan-bo\\lang-*\\npc.md`, chờ KH9 và máy chủ chốt NPC 4 làng — hôm nay chưa có làng nào ngoài Lá có NPC). Thầy trung niên Làng Cát: vest nâu cát, băng trán khắc đồng hồ cát, khăn che nửa mặt dưới, mắt hõm sắc, da rám. Vẽ CÙNG LÚC với master của NPC đó ở brief 03-npc để cùng khuôn mặt. Tên tra cứu `cd_cat_thay_x4` đã có trong kich-thuoc-anh.json (200×200) nhưng chưa có ảnh.",
+      "dung_tham_chieu": [
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the Sand Village instructor: a middle-aged man with sun-darkened skin, deep-set sharp eyes, a sand-beige cloth mask covering the lower half of the face, a forehead protector with the Sand hourglass symbol on a khaki band, a sand-brown flak vest with a cream high collar. Sand Village / Wind nature palette: sand-yellow, ochre, cream and pale desert green.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: no writing or kanji on any hat or plate — village identity comes only from the engraved symbol and the palette.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_cat_thay_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Đề xuất đợt 3, chờ KH9. Tên đã có trong kich-thuoc-anh.json (200×200), chưa có ảnh."
+    },
+    {
+      "ten_file": "cat_giao_nv_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "cat",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Người giao nhiệm vụ Suna** (đề xuất đợt 3 `dot-3-toan-bo\\lang-*\\npc.md`, chờ KH9 và máy chủ chốt NPC 4 làng — hôm nay chưa có làng nào ngoài Lá có NPC). Thương nhân sa mạc: khăn trùm kín đầu nâu sờn, mặt khắc khổ rám nắng, mắt nheo, áo choàng nâu, dây túi da chéo vai. Vẽ CÙNG LÚC với master của NPC đó ở brief 03-npc để cùng khuôn mặt. Tên tra cứu `cd_cat_giao_nv_x4` đã có trong kich-thuoc-anh.json (200×200) nhưng chưa có ảnh.",
+      "dung_tham_chieu": [
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the Sand Village mission clerk, a desert merchant: a gaunt sun-weathered face with squinting eyes and dry cracked lips, a frayed brown head-wrap covering hair and neck, a rough ochre travelling cloak collar, a worn leather bag strap across the chest. Sand Village / Wind nature palette: sand-yellow, ochre, cream and pale desert green.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: no writing or kanji on any hat or plate — village identity comes only from the engraved symbol and the palette.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_cat_giao_nv_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Đề xuất đợt 3, chờ KH9. Tên đã có trong kich-thuoc-anh.json (200×200), chưa có ảnh."
+    },
+    {
+      "ten_file": "smu_mizukage_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "smu",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Thuỷ Ảnh (Mizukage)** (đề xuất đợt 3 `dot-3-toan-bo\\lang-*\\npc.md`, chờ KH9 và máy chủ chốt NPC 4 làng — hôm nay chưa có làng nào ngoài Lá có NPC). Lãnh đạo Làng Sương Mù: mũ Kage chóp trắng-xanh dương với 4 đường sương lượn sóng (không chữ), khăn choàng lam nhạt, mặt lạnh nghiêm, da tái. Vẽ CÙNG LÚC với master của NPC đó ở brief 03-npc để cùng khuôn mặt. Tên tra cứu `cd_smu_mizukage_x4` đã có trong kich-thuoc-anh.json (200×200) nhưng chưa có ảnh.",
+      "dung_tham_chieu": [
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the Mizukage, leader of the Mist Village: a cold composed face with pale skin and piercing blue-grey eyes, a white-and-deep-blue conical Kage hat marked with four wavy mist lines (no writing) and a pale blue side veil, a light blue shawl over a white-and-navy robe collar. Mist Village / Water nature palette: deep blue, teal and slate grey.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: no writing or kanji on any hat or plate — village identity comes only from the engraved symbol and the palette.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_smu_mizukage_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Đề xuất đợt 3, chờ KH9. Tên đã có trong kich-thuoc-anh.json (200×200), chưa có ảnh."
+    },
+    {
+      "ten_file": "smu_thay_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "smu",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Thầy huấn luyện Kiri** (đề xuất đợt 3 `dot-3-toan-bo\\lang-*\\npc.md`, chờ KH9 và máy chủ chốt NPC 4 làng — hôm nay chưa có làng nào ngoài Lá có NPC). Thầy trung niên Sương Mù: giáp jonin xanh dương-xám ẩm, băng trán 4 đường sương, mặt nạ che nửa mặt dưới xám, mắt lạnh. Vẽ CÙNG LÚC với master của NPC đó ở brief 03-npc để cùng khuôn mặt. Tên tra cứu `cd_smu_thay_x4` đã có trong kich-thuoc-anh.json (200×200) nhưng chưa có ảnh.",
+      "dung_tham_chieu": [
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the Mist Village instructor: a middle-aged man with pale skin and cold steady eyes, a slate-grey half-mask covering nose and mouth, a forehead protector with the four wavy Mist lines on a dark blue band, a damp-looking blue-grey flak vest with a high teal collar. Mist Village / Water nature palette: deep blue, teal and slate grey.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: no writing or kanji on any hat or plate — village identity comes only from the engraved symbol and the palette.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_smu_thay_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Đề xuất đợt 3, chờ KH9. Tên đã có trong kich-thuoc-anh.json (200×200), chưa có ảnh."
+    },
+    {
+      "ten_file": "smu_giao_nv_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "smu",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Người giao nhiệm vụ Kiri** (đề xuất đợt 3 `dot-3-toan-bo\\lang-*\\npc.md`, chờ KH9 và máy chủ chốt NPC 4 làng — hôm nay chưa có làng nào ngoài Lá có NPC). Ngư dân ven biển: nón lá rộng vành, mặt dày dạn sương gió, da tái lạnh, râu bạc lún phún, áo choàng xanh xám sờn, dây túi lưới chéo vai. Vẽ CÙNG LÚC với master của NPC đó ở brief 03-npc để cùng khuôn mặt. Tên tra cứu `cd_smu_giao_nv_x4` đã có trong kich-thuoc-anh.json (200×200) nhưng chưa có ảnh.",
+      "dung_tham_chieu": [
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the Mist Village mission clerk, a coastal fisherman: a weather-beaten face with pale cold skin and grey stubble, a wide woven reed hat, a frayed blue-grey oilcloth cloak collar, the strap of a net bag across the chest, a few painted water stains on the cloak. Mist Village / Water nature palette: deep blue, teal and slate grey.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: no writing or kanji on any hat or plate — village identity comes only from the engraved symbol and the palette.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_smu_giao_nv_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Đề xuất đợt 3, chờ KH9. Tên đã có trong kich-thuoc-anh.json (200×200), chưa có ảnh."
+    },
+    {
+      "ten_file": "da_tsuchikage_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "da",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Thổ Ảnh (Tsuchikage)** (đề xuất đợt 3 `dot-3-toan-bo\\lang-*\\npc.md`, chờ KH9 và máy chủ chốt NPC 4 làng — hôm nay chưa có làng nào ngoài Lá có NPC). Lão nhân Làng Đá: nhỏ người, mũi to, ria mép và râu cằm nhọn trắng, mũ Kage chóp cam đất viền đỏ (không chữ), áo choàng cam đất, mắt nghiêm. Vẽ CÙNG LÚC với master của NPC đó ở brief 03-npc để cùng khuôn mặt. Tên tra cứu `cd_da_tsuchikage_x4` đã có trong kich-thuoc-anh.json (200×200) nhưng chưa có ảnh.",
+      "dung_tham_chieu": [
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the Tsuchikage, elderly leader of the Stone Village: a small wiry old man with a large prominent nose, a pointed white goatee and thin white moustache, stern hooded eyes, an earth-orange conical Kage hat with red trim and a cream side veil (no writing), an earth-orange robe collar edged in dark red. Stone Village / Earth nature palette: earth brown, rust and rock grey.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: no writing or kanji on any hat or plate — village identity comes only from the engraved symbol and the palette.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_da_tsuchikage_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Đề xuất đợt 3, chờ KH9. Tên đã có trong kich-thuoc-anh.json (200×200), chưa có ảnh."
+    },
+    {
+      "ten_file": "da_thay_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "da",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Thầy huấn luyện Iwa** (đề xuất đợt 3 `dot-3-toan-bo\\lang-*\\npc.md`, chờ KH9 và máy chủ chốt NPC 4 làng — hôm nay chưa có làng nào ngoài Lá có NPC). Thầy vạm vỡ Làng Đá: hàm vuông, băng trán hai phiến đá trên dải nâu đỏ, ốp phiến đá xám trên vai, vest nâu đất, da sạm. Vẽ CÙNG LÚC với master của NPC đó ở brief 03-npc để cùng khuôn mặt. Tên tra cứu `cd_da_thay_x4` đã có trong kich-thuoc-anh.json (200×200) nhưng chưa có ảnh.",
+      "dung_tham_chieu": [
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the Stone Village instructor: a broad-shouldered middle-aged man with a square jaw, heavy brows and earth-tan skin, a forehead protector with the two Stone slabs on a rust-brown band, a rock-grey stone shoulder plate strapped over an earth-brown flak vest with a beige collar. Stone Village / Earth nature palette: earth brown, rust and rock grey.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: no writing or kanji on any hat or plate — village identity comes only from the engraved symbol and the palette.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_da_thay_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Đề xuất đợt 3, chờ KH9. Tên đã có trong kich-thuoc-anh.json (200×200), chưa có ảnh."
+    },
+    {
+      "ten_file": "da_giao_nv_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "da",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Người giao nhiệm vụ Iwa** (đề xuất đợt 3 `dot-3-toan-bo\\lang-*\\npc.md`, chờ KH9 và máy chủ chốt NPC 4 làng — hôm nay chưa có làng nào ngoài Lá có NPC). Thợ đá: khăn trùm phủ bụi, mặt khắc khổ da sạm ráp, mắt nhỏ, râu lún phún, áo choàng nâu sờn, cán cuốc đá nhô sau vai. Vẽ CÙNG LÚC với master của NPC đó ở brief 03-npc để cùng khuôn mặt. Tên tra cứu `cd_da_giao_nv_x4` đã có trong kich-thuoc-anh.json (200×200) nhưng chưa có ảnh.",
+      "dung_tham_chieu": [
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the Stone Village mission clerk, a quarry worker: a dusty rough-skinned face with small squinting eyes and grey stubble, a dust-covered brown head cloth, a frayed earth-brown cloak collar, the wooden handle of a stone pick visible above the far shoulder. Stone Village / Earth nature palette: earth brown, rust and rock grey.\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: no writing or kanji on any hat or plate — village identity comes only from the engraved symbol and the palette.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_da_giao_nv_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Đề xuất đợt 3, chờ KH9. Tên đã có trong kich-thuoc-anh.json (200×200), chưa có ảnh."
+    },
+    {
+      "ten_file": "may_raikage_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "may",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Lôi Ảnh (Raikage)** (đề xuất đợt 3 `dot-3-toan-bo\\lang-*\\npc.md`, chờ KH9 và máy chủ chốt NPC 4 làng — hôm nay chưa có làng nào ngoài Lá có NPC). Lãnh đạo Làng Mây: to lớn cơ bắp, da sẫm, tóc bạc dựng, mũ Kage chóp trắng-vàng chớp (không chữ), khăn choàng tím xanh nhạt, mắt nghiêm. Vẽ CÙNG LÚC với master của NPC đó ở brief 03-npc để cùng khuôn mặt. Tên tra cứu `cd_may_raikage_x4` đã có trong kich-thuoc-anh.json (200×200) nhưng chưa có ảnh.",
+      "dung_tham_chieu": [
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the Raikage, leader of the Cloud Village: a massive muscular man with dark brown skin, swept-back white hair, a hard commanding face with a thick neck, a white-and-lightning-yellow conical Kage hat with a pale side veil (no writing), a pale bluish-lavender shawl over a white robe collar with indigo trim. Cloud Village / Lightning nature palette: BLUISH indigo-violet, white and lightning yellow (keep every purple bluish: R-G below 100 — no magenta, no hot pink, no red-violet).\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: no writing or kanji on any hat or plate — village identity comes only from the engraved symbol and the palette.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_may_raikage_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Đề xuất đợt 3, chờ KH9. Tên đã có trong kich-thuoc-anh.json (200×200), chưa có ảnh."
+    },
+    {
+      "ten_file": "may_thay_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "may",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Thầy huấn luyện Kumo** (đề xuất đợt 3 `dot-3-toan-bo\\lang-*\\npc.md`, chờ KH9 và máy chủ chốt NPC 4 làng — hôm nay chưa có làng nào ngoài Lá có NPC). Thầy dày dạn Làng Mây: hàm bạnh, băng trán khối mây trên dải xanh chàm, vest chiến thuật xám xanh, cơ bắp cổ vai, tóc bạch kim ngắn. Vẽ CÙNG LÚC với master của NPC đó ở brief 03-npc để cùng khuôn mặt. Tên tra cứu `cd_may_thay_x4` đã có trong kich-thuoc-anh.json (200×200) nhưng chưa có ảnh.",
+      "dung_tham_chieu": [
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the Cloud Village instructor: a rugged man with a wide jaw, short platinum hair, dark skin and a thick muscular neck, a forehead protector with the Cloud symbol on a bluish indigo band, a grey-blue tactical flak vest with a white high collar and a thin lightning-yellow trim. Cloud Village / Lightning nature palette: BLUISH indigo-violet, white and lightning yellow (keep every purple bluish: R-G below 100 — no magenta, no hot pink, no red-violet).\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: no writing or kanji on any hat or plate — village identity comes only from the engraved symbol and the palette.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_may_thay_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Đề xuất đợt 3, chờ KH9. Tên đã có trong kich-thuoc-anh.json (200×200), chưa có ảnh."
+    },
+    {
+      "ten_file": "may_giao_nv_portrait_chroma.png",
+      "nhom": "chan-dung",
+      "lang": "may",
+      "kich_thuoc": [
+        1254,
+        1254
+      ],
+      "noi_dung": "Chân dung NPC **Người giao nhiệm vụ Kumo** (đề xuất đợt 3 `dot-3-toan-bo\\lang-*\\npc.md`, chờ KH9 và máy chủ chốt NPC 4 làng — hôm nay chưa có làng nào ngoài Lá có NPC). Sứ giả núi cao: mặt khắc khổ da rám gió, khăn quàng dày, áo choàng xám sờn, dây túi da đựng cuộn thư chéo vai. Vẽ CÙNG LÚC với master của NPC đó ở brief 03-npc để cùng khuôn mặt. Tên tra cứu `cd_may_giao_nv_x4` đã có trong kich-thuoc-anh.json (200×200) nhưng chưa có ảnh.",
+      "dung_tham_chieu": [
+        "TOT-npc-ong-tazuna",
+        "iruka_portrait_chroma",
+        "iruka_portrait_contact",
+        "THUOC-NHAN-VAT",
+        "TOT-naruto-logo",
+        "TOT-chitiet-nhanvat",
+        "XAU-npc",
+        "XAU-boss-zabuza"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, 3/4 view facing RIGHT, bust portrait crop (head and shoulders — NOT full body), NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the Cloud Village mission clerk, a mountain messenger: a wind-burnt weathered face with narrowed eyes, a thick bluish-grey wool scarf wrapped around the neck, a frayed grey travelling cloak collar, a leather scroll-case strap across the chest. Cloud Village / Lightning nature palette: BLUISH indigo-violet, white and lightning yellow (keep every purple bluish: R-G below 100 — no magenta, no hot pink, no red-violet).\nCONSISTENCY: same head size as reference idle frame; feet touching bottom edge; uniform magenta background RGB(246,4,242). For a bust portrait the \"feet\" rule means the straight horizontal shoulder cut-line sits exactly on the bottom edge of the cell (in game the portrait stands on top of the dialog frame). Face, hairstyle, forehead protector and outfit colors must match this character's own reference image exactly — a player cannot mistake it for another character.\nCANVAS: one single cell 1254x1254 px, exactly one frame (the file name has no frame number, the pipeline treats it as 1 cell). The bust fills 85-92% of the cell height; top of the hair at least 40 px below the top edge; at least 60 px of pure magenta on the left and on the right side; face height 45-55% of the cell so the face still reads at 50x50 px in the dialog box and at 26x26 px on the HUD.\nBACKGROUND: every background pixel exactly RGB(246,4,242), perfectly flat — no gradient, no vignette, no noise, no glow around the figure, no shadow, no outline halo; hard opaque edges only.\nVIEW: 3/4 view facing RIGHT (the viewer's right), head upright (not tilted up or down), eyes looking forward-right.\nDO NOT DRAW: text, letters, numbers, logos, decorative frame or border, background scenery, drop shadow, glow, motion lines, hands, weapons crossing the face, a second character, semi-transparent or blurred edges; and no magenta / hot-pink / red-violet color anywhere inside the character (any pixel with R-G >= 110 and B-G >= 110 is treated as background and erased).\nIMPORTANT: no writing or kanji on any hat or plate — village identity comes only from the engraved symbol and the palette.",
+      "kieu": "dai_chroma",
+      "so_khung": 1,
+      "o_kich_thuoc": [
+        1254,
+        1254
+      ],
+      "kich_thuoc_dich": [
+        200,
+        200
+      ],
+      "ve_o_co": null,
+      "ma_tra_cuu": "cd_may_giao_nv_x4.png",
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Đề xuất đợt 3, chờ KH9. Tên đã có trong kich-thuoc-anh.json (200×200), chưa có ảnh."
+    },
+    {
+      "ten_file": "ui_icon_app_x4.png",
+      "nhom": "thuong-hieu",
+      "lang": "chung",
+      "kich_thuoc": [
+        512,
+        512
+      ],
+      "noi_dung": "**Icon ứng dụng** — thay icon hiện tại của client vẫn là **Rồng + ngọc 4 sao Dragon Ball** (`D:\\NRO_Project\\Assets\\Resources\\appicon.png` 479×480, `ProjectSettings.asset:292-335` mọi nền tảng trỏ guid b611de4c…). Emblem lá-lửa xoáy (TOT-naruto-logo) đặt giữa nền navy-than tối, KHÔNG chữ, KHÔNG bo góc (hệ điều hành tự bo), đục hoàn toàn. Vẽ 1024×1024 (App Store cần 1024), dự án thu về 512 (Google Play/Unity).",
+      "dung_tham_chieu": [
+        "TOT-naruto-logo",
+        "appicon_cu_dragonball"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the approved Leaf-Fire emblem exactly as in reference TOT-naruto-logo.png: a stylized leaf whose stem curls inward into a tight spiral, wrapped in sweeping orange-red flame strokes with a few teal-blue accent flicks and dark navy shadow strokes, bold clean dark outlines, cel-shaded, centered, occupying about 62% of the canvas width (inside the central safe circle so a round or squircle OS mask never cuts it), on a deep navy-charcoal background with a soft radial lift behind the emblem (slightly lighter navy at the center, near-black at the corners) and a subtle hand-painted paper texture. Read as a bold app icon at 48 px: one silhouette, high contrast orange on navy.\nCANVAS: square 1024x1024 px master (deliver at 1024; the project downsizes to 512x512 for Google Play and Unity). Everything important inside the central 66% (adaptive-icon safe zone).\nOUTPUT FORMAT: PNG, RGBA with the alpha channel fully opaque (every alpha = 255) — this image is NOT a sprite, it never goes through the chroma or zoom pipeline. No transparency, no magenta background.\nDO NOT DRAW: any text, letters, numbers, kanji or fake writing (the project composites the real wordmark afterwards), watermark, border, rounded-corner mask, UI buttons, real-world logos, photographic elements, blurry or noisy AI artifacts.\nDO NOT add a border, a rounded-corner frame, a bevel, a glossy lens flare, letters or the word NARUTO.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "kich_thuoc_dich": null,
+      "ve_o_co": [
+        1024,
+        1024
+      ],
+      "ma_tra_cuu": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P1",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Tên mới: ui_icon_app_x4 512×512. Không qua TAO-4-MUC-ZOOM; đích Unity Player Settings → Icon (thay appicon.png) — việc của người lắp, ngoài phạm vi brief. Alpha toàn 255."
+    },
+    {
+      "ten_file": "ui_icon_app_hinh_x4.png",
+      "nhom": "thuong-hieu",
+      "lang": "chung",
+      "kich_thuoc": [
+        432,
+        432
+      ],
+      "noi_dung": "Lớp **hình** của icon thích ứng Android (adaptive icon foreground): chỉ emblem, nền TRONG SUỐT, nằm trong vòng an toàn 66 % giữa (Android cắt tròn/vuông bo tuỳ máy). Cặp với `ui_icon_app_nen_x4`.",
+      "dung_tham_chieu": [
+        "TOT-naruto-logo"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: the approved Leaf-Fire emblem exactly as in reference TOT-naruto-logo.png: a stylized leaf whose stem curls inward into a tight spiral, wrapped in sweeping orange-red flame strokes with a few teal-blue accent flicks and dark navy shadow strokes, bold clean dark outlines, cel-shaded, centered, occupying about 60% of the canvas width, everything inside the central 66% safe circle; the rest of the canvas is fully TRANSPARENT (this is the Android adaptive-icon foreground layer).\nCANVAS: 432x432 px (Android adaptive icon layer, 108 dp at 4x), PNG RGBA with a real transparent background.\nDO NOT DRAW: background color, drop shadow, glow, border, text or letters; no semi-transparent halo around the emblem.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "kich_thuoc_dich": null,
+      "ve_o_co": null,
+      "ma_tra_cuu": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P3",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Tên mới: ui_icon_app_hinh_x4 432×432 (alpha thật). Cặp với ui_icon_app_nen_x4."
+    },
+    {
+      "ten_file": "ui_icon_app_nen_x4.png",
+      "nhom": "thuong-hieu",
+      "lang": "chung",
+      "kich_thuoc": [
+        432,
+        432
+      ],
+      "noi_dung": "Lớp **nền** của icon thích ứng Android (adaptive icon background): chỉ nền navy-than có ánh sáng toả nhẹ ở giữa, không hình, đục hoàn toàn. Cặp với `ui_icon_app_hinh_x4`.",
+      "dung_tham_chieu": [
+        "TOT-naruto-logo"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: a plain background layer for the Android adaptive icon: deep navy-charcoal with a soft radial lift at the center (slightly lighter navy) fading to near-black at the edges, a very subtle hand-painted paper texture, NO emblem, NO shapes, NO text — the emblem lives on the separate foreground layer.\nCANVAS: 432x432 px, edge-to-edge (the OS may shift and mask this layer, so the texture must be uniform enough to survive cropping).\nOUTPUT FORMAT: PNG, RGBA with the alpha channel fully opaque (every alpha = 255) — this image is NOT a sprite, it never goes through the chroma or zoom pipeline. No transparency, no magenta background.\nDO NOT DRAW: any text, letters, numbers, kanji or fake writing (the project composites the real wordmark afterwards), watermark, border, rounded-corner mask, UI buttons, real-world logos, photographic elements, blurry or noisy AI artifacts.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "kich_thuoc_dich": null,
+      "ve_o_co": null,
+      "ma_tra_cuu": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P3",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Tên mới: ui_icon_app_nen_x4 432×432 (đục). Cặp với ui_icon_app_hinh_x4."
+    },
+    {
+      "ten_file": "ui_splash_doc_x4.png",
+      "nhom": "thuong-hieu",
+      "lang": "la",
+      "kich_thuoc": [
+        1080,
+        1920
+      ],
+      "noi_dung": "**Màn chờ dọc** 1080×1920 khi mở game (Unity Player Settings: `m_ShowUnitySplashScreen: 1`, `m_SplashScreenLogos: []`, `androidSplashScreen` = 0 — chưa có ảnh nào). Trên: emblem lá-lửa lớn. Giữa (45–60 % chiều cao): **chừa trống nền tối** để dự án dán wordmark `Logo\\1.png` — KHÔNG vẽ chữ. Dưới: bóng Làng Lá lúc chạng vạng (núi Hokage không mặt người thật, cổng torii đỏ, mái ngói), trời cam ấm → navy đậm ở đỉnh. Không nhân vật. Đục. Lưu ý: `/e/sp0..2.png` (GameScr.cs:5950) là hiệu ứng toé nước, không phải màn chờ.",
+      "dung_tham_chieu": [
+        "TOT-naruto-logo",
+        "logo_wordmark_client",
+        "concept-map1-langla"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: a vertical mobile launch screen for the game. Top third: the approved Leaf-Fire emblem exactly as in reference TOT-naruto-logo.png: a stylized leaf whose stem curls inward into a tight spiral, wrapped in sweeping orange-red flame strokes with a few teal-blue accent flicks and dark navy shadow strokes, bold clean dark outlines, cel-shaded, large, centered horizontally. Middle band from 45% to 60% of the height: EMPTY quiet dark navy area with no shapes (the project will composite the game wordmark here later). Bottom 40%: a painted silhouette skyline of the Leaf Village at dusk — a tall cliff with four blank carved faces reduced to abstract dark shapes (no recognizable real people), a red torii gate, tiled rooftops with a few warm lit windows, a large pale moon low on the left — warm orange-amber sky near the horizon fading upward into deep navy that becomes near-black at the very top. Match the palette and brush feel of the approved concept (concept-map1-langla.png). No characters.\nCANVAS: 1080x1920 px, portrait. Keep every important element inside the central 80% width and away from the top/bottom 8% (notches, rounded corners, home indicator). Fully opaque.\nOUTPUT FORMAT: PNG, RGBA with the alpha channel fully opaque (every alpha = 255) — this image is NOT a sprite, it never goes through the chroma or zoom pipeline. No transparency, no magenta background.\nDO NOT DRAW: any text, letters, numbers, kanji or fake writing (the project composites the real wordmark afterwards), watermark, border, rounded-corner mask, UI buttons, real-world logos, photographic elements, blurry or noisy AI artifacts.\nDO NOT DRAW: any text or lettering, characters or faces, UI buttons, loading bar, sparkles or lens flares.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "kich_thuoc_dich": null,
+      "ve_o_co": null,
+      "ma_tra_cuu": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Tên mới: ui_splash_doc_x4 1080×1920 (đục). Wordmark dán sau bằng Logo\\1.png. Lắp qua Unity Player Settings (ngoài phạm vi brief)."
+    },
+    {
+      "ten_file": "ui_splash_ngang_x4.png",
+      "nhom": "thuong-hieu",
+      "lang": "la",
+      "kich_thuoc": [
+        1920,
+        1080
+      ],
+      "noi_dung": "**Màn chờ ngang** 1920×1080 (bản PC / máy tính bảng xoay ngang). Cùng chất liệu với bản dọc: emblem ở trái-giữa, vùng trống cho wordmark ở bên phải emblem, bóng Làng Lá chạy dọc mép dưới. Không chữ, không nhân vật, đục.",
+      "dung_tham_chieu": [
+        "TOT-naruto-logo",
+        "logo_wordmark_client",
+        "concept-map1-langla"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: a horizontal launch screen for the game. Left-center: the approved Leaf-Fire emblem exactly as in reference TOT-naruto-logo.png: a stylized leaf whose stem curls inward into a tight spiral, wrapped in sweeping orange-red flame strokes with a few teal-blue accent flicks and dark navy shadow strokes, bold clean dark outlines, cel-shaded, large (about 40% of the height). To its right, from 45% to 85% of the width and vertically centered: an EMPTY quiet dark navy zone with no shapes (the game wordmark will be composited there). Along the bottom 30%: a painted silhouette skyline of the Leaf Village at dusk — cliff with four blank abstract carved shapes (no real faces), red torii gate, tiled rooftops with a few warm lit windows, a large pale moon at the far right — warm orange-amber sky near the horizon fading upward into deep navy, near-black at the top. Match the palette and brush feel of the approved concept (concept-map1-langla.png). No characters.\nCANVAS: 1920x1080 px, landscape. Keep every important element inside the central 85% width. Fully opaque.\nOUTPUT FORMAT: PNG, RGBA with the alpha channel fully opaque (every alpha = 255) — this image is NOT a sprite, it never goes through the chroma or zoom pipeline. No transparency, no magenta background.\nDO NOT DRAW: any text, letters, numbers, kanji or fake writing (the project composites the real wordmark afterwards), watermark, border, rounded-corner mask, UI buttons, real-world logos, photographic elements, blurry or noisy AI artifacts.\nDO NOT DRAW: any text or lettering, characters or faces, UI buttons, loading bar, sparkles or lens flares.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "kich_thuoc_dich": null,
+      "ve_o_co": null,
+      "ma_tra_cuu": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Tên mới: ui_splash_ngang_x4 1920×1080 (đục). Wordmark dán sau."
+    },
+    {
+      "ten_file": "ui_bia_cuahang_x4.png",
+      "nhom": "thuong-hieu",
+      "lang": "la",
+      "kich_thuoc": [
+        1024,
+        500
+      ],
+      "noi_dung": "**Ảnh bìa cửa hàng** 1024×500 (Google Play feature graphic; cũng dùng làm ảnh bìa fanpage). Người chơi học viên Làng Lá (đúng mặt/tóc/vest của `player_idle_3f_chroma`) ở 1/3 trái, thầy Iruka mờ hơn phía sau, một con Sói Rừng nhỏ; nền núi Hokage + cổng torii; 5 vệt chakra màu 5 làng (cam · vàng cát · lam · nâu · tím xanh) quét ngang. Chừa vùng tối yên ở giữa-trên cho wordmark. KHÔNG chữ. Đục. Lưu ý ngoài mỹ thuật (chưa chắc): wordmark NARUTO là nhãn hiệu của bên khác — đưa lên cửa hàng ứng dụng có rủi ro bị gỡ; chủ dự án quyết trước khi dùng.",
+      "dung_tham_chieu": [
+        "player_idle_3f_chroma",
+        "master_iruka_x4_chroma",
+        "wolf_idle_2f_chroma",
+        "TOT-naruto-logo",
+        "concept-map1-langla",
+        "logo_wordmark_client"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: a store feature banner. Left third: the Leaf Village academy-student player character copied exactly from the reference (player_idle_3f_chroma.png — same boy, dark spiky hair, navy Leaf headband, olive flak vest, orange sash), three-quarter pose from the waist up, facing RIGHT toward the center with a confident grin, cel-shaded, clean outlines. Behind him slightly smaller and softer in value: the teacher Iruka (reference master_iruka_x4_chroma.png — brown ponytail, scar across the nose, olive vest) with arms crossed, and at the lower right a small grey forest wolf (reference wolf_idle_2f_chroma.png) snarling. Background: the Leaf Village at golden hour — cliff with four blank abstract carved shapes, red torii gate, rooftops — with five sweeping translucent chakra streaks crossing the sky from left to right in orange, sand-yellow, deep blue, earth-brown and bluish indigo. Keep the upper-center 40% of the canvas visually quiet and darker so the wordmark can be composited there.\nCANVAS: 1024x500 px, landscape. Keep faces and the emblem-free quiet zone inside a 10% margin on every side. Fully opaque.\nOUTPUT FORMAT: PNG, RGBA with the alpha channel fully opaque (every alpha = 255) — this image is NOT a sprite, it never goes through the chroma or zoom pipeline. No transparency, no magenta background.\nDO NOT DRAW: any text, letters, numbers, kanji or fake writing (the project composites the real wordmark afterwards), watermark, border, rounded-corner mask, UI buttons, real-world logos, photographic elements, blurry or noisy AI artifacts.\nDO NOT DRAW: any text, price tags, badges, UI, sparkles, lens flares, extra characters, magenta/pink anywhere.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "kich_thuoc_dich": null,
+      "ve_o_co": null,
+      "ma_tra_cuu": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P2",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Tên mới: ui_bia_cuahang_x4 1024×500 (đục). Google Play feature graphic. Rủi ro nhãn hiệu — chủ dự án quyết."
+    },
+    {
+      "ten_file": "ui_nen_dangnhap_tet_x4.png",
+      "nhom": "thuong-hieu",
+      "lang": "la",
+      "kich_thuoc": [
+        1024,
+        576
+      ],
+      "noi_dung": "**Banner đăng nhập theo mùa — Tết (xuân)** 1024×576: cùng bố cục với `ui_nen_dangnhap_x4` lô 343 (Làng Lá nhìn từ sườn đồi, mái ngói đổ bóng, trăng lớn) nhưng vẽ lại hand-painted và đổi không khí: đèn lồng đỏ treo dọc phố, cành đào-mai nở hồng-vàng ở tiền cảnh, pháo hoa nhỏ trên trời đêm, tuyết nhẹ trên mái ngói. KHÔNG chữ. Đục. Chưa có chỗ lắp: `LoginScr.cs:655-667` hôm nay chỉ vẽ logo, cần code nạp nền trước — P3.",
+      "dung_tham_chieu": [
+        "ui_nen_dangnhap_343",
+        "concept-map1-langla",
+        "TOT-naruto-logo",
+        "logo_wordmark_client"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: a seasonal login-screen background: the Leaf Village seen from a hillside road — tiled rooftops stepping down toward a red torii gate, the carved cliff with four blank abstract shapes in the distance (no real faces), a big sky occupying the upper half — reinterpreted for the season: Lunar New Year: strings of red paper lanterns hung along the street and the torii gate, blooming peach-pink and apricot-yellow blossom branches in the foreground, a few small painted fireworks bursting in the deep night sky, a light dusting of snow on the tiled rooftops, warm red-gold light spilling from doorways. Hand-painted, cel-shaded, clean outlines, matching the approved concept (concept-map1-langla.png). Keep the upper-center third of the sky calm and uncluttered so the wordmark can sit there. No characters.\nCANVAS: 1024x576 px, landscape, fully opaque.\nOUTPUT FORMAT: PNG, RGBA with the alpha channel fully opaque (every alpha = 255) — this image is NOT a sprite, it never goes through the chroma or zoom pipeline. No transparency, no magenta background.\nDO NOT DRAW: any text, letters, numbers, kanji or fake writing (the project composites the real wordmark afterwards), watermark, border, rounded-corner mask, UI buttons, real-world logos, photographic elements, blurry or noisy AI artifacts.\nDO NOT DRAW: any text or lettering, characters, UI buttons, real-world brand items, magenta/pink tones.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "kich_thuoc_dich": null,
+      "ve_o_co": null,
+      "ma_tra_cuu": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P3",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Tên mới: ui_nen_dangnhap_tet_x4 1024×576 (đục). Chưa có chỗ lắp trong client (LoginScr chỉ vẽ logo) — P3."
+    },
+    {
+      "ten_file": "ui_nen_dangnhap_he_x4.png",
+      "nhom": "thuong-hieu",
+      "lang": "la",
+      "kich_thuoc": [
+        1024,
+        576
+      ],
+      "noi_dung": "**Banner đăng nhập theo mùa — Hè** 1024×576: cùng bố cục với `ui_nen_dangnhap_x4` lô 343 (Làng Lá nhìn từ sườn đồi, mái ngói đổ bóng, trăng lớn) nhưng vẽ lại hand-painted và đổi không khí: trưa nắng gắt, trời xanh cao có mây trắng lớn, cờ hội hè phấp phới, hướng dương ven đường, bóng đổ ngắn đậm. KHÔNG chữ. Đục. Chưa có chỗ lắp: `LoginScr.cs:655-667` hôm nay chỉ vẽ logo, cần code nạp nền trước — P3.",
+      "dung_tham_chieu": [
+        "ui_nen_dangnhap_343",
+        "concept-map1-langla",
+        "TOT-naruto-logo",
+        "logo_wordmark_client"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: a seasonal login-screen background: the Leaf Village seen from a hillside road — tiled rooftops stepping down toward a red torii gate, the carved cliff with four blank abstract shapes in the distance (no real faces), a big sky occupying the upper half — reinterpreted for the season: high summer noon: a bright high blue sky with big white cumulus clouds, festival streamers fluttering between the rooftops, tall sunflowers along the road in the foreground, short dark hard shadows, heat-shimmer warm light on the tiled roofs and the red torii gate. Hand-painted, cel-shaded, clean outlines, matching the approved concept (concept-map1-langla.png). Keep the upper-center third of the sky calm and uncluttered so the wordmark can sit there. No characters.\nCANVAS: 1024x576 px, landscape, fully opaque.\nOUTPUT FORMAT: PNG, RGBA with the alpha channel fully opaque (every alpha = 255) — this image is NOT a sprite, it never goes through the chroma or zoom pipeline. No transparency, no magenta background.\nDO NOT DRAW: any text, letters, numbers, kanji or fake writing (the project composites the real wordmark afterwards), watermark, border, rounded-corner mask, UI buttons, real-world logos, photographic elements, blurry or noisy AI artifacts.\nDO NOT DRAW: any text or lettering, characters, UI buttons, real-world brand items, magenta/pink tones.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "kich_thuoc_dich": null,
+      "ve_o_co": null,
+      "ma_tra_cuu": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P3",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Tên mới: ui_nen_dangnhap_he_x4 1024×576 (đục). Chưa có chỗ lắp trong client (LoginScr chỉ vẽ logo) — P3."
+    },
+    {
+      "ten_file": "ui_nen_dangnhap_trungthu_x4.png",
+      "nhom": "thuong-hieu",
+      "lang": "la",
+      "kich_thuoc": [
+        1024,
+        576
+      ],
+      "noi_dung": "**Banner đăng nhập theo mùa — Trung thu** 1024×576: cùng bố cục với `ui_nen_dangnhap_x4` lô 343 (Làng Lá nhìn từ sườn đồi, mái ngói đổ bóng, trăng lớn) nhưng vẽ lại hand-painted và đổi không khí: trăng tròn vàng lớn ngay giữa, đèn ông sao và đèn cá chép treo trước hiên, bàn cỗ nhỏ, trời chàm tím xanh. KHÔNG chữ. Đục. Chưa có chỗ lắp: `LoginScr.cs:655-667` hôm nay chỉ vẽ logo, cần code nạp nền trước — P3.",
+      "dung_tham_chieu": [
+        "ui_nen_dangnhap_343",
+        "concept-map1-langla",
+        "TOT-naruto-logo",
+        "logo_wordmark_client"
+      ],
+      "prompt_day_du": "detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, NO flat vector shapes, NO background scenery, NO drop shadow on ground.\nSUBJECT: a seasonal login-screen background: the Leaf Village seen from a hillside road — tiled rooftops stepping down toward a red torii gate, the carved cliff with four blank abstract shapes in the distance (no real faces), a big sky occupying the upper half — reinterpreted for the season: Mid-Autumn Festival: a huge golden full moon centered above the village, star-shaped and carp-shaped paper lanterns glowing warm orange along the eaves and the torii gate, a small festival table with round cakes in the foreground, a bluish indigo night sky (keep the purple bluish, no magenta). Hand-painted, cel-shaded, clean outlines, matching the approved concept (concept-map1-langla.png). Keep the upper-center third of the sky calm and uncluttered so the wordmark can sit there. No characters.\nCANVAS: 1024x576 px, landscape, fully opaque.\nOUTPUT FORMAT: PNG, RGBA with the alpha channel fully opaque (every alpha = 255) — this image is NOT a sprite, it never goes through the chroma or zoom pipeline. No transparency, no magenta background.\nDO NOT DRAW: any text, letters, numbers, kanji or fake writing (the project composites the real wordmark afterwards), watermark, border, rounded-corner mask, UI buttons, real-world logos, photographic elements, blurry or noisy AI artifacts.\nDO NOT DRAW: any text or lettering, characters, UI buttons, real-world brand items, magenta/pink tones.",
+      "kieu": "tinh_alpha",
+      "so_khung": 1,
+      "o_kich_thuoc": null,
+      "kich_thuoc_dich": null,
+      "ve_o_co": null,
+      "ma_tra_cuu": null,
+      "luu_vao": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu\\",
+      "uu_tien": "P3",
+      "trang_thai": "can_ve",
+      "ghi_chu": "Tên mới: ui_nen_dangnhap_trungthu_x4 1024×576 (đục). Chưa có chỗ lắp trong client (LoginScr chỉ vẽ logo) — P3."
+    }
+  ]
+}

@@ -1,0 +1,259 @@
+{
+ "meta": {
+  "mo_ta": "Mục lục máy đọc của kế hoạch mỹ thuật đợt 4 — sinh bởi kiem-ke-hoach-dot-4.py từ 9 manifest JSON cùng thư mục. Nguồn sự thật là từng NN-*.json; file này chỉ gom lại để tool tự động biết có bao nhiêu hạng mục, manifest nào, lưu vào đâu, làm 3 ảnh mẫu nào trước.",
+  "thu_muc": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the",
+  "cach_dung": "Với mỗi hang_muc[]: mở manifest_json → duyệt anh[] → bỏ trang_thai == 'da_co' → làm anh_mau[] trước, dừng chờ duyệt → rồi P1 → P2 → P3. Đọc README.md §5 để biết khoá nào tên khác nhau giữa các manifest.",
+  "sinh_boi": "kiem-ke-hoach-dot-4.py"
+ },
+ "hang_muc": [
+  {
+   "stt": "01",
+   "ma": "01-nhan-vat",
+   "ten": "Nhân vật người chơi",
+   "kieu_file_chinh": "dai_chroma",
+   "brief_md": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\01-nhan-vat.md",
+   "manifest_json": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\01-nhan-vat.json",
+   "luu_vao": [
+    "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\01-nhan-vat"
+   ],
+   "so_anh_can_ve": {
+    "P1": 3,
+    "P2": 25,
+    "P3": 2
+   },
+   "da_co_trong_manifest": 2,
+   "da_co_theo_brief": 2,
+   "tong_anh_trong_manifest": 32,
+   "anh_mau_3_truoc": [
+    "player_run_5f_chroma.png",
+    "player_hit_death_getup_3f_chroma.png",
+    "player_cat_idle_3f_chroma.png"
+   ],
+   "so_ten_moi_can_noi_kich_thuoc_anh": 0
+  },
+  {
+   "stt": "02",
+   "ma": "02-npc",
+   "ten": "NPC",
+   "kieu_file_chinh": "dai_chroma (master) + tinh_alpha (chân dung)",
+   "brief_md": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\02-npc.md",
+   "manifest_json": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\02-npc.json",
+   "luu_vao": [
+    "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\02-npc",
+    "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\02-npc\\chan-dung",
+    "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\02-npc\\master",
+    "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1"
+   ],
+   "so_anh_can_ve": {
+    "P1": 14,
+    "P2": 24,
+    "P3": 0
+   },
+   "da_co_trong_manifest": 2,
+   "da_co_theo_brief": 2,
+   "tong_anh_trong_manifest": 40,
+   "anh_mau_3_truoc": [
+    "master_hokage3_x4_chroma.png",
+    "master_tho_ren_x4_chroma.png",
+    "cd_hokage3_x4.png"
+   ],
+   "so_ten_moi_can_noi_kich_thuoc_anh": 0
+  },
+  {
+   "stt": "03",
+   "ma": "03-quai",
+   "ten": "Quái",
+   "kieu_file_chinh": "dai_chroma",
+   "brief_md": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\03-quai.md",
+   "manifest_json": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\03-quai.json",
+   "luu_vao": [
+    "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\03-quai"
+   ],
+   "so_anh_can_ve": {
+    "P1": 15,
+    "P2": 80,
+    "P3": 0
+   },
+   "da_co_trong_manifest": 5,
+   "da_co_theo_brief": 5,
+   "tong_anh_trong_manifest": 100,
+   "anh_mau_3_truoc": [
+    "master_lon_rung_x4_chroma.png",
+    "lon_rung_run_4f_chroma.png",
+    "nhen_doc_hit_death_2f_chroma.png"
+   ],
+   "so_ten_moi_can_noi_kich_thuoc_anh": 0
+  },
+  {
+   "stt": "04",
+   "ma": "04-boss",
+   "ten": "Boss",
+   "kieu_file_chinh": "dai_chroma",
+   "brief_md": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\04-boss.md",
+   "manifest_json": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\04-boss.json",
+   "luu_vao": [
+    "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\04-boss"
+   ],
+   "so_anh_can_ve": {
+    "P1": 10,
+    "P2": 24,
+    "P3": 0
+   },
+   "da_co_trong_manifest": 0,
+   "da_co_theo_brief": 0,
+   "tong_anh_trong_manifest": 34,
+   "anh_mau_3_truoc": [
+    "boss_la_mat_na_vo_idle_3f_chroma.png",
+    "boss_la_ke_la_mat_idle_3f_chroma.png",
+    "boss_la_mat_na_vo_melee_4f_chroma.png"
+   ],
+   "so_ten_moi_can_noi_kich_thuoc_anh": 3
+  },
+  {
+   "stt": "05",
+   "ma": "05-map",
+   "ten": "Map (Làng Lá còn thiếu · Khu rừng · 4 làng)",
+   "kieu_file_chinh": "tinh_alpha (nền đặc + tile/vật thể alpha)",
+   "brief_md": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\05-map.md",
+   "manifest_json": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\05-map.json",
+   "luu_vao": [
+    "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\05-map"
+   ],
+   "so_anh_can_ve": {
+    "P1": 34,
+    "P2": 131,
+    "P3": 0
+   },
+   "da_co_trong_manifest": 0,
+   "da_co_theo_brief": 51,
+   "tong_anh_trong_manifest": 165,
+   "anh_mau_3_truoc": [
+    "nen_nuihokage_rong2_x4.png",
+    "tile_dat_van_1_x4.png",
+    "map_rung_cay_co_thu_1_x4.png"
+   ],
+   "so_ten_moi_can_noi_kich_thuoc_anh": 165
+  },
+  {
+   "stt": "06",
+   "ma": "06-vat-pham",
+   "ten": "Icon vật phẩm · trang bị · vũ khí",
+   "kieu_file_chinh": "tinh_alpha",
+   "brief_md": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\06-vat-pham.md",
+   "manifest_json": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\06-vat-pham.json",
+   "luu_vao": [
+    "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\06-vat-pham"
+   ],
+   "so_anh_can_ve": {
+    "P1": 1,
+    "P2": 8,
+    "P3": 154
+   },
+   "da_co_trong_manifest": 5,
+   "da_co_theo_brief": 120,
+   "tong_anh_trong_manifest": 168,
+   "anh_mau_3_truoc": [
+    "vp_kunai_luyentap_x4.png",
+    "vp_cat_ao_t1_x4.png",
+    "vp_may_quan_t1_x4.png"
+   ],
+   "so_ten_moi_can_noi_kich_thuoc_anh": 1
+  },
+  {
+   "stt": "07",
+   "ma": "07-ky-nang-hieu-ung",
+   "ten": "Kỹ năng · hiệu ứng",
+   "kieu_file_chinh": "dai_chroma",
+   "brief_md": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\07-ky-nang-hieu-ung.md",
+   "manifest_json": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\07-ky-nang-hieu-ung.json",
+   "luu_vao": [
+    "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\07-ky-nang-hieu-ung",
+    "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\vertical-slice-v1"
+   ],
+   "so_anh_can_ve": {
+    "P1": 8,
+    "P2": 21,
+    "P3": 4
+   },
+   "da_co_trong_manifest": 6,
+   "da_co_theo_brief": 6,
+   "tong_anh_trong_manifest": 39,
+   "anh_mau_3_truoc": [
+    "hu_la_haohoacau_no_6f_chroma.png",
+    "hu_la_ylieu_8f_chroma.png",
+    "hu_la_haohoacau_bay_3f_chroma.png"
+   ],
+   "so_ten_moi_can_noi_kich_thuoc_anh": 0
+  },
+  {
+   "stt": "08",
+   "ma": "08-giao-dien",
+   "ten": "Giao diện (UI / HUD)",
+   "kieu_file_chinh": "tinh_alpha (đúng cỡ, thay file client)",
+   "brief_md": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\08-giao-dien.md",
+   "manifest_json": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\08-giao-dien.json",
+   "luu_vao": [
+    "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\08-giao-dien"
+   ],
+   "so_anh_can_ve": {
+    "P1": 10,
+    "P2": 15,
+    "P3": 5
+   },
+   "da_co_trong_manifest": 0,
+   "da_co_theo_brief": 63,
+   "tong_anh_trong_manifest": 30,
+   "anh_mau_3_truoc": [
+    "ui_hud_khung_trai_x4.png",
+    "ui_khung_popup_9o_x4.png",
+    "ui_nut_thuong_3manh_x4.png"
+   ],
+   "so_ten_moi_can_noi_kich_thuoc_anh": 30
+  },
+  {
+   "stt": "09",
+   "ma": "09-chan-dung-thuong-hieu",
+   "ten": "Chân dung · thương hiệu",
+   "kieu_file_chinh": "dai_chroma (chân dung) + tinh_alpha đục (thương hiệu)",
+   "brief_md": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\09-chan-dung-thuong-hieu.md",
+   "manifest_json": "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\dot-4-ke-hoach-tong-the\\09-chan-dung-thuong-hieu.json",
+   "luu_vao": [
+    "D:\\NRO_GoiBanGiao\\docs\\my-thuat\\anh-nguon\\dot-4\\09-chan-dung-thuong-hieu"
+   ],
+   "so_anh_can_ve": {
+    "P1": 2,
+    "P2": 36,
+    "P3": 5
+   },
+   "da_co_trong_manifest": 1,
+   "da_co_theo_brief": 1,
+   "tong_anh_trong_manifest": 44,
+   "anh_mau_3_truoc": [
+    "nguoi_choi_la_portrait_chroma.png",
+    "ui_icon_app_x4.png",
+    "nhan_gia_mat_na_p1_portrait_chroma.png"
+   ],
+   "so_ten_moi_can_noi_kich_thuoc_anh": 17
+  }
+ ],
+ "tong": {
+  "can_ve": {
+   "P1": 97,
+   "P2": 364,
+   "P3": 170
+  },
+  "da_co_theo_brief": 250,
+  "ghi_chu": "Tổng cộng thô theo từng brief; chân dung xuất hiện ở 01/02/04 VÀ 09 với tên khác nhau (xem README.md §6 mục D1) nên số P1/P2 thật thấp hơn khi chốt vẽ mỗi chân dung một lần."
+ },
+ "trung_ten_giua_manifest": [
+  {
+   "ten_file": "iruka_portrait_chroma.png",
+   "hang_muc": [
+    "02",
+    "09"
+   ]
+  }
+ ],
+ "anh_tham_chieu_thieu": [],
+ "thu_muc_luu_vao_thieu": []
+}

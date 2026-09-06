@@ -53,11 +53,11 @@ Nguyên tắc xếp: **cái người chơi thấy nhiều nhất và lắp đư�
 
 | Việc | Ai | Vì sao phải làm trước |
 |---|---|---|
-| Chốt **D1 chân dung** (vẽ theo 09 hay theo brief chủ thể — §6) | chủ dự án | không chốt thì 27 chân dung bị vẽ hai lần, hai kiểu |
-| Chốt **C1**: người chơi **vẽ lại (V3-B)** hay **giữ V1 sửa dữ liệu**; nếu vẽ lại, gật luôn **dải chạy 5 khung** (đề xuất của 01) | chủ dự án + người viết pipeline | quyết định bước 2 có tồn tại không |
-| **Nối tên mới vào cuối** `D:\NRO_GoiBanGiao\docs\my-thuat\kich-thuoc-anh.json`: 165 tên map (05), 30 UI (08), 1 kunai (06), 17 thương hiệu + mã chân dung (09), 10 mã tra cứu boss (04) — danh sách máy đọc nằm trong khoá `ten_moi_can_them_kich_thuoc` của từng JSON | agent điều phối | `KIEM-TRA-ANH.py` và `TAO-4-MUC-ZOOM.py` **bỏ qua** file có tên chưa nằm trong bảng |
+| **D1 ĐÃ CHỐT:** chân dung theo 09 | chủ dự án | 09 là nguồn duy nhất; 01/02/04 không tạo bộ mã chân dung thứ hai |
+| **C1 ĐÃ CHỐT:** vẽ lại run + hit; run **5 khung** | chủ dự án + người viết pipeline | bước 2 tồn tại; closure kiểm cỡ đầu C1 trước khi lắp |
+| **ĐÃ NỐI** tên mới vào cuối `D:\NRO_GoiBanGiao\docs\my-thuat\kich-thuoc-anh.json`: 165 map (05), 30 UI (08), 1 kunai (06), 17 thương hiệu + mã chân dung (09), **3** mã tra cứu boss đang dùng (04; 7 mã dự phòng bị D1 loại) | agent điều phối | registry có 216 tên canonical mới; test khóa tên/cỡ/trùng |
 | Dọn 2 sprite id lạ `Small27083/27084` trong client (00-KIEM-KE-DA-CO §4 #6) | agent điều phối | id mới của đợt 4 nối từ 27083 |
-| (song song với vẽ) Nới cổng `artqa gate` / `task6b_closure` khỏi 20 tên v1; viết kiểm "cùng cỡ đầu" cho dải mới | agent code | không có thì ảnh đẹp vẫn không có cổng tự động để lắp (`_KHUON-DOT-4.md` D.2–D.3) |
+| (song song với vẽ) **ĐÃ XONG:** nới cổng `artqa gate` / `task6b_closure` khỏi 20 tên v1; kiểm "cùng cỡ đầu" cho dải mới | agent code | run C1 lệch quá ±5 % so với idle bị từ chối (`_KHUON-DOT-4.md` D.2–D.3) |
 
 ### 3.1 Đợt 4A — P1: Làng Lá + Khu rừng chơi trọn (≈ 97 ảnh, làm theo thứ tự này)
 
@@ -171,8 +171,8 @@ anh[]                mỗi phần tử = MỘT file ảnh phải nộp:
 
 | # | Điều chưa chốt | Ảnh hưởng | Ai quyết | Đề nghị của kế hoạch này |
 |---|---|---|---|---|
-| **D1** [mới] | **Chân dung vẽ ở đâu, kiểu gì.** 01: `player_<làng>_portrait_chroma.png` 1254 · 02: `cd_<npc>_x4.png` **tĩnh alpha** 800→200 · 04: `boss_<làng>_<mã>_portrait_chroma.png` 1256 · 09: `<tên>_portrait_chroma.png` 1254 cho **cả ba nhóm**. Cùng một khuôn mặt bị đòi 2 lần với 2 tên (27 dòng) | 27 ảnh vẽ đôi; hai kiểu file cho cùng một chỗ dùng | chủ dự án | Chốt **theo 09** (1 ô chroma 1254×1254, đường đã chạy thật với Iruka → `Small27078`), 09 giữ danh sách; khi dán khối 01/02/04 **bỏ dòng chân dung** (PROMPT-CHO-AGENT ghi sẵn chỗ bỏ). Chân dung vẫn vẽ **cùng lúc** với master/dải idle của nhân vật đó để khớp mặt |
-| **C1** [đã chốt một nửa 06/09] | Chủ dự án chọn **V1 (sửa dữ liệu)** — đã làm xong, gộp `main` `75a64cc`. Còn lại: **có vẽ lại run + hit không** để bỏ giá "thấp đi ~10 % khi chạy"; nếu vẽ, **4 hay 5 khung** (01 đề xuất 5 vì client lặp đúng 5 cf) | bước 2 §3.1; cần nới `PLAYER_ACTIONS` | chủ dự án + pipeline | Vẽ lại run + hit (2 dải), giữ idle/cast; nhận 5 khung |
+| **D1** [đã chốt 06/09] | **Chân dung theo 09.** 09 là nguồn duy nhất 1 ô chroma 1254; tên `cd_` dự phòng của 04 không nối registry | hết 27 ảnh vẽ đôi / hai kiểu file | chủ dự án | Vẽ chân dung cùng master/dải idle để khớp mặt; khi dán khối 01/02/04 bỏ dòng chân dung |
+| **C1** [đã chốt 06/09] | **Vẽ lại run + hit; run 5 khung.** V1 dữ liệu `75a64cc` vẫn là đường đang chạy cho tới khi lắp ảnh mới | bước 2 §3.1; closure nhận `player_run_5f_chroma.png`, gán cf 2→6, và chặn cỡ đầu lệch quá ±5 % | chủ dự án + pipeline | Giữ idle/cast; thân 14→16 dùng hit 0→2, chân không dùng hit |
 | **C2** [I2] | Danh sách **quái** Khu rừng + 4 làng — `quai.yaml` chỉ có sói | 03 toàn bộ là đề xuất | máy chủ (`quai.yaml`) | Dùng 3 con rừng + 4 con/làng như 03 §5; mã quái = gốc tên `quai_*` |
 | **C3** [I2] | **Boss 4 làng**; boss vĩ thú cần code Mob | 04 P2 | máy chủ (`boss.yaml`) + KH6b | 1 boss dạng người/làng như 04; vĩ thú hoãn |
 | **C4** [I2] | **NPC** ngoài Iruka, vai trò, menu, thoại — KH9 chưa có spec | 02 toàn bộ là đề xuất | KH9 | vẽ 7 NPC Lá theo 02 để KH9 không phải chờ vẽ |
@@ -188,7 +188,7 @@ anh[]                mỗi phần tử = MỘT file ảnh phải nộp:
 | **D5** [mới] | Trang phục người chơi 4 làng là **đề xuất** (máy chủ chưa gửi outfit theo làng) | 01 P2 | máy chủ (`hinhdang.go`) | vẽ bộ "tân binh" theo brief đợt 3 |
 | **D6** [mới] | Kunai: **vẽ icon vuông mới** hay **đệm ảnh 96×48 cũ bằng công cụ** | 06 P1 | chủ dự án | vẽ mới (1 ảnh, rẻ) |
 | **D7** [mới] | **Màu nối** 5 map mới (rừng/cát/sương/đá/mây) | 05 P1/P2 | chốt sau concept | dùng số đề xuất trong 05 §3.3, sửa prompt nền khi concept khác |
-| **D8** [mới] | Công cụ **chưa có, cần viết** (không cản vẽ, cản lắp): cổng artqa cho lô mới · kiểm cỡ đầu dải mới · bộ đóng gói EffectData/blob effect · pipeline NPC (`component_placement`) · pipeline quái (một tỉ lệ, atlas nhiều hàng, nhiều mob, bảng ánh xạ 12 frame) · `sinh-lai-sprite` cho nhân vật thứ hai · `lap-anh-map.py`/`kiem-anh-map.py` tham số hoá · script cắt 9 ô/3 mảnh UI | bước 9 §4 | agent code | làm song song với vẽ, bắt đầu từ cái chặn bước 2 và 6 |
+| **D8** [mới] | Công cụ **chưa có, cần viết** (không cản vẽ, cản lắp): bộ đóng gói EffectData/blob effect · pipeline NPC (`component_placement`) · pipeline quái (một tỉ lệ, atlas nhiều hàng, nhiều mob, bảng ánh xạ 12 frame) · `sinh-lai-sprite` cho nhân vật thứ hai · `lap-anh-map.py`/`kiem-anh-map.py` tham số hoá · script cắt 9 ô/3 mảnh UI | bước 9 §4 | agent code | cổng artqa và kiểm cỡ đầu C1 đã có; làm phần còn lại song song với vẽ |
 
 ---
 
@@ -220,7 +220,7 @@ anh[]                mỗi phần tử = MỘT file ảnh phải nộp:
 
 > ⚠️ **Thư mục ảnh nằm NGOÀI git.** `.gitignore:83` bỏ qua cả `docs/my-thuat/anh-nguon/` — nên 9 thư mục `anh-nguon\dot-4\<hạng mục>\` (và cả 0,3 GB ảnh nguồn hiện có: 343 ảnh lô 1, 20 dải chroma v1, 51 ảnh map 1) **không có bản sao trong git**. Ảnh mới vẽ xong phải tự sao lưu (ổ ngoài / đám mây) trước khi dọn máy; chỉ ảnh đã lắp vào client mới được chép vào `docs/my-thuat/lang-la-client-assets/` và commit.
 
-**File liên quan ngoài thư mục:** `D:\NRO_GoiBanGiao\docs\my-thuat\dot-3-toan-bo\_KHUON.md` (luật vàng, bảng cỡ tĩnh, màu 5 làng) · `D:\NRO_GoiBanGiao\docs\my-thuat\KHUON-DE-BAI-ANH-MAP.md` (khuôn 27–33 ảnh/map) · `D:\NRO_GoiBanGiao\docs\my-thuat\kich-thuoc-anh.json` (bảng cỡ 691 tên, append-only) · `D:\NRO_GoiBanGiao\docs\my-thuat\manifest-tao-anh.json` (schema gốc) · `D:\NRO_GoiBanGiao\docs\my-thuat\map-1-lang-la\PROMPT-CHO-AGENT.md` (mẫu khối giao việc đã dùng thật) · `D:\NRO_GoiBanGiao\docs\my-thuat\anh-nguon\vertical-slice-v1\` (20 dải chroma gốc) · `D:\NRO_GoiBanGiao\docs\my-thuat\anh-nguon\343-anh\` (lô 343 ảnh tĩnh) · `D:\NRO_GoiBanGiao\docs\my-thuat\anh-nguon\dot-4\` (nơi ảnh đợt 4 sẽ về).
+**File liên quan ngoài thư mục:** `D:\NRO_GoiBanGiao\docs\my-thuat\dot-3-toan-bo\_KHUON.md` (luật vàng, bảng cỡ tĩnh, màu 5 làng) · `D:\NRO_GoiBanGiao\docs\my-thuat\KHUON-DE-BAI-ANH-MAP.md` (khuôn 27–33 ảnh/map) · `D:\NRO_GoiBanGiao\docs\my-thuat\kich-thuoc-anh.json` (bảng cỡ 907 tên, append-only) · `D:\NRO_GoiBanGiao\docs\my-thuat\manifest-tao-anh.json` (schema gốc) · `D:\NRO_GoiBanGiao\docs\my-thuat\map-1-lang-la\PROMPT-CHO-AGENT.md` (mẫu khối giao việc đã dùng thật) · `D:\NRO_GoiBanGiao\docs\my-thuat\anh-nguon\vertical-slice-v1\` (20 dải chroma gốc) · `D:\NRO_GoiBanGiao\docs\my-thuat\anh-nguon\343-anh\` (lô 343 ảnh tĩnh) · `D:\NRO_GoiBanGiao\docs\my-thuat\anh-nguon\dot-4\` (nơi ảnh đợt 4 sẽ về).
 
 ---
 

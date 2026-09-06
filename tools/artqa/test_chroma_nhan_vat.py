@@ -104,7 +104,8 @@ class KheNenNhanVatTests(unittest.TestCase):
         from tools.artqa.task6b_closure import IRUKA_SOURCE
         from tools.artqa.nhan_vat_moc import NGUON_NGUOI_CHOI
 
-        self.assertEqual(NGUON_NHAN_VAT, frozenset(NGUON_NGUOI_CHOI) | {IRUKA_SOURCE})
+        self.assertTrue(frozenset(NGUON_NGUOI_CHOI) | {IRUKA_SOURCE} <= NGUON_NHAN_VAT)
+        self.assertIn("player_run_5f_chroma.png", NGUON_NHAN_VAT)
 
 
     def test_dom_co_lap_khong_co_mau_sach_thi_dat_alpha_0(self):

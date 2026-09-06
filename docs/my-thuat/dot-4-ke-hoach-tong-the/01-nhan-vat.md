@@ -1,4 +1,4 @@
-# NHÂN VẬT NGƯỜI CHƠI — Đợt 4 (P1 vẽ lại = nâng cấp tuỳ chọn sau khi V1 xong 06/09 · P2/P3 đề xuất)
+# NHÂN VẬT NGƯỜI CHƠI — Đợt 4 (C1 đã chốt: P1 vẽ lại run 5 khung + hit · P2/P3 đề xuất)
 
 > Đọc `_KHUON-DOT-4.md` và `../dot-3-toan-bo/_KHUON.md` trước. **LƯU VÀO:** `D:\NRO_GoiBanGiao\docs\my-thuat\anh-nguon\dot-4\01-nhan-vat`
 >
@@ -12,7 +12,7 @@ Nhân vật người chơi là thứ **hiện trên màn hình nhiều nhất**:
 
 Ba việc của hạng mục này:
 
-- **(a) P1 — vẽ lại dải chạy + dải trúng đòn của học viên Làng Lá.** Bài học 05/09: 5 dải v1 vẽ nhân vật **khác cỡ nhau** (chạy nhỏ hơn 12 % và khom 13 %, đánh nhỏ hơn 17 %), dải trúng đòn có **khung nằm**. Phương án dữ liệu V1 chữa được "hai khuôn mặt" nhưng phải trả giá **nhân vật thấp đi ~10 % khi chạy** (53–55 so 61–62 px x1) và khung nằm vẫn hiện lúc bắt đầu tung chiêu. Vẽ lại đúng thước là cách **bỏ cái giá đó**. **Cập nhật 06/09:** chủ dự án đã chọn V1, và V1 **đã làm xong + gộp `main`** (`75a64cc`) — trong game hiện 33/33 khung một mặt, đầu ngồi lên vai (ảnh `review/khe-dau-than-2026-09-05/in-game/`). Vì thế dải vẽ lại ở đây là **nâng cấp tuỳ chọn**: làm thì hết "thấp đi ~10 % khi chạy" và hết khung nằm; không làm thì game vẫn chạy đúng.
+- **(a) P1 — vẽ lại dải chạy + dải trúng đòn của học viên Làng Lá.** Bài học 05/09: 5 dải v1 vẽ nhân vật **khác cỡ nhau** (chạy nhỏ hơn 12 % và khom 13 %, đánh nhỏ hơn 17 %), dải trúng đòn có **khung nằm**. V1 dữ liệu vẫn giữ game chạy đúng (`75a64cc`), nhưng **C1 đã chốt** vẽ lại hai dải để bỏ giá **nhân vật thấp đi ~10 % khi chạy** và khung nằm lúc bắt đầu tung chiêu. Dải chạy bắt buộc **5 khung** theo cf 2→6; closure chặn run/hit có cỡ đầu lệch quá ±5 % so với idle.
 - **(b) P2 — bộ khởi đầu 4 làng còn lại** (Cát · Sương Mù · Đá · Mây): mỗi làng **đủ 5 dải cùng một nhân vật mặc đồ làng đó** → 34 mảnh riêng + 3 part id mới. Không phải 2 mảnh đầu/thân tĩnh như brief đợt 3 (`lang-*/nhan-vat.md`) — thứ đó client không ăn được.
 - **(c) P3 — biến thể nữ / kiểu tóc**: client **không có giới tính nữ** (`cgender` chỉ có 3 giá trị hành tinh Dragon Ball, máy chủ ép luôn = 0, `hinhdang.go:48-57`); thứ client cho đổi là **part ĐẦU** (`KieuToc`, hiện `dauHopLe` ép về 30). Nên "nữ" hay "tóc khác" = **một part đầu mới 3 khung**, thân/chân dùng chung → chỉ cần dải idle 3 khung với đầu mới.
 
@@ -39,7 +39,7 @@ Kèm theo: **chân dung** (ô avatar HUD + khung hội thoại) cho 5 nhân vậ
 
 **Kiểu file: DẢI CHROMA** (`dai_chroma`, `_KHUON-DOT-4.md` §A) — PNG nền tím **RGB(246, 4, 242)** phẳng tuyệt đối, chia **n ô bằng nhau 724×724** xếp ngang, một ô một khung; **con số trong tên `_<n>f` là số ô máy dùng để cắt** (`tools/artqa/artqa.py:450-452`, regex `_(\d+)(?:f|_chroma)` — `_5f` cắt 5 ô). Chân dung: 1 ô 1254×1254 (như `iruka_portrait_chroma.png`). Cỡ cả dải: 3 khung **2172×724** · 4 khung **2896×724** · 5 khung **3620×724** (724 chia hết cho 4 → x1 không lệch nửa pixel).
 
-**Bộ nhân vật đầy đủ = 5 dải**, thứ tự cố định (`task6b_closure.py:41-47, 189-195`): `idle_3f` · `run_5f` (đề xuất, v1 là 4) · `melee_4f` · `cast_3f` · `hit_death_getup_3f` = 17 khung (v1) / **18 khung (đề xuất)**. Client chỉ có **17 slot thân / 14 slot chân / 3 slot đầu**: thân lấy idle 0–1, run 0–4 (run 0 vào slot 2 thay idle 2), melee, cast, hit; chân lấy 14 khung đầu tới cast 2 (bỏ hit); **đầu chỉ lấy 3 khung idle**. Thân của idle 2 không dùng khi chọn run 5 khung — đó là việc gán slot ở bước lắp, không ảnh hưởng người vẽ. Mọi khung nhân **một** tỉ lệ `s = 128 / rộng(idle 0)`; gốc mỗi khung = giữa-dưới hộp nội dung (bàn chân) đặt tại `cy − 11` x1; cắt mảnh theo % chiều cao khung: đầu 0–42 %, thân 28–76 %, chân 66–100 % (`task6b_closure.py:69-75, 143-159`). **Chính vì cắt theo %** mà khung nào thấp/khom hơn là lát cắt 28 % rơi lên trán → mảnh thân mang theo mặt → "hai khuôn mặt".
+**Bộ nhân vật đầy đủ = 5 dải**, thứ tự C1 cố định (`task6b_closure.py`): `idle_3f` · `run_5f` · `melee_4f` · `cast_3f` · `hit_death_getup_3f` = **18 khung**. Client chỉ có **17 slot thân / 14 slot chân / 3 slot đầu**: thân lấy idle 0–1, run 0–4 (run 0 vào slot 2 thay idle 2), melee, cast, hit; chân lấy 14 khung đầu tới cast 2 (bỏ hit); **đầu chỉ lấy 3 khung idle**. Thân của idle 2 không dùng khi chọn run 5 khung. Cổng C1 đo cỡ đầu run/hit so với idle và từ chối lệch quá ±5 % trước khi pipeline cắt mảnh.
 
 **Bảng khung → slot → cf thật của client** (từ `tools/nhan-vat/charinfo.json`, đủ ở `_KHUON-DOT-4.md` B.1; đây là "khung nào lên hình lúc nào"):
 
@@ -47,8 +47,8 @@ Kèm theo: **chân dung** (ô avatar HUD + khung hội thoại) cho 5 nhân vậ
 |---|---|---|---|---|
 | idle 0 | 0 → 23, 24 | 0 → 8 | **0 → 0,1,7,8,11,12,17–24,30–32** | Đầu chính của gần hết tư thế; thân idle 0 = **chết đứng / trúng đòn** (client không có khung nằm) |
 | idle 1 | 1 → 0, 1 | 1 → 0, 1, 22 | **1 → 2–6, 9,10, 13–16, 26–29** | Thân đứng; đầu slot 1 là đầu hiện **khi chạy/nhảy** (`Char.cs:7643 isFrNgang`) — vẽ cùng cỡ, có thể quay thêm chút về phải |
-| idle 2 | 2 → 2, 15, 28 | 2 → 2 | 2 → 25 | Hiện tại cf 2 (khung chạy đầu tiên) mượn idle 2 → đề xuất run 0 thay vào |
-| run 0–3 (v1) / **run 0–4 (đề xuất)** | 3–6 → 3, 4, 5, 6 (**2–6 → 2..6**) | 3–6 → 3–6 (**2–6**) | — | Vòng chạy `cf = gameTick % 5 + 2` (`Char.cs:2537`) = **5 cf** → 5 khung |
+| idle 2 | 2 → 2, 15, 28 | 2 → 2 | 2 → 25 | C1: cf 2 (khung chạy đầu tiên) lấy run 0, không mượn idle 2 |
+| run 0–4 (C1) | **2–6 → 2..6** | **2–6** | — | Vòng chạy `cf = gameTick % 5 + 2` (`Char.cs:2537`) = **5 cf** → 5 khung |
 | melee 0 | 7 → 7, 8, 17 | **7 → 7, 23** | — | Đánh / đà / nạp; **chân melee 0 hiện ở cf 23 = chết đứng** → tấn vững, không nhấc chân |
 | melee 1 | 8 → 12, 18, 22 | 8 → 12, 26–32 | — | Nạp trên đất |
 | melee 2 | 9 → 11, 21, 32 | 9 → 13–21, 24 | — | Đỉnh nhảy / thế chiêu |
@@ -60,7 +60,7 @@ Kèm theo: **chân dung** (ô avatar HUD + khung hội thoại) cho 5 nhân vậ
 | hit 1 | **15 → 20, 31** | — | — | **Thế bắt đầu chiêu** — v1 vẽ khung này NẰM → lỗi |
 | hit 2 | 16 → 25 | — | — | Sau dịch chuyển (tiếp đất) |
 
-> Phương án V1 (`review/.../geometry-V1.json`, **đã tích hợp 06/09**) gán khác: thân slot 2 = run0, 6 = run0, 14 = cast2, 15 = cast0, 16 = idle2 (không dùng khung hit). Khi lắp dải hit mới thì gán lại 14–16 = hit 0–2. Quyết định này thuộc bước lắp, không thuộc người vẽ.
+> Lịch sử V1 (`review/.../geometry-V1.json`, **đã tích hợp 06/09**) từng gán run0 lặp ở slot 6 và 14–16 = cast2/cast0/idle2. C1 thay rõ ràng thành run 0–4 ở slot 2–6 và hit 0–2 ở thân 14–16; chân vẫn không lấy hit.
 
 **Bảy luật bài học 05/09 — chép nguyên vào mọi lần gen, kèm `D:\NRO_GoiBanGiao\docs\my-thuat\dot-4-ke-hoach-tong-the\anh-tham-chieu\THUOC-NHAN-VAT.png`:**
 
@@ -167,9 +167,9 @@ Mỗi khối là một prompt tiếng Anh **tự đứng được** (phong cách
 
 ### 6.1 `player_run_5f_chroma.png` — P1 · ve_lai
 
-Khung → cf client: run 0 → thân/chân slot 2 → cf 2 (đề xuất; hiện slot 2 = idle 2) · run 1 → thân/chân slot 3 → cf 3 · run 2 → slot 4 → cf 4 · run 3 → slot 5 → cf 5 · run 4 → slot 6 → cf 6 (vòng lặp `cf = gameTick % 5 + 2`, Char.cs:2537)
+Khung → cf client C1: run 0 → thân/chân slot 2 → cf 2 · run 1 → thân/chân slot 3 → cf 3 · run 2 → slot 4 → cf 4 · run 3 → slot 5 → cf 5 · run 4 → slot 6 → cf 6 (vòng lặp `cf = gameTick % 5 + 2`, Char.cs:2537)
 
-> Đổi 4→5 khung là ĐỀ XUẤT: cần nới PLAYER_ACTIONS (task6b_closure.py:41-47) và gán slot thân/chân 2..6 = run 0..4. Nếu dự án giữ 4 khung: dùng khung 2–5 làm run 0–3, bỏ khung 1 (cf 2 lại lấy idle 2).
+> C1 đã chốt 4→5 khung; `task6b_closure.py` đã nhận `player_run_5f_chroma.png` và gán slot thân/chân 2..6 = run 0..4.
 
 ```text
 detailed 2D game sprite, hand-painted with cel-shading, clean dark outlines, rich shading (40+ colors), Naruto ninja aesthetic, side/3-4 view facing RIGHT, full body, NO flat vector shapes, NO background scenery, NO drop shadow on ground.

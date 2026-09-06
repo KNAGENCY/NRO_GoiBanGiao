@@ -41,6 +41,15 @@ TILE_SOURCE_SHA256 = "2031edef163fc766b9f44df6c30724c0e41c57730b4f98749e3940fae1
 
 PLAYER_ACTIONS = (
     ("idle", "player_idle_3f_chroma.png", 3),
+    ("run", "player_run_5f_chroma.png", 5),
+    ("melee", "player_melee_4f_chroma.png", 4),
+    ("cast", "player_cast_3f_chroma.png", 3),
+    ("hit_death_getup", "player_hit_death_getup_3f_chroma.png", 3),
+)
+# Closure V1 đã ký vẫn cần tái lập được khi review cũ chỉ có run 4 khung. Lối này
+# chỉ là tương thích dữ liệu cũ; C1 luôn ưu tiên bộ tên mới ở trên.
+LEGACY_PLAYER_ACTIONS = (
+    ("idle", "player_idle_3f_chroma.png", 3),
     ("run", "player_run_4f_chroma.png", 4),
     ("melee", "player_melee_4f_chroma.png", 4),
     ("cast", "player_cast_3f_chroma.png", 3),
@@ -95,17 +104,31 @@ COMPONENT_CHARINFO_SLOT = {"head": 0, "leg": 1, "body": 2}
 PLAYER_HEAD_SLOTS_V1 = (("idle", 0), ("idle", 1), ("idle", 2))
 PLAYER_BODY_SLOTS_V1 = {
     0: ("idle", 0), 1: ("idle", 1),
+    2: ("run", 0), 3: ("run", 1), 4: ("run", 2), 5: ("run", 3), 6: ("run", 4),
+    7: ("melee", 0), 8: ("melee", 1), 9: ("melee", 2), 10: ("melee", 3),
+    11: ("cast", 0), 12: ("cast", 1), 13: ("cast", 2),
+    14: ("hit_death_getup", 0), 15: ("hit_death_getup", 1), 16: ("hit_death_getup", 2),
+}
+PLAYER_LEG_SLOTS_V1 = {
+    0: ("idle", 0), 1: ("idle", 1),
+    2: ("run", 0), 3: ("run", 1), 4: ("run", 2), 5: ("run", 3), 6: ("run", 4),
+    7: ("melee", 0), 8: ("melee", 1), 9: ("melee", 2), 10: ("melee", 3),
+    11: ("cast", 0), 12: ("cast", 1), 13: ("idle", 2),
+}
+LEGACY_PLAYER_BODY_SLOTS_V1 = {
+    0: ("idle", 0), 1: ("idle", 1),
     2: ("run", 0), 3: ("run", 1), 4: ("run", 2), 5: ("run", 3), 6: ("run", 0),
     7: ("melee", 0), 8: ("melee", 1), 9: ("melee", 2), 10: ("melee", 3),
     11: ("cast", 0), 12: ("cast", 1), 13: ("cast", 2),
     14: ("cast", 2), 15: ("cast", 0), 16: ("idle", 2),
 }
-PLAYER_LEG_SLOTS_V1 = {
+LEGACY_PLAYER_LEG_SLOTS_V1 = {
     0: ("idle", 0), 1: ("idle", 1),
     2: ("run", 0), 3: ("run", 1), 4: ("run", 2), 5: ("run", 3), 6: ("run", 0),
     7: ("melee", 0), 8: ("melee", 1), 9: ("melee", 2), 10: ("melee", 3),
     11: ("cast", 0), 12: ("cast", 1), 13: ("idle", 2),
 }
+PLAYER_HEAD_SCALE_RANGE_C1 = (0.95, 1.05)
 HEAD_CHIN_MARGIN_SRC = 6      # px nguồn dưới cằm gộp vào ĐẦU (cổ áo che mối nối)
 BODY_CHIN_MARGIN_X1 = 2.0     # px x1 trên cằm gộp vào THÂN (đầu vẽ trước, thân đè lên)
 BODY_BOTTOM_RATIO = 0.76
@@ -159,14 +182,9 @@ IRUKA_THUOC_CUNG = ("face_h", "face_w", "face_area_sqrt", "eye_h", "eye_to_chin"
 # Đo thêm: `is_chroma` nghiêm ngặt ⊂ mặt nạ candidate trên cả 6 dải (0 pixel lọt),
 # nên xoá hết đảo candidate là đủ để đếm chroma về 0.
 NGUON_NHAN_VAT = frozenset(
-    {
-        "player_idle_3f_chroma.png",
-        "player_run_4f_chroma.png",
-        "player_melee_4f_chroma.png",
-        "player_cast_3f_chroma.png",
-        "player_hit_death_getup_3f_chroma.png",
-        IRUKA_SOURCE,
-    }
+    {source for _, source, _ in PLAYER_ACTIONS}
+    | {source for _, source, _ in LEGACY_PLAYER_ACTIONS}
+    | {IRUKA_SOURCE}
 )
 # Đảo ≥ 8 px là KHE NỀN thật → alpha 0 (nền vốn phải trong suốt). Đo 06/09 trên
 # 6 dải: khe nhỏ nhất 9 px, đốm lẻ lớn nhất 4 px — khoảng trống 4↔9 tách hai loại
@@ -300,6 +318,49 @@ def player_frame_geometry(
     return nhan_vat_moc.hinh_hoc_khung(moc, tham_chieu, s0), tham_chieu, s0
 
 
+def _player_actions_for_records(records: dict[str, dict[str, Any]]) -> tuple[tuple[str, str, int], ...]:
+    """Ưu tiên C1; chỉ rơi về V1 để tái lập artifact V1 đã được ký."""
+
+    if all(source_name in records for _, source_name, _ in PLAYER_ACTIONS):
+        return PLAYER_ACTIONS
+    if all(source_name in records for _, source_name, _ in LEGACY_PLAYER_ACTIONS):
+        return LEGACY_PLAYER_ACTIONS
+    raise ClosureError("ASSET-CLOSURE-015: review thiếu đủ bộ dải người chơi C1 hoặc V1")
+
+
+def _player_slot_maps(actions: tuple[tuple[str, str, int], ...]) -> tuple[dict[int, tuple[str, int]], dict[int, tuple[str, int]]]:
+    if actions == PLAYER_ACTIONS:
+        return PLAYER_BODY_SLOTS_V1, PLAYER_LEG_SLOTS_V1
+    return LEGACY_PLAYER_BODY_SLOTS_V1, LEGACY_PLAYER_LEG_SLOTS_V1
+
+
+def _require_c1_same_head_size(
+    geometry: dict[tuple[str, int], dict[str, Any]],
+    actions: tuple[tuple[str, str, int], ...],
+) -> None:
+    """C1 từ chối run/hit có đầu lệch quá ±5 % so với idle chuẩn.
+
+    V1 chỉ dùng bù tỷ lệ bằng toán nên không thể áp tiêu chuẩn mới vào artifact đã ký.
+    C1 đã chốt vẽ lại run + hit, vì vậy phải chặn ngay ở closure thay vì lại co giãn
+    từng pose rồi để nhân vật thấp hoặc xuất hiện hai khuôn mặt trong game.
+    """
+
+    if actions != PLAYER_ACTIONS:
+        return
+    minimum, maximum = PLAYER_HEAD_SCALE_RANGE_C1
+    for action, source_name, frame_count in actions:
+        if action not in {"run", "hit_death_getup"}:
+            continue
+        for frame_index in range(frame_count):
+            scale = geometry.get((source_name, frame_index), {}).get("he_so_dau")
+            if scale is None or not minimum <= float(scale) <= maximum:
+                raise ClosureError(
+                    "ASSET-CLOSURE-015: cùng cỡ đầu C1 lệch ở "
+                    f"{source_name}#{frame_index}: {scale!r}; "
+                    f"cần trong [{minimum}, {maximum}] so với idle"
+                )
+
+
 def derive_player_slot_specs(
     review: dict[str, Any],
     *,
@@ -314,8 +375,9 @@ def derive_player_slot_specs(
     """
 
     records = records if records is not None else _review_by_name(review)
+    actions = _player_actions_for_records(records)
     by_action: dict[str, tuple[str, dict[str, Any]]] = {}
-    for action, source_name, expected_count in PLAYER_ACTIONS:
+    for action, source_name, expected_count in actions:
         record = records.get(source_name)
         if record is None:
             raise ClosureError(
@@ -328,11 +390,13 @@ def derive_player_slot_specs(
             )
         by_action[action] = (source_name, record)
     hinh_hoc, tham_chieu, s0 = player_frame_geometry(records, moc, idle_frames=idle_frames)
+    _require_c1_same_head_size(hinh_hoc, actions)
+    body_slots, leg_slots = _player_slot_maps(actions)
 
     groups = (
         ("head", 27041, dict(enumerate(PLAYER_HEAD_SLOTS_V1))),
-        ("body", 27044, PLAYER_BODY_SLOTS_V1),
-        ("leg", 27061, PLAYER_LEG_SLOTS_V1),
+        ("body", 27044, body_slots),
+        ("leg", 27061, leg_slots),
     )
     slots = []
     for component, first_id, bang in groups:
@@ -524,9 +588,13 @@ def player_component_images(
         raise ClosureError(
             f"ASSET-CLOSURE-015: MILP ban_chan_x1={tham_so.ban_chan_x1} khác feet_offset_x1={feet_offset_x1}"
         )
+    actions = _player_actions_for_records(records)
     if moc is None:
         try:
-            moc = nhan_vat_moc.do_nguon(art_root, records)
+            moc = nhan_vat_moc.do_nguon(
+                art_root, records,
+                sources=tuple(source_name for _, source_name, _ in actions),
+            )
         except nhan_vat_moc.MocError as error:
             raise ClosureError(str(error)) from error
     cf_by_slot = {

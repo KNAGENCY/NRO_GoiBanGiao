@@ -28,28 +28,6 @@ MIN_OPAQUE_RATIO = 0.01
 FRAME_DURATION_MS = 100
 LIGHT = (245, 242, 235, 255)
 DARK = (28, 32, 43, 255)
-REQUIRED_ASSET_NAMES = (
-    "hu_anthan_10f_chroma.png",
-    "hud_hp_chakra_4_chroma.png",
-    "iruka_portrait_chroma.png",
-    "master_hoc_vien_x4_chroma.png",
-    "master_iruka_x4_chroma.png",
-    "master_soi_rung_x4_chroma.png",
-    "player_cast_3f_chroma.png",
-    "player_hit_death_getup_3f_chroma.png",
-    "player_idle_3f_chroma.png",
-    "player_melee_4f_chroma.png",
-    "player_run_4f_chroma.png",
-    "skill_icons_cloud_4_chroma.png",
-    "skill_icons_leaf_4_chroma.png",
-    "skill_icons_mist_4_chroma.png",
-    "skill_icons_sand_4_chroma.png",
-    "skill_icons_stone_4_chroma.png",
-    "wolf_hit_death_2f_chroma.png",
-    "wolf_idle_2f_chroma.png",
-    "wolf_pounce_2f_chroma.png",
-    "wolf_run_4f_chroma.png",
-)
 REQUIRED_EVIDENCE = ("alpha", "crop_report", "contact_sheet", "animation_preview")
 
 
@@ -636,8 +614,13 @@ def _verify_review_gate(review_path: Path) -> tuple[bool, list[str]]:
     if not isinstance(assets, list):
         return False, issues + ["required_assets_missing"]
     names = [asset.get("asset") if isinstance(asset, dict) and isinstance(asset.get("asset"), str) else None for asset in assets]
-    if len(assets) != len(names) or len(names) != len(set(names)) or tuple(sorted(name for name in names if name is not None)) != tuple(sorted(REQUIRED_ASSET_NAMES)):
-        issues.append("exact_required_assets_mismatch")
+    # Gate phải kiểm bằng chứng của đúng tập ảnh review đưa vào, không khóa vào 20
+    # tên Vertical Slice V1. Đợt 4 thay run thành 5 khung và sẽ có các lô độc lập.
+    # Tuy vậy một review rỗng, tên thiếu hoặc lặp vẫn không được qua cổng.
+    if not assets:
+        issues.append("required_assets_missing")
+    elif any(name is None or not name for name in names) or len(names) != len(set(names)):
+        issues.append("asset_names_invalid_or_duplicate")
     seen_evidence: set[Path] = set()
     actual_raw_pass = 0
     actual_raw_fail = 0

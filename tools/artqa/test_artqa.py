@@ -255,10 +255,10 @@ class GateTests(unittest.TestCase):
         path.write_text(json.dumps(document), encoding="utf-8")
         return path
 
-    def _write_generated_review(self, root: Path) -> Path:
+    def _write_generated_review(self, root: Path, names=REQUIRED_ASSET_NAMES) -> Path:
         source_root = root / "vertical-slice-v1"
         source_root.mkdir(parents=True)
-        for index, name in enumerate(REQUIRED_ASSET_NAMES):
+        for index, name in enumerate(names):
             match = re.search(r"_(\d+)(?:f|_chroma)", name)
             columns = int(match.group(1)) if match else 1
             image = Image.new("RGB", (columns * 100, 100), (220 + index % 20, 10, 225))
@@ -401,15 +401,46 @@ class GateTests(unittest.TestCase):
                 self.assertEqual(result.returncode, 2)
                 self.assertIn('"allowed": false', result.stdout)
 
-    def test_gate_requires_exact_twenty_unique_asset_names(self):
+    def test_gate_accepts_new_c1_asset_set_when_every_evidence_is_valid(self):
         with tempfile.TemporaryDirectory() as tmp:
-            review = self._write_strict_review(Path(tmp))
-            data = json.loads(review.read_text(encoding="utf-8"))
-            data["assets"].pop()
-            review.write_text(json.dumps(data), encoding="utf-8")
+            review = self._write_generated_review(
+                Path(tmp),
+                ("player_run_5f_chroma.png", "player_hit_death_getup_3f_chroma.png"),
+            )
+
             ok, issues = verify_review_gate(review)
+
+            self.assertTrue(ok, issues)
+
+    def test_gate_rejects_empty_or_duplicate_asset_names(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            review = self._write_generated_review(Path(tmp), ("player_run_5f_chroma.png",))
+            data = json.loads(review.read_text(encoding="utf-8"))
+            data["assets"] = []
+            data["summary"] = {"total": 0, "pass": 0, "fail": 0,
+                               "raw_source_pass": 0, "raw_source_fail": 0,
+                               "accepted_source_pass": 0, "accepted_source_fail": 0}
+            review.write_text(json.dumps(data), encoding="utf-8")
+
+            ok, issues = verify_review_gate(review)
+
             self.assertFalse(ok)
-            self.assertTrue(any("exact_required_assets" in issue for issue in issues))
+            self.assertIn("required_assets_missing", issues)
+
+            duplicate_root = Path(tmp) / "duplicate"
+            duplicate_root.mkdir()
+            review = self._write_generated_review(duplicate_root, ("player_run_5f_chroma.png",))
+            data = json.loads(review.read_text(encoding="utf-8"))
+            data["assets"].append(dict(data["assets"][0]))
+            data["summary"] = {"total": 2, "pass": 2, "fail": 0,
+                               "raw_source_pass": 2, "raw_source_fail": 0,
+                               "accepted_source_pass": 2, "accepted_source_fail": 0}
+            review.write_text(json.dumps(data), encoding="utf-8")
+
+            ok, issues = verify_review_gate(review)
+
+            self.assertFalse(ok)
+            self.assertIn("asset_names_invalid_or_duplicate", issues)
 
     def test_gate_requires_source_status_and_source_sha(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -49,6 +49,35 @@ def test_mask_only_removes_neutral_checkerboard_connected_from_edge() -> None:
     assert image.getpixel((10, 10)) == (255, 255, 255, 255)
 
 
+def test_mask_preserves_neutral_art_highlight_touching_edge() -> None:
+    image = checkerboard((64, 64))
+    highlight = (244, 244, 244, 255)
+    # Highlight thật đi ra tận mép phải và nằm giữa nền caro 255/242. Màu
+    # trung tính + nối biên không đủ để kết luận đây là nền.
+    for y in range(46, 51):
+        for x in range(52, 64):
+            image.putpixel((x, y), highlight)
+
+    changed = mask_edge_connected_checkerboard(image)
+
+    assert changed > 0
+    assert image.getpixel((0, 0))[3] == 0  # ô nền xám 242 thật bị xoá
+    assert image.getpixel((4, 0))[3] == 0  # ô nền trắng 255 thật bị xoá
+    assert image.getpixel((55, 48)) == highlight
+    assert image.getpixel((63, 48)) == highlight
+
+
+def test_mask_refuses_two_neutral_bands_without_checkerboard_pattern() -> None:
+    image = Image.new("RGBA", (64, 64), (255, 255, 255, 255))
+    image.paste((242, 242, 242, 255), (0, 0, 32, 64))
+    before = image.tobytes()
+
+    with pytest.raises(ValidationError, match="spatial"):
+        mask_edge_connected_checkerboard(image)
+
+    assert image.tobytes() == before
+
+
 def test_processes_three_assets_with_backup_seams_hud_and_idempotence(tmp_path: Path) -> None:
     root = tmp_path / "source"
     backup = tmp_path / "backup"

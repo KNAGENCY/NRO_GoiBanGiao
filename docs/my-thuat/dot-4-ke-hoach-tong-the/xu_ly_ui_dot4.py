@@ -10,7 +10,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import shutil
-from collections import deque
+from collections import Counter, deque
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -40,14 +40,91 @@ class ProcessResult:
     cleared_pixels: int
 
 
-def is_border_checkerboard(pixel: tuple[int, int, int, int]) -> bool:
-    """Nhận đúng vùng caro sáng, trung tính; không nhận giấy vàng hay gỗ."""
+@dataclass(frozen=True)
+class CheckerboardPattern:
+    gray: tuple[int, int, int]
+    bright: tuple[int, int, int]
+
+    def matches(self, pixel: tuple[int, int, int, int]) -> bool:
+        """Chỉ xoá hai màu đã chứng minh tạo thành caro trên chính ảnh này."""
+        return pixel[3] == 255 and pixel[:3] in (self.gray, self.bright)
+
+
+def _is_neutral_candidate(pixel: tuple[int, int, int, int]) -> bool:
+    """Lọc ứng viên để đo; riêng màu trung tính chưa đủ để kết luận là nền."""
     red, green, blue, alpha = pixel
     return alpha == 255 and min(red, green, blue) >= 230 and max(red, green, blue) - min(red, green, blue) <= 8
 
 
+def _brightness(pixel: tuple[int, int, int, int] | tuple[int, int, int]) -> int:
+    return sum(pixel[:3]) // 3
+
+
+def _border_lines(image: Image.Image) -> tuple[list[tuple[int, int, int, int]], ...]:
+    width, height = image.size
+    return (
+        [image.getpixel((x, 0)) for x in range(width)],
+        [image.getpixel((x, height - 1)) for x in range(width)],
+        [image.getpixel((0, y)) for y in range(height)],
+        [image.getpixel((width - 1, y)) for y in range(height)],
+    )
+
+
+def _transition_count(line: list[tuple[int, int, int, int]], split: int) -> int:
+    """Đếm nhịp đổi sáng/xám liên tiếp; vật thể màu ngắt chuỗi thay vì tạo nhịp giả."""
+    transitions = 0
+    previous: bool | None = None
+    for pixel in line:
+        if not _is_neutral_candidate(pixel):
+            previous = None
+            continue
+        bright = _brightness(pixel) > split
+        if previous is not None and bright != previous:
+            transitions += 1
+        previous = bright
+    return transitions
+
+
+def _detect_checkerboard_pattern(image: Image.Image) -> CheckerboardPattern:
+    """Học hai màu nền từ biên và buộc chúng lặp theo cả hai trục.
+
+    Fail-closed ở đây quan trọng hơn xoá sạch vài pixel xám do resize: màu nào
+    không thuộc đúng hai cụm caro đã chứng minh sẽ được giữ nguyên như artwork.
+    """
+    lines = _border_lines(image)
+    border = [pixel for line in lines for pixel in line]
+    gray_counts: Counter[tuple[int, int, int]] = Counter()
+    bright_counts: Counter[tuple[int, int, int]] = Counter()
+    for pixel in border:
+        if not _is_neutral_candidate(pixel):
+            continue
+        color = pixel[:3]
+        value = _brightness(pixel)
+        if value <= 248:
+            gray_counts[color] += 1
+        elif value >= 250:
+            bright_counts[color] += 1
+
+    if not gray_counts or not bright_counts:
+        raise ValidationError("khong co du hai mau cho signature checkerboard spatial")
+    gray = gray_counts.most_common(1)[0][0]
+    bright = bright_counts.most_common(1)[0][0]
+    gray_value = _brightness(gray)
+    bright_value = _brightness(bright)
+    if bright_value - gray_value < 6:
+        raise ValidationError("hai mau khong tach du cho signature checkerboard spatial")
+
+    split = (gray_value + bright_value) // 2
+    horizontal = max(_transition_count(lines[0], split), _transition_count(lines[1], split))
+    vertical = max(_transition_count(lines[2], split), _transition_count(lines[3], split))
+    if horizontal < 4 or vertical < 4:
+        raise ValidationError("hai dai mau khong tao signature checkerboard spatial")
+    return CheckerboardPattern(gray=gray, bright=bright)
+
+
 def mask_edge_connected_checkerboard(image: Image.Image) -> int:
-    """Đổi nền caro trung tính nối từ mép thành alpha 0, không flood qua vật thể."""
+    """Đổi nền caro đã nhận dạng nối từ mép thành alpha 0, không flood qua vật thể."""
+    pattern = _detect_checkerboard_pattern(image)
     pixels = image.load()
     width, height = image.size
     queue: deque[tuple[int, int]] = deque()
@@ -60,7 +137,7 @@ def mask_edge_connected_checkerboard(image: Image.Image) -> int:
 
     while queue:
         x, y = queue.popleft()
-        if (x, y) in seen or not is_border_checkerboard(pixels[x, y]):
+        if (x, y) in seen or not pattern.matches(pixels[x, y]):
             continue
         seen.add((x, y))
         for next_x, next_y in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)):
@@ -90,17 +167,18 @@ def _validate_opaque_checkerboard(path: Path, image: Image.Image) -> None:
     border += [image.getpixel((x, height - 1)) for x in range(width)]
     border += [image.getpixel((0, y)) for y in range(1, height - 1)]
     border += [image.getpixel((width - 1, y)) for y in range(1, height - 1)]
-    neutral_border = sum(is_border_checkerboard(pixel) for pixel in border)
+    neutral_border = sum(_is_neutral_candidate(pixel) for pixel in border)
     if neutral_border * 100 < len(border) * 70:
         raise ValidationError(f"{path.name} khong co du nen checkerboard trung tinh noi tu bien")
     # Nền preview thật có ít nhất hai dải sáng/xám. Một tấm trắng đặc hoặc
     # highlight trắng chạm biên không phải checkerboard và không được xoá.
-    brightness = [sum(pixel[:3]) // 3 for pixel in border if is_border_checkerboard(pixel)]
+    brightness = [_brightness(pixel) for pixel in border if _is_neutral_candidate(pixel)]
     bright = sum(value >= 250 for value in brightness)
     gray = sum(230 <= value <= 248 for value in brightness)
     required_band = max(4, len(border) // 100)
     if bright < required_band or gray < required_band:
         raise ValidationError(f"{path.name} khong co signature checkerboard sang/xam")
+    _detect_checkerboard_pattern(image)
 
 
 def _same_column(image: Image.Image, left: int, right: int) -> bool:

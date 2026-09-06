@@ -50,6 +50,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
 import sys
 from pathlib import Path
@@ -430,10 +431,10 @@ def main() -> int:
     args.part_out.write_bytes(part_bytes)
     # Mốc giải phẫu đã dùng — cùng hàm với `python -m tools.artqa.nhan_vat_moc`.
     hinh_hoc, tham_chieu, s0 = player_frame_geometry(records, moc)
-    args.moc_out.write_text(
-        json.dumps(nhan_vat_moc.xuat_json(moc, tham_chieu, hinh_hoc, s0, records), ensure_ascii=False, indent=1) + "\n",
-        encoding="utf-8",
-    )
+    # newline="\n": Path.write_text trên Windows ghi CRLF, blob đã commit là LF →
+    # file hiện "M" trong git status dù nội dung y hệt (kiểm đối kháng 06/09 bắt được).
+    with io.open(args.moc_out, "w", encoding="utf-8", newline="\n") as f:
+        f.write(json.dumps(nhan_vat_moc.xuat_json(moc, tham_chieu, hinh_hoc, s0, records), ensure_ascii=False, indent=1) + "\n")
 
     # asset-lock.json phải giữ ĐÚNG dạng canonical của `assetpack.lock.lock_bytes`
     # (một dòng, khoá đã sắp xếp): test Go tìm chuỗi con `"mob_ids":[0]` trong đó,

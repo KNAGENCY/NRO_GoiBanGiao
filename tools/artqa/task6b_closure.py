@@ -144,6 +144,35 @@ IRUKA_GEOMETRY_VERSION = "V1 06/09"
 # chơi ~100 px nguồn → tỉ lệ 1,37 là thước lạc, kéo median lệch), thay bằng sqrt diện tích
 # mặt để vẫn đủ 6 thước cho median.
 IRUKA_THUOC_CUNG = ("face_h", "face_w", "face_area_sqrt", "eye_h", "eye_to_chin", "band_thick")
+
+# ── Khe nền còn sót trên mảnh nhân vật (06/09/2026) ──────────────────────────
+# Triệu chứng: VỆT HỒNG nhỏ trên nhân vật trong game (rõ nhất ở khe giữa cánh tay
+# và thắt lưng khung đứng, và trên đầu Iruka). Nguyên nhân: `extract_alpha` chỉ
+# flood magenta CHẠM MÉP ảnh nên khe kín giữ nguyên magenta ĐỤC (alpha 255), rồi
+# `remove_large_chroma_islands` chỉ xoá đảo ≥ 598 px nên khe nhỏ sống sót — 293 px
+# hồng trên 37 mảnh ×4 zoom.
+#
+# Vì sao dám xoá SẠCH trên các dải này: trang phục nhân vật không có tím/hồng
+# thật. Histogram 06/09 trên `player_idle` (360 652 px đục) và `master_iruka`
+# (323 075 px đục): mọi pixel hue 280–340° đều có kênh lục 1–5 — tức viền răng cưa
+# của chính nền khoá màu chứ không phải vải (áo navy, khăn cam, tóc nâu/đen).
+# Đo thêm: `is_chroma` nghiêm ngặt ⊂ mặt nạ candidate trên cả 6 dải (0 pixel lọt),
+# nên xoá hết đảo candidate là đủ để đếm chroma về 0.
+NGUON_NHAN_VAT = frozenset(
+    {
+        "player_idle_3f_chroma.png",
+        "player_run_4f_chroma.png",
+        "player_melee_4f_chroma.png",
+        "player_cast_3f_chroma.png",
+        "player_hit_death_getup_3f_chroma.png",
+        IRUKA_SOURCE,
+    }
+)
+# Đảo ≥ 8 px là KHE NỀN thật → alpha 0 (nền vốn phải trong suốt). Đo 06/09 trên
+# 6 dải: khe nhỏ nhất 9 px, đốm lẻ lớn nhất 4 px — khoảng trống 4↔9 tách hai loại
+# dứt khoát. Đốm < 8 px được VÁ MÀU (giữ alpha) để không thủng áo bằng lỗ kim.
+KHE_NEN_TOI_THIEU = 8
+
 WOLF_ACTIONS = (
     ("idle", "wolf_idle_2f_chroma.png", 2),
     ("run", "wolf_run_4f_chroma.png", 4),
@@ -978,10 +1007,45 @@ def fit_to_canvas(image: Image.Image, size: tuple[int, int]) -> Image.Image:
     return canvas
 
 
+def _va_dom_chroma(
+    mau: np.ndarray, candidate: np.ndarray, alpha: np.ndarray, dom: list[tuple[int, int]]
+) -> np.ndarray:
+    """Thay màu từng đốm chroma lẻ bằng trung bình lân cận không-chroma, GIỮ alpha.
+
+    Vá màu chứ không hạ alpha vì đốm lẻ nằm trong lòng hình (nhiễu răng cưa lọt
+    vào giữa mảng áo); xoá alpha ở đó là đục một lỗ kim trên áo. Chỉ khi quanh đó
+    không có pixel sạch nào trong bán kính 11 mới chịu hạ alpha.
+    """
+
+    height, width = candidate.shape
+    sach = (~candidate) & (alpha > 0)
+    for x, y in dom:
+        for ban_kinh in (2, 5, 11):
+            y0, y1 = max(0, y - ban_kinh), min(height, y + ban_kinh + 1)
+            x0, x1 = max(0, x - ban_kinh), min(width, x + ban_kinh + 1)
+            o = sach[y0:y1, x0:x1]
+            if o.any():
+                mau[y, x] = np.rint(mau[y0:y1, x0:x1][o].mean(axis=0)).astype(mau.dtype)
+                break
+        else:
+            alpha[y, x] = 0
+    return mau
+
+
 def remove_large_chroma_islands(
-    source: Image.Image, extracted: Image.Image
+    source: Image.Image,
+    extracted: Image.Image,
+    *,
+    dien_tich_khe: int | None = None,
+    va_dom: bool = False,
 ) -> Image.Image:
-    """Xóa matte magenta nội vùng lớn, giữ accent màu nhỏ của nhân vật."""
+    """Xóa matte magenta nội vùng, giữ accent màu nhỏ của nhân vật.
+
+    ``dien_tich_khe`` bỏ trống = ngưỡng v11 (0,038 % diện tích ảnh, sàn 16 px) —
+    đường closure cũ giữ NGUYÊN từng byte. Truyền số nhỏ hơn để xoá cả khe nhỏ;
+    ``va_dom`` thì đảo dưới ngưỡng được vá màu thay vì bỏ mặc (xem
+    ``_va_dom_chroma``).
+    """
 
     rgb = np.asarray(source.convert("RGB"), dtype=np.int16)
     high = np.maximum(rgb[:, :, 0], rgb[:, :, 2])
@@ -995,10 +1059,19 @@ def remove_large_chroma_islands(
     alpha = np.asarray(extracted.convert("RGBA").getchannel("A")).copy()
     remaining = candidate & (alpha > 0)
     visited = np.zeros(remaining.shape, dtype=bool)
-    # Với master Iruka, matte gap nhỏ nhất có 633 px còn accent bông tai 586 px;
-    # ngưỡng theo diện tích này tách được hai vùng mà không sửa tay nguồn.
-    threshold = max(16, round(remaining.size * 0.00038))
+    # Chú thích cũ (v11) tin rằng đảo 586 px trên master Iruka là "accent bông tai"
+    # nên chốt ngưỡng 598 px để giữ nó lại. ĐO LẠI 06/09/2026: đảo đó ở
+    # x[488,518] y[329,375], màu (245,3,238)/(255,7,255) — magenta khoá màu nguyên
+    # chất, chính là KHE giữa dải khăn trán và tóc; không có bông tai nào. Ngưỡng
+    # cũ vẫn là mặc định để đường v11 bất động, còn nhân vật thì gọi với
+    # ``dien_tich_khe`` nhỏ (xem ``NGUON_NHAN_VAT`` / ``KHE_NEN_TOI_THIEU``).
+    threshold = (
+        max(16, round(remaining.size * 0.00038))
+        if dien_tich_khe is None
+        else dien_tich_khe
+    )
     height, width = remaining.shape
+    dom: list[tuple[int, int]] = []
     for start_y, start_x in zip(*np.where(remaining & ~visited)):
         if visited[start_y, start_x]:
             continue
@@ -1020,7 +1093,13 @@ def remove_large_chroma_islands(
         if len(component) >= threshold:
             for x, y in component:
                 alpha[y, x] = 0
+        elif va_dom:
+            dom.extend(component)
     result = extracted.convert("RGBA")
+    if dom:
+        mau = np.asarray(result.convert("RGB")).copy()
+        mau = _va_dom_chroma(mau, candidate, alpha, dom)
+        return Image.fromarray(np.dstack([mau, alpha]), mode="RGBA")
     result.putalpha(Image.fromarray(alpha, mode="L"))
     return result
 
@@ -1059,9 +1138,17 @@ def _load_reviewed_alpha(
     if source_name not in cache:
         with Image.open(source) as image:
             image.load()
-            cache[source_name] = remove_large_chroma_islands(
-                image, extract_alpha(image)
-            )
+            if source_name in NGUON_NHAN_VAT:
+                cache[source_name] = remove_large_chroma_islands(
+                    image,
+                    extract_alpha(image),
+                    dien_tich_khe=KHE_NEN_TOI_THIEU,
+                    va_dom=True,
+                )
+            else:
+                cache[source_name] = remove_large_chroma_islands(
+                    image, extract_alpha(image)
+                )
     return cache[source_name]
 
 

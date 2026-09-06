@@ -446,6 +446,110 @@ class ArtifactKhopNhauTests(unittest.TestCase):
         self.assertEqual(output["bytes"], len(part))
 
 
+class KhongConChromaTests(unittest.TestCase):
+    """37 mảnh ×4 zoom KHÔNG được còn một pixel chroma nào (vệt hồng trong game).
+
+    TẠI SAO có file này — lỗi đã lọt tới màn hình người chơi: `extract_alpha` chỉ
+    flood nền magenta CHẠM MÉP ảnh, nên khe kín (nách, giữa tay và thắt lưng, giữa
+    dải khăn và tóc Iruka) giữ nguyên magenta ĐỤC; `remove_large_chroma_islands` chỉ
+    xoá đảo ≥ ngưỡng diện tích (598 px với ảnh 1254² / 2172×724) nên các khe nhỏ hơn
+    sống sót → 293 px hồng trên 37 mảnh (156 px ở x4). Đo 06/09/2026.
+
+    Công thức đếm ĐÚNG BẰNG `tools/artqa/artqa.py::is_chroma` — cùng một sự thật với
+    cổng QA, để không có hai định nghĩa "màu nền" trong repo.
+    """
+
+    IDS = tuple(range(27041, 27078))
+
+    @staticmethod
+    def _dem(path: Path) -> int:
+        """Đếm bằng ĐÚNG hàm của cổng QA — không chép ngưỡng vào đây.
+
+        Bản 06/09 đầu tiên chép cứng bốn ngưỡng; kiểm đối kháng đổi chúng thành 250
+        thì test vẫn xanh dù đã cắm một pixel magenta thật vào sprite (đột biến sống).
+        """
+
+        import numpy as np
+        from tools.artqa.artqa import chroma_mask
+
+        with Image.open(path) as image:
+            anh = image.convert("RGBA")
+        arr = np.asarray(anh, dtype=np.int16)
+        return int((chroma_mask(arr) & (arr[:, :, 3] > 0)).sum())
+
+    def test_bang_mau_ghim_tay_chot_nguong_chroma(self):
+        """Oracle ĐỘC LẬP: kết quả mong đợi chép TAY, không gõ lại biểu thức.
+
+        Ai đổi ngưỡng trong `tools/artqa/artqa.py` (kể cả "cho dễ qua") thì test này
+        đỏ. Hai màu biên 149/150 nằm ngay mép ngưỡng nên đổi một đơn vị cũng lộ.
+        """
+
+        from tools.artqa.artqa import chroma_mask, is_chroma
+
+        mau = [(246, 4, 242), (255, 0, 255), (150, 39, 150), (149, 4, 242),
+               (246, 4, 149), (60, 20, 60), (28, 42, 74), (232, 120, 48)]
+        mong_doi = [True, True, True, False, False, False, False, False]
+        self.assertEqual(list(chroma_mask([mau])[0]), mong_doi)
+        # hai định nghĩa (một pixel / cả ảnh) không được trôi khỏi nhau
+        self.assertEqual([is_chroma(m) for m in mau], mong_doi)
+
+    def test_khong_manh_nao_con_pixel_chroma(self):
+        thua = {}
+        for zoom in ("x1", "x2", "x3", "x4"):
+            for sprite_id in self.IDS:
+                path = SPRITE_ROOT / zoom / "smallimage" / f"Small{sprite_id}.png"
+                self.assertTrue(path.is_file(), path)
+                con = self._dem(path)
+                if con:
+                    thua[f"{zoom}/Small{sprite_id}"] = con
+        self.assertEqual(thua, {}, f"còn {sum(thua.values())} px chroma: {thua}")
+
+    def test_anh_trong_repo_dung_la_dau_ra_cua_ma_sinh_hien_tai(self):
+        """Nối MÃ SINH với ẢNH TRONG REPO — lỗ lưới mà kiểm đối kháng 06/09 tìm ra.
+
+        Test đếm chroma ở trên chỉ đọc file đã sinh: tắt hẳn bước làm sạch trong
+        `task6b_closure` mà không sinh lại thì nó vẫn xanh (đột biến sống). Test này
+        sinh lại 37 mảnh TRONG BỘ NHỚ rồi so byte với file trong repo, nên mọi thay
+        đổi mã sinh đều lộ ngay.
+        """
+
+        import json as _json
+
+        art_root = ROOT / "docs/my-thuat/anh-nguon/vertical-slice-v1"
+        if not (art_root / "player_idle_3f_chroma.png").is_file():
+            self.skipTest("cần kho ảnh nguồn docs/my-thuat/anh-nguon/vertical-slice-v1")
+        from tools.artqa import nhan_vat_moc
+        from tools.artqa.task6b_closure import (
+            _review_by_name,
+            iruka_component_images,
+            load_charinfo,
+            player_component_images,
+            zoom_variants,
+        )
+
+        review = _json.loads(
+            (ROOT / "docs/my-thuat/review/vertical-slice-v1.json").read_text(encoding="utf-8")
+        )
+        records = _review_by_name(review)
+        charinfo = load_charinfo()
+        moc = nhan_vat_moc.do_nguon(art_root, records)
+        manh = player_component_images(
+            review, art_root=art_root, records=records, charinfo=charinfo, moc=moc
+        ) + iruka_component_images(
+            review, art_root=art_root, records=records, charinfo=charinfo
+        )
+        self.assertEqual(len(manh), 37)
+        lech = []
+        for item in manh:
+            for zoom, anh in zoom_variants(item["image_x4"]).items():
+                path = SPRITE_ROOT / zoom / "smallimage" / f"Small{item['id']}.png"
+                with Image.open(path) as f:
+                    trong_repo = f.convert("RGBA")
+                if anh.convert("RGBA").tobytes() != trong_repo.tobytes():
+                    lech.append(f"{zoom}/Small{item['id']}")
+        self.assertEqual(lech, [], f"{len(lech)} ảnh trong repo khác đầu ra của mã sinh: {lech[:6]}")
+
+
 class DoTrenKhungVeTests(unittest.TestCase):
     """Đo lại đúng như client vẽ — đây là thứ người chơi thật sự nhìn thấy."""
 

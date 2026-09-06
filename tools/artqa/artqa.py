@@ -57,9 +57,41 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+# Ngưỡng "màu nền khoá màu" — MỘT nguồn sự thật cho cả `is_chroma` (một pixel) và
+# `chroma_mask` (cả ảnh). Trước 06/09/2026 test đếm chroma chép cứng bốn số này, nên
+# đột biến đổi ngưỡng trong test vẫn xanh (lưới thủng). Đổi ở đây thì test bảng màu
+# ghim tay trong assetpack/tests/test_hinh_hoc_nhan_vat.py sẽ ĐỎ — đó là chốt.
+CHROMA_LECH_TOI_THIEU = 110  # đỏ − lục và lam − lục
+CHROMA_SANG_TOI_THIEU = 150  # đỏ và lam
+
+
 def is_chroma(pixel: tuple[int, int, int]) -> bool:
     red, green, blue = pixel
-    return red - green >= 110 and blue - green >= 110 and red >= 150 and blue >= 150
+    return (
+        red - green >= CHROMA_LECH_TOI_THIEU
+        and blue - green >= CHROMA_LECH_TOI_THIEU
+        and red >= CHROMA_SANG_TOI_THIEU
+        and blue >= CHROMA_SANG_TOI_THIEU
+    )
+
+
+def chroma_mask(arr):
+    """Mặt nạ boolean "pixel là màu nền" cho cả ảnh (numpy HxWx3 hoặc HxWx4).
+
+    Cùng ngưỡng với `is_chroma` — dùng cho mọi phép ĐẾM trên ảnh (test ghim, công cụ
+    đo) để repo chỉ có một định nghĩa "màu nền".
+    """
+
+    import numpy as np
+
+    a = np.asarray(arr, dtype=np.int16)
+    red, green, blue = a[..., 0], a[..., 1], a[..., 2]
+    return (
+        (red - green >= CHROMA_LECH_TOI_THIEU)
+        & (blue - green >= CHROMA_LECH_TOI_THIEU)
+        & (red >= CHROMA_SANG_TOI_THIEU)
+        & (blue >= CHROMA_SANG_TOI_THIEU)
+    )
 
 
 def _border_points(width: int, height: int) -> Iterable[tuple[int, int]]:

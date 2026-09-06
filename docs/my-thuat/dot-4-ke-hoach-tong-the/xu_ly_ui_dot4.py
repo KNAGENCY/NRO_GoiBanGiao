@@ -41,13 +41,30 @@ class ProcessResult:
 
 
 @dataclass(frozen=True)
+class AxisCadence:
+    tile: int
+    offset: int
+    inverted: bool
+
+    def band(self, index: int) -> bool:
+        return bool((((index + self.offset) // self.tile) & 1) ^ self.inverted)
+
+
+@dataclass(frozen=True)
 class CheckerboardPattern:
     gray: tuple[int, int, int]
     bright: tuple[int, int, int]
+    horizontal: AxisCadence
+    vertical: AxisCadence
+    phase: bool
 
-    def matches(self, pixel: tuple[int, int, int, int]) -> bool:
-        """Chỉ xoá hai màu đã chứng minh tạo thành caro trên chính ảnh này."""
-        return pixel[3] == 255 and pixel[:3] in (self.gray, self.bright)
+    def expected_bright(self, x: int, y: int) -> bool:
+        return self.horizontal.band(x) ^ self.vertical.band(y) ^ self.phase
+
+    def matches(self, pixel: tuple[int, int, int, int], x: int, y: int) -> bool:
+        """Chỉ xoá đúng màu, nhịp và pha caro đã chứng minh trên ảnh này."""
+        expected = self.bright if self.expected_bright(x, y) else self.gray
+        return pixel[3] == 255 and pixel[:3] == expected
 
 
 def _is_neutral_candidate(pixel: tuple[int, int, int, int]) -> bool:
@@ -85,12 +102,54 @@ def _transition_count(line: list[tuple[int, int, int, int]], split: int) -> int:
     return transitions
 
 
-def _detect_checkerboard_pattern(image: Image.Image) -> CheckerboardPattern:
-    """Học hai màu nền từ biên và buộc chúng lặp theo cả hai trục.
+def _fit_axis_cadence(
+    line: list[tuple[int, int, int, int]], split: int
+) -> tuple[AxisCadence, float] | None:
+    """Khớp nhịp ô vuông trên một cạnh, cho phép cạnh bị artwork che một đoạn."""
+    samples = [
+        (index, _brightness(pixel) > split)
+        for index, pixel in enumerate(line)
+        if _is_neutral_candidate(pixel)
+    ]
+    if len(samples) < 8:
+        return None
 
-    Fail-closed ở đây quan trọng hơn xoá sạch vài pixel xám do resize: màu nào
-    không thuộc đúng hai cụm caro đã chứng minh sẽ được giữ nguyên như artwork.
-    """
+    best: tuple[int, int, AxisCadence] | None = None
+    max_tile = min(24, max(1, len(line) // 4))
+    for tile in range(1, max_tile + 1):
+        for offset in range(tile):
+            for inverted in (False, True):
+                cadence = AxisCadence(tile=tile, offset=offset, inverted=inverted)
+                hits = sum(cadence.band(index) == bright for index, bright in samples)
+                candidate = (hits, -tile, cadence)
+                if best is None or candidate[:2] > best[:2]:
+                    best = candidate
+
+    assert best is not None
+    hits, _, cadence = best
+    return cadence, hits / len(samples)
+
+
+def _field_evidence(
+    samples: list[tuple[int, int, tuple[int, int, int, int]]],
+    size: tuple[int, int],
+    pattern: CheckerboardPattern,
+) -> tuple[int, int]:
+    """Đo đúng màu + đúng pha trên toàn mặt ảnh, không chỉ bốn đường biên."""
+    width, height = size
+    matches = 0
+    occupied_bins: set[tuple[int, int]] = set()
+    for x, y, pixel in samples:
+        if pattern.matches(pixel, x, y):
+            matches += 1
+            occupied_bins.add((min(3, x * 4 // width), min(3, y * 4 // height)))
+    return matches, len(occupied_bins)
+
+
+def _detect_checkerboard_edge_signature(
+    image: Image.Image,
+) -> tuple[tuple[int, int, int], tuple[int, int, int], int, tuple[list[tuple[int, int, int, int]], ...]]:
+    """Học palette và xác nhận bốn mép có nhịp sáng/xám theo cả hai trục."""
     lines = _border_lines(image)
     border = [pixel for line in lines for pixel in line]
     gray_counts: Counter[tuple[int, int, int]] = Counter()
@@ -119,7 +178,59 @@ def _detect_checkerboard_pattern(image: Image.Image) -> CheckerboardPattern:
     vertical = max(_transition_count(lines[2], split), _transition_count(lines[3], split))
     if horizontal < 4 or vertical < 4:
         raise ValidationError("hai dai mau khong tao signature checkerboard spatial")
-    return CheckerboardPattern(gray=gray, bright=bright)
+    return gray, bright, split, lines
+
+
+def _detect_checkerboard_pattern(image: Image.Image) -> CheckerboardPattern:
+    """Học hai màu nền rồi chứng minh cadence/pha trên toàn mặt ảnh.
+
+    Fail-closed ở đây quan trọng hơn xoá sạch vài pixel xám do resize: màu nào
+    không thuộc đúng hai cụm caro đã chứng minh sẽ được giữ nguyên như artwork.
+    """
+    gray, bright, split, lines = _detect_checkerboard_edge_signature(image)
+
+    width, height = image.size
+    horizontal_fits = [
+        fit
+        for line in (lines[0], lines[1])
+        if (fit := _fit_axis_cadence(line, split)) is not None and fit[1] >= 0.85
+    ]
+    vertical_fits = [
+        fit
+        for line in (lines[2], lines[3])
+        if (fit := _fit_axis_cadence(line, split)) is not None and fit[1] >= 0.85
+    ]
+    if not horizontal_fits or not vertical_fits:
+        raise ValidationError("khong khop duoc nhip checkerboard spatial 2D")
+
+    horizontal_cadence, _ = max(horizontal_fits, key=lambda item: item[1])
+    vertical_cadence, _ = max(vertical_fits, key=lambda item: item[1])
+    samples = [
+        (index % width, index // width, pixel)
+        for index, pixel in enumerate(image.get_flattened_data())
+        if _is_neutral_candidate(pixel)
+    ]
+    best: tuple[float, CheckerboardPattern, int, int] | None = None
+    for phase in (False, True):
+        pattern = CheckerboardPattern(
+            gray=gray,
+            bright=bright,
+            horizontal=horizontal_cadence,
+            vertical=vertical_cadence,
+            phase=phase,
+        )
+        matches, occupied_bins = _field_evidence(samples, image.size, pattern)
+        ratio = matches / len(samples) if samples else 0.0
+        candidate = (ratio, pattern, matches, occupied_bins)
+        if best is None or candidate[0] > best[0]:
+            best = candidate
+
+    assert best is not None
+    ratio, pattern, matches, occupied_bins = best
+    minimum_coverage = max(32, width * height // 10)
+    if ratio < 0.85 or matches < minimum_coverage or occupied_bins < 8:
+        raise ValidationError("khong co du checkerboard spatial 2D dung pha tren mat anh")
+    return pattern
 
 
 def mask_edge_connected_checkerboard(image: Image.Image) -> int:
@@ -137,7 +248,7 @@ def mask_edge_connected_checkerboard(image: Image.Image) -> int:
 
     while queue:
         x, y = queue.popleft()
-        if (x, y) in seen or not pattern.matches(pixels[x, y]):
+        if (x, y) in seen or not pattern.matches(pixels[x, y], x, y):
             continue
         seen.add((x, y))
         for next_x, next_y in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)):
@@ -158,7 +269,9 @@ def _check_name_and_size(path: Path, image: Image.Image) -> None:
         raise ValidationError(f"kich thuoc {path.name} la {image.size}, phai la {expected}")
 
 
-def _validate_opaque_checkerboard(path: Path, image: Image.Image) -> None:
+def _validate_opaque_checkerboard(
+    path: Path, image: Image.Image, *, require_spatial_2d: bool = True
+) -> None:
     _check_name_and_size(path, image)
     if image.getchannel("A").getextrema() != (255, 255):
         raise ValidationError(f"{path.name} da co alpha; khong dung mau input caro duc")
@@ -178,7 +291,10 @@ def _validate_opaque_checkerboard(path: Path, image: Image.Image) -> None:
     required_band = max(4, len(border) // 100)
     if bright < required_band or gray < required_band:
         raise ValidationError(f"{path.name} khong co signature checkerboard sang/xam")
-    _detect_checkerboard_pattern(image)
+    if require_spatial_2d:
+        _detect_checkerboard_pattern(image)
+    else:
+        _detect_checkerboard_edge_signature(image)
 
 
 def _same_column(image: Image.Image, left: int, right: int) -> bool:
@@ -275,12 +391,17 @@ def _verify_processed(path: Path, image: Image.Image) -> None:
 
 
 def _validate_processed_lineage(path: Path, backup_dir: Path) -> None:
-    """Ảnh đã alpha chỉ được nâng cấp nếu truy được backup caro cùng tên."""
+    """Ảnh đã alpha chỉ được nâng cấp nếu truy được backup caro cùng tên.
+
+    Backup round 2 là ảnh generator đã resize nên cadence không đều tới từng pixel;
+    nó chỉ được đọc để chứng minh lineage. Input đục sắp bị mask vẫn bắt buộc qua
+    spatial 2D nghiêm ngặt trước khi bất kỳ pixel nào được đổi.
+    """
     backup = backup_dir / path.name
     if not backup.is_file():
         raise ValidationError(f"{path.name} da xu ly nhung thieu backup de kiem chung nguon")
     with Image.open(backup) as backup_image:
-        _validate_opaque_checkerboard(path, backup_image.convert("RGBA"))
+        _validate_opaque_checkerboard(path, backup_image.convert("RGBA"), require_spatial_2d=False)
 
 
 def process_files(source_dir: Path, backup_dir: Path) -> list[ProcessResult]:

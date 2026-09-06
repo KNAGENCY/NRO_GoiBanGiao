@@ -63,6 +63,7 @@ def test_mask_preserves_neutral_art_highlight_touching_edge() -> None:
     assert changed > 0
     assert image.getpixel((0, 0))[3] == 0  # ô nền xám 242 thật bị xoá
     assert image.getpixel((4, 0))[3] == 0  # ô nền trắng 255 thật bị xoá
+    assert image.getpixel((32, 32))[3] == 0  # nền thật trong ruột ảnh cũng bị xoá
     assert image.getpixel((55, 48)) == highlight
     assert image.getpixel((63, 48)) == highlight
 
@@ -73,6 +74,23 @@ def test_mask_refuses_two_neutral_bands_without_checkerboard_pattern() -> None:
     before = image.tobytes()
 
     with pytest.raises(ValidationError, match="spatial"):
+        mask_edge_connected_checkerboard(image)
+
+    assert image.tobytes() == before
+
+
+def test_mask_refuses_checkerboard_border_around_solid_gray_interior() -> None:
+    image = Image.new("RGBA", (120, 96), (242, 242, 242, 255))
+    border_pattern = checkerboard(image.size)
+    for x in range(image.width):
+        image.putpixel((x, 0), border_pattern.getpixel((x, 0)))
+        image.putpixel((x, image.height - 1), border_pattern.getpixel((x, image.height - 1)))
+    for y in range(1, image.height - 1):
+        image.putpixel((0, y), border_pattern.getpixel((0, y)))
+        image.putpixel((image.width - 1, y), border_pattern.getpixel((image.width - 1, y)))
+    before = image.tobytes()
+
+    with pytest.raises(ValidationError, match="checkerboard spatial 2D"):
         mask_edge_connected_checkerboard(image)
 
     assert image.tobytes() == before

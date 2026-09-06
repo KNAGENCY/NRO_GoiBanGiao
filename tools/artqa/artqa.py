@@ -477,6 +477,21 @@ def _path_under(path: Path, root: Path) -> bool:
     return True
 
 
+def _resolve_source_asset(source_root: Path, name: str) -> Path | None:
+    """Chỉ nhận một tên file phẳng, rồi chuẩn hoá nó dưới source_root.
+
+    Review là dữ liệu có thể bị sửa tay, nên không cho nó biến ``asset`` thành
+    đường dẫn tuyệt đối, đường dẫn con, hoặc phép đi ngược thư mục.  ``resolve``
+    vẫn là lớp phòng vệ cuối nếu hệ thống có symlink bất thường.
+    """
+    candidate = Path(name)
+    if (candidate.is_absolute() or "/" in name or "\\" in name
+            or name in (".", "..") or ".." in candidate.parts):
+        return None
+    resolved = (source_root / candidate).resolve()
+    return resolved if _path_under(resolved, source_root) else None
+
+
 def _evidence_filename(asset_name: str, kind: str) -> str:
     stem = Path(asset_name).stem.replace("_chroma", "")
     return {
@@ -604,7 +619,7 @@ def _verify_review_gate(review_path: Path) -> tuple[bool, list[str]]:
     source_root_value = document.get("source_root")
     if not isinstance(source_root_value, str) or not source_root_value:
         return False, ["source_root_invalid"]
-    source_root = Path(source_root_value)
+    source_root = Path(source_root_value).resolve()
     if not source_root.is_dir():
         issues.append("source_root_invalid")
     qa_root = source_root / "qa"
@@ -622,6 +637,7 @@ def _verify_review_gate(review_path: Path) -> tuple[bool, list[str]]:
     elif any(name is None or not name for name in names) or len(names) != len(set(names)):
         issues.append("asset_names_invalid_or_duplicate")
     seen_evidence: set[Path] = set()
+    seen_sources: list[Path] = []
     actual_raw_pass = 0
     actual_raw_fail = 0
     for asset in assets:
@@ -637,10 +653,17 @@ def _verify_review_gate(review_path: Path) -> tuple[bool, list[str]]:
             issues.append(f"asset_not_required:{name}")
         if asset.get("status") != "PASS":
             issues.append(f"required_asset_not_pass:{name}")
-        source = source_root / name
+        source = _resolve_source_asset(source_root, name)
+        if source is None:
+            issues.append(f"asset_path_invalid:{name}")
+            continue
         if not source.is_file():
             issues.append(f"source_file_missing:{name}")
             continue
+        if any(source.samefile(previous) for previous in seen_sources):
+            issues.append(f"source_alias_duplicate:{name}")
+        else:
+            seen_sources.append(source)
         if asset.get("source_sha256") != sha256(source):
             issues.append(f"source_sha256_mismatch:{name}")
         try:

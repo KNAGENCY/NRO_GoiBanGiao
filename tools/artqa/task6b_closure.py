@@ -113,7 +113,7 @@ PLAYER_LEG_SLOTS_V1 = {
     0: ("idle", 0), 1: ("idle", 1),
     2: ("run", 0), 3: ("run", 1), 4: ("run", 2), 5: ("run", 3), 6: ("run", 4),
     7: ("melee", 0), 8: ("melee", 1), 9: ("melee", 2), 10: ("melee", 3),
-    11: ("cast", 0), 12: ("cast", 1), 13: ("idle", 2),
+    11: ("cast", 0), 12: ("cast", 1), 13: ("cast", 2),
 }
 LEGACY_PLAYER_BODY_SLOTS_V1 = {
     0: ("idle", 0), 1: ("idle", 1),

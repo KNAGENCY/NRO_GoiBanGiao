@@ -11,7 +11,7 @@ không mất — bài học "script nằm ngoài repo là script sẽ mất".)
 import io, json, os, collections
 from collections import Counter, OrderedDict
 
-D  = r"D:\NRO_GoiBanGiao\docs\my-thuat\dot-4-ke-hoach-tong-the"
+D  = os.path.dirname(os.path.abspath(__file__))
 RA = os.path.join(D, "manifest-dot-4.json")
 MA = [("01", "01-nhan-vat",              "Nhân vật người chơi"),
       ("02", "02-npc",                   "NPC"),

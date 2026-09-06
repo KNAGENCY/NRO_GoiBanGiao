@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import hashlib
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -441,6 +442,41 @@ class GateTests(unittest.TestCase):
 
             self.assertFalse(ok)
             self.assertIn("asset_names_invalid_or_duplicate", issues)
+
+    def test_gate_rejects_absolute_separator_and_traversal_asset_names(self):
+        for invalid_name in ("C:\\outside.png", "nested/a.png", "nested\\a.png", "../a.png", "./a.png"):
+            with self.subTest(invalid_name=invalid_name), tempfile.TemporaryDirectory() as tmp:
+                review = self._write_generated_review(Path(tmp), ("player_run_5f_chroma.png",))
+                data = json.loads(review.read_text(encoding="utf-8"))
+                data["assets"][0]["asset"] = invalid_name
+                review.write_text(json.dumps(data), encoding="utf-8")
+
+                ok, issues = verify_review_gate(review)
+
+                self.assertFalse(ok)
+                self.assertIn(f"asset_path_invalid:{invalid_name}", issues)
+
+    def test_gate_rejects_two_names_that_are_hardlink_aliases(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            review = self._write_generated_review(Path(tmp), ("player_run_5f_chroma.png",))
+            data = json.loads(review.read_text(encoding="utf-8"))
+            source_root = Path(data["source_root"])
+            original = source_root / "player_run_5f_chroma.png"
+            alias = source_root / "same-source.png"
+            os.link(original, alias)
+            aliased = json.loads(json.dumps(data["assets"][0]))
+            aliased["asset"] = alias.name
+            aliased["source_sha256"] = hashlib.sha256(alias.read_bytes()).hexdigest()
+            for evidence in aliased["evidence"].values():
+                evidence["asset"] = alias.name
+            data["assets"].append(aliased)
+            data["summary"].update({"total": 2, "pass": 2, "raw_source_pass": 2, "accepted_source_pass": 2})
+            review.write_text(json.dumps(data), encoding="utf-8")
+
+            ok, issues = verify_review_gate(review)
+
+            self.assertFalse(ok)
+            self.assertIn("source_alias_duplicate:same-source.png", issues)
 
     def test_gate_requires_source_status_and_source_sha(self):
         with tempfile.TemporaryDirectory() as tmp:

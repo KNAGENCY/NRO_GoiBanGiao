@@ -16,11 +16,13 @@ def _record(name, frames):
     }
 
 
-def _moc(records, bad_run_frame=None):
+def _moc(records, bad_run_frame=None, bad_hit_frame=None):
     result = {}
     for _, name, frames in PLAYER_ACTIONS:
         for index in range(frames):
-            size = 130 if name == "player_run_5f_chroma.png" and index == bad_run_frame else 100
+            bad = ((name == "player_run_5f_chroma.png" and index == bad_run_frame)
+                   or (name == "player_hit_death_getup_3f_chroma.png" and index == bad_hit_frame))
+            size = 130 if bad else 100
             result[(name, index)] = {
                 "edge_x": index * 100,
                 "face_w": size,
@@ -53,6 +55,7 @@ class C1PlayerPipelineTests(unittest.TestCase):
             [PLAYER_BODY_SLOTS_V1[index] for index in range(14, 17)],
             [("hit_death_getup", index) for index in range(3)],
         )
+        self.assertEqual(PLAYER_LEG_SLOTS_V1[13], ("cast", 2))
 
     def test_c1_rejects_a_run_frame_with_different_head_size(self):
         records = {name: _record(name, frames) for _, name, frames in PLAYER_ACTIONS}
@@ -60,6 +63,13 @@ class C1PlayerPipelineTests(unittest.TestCase):
 
         with self.assertRaisesRegex(ClosureError, "cùng cỡ đầu"):
             derive_player_slot_specs(review, records=records, moc=_moc(records, bad_run_frame=2))
+
+    def test_c1_rejects_a_hit_frame_with_different_head_size(self):
+        records = {name: _record(name, frames) for _, name, frames in PLAYER_ACTIONS}
+        review = {"assets": list(records.values())}
+
+        with self.assertRaisesRegex(ClosureError, "cùng cỡ đầu"):
+            derive_player_slot_specs(review, records=records, moc=_moc(records, bad_hit_frame=1))
 
 
 if __name__ == "__main__":

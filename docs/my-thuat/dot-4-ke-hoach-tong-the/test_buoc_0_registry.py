@@ -35,12 +35,24 @@ def canonical_registry_entries():
 class Buoc0RegistryTests(unittest.TestCase):
     def test_canonical_manifest_counts_and_names_are_unique(self):
         entries = canonical_registry_entries()
-        self.assertEqual(len(_load("04-boss.json")["meta"]["ten_moi_can_them_kich_thuoc"]), 3)
+        boss_meta = _load("04-boss.json")["meta"]
+        active_boss = boss_meta["ten_moi_can_them_kich_thuoc"]
+        reserve_boss = boss_meta["ten_du_phong_neu_doi_D1"]["danh_sach"]
+        self.assertEqual(len(active_boss) + len(reserve_boss), 10)
+        self.assertEqual(boss_meta["quyet_dinh_registry_D1"]["chi_noi"], "ten_moi_can_them_kich_thuoc")
+        self.assertFalse({item["ten_file"] for item in reserve_boss} & set(entries))
         self.assertEqual(len(_load("05-map.json")["ten_moi_can_them_kich_thuoc"]), 165)
         self.assertEqual(len(_load("06-vat-pham.json")["meta"]["ten_moi_can_them_kich_thuoc"]), 1)
         self.assertEqual(len(_load("08-giao-dien.json")["ten_moi_kich_thuoc"]), 30)
         self.assertEqual(len(_load("09-chan-dung-thuong-hieu.json")["meta"]["ten_moi_can_them_kich_thuoc"]), 17)
         self.assertEqual(len(entries), 216)
+
+    def test_merged_manifest_is_regenerated_from_c1_player_manifest(self):
+        merged = _load("manifest-dot-4.json")
+        run = next(item for item in merged["anh"] if item["ten_file"] == "player_run_5f_chroma.png")
+        hit = next(item for item in merged["anh"] if item["ten_file"] == "player_hit_death_getup_3f_chroma.png")
+        self.assertIn("C1 đã chốt", run["ghi_chu"])
+        self.assertIn("cùng cỡ đầu", hit["ghi_chu"])
 
     def test_every_canonical_name_is_appended_once_with_exact_size(self):
         entries = canonical_registry_entries()

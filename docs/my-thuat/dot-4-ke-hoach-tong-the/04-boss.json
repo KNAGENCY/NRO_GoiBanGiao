@@ -54,6 +54,12 @@
       "7. Dải hit KHÔNG vẽ nằm: 3 khung đứng (ngả nhẹ, đỡ, khuỵu gối)."
     ],
     "ghi_chu_chan_dung": "D1 chốt 06/09 theo 09-chan-dung-thuong-hieu: mã tra cứu chân dung boss dùng cd_boss_<mã>_x4.png của 09 (không dùng cd_la_*/cd_smu_* của brief này) để kich-thuoc-anh.json (append-only) không có hai bộ mã cho cùng một mặt.",
+    "quyet_dinh_registry_D1": {
+      "tong_ma_de_xuat": 10,
+      "chi_noi": "ten_moi_can_them_kich_thuoc",
+      "khong_noi": "ten_du_phong_neu_doi_D1.danh_sach",
+      "ly_do": "D1 chốt 09 là nguồn chân dung duy nhất; bảy cd_* của 04 chỉ là phương án dự phòng, không được append để tránh hai bộ mã cho cùng một mặt."
+    },
     "ten_du_phong_neu_doi_D1": {
       "ghi_chu": "D1 chốt 06/09 THEO 09-chan-dung-thuong-hieu: chân dung boss dùng mã cd_boss_<mã>_x4.png của 09. Các mã cd_ dưới đây là bản dự phòng của brief 04 — CHƯA nối vào kich-thuoc-anh.json (bảng append-only, tránh hai bộ mã cho cùng một mặt). Chỉ dùng nếu chủ dự án đổi D1 sang đường cd_ của 04.",
       "danh_sach": [

@@ -175,16 +175,16 @@ Tổng **34 file**: P1 **10** (3 dải đầu/bộ + 3 chân dung cho 3 pha Làn
 | 33 | `boss_may_songdao_hit_death_getup_3f_chroma.png` | dai_chroma | 2640×880 · ô 880 × 3 | may | Kiếm Sĩ Song Đao Lôi (ĐỀ XUẤT — chưa có trong boss.yaml, 1 pha) — 3 khung TRÚNG ĐÒN, cả 3 ĐỨNG: ngả nhẹ - đỡ/loạng choạng - khuỵu một gối; KHÔNG vẽ nằm. Cùng nhân vật, cùng cỡ đầu, cùng ô 880 với dải idle của boss này. | **P2** |
 | 34 | `boss_may_songdao_portrait_chroma.png` | dai_chroma | 1254×1254 · 1 ô | may | Chân dung Kiếm Sĩ Song Đao Lôi cho khung hội thoại: đầu + vai, 3/4 quay phải, cùng thiết kế/màu với dải idle; máy nhồi về 200x200. Lắp phụ thuộc C7 (chưa kiểm client có vẽ avatar khi boss thoại qua gói 44). | **P2** |
 
-### 5.1 Tên tĩnh mới cần nối vào `kich-thuoc-anh.json` (append-only, nối CUỐI)
+### 5.1 Mã tĩnh đề xuất; theo D1 chỉ nối 3 mã đang dùng vào `kich-thuoc-anh.json` (append-only, nối CUỐI)
 
-Dải chroma **không** cần tên trong bảng cỡ tĩnh. Chỉ nối các **mã tra cứu** sau để hệ tên cũ biết tới boss mới; **không vẽ** ảnh tĩnh cho chúng:
+Dải chroma **không** cần tên trong bảng cỡ tĩnh. Bảng này có **10 mã đề xuất**: D1 đã chốt 09 là nguồn chân dung duy nhất, nên chỉ ba mã `boss_*` đầu bảng được nối; bảy mã `cd_*` là dự phòng của đường 04, **không nối** và không được hiểu là ảnh phải vẽ. Vì vậy registry Đợt 4 nhận đúng 3 mã của 04, không phải 10.
 
 | Tên mới | Cỡ | Là gì |
 |---|---|---|
 | `boss_la_ke_la_mat_x4.png` | 160×160 | mã tra cứu boss pha 1 (KHÔNG vẽ tĩnh — ảnh thật là dải chroma) |
 | `boss_la_mat_na_vo_x4.png` | 160×160 | mã tra cứu boss pha 2 (KHÔNG vẽ tĩnh) |
 | `boss_smu_hoc_vien_dao_tau_x4.png` | 160×160 | mã tra cứu boss lẻ (KHÔNG vẽ tĩnh) |
-| `cd_la_ke_la_mat_x4.png` | 200×200 | chân dung tĩnh dự phòng cho `boss_la_ke_la_mat_portrait_chroma.png` nếu dự án đi đường cd_ |
+| `cd_la_ke_la_mat_x4.png` | 200×200 | DỰ PHÒNG D1 — không nối; chân dung tĩnh cho `boss_la_ke_la_mat_portrait_chroma.png` nếu dự án đổi sang đường cd_ |
 | `cd_la_mat_na_vo_x4.png` | 200×200 | chân dung tĩnh dự phòng (pha 2) |
 | `cd_smu_hoc_vien_dao_tau_x4.png` | 200×200 | chân dung tĩnh dự phòng (boss lẻ) |
 | `cd_cat_kiemphong_x4.png` | 200×200 | chân dung tĩnh dự phòng (P2 Cát) |

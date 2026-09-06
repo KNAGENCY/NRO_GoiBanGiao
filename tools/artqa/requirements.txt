@@ -1,2 +1,5 @@
 Pillow>=10.0,<13
 numpy>=1.26,<3
+# V1 05/09/2026: nhan_vat_moc.py (scipy.ndimage tách khối da/băng đô) và
+# nhan_vat_toi_uu.py (scipy.optimize.milp chọn dx/dy 34 mảnh). Máy hiện có 1.17.1.
+scipy>=1.11,<2

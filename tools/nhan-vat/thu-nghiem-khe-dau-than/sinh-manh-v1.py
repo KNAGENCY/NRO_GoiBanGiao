@@ -25,7 +25,7 @@ from tools.artqa.task6b_closure import (  # noqa: E402
 
 ART = GOC / "docs/my-thuat/anh-nguon/vertical-slice-v1"
 REVIEW = GOC / "docs/my-thuat/review/vertical-slice-v1.json"
-DO_JSON = Path(r"C:\Users\Admin\AppData\Local\Temp\claude\D--NRO-GoiBanGiao\8d082123-bbf0-446c-aa97-6342f0eda3a3\scratchpad\wf-phan-bien-anh-nguon\do.json")
+DO_JSON = Path(r"D:\NRO_GoiBanGiao\docs\my-thuat\review\khe-dau-than-2026-09-05") / "moc-giai-phau-do.json"  # 05/09 trỏ thư mục tạm của phiên (đã mất)
 STRIP = {"idle": "player_idle_3f_chroma.png", "run": "player_run_4f_chroma.png",
          "melee": "player_melee_4f_chroma.png", "cast": "player_cast_3f_chroma.png",
          "hit": "player_hit_death_getup_3f_chroma.png"}

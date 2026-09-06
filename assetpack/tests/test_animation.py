@@ -10,10 +10,16 @@ def _closure():
         ("hoc-vien-leg", 14, (160, 128)),
         ("quai-soi-rung", 10, (96, 96)),
     )
+    # Bảng vàng ĐỘC LẬP, chép tay từ `tools/nhan-vat/charinfo.json` (= Char.cs:483) theo
+    # đúng chỉ số slot: CharInfo[cf][0][0] đầu, [1][0] chân, [2][0] thân.
+    # Đổi 05/09/2026 (V1 khe đầu–thân): bảng cũ viết tay SẮP THEO cf đầu tiên chứ không
+    # theo slot — thân slot 0 thật sự phục vụ cf 23/24 (không phải 0/1), slot 1 mới là
+    # idle 0/1; chân slot 0 = cf 8, slot 1 = cf 0/1/22, và cf 26..32 (chân slot 8) bị
+    # bỏ quên hẳn. Bù dx/dy theo bảng cũ là lệch một khung.
     expected_cf = {
         "hoc-vien-head": [[0, 1, 7, 8, 11, 12, 17, 18, 19, 20, 21, 22, 23, 24, 30, 31, 32], [2, 3, 4, 5, 6, 9, 10, 13, 14, 15, 16, 26, 27, 28, 29], [25]],
-        "hoc-vien-body": [[0, 1], [2, 15, 28], [3], [4], [5], [6], [7, 8, 17], [9, 10], [11, 21, 32], [12, 18, 22], [13, 26], [14, 27], [16, 29], [19, 30], [20, 31], [23, 24], [25]],
-        "hoc-vien-leg": [[0, 1, 22], [2], [3], [4], [5], [6], [7, 23], [8], [9], [10], [11], [12], [13, 14, 15, 16, 17, 18, 19, 20, 21, 24], [25]],
+        "hoc-vien-body": [[23, 24], [0, 1], [2, 15, 28], [3], [4], [5], [6], [7, 8, 17], [12, 18, 22], [11, 21, 32], [13, 26], [14, 27], [9, 10], [16, 29], [19, 30], [20, 31], [25]],
+        "hoc-vien-leg": [[8], [0, 1, 22], [2], [3], [4], [5], [6], [7, 23], [12, 26, 27, 28, 29, 30, 31, 32], [13, 14, 15, 16, 17, 18, 19, 20, 21, 24], [9], [10], [11], [25]],
         "quai-soi-rung": [[i] for i in range(10)],
     }
     sheets, animations = [], []
@@ -24,6 +30,40 @@ def _closure():
 
 
 class AnimationContractTests(unittest.TestCase):
+    def test_required_client_cf_sinh_dung_tu_charinfo(self):
+        """Bảng slot→cf phải là cái client THẬT SỰ tra (CharInfo), không phải bảng viết tay.
+
+        Bảng cũ sắp theo cf đầu tiên nên thân/chân lệch slot và chân thiếu hẳn cf 26..32
+        (xem chú thích ở `_closure`). Test này khoá cả hai: bảng module == bảng vàng chép
+        tay ở đây, và == suy ra trực tiếp từ charinfo.json.
+        """
+        import json
+        from pathlib import Path
+
+        from assetpack.animation import REQUIRED_CLIENT_CF, charinfo_client_cf
+
+        _, animations = _closure()
+        for item in animations:
+            for frame in item["frames"]:
+                self.assertEqual(
+                    list(REQUIRED_CLIENT_CF[item["name"]][frame["slot_index"]]),
+                    frame["client_cf"],
+                    f"{item['name']} slot {frame['slot_index']}",
+                )
+        charinfo = json.loads(
+            (Path(__file__).resolve().parents[2] / "tools/nhan-vat/charinfo.json").read_text(encoding="utf-8")
+        )
+        derived = charinfo_client_cf(charinfo)
+        for name in ("hoc-vien-head", "hoc-vien-body", "hoc-vien-leg"):
+            self.assertEqual(REQUIRED_CLIENT_CF[name], derived[name], name)
+            # mỗi cf xuất hiện đúng một lần trong mỗi bảng (33 cf, không slot nào chết)
+            flat = [cf for cfs in REQUIRED_CLIENT_CF[name] for cf in cfs]
+            self.assertEqual(sorted(flat), list(range(33)), name)
+        self.assertEqual(REQUIRED_CLIENT_CF["hoc-vien-body"][0], (23, 24))
+        self.assertEqual(REQUIRED_CLIENT_CF["hoc-vien-body"][1], (0, 1))
+        self.assertEqual(REQUIRED_CLIENT_CF["hoc-vien-leg"][0], (8,))
+        self.assertEqual(REQUIRED_CLIENT_CF["hoc-vien-leg"][8], (12, 26, 27, 28, 29, 30, 31, 32))
+
     def test_slot_index_places_cells_in_the_expected_sheet_not_input_order(self):
         from assetpack.animation import compose_action_sheet
         from PIL import Image

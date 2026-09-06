@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw
 from scipy import ndimage as ndi
 
 ART = Path(r"D:\NRO_GoiBanGiao\docs\my-thuat\anh-nguon\vertical-slice-v1")
-OUT = Path(r"C:\Users\Admin\AppData\Local\Temp\claude\D--NRO-GoiBanGiao\8d082123-bbf0-446c-aa97-6342f0eda3a3\scratchpad\wf-phan-bien-anh-nguon")
+OUT = Path(r"D:\NRO_GoiBanGiao\docs\my-thuat\review\khe-dau-than-2026-09-05") / "thu-nghiem-out"  # 05/09 trỏ thư mục tạm của phiên (đã mất)
 OUT.mkdir(parents=True, exist_ok=True)
 STRIPS = ["player_idle_3f", "player_run_4f", "player_melee_4f", "player_cast_3f", "player_hit_death_getup_3f", "master_iruka_x4", "master_hoc_vien_x4"]
 

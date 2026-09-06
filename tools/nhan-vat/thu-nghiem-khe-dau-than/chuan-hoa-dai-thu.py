@@ -24,8 +24,8 @@ GOC = Path(r"D:\NRO_GoiBanGiao")
 sys.path.insert(0, str(GOC))
 from tools.artqa import task6b_closure as t6  # noqa: E402
 
-OUT = Path(r"C:\Users\Admin\AppData\Local\Temp\claude\D--NRO-GoiBanGiao\8d082123-bbf0-446c-aa97-6342f0eda3a3\scratchpad\wf-huong-anh")
-DO = Path(r"C:\Users\Admin\AppData\Local\Temp\claude\D--NRO-GoiBanGiao\8d082123-bbf0-446c-aa97-6342f0eda3a3\scratchpad\wf-phan-bien-anh-nguon\do.json")
+OUT = Path(r"D:\NRO_GoiBanGiao\docs\my-thuat\review\khe-dau-than-2026-09-05") / "thu-nghiem-out"  # 05/09 trỏ thư mục tạm của phiên (đã mất)
+DO = Path(r"D:\NRO_GoiBanGiao\docs\my-thuat\review\khe-dau-than-2026-09-05") / "moc-giai-phau-do.json")
 ART = GOC / "docs/my-thuat/anh-nguon/vertical-slice-v1"
 REVIEW = GOC / "docs/my-thuat/review/vertical-slice-v1.json"
 PART_BIN = GOC / "server/internal/game/assets/part.bin"

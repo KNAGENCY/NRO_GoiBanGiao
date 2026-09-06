@@ -251,8 +251,8 @@
       "action": "idle",
       "action_slot": 0,
       "client_cf": [
-        0,
-        1
+        23,
+        24
       ]
     },
     {
@@ -302,9 +302,8 @@
       "action": "idle",
       "action_slot": 1,
       "client_cf": [
-        2,
-        15,
-        28
+        0,
+        1
       ]
     },
     {
@@ -354,7 +353,9 @@
       "action": "idle",
       "action_slot": 2,
       "client_cf": [
-        3
+        2,
+        15,
+        28
       ]
     },
     {
@@ -404,7 +405,7 @@
       "action": "run",
       "action_slot": 0,
       "client_cf": [
-        4
+        3
       ]
     },
     {
@@ -454,7 +455,7 @@
       "action": "run",
       "action_slot": 1,
       "client_cf": [
-        5
+        4
       ]
     },
     {
@@ -504,7 +505,7 @@
       "action": "run",
       "action_slot": 2,
       "client_cf": [
-        6
+        5
       ]
     },
     {
@@ -554,9 +555,7 @@
       "action": "run",
       "action_slot": 3,
       "client_cf": [
-        7,
-        8,
-        17
+        6
       ]
     },
     {
@@ -606,8 +605,9 @@
       "action": "melee",
       "action_slot": 0,
       "client_cf": [
-        9,
-        10
+        7,
+        8,
+        17
       ]
     },
     {
@@ -657,9 +657,9 @@
       "action": "melee",
       "action_slot": 1,
       "client_cf": [
-        11,
-        21,
-        32
+        12,
+        18,
+        22
       ]
     },
     {
@@ -709,9 +709,9 @@
       "action": "melee",
       "action_slot": 2,
       "client_cf": [
-        12,
-        18,
-        22
+        11,
+        21,
+        32
       ]
     },
     {
@@ -863,8 +863,8 @@
       "action": "cast",
       "action_slot": 1,
       "client_cf": [
-        16,
-        29
+        9,
+        10
       ]
     },
     {
@@ -914,8 +914,8 @@
       "action": "cast",
       "action_slot": 2,
       "client_cf": [
-        19,
-        30
+        16,
+        29
       ]
     },
     {
@@ -965,8 +965,8 @@
       "action": "hit_death_getup",
       "action_slot": 0,
       "client_cf": [
-        20,
-        31
+        19,
+        30
       ]
     },
     {
@@ -1016,8 +1016,8 @@
       "action": "hit_death_getup",
       "action_slot": 1,
       "client_cf": [
-        23,
-        24
+        20,
+        31
       ]
     },
     {
@@ -1117,9 +1117,7 @@
       "action": "idle",
       "action_slot": 0,
       "client_cf": [
-        0,
-        1,
-        22
+        8
       ]
     },
     {
@@ -1169,7 +1167,9 @@
       "action": "idle",
       "action_slot": 1,
       "client_cf": [
-        2
+        0,
+        1,
+        22
       ]
     },
     {
@@ -1219,7 +1219,7 @@
       "action": "idle",
       "action_slot": 2,
       "client_cf": [
-        3
+        2
       ]
     },
     {
@@ -1269,7 +1269,7 @@
       "action": "run",
       "action_slot": 0,
       "client_cf": [
-        4
+        3
       ]
     },
     {
@@ -1319,7 +1319,7 @@
       "action": "run",
       "action_slot": 1,
       "client_cf": [
-        5
+        4
       ]
     },
     {
@@ -1369,7 +1369,7 @@
       "action": "run",
       "action_slot": 2,
       "client_cf": [
-        6
+        5
       ]
     },
     {
@@ -1419,8 +1419,7 @@
       "action": "run",
       "action_slot": 3,
       "client_cf": [
-        7,
-        23
+        6
       ]
     },
     {
@@ -1470,7 +1469,8 @@
       "action": "melee",
       "action_slot": 0,
       "client_cf": [
-        8
+        7,
+        23
       ]
     },
     {
@@ -1520,7 +1520,14 @@
       "action": "melee",
       "action_slot": 1,
       "client_cf": [
-        9
+        12,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32
       ]
     },
     {
@@ -1570,7 +1577,16 @@
       "action": "melee",
       "action_slot": 2,
       "client_cf": [
-        10
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        24
       ]
     },
     {
@@ -1620,7 +1636,7 @@
       "action": "melee",
       "action_slot": 3,
       "client_cf": [
-        11
+        9
       ]
     },
     {
@@ -1670,7 +1686,7 @@
       "action": "cast",
       "action_slot": 0,
       "client_cf": [
-        12
+        10
       ]
     },
     {
@@ -1720,16 +1736,7 @@
       "action": "cast",
       "action_slot": 1,
       "client_cf": [
-        13,
-        14,
-        15,
-        16,
-        17,
-        18,
-        19,
-        20,
-        21,
-        24
+        11
       ]
     },
     {
@@ -2195,13 +2202,13 @@
       "frames": [
         {
           "sprite_id": 27041,
-          "dx": -3,
-          "dy": -39
+          "dx": -4,
+          "dy": -38
         },
         {
           "sprite_id": 27042,
-          "dx": -6,
-          "dy": -39
+          "dx": -4,
+          "dy": -32
         },
         {
           "sprite_id": 27043,
@@ -2216,88 +2223,88 @@
       "frames": [
         {
           "sprite_id": 27044,
-          "dx": -11,
-          "dy": -30
+          "dx": -5,
+          "dy": -26
         },
         {
           "sprite_id": 27045,
-          "dx": -7,
-          "dy": -39
+          "dx": -6,
+          "dy": -33
         },
         {
           "sprite_id": 27046,
-          "dx": -8,
-          "dy": -39
+          "dx": -9,
+          "dy": -26
         },
         {
           "sprite_id": 27047,
-          "dx": -5,
-          "dy": -32
+          "dx": -8,
+          "dy": -24
         },
         {
           "sprite_id": 27048,
-          "dx": -10,
-          "dy": -25
-        },
-        {
-          "sprite_id": 27049,
-          "dx": -6,
-          "dy": -27
-        },
-        {
-          "sprite_id": 27050,
-          "dx": -8,
-          "dy": -29
-        },
-        {
-          "sprite_id": 27051,
-          "dx": -3,
-          "dy": -20
-        },
-        {
-          "sprite_id": 27052,
-          "dx": -2,
-          "dy": -17
-        },
-        {
-          "sprite_id": 27053,
-          "dx": -14,
-          "dy": -14
-        },
-        {
-          "sprite_id": 27054,
           "dx": -12,
           "dy": -26
         },
         {
+          "sprite_id": 27049,
+          "dx": -8,
+          "dy": -26
+        },
+        {
+          "sprite_id": 27050,
+          "dx": -9,
+          "dy": -26
+        },
+        {
+          "sprite_id": 27051,
+          "dx": -2,
+          "dy": -24
+        },
+        {
+          "sprite_id": 27052,
+          "dx": 0,
+          "dy": -19
+        },
+        {
+          "sprite_id": 27053,
+          "dx": -10,
+          "dy": -18
+        },
+        {
+          "sprite_id": 27054,
+          "dx": -19,
+          "dy": -24
+        },
+        {
           "sprite_id": 27055,
-          "dx": -6,
-          "dy": -34
+          "dx": -5,
+          "dy": -24
         },
         {
           "sprite_id": 27056,
           "dx": -6,
-          "dy": -25
+          "dy": -18
         },
         {
           "sprite_id": 27057,
-          "dx": -8,
-          "dy": -34
+          "dx": -3,
+          "dy": -25
         },
         {
           "sprite_id": 27058,
-          "dx": -18,
-          "dy": -29
+          "dx": -8,
+          "dy": -30
         },
         {
           "sprite_id": 27059,
-          "dx": -25,
-          "dy": -8
+          "dx": -8,
+          "dy": -29
         },
         {
           "sprite_id": 27060,
-          "dx": -4,
-          "dy": -16
+          "dx": -3,
+          "dy": -24
         }
       ]
     },
@@ -2307,73 +2314,73 @@
       "frames": [
         {
           "sprite_id": 27061,
-          "dx": 4,
-          "dy": -10
+          "dx": 7,
+          "dy": -9
         },
         {
           "sprite_id": 27062,
-          "dx": -6,
+          "dx": -7,
           "dy": -22
         },
         {
           "sprite_id": 27063,
-          "dx": -4,
-          "dy": -21
+          "dx": -9,
+          "dy": -19
         },
         {
           "sprite_id": 27064,
-          "dx": -5,
-          "dy": -18
+          "dx": -7,
+          "dy": -17
         },
         {
           "sprite_id": 27065,
-          "dx": -9,
-          "dy": -15
+          "dx": -15,
+          "dy": -18
         },
         {
           "sprite_id": 27066,
-          "dx": -6,
-          "dy": -16
+          "dx": -7,
+          "dy": -18
         },
         {
           "sprite_id": 27067,
-          "dx": -6,
-          "dy": -17
+          "dx": -9,
+          "dy": -20
         },
         {
           "sprite_id": 27068,
           "dx": -8,
-          "dy": -10
+          "dy": -14
         },
         {
           "sprite_id": 27069,
           "dx": -16,
-          "dy": -13
+          "dy": -16
         },
         {
           "sprite_id": 27070,
-          "dx": -4,
-          "dy": -18
+          "dx": 0,
+          "dy": -22
         },
         {
           "sprite_id": 27071,
-          "dx": -6,
-          "dy": -2
+          "dx": -13,
+          "dy": -6
         },
         {
           "sprite_id": 27072,
-          "dx": -9,
+          "dx": -10,
           "dy": -6
         },
         {
           "sprite_id": 27073,
-          "dx": -8,
+          "dx": -9,
           "dy": -9
         },
         {
           "sprite_id": 27074,
-          "dx": -16,
-          "dy": -12
+          "dx": -9,
+          "dy": -15
         }
       ]
     },
@@ -2383,18 +2390,18 @@
       "frames": [
         {
           "sprite_id": 27075,
-          "dx": 0,
-          "dy": 0
+          "dx": -1,
+          "dy": -39
         },
         {
           "sprite_id": 27075,
-          "dx": 0,
-          "dy": 0
+          "dx": -1,
+          "dy": -39
         },
         {
           "sprite_id": 27075,
-          "dx": 0,
-          "dy": 0
+          "dx": -1,
+          "dy": -39
         }
       ]
     },
@@ -2404,88 +2411,88 @@
       "frames": [
         {
           "sprite_id": 27076,
-          "dx": 0,
-          "dy": 0
+          "dx": -3,
+          "dy": -39
         },
         {
           "sprite_id": 27076,
-          "dx": 0,
-          "dy": 0
+          "dx": -3,
+          "dy": -39
         },
         {
           "sprite_id": 27076,
-          "dx": 0,
-          "dy": 0
+          "dx": -3,
+          "dy": -39
         },
         {
           "sprite_id": 27076,
-          "dx": 0,
-          "dy": 0
+          "dx": -3,
+          "dy": -39
         },
         {
           "sprite_id": 27076,
-          "dx": 0,
-          "dy": 0
+          "dx": -3,
+          "dy": -39
         },
         {
           "sprite_id": 27076,
-          "dx": 0,
-          "dy": 0
+          "dx": -3,
+          "dy": -39
         },
         {
           "sprite_id": 27076,
-          "dx": 0,
-          "dy": 0
+          "dx": -3,
+          "dy": -39
         },
         {
           "sprite_id": 27076,
-          "dx": 0,
-          "dy": 0
+          "dx": -3,
+          "dy": -39
         },
         {
           "sprite_id": 27076,
-          "dx": 0,
-          "dy": 0
+          "dx": -3,
+          "dy": -39
         },
         {
           "sprite_id": 27076,
-          "dx": 0,
-          "dy": 0
+          "dx": -3,
+          "dy": -39
         },
         {
           "sprite_id": 27076,
-          "dx": 0,
-          "dy": 0
+          "dx": -3,
+          "dy": -39
         },
         {
           "sprite_id": 27076,
-          "dx": 0,
-          "dy": 0
+          "dx": -3,
+          "dy": -39
         },
         {
           "sprite_id": 27076,
-          "dx": 0,
-          "dy": 0
+          "dx": -3,
+          "dy": -39
         },
         {
           "sprite_id": 27076,
-          "dx": 0,
-          "dy": 0
+          "dx": -3,
+          "dy": -39
         },
         {
           "sprite_id": 27076,
-          "dx": 0,
-          "dy": 0
+          "dx": -3,
+          "dy": -39
         },
         {
           "sprite_id": 27076,
-          "dx": 0,
-          "dy": 0
+          "dx": -3,
+          "dy": -39
         },
         {
           "sprite_id": 27076,
-          "dx": 0,
-          "dy": 0
+          "dx": -3,
+          "dy": -39
         }
       ]
     },
@@ -2495,73 +2502,73 @@
       "frames": [
         {
           "sprite_id": 27077,
-          "dx": 0,
-          "dy": 0
+          "dx": -2,
+          "dy": -22
         },
         {
           "sprite_id": 27077,
-          "dx": 0,
-          "dy": 0
+          "dx": -2,
+          "dy": -22
         },
         {
           "sprite_id": 27077,
-          "dx": 0,
-          "dy": 0
+          "dx": -2,
+          "dy": -22
         },
         {
           "sprite_id": 27077,
-          "dx": 0,
-          "dy": 0
+          "dx": -2,
+          "dy": -22
         },
         {
           "sprite_id": 27077,
-          "dx": 0,
-          "dy": 0
+          "dx": -2,
+          "dy": -22
         },
         {
           "sprite_id": 27077,
-          "dx": 0,
-          "dy": 0
+          "dx": -2,
+          "dy": -22
         },
         {
           "sprite_id": 27077,
-          "dx": 0,
-          "dy": 0
+          "dx": -2,
+          "dy": -22
         },
         {
           "sprite_id": 27077,
-          "dx": 0,
-          "dy": 0
+          "dx": -2,
+          "dy": -22
         },
         {
           "sprite_id": 27077,
-          "dx": 0,
-          "dy": 0
+          "dx": -2,
+          "dy": -22
         },
         {
           "sprite_id": 27077,
-          "dx": 0,
-          "dy": 0
+          "dx": -2,
+          "dy": -22
         },
         {
           "sprite_id": 27077,
-          "dx": 0,
-          "dy": 0
+          "dx": -2,
+          "dy": -22
         },
         {
           "sprite_id": 27077,
-          "dx": 0,
-          "dy": 0
+          "dx": -2,
+          "dy": -22
         },
         {
           "sprite_id": 27077,
-          "dx": 0,
-          "dy": 0
+          "dx": -2,
+          "dy": -22
         },
         {
           "sprite_id": 27077,
-          "dx": 0,
-          "dy": 0
+          "dx": -2,
+          "dy": -22
         }
       ]
     }
@@ -2628,12 +2635,19 @@
         {
           "slot_index": 0,
           "client_cf": [
+            23,
+            24
+          ]
+        },
+        {
+          "slot_index": 1,
+          "client_cf": [
             0,
             1
           ]
         },
         {
-          "slot_index": 1,
+          "slot_index": 2,
           "client_cf": [
             2,
             15,
@@ -2641,31 +2655,31 @@
           ]
         },
         {
-          "slot_index": 2,
+          "slot_index": 3,
           "client_cf": [
             3
           ]
         },
         {
-          "slot_index": 3,
+          "slot_index": 4,
           "client_cf": [
             4
           ]
         },
         {
-          "slot_index": 4,
+          "slot_index": 5,
           "client_cf": [
             5
           ]
         },
         {
-          "slot_index": 5,
+          "slot_index": 6,
           "client_cf": [
             6
           ]
         },
         {
-          "slot_index": 6,
+          "slot_index": 7,
           "client_cf": [
             7,
             8,
@@ -2673,26 +2687,19 @@
           ]
         },
         {
-          "slot_index": 7,
-          "client_cf": [
-            9,
-            10
-          ]
-        },
-        {
           "slot_index": 8,
           "client_cf": [
-            11,
-            21,
-            32
+            12,
+            18,
+            22
           ]
         },
         {
           "slot_index": 9,
           "client_cf": [
-            12,
-            18,
-            22
+            11,
+            21,
+            32
           ]
         },
         {
@@ -2712,29 +2719,29 @@
         {
           "slot_index": 12,
           "client_cf": [
+            9,
+            10
+          ]
+        },
+        {
+          "slot_index": 13,
+          "client_cf": [
             16,
             29
           ]
         },
         {
-          "slot_index": 13,
+          "slot_index": 14,
           "client_cf": [
             19,
             30
           ]
         },
         {
-          "slot_index": 14,
+          "slot_index": 15,
           "client_cf": [
             20,
             31
-          ]
-        },
-        {
-          "slot_index": 15,
-          "client_cf": [
-            23,
-            24
           ]
         },
         {
@@ -2752,80 +2759,69 @@
         {
           "slot_index": 0,
           "client_cf": [
+            8
+          ]
+        },
+        {
+          "slot_index": 1,
+          "client_cf": [
             0,
             1,
             22
           ]
         },
         {
-          "slot_index": 1,
+          "slot_index": 2,
           "client_cf": [
             2
           ]
         },
         {
-          "slot_index": 2,
+          "slot_index": 3,
           "client_cf": [
             3
           ]
         },
         {
-          "slot_index": 3,
+          "slot_index": 4,
           "client_cf": [
             4
           ]
         },
         {
-          "slot_index": 4,
+          "slot_index": 5,
           "client_cf": [
             5
           ]
         },
         {
-          "slot_index": 5,
+          "slot_index": 6,
           "client_cf": [
             6
           ]
         },
         {
-          "slot_index": 6,
+          "slot_index": 7,
           "client_cf": [
             7,
             23
           ]
         },
         {
-          "slot_index": 7,
-          "client_cf": [
-            8
-          ]
-        },
-        {
           "slot_index": 8,
           "client_cf": [
-            9
+            12,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32
           ]
         },
         {
           "slot_index": 9,
-          "client_cf": [
-            10
-          ]
-        },
-        {
-          "slot_index": 10,
-          "client_cf": [
-            11
-          ]
-        },
-        {
-          "slot_index": 11,
-          "client_cf": [
-            12
-          ]
-        },
-        {
-          "slot_index": 12,
           "client_cf": [
             13,
             14,
@@ -2837,6 +2833,24 @@
             20,
             21,
             24
+          ]
+        },
+        {
+          "slot_index": 10,
+          "client_cf": [
+            9
+          ]
+        },
+        {
+          "slot_index": 11,
+          "client_cf": [
+            10
+          ]
+        },
+        {
+          "slot_index": 12,
+          "client_cf": [
+            11
           ]
         },
         {
@@ -9514,12 +9528,586 @@
       "my thuat/dot1-nhom1-duyet/dot1-nhom1-duyet/01-giao-dien/ui_o_vatpham_x4.png": "539ddfb184250cd5d19f885b91efbed018eda90ad5e33a40d495f1005220edd2"
     },
     "player_component_geometry": {
-      "ghi_chu": "Hình học THẬT của 34 mảnh người chơi đang chạy. sprites[].zooms vẫn trỏ production-closure-v11 (hình học CŨ, mỗi khung một tỉ lệ) vì closure mới cần reviewer độc lập ký lại (ASSET-ARTIFACT-REVIEW-016). Ảnh đang dùng nằm ở docs/my-thuat/lang-la-client-assets/res/x*/smallimage/.",
+      "ghi_chu": "Hình học THẬT của 34 mảnh người chơi đang chạy (V1 05/09: cắt thân theo cằm, tỉ lệ từng khung theo cỡ đầu, slot gán lại, dx/dy giải MILP). sprites[].zooms vẫn trỏ production-closure-v11 (hình học CŨ, mỗi khung một tỉ lệ) vì closure mới cần reviewer độc lập ký lại (ASSET-ARTIFACT-REVIEW-016). Ảnh đang dùng nằm ở docs/my-thuat/lang-la-client-assets/res/x*/smallimage/.",
+      "phien_ban": "V1 05/09",
       "generator": "tools/nhan-vat/sinh-lai-sprite.py",
       "uniform_scale_x4": 0.3764705882352941,
+      "ti_le": "uniform_scale_x4 = s0 = 128/340 là MỐC; mỗi mảnh dùng scale_frame = s0 / nguon.he_so_dau (cỡ đầu khung / cỡ đầu idle, median 6 thước cứng — tools/artqa/nhan_vat_moc.py).",
+      "lat_cat": "đầu: đỉnh tóc → cằm + 6 px nguồn; thân: cằm − 2 px x1 → 76 % khung; chân: 66 % → 100 %. Thân KHÔNG chứa mặt — đây là phần sửa 'hai khuôn mặt'.",
       "feet_offset_x1": -11,
       "anchor": "feet-bottom-center",
       "sprite_root": "docs/my-thuat/lang-la-client-assets/res",
+      "moc_giai_phau": "docs/my-thuat/review/nhan-vat-moc-giai-phau.json",
+      "milp": {
+        "ghi_chu": "dx/dy 34 mảnh là nghiệm MILP (tools/artqa/nhan_vat_toi_uu.py) — tái lập bằng nghiem + tham_so ở đây, không cần giải lại; kiem_nghiem() phải trả [].",
+        "phien_ban": "V1 05/09",
+        "tham_so": {
+          "ban_chan_x1": -11,
+          "khe_dau_than": [
+            -9,
+            0
+          ],
+          "khe_than_chan": [
+            -11,
+            -2
+          ],
+          "e": [
+            -2.0,
+            1.0
+          ],
+          "d_max": 5.5,
+          "ghim_dy_dau": {
+            "0": -38
+          },
+          "w_d": 0.5,
+          "M": 50.0,
+          "w_cf": {
+            "0": 4.0,
+            "1": 4.0,
+            "2": 2.0,
+            "3": 2.0,
+            "4": 2.0,
+            "5": 2.0,
+            "6": 2.0,
+            "7": 2.0,
+            "8": 2.0
+          },
+          "w_neo": 0.05
+        },
+        "nghiem": {
+          "head": {
+            "dx": [
+              -4,
+              -4,
+              -7
+            ],
+            "dy": [
+              -38,
+              -32,
+              -36
+            ]
+          },
+          "body": {
+            "dx": [
+              -5,
+              -6,
+              -9,
+              -8,
+              -12,
+              -8,
+              -9,
+              -2,
+              0,
+              -10,
+              -19,
+              -5,
+              -6,
+              -3,
+              -8,
+              -8,
+              -3
+            ],
+            "dy": [
+              -26,
+              -33,
+              -26,
+              -24,
+              -26,
+              -26,
+              -26,
+              -24,
+              -19,
+              -18,
+              -24,
+              -24,
+              -18,
+              -25,
+              -30,
+              -29,
+              -24
+            ]
+          },
+          "leg": {
+            "dx": [
+              7,
+              -7,
+              -9,
+              -7,
+              -15,
+              -7,
+              -9,
+              -8,
+              -16,
+              0,
+              -13,
+              -10,
+              -9,
+              -9
+            ],
+            "dy": [
+              -9,
+              -22,
+              -19,
+              -17,
+              -18,
+              -18,
+              -20,
+              -14,
+              -16,
+              -22,
+              -6,
+              -6,
+              -9,
+              -15
+            ]
+          }
+        },
+        "muc_tieu": 208.15733647718918,
+        "tham_chieu_idle": {
+          "face_w": 167.33333333333334,
+          "face_h": 96.66666666666667,
+          "eye_h": 33.666666666666664,
+          "eye_to_chin": 64.5,
+          "head_h_hair_chin": 268.0,
+          "band_thick": 25.5
+        },
+        "idle_frames": [
+          0,
+          1,
+          2
+        ],
+        "bang_cf": [
+          {
+            "cf": 0,
+            "e": 0.166,
+            "d": 0.25,
+            "ex": -0.096,
+            "gx": 0.0,
+            "khe_dau_than": -3,
+            "khe_than_chan": -7,
+            "chan": -11,
+            "cao": 61,
+            "than": "idle1",
+            "chan_khung": "idle1"
+          },
+          {
+            "cf": 1,
+            "e": 0.166,
+            "d": -0.75,
+            "ex": -0.096,
+            "gx": 0.0,
+            "khe_dau_than": -3,
+            "khe_than_chan": -6,
+            "chan": -11,
+            "cao": 62,
+            "than": "idle1",
+            "chan_khung": "idle1"
+          },
+          {
+            "cf": 2,
+            "e": 0.365,
+            "d": 0.5,
+            "ex": -0.076,
+            "gx": -0.25,
+            "khe_dau_than": -3,
+            "khe_than_chan": -6,
+            "chan": -11,
+            "cao": 54,
+            "than": "run0",
+            "chan_khung": "run0"
+          },
+          {
+            "cf": 3,
+            "e": -1.753,
+            "d": -2.75,
+            "ex": -0.172,
+            "gx": 0.0,
+            "khe_dau_than": -1,
+            "khe_than_chan": -2,
+            "chan": -11,
+            "cao": 53,
+            "than": "run1",
+            "chan_khung": "run1"
+          },
+          {
+            "cf": 4,
+            "e": 0.232,
+            "d": -2.0,
+            "ex": -0.086,
+            "gx": 0.5,
+            "khe_dau_than": -3,
+            "khe_than_chan": -3,
+            "chan": -11,
+            "cao": 55,
+            "than": "run2",
+            "chan_khung": "run2"
+          },
+          {
+            "cf": 5,
+            "e": 0.141,
+            "d": -0.5,
+            "ex": -0.391,
+            "gx": 0.5,
+            "khe_dau_than": -3,
+            "khe_than_chan": -4,
+            "chan": -11,
+            "cao": 55,
+            "than": "run3",
+            "chan_khung": "run3"
+          },
+          {
+            "cf": 6,
+            "e": 0.365,
+            "d": 0.5,
+            "ex": -0.076,
+            "gx": -0.25,
+            "khe_dau_than": -3,
+            "khe_than_chan": -6,
+            "chan": -11,
+            "cao": 54,
+            "than": "run0",
+            "chan_khung": "run0"
+          },
+          {
+            "cf": 7,
+            "e": -1.94,
+            "d": -4.0,
+            "ex": -0.796,
+            "gx": 0.0,
+            "khe_dau_than": -1,
+            "khe_than_chan": -2,
+            "chan": -11,
+            "cao": 63,
+            "than": "melee0",
+            "chan_khung": "melee0"
+          },
+          {
+            "cf": 8,
+            "e": -0.94,
+            "d": -4.0,
+            "ex": 0.204,
+            "gx": -0.25,
+            "khe_dau_than": -2,
+            "khe_than_chan": -2,
+            "chan": -11,
+            "cao": 62,
+            "than": "melee0",
+            "chan_khung": "idle0"
+          },
+          {
+            "cf": 9,
+            "e": 0.17,
+            "d": -0.25,
+            "ex": -0.042,
+            "gx": 0.125,
+            "khe_dau_than": -3,
+            "khe_than_chan": -6,
+            "chan": -11,
+            "cao": 56,
+            "than": "cast1",
+            "chan_khung": "melee3"
+          },
+          {
+            "cf": 10,
+            "e": -0.83,
+            "d": -1.25,
+            "ex": 0.958,
+            "gx": -0.125,
+            "khe_dau_than": -2,
+            "khe_than_chan": -5,
+            "chan": -11,
+            "cao": 58,
+            "than": "cast1",
+            "chan_khung": "cast0"
+          },
+          {
+            "cf": 11,
+            "e": 0.217,
+            "d": -1.75,
+            "ex": 0.056,
+            "gx": -0.125,
+            "khe_dau_than": -3,
+            "khe_than_chan": -3,
+            "chan": -11,
+            "cao": 61,
+            "than": "melee2",
+            "chan_khung": "cast1"
+          },
+          {
+            "cf": 12,
+            "e": -1.935,
+            "d": -3.25,
+            "ex": -1.332,
+            "gx": -1.5,
+            "khe_dau_than": -1,
+            "khe_than_chan": -2,
+            "chan": -11,
+            "cao": 62,
+            "than": "melee1",
+            "chan_khung": "melee1"
+          },
+          {
+            "cf": 13,
+            "e": 0.196,
+            "d": 2.0,
+            "ex": 0.344,
+            "gx": 0.875,
+            "khe_dau_than": -3,
+            "khe_than_chan": -8,
+            "chan": -11,
+            "cao": 55,
+            "than": "melee3",
+            "chan_khung": "melee2"
+          },
+          {
+            "cf": 14,
+            "e": 0.243,
+            "d": 4.75,
+            "ex": -0.133,
+            "gx": -0.75,
+            "khe_dau_than": -3,
+            "khe_than_chan": -10,
+            "chan": -11,
+            "cao": 55,
+            "than": "cast0",
+            "chan_khung": "melee2"
+          },
+          {
+            "cf": 15,
+            "e": 0.365,
+            "d": 1.5,
+            "ex": -0.076,
+            "gx": -2.625,
+            "khe_dau_than": -3,
+            "khe_than_chan": -8,
+            "chan": -11,
+            "cao": 53,
+            "than": "run0",
+            "chan_khung": "melee2"
+          },
+          {
+            "cf": 16,
+            "e": 0.12,
+            "d": 5.0,
+            "ex": 0.323,
+            "gx": 0.839,
+            "khe_dau_than": -3,
+            "khe_than_chan": -11,
+            "chan": -11,
+            "cao": 53,
+            "than": "cast2",
+            "chan_khung": "melee2"
+          },
+          {
+            "cf": 17,
+            "e": -1.94,
+            "d": 1.0,
+            "ex": 0.204,
+            "gx": -0.375,
+            "khe_dau_than": -1,
+            "khe_than_chan": -7,
+            "chan": -11,
+            "cao": 58,
+            "than": "melee0",
+            "chan_khung": "melee2"
+          },
+          {
+            "cf": 18,
+            "e": -1.935,
+            "d": -0.25,
+            "ex": -0.332,
+            "gx": -1.125,
+            "khe_dau_than": -1,
+            "khe_than_chan": -6,
+            "chan": -11,
+            "cao": 59,
+            "than": "melee1",
+            "chan_khung": "melee2"
+          },
+          {
+            "cf": 19,
+            "e": 0.035,
+            "d": -2.0,
+            "ex": 0.227,
+            "gx": -0.161,
+            "khe_dau_than": -3,
+            "khe_than_chan": -4,
+            "chan": -11,
+            "cao": 60,
+            "than": "cast2",
+            "chan_khung": "melee2"
+          },
+          {
+            "cf": 20,
+            "e": 0.158,
+            "d": -0.25,
+            "ex": 0.771,
+            "gx": 0.25,
+            "khe_dau_than": -3,
+            "khe_than_chan": -5,
+            "chan": -11,
+            "cao": 60,
+            "than": "cast0",
+            "chan_khung": "melee2"
+          },
+          {
+            "cf": 21,
+            "e": 0.217,
+            "d": 1.25,
+            "ex": -0.944,
+            "gx": -3.25,
+            "khe_dau_than": -3,
+            "khe_than_chan": -7,
+            "chan": -11,
+            "cao": 58,
+            "than": "melee2",
+            "chan_khung": "melee2"
+          },
+          {
+            "cf": 22,
+            "e": -1.935,
+            "d": -2.25,
+            "ex": -2.332,
+            "gx": -1.375,
+            "khe_dau_than": -1,
+            "khe_than_chan": -5,
+            "chan": -11,
+            "cao": 61,
+            "than": "melee1",
+            "chan_khung": "idle1"
+          },
+          {
+            "cf": 23,
+            "e": 0.25,
+            "d": -2.5,
+            "ex": 0.25,
+            "gx": 0.795,
+            "khe_dau_than": -3,
+            "khe_than_chan": -3,
+            "chan": -11,
+            "cao": 63,
+            "than": "idle0",
+            "chan_khung": "melee0"
+          },
+          {
+            "cf": 24,
+            "e": 0.25,
+            "d": 2.5,
+            "ex": 0.25,
+            "gx": 1.67,
+            "khe_dau_than": -3,
+            "khe_than_chan": -8,
+            "chan": -11,
+            "cao": 58,
+            "than": "idle0",
+            "chan_khung": "melee2"
+          },
+          {
+            "cf": 25,
+            "e": 0.25,
+            "d": 0.25,
+            "ex": 0.0,
+            "gx": 0.0,
+            "khe_dau_than": -3,
+            "khe_than_chan": -7,
+            "chan": -11,
+            "cao": 61,
+            "than": "idle2",
+            "chan_khung": "idle2"
+          },
+          {
+            "cf": 26,
+            "e": 0.196,
+            "d": 2.0,
+            "ex": 0.344,
+            "gx": 0.875,
+            "khe_dau_than": -3,
+            "khe_than_chan": -6,
+            "chan": -10,
+            "cao": 56,
+            "than": "melee3",
+            "chan_khung": "melee1"
+          },
+          {
+            "cf": 27,
+            "e": 0.243,
+            "d": 4.75,
+            "ex": -0.133,
+            "gx": -0.75,
+            "khe_dau_than": -3,
+            "khe_than_chan": -8,
+            "chan": -10,
+            "cao": 56,
+            "than": "cast0",
+            "chan_khung": "melee1"
+          },
+          {
+            "cf": 28,
+            "e": 0.365,
+            "d": 1.5,
+            "ex": -0.076,
+            "gx": -2.625,
+            "khe_dau_than": -3,
+            "khe_than_chan": -6,
+            "chan": -10,
+            "cao": 54,
+            "than": "run0",
+            "chan_khung": "melee1"
+          },
+          {
+            "cf": 29,
+            "e": 0.12,
+            "d": 5.0,
+            "ex": 0.323,
+            "gx": 0.839,
+            "khe_dau_than": -3,
+            "khe_than_chan": -9,
+            "chan": -10,
+            "cao": 54,
+            "than": "cast2",
+            "chan_khung": "melee1"
+          },
+          {
+            "cf": 30,
+            "e": 0.035,
+            "d": -2.0,
+            "ex": 0.227,
+            "gx": -0.161,
+            "khe_dau_than": -3,
+            "khe_than_chan": -2,
+            "chan": -10,
+            "cao": 61,
+            "than": "cast2",
+            "chan_khung": "melee1"
+          },
+          {
+            "cf": 31,
+            "e": 0.158,
+            "d": -0.25,
+            "ex": 0.771,
+            "gx": 0.25,
+            "khe_dau_than": -3,
+            "khe_than_chan": -3,
+            "chan": -10,
+            "cao": 61,
+            "than": "cast0",
+            "chan_khung": "melee1"
+          },
+          {
+            "cf": 32,
+            "e": 0.217,
+            "d": 0.25,
+            "ex": -0.944,
+            "gx": -3.25,
+            "khe_dau_than": -3,
+            "khe_than_chan": -4,
+            "chan": -10,
+            "cao": 60,
+            "than": "melee2",
+            "chan_khung": "melee1"
+          }
+        ]
+      },
       "components": [
         {
           "id": 27041,
@@ -9532,19 +10120,45 @@
             180,
             62,
             340,
-            274
+            276
           ],
+          "scale_frame": 0.37254120614740127,
+          "nguon": {
+            "frame_top": 62,
+            "frame_height": 653,
+            "edge_x": 0,
+            "he_so_dau": 1.0105475099748782,
+            "chin_y": 332.0,
+            "cam_uoc_luong": false,
+            "face_cx": 387.0,
+            "hair_top": 61,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            128,
+            127,
             103
           ],
+          "moc": {
+            "bbox_x1": [
+              1,
+              0,
+              32,
+              26
+            ],
+            "chin_off": 25.146531414949585,
+            "feet_off": 60.75,
+            "hair_off": -0.09313530153685032,
+            "face_cx_off": 19.279007418128018,
+            "center_off": 15.875,
+            "hip_cx_off": 16.666666666666668
+          },
           "placement_x1": {
-            "left_rel": -16,
-            "top_rel": -73
+            "left_rel": -17,
+            "top_rel": -72
           },
           "part_offset": {
-            "dx": -3,
-            "dy": -39
+            "dx": -4,
+            "dy": -38
           },
           "charinfo_cf": [
             0,
@@ -9567,70 +10181,142 @@
           ],
           "charinfo_anchor_cf": 0,
           "charinfo_residual": {
-            "1": [
-              0,
-              -1
-            ],
-            "7": [
-              4,
-              -2
-            ],
-            "8": [
-              6,
-              -1
-            ],
-            "11": [
-              -1,
-              0
-            ],
-            "12": [
-              1,
-              -1
-            ],
-            "17": [
-              3,
-              3
-            ],
-            "18": [
-              2,
-              2
-            ],
-            "19": [
-              4,
-              1
-            ],
-            "20": [
-              2,
-              1
-            ],
-            "21": [
-              -3,
-              3
-            ],
-            "22": [
-              -1,
-              0
-            ],
-            "23": [
-              5,
-              -2
-            ],
-            "24": [
-              4,
-              3
-            ],
-            "30": [
-              4,
-              1
-            ],
-            "31": [
-              2,
-              1
-            ],
-            "32": [
-              -3,
-              2
-            ]
+            "0": {
+              "e": 0.166,
+              "d": 0.25,
+              "ex": -0.096,
+              "gx": 0.0,
+              "khe_dau_than": -3,
+              "khe_than_chan": -7
+            },
+            "1": {
+              "e": 0.166,
+              "d": -0.75,
+              "ex": -0.096,
+              "gx": 0.0,
+              "khe_dau_than": -3,
+              "khe_than_chan": -6
+            },
+            "7": {
+              "e": -1.94,
+              "d": -4.0,
+              "ex": -0.796,
+              "gx": 0.0,
+              "khe_dau_than": -1,
+              "khe_than_chan": -2
+            },
+            "8": {
+              "e": -0.94,
+              "d": -4.0,
+              "ex": 0.204,
+              "gx": -0.25,
+              "khe_dau_than": -2,
+              "khe_than_chan": -2
+            },
+            "11": {
+              "e": 0.217,
+              "d": -1.75,
+              "ex": 0.056,
+              "gx": -0.125,
+              "khe_dau_than": -3,
+              "khe_than_chan": -3
+            },
+            "12": {
+              "e": -1.935,
+              "d": -3.25,
+              "ex": -1.332,
+              "gx": -1.5,
+              "khe_dau_than": -1,
+              "khe_than_chan": -2
+            },
+            "17": {
+              "e": -1.94,
+              "d": 1.0,
+              "ex": 0.204,
+              "gx": -0.375,
+              "khe_dau_than": -1,
+              "khe_than_chan": -7
+            },
+            "18": {
+              "e": -1.935,
+              "d": -0.25,
+              "ex": -0.332,
+              "gx": -1.125,
+              "khe_dau_than": -1,
+              "khe_than_chan": -6
+            },
+            "19": {
+              "e": 0.035,
+              "d": -2.0,
+              "ex": 0.227,
+              "gx": -0.161,
+              "khe_dau_than": -3,
+              "khe_than_chan": -4
+            },
+            "20": {
+              "e": 0.158,
+              "d": -0.25,
+              "ex": 0.771,
+              "gx": 0.25,
+              "khe_dau_than": -3,
+              "khe_than_chan": -5
+            },
+            "21": {
+              "e": 0.217,
+              "d": 1.25,
+              "ex": -0.944,
+              "gx": -3.25,
+              "khe_dau_than": -3,
+              "khe_than_chan": -7
+            },
+            "22": {
+              "e": -1.935,
+              "d": -2.25,
+              "ex": -2.332,
+              "gx": -1.375,
+              "khe_dau_than": -1,
+              "khe_than_chan": -5
+            },
+            "23": {
+              "e": 0.25,
+              "d": -2.5,
+              "ex": 0.25,
+              "gx": 0.795,
+              "khe_dau_than": -3,
+              "khe_than_chan": -3
+            },
+            "24": {
+              "e": 0.25,
+              "d": 2.5,
+              "ex": 0.25,
+              "gx": 1.67,
+              "khe_dau_than": -3,
+              "khe_than_chan": -8
+            },
+            "30": {
+              "e": 0.035,
+              "d": -2.0,
+              "ex": 0.227,
+              "gx": -0.161,
+              "khe_dau_than": -3,
+              "khe_than_chan": -2
+            },
+            "31": {
+              "e": 0.158,
+              "d": -0.25,
+              "ex": 0.771,
+              "gx": 0.25,
+              "khe_dau_than": -3,
+              "khe_than_chan": -3
+            },
+            "32": {
+              "e": 0.217,
+              "d": 0.25,
+              "ex": -0.944,
+              "gx": -3.25,
+              "khe_dau_than": -3,
+              "khe_than_chan": -4
+            }
           },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27041.png",
@@ -9639,10 +10325,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27041.png"
           },
           "sha256": {
-            "x1": "04f89b1630cdd0800916ca2293d5673031be003078f710666697de8142bc8760",
-            "x2": "c5db5142bab49698a13625655243979370e098b6cd6d26a66ad88f38f1465f0a",
-            "x3": "5cb2b8d6953482835c73df74ba14fc71393a9d6ccafd17b37807857cb8dfe074",
-            "x4": "60120cf59afb42462beafa9790548a74da43e0a2528242e2c86cb0409e1518ef"
+            "x1": "d5190c6880e645caed7b212ab51a1c805f6c8c1d8e7a3607e1344a178176dfad",
+            "x2": "dae9b573445d71a986e8dccef9e07e63c764585bbb03894307bb7720b757dbe9",
+            "x3": "590a012c6a0fdf746cab8e5280b2bca0eeee4cf16143ef47b0a1c2d687a09c2a",
+            "x4": "76cb066206127ec1a8e30c9f9be7799fd44a18abe0af889751e8dc4ca7b29cc8"
           }
         },
         {
@@ -9658,17 +10344,43 @@
             335,
             271
           ],
+          "scale_frame": 0.3808439261586127,
+          "nguon": {
+            "frame_top": 68,
+            "frame_height": 645,
+            "edge_x": 724,
+            "he_so_dau": 0.9885167187319217,
+            "chin_y": 333.0,
+            "cam_uoc_luong": false,
+            "face_cx": 363.5,
+            "hair_top": 67,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            126,
-            102
+            128,
+            103
           ],
+          "moc": {
+            "bbox_x1": [
+              1,
+              0,
+              32,
+              26
+            ],
+            "chin_off": 25.23091010800809,
+            "feet_off": 61.5,
+            "hair_off": -0.09521098153965317,
+            "face_cx_off": 19.37543474331942,
+            "center_off": 16.0,
+            "hip_cx_off": 16.791044776119403
+          },
           "placement_x1": {
-            "left_rel": -16,
-            "top_rel": -72
+            "left_rel": -14,
+            "top_rel": -65
           },
           "part_offset": {
-            "dx": -6,
-            "dy": -39
+            "dx": -4,
+            "dy": -32
           },
           "charinfo_cf": [
             2,
@@ -9689,58 +10401,126 @@
           ],
           "charinfo_anchor_cf": 2,
           "charinfo_residual": {
-            "3": [
-              0,
-              1
-            ],
-            "4": [
-              0,
-              -1
-            ],
-            "5": [
-              0,
-              -1
-            ],
-            "9": [
-              -1,
-              -2
-            ],
-            "10": [
-              -1,
-              -4
-            ],
-            "13": [
-              1,
-              -1
-            ],
-            "14": [
-              -3,
-              -1
-            ],
-            "15": [
-              2,
-              1
-            ],
-            "16": [
-              2,
-              1
-            ],
-            "26": [
-              1,
-              -1
-            ],
-            "27": [
-              -3,
-              -1
-            ],
-            "28": [
-              2,
-              1
-            ],
-            "29": [
-              2,
-              1
-            ]
+            "2": {
+              "e": 0.365,
+              "d": 0.5,
+              "ex": -0.076,
+              "gx": -0.25,
+              "khe_dau_than": -3,
+              "khe_than_chan": -6
+            },
+            "3": {
+              "e": -1.753,
+              "d": -2.75,
+              "ex": -0.172,
+              "gx": 0.0,
+              "khe_dau_than": -1,
+              "khe_than_chan": -2
+            },
+            "4": {
+              "e": 0.232,
+              "d": -2.0,
+              "ex": -0.086,
+              "gx": 0.5,
+              "khe_dau_than": -3,
+              "khe_than_chan": -3
+            },
+            "5": {
+              "e": 0.141,
+              "d": -0.5,
+              "ex": -0.391,
+              "gx": 0.5,
+              "khe_dau_than": -3,
+              "khe_than_chan": -4
+            },
+            "6": {
+              "e": 0.365,
+              "d": 0.5,
+              "ex": -0.076,
+              "gx": -0.25,
+              "khe_dau_than": -3,
+              "khe_than_chan": -6
+            },
+            "9": {
+              "e": 0.17,
+              "d": -0.25,
+              "ex": -0.042,
+              "gx": 0.125,
+              "khe_dau_than": -3,
+              "khe_than_chan": -6
+            },
+            "10": {
+              "e": -0.83,
+              "d": -1.25,
+              "ex": 0.958,
+              "gx": -0.125,
+              "khe_dau_than": -2,
+              "khe_than_chan": -5
+            },
+            "13": {
+              "e": 0.196,
+              "d": 2.0,
+              "ex": 0.344,
+              "gx": 0.875,
+              "khe_dau_than": -3,
+              "khe_than_chan": -8
+            },
+            "14": {
+              "e": 0.243,
+              "d": 4.75,
+              "ex": -0.133,
+              "gx": -0.75,
+              "khe_dau_than": -3,
+              "khe_than_chan": -10
+            },
+            "15": {
+              "e": 0.365,
+              "d": 1.5,
+              "ex": -0.076,
+              "gx": -2.625,
+              "khe_dau_than": -3,
+              "khe_than_chan": -8
+            },
+            "16": {
+              "e": 0.12,
+              "d": 5.0,
+              "ex": 0.323,
+              "gx": 0.839,
+              "khe_dau_than": -3,
+              "khe_than_chan": -11
+            },
+            "26": {
+              "e": 0.196,
+              "d": 2.0,
+              "ex": 0.344,
+              "gx": 0.875,
+              "khe_dau_than": -3,
+              "khe_than_chan": -6
+            },
+            "27": {
+              "e": 0.243,
+              "d": 4.75,
+              "ex": -0.133,
+              "gx": -0.75,
+              "khe_dau_than": -3,
+              "khe_than_chan": -8
+            },
+            "28": {
+              "e": 0.365,
+              "d": 1.5,
+              "ex": -0.076,
+              "gx": -2.625,
+              "khe_dau_than": -3,
+              "khe_than_chan": -6
+            },
+            "29": {
+              "e": 0.12,
+              "d": 5.0,
+              "ex": 0.323,
+              "gx": 0.839,
+              "khe_dau_than": -3,
+              "khe_than_chan": -9
+            }
           },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27042.png",
@@ -9749,10 +10529,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27042.png"
           },
           "sha256": {
-            "x1": "1c8d9f2fb67bf2aad55b768e8ab43cdab549ae79ced1064b9ef5ab771fd0e9b9",
-            "x2": "ae9c9dcf5129853f34d8098d1133432154c5ebee3c871acf3f2e6317cb4b1ad2",
-            "x3": "79e80f5dcdca6ab51b5257947b2d108d3e91501d0290911bf5e895293ea75a6b",
-            "x4": "9953b69c09810a38114be1b42169e83837b6d8492a71e17c952545ae678e091d"
+            "x1": "b8873805bd1ffa808cf0b1893cacca1594a64c730a708ae57c1566e2a494e096",
+            "x2": "0a7d529bd4935066e6e8d0247de55c06593c96e58ff88c44ed26fad211d95b66",
+            "x3": "3dd2f4f78356b53bfbe17a28951768e52ca639eb24061e0a024fc30a2a35f364",
+            "x4": "52a4d46f30a180ace7861dea97767406a3189eb24cbf2785fed367daf4f77bc3"
           }
         },
         {
@@ -9768,10 +10548,36 @@
             337,
             273
           ],
+          "scale_frame": 0.37848182076198866,
+          "nguon": {
+            "frame_top": 65,
+            "frame_height": 650,
+            "edge_x": 1448,
+            "he_so_dau": 0.9946860524961401,
+            "chin_y": 332.0,
+            "cam_uoc_luong": false,
+            "face_cx": 328.5,
+            "hair_top": 65,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            127,
+            128,
             103
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              32,
+              26
+            ],
+            "chin_off": 25.26366153586274,
+            "feet_off": 61.5,
+            "hair_off": 0.0,
+            "face_cx_off": 19.34988308645667,
+            "center_off": 16.0,
+            "hip_cx_off": 16.375
+          },
           "placement_x1": {
             "left_rel": -16,
             "top_rel": -72
@@ -9784,7 +10590,16 @@
             25
           ],
           "charinfo_anchor_cf": 25,
-          "charinfo_residual": {},
+          "charinfo_residual": {
+            "25": {
+              "e": 0.25,
+              "d": 0.25,
+              "ex": 0.0,
+              "gx": 0.0,
+              "khe_dau_than": -3,
+              "khe_than_chan": -7
+            }
+          },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27043.png",
             "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27043.png",
@@ -9792,10 +10607,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27043.png"
           },
           "sha256": {
-            "x1": "4c2bdf1ed44981e8e505f64aee288ccbc66982815f6fffea0605f5589314a70c",
-            "x2": "c8b90a22405ccfffa088462f7d88a46ccc40a107b15421baeace6c5a57b0d708",
-            "x3": "a5ccd4d39a09b0d954ee9ea26c505967fa22a92d52f4089dcd0a61af3b360dfc",
-            "x4": "096f0bb49e1ae20ffd9f61396a1c413547bc8da9dc04699feef4b6e75822e97c"
+            "x1": "d86205789f990368efb7c21d714d6dfc7384ae9f4ed127f2940a95632d8649a3",
+            "x2": "dc644856fd22b2602aea628a8ad8940c63dd0bbe45f8e1182b93ccfd220bbd30",
+            "x3": "42829429040bb33c2f142dd63b7d9a547fe5381c6eb2694f60413b0239e14181",
+            "x4": "c8dfb9fb1e59fbe14c77a293ee7ad29c3d5431880cd8ea0de136ecbb6c27773b"
           }
         },
         {
@@ -9807,21 +10622,47 @@
           "source_path": "player_idle_3f_chroma.png",
           "source_rect": [
             180,
-            245,
+            311,
             340,
-            313
+            247
           ],
+          "scale_frame": 0.37254120614740127,
+          "nguon": {
+            "frame_top": 62,
+            "frame_height": 653,
+            "edge_x": 0,
+            "he_so_dau": 1.0105475099748782,
+            "chin_y": 332.0,
+            "cam_uoc_luong": false,
+            "face_cx": 387.0,
+            "hair_top": 61,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            117,
-            118
+            107,
+            92
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              27,
+              23
+            ],
+            "chin_off": 1.8965314149495853,
+            "feet_off": 37.5,
+            "hair_off": -23.34313530153685,
+            "face_cx_off": 17.029007418128018,
+            "center_off": 13.625,
+            "hip_cx_off": 12.42
+          },
           "placement_x1": {
-            "left_rel": -16,
-            "top_rel": -55
+            "left_rel": -10,
+            "top_rel": -51
           },
           "part_offset": {
-            "dx": -11,
-            "dy": -30
+            "dx": -5,
+            "dy": -26
           },
           "charinfo_cf": [
             23,
@@ -9829,10 +10670,22 @@
           ],
           "charinfo_anchor_cf": 23,
           "charinfo_residual": {
-            "24": [
-              -1,
-              5
-            ]
+            "23": {
+              "e": 0.25,
+              "d": -2.5,
+              "ex": 0.25,
+              "gx": 0.795,
+              "khe_dau_than": -3,
+              "khe_than_chan": -3
+            },
+            "24": {
+              "e": 0.25,
+              "d": 2.5,
+              "ex": 0.25,
+              "gx": 1.67,
+              "khe_dau_than": -3,
+              "khe_than_chan": -8
+            }
           },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27044.png",
@@ -9841,10 +10694,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27044.png"
           },
           "sha256": {
-            "x1": "b12433666105bf8a1dfcd8eb98ad6fd441f8a7191095785e170b7cff85345ab3",
-            "x2": "c7793733af070e3550b3aaa8d20416771880eae6ea0dbe91ff590d6ac89bdc47",
-            "x3": "fa88ff29e87a96a540aad9a3d6865ae6b3384a1c470ddd5471184390b61dd296",
-            "x4": "6e7a61f89d3e1b725f943c93bb1340924c37c07470da8cd348f5e997b2221d42"
+            "x1": "3c3e7365abf54488703130bcc54ba14b7b0abf03a078143122989614753ca884",
+            "x2": "37a0ce726562db8761d286dfdf17b30b343c9b2ad51642baba93e9f3f1455732",
+            "x3": "19e431c3f50832373df0ea22ee851d1349583e2a21a9efa9bf3ac3b55851dce6",
+            "x4": "c5186435bbc6696804be1bbbaa14bd222140ea4560c1543a3e2d30c81d02db93"
           }
         },
         {
@@ -9856,21 +10709,47 @@
           "source_path": "player_idle_3f_chroma.png",
           "source_rect": [
             884,
-            249,
+            312,
             335,
-            309
+            246
           ],
+          "scale_frame": 0.3808439261586127,
+          "nguon": {
+            "frame_top": 68,
+            "frame_height": 645,
+            "edge_x": 724,
+            "he_so_dau": 0.9885167187319217,
+            "chin_y": 333.0,
+            "cam_uoc_luong": false,
+            "face_cx": 363.5,
+            "hair_top": 67,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            116,
-            116
+            110,
+            94
           ],
+          "moc": {
+            "bbox_x1": [
+              1,
+              0,
+              28,
+              24
+            ],
+            "chin_off": 1.9809101080080893,
+            "feet_off": 38.25,
+            "hair_off": -23.345210981539655,
+            "face_cx_off": 17.37543474331942,
+            "center_off": 14.0,
+            "hip_cx_off": 11.875
+          },
           "placement_x1": {
-            "left_rel": -16,
-            "top_rel": -55
+            "left_rel": -15,
+            "top_rel": -49
           },
           "part_offset": {
-            "dx": -7,
-            "dy": -39
+            "dx": -6,
+            "dy": -33
           },
           "charinfo_cf": [
             0,
@@ -9878,10 +10757,22 @@
           ],
           "charinfo_anchor_cf": 0,
           "charinfo_residual": {
-            "1": [
-              0,
-              -1
-            ]
+            "0": {
+              "e": 0.166,
+              "d": 0.25,
+              "ex": -0.096,
+              "gx": 0.0,
+              "khe_dau_than": -3,
+              "khe_than_chan": -7
+            },
+            "1": {
+              "e": 0.166,
+              "d": -0.75,
+              "ex": -0.096,
+              "gx": 0.0,
+              "khe_dau_than": -3,
+              "khe_than_chan": -6
+            }
           },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27045.png",
@@ -9890,36 +10781,62 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27045.png"
           },
           "sha256": {
-            "x1": "596a8811299382596d36e1f78595035317a34f9fe50ef4236a846c53aad1dc60",
-            "x2": "ea9708c3a54fcb3f99881d1b9885ea669590ee855006bc042047bd0f4ea8e177",
-            "x3": "9d6b77252a53b784409d2f896ff34cd0d15e15de68ef23c83f952caee435755b",
-            "x4": "419b235aeb83b1fb5fe9fb4fad6741ecc206305d19195407378c8b231a0dcee1"
+            "x1": "e9acef59f269dc17aca3e1ba11c19cc0da2bbf8948cb482fd2e9e46c06a50b80",
+            "x2": "6a5eb389561e4adec9eb906951a0fdd00e49aa55a60175ed97efa53568bff092",
+            "x3": "f8a87d36da87eac773168efe51ed18af76eb9fa72a1388ca2f669154fea6e525",
+            "x4": "f56d6f895b9e6e372a9cbe1d6fb2b3d40ecd9c5ff7370339479c69030cd1dd7e"
           }
         },
         {
           "id": 27046,
           "component": "body",
           "slot_index": 2,
-          "action": "idle",
-          "action_slot": 2,
-          "source_path": "player_idle_3f_chroma.png",
+          "action": "run",
+          "action_slot": 0,
+          "source_path": "player_run_4f_chroma.png",
           "source_rect": [
-            1572,
-            247,
-            337,
-            312
+            97,
+            340,
+            356,
+            178
           ],
+          "scale_frame": 0.4151425346943715,
+          "nguon": {
+            "frame_top": 117,
+            "frame_height": 528,
+            "edge_x": 0,
+            "he_so_dau": 0.9068465810482471,
+            "chin_y": 359.0,
+            "cam_uoc_luong": false,
+            "face_cx": 335.0,
+            "hair_top": 116,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            116,
-            117
+            137,
+            73
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              34,
+              18
+            ],
+            "chin_off": 1.8661233490094773,
+            "feet_off": 31.5,
+            "hair_off": -23.353785633673592,
+            "face_cx_off": 22.450980814315106,
+            "center_off": 16.25,
+            "hip_cx_off": 12.125
+          },
           "placement_x1": {
-            "left_rel": -16,
-            "top_rel": -55
+            "left_rel": -17,
+            "top_rel": -42
           },
           "part_offset": {
-            "dx": -8,
-            "dy": -39
+            "dx": -9,
+            "dy": -26
           },
           "charinfo_cf": [
             2,
@@ -9928,14 +10845,30 @@
           ],
           "charinfo_anchor_cf": 2,
           "charinfo_residual": {
-            "15": [
-              2,
-              1
-            ],
-            "28": [
-              2,
-              1
-            ]
+            "2": {
+              "e": 0.365,
+              "d": 0.5,
+              "ex": -0.076,
+              "gx": -0.25,
+              "khe_dau_than": -3,
+              "khe_than_chan": -6
+            },
+            "15": {
+              "e": 0.365,
+              "d": 1.5,
+              "ex": -0.076,
+              "gx": -2.625,
+              "khe_dau_than": -3,
+              "khe_than_chan": -8
+            },
+            "28": {
+              "e": 0.365,
+              "d": 1.5,
+              "ex": -0.076,
+              "gx": -2.625,
+              "khe_dau_than": -3,
+              "khe_than_chan": -6
+            }
           },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27046.png",
@@ -9944,10 +10877,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27046.png"
           },
           "sha256": {
-            "x1": "cad3bf11e04203120686345d0a96559344ed6c28559fb0528942b63a0e4ce844",
-            "x2": "bfd4725d929533d2b2fd0b353ee08208acc261df46039681365ebc1bbc358807",
-            "x3": "0d691a5870b752247f3dddcfc4a7410723db46f90c845016037ee4da2147fb89",
-            "x4": "baf21e03dc1b0fc029fe89d175d919cd46dd2400b9d7105473c53ad7ed19860f"
+            "x1": "2eb8c20028a10668178905ed20a1078daeaf6b861adc056f8b610e8244e7d315",
+            "x2": "61628c217fb4616efccd73a86a91f25a1a16caed14800bd6c3f6b556f8036d8c",
+            "x3": "136fa32df4cc4569a9fe49657a2dfdb2fb0cb1dca308cd73368fe046f63e5756",
+            "x4": "095e6f3001798be64037167d3e847c03d7e4e1af1c853f14be32a5ec5c64ef86"
           }
         },
         {
@@ -9955,31 +10888,66 @@
           "component": "body",
           "slot_index": 3,
           "action": "run",
-          "action_slot": 0,
+          "action_slot": 1,
           "source_path": "player_run_4f_chroma.png",
           "source_rect": [
-            97,
-            265,
-            356,
-            253
+            649,
+            405,
+            354,
+            129
           ],
+          "scale_frame": 0.4223173245344056,
+          "nguon": {
+            "frame_top": 185,
+            "frame_height": 459,
+            "edge_x": 543,
+            "he_so_dau": 0.8914400768435052,
+            "chin_y": 424.0,
+            "cam_uoc_luong": false,
+            "face_cx": 338.5,
+            "hair_top": 185,
+            "thuoc_loai": []
+          },
           "size_x4": [
             128,
-            95
+            54
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              32,
+              14
+            ],
+            "chin_off": 1.9834601409307346,
+            "feet_off": 25.25,
+            "hair_off": -23.25,
+            "face_cx_off": 24.547194488562326,
+            "center_off": 18.75,
+            "hip_cx_off": 15.942857142857143
+          },
           "placement_x1": {
-            "left_rel": -16,
-            "top_rel": -47
+            "left_rel": -19,
+            "top_rel": -39
           },
           "part_offset": {
-            "dx": -5,
-            "dy": -32
+            "dx": -8,
+            "dy": -24
           },
           "charinfo_cf": [
             3
           ],
           "charinfo_anchor_cf": 3,
-          "charinfo_residual": {},
+          "charinfo_residual": {
+            "3": {
+              "e": -1.753,
+              "d": -2.75,
+              "ex": -0.172,
+              "gx": 0.0,
+              "khe_dau_than": -1,
+              "khe_than_chan": -2
+            }
+          },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27047.png",
             "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27047.png",
@@ -9987,10 +10955,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27047.png"
           },
           "sha256": {
-            "x1": "1eb1c7f5dfaec401f5b8cfd6247e77141c1fdb516f5d7f5dbf95e86d4d841c06",
-            "x2": "a491ff5f8184a1bdc0eb90371b95133662425f883913a42153dc6c18e88ee60c",
-            "x3": "8c60042e993763b27765045b14bdad0fdadfd2390a5c5d258a2135a0c320ee08",
-            "x4": "58195b6f2be215ab4bdc4d8b9d9652c499ea1ba782fcade983dedf79d0c4d49c"
+            "x1": "5d49c89e036e0c85f4cbc4f966574dae1f866d18f3e83bfa526e5d034c898b59",
+            "x2": "119b0650ea1424d578aec5cbe923af557b154762b845948d8e2eb37782114243",
+            "x3": "ad3e9199ea346e92fc7bd5b848c6b3fa8ee40dd004aafeeff00bc3d424381299",
+            "x4": "89a4121d520fcbf475d4f8040ee13b7d9ac0c5b5e8f6d454e83e9b248f1525c2"
           }
         },
         {
@@ -9998,31 +10966,66 @@
           "component": "body",
           "slot_index": 4,
           "action": "run",
-          "action_slot": 1,
+          "action_slot": 2,
           "source_path": "player_run_4f_chroma.png",
           "source_rect": [
-            649,
-            314,
-            354,
-            220
+            1139,
+            357,
+            371,
+            157
           ],
+          "scale_frame": 0.4377547600949508,
+          "nguon": {
+            "frame_top": 142,
+            "frame_height": 489,
+            "edge_x": 1086,
+            "he_so_dau": 0.860003414134517,
+            "chin_y": 375.0,
+            "cam_uoc_luong": false,
+            "face_cx": 308.5,
+            "hair_top": 142,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            132,
-            82
+            139,
+            69
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              35,
+              17
+            ],
+            "chin_off": 1.9992147755308842,
+            "feet_off": 30.0,
+            "hair_off": -23.5,
+            "face_cx_off": 24.461585301064982,
+            "center_off": 16.75,
+            "hip_cx_off": 13.0
+          },
           "placement_x1": {
-            "left_rel": -17,
-            "top_rel": -42
+            "left_rel": -19,
+            "top_rel": -43
           },
           "part_offset": {
-            "dx": -10,
-            "dy": -25
+            "dx": -12,
+            "dy": -26
           },
           "charinfo_cf": [
             4
           ],
           "charinfo_anchor_cf": 4,
-          "charinfo_residual": {},
+          "charinfo_residual": {
+            "4": {
+              "e": 0.232,
+              "d": -2.0,
+              "ex": -0.086,
+              "gx": 0.5,
+              "khe_dau_than": -3,
+              "khe_than_chan": -3
+            }
+          },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27048.png",
             "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27048.png",
@@ -10030,10 +11033,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27048.png"
           },
           "sha256": {
-            "x1": "45c2441e24347512e5c5d23aecc91a442270cc0da5183766b7d056caaec16880",
-            "x2": "4c7c1d4912be039cb17fa8bd978b3bc3dde4b325ef18df64323c519299bfc97e",
-            "x3": "b842d0eaef01737897e86e73feaee5cd0192596b62a23b55a1c87cb42f7b2c2b",
-            "x4": "0b36c4261d735195dfc09c0a2d4a93e6c8e5aea59db54ba474181bf89d3216ff"
+            "x1": "7460e8218af4105687baead02dd5b97d21786e1928c830b18cc25dd785c262ad",
+            "x2": "87bc9624fdd341ce6766da61034087d8b45a5c0db6784bfb2992b5d8eba6782d",
+            "x3": "6a574b5cb78bb13e5ddf11176040f41dbe7ff9275387ecb8c554ab8239a15db3",
+            "x4": "1bc223c942c446ee9ea69e2ce55cdaa4521f3283ef4d4e2defcc770ba2360603"
           }
         },
         {
@@ -10041,31 +11044,66 @@
           "component": "body",
           "slot_index": 5,
           "action": "run",
-          "action_slot": 2,
+          "action_slot": 3,
           "source_path": "player_run_4f_chroma.png",
           "source_rect": [
-            1139,
-            279,
-            371,
-            235
+            1733,
+            314,
+            351,
+            171
           ],
+          "scale_frame": 0.4294895788856211,
+          "nguon": {
+            "frame_top": 97,
+            "frame_height": 511,
+            "edge_x": 1629,
+            "he_so_dau": 0.8765534875423678,
+            "chin_y": 333.0,
+            "cam_uoc_luong": false,
+            "face_cx": 330.0,
+            "hair_top": 97,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            126,
-            88
+            145,
+            74
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              36,
+              18
+            ],
+            "chin_off": 2.089885154251647,
+            "feet_off": 31.5,
+            "hair_off": -23.25,
+            "face_cx_off": 22.766161207037594,
+            "center_off": 17.375,
+            "hip_cx_off": 16.47029702970297
+          },
           "placement_x1": {
-            "left_rel": -15,
-            "top_rel": -44
+            "left_rel": -17,
+            "top_rel": -43
           },
           "part_offset": {
-            "dx": -6,
-            "dy": -27
+            "dx": -8,
+            "dy": -26
           },
           "charinfo_cf": [
             5
           ],
           "charinfo_anchor_cf": 5,
-          "charinfo_residual": {},
+          "charinfo_residual": {
+            "5": {
+              "e": 0.141,
+              "d": -0.5,
+              "ex": -0.391,
+              "gx": 0.5,
+              "khe_dau_than": -3,
+              "khe_than_chan": -4
+            }
+          },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27049.png",
             "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27049.png",
@@ -10073,10 +11111,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27049.png"
           },
           "sha256": {
-            "x1": "73f480da8447e1000ba3e67757a1358af10132a3c74b6176656e6564143ffe40",
-            "x2": "35146cd72436489cd71705ea5489657327859fd306e43d841de06f5fb6608443",
-            "x3": "e7d0ad6e2819be5726ccacf97f644d4339144159b4f45f8cece74f491ae4851a",
-            "x4": "6d1759d21c8eb7e5dfad467d2f87cb46a765a623cb9dee6fb9308bf0ee019beb"
+            "x1": "17eddfae2c90a13aa610f1290870c52cebf46815d667d4210c1586e74377cadf",
+            "x2": "4b5e0e0cab91aeaa535c3280f775d4eaf6f563c416b13c6f6312b3f0c6a08dce",
+            "x3": "e5bc348435f2be055a7ef007dd765e09a2e3e7c0ca0daa595ba1e21cbd7ed631",
+            "x4": "3f485c0e9413103306c683446acc167916cae5f59f7a3dc29564eb53de7682de"
           }
         },
         {
@@ -10084,31 +11122,66 @@
           "component": "body",
           "slot_index": 6,
           "action": "run",
-          "action_slot": 3,
+          "action_slot": 0,
           "source_path": "player_run_4f_chroma.png",
           "source_rect": [
-            1733,
-            240,
-            351,
-            245
+            97,
+            340,
+            356,
+            178
           ],
+          "scale_frame": 0.4151425346943715,
+          "nguon": {
+            "frame_top": 117,
+            "frame_height": 528,
+            "edge_x": 0,
+            "he_so_dau": 0.9068465810482471,
+            "chin_y": 359.0,
+            "cam_uoc_luong": false,
+            "face_cx": 335.0,
+            "hair_top": 116,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            129,
-            92
+            137,
+            73
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              34,
+              18
+            ],
+            "chin_off": 1.8661233490094773,
+            "feet_off": 31.5,
+            "hair_off": -23.353785633673592,
+            "face_cx_off": 22.450980814315106,
+            "center_off": 16.25,
+            "hip_cx_off": 12.125
+          },
           "placement_x1": {
-            "left_rel": -16,
-            "top_rel": -45
+            "left_rel": -17,
+            "top_rel": -42
           },
           "part_offset": {
-            "dx": -8,
-            "dy": -29
+            "dx": -9,
+            "dy": -26
           },
           "charinfo_cf": [
             6
           ],
           "charinfo_anchor_cf": 6,
-          "charinfo_residual": {},
+          "charinfo_residual": {
+            "6": {
+              "e": 0.365,
+              "d": 0.5,
+              "ex": -0.076,
+              "gx": -0.25,
+              "khe_dau_than": -3,
+              "khe_than_chan": -6
+            }
+          },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27050.png",
             "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27050.png",
@@ -10116,10 +11189,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27050.png"
           },
           "sha256": {
-            "x1": "9e0c1d0d6452178c7053a7e06b9e2bcec8095f45bca172e3ea8bd477d6128674",
-            "x2": "3fcb62fc21c9c3432a017201df03cd62439ab437b4f97cacd7b0039b158260c9",
-            "x3": "397bdd483f948d14ee8cfa858a30681d0510d4ba0cf7e0b73cea9462635b7c80",
-            "x4": "858da5af948134d06724ce24cab51cd1202a538939385ff3a1e3a23d4bb8f318"
+            "x1": "2eb8c20028a10668178905ed20a1078daeaf6b861adc056f8b610e8244e7d315",
+            "x2": "61628c217fb4616efccd73a86a91f25a1a16caed14800bd6c3f6b556f8036d8c",
+            "x3": "136fa32df4cc4569a9fe49657a2dfdb2fb0cb1dca308cd73368fe046f63e5756",
+            "x4": "095e6f3001798be64037167d3e847c03d7e4e1af1c853f14be32a5ec5c64ef86"
           }
         },
         {
@@ -10131,21 +11204,47 @@
           "source_path": "player_melee_4f_chroma.png",
           "source_rect": [
             115,
-            268,
+            332,
             308,
-            245
+            181
           ],
+          "scale_frame": 0.4459905142196,
+          "nguon": {
+            "frame_top": 125,
+            "frame_height": 511,
+            "edge_x": 0,
+            "he_so_dau": 0.8441224111998149,
+            "chin_y": 350.0,
+            "cam_uoc_luong": false,
+            "face_cx": 308.5,
+            "hair_top": 124,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            115,
-            92
+            131,
+            81
           ],
+          "moc": {
+            "bbox_x1": [
+              1,
+              0,
+              33,
+              20
+            ],
+            "chin_off": 2.086966424852502,
+            "feet_off": 34.0,
+            "hair_off": -23.1114976285549,
+            "face_cx_off": 20.07479112537315,
+            "center_off": 15.75,
+            "hip_cx_off": 14.375
+          },
           "placement_x1": {
-            "left_rel": -14,
-            "top_rel": -45
+            "left_rel": -13,
+            "top_rel": -49
           },
           "part_offset": {
-            "dx": -3,
-            "dy": -20
+            "dx": -2,
+            "dy": -24
           },
           "charinfo_cf": [
             7,
@@ -10154,14 +11253,30 @@
           ],
           "charinfo_anchor_cf": 7,
           "charinfo_residual": {
-            "8": [
-              1,
-              0
-            ],
-            "17": [
-              -2,
-              5
-            ]
+            "7": {
+              "e": -1.94,
+              "d": -4.0,
+              "ex": -0.796,
+              "gx": 0.0,
+              "khe_dau_than": -1,
+              "khe_than_chan": -2
+            },
+            "8": {
+              "e": -0.94,
+              "d": -4.0,
+              "ex": 0.204,
+              "gx": -0.25,
+              "khe_dau_than": -2,
+              "khe_than_chan": -2
+            },
+            "17": {
+              "e": -1.94,
+              "d": 1.0,
+              "ex": 0.204,
+              "gx": -0.375,
+              "khe_dau_than": -1,
+              "khe_than_chan": -7
+            }
           },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27051.png",
@@ -10170,10 +11285,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27051.png"
           },
           "sha256": {
-            "x1": "78eea7557ef9cf04d9b1242c61b872c8d7e4e0f91d2cdfb16b3e3413ff1151a8",
-            "x2": "d010c8b78c1c96aaae35af43caebd11852c65b6e5546219dbe1be7a07d89099e",
-            "x3": "c0f787b89e27b5ee71ad5e0141de45181f7872aa80a3b25d3bf345e24b3ca914",
-            "x4": "0f94f3b722f388725691763948e0bb4408bcd65c264c128c92adc7793adbf163"
+            "x1": "b0d6502b2ddceb0885039a794b81e13f7f8ccb8f07a03903678b7b20a769d5f0",
+            "x2": "d1cc5e67f53e501578458a795fa81451c5558084e020b4a5f989c76cbcdc2305",
+            "x3": "8349c6ef15df8b347b22d98c2bdbe8958b5b445740b983dff7d04ce92db2ed6b",
+            "x4": "65c3ad6ee0273e6545396af60a1cb17e9cf7279d17cd29ca43826d0088fb6457"
           }
         },
         {
@@ -10185,21 +11300,50 @@
           "source_path": "player_melee_4f_chroma.png",
           "source_rect": [
             606,
-            263,
+            330,
             448,
-            248
+            181
           ],
+          "scale_frame": 0.4417312072892938,
+          "nguon": {
+            "frame_top": 119,
+            "frame_height": 516,
+            "edge_x": 543,
+            "he_so_dau": 0.8522616967579111,
+            "chin_y": 348.3852973532647,
+            "cam_uoc_luong": true,
+            "face_cx": 308.5,
+            "hair_top": 119,
+            "thuoc_loai": [
+              "eye_to_chin",
+              "face_h"
+            ]
+          },
           "size_x4": [
-            151,
-            94
+            168,
+            80
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              42,
+              20
+            ],
+            "chin_off": 2.0816610835678198,
+            "feet_off": 33.75,
+            "hair_off": -23.25,
+            "face_cx_off": 19.61125284738041,
+            "center_off": 17.25,
+            "hip_cx_off": 13.625
+          },
           "placement_x1": {
-            "left_rel": -17,
-            "top_rel": -46
+            "left_rel": -15,
+            "top_rel": -48
           },
           "part_offset": {
-            "dx": -2,
-            "dy": -17
+            "dx": 0,
+            "dy": -19
           },
           "charinfo_cf": [
             12,
@@ -10208,14 +11352,30 @@
           ],
           "charinfo_anchor_cf": 12,
           "charinfo_residual": {
-            "18": [
-              0,
-              3
-            ],
-            "22": [
-              -1,
-              1
-            ]
+            "12": {
+              "e": -1.935,
+              "d": -3.25,
+              "ex": -1.332,
+              "gx": -1.5,
+              "khe_dau_than": -1,
+              "khe_than_chan": -2
+            },
+            "18": {
+              "e": -1.935,
+              "d": -0.25,
+              "ex": -0.332,
+              "gx": -1.125,
+              "khe_dau_than": -1,
+              "khe_than_chan": -6
+            },
+            "22": {
+              "e": -1.935,
+              "d": -2.25,
+              "ex": -2.332,
+              "gx": -1.375,
+              "khe_dau_than": -1,
+              "khe_than_chan": -5
+            }
           },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27052.png",
@@ -10224,10 +11384,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27052.png"
           },
           "sha256": {
-            "x1": "8acba21ae199abd7e8f089f1df0b37e86157dd3ad45f8622f23b0658d1a9538f",
-            "x2": "909b43bfcfc5dd836c01df5cce836a97eeef7df8781a844e4640703b117729d2",
-            "x3": "c1e8b51d749a50d2522fbe25463753d75492a676764bced16e3f84a121b51c65",
-            "x4": "e081cac43d6d8c5ce23c4a8a208b1758f7203a09b4c14ca0c47d105b07108363"
+            "x1": "87051b47160af59e928f146ad0980ceb0db3fe58717818e7935daccd2e4e8c32",
+            "x2": "42c26f8eea7c348f2ff135cfa61620969c92d3bd7035172109c2ecde38cbf486",
+            "x3": "fcd382e14de029dc67845068cf97ee328fe1c4a0f822454da4789a53d7b1ae62",
+            "x4": "bdcd590533b52670300c1323ec0d2fa9d83fb2df189010c7b163501d9e0e062b"
           }
         },
         {
@@ -10239,21 +11399,47 @@
           "source_path": "player_melee_4f_chroma.png",
           "source_rect": [
             1126,
-            268,
+            320,
             503,
-            241
+            189
           ],
+          "scale_frame": 0.47008369773558506,
+          "nguon": {
+            "frame_top": 127,
+            "frame_height": 503,
+            "edge_x": 1086,
+            "he_so_dau": 0.8008586344278059,
+            "chin_y": 337.0,
+            "cam_uoc_luong": false,
+            "face_cx": 252.5,
+            "hair_top": 127,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            177,
-            91
+            209,
+            89
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              52,
+              22
+            ],
+            "chin_off": 1.9293941311182152,
+            "feet_off": 36.25,
+            "hair_off": -22.75,
+            "face_cx_off": 18.223196442202955,
+            "center_off": 22.75,
+            "hip_cx_off": 14.5
+          },
           "placement_x1": {
-            "left_rel": -21,
-            "top_rel": -45
+            "left_rel": -17,
+            "top_rel": -49
           },
           "part_offset": {
-            "dx": -14,
-            "dy": -14
+            "dx": -10,
+            "dy": -18
           },
           "charinfo_cf": [
             11,
@@ -10262,14 +11448,30 @@
           ],
           "charinfo_anchor_cf": 11,
           "charinfo_residual": {
-            "21": [
-              -1,
-              3
-            ],
-            "32": [
-              -1,
-              2
-            ]
+            "11": {
+              "e": 0.217,
+              "d": -1.75,
+              "ex": 0.056,
+              "gx": -0.125,
+              "khe_dau_than": -3,
+              "khe_than_chan": -3
+            },
+            "21": {
+              "e": 0.217,
+              "d": 1.25,
+              "ex": -0.944,
+              "gx": -3.25,
+              "khe_dau_than": -3,
+              "khe_than_chan": -7
+            },
+            "32": {
+              "e": 0.217,
+              "d": 0.25,
+              "ex": -0.944,
+              "gx": -3.25,
+              "khe_dau_than": -3,
+              "khe_than_chan": -4
+            }
           },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27053.png",
@@ -10278,10 +11480,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27053.png"
           },
           "sha256": {
-            "x1": "29bdf60f7799c810944bfb0102e4627c05db81b681cb342d1d0ee50506cfa496",
-            "x2": "01375dd797296e0c6e81e376e25c82010f9fda4b9f3809d620ab396f3395c16d",
-            "x3": "2643414426c9156212a1a6a5cdb47235b5c659204aef6ee84b8a513757eff4ad",
-            "x4": "2dd343d08bea7b6ab7cc19d460f2ac382d8eb8b0fe39afa104076845c1e23de6"
+            "x1": "58c42695ac1cf41b2b144122f37960440d1ed33dbc5aa2d76ca9bc464d71f09a",
+            "x2": "df2c2ae2ed8dd49dc3b5d988290991a9b9be7546a14dc1c67d2a20acd2062598",
+            "x3": "07249bad4dbab172bd45f205f5cfbe7a19980be2a9239a36ff641bc2de3f4c0d",
+            "x4": "177963e19a71c87099268169ad7f3119dcab6bd8374a614f1fbf7fcedd3022ba"
           }
         },
         {
@@ -10293,28 +11495,71 @@
           "source_path": "player_melee_4f_chroma.png",
           "source_rect": [
             1629,
-            278,
+            341,
             396,
-            243
+            180
           ],
+          "scale_frame": 0.45354223172335156,
+          "nguon": {
+            "frame_top": 136,
+            "frame_height": 506,
+            "edge_x": 1629,
+            "he_so_dau": 0.8300673275888693,
+            "chin_y": 359.0,
+            "cam_uoc_luong": false,
+            "face_cx": 282.5,
+            "hair_top": 136,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            149,
-            92
+            180,
+            82
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              45,
+              20
+            ],
+            "chin_off": 2.0349794185768495,
+            "feet_off": 34.0,
+            "hair_off": -23.25,
+            "face_cx_off": 32.03142011546171,
+            "center_off": 22.5,
+            "hip_cx_off": 26.625
+          },
           "placement_x1": {
-            "left_rel": -19,
-            "top_rel": -45
+            "left_rel": -26,
+            "top_rel": -43
           },
           "part_offset": {
-            "dx": -12,
-            "dy": -26
+            "dx": -19,
+            "dy": -24
           },
           "charinfo_cf": [
             13,
             26
           ],
           "charinfo_anchor_cf": 13,
-          "charinfo_residual": {},
+          "charinfo_residual": {
+            "13": {
+              "e": 0.196,
+              "d": 2.0,
+              "ex": 0.344,
+              "gx": 0.875,
+              "khe_dau_than": -3,
+              "khe_than_chan": -8
+            },
+            "26": {
+              "e": 0.196,
+              "d": 2.0,
+              "ex": 0.344,
+              "gx": 0.875,
+              "khe_dau_than": -3,
+              "khe_than_chan": -6
+            }
+          },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27054.png",
             "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27054.png",
@@ -10322,10 +11567,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27054.png"
           },
           "sha256": {
-            "x1": "8c1fe7ffc14c71c8b1ea67fbc440e8ada913bee2eb7619e38672b47e7dff2ba3",
-            "x2": "711a20bf4f1a12020c0fdd91b5abf7041f7a48f3a11825109b0d9ca8321b79a9",
-            "x3": "18e37d22349d8f526f38a90ebead5662deea4cbaeb71990304955662a19fbb48",
-            "x4": "772ed5282bf89df37d772d01a9bbc8bd2dbea06e4aaa088c94638d89331d5f7b"
+            "x1": "69c3d537bc45feeb7ccc89d6dc314f73e58aa9abed1cc7277b25aa94eebf14fa",
+            "x2": "fd3c6c470746833249b53f49f56477eb36ac017fcfea98f0d295f47e071dd733",
+            "x3": "2b3e142a689d43ac46a2c8adf86bce43f715eee8c67f822c135439e9947dc933",
+            "x4": "7d923b20be16ed398e5b96d59cb027eef56a97d1473e84a41d8954bfcf4d667b"
           }
         },
         {
@@ -10337,28 +11582,71 @@
           "source_path": "player_cast_3f_chroma.png",
           "source_rect": [
             149,
-            225,
+            292,
             351,
-            301
+            234
           ],
+          "scale_frame": 0.38385180835682986,
+          "nguon": {
+            "frame_top": 50,
+            "frame_height": 626,
+            "edge_x": 0,
+            "he_so_dau": 0.9807706516920349,
+            "chin_y": 313.0,
+            "cam_uoc_luong": false,
+            "face_cx": 357.5,
+            "hair_top": 50,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            132,
-            113
+            125,
+            90
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              31,
+              22
+            ],
+            "chin_off": 1.9882563994615623,
+            "feet_off": 36.75,
+            "hair_off": -23.25,
+            "face_cx_off": 17.508275510599756,
+            "center_off": 14.375,
+            "hip_cx_off": 14.0
+          },
           "placement_x1": {
-            "left_rel": -16,
-            "top_rel": -53
+            "left_rel": -15,
+            "top_rel": -43
           },
           "part_offset": {
-            "dx": -6,
-            "dy": -34
+            "dx": -5,
+            "dy": -24
           },
           "charinfo_cf": [
             14,
             27
           ],
           "charinfo_anchor_cf": 14,
-          "charinfo_residual": {},
+          "charinfo_residual": {
+            "14": {
+              "e": 0.243,
+              "d": 4.75,
+              "ex": -0.133,
+              "gx": -0.75,
+              "khe_dau_than": -3,
+              "khe_than_chan": -10
+            },
+            "27": {
+              "e": 0.243,
+              "d": 4.75,
+              "ex": -0.133,
+              "gx": -0.75,
+              "khe_dau_than": -3,
+              "khe_than_chan": -8
+            }
+          },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27055.png",
             "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27055.png",
@@ -10366,10 +11654,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27055.png"
           },
           "sha256": {
-            "x1": "710f9558a499bc65c117ef9fb949f90f4a957f08da8ac53ae521e1cb0bf9e5bb",
-            "x2": "bb0bece16a5e160cea4d7b566508bea2888a69c5d973207a9dbfe9d7984d352f",
-            "x3": "8638b31ac5a771450be25197cfa8e89f518144d9d3c036f22bda6519df54b8b1",
-            "x4": "300693bbdc29804ecf237291dcc8fbe368dc59f8bfd199961edd069451cc5087"
+            "x1": "3decddbe489d82eab49ffd64ef808d8ba995ae5e468b2f31519b46483494a634",
+            "x2": "006d86d5b26f5cbfb47d50c93d221db4551235ef4fe9b2689cba21083596ea47",
+            "x3": "164da7847cfe1b805bea6c26a058f6a816d3b5b9ccc466d7e7f2c9d64ef13eb7",
+            "x4": "cfa86cacc1ae68ace908fa442fdd734159dfa5811b17e25837c8b66a4e7c12aa"
           }
         },
         {
@@ -10381,21 +11669,47 @@
           "source_path": "player_cast_3f_chroma.png",
           "source_rect": [
             878,
-            247,
+            329,
             348,
-            285
+            203
           ],
+          "scale_frame": 0.37636405183359134,
+          "nguon": {
+            "frame_top": 81,
+            "frame_height": 594,
+            "edge_x": 724,
+            "he_so_dau": 1.000283067421513,
+            "chin_y": 350.0,
+            "cam_uoc_luong": false,
+            "face_cx": 371.0,
+            "hair_top": 80,
+            "thuoc_loai": []
+          },
           "size_x4": [
             128,
-            108
+            77
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              32,
+              19
+            ],
+            "chin_off": 2.0604824858090183,
+            "feet_off": 32.75,
+            "hair_off": -23.344091012958398,
+            "face_cx_off": 20.41774981197233,
+            "center_off": 16.375,
+            "hip_cx_off": 15.25
+          },
           "placement_x1": {
             "left_rel": -16,
-            "top_rel": -51
+            "top_rel": -44
           },
           "part_offset": {
             "dx": -6,
-            "dy": -25
+            "dy": -18
           },
           "charinfo_cf": [
             9,
@@ -10403,10 +11717,22 @@
           ],
           "charinfo_anchor_cf": 9,
           "charinfo_residual": {
-            "10": [
-              -1,
-              -1
-            ]
+            "9": {
+              "e": 0.17,
+              "d": -0.25,
+              "ex": -0.042,
+              "gx": 0.125,
+              "khe_dau_than": -3,
+              "khe_than_chan": -6
+            },
+            "10": {
+              "e": -0.83,
+              "d": -1.25,
+              "ex": 0.958,
+              "gx": -0.125,
+              "khe_dau_than": -2,
+              "khe_than_chan": -5
+            }
           },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27056.png",
@@ -10415,10 +11741,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27056.png"
           },
           "sha256": {
-            "x1": "1fb3cf6f2e24dad011a01274c70b9d41e0d75653fb86e15b78e6fb5e6acd434e",
-            "x2": "7e593c5ed88531cb83359da90e62700ddf810bf8f9306f3eff9a600f77a15a02",
-            "x3": "e90e883777a7419c03498246de3d26fc3ef10e0c8137f8a1042e4fed01a4a029",
-            "x4": "1a9374e471b3a7fb4d63f8f934574c5956842ef60e708fea0a4dc5cccaba59f0"
+            "x1": "5eb5dd19503963a6fe0d7a4858a2f853b9e0b1dc781a6017512b70608fe4a3e2",
+            "x2": "a1aa22f6efcbef63f54c4ba45ecc733cb61e5141c87a2ee71004ed45e67ebda2",
+            "x3": "33d4cf55eee85c0c448988107d98cc8c09e594da18abcd81507d84d36168855f",
+            "x4": "20b69e206ff0a79f34a1c5e00e7187427cb8c1dc9861cfa4a83ad8786171c276"
           }
         },
         {
@@ -10430,28 +11756,71 @@
           "source_path": "player_cast_3f_chroma.png",
           "source_rect": [
             1573,
-            260,
+            328,
             453,
-            277
+            209
           ],
+          "scale_frame": 0.40178027641133757,
+          "nguon": {
+            "frame_top": 98,
+            "frame_height": 577,
+            "edge_x": 1448,
+            "he_so_dau": 0.9370061457418788,
+            "chin_y": 348.0,
+            "cam_uoc_luong": false,
+            "face_cx": 354.5,
+            "hair_top": 98,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            167,
-            104
+            178,
+            84
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              44,
+              21
+            ],
+            "chin_off": 2.111267275708599,
+            "feet_off": 35.0,
+            "hair_off": -23.0,
+            "face_cx_off": 22.052143359100494,
+            "center_off": 21.75,
+            "hip_cx_off": 15.588636363636363
+          },
           "placement_x1": {
-            "left_rel": -20,
-            "top_rel": -50
+            "left_rel": -15,
+            "top_rel": -41
           },
           "part_offset": {
-            "dx": -8,
-            "dy": -34
+            "dx": -3,
+            "dy": -25
           },
           "charinfo_cf": [
             16,
             29
           ],
           "charinfo_anchor_cf": 16,
-          "charinfo_residual": {},
+          "charinfo_residual": {
+            "16": {
+              "e": 0.12,
+              "d": 5.0,
+              "ex": 0.323,
+              "gx": 0.839,
+              "khe_dau_than": -3,
+              "khe_than_chan": -11
+            },
+            "29": {
+              "e": 0.12,
+              "d": 5.0,
+              "ex": 0.323,
+              "gx": 0.839,
+              "khe_dau_than": -3,
+              "khe_than_chan": -9
+            }
+          },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27057.png",
             "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27057.png",
@@ -10459,43 +11828,86 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27057.png"
           },
           "sha256": {
-            "x1": "7e7fadd9b8d3be24c681340d9e05732dd9fc52eb977132ff6d902939dddda3ec",
-            "x2": "14a84f038d1558e2ac19c746a9b22926321402dfec0547ae79a11c28d9052d64",
-            "x3": "6eb1e5bda4217f5806efada66ec17f2f5926bfbd00bc1e806e2cd729486f2923",
-            "x4": "78b026f7cec0bd75a53f5cd469abcd8a14f1e958ad06edb14ec47bf4443566ff"
+            "x1": "4d2ad4c5cf976dd7d0d6fdf111a881ceb521e601a4bf34b322325ec94abbb91c",
+            "x2": "33819f8d1e2dcae9a6f224dd44c86a18b5297a94eaa8e6a4b45c63b0d4c73032",
+            "x3": "8f47305b379dd64ee50895070ac61a520f1a309bbb6e24d5b1b66077aed1fc8f",
+            "x4": "470380f698176c39fd72ced7454d6f87dce85531de63a84d70c5429e52d8b93c"
           }
         },
         {
           "id": 27058,
           "component": "body",
           "slot_index": 14,
-          "action": "hit_death_getup",
-          "action_slot": 0,
-          "source_path": "player_hit_death_getup_3f_chroma.png",
+          "action": "cast",
+          "action_slot": 2,
+          "source_path": "player_cast_3f_chroma.png",
           "source_rect": [
-            98,
-            258,
-            564,
-            253
+            1573,
+            328,
+            453,
+            209
           ],
+          "scale_frame": 0.40178027641133757,
+          "nguon": {
+            "frame_top": 98,
+            "frame_height": 577,
+            "edge_x": 1448,
+            "he_so_dau": 0.9370061457418788,
+            "chin_y": 348.0,
+            "cam_uoc_luong": false,
+            "face_cx": 354.5,
+            "hair_top": 98,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            186,
-            95
+            178,
+            84
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              44,
+              21
+            ],
+            "chin_off": 2.111267275708599,
+            "feet_off": 35.0,
+            "hair_off": -23.0,
+            "face_cx_off": 22.052143359100494,
+            "center_off": 21.75,
+            "hip_cx_off": 15.588636363636363
+          },
           "placement_x1": {
-            "left_rel": -26,
-            "top_rel": -47
+            "left_rel": -16,
+            "top_rel": -48
           },
           "part_offset": {
-            "dx": -18,
-            "dy": -29
+            "dx": -8,
+            "dy": -30
           },
           "charinfo_cf": [
             19,
             30
           ],
           "charinfo_anchor_cf": 19,
-          "charinfo_residual": {},
+          "charinfo_residual": {
+            "19": {
+              "e": 0.035,
+              "d": -2.0,
+              "ex": 0.227,
+              "gx": -0.161,
+              "khe_dau_than": -3,
+              "khe_than_chan": -4
+            },
+            "30": {
+              "e": 0.035,
+              "d": -2.0,
+              "ex": 0.227,
+              "gx": -0.161,
+              "khe_dau_than": -3,
+              "khe_than_chan": -2
+            }
+          },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27058.png",
             "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27058.png",
@@ -10503,43 +11915,86 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27058.png"
           },
           "sha256": {
-            "x1": "0be79c543923016ad62255ce675b5afd81486f0c451791476f7ada4c8d8559d2",
-            "x2": "f73bc6e8d799091821f2ad66f45c7098849510bdb87cdb31c82088290208a710",
-            "x3": "05300b04527a3901b9feb4ef1ec8523eb1d6021d330ee120adefa24e814cf2ae",
-            "x4": "f41521d241f9777b86e782f814160f12d28363e828c64fad6a7338da76601486"
+            "x1": "4d2ad4c5cf976dd7d0d6fdf111a881ceb521e601a4bf34b322325ec94abbb91c",
+            "x2": "33819f8d1e2dcae9a6f224dd44c86a18b5297a94eaa8e6a4b45c63b0d4c73032",
+            "x3": "8f47305b379dd64ee50895070ac61a520f1a309bbb6e24d5b1b66077aed1fc8f",
+            "x4": "470380f698176c39fd72ced7454d6f87dce85531de63a84d70c5429e52d8b93c"
           }
         },
         {
           "id": 27059,
           "component": "body",
           "slot_index": 15,
-          "action": "hit_death_getup",
-          "action_slot": 1,
-          "source_path": "player_hit_death_getup_3f_chroma.png",
+          "action": "cast",
+          "action_slot": 0,
+          "source_path": "player_cast_3f_chroma.png",
           "source_rect": [
-            751,
-            467,
-            665,
-            113
+            149,
+            292,
+            351,
+            234
           ],
+          "scale_frame": 0.38385180835682986,
+          "nguon": {
+            "frame_top": 50,
+            "frame_height": 626,
+            "edge_x": 0,
+            "he_so_dau": 0.9807706516920349,
+            "chin_y": 313.0,
+            "cam_uoc_luong": false,
+            "face_cx": 357.5,
+            "hair_top": 50,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            249,
-            42
+            125,
+            90
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              31,
+              22
+            ],
+            "chin_off": 1.9882563994615623,
+            "feet_off": 36.75,
+            "hair_off": -23.25,
+            "face_cx_off": 17.508275510599756,
+            "center_off": 14.375,
+            "hip_cx_off": 14.0
+          },
           "placement_x1": {
-            "left_rel": -31,
-            "top_rel": -27
+            "left_rel": -14,
+            "top_rel": -48
           },
           "part_offset": {
-            "dx": -25,
-            "dy": -8
+            "dx": -8,
+            "dy": -29
           },
           "charinfo_cf": [
             20,
             31
           ],
           "charinfo_anchor_cf": 20,
-          "charinfo_residual": {},
+          "charinfo_residual": {
+            "20": {
+              "e": 0.158,
+              "d": -0.25,
+              "ex": 0.771,
+              "gx": 0.25,
+              "khe_dau_than": -3,
+              "khe_than_chan": -5
+            },
+            "31": {
+              "e": 0.158,
+              "d": -0.25,
+              "ex": 0.771,
+              "gx": 0.25,
+              "khe_dau_than": -3,
+              "khe_than_chan": -3
+            }
+          },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27059.png",
             "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27059.png",
@@ -10547,42 +12002,77 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27059.png"
           },
           "sha256": {
-            "x1": "99582f3e07cf984220dfc8bc58741b2b2c0184a0c5c450a41b34f383a2374fd8",
-            "x2": "a2a51bbc71235591f36e5c6d4aab3aa9c901a67a0097c83c0d0bf60450623a21",
-            "x3": "50e43db1180cefdc96c90603773a20157b1741d9e9def4d4e4d20b99c0ed62a5",
-            "x4": "361f0fb59c8040c3aa7bc321c40a0302baf46266e5783483d345cae562e2eec4"
+            "x1": "3decddbe489d82eab49ffd64ef808d8ba995ae5e468b2f31519b46483494a634",
+            "x2": "006d86d5b26f5cbfb47d50c93d221db4551235ef4fe9b2689cba21083596ea47",
+            "x3": "164da7847cfe1b805bea6c26a058f6a816d3b5b9ccc466d7e7f2c9d64ef13eb7",
+            "x4": "cfa86cacc1ae68ace908fa442fdd734159dfa5811b17e25837c8b66a4e7c12aa"
           }
         },
         {
           "id": 27060,
           "component": "body",
           "slot_index": 16,
-          "action": "hit_death_getup",
+          "action": "idle",
           "action_slot": 2,
-          "source_path": "player_hit_death_getup_3f_chroma.png",
+          "source_path": "player_idle_3f_chroma.png",
           "source_rect": [
-            1549,
-            325,
-            484,
-            212
+            1572,
+            311,
+            337,
+            248
           ],
+          "scale_frame": 0.37848182076198866,
+          "nguon": {
+            "frame_top": 65,
+            "frame_height": 650,
+            "edge_x": 1448,
+            "he_so_dau": 0.9946860524961401,
+            "chin_y": 332.0,
+            "cam_uoc_luong": false,
+            "face_cx": 328.5,
+            "hair_top": 65,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            151,
-            80
+            109,
+            94
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              27,
+              24
+            ],
+            "chin_off": 2.0136615358627417,
+            "feet_off": 38.25,
+            "hair_off": -23.25,
+            "face_cx_off": 17.34988308645667,
+            "center_off": 14.0,
+            "hip_cx_off": 12.669117647058824
+          },
           "placement_x1": {
-            "left_rel": -15,
-            "top_rel": -41
+            "left_rel": -14,
+            "top_rel": -49
           },
           "part_offset": {
-            "dx": -4,
-            "dy": -16
+            "dx": -3,
+            "dy": -24
           },
           "charinfo_cf": [
             25
           ],
           "charinfo_anchor_cf": 25,
-          "charinfo_residual": {},
+          "charinfo_residual": {
+            "25": {
+              "e": 0.25,
+              "d": 0.25,
+              "ex": 0.0,
+              "gx": 0.0,
+              "khe_dau_than": -3,
+              "khe_than_chan": -7
+            }
+          },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27060.png",
             "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27060.png",
@@ -10590,10 +12080,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27060.png"
           },
           "sha256": {
-            "x1": "51dadf63d03c630c5a97c006c56d51ca3e1b404c1ca33943305fab4699afba52",
-            "x2": "ee4b63339a3a545e1ee58d28695f4e8e676755229bddf585693e5ce114f9c83f",
-            "x3": "cee114892723a9824f0100e9b98d0f7ac4fa7c4a0cccb151996186a28b50b054",
-            "x4": "652bac013d5e8cfa5038f7e0b8b1fc301e77fcca9ba73e07c251bdae830c5147"
+            "x1": "eb4ef27ba81709275cbe344c510daae849b8c3f30480d69d418ddfccb9ccd482",
+            "x2": "4e8b63669b1077452c311dd9e97f07515a94d6ff6eb4edbef3ed168b090990f3",
+            "x3": "b57cb7a797cfd3a689e52612719b488b470027c1a5f2703103d0fb3a6bf4945d",
+            "x4": "b2295a3f5c169f3970bce414c0a8c24d8da19f8df0e49aca69a67bc6f3e8e55c"
           }
         },
         {
@@ -10609,23 +12099,58 @@
             340,
             222
           ],
+          "scale_frame": 0.37254120614740127,
+          "nguon": {
+            "frame_top": 62,
+            "frame_height": 653,
+            "edge_x": 0,
+            "he_so_dau": 1.0105475099748782,
+            "chin_y": 332.0,
+            "cam_uoc_luong": false,
+            "face_cx": 387.0,
+            "hair_top": 61,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            108,
-            84
+            107,
+            82
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              27,
+              20
+            ],
+            "chin_off": -15.103468585050415,
+            "feet_off": 20.5,
+            "hair_off": -40.34313530153685,
+            "face_cx_off": 17.029007418128018,
+            "center_off": 13.625,
+            "hip_cx_off": 13.625
+          },
           "placement_x1": {
-            "left_rel": -14,
-            "top_rel": -32
+            "left_rel": -11,
+            "top_rel": -31
           },
           "part_offset": {
-            "dx": 4,
-            "dy": -10
+            "dx": 7,
+            "dy": -9
           },
           "charinfo_cf": [
             8
           ],
           "charinfo_anchor_cf": 8,
-          "charinfo_residual": {},
+          "charinfo_residual": {
+            "8": {
+              "e": -0.94,
+              "d": -4.0,
+              "ex": 0.204,
+              "gx": -0.25,
+              "khe_dau_than": -2,
+              "khe_than_chan": -2
+            }
+          },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27061.png",
             "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27061.png",
@@ -10633,10 +12158,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27061.png"
           },
           "sha256": {
-            "x1": "615b9d4913f34f5ec0ad867863f6779b48788b50a2020a481f7d80f3c5a8932f",
-            "x2": "4f91769bdf0b034cc2fbc1bca93957c8ff6cca58947e8191810a4fdc3c0d9f80",
-            "x3": "285e1ccc987a3bffc5b1b1e3f5661076dccc428b24f20b006431acdc9eaa5ee1",
-            "x4": "7978382cadfd3d5aa75fd4dbe82613082668db4cc1ad0bf4f57a035020074e4d"
+            "x1": "05866fefaa002fb36b6982269b9dcd62c5d489098b153cde2a6a7d1b4ab1ee9d",
+            "x2": "ea331583ddfa63d70bc31eeeb89ae634eb06bd1d5ece28162cf56438d2596a30",
+            "x3": "7c6d12981f6994ade258a4c6648da01e55a41fd933a5300ec6c609a92084a80d",
+            "x4": "ceeb852c37129fa75301d084b986e0cfb98fbe6177178d082363379e55868f64"
           }
         },
         {
@@ -10652,16 +12177,42 @@
             335,
             219
           ],
+          "scale_frame": 0.3808439261586127,
+          "nguon": {
+            "frame_top": 68,
+            "frame_height": 645,
+            "edge_x": 724,
+            "he_so_dau": 0.9885167187319217,
+            "chin_y": 333.0,
+            "cam_uoc_luong": false,
+            "face_cx": 363.5,
+            "hair_top": 67,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            107,
-            83
+            110,
+            84
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              28,
+              21
+            ],
+            "chin_off": -15.26908989199191,
+            "feet_off": 21.0,
+            "hair_off": -40.59521098153965,
+            "face_cx_off": 17.37543474331942,
+            "center_off": 14.0,
+            "hip_cx_off": 14.0
+          },
           "placement_x1": {
-            "left_rel": -14,
+            "left_rel": -15,
             "top_rel": -32
           },
           "part_offset": {
-            "dx": -6,
+            "dx": -7,
             "dy": -22
           },
           "charinfo_cf": [
@@ -10670,7 +12221,32 @@
             22
           ],
           "charinfo_anchor_cf": 0,
-          "charinfo_residual": {},
+          "charinfo_residual": {
+            "0": {
+              "e": 0.166,
+              "d": 0.25,
+              "ex": -0.096,
+              "gx": 0.0,
+              "khe_dau_than": -3,
+              "khe_than_chan": -7
+            },
+            "1": {
+              "e": 0.166,
+              "d": -0.75,
+              "ex": -0.096,
+              "gx": 0.0,
+              "khe_dau_than": -3,
+              "khe_than_chan": -6
+            },
+            "22": {
+              "e": -1.935,
+              "d": -2.25,
+              "ex": -2.332,
+              "gx": -1.375,
+              "khe_dau_than": -1,
+              "khe_than_chan": -5
+            }
+          },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27062.png",
             "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27062.png",
@@ -10678,59 +12254,16 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27062.png"
           },
           "sha256": {
-            "x1": "224881af3998d3b3a73b12cb89533bdf3088ba90769bf2af67e66e7eab826fbf",
-            "x2": "b4471c7660ff324bcb3fe6c2f925e99f9c8264e7750b98b513778b7a5e262d7d",
-            "x3": "657ecd36dfe0f775ab8d7b665f330e566d7985620f248e73d0e76e63d3e51ed5",
-            "x4": "2810a481b4e2569d07e202309a095a035edc59984d59f2cc47fc71635ef4b04a"
+            "x1": "079e057f9247a940c937777a305c7f63b137d4f944c1872c6963a52f1585fffc",
+            "x2": "824de9412c14595e722dfb0da33e56d51d7f09eaaceebed2575bff130767bd8b",
+            "x3": "85140b87029e64dd8d5e9038390ef18cdc52105034914e3b23e8cfe77c5ba627",
+            "x4": "dac437d440792a267d387cf0534180f22612dfebd22337226224d9cd747aa95e"
           }
         },
         {
           "id": 27063,
           "component": "leg",
           "slot_index": 2,
-          "action": "idle",
-          "action_slot": 2,
-          "source_path": "player_idle_3f_chroma.png",
-          "source_rect": [
-            1572,
-            494,
-            337,
-            221
-          ],
-          "size_x4": [
-            108,
-            83
-          ],
-          "placement_x1": {
-            "left_rel": -14,
-            "top_rel": -32
-          },
-          "part_offset": {
-            "dx": -4,
-            "dy": -21
-          },
-          "charinfo_cf": [
-            2
-          ],
-          "charinfo_anchor_cf": 2,
-          "charinfo_residual": {},
-          "paths": {
-            "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27063.png",
-            "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27063.png",
-            "x3": "docs/my-thuat/lang-la-client-assets/res/x3/smallimage/Small27063.png",
-            "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27063.png"
-          },
-          "sha256": {
-            "x1": "5ce263464575f15e9fd1d54565e6649834120fddb757bc358d284e3f1d550b99",
-            "x2": "04a8b0dfa032b27a10932417e1622445d883f02de71b72896f399766c43e9189",
-            "x3": "cd1a7f32029ceb7850c212e901bc05ff2487827430f89549f8b5eded8ee318df",
-            "x4": "6abd4cd2480cfb5aa2fcb3f7402b5924b8b574dbb801e8997eabfa8a0cdc2be7"
-          }
-        },
-        {
-          "id": 27064,
-          "component": "leg",
-          "slot_index": 3,
           "action": "run",
           "action_slot": 0,
           "source_path": "player_run_4f_chroma.png",
@@ -10740,40 +12273,75 @@
             356,
             180
           ],
+          "scale_frame": 0.4151425346943715,
+          "nguon": {
+            "frame_top": 117,
+            "frame_height": 528,
+            "edge_x": 0,
+            "he_so_dau": 0.9068465810482471,
+            "chin_y": 359.0,
+            "cam_uoc_luong": false,
+            "face_cx": 335.0,
+            "hair_top": 116,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            122,
-            68
+            135,
+            75
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              34,
+              19
+            ],
+            "chin_off": -10.883876650990523,
+            "feet_off": 18.75,
+            "hair_off": -36.103785633673596,
+            "face_cx_off": 24.700980814315106,
+            "center_off": 18.5,
+            "hip_cx_off": 13.125
+          },
           "placement_x1": {
-            "left_rel": -17,
-            "top_rel": -28
+            "left_rel": -19,
+            "top_rel": -30
           },
           "part_offset": {
-            "dx": -5,
-            "dy": -18
+            "dx": -9,
+            "dy": -19
           },
           "charinfo_cf": [
-            3
+            2
           ],
-          "charinfo_anchor_cf": 3,
-          "charinfo_residual": {},
+          "charinfo_anchor_cf": 2,
+          "charinfo_residual": {
+            "2": {
+              "e": 0.365,
+              "d": 0.5,
+              "ex": -0.076,
+              "gx": -0.25,
+              "khe_dau_than": -3,
+              "khe_than_chan": -6
+            }
+          },
           "paths": {
-            "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27064.png",
-            "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27064.png",
-            "x3": "docs/my-thuat/lang-la-client-assets/res/x3/smallimage/Small27064.png",
-            "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27064.png"
+            "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27063.png",
+            "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27063.png",
+            "x3": "docs/my-thuat/lang-la-client-assets/res/x3/smallimage/Small27063.png",
+            "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27063.png"
           },
           "sha256": {
-            "x1": "2576db000e740a6a8a2254fb9d5e33a8bda51c270a5e0faa685f5daf9a3b92b4",
-            "x2": "4adc26a6f709e976202e85a1647066e4e7cb77aeb3cf4a6587002320b20bca3c",
-            "x3": "fe3b8d47729ef005bb56434c6a4a61345008c49c81f5dd5062843db39fd53d0b",
-            "x4": "768f8cd72db6e8ee45176afdc4e76045c1bef2f5d8eeb3d4c5957cdc7ab3c2e0"
+            "x1": "e893daef8882c28679cf2febdec02550d956880494cac714fad40044ff88afba",
+            "x2": "d1d7f15d96eb593d590d0424aa0dff2f5407d8f598746c0c3c6b0e585a35eb82",
+            "x3": "22db96e74a6ac14e11fec19d4e7ee2642b6c38aa91e3d44d83af9d0a2fc80302",
+            "x4": "1d19f6974031b9cba922a386ff833bdec65bfa9ca679ef5cd0493812990ed0ff"
           }
         },
         {
-          "id": 27065,
+          "id": 27064,
           "component": "leg",
-          "slot_index": 4,
+          "slot_index": 3,
           "action": "run",
           "action_slot": 1,
           "source_path": "player_run_4f_chroma.png",
@@ -10783,40 +12351,75 @@
             354,
             156
           ],
+          "scale_frame": 0.4223173245344056,
+          "nguon": {
+            "frame_top": 185,
+            "frame_height": 459,
+            "edge_x": 543,
+            "he_so_dau": 0.8914400768435052,
+            "chin_y": 424.0,
+            "cam_uoc_luong": false,
+            "face_cx": 338.5,
+            "hair_top": 185,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            113,
-            59
+            128,
+            66
           ],
+          "moc": {
+            "bbox_x1": [
+              1,
+              0,
+              32,
+              16
+            ],
+            "chin_off": -6.766539859069265,
+            "feet_off": 16.5,
+            "hair_off": -32.0,
+            "face_cx_off": 24.547194488562326,
+            "center_off": 18.75,
+            "hip_cx_off": 15.875
+          },
           "placement_x1": {
-            "left_rel": -17,
-            "top_rel": -26
+            "left_rel": -19,
+            "top_rel": -27
           },
           "part_offset": {
-            "dx": -9,
-            "dy": -15
+            "dx": -7,
+            "dy": -17
           },
           "charinfo_cf": [
-            4
+            3
           ],
-          "charinfo_anchor_cf": 4,
-          "charinfo_residual": {},
+          "charinfo_anchor_cf": 3,
+          "charinfo_residual": {
+            "3": {
+              "e": -1.753,
+              "d": -2.75,
+              "ex": -0.172,
+              "gx": 0.0,
+              "khe_dau_than": -1,
+              "khe_than_chan": -2
+            }
+          },
           "paths": {
-            "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27065.png",
-            "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27065.png",
-            "x3": "docs/my-thuat/lang-la-client-assets/res/x3/smallimage/Small27065.png",
-            "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27065.png"
+            "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27064.png",
+            "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27064.png",
+            "x3": "docs/my-thuat/lang-la-client-assets/res/x3/smallimage/Small27064.png",
+            "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27064.png"
           },
           "sha256": {
-            "x1": "50a40d71097ee1d0ad5c79a0729ac8ea59e73885fdbc4965f811560715f966d0",
-            "x2": "009e87eec3f76f5156b2d8b28c8caf5c5503079e21a6c8b08d39ac2b071670f3",
-            "x3": "d17f2c11d95609d03d128f82371233b2ad6a0899e3d9a29cac32f562af87c0aa",
-            "x4": "8a2bf33463d899d761b65f77ccffee74a807681e7847fea3415935155614fb86"
+            "x1": "f70a379630b294c0872b38533ad8b907a3b9e235621cdaf205fb641d310376a3",
+            "x2": "ac2dc78d41e00d78c67050dfe6f878148ebf13ef3535845405825f82a1da11d3",
+            "x3": "cb887a8023b4896587b4febe31e554cb54f97909210671b545cdaba57316a669",
+            "x4": "586ed88921a5a930dbe44f8554a8ca3ccc432f7f39dab59f9d153a8745c64626"
           }
         },
         {
-          "id": 27066,
+          "id": 27065,
           "component": "leg",
-          "slot_index": 5,
+          "slot_index": 4,
           "action": "run",
           "action_slot": 2,
           "source_path": "player_run_4f_chroma.png",
@@ -10826,40 +12429,75 @@
             371,
             166
           ],
+          "scale_frame": 0.4377547600949508,
+          "nguon": {
+            "frame_top": 142,
+            "frame_height": 489,
+            "edge_x": 1086,
+            "he_so_dau": 0.860003414134517,
+            "chin_y": 375.0,
+            "cam_uoc_luong": false,
+            "face_cx": 308.5,
+            "hair_top": 142,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            134,
-            62
+            155,
+            73
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              39,
+              18
+            ],
+            "chin_off": -9.750785224469116,
+            "feet_off": 18.25,
+            "hair_off": -35.25,
+            "face_cx_off": 27.961585301064982,
+            "center_off": 20.25,
+            "hip_cx_off": 18.559734513274336
+          },
           "placement_x1": {
-            "left_rel": -18,
-            "top_rel": -27
+            "left_rel": -23,
+            "top_rel": -29
           },
           "part_offset": {
-            "dx": -6,
-            "dy": -16
+            "dx": -15,
+            "dy": -18
           },
           "charinfo_cf": [
-            5
+            4
           ],
-          "charinfo_anchor_cf": 5,
-          "charinfo_residual": {},
+          "charinfo_anchor_cf": 4,
+          "charinfo_residual": {
+            "4": {
+              "e": 0.232,
+              "d": -2.0,
+              "ex": -0.086,
+              "gx": 0.5,
+              "khe_dau_than": -3,
+              "khe_than_chan": -3
+            }
+          },
           "paths": {
-            "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27066.png",
-            "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27066.png",
-            "x3": "docs/my-thuat/lang-la-client-assets/res/x3/smallimage/Small27066.png",
-            "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27066.png"
+            "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27065.png",
+            "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27065.png",
+            "x3": "docs/my-thuat/lang-la-client-assets/res/x3/smallimage/Small27065.png",
+            "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27065.png"
           },
           "sha256": {
-            "x1": "431b41c18c97cf03b87a5fbdbf105ac070bc2e120aa547ce7c3dfe2f1a4251d4",
-            "x2": "9a432d4383c24876649f5fbc1aad066c24da18f5143f2f815818caadfc6d7800",
-            "x3": "8c8ee70535074d5c008528e2aca0d027ec128bdcd460021b6e3648b92f73719b",
-            "x4": "b0dac21178756fed552659bbf2554c7daefa3cbed2d6129fa0ce565d69193b7c"
+            "x1": "dc19ba2a61d66960cecfc45f456f1a845384ab028cbd7ed2707db889a898c73a",
+            "x2": "2d198983a700abdfd90ecafbba8e330f0115f55140ffec10db03da596122e7c8",
+            "x3": "2dc639b5b85e99c336cc120c7035a618d5801c26243f62d3c40d7845667a1696",
+            "x4": "990bfad4ea00513c1398f00b2a83c1f2183abda43eb73ea1e154393c670f3dca"
           }
         },
         {
-          "id": 27067,
+          "id": 27066,
           "component": "leg",
-          "slot_index": 6,
+          "slot_index": 5,
           "action": "run",
           "action_slot": 3,
           "source_path": "player_run_4f_chroma.png",
@@ -10869,23 +12507,136 @@
             351,
             174
           ],
+          "scale_frame": 0.4294895788856211,
+          "nguon": {
+            "frame_top": 97,
+            "frame_height": 511,
+            "edge_x": 1629,
+            "he_so_dau": 0.8765534875423678,
+            "chin_y": 333.0,
+            "cam_uoc_luong": false,
+            "face_cx": 330.0,
+            "hair_top": 97,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            107,
-            65
+            123,
+            74
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              31,
+              18
+            ],
+            "chin_off": -10.910114845748353,
+            "feet_off": 18.5,
+            "hair_off": -36.25,
+            "face_cx_off": 24.266161207037594,
+            "center_off": 18.875,
+            "hip_cx_off": 16.75
+          },
           "placement_x1": {
-            "left_rel": -16,
-            "top_rel": -27
+            "left_rel": -19,
+            "top_rel": -29
           },
           "part_offset": {
-            "dx": -6,
-            "dy": -17
+            "dx": -7,
+            "dy": -18
+          },
+          "charinfo_cf": [
+            5
+          ],
+          "charinfo_anchor_cf": 5,
+          "charinfo_residual": {
+            "5": {
+              "e": 0.141,
+              "d": -0.5,
+              "ex": -0.391,
+              "gx": 0.5,
+              "khe_dau_than": -3,
+              "khe_than_chan": -4
+            }
+          },
+          "paths": {
+            "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27066.png",
+            "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27066.png",
+            "x3": "docs/my-thuat/lang-la-client-assets/res/x3/smallimage/Small27066.png",
+            "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27066.png"
+          },
+          "sha256": {
+            "x1": "87b1b130204b48dc5df6bf0b80b1f12c004d8ab30ef10c736f0df394159b8065",
+            "x2": "b7cfdb6bd81158d34ddb83b36c0d7c195684e6e17d5e8305f20cf82d56584b30",
+            "x3": "2280a317c40153462a282baddb78c0cac1a1543cc2f536cbe93073f288ad138f",
+            "x4": "7447f1b32e6567be8adb656d287d0a17086006657d5b633b3c15967f373c1fe9"
+          }
+        },
+        {
+          "id": 27067,
+          "component": "leg",
+          "slot_index": 6,
+          "action": "run",
+          "action_slot": 0,
+          "source_path": "player_run_4f_chroma.png",
+          "source_rect": [
+            97,
+            465,
+            356,
+            180
+          ],
+          "scale_frame": 0.4151425346943715,
+          "nguon": {
+            "frame_top": 117,
+            "frame_height": 528,
+            "edge_x": 0,
+            "he_so_dau": 0.9068465810482471,
+            "chin_y": 359.0,
+            "cam_uoc_luong": false,
+            "face_cx": 335.0,
+            "hair_top": 116,
+            "thuoc_loai": []
+          },
+          "size_x4": [
+            135,
+            75
+          ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              34,
+              19
+            ],
+            "chin_off": -10.883876650990523,
+            "feet_off": 18.75,
+            "hair_off": -36.103785633673596,
+            "face_cx_off": 24.700980814315106,
+            "center_off": 18.5,
+            "hip_cx_off": 13.125
+          },
+          "placement_x1": {
+            "left_rel": -19,
+            "top_rel": -30
+          },
+          "part_offset": {
+            "dx": -9,
+            "dy": -20
           },
           "charinfo_cf": [
             6
           ],
           "charinfo_anchor_cf": 6,
-          "charinfo_residual": {},
+          "charinfo_residual": {
+            "6": {
+              "e": 0.365,
+              "d": 0.5,
+              "ex": -0.076,
+              "gx": -0.25,
+              "khe_dau_than": -3,
+              "khe_than_chan": -6
+            }
+          },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27067.png",
             "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27067.png",
@@ -10893,10 +12644,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27067.png"
           },
           "sha256": {
-            "x1": "ab6b57e8fffba17fbde62407c67dfbfdf704a9aa2c0a41f49ff6178715f3bb6a",
-            "x2": "71784f366d46723e641fb0b827793619475a8ac954550f430aa15e7d10404cee",
-            "x3": "a5aaee5d00bbfc6fb63a02681f9cb3afbe9582ad72f6b5d3bb1b92c5e8253199",
-            "x4": "d304a7d4a21754daa949898882c29b35b08a264d93dcf1586dcb99ac5df10256"
+            "x1": "e893daef8882c28679cf2febdec02550d956880494cac714fad40044ff88afba",
+            "x2": "d1d7f15d96eb593d590d0424aa0dff2f5407d8f598746c0c3c6b0e585a35eb82",
+            "x3": "22db96e74a6ac14e11fec19d4e7ee2642b6c38aa91e3d44d83af9d0a2fc80302",
+            "x4": "1d19f6974031b9cba922a386ff833bdec65bfa9ca679ef5cd0493812990ed0ff"
           }
         },
         {
@@ -10912,24 +12663,67 @@
             308,
             174
           ],
+          "scale_frame": 0.4459905142196,
+          "nguon": {
+            "frame_top": 125,
+            "frame_height": 511,
+            "edge_x": 0,
+            "he_so_dau": 0.8441224111998149,
+            "chin_y": 350.0,
+            "cam_uoc_luong": false,
+            "face_cx": 308.5,
+            "hair_top": 124,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            108,
-            65
+            127,
+            78
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              32,
+              20
+            ],
+            "chin_off": -12.413033575147498,
+            "feet_off": 19.5,
+            "hair_off": -37.6114976285549,
+            "face_cx_off": 20.07479112537315,
+            "center_off": 15.75,
+            "hip_cx_off": 14.625
+          },
           "placement_x1": {
             "left_rel": -13,
-            "top_rel": -27
+            "top_rel": -31
           },
           "part_offset": {
             "dx": -8,
-            "dy": -10
+            "dy": -14
           },
           "charinfo_cf": [
             7,
             23
           ],
           "charinfo_anchor_cf": 7,
-          "charinfo_residual": {},
+          "charinfo_residual": {
+            "7": {
+              "e": -1.94,
+              "d": -4.0,
+              "ex": -0.796,
+              "gx": 0.0,
+              "khe_dau_than": -1,
+              "khe_than_chan": -2
+            },
+            "23": {
+              "e": 0.25,
+              "d": -2.5,
+              "ex": 0.25,
+              "gx": 0.795,
+              "khe_dau_than": -3,
+              "khe_than_chan": -3
+            }
+          },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27068.png",
             "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27068.png",
@@ -10937,10 +12731,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27068.png"
           },
           "sha256": {
-            "x1": "686dfc5c79bd27e32c7813f5d4fe04ea0f895784eb1c90d5bbdc59b559c7a4f1",
-            "x2": "61a6da225bcd4748bbc982fbbfbd4d80dd42e147a84ab5f534b3fc9b107000e3",
-            "x3": "24ad738440f58c5e7287e7010e32e6c9d7a56049fdfdec6058050519145987bc",
-            "x4": "63a4573cd04f27a61e99b6681d92d42c619ea8a6560d0cc04cc6aa201aed8fd1"
+            "x1": "490fb6c6b85ab3cb796cd59fc661e8b9990b212d81ca0cd6dec53cffaee37db7",
+            "x2": "72d52933fb17050628a915b1b7b138735b449ee0edda3cf991c9f16eef02fe86",
+            "x3": "5ebc76a96373ee5e63cbea760d9d82970f5522459da2f8b7088500a805db6066",
+            "x4": "850d222ec7cca553f428fb942d5a43468355a06bbe23faf12cbd960e46699eb0"
           }
         },
         {
@@ -10956,17 +12750,46 @@
             448,
             175
           ],
+          "scale_frame": 0.4417312072892938,
+          "nguon": {
+            "frame_top": 119,
+            "frame_height": 516,
+            "edge_x": 543,
+            "he_so_dau": 0.8522616967579111,
+            "chin_y": 348.3852973532647,
+            "cam_uoc_luong": true,
+            "face_cx": 308.5,
+            "hair_top": 119,
+            "thuoc_loai": [
+              "eye_to_chin",
+              "face_h"
+            ]
+          },
           "size_x4": [
-            128,
-            66
+            150,
+            77
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              38,
+              19
+            ],
+            "chin_off": -12.41833891643218,
+            "feet_off": 19.25,
+            "hair_off": -37.75,
+            "face_cx_off": 27.11125284738041,
+            "center_off": 24.75,
+            "hip_cx_off": 20.75
+          },
           "placement_x1": {
             "left_rel": -21,
-            "top_rel": -27
+            "top_rel": -30
           },
           "part_offset": {
             "dx": -16,
-            "dy": -13
+            "dy": -16
           },
           "charinfo_cf": [
             12,
@@ -10980,34 +12803,70 @@
           ],
           "charinfo_anchor_cf": 12,
           "charinfo_residual": {
-            "26": [
-              0,
-              1
-            ],
-            "27": [
-              0,
-              1
-            ],
-            "28": [
-              0,
-              1
-            ],
-            "29": [
-              0,
-              1
-            ],
-            "30": [
-              0,
-              1
-            ],
-            "31": [
-              0,
-              1
-            ],
-            "32": [
-              0,
-              1
-            ]
+            "12": {
+              "e": -1.935,
+              "d": -3.25,
+              "ex": -1.332,
+              "gx": -1.5,
+              "khe_dau_than": -1,
+              "khe_than_chan": -2
+            },
+            "26": {
+              "e": 0.196,
+              "d": 2.0,
+              "ex": 0.344,
+              "gx": 0.875,
+              "khe_dau_than": -3,
+              "khe_than_chan": -6
+            },
+            "27": {
+              "e": 0.243,
+              "d": 4.75,
+              "ex": -0.133,
+              "gx": -0.75,
+              "khe_dau_than": -3,
+              "khe_than_chan": -8
+            },
+            "28": {
+              "e": 0.365,
+              "d": 1.5,
+              "ex": -0.076,
+              "gx": -2.625,
+              "khe_dau_than": -3,
+              "khe_than_chan": -6
+            },
+            "29": {
+              "e": 0.12,
+              "d": 5.0,
+              "ex": 0.323,
+              "gx": 0.839,
+              "khe_dau_than": -3,
+              "khe_than_chan": -9
+            },
+            "30": {
+              "e": 0.035,
+              "d": -2.0,
+              "ex": 0.227,
+              "gx": -0.161,
+              "khe_dau_than": -3,
+              "khe_than_chan": -2
+            },
+            "31": {
+              "e": 0.158,
+              "d": -0.25,
+              "ex": 0.771,
+              "gx": 0.25,
+              "khe_dau_than": -3,
+              "khe_than_chan": -3
+            },
+            "32": {
+              "e": 0.217,
+              "d": 0.25,
+              "ex": -0.944,
+              "gx": -3.25,
+              "khe_dau_than": -3,
+              "khe_than_chan": -4
+            }
           },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27069.png",
@@ -11016,10 +12875,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27069.png"
           },
           "sha256": {
-            "x1": "96663582a9988879a36d01a75d9459020b480031f0d8fecf1bb8adb3f06edad4",
-            "x2": "91b4d9425941b6e1c29031b8e0a808a1e9011df0556efbc296770d8a813f5121",
-            "x3": "bb2ce30ef062602900869d328939ecdeff643b856c0a0adc625953e2018dd5fd",
-            "x4": "d80ab1c5649c6cb419e43ffbacb059f215ff65a2c3df5b0ce1567b619d54020d"
+            "x1": "cf529b45d3932f744e2055ce867e54bd94e55513dcc111a0c1662ae03b024a4e",
+            "x2": "be8e15965dde3e710e3ea621a08ed8f9607085d9857a45e20b144878d1f71659",
+            "x3": "032bccfe63c00f3c12c5be75bf406ac9d906bba15710fc9c9aceb42c07eec243",
+            "x4": "e29d8b14947570a5d7c16725b21b6603876e35b286fd4c503c16b5d473d1e33c"
           }
         },
         {
@@ -11035,17 +12894,43 @@
             503,
             171
           ],
+          "scale_frame": 0.47008369773558506,
+          "nguon": {
+            "frame_top": 127,
+            "frame_height": 503,
+            "edge_x": 1086,
+            "he_so_dau": 0.8008586344278059,
+            "chin_y": 337.0,
+            "cam_uoc_luong": false,
+            "face_cx": 252.5,
+            "hair_top": 127,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            75,
-            64
+            95,
+            80
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              23,
+              20
+            ],
+            "chin_off": -14.320605868881785,
+            "feet_off": 20.0,
+            "hair_off": -39.0,
+            "face_cx_off": 15.473196442202955,
+            "center_off": 20.0,
+            "hip_cx_off": 11.75
+          },
           "placement_x1": {
-            "left_rel": -16,
-            "top_rel": -27
+            "left_rel": -12,
+            "top_rel": -31
           },
           "part_offset": {
-            "dx": -4,
-            "dy": -18
+            "dx": 0,
+            "dy": -22
           },
           "charinfo_cf": [
             13,
@@ -11060,7 +12945,88 @@
             24
           ],
           "charinfo_anchor_cf": 13,
-          "charinfo_residual": {},
+          "charinfo_residual": {
+            "13": {
+              "e": 0.196,
+              "d": 2.0,
+              "ex": 0.344,
+              "gx": 0.875,
+              "khe_dau_than": -3,
+              "khe_than_chan": -8
+            },
+            "14": {
+              "e": 0.243,
+              "d": 4.75,
+              "ex": -0.133,
+              "gx": -0.75,
+              "khe_dau_than": -3,
+              "khe_than_chan": -10
+            },
+            "15": {
+              "e": 0.365,
+              "d": 1.5,
+              "ex": -0.076,
+              "gx": -2.625,
+              "khe_dau_than": -3,
+              "khe_than_chan": -8
+            },
+            "16": {
+              "e": 0.12,
+              "d": 5.0,
+              "ex": 0.323,
+              "gx": 0.839,
+              "khe_dau_than": -3,
+              "khe_than_chan": -11
+            },
+            "17": {
+              "e": -1.94,
+              "d": 1.0,
+              "ex": 0.204,
+              "gx": -0.375,
+              "khe_dau_than": -1,
+              "khe_than_chan": -7
+            },
+            "18": {
+              "e": -1.935,
+              "d": -0.25,
+              "ex": -0.332,
+              "gx": -1.125,
+              "khe_dau_than": -1,
+              "khe_than_chan": -6
+            },
+            "19": {
+              "e": 0.035,
+              "d": -2.0,
+              "ex": 0.227,
+              "gx": -0.161,
+              "khe_dau_than": -3,
+              "khe_than_chan": -4
+            },
+            "20": {
+              "e": 0.158,
+              "d": -0.25,
+              "ex": 0.771,
+              "gx": 0.25,
+              "khe_dau_than": -3,
+              "khe_than_chan": -5
+            },
+            "21": {
+              "e": 0.217,
+              "d": 1.25,
+              "ex": -0.944,
+              "gx": -3.25,
+              "khe_dau_than": -3,
+              "khe_than_chan": -7
+            },
+            "24": {
+              "e": 0.25,
+              "d": 2.5,
+              "ex": 0.25,
+              "gx": 1.67,
+              "khe_dau_than": -3,
+              "khe_than_chan": -8
+            }
+          },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27070.png",
             "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27070.png",
@@ -11068,10 +13034,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27070.png"
           },
           "sha256": {
-            "x1": "19a6eafa23cc753def720dab720b5d2c071bd00e460740900a0c7d3529fd39a7",
-            "x2": "20c78d006fac7bd5aa9c3a89a10287fb8dfba6840670c524a949d7dfc736167c",
-            "x3": "6465ee13b159ebbeed4fc0e9d883f2b3727c811716133b48ab73bad4c2c79d40",
-            "x4": "5fb45222a7dd5260a642623753597df971c65c8830508298fe149ca133f7d9ac"
+            "x1": "e309e90ed185d46ef843bfe14a548c4fc27652eaf29dc345a309444d99777a5e",
+            "x2": "a869e0245cec7bd6e3b228f527b0dfcf5490a30966a397df6f394b1ef1b94b77",
+            "x3": "29de3981d5de6e78601d42c6822b9da76b0b7e9d6a6069bbcb6a5dd9df6fefc5",
+            "x4": "2204aa35eb67bb24af60da3b81e6a5874478127ec56c568175054bff61a01b7a"
           }
         },
         {
@@ -11087,23 +13053,58 @@
             396,
             172
           ],
+          "scale_frame": 0.45354223172335156,
+          "nguon": {
+            "frame_top": 136,
+            "frame_height": 506,
+            "edge_x": 1629,
+            "he_so_dau": 0.8300673275888693,
+            "chin_y": 359.0,
+            "cam_uoc_luong": false,
+            "face_cx": 282.5,
+            "hair_top": 136,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            107,
-            64
+            129,
+            78
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              32,
+              20
+            ],
+            "chin_off": -12.46502058142315,
+            "feet_off": 19.5,
+            "hair_off": -37.75,
+            "face_cx_off": 20.281420115461707,
+            "center_off": 10.75,
+            "hip_cx_off": 15.125
+          },
           "placement_x1": {
-            "left_rel": -9,
-            "top_rel": -27
+            "left_rel": -16,
+            "top_rel": -31
           },
           "part_offset": {
-            "dx": -6,
-            "dy": -2
+            "dx": -13,
+            "dy": -6
           },
           "charinfo_cf": [
             9
           ],
           "charinfo_anchor_cf": 9,
-          "charinfo_residual": {},
+          "charinfo_residual": {
+            "9": {
+              "e": 0.17,
+              "d": -0.25,
+              "ex": -0.042,
+              "gx": 0.125,
+              "khe_dau_than": -3,
+              "khe_than_chan": -6
+            }
+          },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27071.png",
             "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27071.png",
@@ -11111,10 +13112,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27071.png"
           },
           "sha256": {
-            "x1": "649bd9bcc543c74a69ca2fbb6bb7675bc0d57ba421c5f97daa3feb46bd59c04c",
-            "x2": "e9d3536f1709c611b1295653033e0512c5280d270c74deb10af76a5626665420",
-            "x3": "8226622996e2d60250a2fc3d407a4b6417f37ec8c1b92a94aa4f985ef2f8bad6",
-            "x4": "472dcb70ef13c120b6f765838081c5f536b5bc4f5effbf551f43e810572c8cc7"
+            "x1": "4c3c03652c5c7a882d6742f20ee8effde4b238c95adf9321fe234ff3a94f703d",
+            "x2": "fc1c72afd6bc66e2b4a43dca9008942ecbff8ee9ec561048ac088640da9a1d54",
+            "x3": "a53619383a13432b321b67ddb773c3b1ecf0dd07719a7820e0df0b79dbf063c3",
+            "x4": "e285c403cd02e66fbd490f0d3e8235cc3631e7eac7502d5708115f79b1cfe947"
           }
         },
         {
@@ -11130,23 +13131,58 @@
             351,
             213
           ],
+          "scale_frame": 0.38385180835682986,
+          "nguon": {
+            "frame_top": 50,
+            "frame_height": 626,
+            "edge_x": 0,
+            "he_so_dau": 0.9807706516920349,
+            "chin_y": 313.0,
+            "cam_uoc_luong": false,
+            "face_cx": 357.5,
+            "hair_top": 50,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            108,
+            111,
             81
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              28,
+              20
+            ],
+            "chin_off": -14.511743600538438,
+            "feet_off": 20.25,
+            "hair_off": -39.75,
+            "face_cx_off": 15.008275510599756,
+            "center_off": 11.875,
+            "hip_cx_off": 11.375
+          },
           "placement_x1": {
-            "left_rel": -12,
+            "left_rel": -13,
             "top_rel": -31
           },
           "part_offset": {
-            "dx": -9,
+            "dx": -10,
             "dy": -6
           },
           "charinfo_cf": [
             10
           ],
           "charinfo_anchor_cf": 10,
-          "charinfo_residual": {},
+          "charinfo_residual": {
+            "10": {
+              "e": -0.83,
+              "d": -1.25,
+              "ex": 0.958,
+              "gx": -0.125,
+              "khe_dau_than": -2,
+              "khe_than_chan": -5
+            }
+          },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27072.png",
             "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27072.png",
@@ -11154,10 +13190,10 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27072.png"
           },
           "sha256": {
-            "x1": "76ffe78d7273869cd6be060ab6e670875161ad861d14d50dc02cfe83904cd71d",
-            "x2": "5d104001da51a02d3bd74776c0dd18d04fd634893a966cce42151e5a77a09523",
-            "x3": "2b802a8829c69d55b119cd1c9f153771af1416aa3085d7eb3a34a9270bd0c777",
-            "x4": "a445aa4aaf1d4249b44fb2a278ea9ce2697ceb178eaa058184819a69a86980fc"
+            "x1": "d89c126e6e990f4b04d9c86e504b9bda8e058c4086b50031ecc816d380a580f1",
+            "x2": "c4b9d116e7114c381c4af3b6fe41dac88b18185a2fbc53e29f6a9d53556533a3",
+            "x3": "95ca38c49011298c0c9938a12ca94d2c81389f08bc8671dc7748c8354f78b9e6",
+            "x4": "355006c4bc853c9dad72761766b9633e0d8f7cadb1263dc6c540ecdc03832a4d"
           }
         },
         {
@@ -11173,23 +13209,58 @@
             348,
             202
           ],
+          "scale_frame": 0.37636405183359134,
+          "nguon": {
+            "frame_top": 81,
+            "frame_height": 594,
+            "edge_x": 724,
+            "he_so_dau": 1.000283067421513,
+            "chin_y": 350.0,
+            "cam_uoc_luong": false,
+            "face_cx": 371.0,
+            "hair_top": 80,
+            "thuoc_loai": []
+          },
           "size_x4": [
             129,
             76
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              32,
+              19
+            ],
+            "chin_off": -11.689517514190982,
+            "feet_off": 19.0,
+            "hair_off": -37.0940910129584,
+            "face_cx_off": 20.41774981197233,
+            "center_off": 16.375,
+            "hip_cx_off": 14.625
+          },
           "placement_x1": {
-            "left_rel": -16,
+            "left_rel": -17,
             "top_rel": -30
           },
           "part_offset": {
-            "dx": -8,
+            "dx": -9,
             "dy": -9
           },
           "charinfo_cf": [
             11
           ],
           "charinfo_anchor_cf": 11,
-          "charinfo_residual": {},
+          "charinfo_residual": {
+            "11": {
+              "e": 0.217,
+              "d": -1.75,
+              "ex": 0.056,
+              "gx": -0.125,
+              "khe_dau_than": -3,
+              "khe_than_chan": -3
+            }
+          },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27073.png",
             "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27073.png",
@@ -11207,32 +13278,67 @@
           "id": 27074,
           "component": "leg",
           "slot_index": 13,
-          "action": "cast",
+          "action": "idle",
           "action_slot": 2,
-          "source_path": "player_cast_3f_chroma.png",
+          "source_path": "player_idle_3f_chroma.png",
           "source_rect": [
-            1573,
-            479,
-            453,
-            196
+            1572,
+            494,
+            337,
+            221
           ],
+          "scale_frame": 0.37848182076198866,
+          "nguon": {
+            "frame_top": 65,
+            "frame_height": 650,
+            "edge_x": 1448,
+            "he_so_dau": 0.9946860524961401,
+            "chin_y": 332.0,
+            "cam_uoc_luong": false,
+            "face_cx": 328.5,
+            "hair_top": 65,
+            "thuoc_loai": []
+          },
           "size_x4": [
-            121,
-            74
+            109,
+            84
           ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              27,
+              21
+            ],
+            "chin_off": -15.236338464137258,
+            "feet_off": 21.0,
+            "hair_off": -40.5,
+            "face_cx_off": 17.34988308645667,
+            "center_off": 14.0,
+            "hip_cx_off": 14.0
+          },
           "placement_x1": {
-            "left_rel": -21,
-            "top_rel": -29
+            "left_rel": -14,
+            "top_rel": -32
           },
           "part_offset": {
-            "dx": -16,
-            "dy": -12
+            "dx": -9,
+            "dy": -15
           },
           "charinfo_cf": [
             25
           ],
           "charinfo_anchor_cf": 25,
-          "charinfo_residual": {},
+          "charinfo_residual": {
+            "25": {
+              "e": 0.25,
+              "d": 0.25,
+              "ex": 0.0,
+              "gx": 0.0,
+              "khe_dau_than": -3,
+              "khe_than_chan": -7
+            }
+          },
           "paths": {
             "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27074.png",
             "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27074.png",
@@ -11240,10 +13346,298 @@
             "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27074.png"
           },
           "sha256": {
-            "x1": "7d580ff343e20a5be6df173953a1ec0b33d272ffa3dbc9adf6621a48f88a79f2",
-            "x2": "df0abb0de9345dc84eb45b8995f0a9db88beabf10a225c50ce7b74ba115696fb",
-            "x3": "e293ae656585789880e442d5d86891a9dc686d4a75ebbc371ec19ab3f1436f68",
-            "x4": "ea824534c8b9d6fede924687b82e741b8075d0dd698808510845f5e20b45cb85"
+            "x1": "b98b428a5b1796cdbb51132ff64e9604e194c0de8cada6c3097b1111889b9a8c",
+            "x2": "e78e2d7def7c7c89278cdd19d8820315fa78f80cbbb71f8ef22ba10a9948a57e",
+            "x3": "c688b4b7e43ed989e8bdc725b77b350826d7f945d6429f3cfdf0dab4dbe99088",
+            "x4": "52fbe9417df9c774c32936969c9909b93596d174d1e77c1aacbbb5f1fa17ec4f"
+          }
+        }
+      ]
+    },
+    "iruka_component_geometry": {
+      "ghi_chu": "Hình học THẬT của 3 mảnh NPC Iruka đang chạy (V1 06/09: cùng lát cắt theo cằm và phép bù CharInfo như người chơi; tỉ lệ s0 / he_so_dau × ti_le_dau; dx/dy từ component_placement tại cf 0 — NPC chỉ đảo cf 0/1 nên không cần MILP). sprites[] 27075–27077 vẫn trỏ production-closure-v11 (hình học CŨ 128×160, dx=dy=0) vì closure mới cần reviewer độc lập ký lại (ASSET-ARTIFACT-REVIEW-016). Ảnh đang dùng nằm ở docs/my-thuat/lang-la-client-assets/res/x*/smallimage/.",
+      "phien_ban": "V1 06/09",
+      "generator": "tools/nhan-vat/sinh-lai-sprite.py",
+      "source_path": "master_iruka_x4_chroma.png",
+      "source_sha256": "a53d149ca17557f365dd3d2b8f9f1b9d4fcb6c14dbfb130876157e7e27533622",
+      "source_frame": [
+        369,
+        70,
+        481,
+        1104
+      ],
+      "ti_le_dau": 1.0,
+      "he_so_dau": 1.6642020783749412,
+      "tham_chieu": {
+        "kieu": "trung_binh_idle",
+        "idle_frames": [
+          0,
+          1,
+          2
+        ],
+        "thuoc": [
+          "face_h",
+          "face_w",
+          "face_area_sqrt",
+          "eye_h",
+          "eye_to_chin",
+          "band_thick"
+        ],
+        "gia_tri": {
+          "face_h": 96.66666666666667,
+          "face_w": 167.33333333333334,
+          "face_area_sqrt": 91.47296905333792,
+          "eye_h": 33.666666666666664,
+          "eye_to_chin": 64.5,
+          "band_thick": 25.5
+        },
+        "ti_le_tung_thuoc": {
+          "face_h": 1.7172413793103447,
+          "face_w": 1.5,
+          "face_area_sqrt": 1.6307297381452313,
+          "eye_h": 1.5742574257425743,
+          "eye_to_chin": 1.697674418604651,
+          "band_thick": 1.9607843137254901
+        }
+      },
+      "ti_le": "scale_x4 = uniform_scale_x4 (s0 = 128/340) / he_so_dau × ti_le_dau. he_so_dau = cỡ đầu Iruka / cỡ đầu người chơi = median 6 thước cứng (bỏ head_h_hair_chin vì đuôi tóc Iruka, thay bằng sqrt diện tích mặt) trên CÙNG tham chiếu trung bình 3 khung idle mà player_component_geometry dùng → ti_le_dau = 1.0 nghĩa là đầu bằng đầu người chơi.",
+      "uniform_scale_x4": 0.3764705882352941,
+      "scale_x4": 0.22621687181337366,
+      "frame_bbox_x4": [
+        0,
+        0,
+        109,
+        250
+      ],
+      "cao_x1": 62,
+      "feet_offset_x1": -11,
+      "anchor": "feet-bottom-center",
+      "charinfo_cf": [
+        0,
+        1
+      ],
+      "charinfo_anchor_cf": 0,
+      "lat_cat": "đầu: đỉnh tóc → cằm + 6 px nguồn; thân: cằm − 2 px x1 → 76 % khung; chân: 66 % → 100 %.",
+      "sprite_root": "docs/my-thuat/lang-la-client-assets/res",
+      "bang_cf": [
+        {
+          "cf": 0,
+          "khe_dau_than": -3,
+          "khe_than_chan": -6,
+          "chan": -11,
+          "cao": 62
+        },
+        {
+          "cf": 1,
+          "khe_dau_than": -3,
+          "khe_than_chan": -5,
+          "chan": -11,
+          "cao": 63
+        }
+      ],
+      "components": [
+        {
+          "id": 27075,
+          "part_id": 2189,
+          "component": "head",
+          "source_rect": [
+            369,
+            70,
+            481,
+            374
+          ],
+          "size_x4": [
+            105,
+            85
+          ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              26,
+              21
+            ],
+            "chin_off": 20.811952206830377,
+            "feet_off": 62.5,
+            "hair_off": 0.0,
+            "face_cx_off": 16.429000315446263,
+            "center_off": 13.625,
+            "hip_cx_off": 16.375
+          },
+          "placement_x1": {
+            "left_rel": -14,
+            "top_rel": -73
+          },
+          "part_offset": {
+            "dx": -1,
+            "dy": -39
+          },
+          "charinfo_cf": [
+            0,
+            1
+          ],
+          "charinfo_anchor_cf": 0,
+          "charinfo_residual": {
+            "0": [
+              0,
+              0
+            ],
+            "1": [
+              0,
+              -1
+            ]
+          },
+          "component_origin_x4": [
+            0,
+            0
+          ],
+          "paths": {
+            "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27075.png",
+            "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27075.png",
+            "x3": "docs/my-thuat/lang-la-client-assets/res/x3/smallimage/Small27075.png",
+            "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27075.png"
+          },
+          "sha256": {
+            "x1": "c161d580705bafc5d937206f8fdc6a2be45b316953774d6b79827ae85d47aa99",
+            "x2": "81eaefddaea01a534d791bbf7fa4094dc03411b6fbebd53a8f7bbbc6ee0a3ee1",
+            "x3": "981c8aefa73a36f7313bf0d6b555644aeff46992d79a0a539ae2a629eb5a239d",
+            "x4": "66653fcd3b6b773203b35acf14c16e8e51ef924b310ed259e2a684a0af7ca050"
+          }
+        },
+        {
+          "id": 27076,
+          "part_id": 2190,
+          "component": "body",
+          "source_rect": [
+            369,
+            403,
+            481,
+            506
+          ],
+          "size_x4": [
+            102,
+            115
+          ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              26,
+              29
+            ],
+            "chin_off": 2.0619522068303766,
+            "feet_off": 43.75,
+            "hair_off": -18.75,
+            "face_cx_off": 14.679000315446263,
+            "center_off": 11.875,
+            "hip_cx_off": 13.488636363636363
+          },
+          "placement_x1": {
+            "left_rel": -12,
+            "top_rel": -55
+          },
+          "part_offset": {
+            "dx": -3,
+            "dy": -39
+          },
+          "charinfo_cf": [
+            0,
+            1
+          ],
+          "charinfo_anchor_cf": 0,
+          "charinfo_residual": {
+            "0": [
+              0,
+              0
+            ],
+            "1": [
+              0,
+              -1
+            ]
+          },
+          "component_origin_x4": [
+            7,
+            75
+          ],
+          "paths": {
+            "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27076.png",
+            "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27076.png",
+            "x3": "docs/my-thuat/lang-la-client-assets/res/x3/smallimage/Small27076.png",
+            "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27076.png"
+          },
+          "sha256": {
+            "x1": "60b80a13de01172bb46ccdfb763444f39284a61322a0eba06b16425691379ee0",
+            "x2": "12dd7fdbf0f49ad2fa1dd493a02c0e28e66bede8acf52f6d40b623cfa03ab510",
+            "x3": "df8bcd04bd60ed351e55c41b40befc40b2da82646b9db7bdb2e07a7112c6c2c0",
+            "x4": "23a4cae3fc0f3fca83ab6c297c4660733baba21ac9689091ac03a3e6861501b7"
+          }
+        },
+        {
+          "id": 27077,
+          "part_id": 2191,
+          "component": "leg",
+          "source_rect": [
+            369,
+            799,
+            481,
+            375
+          ],
+          "size_x4": [
+            95,
+            85
+          ],
+          "moc": {
+            "bbox_x1": [
+              0,
+              0,
+              24,
+              21
+            ],
+            "chin_off": -20.438047793169623,
+            "feet_off": 21.25,
+            "hair_off": -41.25,
+            "face_cx_off": 12.929000315446263,
+            "center_off": 10.125,
+            "hip_cx_off": 11.75
+          },
+          "placement_x1": {
+            "left_rel": -10,
+            "top_rel": -32
+          },
+          "part_offset": {
+            "dx": -2,
+            "dy": -22
+          },
+          "charinfo_cf": [
+            0,
+            1
+          ],
+          "charinfo_anchor_cf": 0,
+          "charinfo_residual": {
+            "0": [
+              0,
+              0
+            ],
+            "1": [
+              0,
+              0
+            ]
+          },
+          "component_origin_x4": [
+            14,
+            165
+          ],
+          "paths": {
+            "x1": "docs/my-thuat/lang-la-client-assets/res/x1/smallimage/Small27077.png",
+            "x2": "docs/my-thuat/lang-la-client-assets/res/x2/smallimage/Small27077.png",
+            "x3": "docs/my-thuat/lang-la-client-assets/res/x3/smallimage/Small27077.png",
+            "x4": "docs/my-thuat/lang-la-client-assets/res/x4/smallimage/Small27077.png"
+          },
+          "sha256": {
+            "x1": "fc9a6e1bdc425d9526a74f299d8fe376f0cfafb41ce995ccb471c14736e47c3f",
+            "x2": "5ad3d7b99594674e787e4425e747e3ab63e23b4e717de0594ca51272a7319d00",
+            "x3": "c58a1d60da2bb9a64a0d4e0dc1a2ecb9a8ebe614949c17d4b2b8c48f54b94458",
+            "x4": "d3fcb84eb5838dd66df2bad2724cf2a3430eb9101e24fc7c5e1c884c19288c5e"
           }
         }
       ]

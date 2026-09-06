@@ -40,6 +40,12 @@ PowerShell bằng cách để code trong file.
 | `npc-mo.cs` / `npc-menu.cs` / `panel.cs` | Bấm NPC 0 → chọn "Cửa hàng" → đọc panel |
 | `thu-npc.cs` | Tạo tay `Mob`/`Npc` để bắt ngoại lệ mà client nuốt |
 | `chup.cs` | `ScreenCapture` Game view ra PNG (đọc file ở lượt sau, ảnh xuất hiện sau ~1 khung) |
+| `iruka-part.cs` | Part 30/57/58/2189/2190/2191 client đang nạp (id, dx, dy 3 khung đầu) + NPC trong map (template head/body/leg, cf) — kiểm client đã nhận `part.bin` mới (06/09) |
+| `nhay.cs` | Giữ phím nhảy (`keyHold[21|2]`) — kẹt vách phải nhảy rồi mới giữ trái/phải (chuỗi else-if) |
+| `co-cho.cs` | Các cờ làm client vẽ "Xin chờ" (`isLoading`, `isLoadingMap`, `msgdlg`, `timeBreakLoading`, hp/statusMe) — chẩn đoán treo/rớt |
+| `chay-phai.cs` / `chay-trai.cs` / `tha-phim.cs` | Giữ phím chạy phải/trái (`GameCanvas.keyHold[24|6]` / `[23|4]`, GameScr.cs:2737–2845) rồi thả — để chụp vòng chạy cf 2→6 và hướng nhìn trái (client lật gương) |
+
+Chụp hoạt ảnh nhiều khung: `python tools\unity-mcp\chup-loat.py --out <thư mục> --ten chay --n 8 --cach 0.12 --truoc tools\unity-mcp\cs\chay-phai.cs --sau tools\unity-mcp\cs\tha-phim.cs` (giữ phím → chụp N ảnh cách 120 ms → thả phím).
 
 Lệnh Editor (`--json`): `{"name":"manage_editor","arguments":{"action":"stop"}}` /
 `"play"`; `{"name":"refresh_unity","arguments":{}}` sau khi chép asset vào
@@ -47,6 +53,9 @@ Lệnh Editor (`--json`): `{"name":"manage_editor","arguments":{"action":"stop"}
 
 ## Bẫy đã vấp
 
+- **Unity không có focus thì Game view không vẽ lại** → `ScreenCapture` trả khung cũ (thấy màn "Xin chờ" thay vì map). `chup.cs`/`chup-loat.py` gọi `InternalEditorUtility.RepaintAllViews()` trước khi chụp.
+- **Bấm Play ngay sau `refresh_unity`** (đang nhập lại nhiều ảnh) → phiên chơi bị reset về màn chọn máy chủ. Chờ nhập xong.
+- **Boss sinh 10 phút sau khi máy chủ khởi động** ngay điểm sinh của tài khoản thử → chết trong ~9 s, rồi client rớt. Chụp/đo trong 10 phút đầu sau khi khởi động lại máy chủ.
 - `execute_code` chặn `System.IO.File.Delete` (safety) — `ScreenCapture` ghi đè được, không cần xoá.
 - `types` của `read_console` phải là **mảng** (`["error"]`), không phải chuỗi.
 - Client nuốt ngoại lệ trong `try/catch` không log gì → Console 0 lỗi mà vẫn hỏng. Khi đó

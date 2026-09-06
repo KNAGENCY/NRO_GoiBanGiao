@@ -193,10 +193,13 @@ class BuildContractTests(unittest.TestCase):
 
         for sprite in sprites:
             sprite["source_sha256"] = hashlib.sha256((root / sprite["source_path"]).read_bytes()).hexdigest()
+        # Bảng slot→cf chép tay từ CharInfo (Char.cs:483) theo đúng chỉ số slot. Đổi
+        # 05/09/2026 (V1 khe đầu–thân): bảng cũ sắp theo cf đầu tiên nên thân/chân lệch
+        # slot và chân thiếu cf 26..32 — xem test_animation.py.
         cf = {
             "hoc-vien-head": [[0, 1, 7, 8, 11, 12, 17, 18, 19, 20, 21, 22, 23, 24, 30, 31, 32], [2, 3, 4, 5, 6, 9, 10, 13, 14, 15, 16, 26, 27, 28, 29], [25]],
-            "hoc-vien-body": [[0, 1], [2, 15, 28], [3], [4], [5], [6], [7, 8, 17], [9, 10], [11, 21, 32], [12, 18, 22], [13, 26], [14, 27], [16, 29], [19, 30], [20, 31], [23, 24], [25]],
-            "hoc-vien-leg": [[0, 1, 22], [2], [3], [4], [5], [6], [7, 23], [8], [9], [10], [11], [12], [13, 14, 15, 16, 17, 18, 19, 20, 21, 24], [25]],
+            "hoc-vien-body": [[23, 24], [0, 1], [2, 15, 28], [3], [4], [5], [6], [7, 8, 17], [12, 18, 22], [11, 21, 32], [13, 26], [14, 27], [9, 10], [16, 29], [19, 30], [20, 31], [25]],
+            "hoc-vien-leg": [[8], [0, 1, 22], [2], [3], [4], [5], [6], [7, 23], [12, 26, 27, 28, 29, 30, 31, 32], [13, 14, 15, 16, 17, 18, 19, 20, 21, 24], [9], [10], [11], [25]],
             "quai-soi-rung": [[index] for index in range(10)],
         }
         manifest = {

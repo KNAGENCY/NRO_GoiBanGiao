@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import re
 import struct
 import unittest
 from pathlib import Path
@@ -18,26 +19,35 @@ FRAME_COUNTS = {0: 3, 1: 17, 2: 14}
 # (khong doc tu manifest) de oracle van doc lap: sua nham manifest la test nay do.
 #
 # Truoc 05/09/2026 o day chi co ba hang so (-41/-50/-33) vi moi khung bi nhoi vao
-# cung mot hop 128x128/128x160, nen moi khung chung mot do doi. Nay moi khung giu
-# ti le CHUNG va duoc neo theo ban chan cua chinh no, nen dx/dy khac nhau tung
-# khung. Doi mot cap so o day nghia la nhan vat dich cho khi ve - phai co y.
+# cung mot hop 128x128/128x160, nen moi khung chung mot do doi. Sang (05/09): moi
+# khung giu ti le CHUNG va duoc neo theo ban chan cua chinh no. Chieu 05/09 (V1 khe
+# dau-than): dx/dy la NGHIEM MILP cho ca 34 manh (tools/artqa/nhan_vat_toi_uu.py) —
+# than cat tu cam xuong (het "hai khuon mat"), ti le tung khung theo co dau, slot
+# than/chan 2..6 = 5 khung chay, slot 15 het khung nam; dy dau slot 0 ghim -38.
+# Bang nay chep tay tu bang `sinh-lai-sprite.py` in ra (khong doc tu manifest) de
+# oracle van doc lap. Doi mot cap so o day nghia la nhan vat dich cho khi ve - phai co y.
 DX_DY = {
     # dau (part 30) - ba khung idle
-    27041: (-3, -39), 27042: (-6, -39), 27043: (-7, -36),
-    # than (part 57)
-    27044: (-11, -30), 27045: (-7, -39), 27046: (-8, -39), 27047: (-5, -32),
-    27048: (-10, -25), 27049: (-6, -27), 27050: (-8, -29), 27051: (-3, -20),
-    27052: (-2, -17), 27053: (-14, -14), 27054: (-12, -26), 27055: (-6, -34),
-    27056: (-6, -25), 27057: (-8, -34), 27058: (-18, -29), 27059: (-25, -8),
-    27060: (-4, -16),
-    # chan (part 58)
-    27061: (4, -10), 27062: (-6, -22), 27063: (-4, -21), 27064: (-5, -18),
-    27065: (-9, -15), 27066: (-6, -16), 27067: (-6, -17), 27068: (-8, -10),
-    27069: (-16, -13), 27070: (-4, -18), 27071: (-6, -2), 27072: (-9, -6),
-    27073: (-8, -9), 27074: (-16, -12),
+    27041: (-4, -38), 27042: (-4, -32), 27043: (-7, -36),
+    # than (part 57): idle0 idle1 run0 run1 run2 run3 run0 melee0..3 cast0 cast1 cast2 cast2 cast0 idle2
+    27044: (-5, -26), 27045: (-6, -33), 27046: (-9, -26), 27047: (-8, -24),
+    27048: (-12, -26), 27049: (-8, -26), 27050: (-9, -26), 27051: (-2, -24),
+    27052: (0, -19), 27053: (-10, -18), 27054: (-19, -24), 27055: (-5, -24),
+    27056: (-6, -18), 27057: (-3, -25), 27058: (-8, -30), 27059: (-8, -29),
+    27060: (-3, -24),
+    # chan (part 58): idle0 idle1 run0 run1 run2 run3 run0 melee0..3 cast0 cast1 idle2
+    27061: (7, -9), 27062: (-7, -22), 27063: (-9, -19), 27064: (-7, -17),
+    27065: (-15, -18), 27066: (-7, -18), 27067: (-9, -20), 27068: (-8, -14),
+    27069: (-16, -16), 27070: (0, -22), 27071: (-13, -6), 27072: (-10, -6),
+    27073: (-9, -9), 27074: (-9, -15),
+    # Iruka (part 2189 dau / 2190 than / 2191 chan) — 06/09/2026: truoc do dx=dy=0 (dau lung
+    # +13, than chim +29 px). Nay component_placement tai cf 0 voi ti le s0/1.6642; moi frame
+    # cua mot part cung tro mot sprite nen cung dx/dy. Chep tay tu bang IRUKA sinh-lai-sprite.py.
+    27075: (-1, -39), 27076: (-3, -39), 27077: (-2, -22),
 }
 LEGACY_SHA256 = "09349f28a95b46469b691abf87d6b341f3395f53ca8d6d704b48ab706992826b"
-BUILT_SHA256 = "49205db30bd642f9bf705394ed830bdf107499cbeadebf5eb2619b826a7a41a8"
+# sha256 part.bin sau V1 05/09 + Iruka 06/09 (in boi sinh-lai-sprite.py: "part.bin: ... sha ...").
+BUILT_SHA256 = "27075681b1a5426884268dddccf32c500e8a25ece854b36e69427abd99605ea4"
 
 
 def scan_legacy_records(data: bytes):
@@ -100,11 +110,13 @@ class PartBinaryTest(unittest.TestCase):
         expected[30] = khung(0, (27041, 27042, 27043))
         expected[57] = khung(1, range(27044, 27061))
         expected[58] = khung(2, range(27061, 27075))
+        # Iruka: 3/17/14 frame cung tro mot sprite, cung dx/dy (khong con 0/0 nhu truoc 06/09)
         expected.extend((
-            record_bytes(0, 27075, 3),
-            record_bytes(1, 27076, 17),
-            record_bytes(2, 27077, 14),
+            khung(0, [27075] * 3),
+            khung(1, [27076] * 17),
+            khung(2, [27077] * 14),
         ))
+        self.assertNotEqual(record_bytes(0, 27075, 3), expected[2189], "Iruka dx=dy=0 la ban loi cu")
         golden = struct.pack(">h", 2192) + b"".join(expected)
         self.assertEqual(golden, actual)
         self.assertEqual(BUILT_SHA256, hashlib.sha256(actual).hexdigest())
@@ -117,6 +129,27 @@ class PartBinaryTest(unittest.TestCase):
         changed = build_part(mutated, self.legacy)
 
         self.assertNotEqual(BUILT_SHA256, hashlib.sha256(changed).hexdigest())
+
+    def test_committed_part_bin_khop_golden_va_lock(self):
+        """File part.bin ĐÃ COMMIT (server/internal/game/assets) phải đúng golden và đúng lock.
+
+        Trước 06/09 oracle chỉ kiểm build_part(manifest) — đổi 1 byte trong file đã commit
+        thì test_part vẫn xanh (đột biến M10 của kiểm đối kháng). Đây là cửa cho chính file
+        máy chủ nhúng (go:embed dongbo.go). Cũng ghim lock.versions.data == vsData trong dongbo.go.
+        """
+        assets = ROOT / "server" / "internal" / "game" / "assets"
+        committed = (assets / "part.bin").read_bytes()
+        self.assertEqual(BUILT_SHA256, hashlib.sha256(committed).hexdigest())
+        lock = json.loads((assets / "asset-lock.json").read_text(encoding="utf-8"))
+        out = [o for o in lock["outputs"] if o["path"] == "server/part.bin"]
+        self.assertEqual(1, len(out))
+        self.assertEqual(BUILT_SHA256, out[0]["sha256"])
+        self.assertEqual(len(committed), out[0]["bytes"])
+        # versions.data của lock phải đúng vsData máy chủ nhúng (dongbo.go); mapping["versions"]
+        # là khối của closure v11 đã ký nên KHÔNG so ở đây (test_deploy ghim nó riêng).
+        dongbo = (ROOT / "server" / "internal" / "game" / "dongbo.go").read_text(encoding="utf-8")
+        vs_data = int(re.search(r"vsData\s+byte\s*=\s*(\d+)", dongbo).group(1))
+        self.assertEqual(vs_data, lock["versions"]["data"])
 
     def test_rejects_manifest_missing_required_iruka_part_2191(self):
         missing_2191 = json.loads(json.dumps(self.manifest))

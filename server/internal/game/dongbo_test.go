@@ -89,7 +89,11 @@ func TestGoiVersionGameDungByte(t *testing.T) {
 	//
 	// 26 -> 27 (05/09/2026): sprite nguoi choi sinh lai bang MOT ti le chung cho
 	// moi khung + neo ban chan, nen dx/dy cua part 30/57/58 doi het.
-	want := []byte{4, 27, 22, 21, 20, 0, 0}
+	//
+	// 27 -> 28 (05/09/2026, chieu — V1 khe dau-than): mang than cat tu cam xuong
+	// (het hai khuon mat), ti le TUNG khung theo co dau, slot than 2..6 = 5 khung
+	// chay, slot 15 het khung nam, dx/dy giai bang MILP -> part 30/57/58 doi het lan nua.
+	want := []byte{4, 28, 22, 21, 20, 0, 0}
 	if !bytes.Equal(m.Data, want) {
 		t.Errorf("than versionGame = %v, mong doi %v", m.Data, want)
 	}

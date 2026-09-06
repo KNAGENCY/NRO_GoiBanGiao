@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 from collections import deque
+import dataclasses
 import hashlib
 import json
 import shutil
@@ -25,6 +26,7 @@ from assetpack.visual import (
     render_hud_golden,
     render_iruka_composite_contact_sheet,
 )
+from tools.artqa import nhan_vat_moc, nhan_vat_toi_uu
 from tools.artqa.artqa import _adaptive_chroma_mask, extract_alpha
 from tools.artqa.generate_tile_sheet import generate_tile_sheet
 
@@ -73,9 +75,75 @@ PLAYER_REFERENCE_X4_WIDTH = 128
 # so với mặt đất; đổi MỘT hằng số này là dời cả nhân vật lên/xuống đều nhau.
 PLAYER_FEET_OFFSET_X1 = -11
 COMPONENT_CHARINFO_SLOT = {"head": 0, "leg": 1, "body": 2}
+
+# --- V1 (05/09/2026): tỉ lệ TỪNG KHUNG theo cỡ đầu + cắt theo cằm + gán lại slot -----
+#
+# Chẩn đoán lại "đầu tách thân" (docs/my-thuat/review/khe-dau-than-2026-09-05/GHI-CHU.md):
+# thứ nhìn thấy là HAI KHUÔN MẶT — mảnh thân cắt ở 28 % chiều cao khung, ở khung
+# chạy/đánh (nguồn vẽ nhỏ hơn idle 12–27 % và khom hơn) lát cắt rơi lên trán nên mảnh
+# thân chứa cả mặt và client vẽ nó ĐÈ lên đầu idle. Ba tầng lệch, ba phép sửa dữ liệu:
+#   1. s_f = s0 / (cỡ đầu khung / cỡ đầu idle) — đo 6 thước cứng của đầu
+#      (tools/artqa/nhan_vat_moc.py); đầu idle dùng chung 33 cf nên thân phải khớp cỡ đầu.
+#   2. Cắt ĐẦU từ đỉnh tóc tới cằm + 6 px nguồn; cắt THÂN từ cằm − 2 px x1 tới 76 %;
+#      chân giữ 66–100 %. Thân KHÔNG được chứa mặt.
+#   3. Gán lại slot theo cách client THẬT dùng (Char.cs:2537 `cf = gameTick % 5 + 2`
+#      → cf 2..6 là 5 khung CHẠY; cf 20/31 = thế bắt đầu skill, client không bao giờ vẽ
+#      nằm). Ba khung hit_death_getup không dùng (hit0 lệch tâm mặt 15 px).
+# dx/dy không còn bù từng mảnh theo cf neo mà giải MỘT LẦN cho cả 34 mảnh bằng MILP
+# (tools/artqa/nhan_vat_toi_uu.py): khe đầu–thân ∈ [−9, 0], thân–chân ∈ [−11, −2], ghim
+# dy đầu slot 0 = −38 (−39 vô nghiệm). Giá đã chấp nhận: nhân vật thấp đi ~10 % khi chạy.
+PLAYER_HEAD_SLOTS_V1 = (("idle", 0), ("idle", 1), ("idle", 2))
+PLAYER_BODY_SLOTS_V1 = {
+    0: ("idle", 0), 1: ("idle", 1),
+    2: ("run", 0), 3: ("run", 1), 4: ("run", 2), 5: ("run", 3), 6: ("run", 0),
+    7: ("melee", 0), 8: ("melee", 1), 9: ("melee", 2), 10: ("melee", 3),
+    11: ("cast", 0), 12: ("cast", 1), 13: ("cast", 2),
+    14: ("cast", 2), 15: ("cast", 0), 16: ("idle", 2),
+}
+PLAYER_LEG_SLOTS_V1 = {
+    0: ("idle", 0), 1: ("idle", 1),
+    2: ("run", 0), 3: ("run", 1), 4: ("run", 2), 5: ("run", 3), 6: ("run", 0),
+    7: ("melee", 0), 8: ("melee", 1), 9: ("melee", 2), 10: ("melee", 3),
+    11: ("cast", 0), 12: ("cast", 1), 13: ("idle", 2),
+}
+HEAD_CHIN_MARGIN_SRC = 6      # px nguồn dưới cằm gộp vào ĐẦU (cổ áo che mối nối)
+BODY_CHIN_MARGIN_X1 = 2.0     # px x1 trên cằm gộp vào THÂN (đầu vẽ trước, thân đè lên)
+BODY_BOTTOM_RATIO = 0.76
+LEG_TOP_RATIO = 0.66
+# Lát cắt cũ theo phần trăm — chỉ còn dùng cho khung không có cằm (nằm) và Iruka.
+HEAD_BOTTOM_RATIO_CU = 0.42
+BODY_TOP_RATIO_CU = 0.28
+PLAYER_MILP_V1 = nhan_vat_toi_uu.ThamSoMILP(ban_chan_x1=PLAYER_FEET_OFFSET_X1)
+PLAYER_GEOMETRY_VERSION = "V1 05/09"
 CHARINFO_PATH = (
     Path(__file__).resolve().parents[1] / "nhan-vat" / "charinfo.json"
 )
+
+# --- Iruka V1 (06/09/2026): NPC part 2189 đầu / 2190 thân / 2191 chân → 27075/27076/27077 --
+#
+# Client vẽ NPC bằng ĐÚNG phép toán của người chơi (Npc.cs:305-313, cùng CharInfo) nhưng
+# chỉ đảo cf 0/1 (Npc.cs:179-185); CharInfo cf 1 nâng đầu + thân 1 px cùng nhau, chân đứng
+# yên. Bản đang chạy sinh Iruka bằng `_generate_iruka_components` (hình học CŨ): ép cả
+# khung vào canvas 128×160 → Iruka chỉ 38 px x1 = 62 % người chơi, part 2189–2191 ghi
+# dx = dy = 0 → đầu lửng +13 px, thân chìm +29 px. Bản V1 dùng lại bộ hàm người chơi:
+#   * s_iruka = s0 / r × IRUKA_TI_LE_DAU. r = cỡ đầu Iruka / cỡ đầu người chơi = median 6
+#     thước cứng, đo trên CÙNG tham chiếu trung bình 3 khung idle mà `player_frame_geometry`
+#     dùng — nhờ vậy IRUKA_TI_LE_DAU = 1.0 đúng nghĩa "đầu Iruka bằng đầu người chơi trên
+#     màn" (đo 06/09: r = 1,6642; nếu lấy idle0 lẻ thì 1,6382).
+#   * Lát cắt theo cằm y như người chơi (`_component_rect_v1`), trim alpha, không hộp cố định.
+#   * dx/dy KHÔNG cần MILP: một khung, ba mảnh cùng hệ toạ độ → `component_placement` tại
+#     cf 0; cf 1 lệch đúng 1 px theo CharInfo, ghi ở `charinfo_residual`. Mọi frame của
+#     part 2189 (3) / 2190 (17) / 2191 (14) cùng trỏ một sprite nên cùng dx/dy.
+IRUKA_TI_LE_DAU = 1.0
+IRUKA_SOURCE = "master_iruka_x4_chroma.png"
+IRUKA_IDS = (27075, 27076, 27077)
+IRUKA_PART_IDS = {"head": 2189, "body": 2190, "leg": 2191}
+IRUKA_CHARINFO_CF = (0, 1)
+IRUKA_GEOMETRY_VERSION = "V1 06/09"
+# 6 thước cứng cho Iruka: bỏ `head_h_hair_chin` (đuôi tóc dựng của Iruka cao hơn tóc người
+# chơi ~100 px nguồn → tỉ lệ 1,37 là thước lạc, kéo median lệch), thay bằng sqrt diện tích
+# mặt để vẫn đủ 6 thước cho median.
+IRUKA_THUOC_CUNG = ("face_h", "face_w", "face_area_sqrt", "eye_h", "eye_to_chin", "band_thick")
 WOLF_ACTIONS = (
     ("idle", "wolf_idle_2f_chroma.png", 2),
     ("run", "wolf_run_4f_chroma.png", 4),
@@ -143,26 +211,81 @@ def _component_rect(
     record: dict[str, Any], frame_index: int, component: str
 ) -> list[int]:
     x, y, width, height = _frame_rect(record, frame_index)
-    # Chia theo cơ thể, có overlap 10% để không tạo khe khi runtime ghép part.
+    # Lát cắt theo % chiều cao khung — CHỈ còn dùng cho Iruka và khung không có cằm.
+    # Với người chơi, 28 % ở khung chạy/đánh rơi lên trán → thân chứa mặt (hai khuôn
+    # mặt); xem `_component_rect_v1`.
     if component == "head":
         top = 0
-        bottom = max(1, round(height * 0.42))
+        bottom = max(1, round(height * HEAD_BOTTOM_RATIO_CU))
     elif component == "body":
-        top = round(height * 0.28)
-        bottom = max(top + 1, round(height * 0.76))
+        top = round(height * BODY_TOP_RATIO_CU)
+        bottom = max(top + 1, round(height * BODY_BOTTOM_RATIO))
     elif component == "leg":
-        top = round(height * 0.66)
+        top = round(height * LEG_TOP_RATIO)
         bottom = height
     else:
         raise ClosureError(f"ASSET-CLOSURE-015: component lạ: {component}")
     return [x, y + top, width, bottom - top]
 
 
-def derive_player_slot_specs(review: dict[str, Any]) -> list[dict[str, Any]]:
-    """Trả đúng 3/17/14 slot từ các action strip đã review."""
+def _component_rect_v1(
+    record: dict[str, Any], frame_index: int, component: str, khung: dict[str, Any]
+) -> list[int]:
+    """Lát cắt V1 theo CẰM của chính khung (đơn vị nguồn), không theo % chiều cao.
 
-    records = _review_by_name(review)
-    frames: list[dict[str, Any]] = []
+    ``khung`` = một mục của ``nhan_vat_moc.hinh_hoc_khung`` (``chin_y`` tuyệt đối theo
+    dải, ``scale`` = s_f). Khung không có cằm (nằm) rơi về lát cắt % cũ.
+    """
+
+    x, y, width, height = _frame_rect(record, frame_index)
+    chin = khung.get("chin_y")
+    scale = float(khung["scale"])
+    if chin is None:
+        return _component_rect(record, frame_index, component)
+    chin_rel = float(chin) - y
+    if component == "head":
+        top, bottom = 0.0, chin_rel + HEAD_CHIN_MARGIN_SRC
+    elif component == "body":
+        top = chin_rel - BODY_CHIN_MARGIN_X1 * 4.0 / scale
+        bottom = height * BODY_BOTTOM_RATIO
+    elif component == "leg":
+        top, bottom = height * LEG_TOP_RATIO, float(height)
+    else:
+        raise ClosureError(f"ASSET-CLOSURE-015: component lạ: {component}")
+    top_i = min(max(0, round(top)), height - 1)
+    bottom_i = min(max(top_i + 1, round(bottom)), height)
+    return [x, y + top_i, width, bottom_i - top_i]
+
+
+def player_frame_geometry(
+    records: dict[str, dict[str, Any]],
+    moc: dict[tuple[str, int], dict[str, Any]],
+    *,
+    idle_frames: tuple[int, ...] = (0, 1, 2),
+) -> tuple[dict[tuple[str, int], dict[str, Any]], dict[str, float], float]:
+    """Từng khung nguồn: hệ số đầu, s_f, cằm, tâm mặt. Trả (hình_học, tham_chiếu_idle, s0)."""
+
+    reference = _frame_rect(records[PLAYER_REFERENCE_SOURCE], PLAYER_REFERENCE_FRAME)
+    s0 = player_uniform_scale(reference[2])
+    tham_chieu = nhan_vat_moc.tham_chieu_idle(moc, frames=idle_frames)
+    return nhan_vat_moc.hinh_hoc_khung(moc, tham_chieu, s0), tham_chieu, s0
+
+
+def derive_player_slot_specs(
+    review: dict[str, Any],
+    *,
+    moc: dict[tuple[str, int], dict[str, Any]],
+    records: dict[str, dict[str, Any]] | None = None,
+    idle_frames: tuple[int, ...] = (0, 1, 2),
+) -> list[dict[str, Any]]:
+    """Trả đúng 3/17/14 slot theo bảng V1, lát cắt theo cằm, tỉ lệ từng khung.
+
+    ``moc`` = mốc giải phẫu của 17 khung nguồn (``nhan_vat_moc.do_nguon``). Mỗi spec
+    mang thêm ``scale_frame`` (s_f) và ``nguon`` (cằm, tâm mặt, hệ số đầu — đơn vị nguồn).
+    """
+
+    records = records if records is not None else _review_by_name(review)
+    by_action: dict[str, tuple[str, dict[str, Any]]] = {}
     for action, source_name, expected_count in PLAYER_ACTIONS:
         record = records.get(source_name)
         if record is None:
@@ -174,42 +297,48 @@ def derive_player_slot_specs(review: dict[str, Any]) -> list[dict[str, Any]]:
             raise ClosureError(
                 f"ASSET-CLOSURE-015: frame count lệch review: {source_name}"
             )
-        for frame_index in range(expected_count):
-            frames.append(
-                {
-                    "action": action,
-                    "action_slot": frame_index,
-                    "source_path": source_name,
-                    "record": record,
-                    "frame_index": frame_index,
-                }
-            )
+        by_action[action] = (source_name, record)
+    hinh_hoc, tham_chieu, s0 = player_frame_geometry(records, moc, idle_frames=idle_frames)
 
-    idle = frames[:3]
-    without_hit = frames[:14]
     groups = (
-        ("head", 27041, idle),
-        ("body", 27044, frames),
-        ("leg", 27061, without_hit),
+        ("head", 27041, dict(enumerate(PLAYER_HEAD_SLOTS_V1))),
+        ("body", 27044, PLAYER_BODY_SLOTS_V1),
+        ("leg", 27061, PLAYER_LEG_SLOTS_V1),
     )
     slots = []
-    for component, first_id, selected in groups:
-        for slot_index, frame in enumerate(selected):
-            record = frame["record"]
+    for component, first_id, bang in groups:
+        for slot_index in range(len(bang)):
+            action, frame_index = bang[slot_index]
+            source_name, record = by_action[action]
+            key = (source_name, frame_index)
+            if key not in hinh_hoc:
+                raise ClosureError(f"ASSET-CLOSURE-015: thiếu mốc giải phẫu khung {key}")
+            khung = hinh_hoc[key]
+            x, y, width, height = _frame_rect(record, frame_index)
             slots.append(
                 {
                     "id": first_id + slot_index,
                     "component": component,
                     "slot_index": slot_index,
-                    "action": frame["action"],
-                    "action_slot": frame["action_slot"],
-                    "frame_index": frame["frame_index"],
-                    "source_path": frame["source_path"],
+                    "action": action,
+                    "action_slot": frame_index,
+                    "frame_index": frame_index,
+                    "source_path": source_name,
                     "source_sha256": record["source_sha256"],
-                    "source_rect": _component_rect(
-                        record, frame["frame_index"], component
-                    ),
-                    "anchor": "bottom-center",
+                    "source_rect": _component_rect_v1(record, frame_index, component, khung),
+                    "scale_frame": float(khung["scale"]),
+                    "nguon": {
+                        "frame_top": y,
+                        "frame_height": height,
+                        "edge_x": int(moc[key]["edge_x"]),
+                        "he_so_dau": khung["he_so_dau"],
+                        "chin_y": khung["chin_y"],
+                        "cam_uoc_luong": bool(khung["cam_uoc_luong"]),
+                        "face_cx": khung["face_cx"],
+                        "hair_top": khung["hair_top"],
+                        "thuoc_loai": list(khung["thuoc_loai"]),
+                    },
+                    "anchor": "feet-bottom-center",
                     "layer": {"head": 2, "body": 1, "leg": 0}[component],
                     "overlap_ratio": {
                         "head_body": 0.14,
@@ -256,7 +385,12 @@ def player_uniform_scale(
     reference_frame_width: int,
     target_x4_width: int = PLAYER_REFERENCE_X4_WIDTH,
 ) -> float:
-    """Một tỉ lệ chung cho MỌI khung, chốt bởi khung tham chiếu (idle 0)."""
+    """s0 = 128/340 là tỉ lệ MỐC (khung idle 0).
+
+    Từ V1 05/09 KHÔNG còn dùng chung cho mọi khung: mỗi khung vẽ với
+    ``scale_frame = s0 / he_so_dau`` (hệ số cỡ đầu khung / cỡ đầu idle, xem
+    ``nhan_vat_moc``), để đầu idle dùng chung 33 cf khớp với thân/chân của khung đó.
+    """
 
     if reference_frame_width <= 0 or target_x4_width <= 0:
         raise ClosureError("ASSET-CLOSURE-015: bề rộng khung tham chiếu phải > 0")
@@ -306,6 +440,21 @@ def zoom_variants(x4: Image.Image) -> dict[str, Image.Image]:
     return result
 
 
+def _hip_cx_x1(piece: Image.Image, component: str) -> float:
+    """Tâm hông (x1, so với mép trái ảnh): thân = 12 hàng x4 dưới cùng, chân = 12 hàng trên cùng.
+
+    Dùng để căn ngang thân–chân khi hai mảnh lấy từ HAI khung khác nhau (không có
+    "tâm khung" chung để so).
+    """
+
+    alpha = np.asarray(piece.getchannel("A")) > 0
+    rows = alpha[-12:] if component == "body" else alpha[:12]
+    xs = np.where(rows.any(axis=0))[0]
+    if len(xs) == 0:
+        return piece.width / 8.0
+    return float(xs.mean() / 4.0)
+
+
 def player_component_images(
     review: dict[str, Any],
     *,
@@ -314,31 +463,53 @@ def player_component_images(
     alpha_cache: dict[str, Image.Image] | None = None,
     charinfo: list[list[list[int]]] | None = None,
     feet_offset_x1: int = PLAYER_FEET_OFFSET_X1,
+    moc: dict[tuple[str, int], dict[str, Any]] | None = None,
+    tham_so_milp: nhan_vat_toi_uu.ThamSoMILP | None = None,
+    idle_frames: tuple[int, ...] = (0, 1, 2),
 ) -> list[dict[str, Any]]:
-    """34 mảnh người chơi: ảnh x4 + hình học, tất cả trong một hệ toạ độ.
+    """34 mảnh người chơi (V1): ảnh x4 + mốc giải phẫu + dx/dy giải bằng MILP.
 
     Trả về thứ tự slot 27041..27074. Mỗi phần tử là spec của
-    ``derive_player_slot_specs`` cộng thêm ``image_x4``, ``placement``,
-    ``charinfo_cf`` (cf thật dùng slot), ``charinfo_anchor_cf`` (cf neo = cf nhỏ
-    nhất), ``charinfo_residual`` (sai số dư px cho các cf còn lại) và
-    ``shared_transform``.
+    ``derive_player_slot_specs`` cộng thêm:
+      * ``image_x4`` — mảnh đã cắt theo cằm, scale s_f, trim alpha;
+      * ``moc`` — mốc giải phẫu đơn vị x1 so với góc trên-trái ảnh (``chin_off``,
+        ``feet_off``, ``hair_off``, ``face_cx_off``, ``center_off``, ``hip_cx_off``,
+        ``bbox_x1``) — chính là đầu vào của MILP;
+      * ``placement`` — ``dx/dy`` từ nghiệm MILP (một lần cho cả 34 mảnh) và
+        ``left_rel/top_rel`` tương ứng tại cf neo;
+      * ``charinfo_cf`` (cf thật dùng slot), ``charinfo_anchor_cf`` (cf nhỏ nhất),
+        ``charinfo_residual`` — nay là sai số giải phẫu dự đoán TỪNG cf (e/d/ex/gx, khe);
+      * ``milp`` — tham số + nghiệm + bảng cf (chung cho mọi phần tử);
+      * ``shared_transform`` — s0, s_f, gốc khung.
+
+    ``moc`` bỏ trống thì đo thẳng từ ảnh nguồn (``nhan_vat_moc.do_nguon``).
     """
 
     records = records if records is not None else _review_by_name(review)
     alpha_cache = alpha_cache if alpha_cache is not None else {}
     charinfo = charinfo if charinfo is not None else load_charinfo()
-    reference = _frame_rect(
-        records[PLAYER_REFERENCE_SOURCE], PLAYER_REFERENCE_FRAME
+    tham_so = tham_so_milp if tham_so_milp is not None else dataclasses.replace(
+        PLAYER_MILP_V1, ban_chan_x1=feet_offset_x1
     )
-    scale = player_uniform_scale(reference[2])
+    if tham_so.ban_chan_x1 != feet_offset_x1:
+        raise ClosureError(
+            f"ASSET-CLOSURE-015: MILP ban_chan_x1={tham_so.ban_chan_x1} khác feet_offset_x1={feet_offset_x1}"
+        )
+    if moc is None:
+        try:
+            moc = nhan_vat_moc.do_nguon(art_root, records)
+        except nhan_vat_moc.MocError as error:
+            raise ClosureError(str(error)) from error
     cf_by_slot = {
         component: charinfo_slot_to_cf(charinfo, component)
         for component in COMPONENT_CHARINFO_SLOT
     }
+    specs = derive_player_slot_specs(review, moc=moc, records=records, idle_frames=idle_frames)
+    hinh_hoc, tham_chieu, s0 = player_frame_geometry(records, moc, idle_frames=idle_frames)
 
-    frames: dict[tuple[str, int], tuple[Image.Image, tuple[int, int, int, int], float, float]] = {}
+    frames: dict[tuple[str, int], dict[str, Any]] = {}
 
-    def frame_at(source_name: str, frame_index: int):
+    def frame_at(source_name: str, frame_index: int, scale: float):
         key = (source_name, frame_index)
         if key not in frames:
             alpha = _load_reviewed_alpha(
@@ -354,21 +525,29 @@ def player_component_images(
                 raise ClosureError(
                     f"ASSET-CLOSURE-015: khung nguồn rỗng: {source_name}#{frame_index}"
                 )
-            frames[key] = (
-                resized,
-                (x, y, width, height),
-                (bbox[0] + bbox[2]) / 2.0,
-                float(bbox[3]),
-            )
+            khung = hinh_hoc[key]
+            frames[key] = {
+                "resized": resized,
+                "rect": (x, y, width, height),
+                "center_x4": (bbox[0] + bbox[2]) / 2.0,
+                "feet_x4": float(bbox[3]),
+                "chin_x4": None if khung["chin_y"] is None else (float(khung["chin_y"]) - y) * scale,
+                "face_cx_x4": None
+                if khung["face_cx"] is None
+                else (float(khung["face_cx"]) + moc[key]["edge_x"] - x) * scale,
+                "hair_top_x4": None if khung["hair_top"] is None else (float(khung["hair_top"]) - y) * scale,
+            }
         return frames[key]
 
-    result = []
-    for spec in derive_player_slot_specs(review):
+    pieces = []
+    for spec in specs:
         component = spec["component"]
         source_name = spec["source_path"]
         frame_index = spec["frame_index"]
-        resized, frame_rect, center_x, feet_y = frame_at(source_name, frame_index)
-        frame_x, frame_y = frame_rect[0], frame_rect[1]
+        scale = spec["scale_frame"]
+        frame = frame_at(source_name, frame_index, scale)
+        resized = frame["resized"]
+        frame_x, frame_y = frame["rect"][0], frame["rect"][1]
         rect_x, rect_y, rect_width, rect_height = spec["source_rect"]
         left = max(0, round((rect_x - frame_x) * scale))
         top = max(0, round((rect_y - frame_y) * scale))
@@ -387,49 +566,393 @@ def player_component_images(
         piece = piece.crop(bbox)
         component_left = left + bbox[0]
         component_top = top + bbox[1]
+        x1 = zoom_variants(piece)["x1"]
+        bbox_x1 = x1.getchannel("A").getbbox()
+        if bbox_x1 is None:
+            raise ClosureError(f"ASSET-CLOSURE-015: ảnh x1 rỗng: {spec['id']}")
+
+        def off_y(v):
+            return None if v is None else float((v - component_top) / 4.0)
+
+        def off_x(v):
+            return None if v is None else float((v - component_left) / 4.0)
+
         cf_list = cf_by_slot[component].get(spec["slot_index"], [])
         if not cf_list:
             raise ClosureError(
                 f"ASSET-CLOSURE-015: slot {spec['id']} không cf nào dùng"
             )
-        anchor_cf = cf_list[0]
-        charinfo_index = COMPONENT_CHARINFO_SLOT[component]
-        placement = component_placement(
-            component_left_x4=component_left,
-            component_top_x4=component_top,
-            frame_center_x4=center_x,
-            frame_feet_x4=feet_y,
-            charinfo_row=charinfo[anchor_cf][charinfo_index],
-            feet_offset_x1=feet_offset_x1,
-        )
-        anchor_row = charinfo[anchor_cf][charinfo_index]
-        residual = {
-            str(cf): [
-                charinfo[cf][charinfo_index][1] - anchor_row[1],
-                anchor_row[2] - charinfo[cf][charinfo_index][2],
-            ]
-            for cf in cf_list
-            if charinfo[cf][charinfo_index][1:] != anchor_row[1:]
-        }
-        result.append(
+        pieces.append(
             {
                 **spec,
                 "image_x4": piece,
-                "placement": placement,
+                "moc": {
+                    "bbox_x1": [int(v) for v in bbox_x1],
+                    "chin_off": off_y(frame["chin_x4"]),
+                    "feet_off": off_y(frame["feet_x4"]),
+                    "hair_off": off_y(frame["hair_top_x4"]),
+                    "face_cx_off": off_x(frame["face_cx_x4"]),
+                    "center_off": off_x(frame["center_x4"]),
+                    "hip_cx_off": _hip_cx_x1(piece, component),
+                },
                 "charinfo_cf": cf_list,
-                "charinfo_anchor_cf": anchor_cf,
+                "charinfo_anchor_cf": cf_list[0],
+                "_frame": frame,
+                "_origin_x4": [int(component_left), int(component_top)],
+            }
+        )
+
+    try:
+        nghiem = nhan_vat_toi_uu.giai(pieces, charinfo, tham_so)
+    except nhan_vat_toi_uu.VoNghiem as error:
+        raise ClosureError(f"ASSET-CLOSURE-015: {error}") from error
+    bang = nhan_vat_toi_uu.bang_cf(pieces, charinfo, nghiem, tham_so)
+    vi_pham = nhan_vat_toi_uu.kiem_nghiem(pieces, charinfo, nghiem, tham_so)
+    if vi_pham:
+        raise ClosureError(f"ASSET-CLOSURE-015: nghiệm MILP không tự kiểm được: {vi_pham[:3]}")
+    milp = {
+        "phien_ban": PLAYER_GEOMETRY_VERSION,
+        "tham_so": tham_so.json(),
+        "nghiem": {k: nghiem[k] for k in ("head", "body", "leg")},
+        "muc_tieu": nghiem["muc_tieu"],
+        "bang_cf": bang,
+        "tham_chieu_idle": tham_chieu,
+        "idle_frames": list(idle_frames),
+    }
+
+    result = []
+    for piece in pieces:
+        component = piece["component"]
+        slot = piece["slot_index"]
+        charinfo_index = COMPONENT_CHARINFO_SLOT[component]
+        anchor_row = charinfo[piece["charinfo_anchor_cf"]][charinfo_index]
+        dx = int(nghiem[component]["dx"][slot])
+        dy = int(nghiem[component]["dy"][slot])
+        frame = piece.pop("_frame")
+        origin = piece.pop("_origin_x4")
+        residual = {
+            str(row["cf"]): {k: row[k] for k in ("e", "d", "ex", "gx", "khe_dau_than", "khe_than_chan")}
+            for row in bang
+            if row["cf"] in piece["charinfo_cf"]
+        }
+        result.append(
+            {
+                **piece,
+                "placement": {
+                    "dx": dx,
+                    "dy": dy,
+                    "left_rel": anchor_row[1] + dx,
+                    "top_rel": dy - anchor_row[2],
+                },
                 "charinfo_residual": residual,
+                "milp": milp,
                 "shared_transform": {
-                    "source_frame": list(frame_rect),
-                    "scale": scale,
-                    "frame_center_x4": center_x,
-                    "frame_feet_x4": feet_y,
-                    "component_origin_x4": [component_left, component_top],
+                    "source_frame": list(frame["rect"]),
+                    "scale": s0,
+                    "scale_frame": piece["scale_frame"],
+                    "frame_center_x4": frame["center_x4"],
+                    "frame_feet_x4": frame["feet_x4"],
+                    "component_origin_x4": origin,
                     "feet_offset_x1": feet_offset_x1,
                 },
             }
         )
     return result
+
+
+def _thuoc_iruka(khung: dict[str, Any], ten: str) -> float | None:
+    """Giá trị một thước trong IRUKA_THUOC_CUNG; `face_area_sqrt` = sqrt(face_area)."""
+
+    if ten == "face_area_sqrt":
+        v = khung.get("face_area")
+        return None if v is None else float(np.sqrt(float(v)))
+    v = khung.get(ten)
+    return None if v is None else float(v)
+
+
+def iruka_he_so_dau(
+    khung_iruka: dict[str, Any],
+    moc: dict[tuple[str, int], dict[str, Any]],
+    *,
+    idle_frames: tuple[int, ...] = (0, 1, 2),
+    source: str = PLAYER_REFERENCE_SOURCE,
+    thuoc: tuple[str, ...] = IRUKA_THUOC_CUNG,
+) -> dict[str, Any]:
+    """r = cỡ đầu Iruka / cỡ đầu người chơi (median 6 thước, tham chiếu trung bình idle).
+
+    ``khung_iruka`` = một mục của ``nhan_vat_moc.do_dai`` trên master Iruka; ``moc`` = mốc
+    17 khung người chơi (chỉ dùng các khung idle). Tham chiếu là TRUNG BÌNH các khung idle
+    — cùng tham chiếu với ``player_frame_geometry`` — nên r = 1 nghĩa là đầu hai nhân vật
+    bằng nhau trên màn.
+    """
+
+    if khung_iruka.get("face_w") is None:
+        raise ClosureError("ASSET-CLOSURE-015: khung Iruka không tìm được mặt (da)")
+    tham_chieu: dict[str, float] = {}
+    ti_le: dict[str, float] = {}
+    for ten in thuoc:
+        vals = []
+        for i in idle_frames:
+            key = (source, i)
+            if key not in moc:
+                raise ClosureError(f"ASSET-CLOSURE-015: thiếu mốc khung idle {key}")
+            v = _thuoc_iruka(moc[key], ten)
+            if v is not None:
+                vals.append(v)
+        if not vals:
+            raise ClosureError(f"ASSET-CLOSURE-015: idle thiếu thước {ten}")
+        tham_chieu[ten] = float(sum(vals) / len(vals))
+        v_iruka = _thuoc_iruka(khung_iruka, ten)
+        if v_iruka is None or tham_chieu[ten] <= 0:
+            continue
+        ti_le[ten] = v_iruka / tham_chieu[ten]
+    if not ti_le:
+        raise ClosureError("ASSET-CLOSURE-015: Iruka không đo được thước nào")
+    return {
+        "he_so": float(np.median(list(ti_le.values()))),
+        "kieu": "trung_binh_idle",
+        "idle_frames": list(idle_frames),
+        "thuoc": list(thuoc),
+        "tham_chieu": tham_chieu,
+        "ti_le_tung_thuoc": ti_le,
+    }
+
+
+def iruka_charinfo_residual(
+    charinfo: list[list[list[int]]],
+    component: str,
+    cfs: tuple[int, ...] = IRUKA_CHARINFO_CF,
+    anchor_cf: int = 0,
+) -> dict[str, list[int]]:
+    """Độ lệch (Δleft, Δtop, x1) của mảnh tại từng cf so với cf neo — do CharInfo, không do dx/dy.
+
+    Client: left = cx + CI[cf][k][1] + dx ; top = cy − CI[cf][k][2] + dy. dx/dy chung cho mọi
+    cf nên phần lệch giữa cf chỉ còn CI. Với cf 1: đầu/thân [0, −1] (lên 1 px), chân [0, 0].
+    """
+
+    k = COMPONENT_CHARINFO_SLOT[component]
+    goc = charinfo[anchor_cf][k]
+    return {
+        str(cf): [int(charinfo[cf][k][1] - goc[1]), int(-(charinfo[cf][k][2] - goc[2]))]
+        for cf in cfs
+    }
+
+
+def iruka_bang_cf(
+    pieces: list[dict[str, Any]],
+    charinfo: list[list[list[int]]],
+    cfs: tuple[int, ...] = IRUKA_CHARINFO_CF,
+) -> list[dict[str, Any]]:
+    """Dự đoán (x1) khe đầu–thân, thân–chân, bàn chân, cao tổng theo phép vẽ client cho từng cf.
+
+    Cùng công thức với ``nhan_vat_toi_uu.bang_cf`` nhưng không cần slot (mọi frame part
+    Iruka cùng dx/dy). Dùng để mapping tự chứng minh và để test đối chiếu với ghep-khung.
+    """
+
+    by = {p["component"]: p for p in pieces}
+
+    def top_bottom(component, cf):
+        k = COMPONENT_CHARINFO_SLOT[component]
+        p = by[component]
+        bbox = p["moc"]["bbox_x1"]
+        top = -charinfo[cf][k][2] + p["placement"]["dy"]
+        return top + bbox[1], top + bbox[3]
+
+    rows = []
+    for cf in cfs:
+        h_t, h_b = top_bottom("head", cf)
+        b_t, b_b = top_bottom("body", cf)
+        l_t, l_b = top_bottom("leg", cf)
+        rows.append(
+            {
+                "cf": int(cf),
+                "khe_dau_than": int(b_t - h_b),
+                "khe_than_chan": int(l_t - b_b),
+                "chan": int(l_b),
+                "cao": int(l_b - h_t),
+            }
+        )
+    return rows
+
+
+def iruka_component_images(
+    review: dict[str, Any],
+    *,
+    art_root: Path,
+    records: dict[str, dict[str, Any]] | None = None,
+    alpha_cache: dict[str, Image.Image] | None = None,
+    charinfo: list[list[list[int]]] | None = None,
+    moc: dict[tuple[str, int], dict[str, Any]] | None = None,
+    moc_iruka: dict[tuple[str, int], dict[str, Any]] | None = None,
+    feet_offset_x1: int = PLAYER_FEET_OFFSET_X1,
+    ti_le_dau: float = IRUKA_TI_LE_DAU,
+    idle_frames: tuple[int, ...] = (0, 1, 2),
+) -> list[dict[str, Any]]:
+    """3 mảnh Iruka (V1) cùng khuôn với ``player_component_images``: đầu, thân, chân.
+
+    Mỗi phần tử: ``id``, ``part_id``, ``component``, ``source_rect``, ``image_x4`` (cắt theo
+    cằm, scale s_iruka, trim alpha), ``moc`` (mốc x1 so với góc ảnh), ``placement``
+    (``left_rel/top_rel/dx/dy`` tại cf 0), ``charinfo_cf`` [0, 1], ``charinfo_anchor_cf`` 0,
+    ``charinfo_residual``, ``bang_cf`` (dự đoán cf 0/1, chung), ``shared_transform``
+    (``scale``, ``he_so_dau`` r, ``ti_le_dau``, ``tham_chieu``, gốc khung).
+
+    ``moc`` (17 khung người chơi) / ``moc_iruka`` bỏ trống thì đo thẳng từ ảnh nguồn.
+    """
+
+    records = records if records is not None else _review_by_name(review)
+    alpha_cache = alpha_cache if alpha_cache is not None else {}
+    charinfo = charinfo if charinfo is not None else load_charinfo()
+    record = records.get(IRUKA_SOURCE)
+    if record is None:
+        raise ClosureError(f"ASSET-CLOSURE-015: nguồn Iruka chưa PASS: {IRUKA_SOURCE}")
+    if PLAYER_REFERENCE_SOURCE not in records:
+        raise ClosureError(f"ASSET-CLOSURE-015: nguồn player chưa PASS: {PLAYER_REFERENCE_SOURCE}")
+    try:
+        if moc is None:
+            moc = nhan_vat_moc.do_dai(art_root, records, PLAYER_REFERENCE_SOURCE)
+        if moc_iruka is None:
+            moc_iruka = nhan_vat_moc.do_dai(art_root, records, IRUKA_SOURCE)
+    except nhan_vat_moc.MocError as error:
+        raise ClosureError(str(error)) from error
+    key = (IRUKA_SOURCE, 0)
+    if key not in moc_iruka:
+        raise ClosureError(f"ASSET-CLOSURE-015: thiếu mốc giải phẫu khung {key}")
+    khung_iruka = moc_iruka[key]
+    if khung_iruka.get("chin_y") is None:
+        raise ClosureError("ASSET-CLOSURE-015: Iruka không đo được cằm")
+
+    he_so = iruka_he_so_dau(khung_iruka, moc, idle_frames=idle_frames)
+    r = he_so["he_so"]
+    if r <= 0:
+        raise ClosureError(f"ASSET-CLOSURE-015: hệ số đầu Iruka không hợp lệ: {r}")
+    s0 = player_uniform_scale(_frame_rect(records[PLAYER_REFERENCE_SOURCE], PLAYER_REFERENCE_FRAME)[2])
+    scale = s0 / r * float(ti_le_dau)
+    khung = {"chin_y": float(khung_iruka["chin_y"]), "scale": scale}
+
+    alpha = _load_reviewed_alpha(art_root, records, IRUKA_SOURCE, alpha_cache)
+    x, y, width, height = _frame_rect(record, 0)
+    resized = alpha.crop((x, y, x + width, y + height)).resize(
+        (max(1, round(width * scale)), max(1, round(height * scale))),
+        Image.Resampling.NEAREST,
+    )
+    frame_bbox = resized.getchannel("A").getbbox()
+    if frame_bbox is None:
+        raise ClosureError(f"ASSET-CLOSURE-015: khung nguồn rỗng: {IRUKA_SOURCE}#0")
+    frame_center_x4 = (frame_bbox[0] + frame_bbox[2]) / 2.0
+    frame_feet_x4 = float(frame_bbox[3])
+    chin_x4 = (float(khung_iruka["chin_y"]) - y) * scale
+    face_cx_x4 = (
+        None
+        if khung_iruka.get("face_cx") is None
+        else (float(khung_iruka["face_cx"]) + int(khung_iruka["edge_x"]) - x) * scale
+    )
+    hair_top_x4 = None if khung_iruka.get("content_top") is None else (float(khung_iruka["content_top"]) - y) * scale
+
+    pieces = []
+    for component in ("head", "body", "leg"):
+        rect = _component_rect_v1(record, 0, component, khung)
+        rect_x, rect_y, rect_width, rect_height = rect
+        left = max(0, round((rect_x - x) * scale))
+        top = max(0, round((rect_y - y) * scale))
+        right = min(resized.width, round((rect_x - x + rect_width) * scale))
+        bottom = min(resized.height, round((rect_y - y + rect_height) * scale))
+        if right <= left or bottom <= top:
+            raise ClosureError(f"ASSET-CLOSURE-015: vùng mảnh Iruka rỗng sau scale: {component}")
+        piece = resized.crop((left, top, right, bottom))
+        bbox = piece.getchannel("A").getbbox()
+        if bbox is None:
+            raise ClosureError(f"ASSET-CLOSURE-015: sprite Iruka alpha rỗng: {component}")
+        piece = piece.crop(bbox)
+        component_left = left + bbox[0]
+        component_top = top + bbox[1]
+        x1 = zoom_variants(piece)["x1"]
+        bbox_x1 = x1.getchannel("A").getbbox()
+        if bbox_x1 is None:
+            raise ClosureError(f"ASSET-CLOSURE-015: ảnh x1 Iruka rỗng: {component}")
+        k = COMPONENT_CHARINFO_SLOT[component]
+        placement = component_placement(
+            component_left_x4=float(component_left),
+            component_top_x4=float(component_top),
+            frame_center_x4=frame_center_x4,
+            frame_feet_x4=frame_feet_x4,
+            charinfo_row=charinfo[0][k],
+            feet_offset_x1=feet_offset_x1,
+        )
+
+        def off_y(v):
+            return None if v is None else float((v - component_top) / 4.0)
+
+        def off_x(v):
+            return None if v is None else float((v - component_left) / 4.0)
+
+        pieces.append(
+            {
+                "id": IRUKA_IDS[("head", "body", "leg").index(component)],
+                "part_id": IRUKA_PART_IDS[component],
+                "name": f"iruka-{component}",
+                "component": component,
+                "slot_index": 0,
+                "action": "idle",
+                "action_slot": 0,
+                "frame_index": 0,
+                "source_path": IRUKA_SOURCE,
+                "source_sha256": record["source_sha256"],
+                "source_rect": rect,
+                "scale_frame": scale,
+                "nguon": {
+                    "frame_top": y,
+                    "frame_height": height,
+                    "edge_x": int(khung_iruka["edge_x"]),
+                    "he_so_dau": r,
+                    "chin_y": float(khung_iruka["chin_y"]),
+                    "cam_uoc_luong": False,
+                    "face_cx": None if khung_iruka.get("face_cx") is None else float(khung_iruka["face_cx"]),
+                    "hair_top": None if khung_iruka.get("content_top") is None else int(khung_iruka["content_top"]),
+                },
+                "image_x4": piece,
+                "moc": {
+                    "bbox_x1": [int(v) for v in bbox_x1],
+                    "chin_off": off_y(chin_x4),
+                    "feet_off": off_y(frame_feet_x4),
+                    "hair_off": off_y(hair_top_x4),
+                    "face_cx_off": off_x(face_cx_x4),
+                    "center_off": off_x(frame_center_x4),
+                    "hip_cx_off": _hip_cx_x1(piece, component),
+                },
+                "placement": placement,
+                "charinfo_cf": list(IRUKA_CHARINFO_CF),
+                "charinfo_anchor_cf": 0,
+                "charinfo_residual": iruka_charinfo_residual(charinfo, component),
+                "anchor": "feet-bottom-center",
+                "layer": {"head": 2, "body": 1, "leg": 0}[component],
+                "overlap_ratio": {"head_body": 0.14, "body_leg": 0.10},
+                "provenance_role": "approved_iruka_master_component",
+                "shared_transform": {
+                    "source_frame": [x, y, width, height],
+                    "scale": scale,
+                    "scale_frame": scale,
+                    "uniform_scale_x4": s0,
+                    "he_so_dau": r,
+                    "ti_le_dau": float(ti_le_dau),
+                    "tham_chieu": {
+                        "kieu": he_so["kieu"],
+                        "idle_frames": he_so["idle_frames"],
+                        "thuoc": he_so["thuoc"],
+                        "gia_tri": he_so["tham_chieu"],
+                        "ti_le_tung_thuoc": he_so["ti_le_tung_thuoc"],
+                    },
+                    "frame_bbox_x4": [int(v) for v in frame_bbox],
+                    "frame_center_x4": frame_center_x4,
+                    "frame_feet_x4": frame_feet_x4,
+                    "component_origin_x4": [int(component_left), int(component_top)],
+                    "feet_offset_x1": feet_offset_x1,
+                },
+            }
+        )
+    bang = iruka_bang_cf(pieces, charinfo)
+    for piece in pieces:
+        piece["bang_cf"] = bang
+    return pieces
 
 
 def fit_to_canvas(image: Image.Image, size: tuple[int, int]) -> Image.Image:
@@ -683,9 +1206,16 @@ def _generate_iruka_components(
     alpha_cache: dict[str, Image.Image],
     temporary: Path,
 ) -> list[dict[str, Any]]:
-    """Giữ ba part trong cùng hệ tọa độ để runtime ghép lại đúng một Iruka."""
+    """Giữ ba part trong cùng hệ tọa độ để runtime ghép lại đúng một Iruka.
 
-    source_name = "master_iruka_x4_chroma.png"
+    HÌNH HỌC CŨ (closure v11): ép cả khung vào canvas 128×160 (Iruka 38 px x1 = 62 %
+    người chơi), lát cắt theo % chiều cao, không có dx/dy. Chỉ còn phục vụ đường
+    ``_generate_sprites`` → closure v11 mà test cũ và ``sprites[].zooms`` trong mapping
+    vẫn trỏ tới. Ảnh Iruka ĐANG DÙNG (client) sinh bằng ``iruka_component_images`` qua
+    ``tools/nhan-vat/sinh-lai-sprite.py``.
+    """
+
+    source_name = IRUKA_SOURCE
     source = art_root / source_name
     alpha = _load_reviewed_alpha(
         art_root, {source_name: record}, source_name, alpha_cache

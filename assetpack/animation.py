@@ -1,5 +1,8 @@
 """Ghép strip action theo slot index, không theo thứ tự input dễ bị đảo cell."""
 
+import json
+from pathlib import Path
+
 from PIL import Image
 
 
@@ -7,13 +10,52 @@ class AnimationError(ValueError):
     pass
 
 
+# Bảng khung xương 33 cf trích từ `Char.cs:483` của client (nguồn sự thật duy nhất về
+# "cf nào tra slot nào"). Nằm ở tools/nhan-vat vì công cụ đo `ghep-khung.py` dùng chung.
+CHARINFO_PATH = Path(__file__).resolve().parents[1] / "tools" / "nhan-vat" / "charinfo.json"
+# CharInfo[cf][k]: k = 0 đầu, 1 chân, 2 thân (đúng thứ tự trong Char.cs).
+_CHARINFO_SLOT = {"hoc-vien-head": 0, "hoc-vien-leg": 1, "hoc-vien-body": 2}
+_SLOT_COUNT = {"hoc-vien-head": 3, "hoc-vien-body": 17, "hoc-vien-leg": 14}
+
+
+def charinfo_client_cf(charinfo):
+    """slot → tuple cf THẬT dùng slot đó, suy thẳng từ CharInfo cho cả ba mảnh.
+
+    Vì sao (05/09/2026): bảng `REQUIRED_CLIENT_CF` cũ viết tay và SẮP THEO cf đầu tiên
+    thay vì theo slot — thân slot 0 thật sự phục vụ cf 23/24 (bảng cũ nói 0/1), slot 1
+    mới là idle 0/1; chân slot 0 = cf 8 (bảng cũ nói 0/1/22) và cf 26..32 (chân slot 8)
+    bị bỏ quên hẳn. Ai bù dx/dy theo bảng cũ là lệch một khung — đó là một trong ba tầng
+    lệch gây "đầu tách thân". Sinh từ dữ liệu để không bao giờ trôi nữa.
+    """
+    if not isinstance(charinfo, list) or len(charinfo) != 33:
+        raise AnimationError("ASSET-ANIMATION-008: charinfo phải có đúng 33 cf")
+    result = {}
+    for name, k in _CHARINFO_SLOT.items():
+        by_slot = {}
+        for cf, entry in enumerate(charinfo):
+            by_slot.setdefault(int(entry[k][0]), []).append(cf)
+        count = _SLOT_COUNT[name]
+        if sorted(by_slot) != list(range(count)):
+            raise AnimationError(f"ASSET-ANIMATION-008: {name} slot trong CharInfo phải phủ đủ 0..{count - 1}")
+        result[name] = tuple(tuple(by_slot[slot]) for slot in range(count))
+    return result
+
+
+def _nap_charinfo(path=CHARINFO_PATH):
+    try:
+        return json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError) as error:
+        raise AnimationError(f"ASSET-ANIMATION-008: không đọc được charinfo {path}: {error}") from error
+
+
 # `cell_size` là Ô TỐI ĐA của contact sheet bằng chứng, KHÔNG phải kích thước bắt
 # buộc của từng cell.
 #
 # Vì sao đổi (05/09/2026): sprite người chơi từng bị nhồi vào hộp cố định
 # 128×128/128×160 nên mỗi khung có một tỉ lệ riêng — nhân vật phình/teo theo pose,
-# đầu rời khỏi thân. Bản mới giữ MỘT tỉ lệ chung cho mọi khung, nên cell có kích
-# thước khác nhau (khung nằm rộng gấp đôi khung đứng). Client `SmallImage` vẽ ảnh
+# đầu rời khỏi thân. Bản sáng 05/09 giữ một tỉ lệ chung; V1 chiều 05/09 mỗi khung một
+# tỉ lệ theo cỡ đầu (s0 / hệ số đầu, tools/artqa/nhan_vat_moc.py) — cell vì thế có
+# kích thước khác nhau. Client `SmallImage` vẽ ảnh
 # mọi kích cỡ, chỉ contact sheet mới cần ô. Ô phải bao được cell rộng nhất; cell
 # vượt ô vẫn là lỗi (fail-closed) chứ không bị cắt im lặng.
 REQUIRED_ANIMATION_SHEETS = {
@@ -23,21 +65,9 @@ REQUIRED_ANIMATION_SHEETS = {
     "quai-soi-rung": {"slot_count": 10, "cell_size": (96, 96)},
 }
 
+# Ba bảng người chơi SINH từ CharInfo (xem `charinfo_client_cf`); sói là 1 slot / 1 cf.
 REQUIRED_CLIENT_CF = {
-    "hoc-vien-head": (
-        (0, 1, 7, 8, 11, 12, 17, 18, 19, 20, 21, 22, 23, 24, 30, 31, 32),
-        (2, 3, 4, 5, 6, 9, 10, 13, 14, 15, 16, 26, 27, 28, 29),
-        (25,),
-    ),
-    "hoc-vien-body": (
-        (0, 1), (2, 15, 28), (3,), (4,), (5,), (6,), (7, 8, 17), (9, 10),
-        (11, 21, 32), (12, 18, 22), (13, 26), (14, 27), (16, 29), (19, 30),
-        (20, 31), (23, 24), (25,),
-    ),
-    "hoc-vien-leg": (
-        (0, 1, 22), (2,), (3,), (4,), (5,), (6,), (7, 23), (8,), (9,), (10,),
-        (11,), (12,), (13, 14, 15, 16, 17, 18, 19, 20, 21, 24), (25,),
-    ),
+    **charinfo_client_cf(_nap_charinfo()),
     "quai-soi-rung": tuple((index,) for index in range(10)),
 }
 

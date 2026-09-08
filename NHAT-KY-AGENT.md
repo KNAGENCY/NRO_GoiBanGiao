@@ -1,11 +1,11 @@
 # Nhật ký agent — ai đã làm gì
 
-## ⏳ ĐANG CHỜ GÌ NGAY LÚC NÀY — cập nhật: 06/09/2026
+## ⏳ ĐANG CHỜ GÌ NGAY LÚC NÀY — cập nhật: 08/09/2026
 
 > Ai vào cũng đọc khối này trước. **Xong việc thì phải sửa lại khối này**, nếu không nó
 > thành thông tin cũ gây hại hơn là không có.
 
-- ✅ **Task 2 UI Đợt 4 fix round 4/5 xong trên `dot-4-thi-cong`:** detector nền caro giữ highlight `(244,244,244)` chạm biên nhưng vẫn xoá nền `255/242`; guard học hai màu trội và bắt buộc nhịp lặp cả ngang/dọc. Focused **7/7 xanh**, hai mutation bị bắt; ba PNG final `changed=False`, SHA không đổi. **Chờ review vòng kế**, chưa lắp Unity/asset-lock.
+- ⏳ **Task 3 UI Đợt 4 đã lắp thử trên `dot-4-thi-cong`, còn BLOCKED bằng chứng HUD:** backup 15/15; cài đúng 15 PNG x2–x4; 5/5 test + mutation; Game View thật PASS popup/button. Máy chủ mất kết nối nên chưa vào HUD để kiểm HP/chakra/anchor; không đoán credential. `Small27083/27084` và asset-lock không đổi. Report: `.superpowers/sdd/README/task-3-report.md`.
 - ✅ **Đợt 4 Bước 0 phía repo ĐÃ XONG trên nhánh `dot-4-thi-cong`**: D1 theo 09; C1 vẽ lại run 5 khung + hit; `kich-thuoc-anh.json` thêm 216 tên/cỡ canonical (tổng 907); gate nhận lô mới, closure chặn đầu C1 lệch quá ±5 %. Bước 0 không tạo/lắp ảnh và không đổi asset-lock/`D:\NRO_Project`; ba mẫu UI về sau đã tạo ở Task 2 nhưng vẫn chưa được lắp.
 
 - ✅ **Client Unity ĐÃ VÀO ĐƯỢC GAME** (28/07) — chủ dự án tự bấm Play, tự động login. Server 100% đúng. Chi tiết chuỗi 4 fix + 3 sửa đổi tay ở client Unity: **BAT-DAU §8 hai bullet cuối + §12 dòng 28/07** — ai chưa đọc ĐỪNG sửa gì thêm ở `D:\NRO_Project` hoặc RMS Unity.
@@ -139,3 +139,4 @@
 | 06/09/2026 | Codex | **Đợt 4 Bước 0 phía repo xong:** D1 theo 09, C1 run 5 khung + hit; registry append-only thêm 216 tên/cỡ canonical (907 tổng), gate bỏ danh sách 20 V1 nhưng vẫn fail-closed với review rỗng/tên trùng, closure ưu tiên C1 + fallback tái lập V1 và chặn cỡ đầu run/hit lệch ±5 %. RED→GREEN; mutation nới ngưỡng 1,05→1,50 làm test đỏ. | `dot-4-thi-cong` / `HEAD` | Chưa tạo/lắp ảnh; `Small27083/27084`, asset-lock và client Unity để task lắp ảnh xử lý. |
 | 06/09/2026 | Codex (Task 2 fix round 4/5) | Detector checkerboard nay học đúng hai màu trội + nhịp lặp hai trục; test giữ highlight `(244,244,244)` tại `(55,48)` và mép phải, vẫn xoá nền `255/242`; từ chối hai dải màu giả caro. 7/7 test xanh, 2 mutation đỏ, final idempotent. | `dot-4-thi-cong` / `HEAD` | Chờ review vòng kế; không đổi ba PNG, geometry, Unity/client hay asset-lock. |
 | 06/09/2026 | Codex (Task 2 breaker fix round 5/5) | Detector checkerboard học cadence ngang/dọc + pha, rồi kiểm đúng màu/pha và coverage trên toàn mặt ảnh. Fixture 120×96 chỉ có viền caro, ruột xám đặc nay reject trước khi đổi pixel; 8/8 test xanh, mutation bỏ spatial ratio đỏ, ba final idempotent. | `dot-4-thi-cong` / `HEAD` | Chờ review cuối; không đổi ba PNG, geometry, Unity/client hay asset-lock. |
+| 08/09/2026 | Codex (Task 3 UI Đợt 4) | Preflight Unity MCP, backup phục hồi 15/15, sinh 12 zoom và cài đúng 15 PNG x2–x4; Game View thật chứng minh popup/button; 5/5 test + mutation backup. | `dot-4-thi-cong` / `HEAD` | **BLOCKED phần HUD sau login:** máy chủ mất kết nối, không có tài khoản test được cấp; không dùng production credential. Asset-lock và `Small27083/27084` không đổi. |

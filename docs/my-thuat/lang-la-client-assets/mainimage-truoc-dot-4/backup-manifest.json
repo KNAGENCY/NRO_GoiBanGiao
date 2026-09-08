@@ -1,0 +1,126 @@
+{
+  "created_at_utc": "2026-09-08T04:19:27.898468+00:00",
+  "unity_root": "D:\\NRO_Project",
+  "files": [
+    {
+      "relative_path": "Assets/Resources/res/x2/mainimage/myTexture2dpanel.png",
+      "sha256": "0b01a9a2f836951225d689c0bf824c3809f705092d1f79157d55f05ca664846a",
+      "size": [
+        309,
+        82
+      ]
+    },
+    {
+      "relative_path": "Assets/Resources/res/x2/mainimage/myTexture2dimgPopup.png",
+      "sha256": "161f893fedf5a0b7973146c7c8911b6f9aae8c93a9f23f6c8246fe0671e5034a",
+      "size": [
+        20,
+        160
+      ]
+    },
+    {
+      "relative_path": "Assets/Resources/res/x2/mainimage/btn0left.png",
+      "sha256": "ba2b42d3d7a99a0aaa9f9dab54f59c9fc12c8a2d2cc90b583f63a05cb2403fb0",
+      "size": [
+        20,
+        48
+      ]
+    },
+    {
+      "relative_path": "Assets/Resources/res/x2/mainimage/btn0mid.png",
+      "sha256": "04be88cbf9816d6ceb3cca0985ff6399248ebc57108edfeb52c1474e53f55106",
+      "size": [
+        20,
+        48
+      ]
+    },
+    {
+      "relative_path": "Assets/Resources/res/x2/mainimage/btn0right.png",
+      "sha256": "74df3cfeb1ee2686bea659f0cf00e2f97c8c59d4793cec5a4723d719b4a1a05b",
+      "size": [
+        20,
+        48
+      ]
+    },
+    {
+      "relative_path": "Assets/Resources/res/x3/mainimage/myTexture2dpanel.png",
+      "sha256": "86b8ca87a22371c92a8a1f088c4722a61e9dbfe80c564dc30337e96ff5c431d5",
+      "size": [
+        463,
+        123
+      ]
+    },
+    {
+      "relative_path": "Assets/Resources/res/x3/mainimage/myTexture2dimgPopup.png",
+      "sha256": "e605099bef3f8f7cd96d116ec7e14cf89c1e66f6601456865eedca3a0ca3a6ab",
+      "size": [
+        30,
+        240
+      ]
+    },
+    {
+      "relative_path": "Assets/Resources/res/x3/mainimage/btn0left.png",
+      "sha256": "899e92bb6ab8cca2b6fc35e316440f54e17e649e069bb4d22ba223343292ffa2",
+      "size": [
+        30,
+        72
+      ]
+    },
+    {
+      "relative_path": "Assets/Resources/res/x3/mainimage/btn0mid.png",
+      "sha256": "599ebd6bba21243750b867c2a44a8443bcd65c9f9aa1b40370a58376994f663c",
+      "size": [
+        30,
+        72
+      ]
+    },
+    {
+      "relative_path": "Assets/Resources/res/x3/mainimage/btn0right.png",
+      "sha256": "254f5194e70b4e4d2f061fae991ed815cf09c02de1dcc6a61c3ca6b6e1984775",
+      "size": [
+        30,
+        72
+      ]
+    },
+    {
+      "relative_path": "Assets/Resources/res/x4/mainimage/myTexture2dpanel.png",
+      "sha256": "f049195a041545090cc1fc8d9c94ca316ba2272b3678b293da89a04a24e5d76e",
+      "size": [
+        618,
+        164
+      ]
+    },
+    {
+      "relative_path": "Assets/Resources/res/x4/mainimage/myTexture2dimgPopup.png",
+      "sha256": "9a9bec501a49f7059eb89d2694dfb538d5c1b6f2b66dd2c3939f6505b6cc4c6e",
+      "size": [
+        40,
+        320
+      ]
+    },
+    {
+      "relative_path": "Assets/Resources/res/x4/mainimage/btn0left.png",
+      "sha256": "982c0374534e8204e0b0c54b3fbea67d09e48d6f451ce8eafacaa48dd8ad3706",
+      "size": [
+        40,
+        96
+      ]
+    },
+    {
+      "relative_path": "Assets/Resources/res/x4/mainimage/btn0mid.png",
+      "sha256": "82f5decccfdcff2703b6c982f65a30d18ee270111c564e63acb4c5edb50f37bd",
+      "size": [
+        40,
+        96
+      ]
+    },
+    {
+      "relative_path": "Assets/Resources/res/x4/mainimage/btn0right.png",
+      "sha256": "7276c92ff6eb2847dc2cd98e239ddbc89267143734e32065c625860f346840f2",
+      "size": [
+        40,
+        96
+      ]
+    }
+  ]
+}

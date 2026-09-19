@@ -42,6 +42,7 @@ PowerShell bằng cách để code trong file.
 | `chup.cs` | `ScreenCapture` Game view ra PNG (đọc file ở lượt sau, ảnh xuất hiện sau ~1 khung) |
 | `iruka-part.cs` | Part 30/57/58/2189/2190/2191 client đang nạp (id, dx, dy 3 khung đầu) + NPC trong map (template head/body/leg, cf) — kiểm client đã nhận `part.bin` mới (06/09) |
 | `nhay.cs` | Giữ phím nhảy (`keyHold[21|2]`) — kẹt vách phải nhảy rồi mới giữ trái/phải (chuỗi else-if) |
+| `nhip.cs` | Game có đang chạy khung hình không (`frameCount`, `gameTick`, Pause, `runInBackground`) — màn đen / `currentScreen = null` thì chạy cái này trước |
 | `co-cho.cs` | Các cờ làm client vẽ "Xin chờ" (`isLoading`, `isLoadingMap`, `msgdlg`, `timeBreakLoading`, hp/statusMe) — chẩn đoán treo/rớt |
 | `chay-phai.cs` / `chay-trai.cs` / `tha-phim.cs` | Giữ phím chạy phải/trái (`GameCanvas.keyHold[24|6]` / `[23|4]`, GameScr.cs:2737–2845) rồi thả — để chụp vòng chạy cf 2→6 và hướng nhìn trái (client lật gương) |
 
@@ -53,6 +54,7 @@ Lệnh Editor (`--json`): `{"name":"manage_editor","arguments":{"action":"stop"}
 
 ## Bẫy đã vấp
 
+- **Bấm Play qua MCP khi cửa sổ Unity nằm SAU cửa sổ khác → game đứng ở khung 2** (màn đen, `currentScreen = null`, Console trống; `runInBackground` của client là False cho tới khi `Main` chạy). Đưa cửa sổ Unity lên trước (PowerShell `SetForegroundWindow` trên `MainWindowHandle` của tiến trình Unity) là khung hình chạy tiếp. Gặp 19/09/2026.
 - **Unity không có focus thì Game view không vẽ lại** → `ScreenCapture` trả khung cũ (thấy màn "Xin chờ" thay vì map). `chup.cs`/`chup-loat.py` gọi `InternalEditorUtility.RepaintAllViews()` trước khi chụp.
 - **Bấm Play ngay sau `refresh_unity`** (đang nhập lại nhiều ảnh) → phiên chơi bị reset về màn chọn máy chủ. Chờ nhập xong.
 - **Boss sinh 10 phút sau khi máy chủ khởi động** ngay điểm sinh của tài khoản thử → chết trong ~9 s, rồi client rớt. Chụp/đo trong 10 phút đầu sau khi khởi động lại máy chủ.

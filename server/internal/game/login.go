@@ -383,6 +383,8 @@ func (b *BoXuLy) XuLy(s *mynet.Session, m *protocol.Message) error {
 		return b.xuLyDanhNguoiChoi(m)
 	case lenhHoiSinh: // -16 — client xin hoi sinh (dac ta §3.1, Ke hoach 6 Task 13)
 		return b.xuLyHoiSinh()
+	case -15: // client bam "Ve lang" luc chet (Service.returnTownFromDead) — tam xu ly nhu hoi sinh tai cho, truoc day bi bo qua lam client ket
+		return b.xuLyHoiSinh()
 	case lenhMoNPC: // 33 — client mo hoi thoai NPC
 		return b.xuLyMoNPC(s, m)
 	case lenhChonMenuNPC: // 32 — client chon mot dong trong menu NPC (xem npc.go)

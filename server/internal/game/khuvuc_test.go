@@ -589,8 +589,10 @@ func TestSuKienHoiSinhNguoiConSongBiBoQua(t *testing.T) {
 	if nvA.HpHienTai != 50 {
 		t.Fatalf("HpHienTai = %d, mong doi VAN LA 50 (dang song, khong duoc hoi sinh oan)", nvA.HpHienTai)
 	}
-	if len(pA.nhan) != 0 {
-		t.Fatalf("nhan %d goi khi dang song ma van gui suKienHoiSinh, mong doi 0 (im lang bo qua)", len(pA.nhan))
+	// 19/09/2026: KHONG con im lang — gui lai DUNG 1 goi -16 rieng chinh chu
+	// (mo khoa meDead/isLockMove phia client), khong -30/15, khong hoi mau.
+	if len(pA.nhan) != 1 || pA.nhan[0].Command != -16 || len(pA.nhan[0].Data) != 0 {
+		t.Fatalf("nguoi dang song gui -16: mong doi DUNG 1 goi -16 rong (mo khoa client), nhan %+v", pA.nhan)
 	}
 }
 

@@ -439,7 +439,7 @@ class ArtifactKhopNhauTests(unittest.TestCase):
         import hashlib
 
         lock = json.loads(ASSET_LOCK.read_text(encoding="utf-8"))
-        self.assertEqual(lock["versions"]["data"], 28)
+        self.assertEqual(lock["versions"]["data"], 29)  # 29: bang hieu ung 128 o (19/09)
         part = PART_BIN.read_bytes()
         output = next(o for o in lock["outputs"] if o["path"] == "server/part.bin")
         self.assertEqual(output["sha256"], hashlib.sha256(part).hexdigest())

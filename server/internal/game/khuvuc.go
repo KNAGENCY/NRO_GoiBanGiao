@@ -1517,6 +1517,16 @@ func (k *KhuVuc) xuLy(sk suKienKhuVuc) {
 			// gui -16 hai lan lien tiep (client bam nut kep, hoac goi den
 			// tre): lan dau xu ly xong HpHienTai da > 0 nen lan hai tu nhien
 			// roi vao nhanh nay, khong can them bo dem thoi gian rieng.
+			// NHUNG van gui lai -16 RIENG chinh chu (khong hoi mau): client
+			// chi go meDead/isLockMove khi nhan -16 (Controller.cs:4556-4565).
+			// Neu may chu da coi la song (vd hoi sinh luc vao, -42 kep mau)
+			// ma client van ket meDead, im lang = ket khong di chuyen duoc
+			// mai (gap 19/09/2026: cHP=145, meDead=True, isLockMove=True).
+			slog.Info("xin hoi sinh khi dang song -> gui lai -16 mo khoa client", "id", sk.idNhanVat, "hp", nguoi.nv.HpHienTai)
+			if err := nguoi.phien.XepGui(goiHoiSinhChinhChu()); err != nil {
+				slog.Warn("gui lai -16 (mo khoa client) that bai", "id", sk.idNhanVat, "loi", err)
+				k.loaiNguoiLoiGui(sk.idNhanVat)
+			}
 			return
 		}
 

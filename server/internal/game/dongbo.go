@@ -36,7 +36,7 @@ const (
 	// 27 -> 28 (05/09/2026, V1 khe dau-than): 34 sprite nguoi choi cat lai theo cam
 	// (het "hai khuon mat"), ti le tung khung theo co dau, gan lai slot than/chan,
 	// dx/dy giai bang MILP -> part 30/57/58 doi het.
-	vsData  byte = 28 // moi lan part.bin doi phai tang, khong client dung ban cu trong RMS
+	vsData  byte = 29 // moi lan part.bin HOAC bang hieu ung doi phai tang, khong client dung ban cu trong RMS
 	vsMap   byte = 22
 	vsSkill byte = 21
 	vsItem  byte = 20
@@ -69,6 +69,32 @@ func goiVersionGame() *protocol.Message {
 	return protocol.NewMessage(lenhKhongTrenBanDo, w)
 }
 
+// soHieuUngTrong: so o bang hieu ung (NR_effect) gui xuong client. Client tra
+// GameScr.efs[id-1] KHONG kiem bien — vd Char.liveFromDead goi hieu ung 109
+// (Char.cs:6957) NGAY TRUOC khi go meDead/isLockMove (Controller.cs:4563-4565).
+// Bang rong (0 o) = nem IndexOutOfRange, client nuot loi, nguoi choi hoi sinh
+// xong van KHONG DI CHUYEN DUOC (gap 19/09/2026). 128 o du cho moi id client
+// dang goi (<=109).
+const soHieuUngTrong = 128
+
+// duLieuHieuUngTrong: blob NR_effect gom soHieuUngTrong o, moi o DUNG 1 khung
+// voi idImg = -1 — SmallImage.drawSmallImage thoat ngay khi id < 0 nen khong
+// ve gi va khong xin anh (SmallImage.cs:153). Khong de 0 khung: ServerEffect.paint
+// doc arrEfInfo[0] khong kiem. Dinh dang (GameScr.cs:1311-1326): short dem, roi
+// moi o: short idEf, byte soKhung, [short idImg, byte dx, byte dy]...
+var duLieuHieuUngTrong = func() []byte {
+	w := protocol.NewWriter()
+	w.Short(soHieuUngTrong)
+	for i := 0; i < soHieuUngTrong; i++ {
+		w.Short(int16(i + 1))
+		w.Byte(1)
+		w.Short(-1)
+		w.Byte(0)
+		w.Byte(0)
+	}
+	return w.Bytes()
+}()
+
 // goiCatalogData dùng gói -87: vsData rồi 6 blob đúng thứ tự. Part và skill là
 // byte artifact thật; dart/arrow/effect/image chưa dùng nên là count=0 hợp lệ.
 func goiCatalogData() *protocol.Message {
@@ -79,9 +105,10 @@ func goiCatalogData() *protocol.Message {
 		w.Int(2)
 		w.Short(0)
 	}
-	blobRong()                    // dart
-	blobRong()                    // arrow
-	blobRong()                    // effect
+	blobRong()                            // dart
+	blobRong()                            // arrow
+	w.Int(int32(len(duLieuHieuUngTrong))) // effect: cac o trong (xem duLieuHieuUngTrong)
+	w.ThemMang(duLieuHieuUngTrong)
 	blobRong()                    // image
 	w.Int(int32(len(duLieuPart))) // part: do dai that
 	w.ThemMang(duLieuPart)        // part: noi dung

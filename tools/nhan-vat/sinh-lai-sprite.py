@@ -323,7 +323,7 @@ def main() -> int:
     parser.add_argument("--moc-out", type=Path, default=MOC_OUT)
     # 28 = V1 05/09 (part 30/57/58 đổi hết lần nữa); phải khớp vsData trong dongbo.go.
     # Iruka 06/09 (part 2189–2191) đổi CÙNG đợt, chưa phát hành → giữ 28, không bump hai lần.
-    parser.add_argument("--vsdata", type=int, default=28)
+    parser.add_argument("--vsdata", type=int, default=29)
     parser.add_argument(
         "--thu", action="store_true", help="chỉ in bảng, không ghi file nào"
     )

@@ -93,7 +93,7 @@ func TestGoiVersionGameDungByte(t *testing.T) {
 	// 27 -> 28 (05/09/2026, chieu — V1 khe dau-than): mang than cat tu cam xuong
 	// (het hai khuon mat), ti le TUNG khung theo co dau, slot than 2..6 = 5 khung
 	// chay, slot 15 het khung nam, dx/dy giai bang MILP -> part 30/57/58 doi het lan nua.
-	want := []byte{4, 28, 22, 21, 20, 0, 0}
+	want := []byte{4, 29, 22, 21, 20, 0, 0}
 	if !bytes.Equal(m.Data, want) {
 		t.Errorf("than versionGame = %v, mong doi %v", m.Data, want)
 	}
@@ -146,7 +146,7 @@ func TestGoiCatalogDataDungCauTruc(t *testing.T) {
 	}
 	doKiemBlob("dart", nil)
 	doKiemBlob("arrow", nil)
-	doKiemBlob("effect", nil)
+	doKiemBlob("effect", duLieuHieuUngTrong)
 	doKiemBlob("image", nil)
 	doKiemBlob("part", duLieuPart)
 	doKiemBlob("skill", duLieuSkill)
@@ -361,5 +361,29 @@ func TestGoiCatalogItemSubtype2Rong(t *testing.T) {
 	want := []byte{8, 20, 2, 0, 0, 0, 0}
 	if !bytes.Equal(m.Data, want) {
 		t.Errorf("than catalog item = %v, mong doi %v", m.Data, want)
+	}
+}
+
+// TestBangHieuUngDuChoLiveFromDead: client tra efs[id-1] khong kiem bien —
+// liveFromDead goi hieu ung 109 truoc khi go khoa di chuyen. Bang phai >= 109
+// o, moi o dung 1 khung idImg = -1 (khong ve, khong xin anh). Gap 19/09/2026.
+func TestBangHieuUngDuChoLiveFromDead(t *testing.T) {
+	r := protocol.NewReader(duLieuHieuUngTrong)
+	n, _ := r.Short()
+	if n < 109 {
+		t.Fatalf("so o hieu ung = %d, phai >= 109 (Char.liveFromDead goi 109)", n)
+	}
+	for i := int16(0); i < n; i++ {
+		id, _ := r.Short()
+		k, _ := r.Byte()
+		img, _ := r.Short()
+		dx, _ := r.Byte()
+		dy, err := r.Byte()
+		if err != nil || id != i+1 || k != 1 || img != -1 || dx != 0 || dy != 0 {
+			t.Fatalf("o %d = id %d khung %d img %d dx %d dy %d (loi %v), muon id %d khung 1 img -1", i, id, k, img, dx, dy, err, i+1)
+		}
+	}
+	if _, err := r.Byte(); err == nil {
+		t.Fatal("con byte thua sau bang hieu ung")
 	}
 }

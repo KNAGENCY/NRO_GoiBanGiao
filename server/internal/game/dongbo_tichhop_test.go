@@ -1,4 +1,4 @@
-package game
+﻿package game
 
 // Kiem thu dau-cuoi (Task 6, Ke hoach 3): mo phong MOT client gia di TRON
 // version dance — dang nhap -> tao nhan vat -> nhan -28/4 (versionGame) ->
@@ -241,16 +241,16 @@ func kiemDataCoPartVaDuoi100KB(t *testing.T, m *protocol.Message) {
 	}
 
 	if data := docBlob("dart"); !bytes.Equal(data, []byte{0, 0}) {
-		t.Errorf("blob dart = %v, mong doi [0 0] (rong)", data)
+		t.Errorf("blob dart = %v, mong doi bang hieu ung trong 128 o", data)
 	}
 	if data := docBlob("arrow"); !bytes.Equal(data, []byte{0, 0}) {
-		t.Errorf("blob arrow = %v, mong doi [0 0] (rong)", data)
+		t.Errorf("blob arrow = %v, mong doi bang hieu ung trong 128 o", data)
 	}
-	if data := docBlob("effect"); !bytes.Equal(data, []byte{0, 0}) {
-		t.Errorf("blob effect = %v, mong doi [0 0] (rong)", data)
+	if data := docBlob("effect"); !bytes.Equal(data, duLieuHieuUngTrong) {
+		t.Errorf("blob effect = %v, mong doi bang hieu ung trong 128 o", data)
 	}
 	if data := docBlob("image"); !bytes.Equal(data, []byte{0, 0}) {
-		t.Errorf("blob image = %v, mong doi [0 0] (rong)", data)
+		t.Errorf("blob image = %v, mong doi bang hieu ung trong 128 o", data)
 	}
 	if data := docBlob("part"); !bytes.Equal(data, duLieuPart) {
 		t.Errorf("blob part không byte-identical artifact nhúng (nhận %d, muốn %d)", len(data), len(duLieuPart))

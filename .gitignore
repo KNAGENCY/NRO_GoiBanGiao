@@ -98,4 +98,4 @@ docs/my-thuat/kich-thuoc-anh.json.bak-*
 graphify-out/
 
 # Du lieu phien cua plugin autoharness (sinh ra moi phien, khong phai ma nguon)
-.claude/autoharness/
+**/.claude/autoharness/

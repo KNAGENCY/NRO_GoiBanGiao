@@ -1,4 +1,4 @@
-﻿package game
+package game
 
 // Kiem thu dau-cuoi (Task 6, Ke hoach 3): mo phong MOT client gia di TRON
 // version dance — dang nhap -> tao nhan vat -> nhan -28/4 (versionGame) ->

@@ -96,3 +96,6 @@ docs/my-thuat/kich-thuoc-anh.json.bak-*
 
 # Do thi tri thuc do skill dothi (graphify) sinh ra — 4MB, tao lai duoc bang mot lenh
 graphify-out/
+
+# Du lieu phien cua plugin autoharness (sinh ra moi phien, khong phai ma nguon)
+.claude/autoharness/

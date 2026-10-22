@@ -4,8 +4,9 @@ MMORPG 2D chủ đề Naruto, 5 làng ninja. Client Unity tái sử dụng từ 
 (giữ nguyên giao thức mạng nhị phân); máy chủ viết lại bằng **Go + PostgreSQL** (`server/`),
 web + panel quản trị bằng **Next.js** (`web/`).
 
-> ⚠️ **Repo riêng tư.** Có mã nguồn đã mua và hình ảnh Naruto — không chia sẻ ra ngoài,
-> không đổi sang công khai.
+> ⚠️ **Repo CÔNG KHAI** (chủ dự án quyết 22/10/2026). Ai cũng đọc được — **tuyệt đối không
+> commit mật khẩu thật, khoá, dump CSDL, IP máy chủ đang chạy**. Mật khẩu trong script
+> (`nrodev123`) chỉ dành cho CSDL chạy thử trên máy mình.
 
 ## Người mới vào: đọc theo thứ tự
 
